@@ -29,18 +29,15 @@ public class UserProfileUpdateDto implements Serializable {
     @NotBlank
     @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientName;
-    @NotBlank
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
+    @Pattern(regexp = "^$|" + ValidationConstant.NAME_REGEXP)
     private String recipientSurname;
     @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String alternateEmail;
-    @NotBlank
     @ValidPhoneNumber
     private String recipientPhone;
     @Valid
     private List<AddressDto> addressDto;
     @NotNull
     private Boolean telegramIsNotify;
-    @NotNull
     private Boolean viberIsNotify;
 }

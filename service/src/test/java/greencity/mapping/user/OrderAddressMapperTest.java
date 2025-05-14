@@ -22,15 +22,23 @@ class OrderAddressMapperTest {
         OrderAddress expectedOrderAddressResult = orderAddressMapper.convert(address);
 
         assertEquals(expectedOrderAddressResult.getId(), orderAddress.getId());
-        assertEquals(expectedOrderAddressResult.getCity(), orderAddress.getCity());
-        assertEquals(expectedOrderAddressResult.getStreet(), orderAddress.getStreet());
-        assertEquals(expectedOrderAddressResult.getDistrict(), orderAddress.getDistrict());
-        assertEquals(expectedOrderAddressResult.getEntranceNumber(), orderAddress.getEntranceNumber());
-        assertEquals(expectedOrderAddressResult.getHouseNumber(), orderAddress.getHouseNumber());
-        assertEquals(expectedOrderAddressResult.getHouseCorpus(), orderAddress.getHouseCorpus());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getCityUk(),
+            orderAddress.getBaseAddress().getCityUk());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getStreetUk(),
+            orderAddress.getBaseAddress().getStreetUk());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getDistrictUk(),
+            orderAddress.getBaseAddress().getDistrictUk());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getEntranceNumber(),
+            orderAddress.getBaseAddress().getEntranceNumber());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getHouseNumber(),
+            orderAddress.getBaseAddress().getHouseNumber());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getHouseCorpus(),
+            orderAddress.getBaseAddress().getHouseCorpus());
         assertEquals(expectedOrderAddressResult.getCoordinates(), orderAddress.getCoordinates());
-        assertEquals(expectedOrderAddressResult.getActual(), orderAddress.getActual());
-        assertEquals(expectedOrderAddressResult.getAddressStatus(), orderAddress.getAddressStatus());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getActual(),
+            orderAddress.getBaseAddress().getActual());
+        assertEquals(expectedOrderAddressResult.getBaseAddress().getAddressStatus(),
+            orderAddress.getBaseAddress().getAddressStatus());
     }
 
 }

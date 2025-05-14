@@ -101,4 +101,17 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      */
     Optional<UserNotification> findUserNotificationByOrderAndNotificationType(Order order,
         NotificationType notificationType);
+
+    /**
+     * Finds all {@link UserNotification} entities associated with a given
+     * {@link Order} and {@link NotificationType}.
+     *
+     * @param order            the order associated with the notifications to be
+     *                         retrieved
+     * @param notificationType the type of notifications to be retrieved
+     * @return a list of {@link UserNotification} entities matching the specified
+     *         order and notification type
+     */
+    List<UserNotification> findAllUserNotificationByOrderAndNotificationType(Order order,
+        NotificationType notificationType);
 }

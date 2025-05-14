@@ -29,7 +29,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Nazar Struk
      */
     @Query(value = "SELECT  distinct u.recipient_name , u.recipient_phone , "
-        + "u.recipient_email, a.city , a.street , a.house_number , a.district , a.address_comment, "
+        + "u.recipient_email, a.city_uk , a.street_uk , a.house_number , a.district_uk , a.address_comment, "
         + "(SELECT string_agg(payment_id,',') AS pay_id "
         + "FROM payment WHERE recipient_email = :recipientEmail) "
         + "FROM payment "
@@ -47,7 +47,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @author Nazar Struk
      * @author José Castellanos
      */
-    @Query(value = "SELECT name, b.capacity, (b.price/100.00) AS price, "
+    @Query(value = "SELECT b.name_uk, b.capacity, (b.price/100.00) AS price, "
         + "obm.amount, ((b.price * obm.amount) / 100.00) AS summ "
         + "FROM bag b "
         + "JOIN order_bag_mapping obm on b.id = obm.bag_id "
@@ -73,9 +73,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @return {@link Optional} of {@link Bag}
      * @author Oksana Spodaryk
      */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM bag "
-            + "WHERE id = :bagId AND status = 'ACTIVE'")
+    @Query(value = "SELECT b FROM Bag b WHERE b.id = :bagId AND b.status = greencity.enums.BagStatus.ACTIVE")
     Optional<Bag> findActiveBagById(Integer bagId);
 
     /**

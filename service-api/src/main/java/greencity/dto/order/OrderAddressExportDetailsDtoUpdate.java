@@ -1,5 +1,9 @@
 package greencity.dto.order;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,10 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
 
 @Getter
 @Setter
@@ -23,31 +23,31 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     @Min(1)
     private Long id;
     @NotBlank
-    @Length(max = 30)
-    private String district;
+    @Length(min = 2, max = 75)
+    private String districtUk;
     @NotBlank
-    @Length(max = 30)
+    @Length(min = 2, max = 75)
     private String districtEn;
-    @Length(min = 3, max = 40)
+    @Length(min = 3, max = 75)
     @NotNull
-    private String street;
-    @Length(min = 3, max = 40)
+    private String streetUk;
+    @Length(min = 3, max = 75)
     @NotNull
     private String streetEn;
-    @Length(min = 1, max = 4)
+    @Length(max = 4)
     private String houseCorpus;
-    @Length(min = 1, max = 4)
+    @Length(max = 4)
     private String entranceNumber;
     @Length(max = 10)
     private String houseNumber;
-    @Length(max = 15)
-    private String city;
-    @Length(max = 15)
+    @Length(min = 2, max = 75)
+    private String cityUk;
+    @Length(min = 2, max = 75)
     private String cityEn;
-    @Length(max = 15)
-    private String region;
-    @Length(max = 15)
+    @Length(min = 2, max = 75)
+    private String regionUk;
+    @Length(min = 2, max = 75)
     private String regionEn;
-    @Length(min = 10, max = 255)
+    @Length(max = 255)
     private String addressComment;
 }

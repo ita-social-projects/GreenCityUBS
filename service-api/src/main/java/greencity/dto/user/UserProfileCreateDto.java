@@ -11,7 +11,6 @@ import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -25,7 +24,6 @@ public class UserProfileCreateDto {
     private String uuid;
     @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String email;
-    @Size(min = 1, max = 30, message = "name must have no less than 1 and no more than 30 symbols")
     @Pattern(regexp = ValidationConstant.USERNAME_REGEXP,
         message = ValidationConstant.USERNAME_MESSAGE)
     private String name;

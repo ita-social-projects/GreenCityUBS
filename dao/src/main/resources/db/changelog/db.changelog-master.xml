@@ -276,4 +276,7 @@
     <include file="db/changelog/logs/ch-add-table-telegram-text-message-Haliara.xml"/>
     <include file="db/changelog/logs/ch-create-table-unknown-telegram-user-Haliara.xml"/>
     <include file="/db/changelog/logs/ch-add-table-chat-feedback-Haliara.xml"/>
+    <include file="db/changelog/logs/2025-02-11-edit-order-address-table-Kizerov.xml"/>
+    <include file="db/changelog/logs/ch-update-order-payment-status-translations-Feduniak.xml"/>
+    <include file="db/changelog/logs/ch-update-column-names-Bulhakova.xml"/>
 </databaseChangeLog>

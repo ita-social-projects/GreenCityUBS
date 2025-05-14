@@ -50,6 +50,7 @@
         <sonar.coverage.exclusions>**/config/*,**/entity/*,**/exceptions/*</sonar.coverage.exclusions>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
+        <org.eclipse.jgit.version>7.1.0.202411261347-r</org.eclipse.jgit.version>
     </properties>
 
     <build>

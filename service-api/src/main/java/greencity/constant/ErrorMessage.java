@@ -184,7 +184,18 @@ public class ErrorMessage {
     public static final String TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND =
         "Table column width by employee id not found";
     public static final String ORDER_STATUS_INVALID = "Order with ID %d cannot be updated due to its current status.";
+    public static final String WARNING_GIT_DIRECTORY_NOT_FOUND =
+        "WARNING: .git directory not found. Git commit info will be unavailable.";
+    public static final String GIT_REPOSITORY_NOT_INITIALIZED =
+        "Git repository not initialized. Commit info is unavailable.";
+    public static final String FAILED_TO_FETCH_COMMIT_INFO = "Failed to fetch commit info due to I/O error: ";
     public static final String MAPPER_ERROR = "Data mapping error occurred. Please verify the input.";
     public static final String UNSUPPORTED_TYPE = "Unsupported target type: ";
+    public static final String NOT_FOUND_ADDRESS_BY_ID = "Address with ID %d not found";
+    public static final String CANNOT_EXPORT_DATA_TO_PDF = "An error occurred while exporting to PDF.";
+    public static final String ORDER_NOT_FOUND_BY_PAYMENT_ID = "Order not found for payment id: %s";
+    public static final String ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED =
+        "Cannot update order: status must be FORMED and payment must be UNPAID";
+    public static final String ORDER_NOT_FOUND_BY_ID = "Order not found with id: ";
     public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
 }

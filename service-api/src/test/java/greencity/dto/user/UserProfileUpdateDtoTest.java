@@ -38,7 +38,7 @@ class UserProfileUpdateDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"InvalidLengthOfName31Characters", "", "   ", "!?+=@#$%^&*", "тест!", "тест@123", "Hello World!"})
+        strings = {"InvalidLengthOfName31Characters", "!?+=@#$%^&*", "тест!", "тест@123", "Hello World!"})
     void testInvalidRecipientSurname(String name) throws NoSuchFieldException {
         checkRegexPattern("recipientSurname", name, false);
     }

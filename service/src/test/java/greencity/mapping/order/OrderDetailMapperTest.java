@@ -24,7 +24,7 @@ class OrderDetailMapperTest {
         OrderDetailDto orderDetailDto = OrderDetailDto.builder()
             .amount(List.of(BagMappingDto.builder().amount(2).confirmed(2).exported(2).build()))
             .orderId(1L)
-            .capacityAndPrice(List.of(BagInfoDto.builder().price(500.0).capacity(100).name("BigOne").id(1).build()))
+            .capacityAndPrice(List.of(BagInfoDto.builder().price(500.0).capacity(100).nameUk("BigOne").id(1).build()))
             .name(List.of(BagTransDto.builder().name("BigOne").build()))
             .build();
 

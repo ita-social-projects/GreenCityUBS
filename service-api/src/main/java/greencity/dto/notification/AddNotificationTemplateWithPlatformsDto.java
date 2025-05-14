@@ -19,13 +19,13 @@ import lombok.NoArgsConstructor;
 public class AddNotificationTemplateWithPlatformsDto {
     @NotNull
     @NotBlank
-    private String title;
+    private String titleUk;
     private String schedule;
     @NotNull
     private UserCategory userCategory;
     @NotNull
     @NotBlank
-    private String titleEng;
+    private String titleEn;
     @NotNull
     private List<AddNotificationPlatformDto> platforms = new ArrayList<>();
 }
