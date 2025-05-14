@@ -46,7 +46,7 @@ public class EmailService extends AbstractNotificationProvider {
         String userLanguage = userRemoteClient.findUserLanguageByUuid(notification.getUser().getUuid());
         ScheduledEmailMessage emailNotification = ScheduledEmailMessage.builder()
             .username(notification.getUser().getRecipientName())
-            .email(notification.getUser().getRecipientEmail())
+            .userId(notification.getUser().getId())
             .subject(notificationDto.getTitle())
             .body(notificationDto.getBody())
             .language(userLanguage)
