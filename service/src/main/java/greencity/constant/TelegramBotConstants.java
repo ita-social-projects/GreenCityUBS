@@ -100,8 +100,8 @@ public class TelegramBotConstants {
         """
             Для юридичних осіб і ФОП у нас діє послуга «Зелений Офіс» 🏢
 
-            Якщо хочете дізнатися більше про цю послугу, залиште свій e-mail
-            — і ми надішлемо вам лист із детальним описом.
+            Якщо хочете дізнатися більше про цю послугу, залиште свій
+            e-mail — і ми надішлемо вам лист із детальним описом.
 
             Напишіть ваш e-mail ✍️👇
             """;
@@ -143,7 +143,7 @@ public class TelegramBotConstants {
             Передаю його нашій менеджерці в роботу. Все виправимо! 👩\u200D💼
             """;
 
-    public static final String BACK_TO_MAIN_MENU = "⏪️ В головне меню";
+    public static final String BACK_TO_MAIN_MENU = "⏪ В головне меню\n";
     public static final String NEW_SUPPORT_MESSAGE_NOTIFICATION = "%s нових повідомлень від клієнта %s";
     public static final String CLIENT_END_SUPPORT_MODE = "Закінчити розмову з менеджером";
     public static final String CLIENT_STOP_SUPPORT_MODE =
@@ -155,7 +155,8 @@ public class TelegramBotConstants {
     public static final String CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY =
         """
             Поставте, будь ласка, своє запитання — і я покличу когось із моїх колег-людей ✍️👇
-            Якщо після спілкування з людиною ви захочете повернутися до моїх функцій,
-            просто відправте в чат слово БОТ або одну з команд — /options, /courier чи /post 🤖
+            Якщо після спілкування з людиною ви захочете повернутися до моїх функцій, просто відправте в
+            чат слово БОТ або одну з команд — /options, /courier чи /post 🤖
             """;
+    public static final String GREEN_OFFICE_SUBJECT = "Цікавить Зелений офіс";
 }

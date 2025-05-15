@@ -109,6 +109,14 @@ public interface UserRemoteClient {
     void sendScheduledEmailNotification(@RequestBody ScheduledEmailMessage notification);
 
     /**
+     * Send email notification to manager about green office request.
+     *
+     * @param notification {@link ScheduledEmailMessage} - notification details.
+     */
+    @PostMapping("/email/greenoffice/notification")
+    void sendGreenOfficeRequestNotification(@RequestBody ScheduledEmailMessage notification);
+
+    /**
      * Get user language by uuid.
      *
      * @param uuid user uuid.

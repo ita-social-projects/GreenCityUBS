@@ -3,7 +3,6 @@ package greencity.ubstelegrambot.service;
 import greencity.client.UserRemoteClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.TestersSignInRequest;
-import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.FeedbackDto;
@@ -26,6 +25,7 @@ import greencity.repository.TelegramImageRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UnknownTelegramUserRepository;
+import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.TelegramAuthorizationService;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
@@ -34,8 +34,10 @@ import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
@@ -73,6 +76,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramStreamingService telegramStreamingService;
     private final ChatFeedbackRepository chatFeedbackRepository;
     private final NotificationTimestampRepository notificationTimestampRepository;
+    private NotificationService notificationService;
     private Integer messageIdForDeleting;
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
@@ -509,16 +513,7 @@ public class TelegramServiceImpl implements TelegramService {
         if (ENTERING_EMAIL.equals(currentState)) {
             var email = message.getText();
             if (isValidEmail(email)) {
-                var notification = ScheduledEmailMessage
-                    .builder()
-                    .username(USERNAME)
-                    .email("vlad.galyara@gmail.com")
-                    .subject("Цікавить Зелений офіс")
-                    .body("client email " + email)
-                    .language("ua")
-                    .isUbs(true)
-                    .build();
-                userRemoteClient.sendScheduledEmailNotification(notification);
+                notifyManagerOfGreenOfficeRequest(message, email);
                 userState.remove(message.getChatId().toString());
                 telegramExecutor.executeCommand(ubsBot,
                     MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString()));
@@ -542,5 +537,22 @@ public class TelegramServiceImpl implements TelegramService {
         Pattern emailPattern = Pattern.compile(EMAIL_REGEXP);
         Matcher matcher = emailPattern.matcher(email);
         return matcher.matches();
+    }
+
+    private void notifyManagerOfGreenOfficeRequest(Message message, String email) {
+        String chatId = String.valueOf(message.getChatId());
+        Optional<AuthorizedUser> userOpt = authorizedUserRepository.findByChatId(chatId);
+
+        String username = userOpt
+            .map(u -> u.getUser().getRecipientName() + " " + u.getUser().getRecipientSurname())
+            .orElse(message.getFrom().getUserName());
+
+        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email, username);
+    }
+
+    @Lazy
+    @Autowired
+    public void setNotificationService(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 }
