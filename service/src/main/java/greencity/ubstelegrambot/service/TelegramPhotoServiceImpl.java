@@ -64,10 +64,10 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
                     byte[] content = inputStream.readAllBytes();
 
                     MultipartFile file = BASE64DecodedMultipartFile.builder()
-                            .name(getFileNameFromUrl(urlString))
-                            .content(content)
-                            .contentType(IMAGE_CONTENT_TYPE)
-                            .build();
+                        .name(getFileNameFromUrl(urlString))
+                        .content(content)
+                        .contentType(IMAGE_CONTENT_TYPE)
+                        .build();
 
                     savedPhotoUrls.add(azureCloudStorageService.upload(file));
                 }
@@ -77,7 +77,6 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
         }
         return savedPhotoUrls;
     }
-
 
     @Override
     public String savePhotoToAzureBlob(MultipartFile file) {

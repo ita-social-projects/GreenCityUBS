@@ -2,7 +2,6 @@ package greencity.ubstelegrambot.keyboards;
 
 import com.vdurmont.emoji.EmojiParser;
 import greencity.constant.TelegramBotConstants;
-import org.bouncycastle.pqc.crypto.util.PQCOtherInfoGenerator;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -10,13 +9,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-
 import static greencity.constant.TelegramBotConstants.BACK_TO_MAIN_MENU;
 import static greencity.constant.TelegramBotConstants.SCORE;
 
 public class KeyboardFactory {
     public static final String YES = "Так";
     public static final String CHAT_WITH_PEOPLE = "Чат з людиною";
+
     private KeyboardFactory() {
     }
 
@@ -30,7 +29,6 @@ public class KeyboardFactory {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
         keyboard.add(createRow(CHAT_WITH_PEOPLE, TelegramBotConstants.CLIENT_SUPPORT_CALLBACK));
-        keyboard.add(createRow("Досортування", TelegramBotConstants.SORTING_CALLBACK));
         keyboard.add(createRow("Графік роботи станції", TelegramBotConstants.WORK_SCHEDULE_CALLBACK));
         keyboard.add(createRow("Правила прийому сировини", TelegramBotConstants.ADMISSION_RULES_CALLBACK));
         keyboard.add(createRow("Зелений офіс", TelegramBotConstants.GREEN_OFFICE_CALLBACK));
@@ -127,14 +125,13 @@ public class KeyboardFactory {
         List<List<InlineKeyboardButton>> keyboardRows = new ArrayList<>(originalRows);
 
         keyboardRows.add(List.of(
-                InlineKeyboardButton.builder()
-                        .text(BACK_TO_MAIN_MENU)
-                        .callbackData(TelegramBotConstants.MAIN_MENU_CALLBACK)
-                        .build()
-        ));
+            InlineKeyboardButton.builder()
+                .text(BACK_TO_MAIN_MENU)
+                .callbackData(TelegramBotConstants.MAIN_MENU_CALLBACK)
+                .build()));
 
         return InlineKeyboardMarkup.builder()
-                .keyboard(keyboardRows)
-                .build();
+            .keyboard(keyboardRows)
+            .build();
     }
 }

@@ -28,11 +28,6 @@ public class MessageFactory {
             KeyboardFactory.createHelpKeyboard());
     }
 
-    public static SendMessage createSortingMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SORTING_MESSAGE,
-            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.SORTING_PROCESS_CALLBACK));
-    }
-
     /**
      * Builds a SendMessage object with the specified chat ID and text.
      *
@@ -338,17 +333,19 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the feedback message.
      */
     public static SendMessage createFeedbackMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.FEEDBACK_MESSAGE, KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard());
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.FEEDBACK_MESSAGE,
+            KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard());
     }
 
-    public static SendMessage createEnteringFeedbackMessage(String chatId, String feedback){
+    public static SendMessage createEnteringFeedbackMessage(String chatId, String feedback) {
         if (feedback != null && !feedback.isEmpty() && feedback.equals(TelegramBotConstants.GREAT_FEEDBACK_CALLBACK)) {
-            return buildMessage(chatId,TelegramBotConstants.GREAT_FEEDBACK_MESSAGE);
+            return buildMessage(chatId, TelegramBotConstants.GREAT_FEEDBACK_MESSAGE);
         } else {
-            return buildMessage(chatId,TelegramBotConstants.BAD_FEEDBACK_MESSAGE);
+            return buildMessage(chatId, TelegramBotConstants.BAD_FEEDBACK_MESSAGE);
         }
     }
-    public static SendMessage createFeedbackThanksMessage(String chatId){
-        return buildMessage(chatId,TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE);
+
+    public static SendMessage createFeedbackThanksMessage(String chatId) {
+        return buildMessage(chatId, TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE);
     }
 }

@@ -211,6 +211,7 @@ public class TelegramController {
 
         return emitter;
     }
+
     /**
      * Retrieves a list of {@link FeedbackDto} for all users.
      *
@@ -220,19 +221,20 @@ public class TelegramController {
      */
     @Operation(summary = "Get all feedbacks")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacks(Pageable pageable){
+    public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacks(Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllFeedbacks(pageable));
     }
 
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(@PathVariable(name = "chatId") String chatId, Pageable pageable){
+    public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(
+        @PathVariable(name = "chatId") String chatId, Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAlFeedbacksByChatId(chatId, pageable));
     }
 }

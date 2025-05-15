@@ -16,6 +16,4 @@ public interface ChatFeedbackRepository extends JpaRepository<ChatFeedback, Long
 
     @Query(value = "SELECT * FROM chat_feedback WHERE chat_id = :chatId", nativeQuery = true)
     Page<ChatFeedback> findByChatIdPageable(String chatId, Pageable pageable);
-
-
 }

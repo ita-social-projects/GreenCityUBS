@@ -169,9 +169,11 @@ import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
+import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
 import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
@@ -1699,42 +1701,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         userRemoteClient.updateEmployeesAuthorities(dto);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public AddressDto makeAddressActual(Long addressId, String uuid) {
-        Address currentAddress = addressRepo.findById(addressId).orElseThrow(
-            () -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
-
-        if (!currentAddress.getUser().getUuid().equals(uuid)) {
-            throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
-        }
-
-        if (currentAddress.getAddressStatus() == AddressStatus.DELETED) {
-            throw new BadRequestException(CANNOT_MAKE_ACTUAL_DELETED_ADDRESS);
-        }
-
-        if (Boolean.FALSE.equals(currentAddress.getActual())) {
-            Address address = addressRepo.findByUserIdAndActualTrue(currentAddress.getUser().getId()).orElseThrow(
-                () -> new NotFoundException(ACTUAL_ADDRESS_NOT_FOUND));
-            address.setActual(false);
-            currentAddress.setActual(true);
-        }
-
-        return modelMapper.map(currentAddress, AddressDto.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<DistrictDto> getAllDistricts(String region, String city) {
-        List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
-        return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
-            .toList();
-    }
     /**
      * {@inheritDoc}
      */
