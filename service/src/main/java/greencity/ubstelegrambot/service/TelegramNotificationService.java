@@ -10,6 +10,8 @@ import greencity.service.notification.AbstractNotificationProvider;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.Objects;
@@ -18,21 +20,20 @@ import static greencity.enums.NotificationReceiverType.MOBILE;
 @Service
 @Slf4j
 public class TelegramNotificationService extends AbstractNotificationProvider {
-    private final UBSTelegramBot ubsTelegramBot;
     private final TelegramExecutor executor;
+    private final ApplicationContext applicationContext;
     private static final NotificationReceiverType notificationType = MOBILE;
 
     /**
      * Constructor with super() call.
      */
     @Autowired
-    public TelegramNotificationService(UBSTelegramBot ubsTelegramBot,
-        UserRemoteClient userRemoteClient,
+    public TelegramNotificationService(UserRemoteClient userRemoteClient,
         NotificationTemplateRepository templateRepository,
-        TelegramExecutor executor) {
+        TelegramExecutor executor,ApplicationContext applicationContext) {
         super(userRemoteClient, templateRepository, notificationType);
-        this.ubsTelegramBot = ubsTelegramBot;
         this.executor = executor;
+        this.applicationContext = applicationContext;
     }
 
     /**
@@ -49,6 +50,7 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
     }
 
     private void sendMessageToUser(SendMessage sendMessage) {
+        var ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
         executor.executeCommand(ubsTelegramBot, sendMessage);
     }
 
