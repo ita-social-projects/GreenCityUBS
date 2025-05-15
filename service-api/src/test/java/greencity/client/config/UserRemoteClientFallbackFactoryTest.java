@@ -68,7 +68,7 @@ class UserRemoteClientFallbackFactoryTest {
 
     @Test
     void sendScheduledEmailNotification() {
-        ScheduledEmailMessage dto = ScheduledEmailMessage.builder().email(USER_EMAIL).build();
+        ScheduledEmailMessage dto = ScheduledEmailMessage.builder().userUuid(USER_UUID).build();
         assertDoesNotThrow(() -> client.sendScheduledEmailNotification(dto));
     }
 
