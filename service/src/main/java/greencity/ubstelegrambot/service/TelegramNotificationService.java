@@ -30,7 +30,7 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
     @Autowired
     public TelegramNotificationService(UserRemoteClient userRemoteClient,
         NotificationTemplateRepository templateRepository,
-        TelegramExecutor executor,ApplicationContext applicationContext) {
+        TelegramExecutor executor, ApplicationContext applicationContext) {
         super(userRemoteClient, templateRepository, notificationType);
         this.executor = executor;
         this.applicationContext = applicationContext;

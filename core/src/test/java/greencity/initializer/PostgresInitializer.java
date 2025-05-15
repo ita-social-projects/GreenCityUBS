@@ -14,13 +14,13 @@ public class PostgresInitializer {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             TestPropertyValues.of(
-                    "spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
-                    "spring.datasource.username=" + postgreSQLContainer.getUsername(),
-                    "spring.datasource.password=" + postgreSQLContainer.getPassword(),
-                    "spring.liquibase.enabled=true",
-                    "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml",
-                    "spring.datasource.hikari.data-source-properties.timezone=UTC"
-            ).applyTo(configurableApplicationContext.getEnvironment());
+                "spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
+                "spring.datasource.username=" + postgreSQLContainer.getUsername(),
+                "spring.datasource.password=" + postgreSQLContainer.getPassword(),
+                "spring.liquibase.enabled=true",
+                "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml",
+                "spring.datasource.hikari.data-source-properties.timezone=UTC")
+                .applyTo(configurableApplicationContext.getEnvironment());
 
         }
     }
