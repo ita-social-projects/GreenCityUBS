@@ -184,10 +184,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * method returns all orders that contain a bag with id.
      */
-    @Query(nativeQuery = true,
-        value = "select o.* from orders o "
-            + "left join order_bag_mapping obm on o.id = obm.order_id "
-            + "where obm.bag_id = :bagId")
+    @Query(value = "SELECT o FROM Order o JOIN o.orderBags b WHERE b.id = :bagId")
     List<Order> findAllByBagId(Integer bagId);
 
     /**

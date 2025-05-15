@@ -256,13 +256,13 @@
     <include file="/db/changelog/logs/2024-11-07-rename-positions-Kizerov.xml"/>
     <include file="db/changelog/logs/2024-11-08-rename-position-kizerov.xml"/>
     <include file="db/changelog/logs/2024-12-09-update-big-order-table-view-Kizerov.xml"/>
-    <include file="/db/changelog/logs/2024-12-5-update-colum_width_for_employee-Kizerov.xml"/>
+    <include file="db/changelog/logs/2024-12-5-update-colum_width_for_employee-Kizerov.xml"/>
     <include file="db/changelog/logs/2024-12-14-update-custom_table_view-Kizerov.xml"/>
     <include file="db/changelog/logs/2024-12-16-hotfix-big_order_table-Kizerov.xml"/>
     <include file="db/changelog/logs/2024-11-28-change-add-column-isTableFreeze-to-column_width_for_employee-Warded120.xml"/>
     <include file="db/changelog/logs/2024-12-18-update-column_width_for_employee-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-add-column-reason-into-change-of-points-table-Chernenko.xml"/>
-    <include file="/db/changelog/logs/2024-12-26-add-new-column-to-user-table-Kizerov.xml"/>
+    <include file="db/changelog/logs/2024-12-26-add-new-column-to-user-table-Kizerov.xml"/>
     <include file="db/changelog/logs/add-other-packages-to-column_width_for_employee-table.xml"/>
     <include file="db/changelog/logs/add-new-column-to-big_order_table-view.xml"/>
     <include file="db/changelog/logs/update-custom_table_view-table.xml"/>
