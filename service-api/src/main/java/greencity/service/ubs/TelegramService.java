@@ -171,7 +171,7 @@ public interface TelegramService {
 
     PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable);
 
-    PageableDto<FeedbackDto> getAlFeedbacksByChatId(String chatId, Pageable pageable);
+    PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable);
 
     void processTextCommand(Update update);
 

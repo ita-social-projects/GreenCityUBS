@@ -35,7 +35,6 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
     private final TelegramExecutor executor;
     private final AzureCloudStorageService azureCloudStorageService;
     private final TelegramImageRepository telegramImageRepository;
-    private final TelegramExecutor telegramExecutor;
     private final ApplicationContext applicationContext;
     private final AuthorizedUserRepository telegramBotRepository;
     private final ImageConverter imageConverter;
@@ -108,7 +107,7 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
         }
         var message = MessageFactory.createPhotoSender(chatId, photoUrl, caption);
         Message returnMessage =
-            telegramExecutor.executeSendPhoto(applicationContext.getBean(UBSTelegramBot.class), message);
+            executor.executeSendPhoto(applicationContext.getBean(UBSTelegramBot.class), message);
         List<PhotoSize> photos = returnMessage.getPhoto();
         var bot = applicationContext.getBean(UBSTelegramBot.class);
 

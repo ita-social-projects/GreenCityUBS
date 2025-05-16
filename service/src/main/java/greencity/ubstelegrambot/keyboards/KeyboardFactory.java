@@ -99,7 +99,7 @@ public class KeyboardFactory {
             .build();
     }
 
-    public static InlineKeyboardMarkup createBackToMainManuButton() {
+    public static InlineKeyboardMarkup createBackToMainMenuButton() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(createRow(BACK_TO_MAIN_MENU, TelegramBotConstants.MAIN_MENU_CALLBACK));
         return InlineKeyboardMarkup

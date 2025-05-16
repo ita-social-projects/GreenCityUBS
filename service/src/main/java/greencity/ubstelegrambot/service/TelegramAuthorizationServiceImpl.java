@@ -55,8 +55,10 @@ public class TelegramAuthorizationServiceImpl implements TelegramAuthorizationSe
             Optional<UnknownTelegramUser> unknownSavedTelegramUser =
                 unknownTelegramUserRepository.findById(tgUserId);
             if (unknownSavedTelegramUser.isPresent()) {
-                unknownTelegramUserRepository.delete(unknownSavedTelegramUser.get());
-                user.ifPresent(value -> telegramBotRepository.save(createTelegramBotEntity(value, tgUserId, false)));
+                if (user.isPresent()) {
+                    telegramBotRepository.save(createTelegramBotEntity(user.get(), tgUserId, false));
+                    unknownTelegramUserRepository.delete(unknownSavedTelegramUser.get());
+                }
                 return TelegramUser.UNKNOWN_USER;
             }
 

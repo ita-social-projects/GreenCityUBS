@@ -235,6 +235,6 @@ public class TelegramController {
     @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(
         @PathVariable(name = "chatId") String chatId, Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAlFeedbacksByChatId(chatId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllFeedbacksByChatId(chatId, pageable));
     }
 }

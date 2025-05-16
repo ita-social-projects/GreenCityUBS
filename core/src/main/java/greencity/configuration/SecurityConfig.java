@@ -273,14 +273,6 @@ public class SecurityConfig {
                     UBS_LINK + "/client/**",
                     "/notifications/**")
                 .hasAnyRole(USER, ADMIN)
-                .requestMatchers(HttpMethod.POST,
-                    UBS_LINK + "/order/**",
-                    UBS_LINK + "/processOrder",
-                    UBS_LINK + "/processOrder/{id}",
-                    UBS_LINK + "/save-order-address",
-                    UBS_LINK + "/client/**",
-                    "/notifications/**")
-                .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + "/telegram/**")
                 .hasRole(UBS_EMPLOYEE)

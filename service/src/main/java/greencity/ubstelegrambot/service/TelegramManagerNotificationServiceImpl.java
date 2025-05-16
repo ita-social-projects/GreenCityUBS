@@ -78,7 +78,7 @@ public class TelegramManagerNotificationServiceImpl implements TelegramManagerNo
             Instant lastTime = lastNotification.map(NotificationTimestamp::getLastNotificationTime)
                 .orElse(Instant.MIN);
 
-            if (messageCount > 0 && now.isAfter(lastTime.plusSeconds(notificationCooldownMilliseconds))) {
+            if (messageCount > 0 && now.isAfter(lastTime.plusMillis(notificationCooldownMilliseconds))) {
                 notificationTimestampRepository.save(NotificationTimestamp.builder()
                     .chatId(chatId)
                     .lastNotificationTime(now)

@@ -61,7 +61,6 @@ public class TelegramServiceImpl implements TelegramService {
     private final UserRemoteClient userRemoteClient;
     private final TelegramMessageRepository telegramMessageRepository;
     private final TelegramManagerRepository telegramManagerRepository;
-    private final TelegramExecutor telegramExecutor;
     private final TelegramManagerNotificationServiceImpl telegramManagerNotification;
     private final ApplicationContext applicationContext;
     private final TelegramAuthorizationService telegramAuthorizationService;
@@ -83,10 +82,14 @@ public class TelegramServiceImpl implements TelegramService {
     private static final String USERNAME = "username";
     private static final String ENTERING_FEEDBACK_COMMENT = "entering_feedback_comment";
     private static final String ENTERING_EMAIL = "entering_email";
+    private static final String INCORRECT_LOGIN_FORMAT = "Incorrect login format. Please use format: login:password";
 
     @Override
     public SendMessage processLoginCommand(Message message) {
         String[] parts = message.getText().split(":");
+        if (parts.length < 3) {
+            return MessageFactory.createFailLoginMessage(message.getChatId().toString(), INCORRECT_LOGIN_FORMAT);
+        }
         String login = parts[1];
         String password = parts[2];
         managerMode(message.getChatId().toString());
@@ -219,7 +222,7 @@ public class TelegramServiceImpl implements TelegramService {
         var bot = applicationContext.getBean(UBSTelegramBot.class);
         var sendMessage = MessageFactory.buildMessage(chatId, message);
         saveManagerMessage(chatId, message, true);
-        telegramExecutor.executeCommand(bot, sendMessage);
+        executor.executeCommand(bot, sendMessage);
     }
 
     @Override
@@ -309,7 +312,7 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public PageableDto<FeedbackDto> getAlFeedbacksByChatId(String chatId, Pageable pageable) {
+    public PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable) {
         Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatIdPageable(chatId, pageable);
         List<FeedbackDto> feedbackDtos = chatFeedbacks
             .getContent()
@@ -338,7 +341,7 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public SendMessage handleUserChatScope(String data, String chatId, Integer messageId) {
         int score = Integer.parseInt(data.replace(String.format(TelegramBotConstants.SCORE, ""), ""));
-        if (userState.get(chatId).equals("entering_feedback")) {
+        if ("entering_feedback".equals(userState.get(chatId))) {
             chatFeedbackRepository.save(new ChatFeedback(chatId, score, null));
             userState.put(chatId, ENTERING_FEEDBACK_COMMENT);
             if (score >= 4) {
@@ -459,7 +462,7 @@ public class TelegramServiceImpl implements TelegramService {
                 ChatFeedback chatFeedback = ChatFeedback.builder().chatId(chatId).rating(5).build();
                 chatFeedbackRepository.save(chatFeedback);
                 userState.put(chatId, ENTERING_FEEDBACK_COMMENT);
-                telegramExecutor.executeCommand(ubsTelegramBot,
+                executor.executeCommand(ubsTelegramBot,
                     MessageFactory.createEnteringFeedbackMessage(userId, TelegramBotConstants.GREAT_FEEDBACK_CALLBACK));
             }
 
@@ -467,7 +470,7 @@ public class TelegramServiceImpl implements TelegramService {
                 ChatFeedback chatFeedback = ChatFeedback.builder().chatId(chatId).rating(1).build();
                 chatFeedbackRepository.save(chatFeedback);
                 userState.put(chatId, ENTERING_FEEDBACK_COMMENT);
-                telegramExecutor.executeCommand(ubsTelegramBot,
+                executor.executeCommand(ubsTelegramBot,
                     MessageFactory.createEnteringFeedbackMessage(userId, TelegramBotConstants.BAD_FEEDBACK_CALLBACK));
             }
 
@@ -515,17 +518,17 @@ public class TelegramServiceImpl implements TelegramService {
             if (isValidEmail(email)) {
                 notifyManagerOfGreenOfficeRequest(message, email);
                 userState.remove(message.getChatId().toString());
-                telegramExecutor.executeCommand(ubsBot,
+                executor.executeCommand(ubsBot,
                     MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString()));
             } else {
-                telegramExecutor.executeCommand(ubsBot,
+                executor.executeCommand(ubsBot,
                     MessageFactory.createInvalidEmailMessage(message.getChatId().toString()));
             }
         } else if (ENTERING_FEEDBACK_COMMENT.equals(currentState)) {
             var chatFeedback = chatFeedbackRepository.findByChatId(message.getChatId().toString());
             chatFeedback.ifPresent(feedback -> chatFeedbackRepository.save(feedback.setComment(message.getText())));
             userState.remove(message.getChatId().toString());
-            telegramExecutor.executeCommand(ubsBot,
+            executor.executeCommand(ubsBot,
                 MessageFactory.createFeedbackThanksMessage(message.getChatId().toString()));
         }
     }

@@ -211,7 +211,7 @@ public class MessageFactory {
         return SendPhoto
             .builder()
             .chatId(chatId)
-            .caption(caption.isEmpty() ? null : caption)
+            .caption((caption == null || caption.isBlank()) ? null : caption)
             .photo(new InputFile(photoUrl))
             .build();
     }
@@ -252,7 +252,7 @@ public class MessageFactory {
      */
     public static SendMessage createWorkScheduleMessage(String chatId) {
         var message = buildReplyMarkUpMessage(chatId, TelegramBotConstants.WORK_SCHEDULE_MESSAGE,
-            KeyboardFactory.createBackToMainManuButton());
+            KeyboardFactory.createBackToMainMenuButton());
         message.setParseMode(ParseMode.HTML);
         return message;
     }
@@ -278,7 +278,7 @@ public class MessageFactory {
      */
     public static SendMessage createAdmissionRulesMessage(String chatId) {
         var message = buildReplyMarkUpMessage(chatId, TelegramBotConstants.ADMISSION_RULES_TEXT,
-            KeyboardFactory.createBackToMainManuButton());
+            KeyboardFactory.createBackToMainMenuButton());
         message.setParseMode(ParseMode.HTML);
         return message;
     }
@@ -302,7 +302,7 @@ public class MessageFactory {
      */
     public static SendMessage createEnteringEmailMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.ENTERING_EMAIL_MESSAGE,
-            KeyboardFactory.createBackToMainManuButton());
+            KeyboardFactory.createBackToMainMenuButton());
     }
 
     /**
