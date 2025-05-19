@@ -4,7 +4,6 @@ import greencity.client.UserRemoteClient;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
-import greencity.service.FeignClientCallAsync;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

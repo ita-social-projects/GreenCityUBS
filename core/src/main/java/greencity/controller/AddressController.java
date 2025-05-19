@@ -91,7 +91,7 @@ public class AddressController {
      * Controller update address for current order.
      *
      * @param dtoRequest {@link OrderAddressDtoRequest}.
-     * @param uuid       - user's  uuid.
+     * @param uuid       - user's uuid.
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Update order address(if placeId is null updates only addressComment)")

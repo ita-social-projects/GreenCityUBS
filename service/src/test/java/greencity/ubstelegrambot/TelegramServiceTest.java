@@ -45,9 +45,9 @@ class TelegramServiceTest {
         .telegramBot(TelegramBot.builder().id(1L).chatId(1L).isNotify(true).build())
         .build();
     private final LanguageVO languageVO = LanguageVO.builder()
-            .id(1L)
-            .code("ua")
-            .build();
+        .id(1L)
+        .code("ua")
+        .build();
     private final UserNotification notification = new UserNotification()
         .setNotificationType(NotificationType.LETS_STAY_CONNECTED)
         .setId(42L)

@@ -152,7 +152,7 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void existsNotDeactivatedByEmailTest() {
         UserRemoteClient fallback = new UserRemoteClientFallbackFactory()
-                .create(new FeignException.NotFound("404", mock(Request.class), null, null));
+            .create(new FeignException.NotFound("404", mock(Request.class), null, null));
 
         boolean result = fallback.existsNotDeactivatedByEmail("test@example.com");
 

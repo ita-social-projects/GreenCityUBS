@@ -42,7 +42,8 @@ public interface UserRemoteClient {
     String findUuidByEmail(@RequestParam(EMAIL) String email);
 
     /**
-     * Checks whether a user with the given email exists and is not in 'DEACTIVATED' status.
+     * Checks whether a user with the given email exists and is not in 'DEACTIVATED'
+     * status.
      *
      * @param email the user's email
      * @return true if the user exists and is not deactivated, false otherwise

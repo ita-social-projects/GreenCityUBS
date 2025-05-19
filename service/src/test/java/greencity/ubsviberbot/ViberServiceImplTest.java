@@ -71,9 +71,9 @@ class ViberServiceImplTest {
         .setId(42L)
         .setUser(user);
     private final LanguageVO languageVO = LanguageVO.builder()
-            .id(1L)
-            .code("ua")
-            .build();
+        .id(1L)
+        .code("ua")
+        .build();
     private final NotificationTemplate template = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 
     @Test

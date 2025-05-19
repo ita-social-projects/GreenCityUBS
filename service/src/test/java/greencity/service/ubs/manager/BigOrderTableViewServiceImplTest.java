@@ -59,9 +59,9 @@ class BigOrderTableViewServiceImplTest {
         var orderPage = getOrderPage();
         var orderSearchCriteria = getOrderSearchCriteria();
         LanguageVO languageVO = LanguageVO.builder()
-                .id(1L)
-                .code("eng")
-                .build();
+            .id(1L)
+            .code("eng")
+            .build();
         Optional<Employee> employee = Optional.of(getEmployee());
         List<Long> tariffsInfoIds = new ArrayList<>();
         when(employeeRepository.findByEmail(USER_EMAIL)).thenReturn(employee);

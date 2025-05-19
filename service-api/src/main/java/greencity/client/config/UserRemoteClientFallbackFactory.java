@@ -16,7 +16,6 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import java.util.Collections;
 import java.util.Set;
-
 import greencity.exceptions.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -129,7 +128,8 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
                         log.error(String.format(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST));
                         throw new UserNotFoundException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST);
                     }
-                } throw new NotFoundException(ErrorMessage.UNEXPECTED_404 + email);
+                }
+                throw new NotFoundException(ErrorMessage.UNEXPECTED_404 + email);
             }
         };
     }
