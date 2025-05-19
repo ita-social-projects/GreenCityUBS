@@ -1,22 +1,26 @@
 package greencity.client.config;
 
+import feign.FeignException;
 import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.language.LanguageVO;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.UserVO;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
+
+import greencity.exceptions.user.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Component
 @Slf4j
@@ -30,9 +34,9 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public Optional<UserVO> findNotDeactivatedByEmail(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + "{}", email, throwable);
-                return Optional.empty();
+            public boolean existsNotDeactivatedByEmail(String email) {
+                log.error("{}: {}", ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST, email, throwable);
+                return false;
             }
 
             @Override
@@ -109,6 +113,23 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
                 log.error(String.format(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED, uuid));
                 throw new RemoteServerUnavailableException(
                     String.format(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED, uuid));
+            }
+
+            @Override
+            public LanguageVO findLanguageByEmail(@RequestParam(EMAIL) String email) {
+                if (throwable instanceof FeignException.NotFound notFound) {
+                    String message = notFound.contentUTF8();
+
+                    if (message.contains("Language not set")) {
+                        log.error(String.format(ErrorMessage.LANGUAGE_NOT_SET));
+                        throw new NotFoundException(ErrorMessage.LANGUAGE_NOT_SET);
+                    }
+
+                    if (message.contains("user does not exist")) {
+                        log.error(String.format(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST));
+                        throw new UserNotFoundException(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST);
+                    }
+                } throw new NotFoundException(ErrorMessage.UNEXPECTED_404 + email);
             }
         };
     }

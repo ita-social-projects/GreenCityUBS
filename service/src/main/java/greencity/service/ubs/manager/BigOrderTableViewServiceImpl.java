@@ -3,13 +3,11 @@ package greencity.service.ubs.manager;
 import java.util.ArrayList;
 import java.util.List;
 import greencity.client.UserRemoteClient;
-import greencity.constant.ErrorMessage;
+import greencity.dto.language.LanguageVO;
 import greencity.dto.order.OrderCountDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.exceptions.BadRequestException;
-import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
 import greencity.repository.EmployeeRepository;
@@ -44,13 +42,12 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
 
     @Override
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String email) {
-        UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(email).orElseThrow(() -> new UserNotFoundException(
-            ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST));
+        LanguageVO languageVO = userRemoteClient.findLanguageByEmail(email);
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         var orders = bigOrderTableRepository.findAll(orderPage, searchCriteria, tariffsInfoIds,
-            userVO.getLanguageVO().getCode());
+            languageVO.getCode());
         var orderList = new ArrayList<BigOrderTableDTO>();
         orders.forEach(o -> orderList.add(modelMapper.map(o, BigOrderTableDTO.class)));
         return new PageImpl<>(orderList, orders.getPageable(), orders.getTotalElements());

@@ -3,7 +3,6 @@ package greencity.ubstelegrambot;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.dto.language.LanguageVO;
-import greencity.dto.user.UserVO;
 import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
@@ -45,7 +44,10 @@ class TelegramServiceTest {
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(TelegramBot.builder().id(1L).chatId(1L).isNotify(true).build())
         .build();
-    private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
+    private final LanguageVO languageVO = LanguageVO.builder()
+            .id(1L)
+            .code("ua")
+            .build();
     private final UserNotification notification = new UserNotification()
         .setNotificationType(NotificationType.LETS_STAY_CONNECTED)
         .setId(42L)
@@ -61,12 +63,12 @@ class TelegramServiceTest {
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
             .thenReturn(Optional.of(template));
-        when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
-            .thenReturn(Optional.of(userVO));
+        when(userRemoteClient.findLanguageByEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(languageVO);
         when(ubsTelegramBot.execute(sendMessage)).thenReturn(null);
 
         telegramService.sendNotification(notification, MOBILE, 0L);
-        verify(userRemoteClient).findNotDeactivatedByEmail(notification.getUser().getRecipientEmail());
+        verify(userRemoteClient).findLanguageByEmail(notification.getUser().getRecipientEmail());
         verify(ubsTelegramBot).execute(sendMessage);
     }
 
@@ -76,8 +78,8 @@ class TelegramServiceTest {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE)).thenReturn(Optional.of(template));
-        when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
-            .thenReturn(Optional.of(userVO));
+        when(userRemoteClient.findLanguageByEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(languageVO);
         when(ubsTelegramBot.execute(any(SendMessage.class))).thenThrow(new TelegramApiException());
 
         assertThrows(MessageWasNotSent.class, () -> telegramService.sendNotification(notification, MOBILE, 0L));

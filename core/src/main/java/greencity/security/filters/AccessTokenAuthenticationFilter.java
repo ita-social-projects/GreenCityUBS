@@ -1,8 +1,7 @@
 package greencity.security.filters;
 
-import greencity.dto.user.UserVO;
+import greencity.client.UserRemoteClient;
 import greencity.security.JwtTool;
-import greencity.service.FeignClientCallAsync;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,7 @@ import java.util.Optional;
 public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTool jwtTool;
     private final AuthenticationManager authenticationManager;
-    private final FeignClientCallAsync userRemoteClient;
+    private final UserRemoteClient userRemoteClient;
 
     private String extractToken(HttpServletRequest request) {
         return jwtTool.getTokenFromHttpServletRequest(request);
@@ -57,18 +56,14 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                 ((ProviderManager) authenticationManager).setEraseCredentialsAfterAuthentication(false);
                 Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
-                Optional<UserVO> user =
-                    userRemoteClient.getRecordsAsync((String) authentication.getPrincipal()).get();
-                log.info("user: {}", user);
-                if (user.isPresent()) {
+
+                boolean exists = userRemoteClient.existsNotDeactivatedByEmail((String) authentication.getPrincipal());
+                if (exists) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (ExpiredJwtException e) {
                 log.info("Token has expired: {}", token);
-            } catch (InterruptedException e) {
-                log.info("Thread was interrupted: {}", e.getMessage());
-                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 log.info("Access denied with token: {}", e.getMessage());
             }

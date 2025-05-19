@@ -3,7 +3,6 @@ package greencity.security.filters;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Optional;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +23,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import greencity.client.UserRemoteClient;
-import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -72,14 +70,14 @@ class AccessTokenAuthenticationFilterTest {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(providerManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
-        when(userRemoteClient.findNotDeactivatedByEmail("test@mail.com"))
-            .thenReturn(Optional.of(UserVO.builder().id(1L).build()));
+        when(userRemoteClient.existsNotDeactivatedByEmail("test@mail.com"))
+            .thenReturn(true);
 
         authenticationFilter.doFilterInternal(request, response, chain);
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(any());
-        verify(userRemoteClient).findNotDeactivatedByEmail("test@mail.com");
+        verify(userRemoteClient).existsNotDeactivatedByEmail("test@mail.com");
     }
 
     @Test
@@ -106,7 +104,7 @@ class AccessTokenAuthenticationFilterTest {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
         when(providerManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
-        when(userRemoteClient.findNotDeactivatedByEmail("test@mail.com")).thenThrow(RuntimeException.class);
+        when(userRemoteClient.existsNotDeactivatedByEmail("test@mail.com")).thenThrow(RuntimeException.class);
 
         authenticationFilter.doFilterInternal(request, response, chain);
 
@@ -114,6 +112,6 @@ class AccessTokenAuthenticationFilterTest {
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(any());
-        verify(userRemoteClient).findNotDeactivatedByEmail("test@mail.com");
+        verify(userRemoteClient).existsNotDeactivatedByEmail("test@mail.com");
     }
 }

@@ -5,13 +5,12 @@ import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
+import greencity.dto.language.LanguageVO;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
-import java.util.Optional;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,13 +42,13 @@ public interface UserRemoteClient {
     String findUuidByEmail(@RequestParam(EMAIL) String email);
 
     /**
-     * Finds {@link UserVO} that is not 'DEACTIVATED' by {@link UserVO}'s Email.
+     * Checks whether a user with the given email exists and is not in 'DEACTIVATED' status.
      *
-     * @param email {@link UserVO}'s Email.
-     * @return {@link Optional} of {@link UserVO}.
+     * @param email the user's email
+     * @return true if the user exists and is not deactivated, false otherwise
      */
-    @GetMapping("/user/findNotDeactivatedByEmail")
-    Optional<UserVO> findNotDeactivatedByEmail(@RequestParam(EMAIL) String email);
+    @GetMapping("/user/existsNotDeactivatedByEmail")
+    boolean existsNotDeactivatedByEmail(@RequestParam(EMAIL) String email);
 
     /**
      * Method checks the existence of the user by uuid.
@@ -161,4 +160,13 @@ public interface UserRemoteClient {
      */
     @PutMapping("/user/markUserAsActivated")
     void activateEmployee(@RequestParam String uuid);
+
+    /**
+     * Finds user's language by his email.
+     *
+     * @param email - {@link String} of user's email.
+     * @return {@link LanguageVO} of user's language.
+     */
+    @GetMapping("user/findLanguageByEmail")
+    LanguageVO findLanguageByEmail(@RequestParam(EMAIL) String email);
 }

@@ -25,7 +25,6 @@ import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -77,10 +76,10 @@ public class OrderController {
 
     /**
      * Controller returns all available bags and bonus points of current user by
-     * tariff and location ids. {@link UserVO}.
+     * tariff and location ids.
      *
-     * @param tariffId   {@link UserVO} id of tariff.
-     * @param locationId {@link UserVO} id of location.
+     * @param tariffId   - id of tariff.
+     * @param locationId - id of location.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
@@ -101,10 +100,10 @@ public class OrderController {
 
     /**
      * Controller returns all available bags and bonus points of current user by
-     * order id. {@link UserVO}.
+     * order id.
      *
-     * @param userUuid {@link UserVO} id.
-     * @param orderId  {@link UserVO} id of order.
+     * @param userUuid - user's uuid.
+     * @param orderId  - id of the order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
@@ -149,9 +148,9 @@ public class OrderController {
     }
 
     /**
-     * Controller returns list of saved {@link UserVO} data.
+     * Controller returns list of saved user's data.
      *
-     * @param userUuid {@link UserVO} id.
+     * @param userUuid - user's id.
      * @return list of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */
@@ -172,7 +171,7 @@ public class OrderController {
     /**
      * Controller saves all entered by user data to database.
      *
-     * @param userUuid {@link UserVO} id.
+     * @param userUuid - user's id.
      * @param dto      {@link OrderResponseDto} order data.
      * @param id       {@link Long} orderId.
      * @return {@link HttpStatus}.

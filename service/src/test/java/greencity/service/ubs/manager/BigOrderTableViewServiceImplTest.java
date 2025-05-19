@@ -3,7 +3,6 @@ package greencity.service.ubs.manager;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.dto.language.LanguageVO;
-import greencity.dto.user.UserVO;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
@@ -59,11 +58,14 @@ class BigOrderTableViewServiceImplTest {
     void getOrders() {
         var orderPage = getOrderPage();
         var orderSearchCriteria = getOrderSearchCriteria();
+        LanguageVO languageVO = LanguageVO.builder()
+                .id(1L)
+                .code("eng")
+                .build();
         Optional<Employee> employee = Optional.of(getEmployee());
         List<Long> tariffsInfoIds = new ArrayList<>();
         when(employeeRepository.findByEmail(USER_EMAIL)).thenReturn(employee);
-        UserVO userVO = new UserVO().setLanguageVO(new LanguageVO(null, "eng"));
-        when(userRemoteClient.findNotDeactivatedByEmail(USER_EMAIL)).thenReturn(Optional.of(userVO));
+        when(userRemoteClient.findLanguageByEmail(USER_EMAIL)).thenReturn(languageVO);
         when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng"))
             .thenReturn(Page.empty());
 

@@ -1,5 +1,6 @@
 package greencity.configuration;
 
+import greencity.client.UserRemoteClient;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
@@ -49,7 +50,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtTool jwtTool;
-    private final FeignClientCallAsync userRemoteClient;
+    private final UserRemoteClient userRemoteClient;
     private final AuthenticationConfiguration authenticationConfiguration;
 
     @Value("${spring.messaging.stomp.websocket.allowed-origins}")
