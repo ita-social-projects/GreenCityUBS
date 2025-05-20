@@ -29,8 +29,8 @@ public class TelegramService extends AbstractNotificationProvider {
      */
     @Autowired
     public TelegramService(UBSTelegramBot ubsTelegramBot,
-                           UserRemoteClient userRemoteClient,
-                           NotificationTemplateRepository templateRepository, UserRepository userRepository) {
+        UserRemoteClient userRemoteClient,
+        NotificationTemplateRepository templateRepository, UserRepository userRepository) {
         super(userRemoteClient, templateRepository, notificationType, userRepository);
         this.ubsTelegramBot = ubsTelegramBot;
     }

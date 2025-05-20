@@ -144,7 +144,8 @@ class AdminUbsControllerTest {
         ColumnWidthDto columnWidthDto = new ColumnWidthDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(columnWidthDto);
-        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
+        when(userRepository.findUuidByRecipientEmail((anyString())))
+            .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
         doNothing().when(ordersAdminsPageService).saveColumnWidthForEmployee(any(ColumnWidthDto.class), anyString());
         mockMvc.perform(put(management + "/orderTableColumnsWidth")
             .principal(principal)

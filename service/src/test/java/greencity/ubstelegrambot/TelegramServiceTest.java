@@ -63,7 +63,8 @@ class TelegramServiceTest {
                 notification.getNotificationType(), MOBILE))
             .thenReturn(Optional.of(template));
         String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())).thenReturn(Optional.of(uuid));
+        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(Optional.of(uuid));
         when(userRemoteClient.findUserLanguageByUuid(uuid))
             .thenReturn("ua");
         when(ubsTelegramBot.execute(sendMessage)).thenReturn(null);

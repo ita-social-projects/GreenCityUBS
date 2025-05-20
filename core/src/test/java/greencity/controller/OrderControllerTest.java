@@ -213,7 +213,8 @@ class OrderControllerTest {
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
         OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
 
-        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
+        when(userRepository.findUuidByRecipientEmail((anyString())))
+            .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -302,7 +303,8 @@ class OrderControllerTest {
     @Test
     void getsCancellationReason() throws Exception {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
-        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
+        when(userRepository.findUuidByRecipientEmail((anyString())))
+            .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
         when(ubsClientService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
 
         mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L)

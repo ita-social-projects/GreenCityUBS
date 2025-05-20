@@ -61,7 +61,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                 Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
                 String uuid = userRepository.findUuidByRecipientEmail((String) authentication.getPrincipal())
-                        .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+                    .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
                 boolean exists = userRemoteClient.checkIfUserExistsByUuid(uuid);
                 if (exists) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());

@@ -42,7 +42,7 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     @Override
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String email) {
         String uuid = userRepository.findUuidByRecipientEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         String languageCode = userRemoteClient.findUserLanguageByUuid(uuid);
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();

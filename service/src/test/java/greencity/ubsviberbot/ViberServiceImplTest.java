@@ -111,7 +111,8 @@ class ViberServiceImplTest {
             .build();
 
         String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())).thenReturn(Optional.of(uuid));
+        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(Optional.of(uuid));
         when(userRemoteClient.findUserLanguageByUuid(uuid))
             .thenReturn("ua");
         when(templateRepository
@@ -130,9 +131,10 @@ class ViberServiceImplTest {
         notification.getUser().getViberBot().setIsNotify(false);
 
         String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())).thenReturn(Optional.of(uuid));
+        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(Optional.of(uuid));
         when(userRemoteClient.findUserLanguageByUuid(uuid))
-                .thenReturn("ua");
+            .thenReturn("ua");
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
@@ -146,22 +148,25 @@ class ViberServiceImplTest {
     @Test
     void sendNotificationUserNotFoundException() {
         String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())).thenReturn(Optional.of(uuid));
+        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(Optional.of(uuid));
         when(userRemoteClient.findUserLanguageByUuid(uuid))
-            .thenThrow(new UserNotFoundException("User with this email does not exist: " + notification.getUser().getRecipientEmail()));
+            .thenThrow(new UserNotFoundException(
+                "User with this email does not exist: " + notification.getUser().getRecipientEmail()));
         assertThrows(UserNotFoundException.class, () -> viberService.sendNotification(notification, MOBILE, 0L));
     }
 
     @Test
     void testViberException() {
         String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())).thenReturn(Optional.of(uuid));
+        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail()))
+            .thenReturn(Optional.of(uuid));
         when(userRemoteClient.findUserLanguageByUuid(uuid))
             .thenReturn("ua");
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
-                    .thenReturn(Optional.of(template));
+            .thenReturn(Optional.of(template));
         when(viberClient.sendMessage(any())).thenThrow(new RuntimeException());
 
         assertThrows(MessageWasNotSent.class, () -> viberService.sendNotification(notification, MOBILE, 0L));

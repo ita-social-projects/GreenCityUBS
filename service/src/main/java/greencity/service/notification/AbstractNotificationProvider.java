@@ -70,7 +70,7 @@ public abstract class AbstractNotificationProvider {
         NotificationReceiverType receiverType,
         long monthsOfAccountInactivity) {
         String uuid = userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())
-                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         String languageCode = userRemoteClient.findUserLanguageByUuid(uuid);
         return NotificationServiceImpl
             .createNotificationDto(notification, languageCode, receiverType, templateRepository,
