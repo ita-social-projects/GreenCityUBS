@@ -100,8 +100,10 @@ class AdminUbsControllerTest {
         List<Long> unblockedOrdersId = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(listOfOrdersId);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
-        when(ordersAdminsPageService.unblockOrder(null, listOfOrdersId)).thenReturn(unblockedOrdersId);
+        when(ordersAdminsPageService.unblockOrder(uuid, listOfOrdersId)).thenReturn(unblockedOrdersId);
 
         mockMvc.perform(put(management + "/unblockOrders")
             .principal(principal)
@@ -109,7 +111,7 @@ class AdminUbsControllerTest {
             .content(json))
             .andExpect(status().isOk());
 
-        verify(ordersAdminsPageService).unblockOrder(null, listOfOrdersId);
+        verify(ordersAdminsPageService).unblockOrder(uuid, listOfOrdersId);
     }
 
     @Test
@@ -117,8 +119,10 @@ class AdminUbsControllerTest {
         List<BlockedOrderDto> dto = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
-        when(ordersAdminsPageService.requestToBlockOrder(null, List.of())).thenReturn(dto);
+        when(ordersAdminsPageService.requestToBlockOrder(uuid, List.of())).thenReturn(dto);
 
         mockMvc.perform(put(management + "/blockOrders")
             .principal(principal)
@@ -126,7 +130,7 @@ class AdminUbsControllerTest {
             .content(json))
             .andExpect(status().isOk());
 
-        verify(ordersAdminsPageService).requestToBlockOrder(null, List.of());
+        verify(ordersAdminsPageService).requestToBlockOrder(uuid, List.of());
     }
 
     @Test

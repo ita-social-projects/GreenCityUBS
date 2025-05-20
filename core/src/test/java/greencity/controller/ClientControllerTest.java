@@ -2,7 +2,6 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrderWayForPayClientDto;
@@ -20,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
+import java.util.Optional;
+
 import static greencity.ModelUtils.getUuid;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -63,6 +64,8 @@ class ClientControllerTest {
 
     @Test
     void getAllPointsForUserTest() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         this.mockMvc.perform(get(ubsLink + getAllPointsForUser)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -85,6 +88,8 @@ class ClientControllerTest {
 
     @Test
     void getDataForOrderTest() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         this.mockMvc.perform(get(ubsLink + "/user-order/{id}", 1)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -93,6 +98,8 @@ class ClientControllerTest {
 
     @Test
     void deleteOrderTest() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         this.mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
@@ -103,6 +110,8 @@ class ClientControllerTest {
         OrderWayForPayClientDto dto = ModelUtils.getOrderWayForPayClientDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String dtoJson = objectMapper.writeValueAsString(dto);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
         this.mockMvc.perform(post(ubsLink + "/processOrder")
             .contentType(MediaType.APPLICATION_JSON)
@@ -113,6 +122,8 @@ class ClientControllerTest {
 
     @Test
     void getUserBonusesTest() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         this.mockMvc.perform(get(ubsLink + "/user-bonuses")
             .principal(principal)).andExpect(status().isOk());
     }

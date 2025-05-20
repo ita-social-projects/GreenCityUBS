@@ -612,6 +612,8 @@ class SuperAdminControllerTest {
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
         mockMvc.perform(post(ubsLink + "/createCourier")
             .principal(principal)
@@ -675,6 +677,8 @@ class SuperAdminControllerTest {
         AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Qqq-qqq").build();
         ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         mockMvc.perform(post(ubsLink + "/create-receiving-station")
             .principal(principal)
             .content(requestedJson)
@@ -754,7 +758,9 @@ class SuperAdminControllerTest {
     void addNewTariffTest() {
         var dto = ModelUtils.getAddNewTariffDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(post(ubsLink + "/add-new-tariff")
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
+        mockMvc.perform(post("/ubs/superAdmin/add-new-tariff")
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal))

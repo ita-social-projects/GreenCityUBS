@@ -118,6 +118,8 @@ class AddressControllerTest {
 
     @Test
     void deleteOrderAddress() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         mockMvc.perform(delete(ubsLink + "/order-addresses/{id}", 1L)
             .principal(principal))
             .andExpect(status().isOk());

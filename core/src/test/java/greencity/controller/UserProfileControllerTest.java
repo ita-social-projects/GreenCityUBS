@@ -28,9 +28,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUserProfileCreateDto;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -78,6 +81,9 @@ class UserProfileControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(userProfileDto);
 
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
+
         mockMvc.perform(put(AppConstant.ubsLink + "/user/update")
             .content(responseJSON)
             .principal(principal)
@@ -87,6 +93,8 @@ class UserProfileControllerTest {
 
     @Test
     void getProfileData() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         mockMvc.perform(get(AppConstant.ubsLink + "/user/getUserProfile")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
