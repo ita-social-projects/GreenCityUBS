@@ -197,4 +197,5 @@ public class ErrorMessage {
     public static final String ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED =
         "Cannot update order: status must be FORMED and payment must be UNPAID";
     public static final String ORDER_NOT_FOUND_BY_ID = "Order not found with id: ";
+    public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
 }

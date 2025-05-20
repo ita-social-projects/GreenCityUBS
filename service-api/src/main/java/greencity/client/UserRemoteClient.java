@@ -2,6 +2,8 @@ package greencity.client;
 
 import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.client.config.UserRemoteClientInterceptor;
+import greencity.dto.SuccessSignInDto;
+import greencity.dto.TestersSignInRequest;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
@@ -15,6 +17,7 @@ import greencity.entity.user.User;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -106,6 +109,14 @@ public interface UserRemoteClient {
     void sendScheduledEmailNotification(@RequestBody ScheduledEmailMessage notification);
 
     /**
+     * Send email notification to manager about green office request.
+     *
+     * @param notification {@link ScheduledEmailMessage} - notification details.
+     */
+    @PostMapping("/email/greenoffice/notification")
+    void sendGreenOfficeRequestNotification(@RequestBody ScheduledEmailMessage notification);
+
+    /**
      * Get user language by uuid.
      *
      * @param uuid user uuid.
@@ -171,4 +182,7 @@ public interface UserRemoteClient {
      */
     @PutMapping("/user/markUserAsActivated")
     void activateEmployee(@RequestParam String uuid);
+
+    @PostMapping("/sign-in")
+    ResponseEntity<SuccessSignInDto> signIn(@RequestBody TestersSignInRequest request);
 }

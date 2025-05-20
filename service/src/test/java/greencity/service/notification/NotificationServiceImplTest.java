@@ -4,10 +4,13 @@ import com.google.common.util.concurrent.MoreExecutors;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.entity.order.Event;
@@ -107,6 +110,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -138,6 +142,8 @@ class NotificationServiceImplTest {
     private static final String PHONE_NUMBER_KEY = "phoneNumber";
     private static final String CUSTOMER = "customerName";
     private static final String PAYMENT_LINK = "https://pay.monobank.ua/2412255Qb57omFE7dAjC";
+    private static final String USERNAME = "John Smith";
+    private static final String USER_EMAIL = "test@some.com";
 
     @Mock
     private OrderRepository orderRepository;
@@ -1526,5 +1532,22 @@ class NotificationServiceImplTest {
 
         verify(userNotificationRepository).save(notification);
         verify(notificationParameterRepository).saveAll(parameters);
+    }
+
+    @Test
+    void notifyManagerWithNewGreenOfficeRequestFromTelegramBotTest() {
+        ScheduledEmailMessage notification = ScheduledEmailMessage
+            .builder()
+            .username(USERNAME)
+            .subject(TelegramBotConstants.GREEN_OFFICE_SUBJECT)
+            .body(USER_EMAIL)
+            .language(AppConstant.LOCALE_UK_NAME)
+            .isUbs(true)
+            .build();
+        doNothing().when(userRemoteClient).sendGreenOfficeRequestNotification(notification);
+
+        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME);
+
+        verify(userRemoteClient, times(1)).sendGreenOfficeRequestNotification(notification);
     }
 }

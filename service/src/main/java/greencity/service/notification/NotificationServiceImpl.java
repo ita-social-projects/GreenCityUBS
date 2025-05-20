@@ -4,10 +4,12 @@ import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
+import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.entity.notifications.NotificationPlatform;
@@ -104,6 +106,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Qualifier("singleThreadedExecutor")
     private ExecutorService executor;
     private final InternalUrlConfigProp internalUrlConfigProp;
+    private final OrderBagService orderBagService;
 
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
@@ -115,8 +118,6 @@ public class NotificationServiceImpl implements NotificationService {
     private static final int MIN_NOTIFICATION_ORDER_AGE_DAYS = 3;
     private static final int MAX_NOTIFICATIONS_PER_WEEK = 1;
     private static final double PERCENTAGE_DIVISOR = 100.0;
-
-    private final OrderBagService orderBagService;
 
     /**
      * {@inheritDoc}
@@ -938,6 +939,19 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         return notificationDto;
+    }
+
+    @Override
+    public void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username) {
+        ScheduledEmailMessage notification = ScheduledEmailMessage
+            .builder()
+            .username(username)
+            .subject(TelegramBotConstants.GREEN_OFFICE_SUBJECT)
+            .body(userEmail)
+            .language(AppConstant.LOCALE_UK_NAME)
+            .isUbs(true)
+            .build();
+        userRemoteClient.sendGreenOfficeRequestNotification(notification);
     }
 
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language,
