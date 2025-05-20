@@ -42,6 +42,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Principal principal = webRequest.getUserPrincipal();
         return principal != null ? userRepository.findUuidByRecipientEmail(principal.getName())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.UUID_NOT_FOUND_BY_EMAIL + principal.getName())) : null;
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.UUID_NOT_FOUND_BY_EMAIL + principal.getName()))
+            : null;
     }
 }
