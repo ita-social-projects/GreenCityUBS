@@ -99,7 +99,7 @@ class OrderControllerTest {
         this.mockMvc = MockMvcBuilders.standaloneSetup(orderController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRepository))
-                .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .build();
     }
 
@@ -282,10 +282,10 @@ class OrderControllerTest {
         when(userRepository.findUuidByRecipientEmail(anyString())).thenReturn(Optional.empty());
 
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-                        .principal(principal))
-                .andExpect(status().isNotFound());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+            .principal(principal))
+            .andExpect(status().isNotFound());
     }
 
     @Test
