@@ -10,6 +10,7 @@ import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.exception.handler.CustomExceptionHandler;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ class UserProfileControllerTest {
     UserProfileController userProfileController;
 
     @Mock
-    UserRemoteClient userRemoteClient;
+    UserRepository userRepository;
 
     @Mock
     private Validator mockValidator;
@@ -62,7 +63,7 @@ class UserProfileControllerTest {
         this.mockMvc = MockMvcBuilders.standaloneSetup(userProfileController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .setValidator(mockValidator)
             .build();

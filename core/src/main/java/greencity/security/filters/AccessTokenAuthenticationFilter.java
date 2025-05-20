@@ -1,6 +1,9 @@
 package greencity.security.filters;
 
 import greencity.client.UserRemoteClient;
+import greencity.constant.ErrorMessage;
+import greencity.exceptions.user.UserNotFoundException;
+import greencity.repository.UserRepository;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTool jwtTool;
     private final AuthenticationManager authenticationManager;
     private final UserRemoteClient userRemoteClient;
+    private final UserRepository userRepository;
 
     private String extractToken(HttpServletRequest request) {
         return jwtTool.getTokenFromHttpServletRequest(request);
@@ -56,8 +60,9 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                 ((ProviderManager) authenticationManager).setEraseCredentialsAfterAuthentication(false);
                 Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
-
-                boolean exists = userRemoteClient.existsNotDeactivatedByEmail((String) authentication.getPrincipal());
+                String uuid = userRepository.findUuidByRecipientEmail((String) authentication.getPrincipal())
+                        .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+                boolean exists = userRemoteClient.checkIfUserExistsByUuid(uuid);
                 if (exists) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
                     SecurityContextHolder.getContext().setAuthentication(authentication);

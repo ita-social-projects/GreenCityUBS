@@ -2,7 +2,6 @@ package greencity.service.ubs.manager;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
-import greencity.dto.language.LanguageVO;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
@@ -14,6 +13,7 @@ import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
+import greencity.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -53,19 +53,19 @@ class BigOrderTableViewServiceImplTest {
     private UserRemoteClient userRemoteClient;
     @Mock
     TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
+    @Mock
+    UserRepository userRepository;
 
     @Test
     void getOrders() {
         var orderPage = getOrderPage();
         var orderSearchCriteria = getOrderSearchCriteria();
-        LanguageVO languageVO = LanguageVO.builder()
-            .id(1L)
-            .code("eng")
-            .build();
+        String uuid = "uuid";
         Optional<Employee> employee = Optional.of(getEmployee());
         List<Long> tariffsInfoIds = new ArrayList<>();
+        when(userRepository.findUuidByRecipientEmail(employee.get().getEmail())).thenReturn(Optional.of(uuid));
         when(employeeRepository.findByEmail(USER_EMAIL)).thenReturn(employee);
-        when(userRemoteClient.findLanguageByEmail(USER_EMAIL)).thenReturn(languageVO);
+        when(userRemoteClient.findUserLanguageByUuid(uuid)).thenReturn("eng");
         when(bigOrderTableRepository.findAll(orderPage, orderSearchCriteria, tariffsInfoIds, "eng"))
             .thenReturn(Page.empty());
 

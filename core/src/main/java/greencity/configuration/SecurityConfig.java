@@ -1,6 +1,7 @@
 package greencity.configuration;
 
 import greencity.client.UserRemoteClient;
+import greencity.repository.UserRepository;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
@@ -51,6 +52,7 @@ public class SecurityConfig {
     private final JwtTool jwtTool;
     private final UserRemoteClient userRemoteClient;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final UserRepository userRepository;
 
     @Value("${spring.messaging.stomp.websocket.allowed-origins}")
     private String[] allowedOrigins;
@@ -86,7 +88,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
             .addFilterBefore(
-                new AccessTokenAuthenticationFilter(jwtTool, authenticationManager(), userRemoteClient),
+                new AccessTokenAuthenticationFilter(jwtTool, authenticationManager(), userRemoteClient, userRepository),
                 UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(exception -> exception.authenticationEntryPoint((req, resp, exc) -> resp
                 .sendError(SC_UNAUTHORIZED, "Authorize first."))

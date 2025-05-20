@@ -5,7 +5,6 @@ import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.language.LanguageVO;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.DeactivateUserRequestDto;
@@ -40,16 +39,6 @@ public interface UserRemoteClient {
      */
     @GetMapping("/user/findUuidByEmail")
     String findUuidByEmail(@RequestParam(EMAIL) String email);
-
-    /**
-     * Checks whether a user with the given email exists and is not in 'DEACTIVATED'
-     * status.
-     *
-     * @param email the user's email
-     * @return true if the user exists and is not deactivated, false otherwise
-     */
-    @GetMapping("/user/existsNotDeactivatedByEmail")
-    boolean existsNotDeactivatedByEmail(@RequestParam(EMAIL) String email);
 
     /**
      * Method checks the existence of the user by uuid.
@@ -161,13 +150,4 @@ public interface UserRemoteClient {
      */
     @PutMapping("/user/markUserAsActivated")
     void activateEmployee(@RequestParam String uuid);
-
-    /**
-     * Finds user's language by his email.
-     *
-     * @param email - {@link String} of user's email.
-     * @return {@link LanguageVO} of user's language.
-     */
-    @GetMapping("user/findLanguageByEmail")
-    LanguageVO findLanguageByEmail(@RequestParam(EMAIL) String email);
 }

@@ -1,12 +1,14 @@
 package greencity.service.notification;
 
 import greencity.client.UserRemoteClient;
-import greencity.dto.language.LanguageVO;
+import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
+import greencity.repository.UserRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import jakarta.annotation.PostConstruct;
@@ -17,6 +19,7 @@ public abstract class AbstractNotificationProvider {
     private final UserRemoteClient userRemoteClient;
     private final NotificationTemplateRepository templateRepository;
     private final NotificationReceiverType notificationType;
+    private final UserRepository userRepository;
 
     /**
      * Initializes the notification provider.
@@ -66,9 +69,11 @@ public abstract class AbstractNotificationProvider {
         UserNotification notification,
         NotificationReceiverType receiverType,
         long monthsOfAccountInactivity) {
-        LanguageVO languageVO = userRemoteClient.findLanguageByEmail(notification.getUser().getRecipientEmail());
+        String uuid = userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        String languageCode = userRemoteClient.findUserLanguageByUuid(uuid);
         return NotificationServiceImpl
-            .createNotificationDto(notification, languageVO.getCode(), receiverType, templateRepository,
+            .createNotificationDto(notification, languageCode, receiverType, templateRepository,
                 monthsOfAccountInactivity);
     }
 }

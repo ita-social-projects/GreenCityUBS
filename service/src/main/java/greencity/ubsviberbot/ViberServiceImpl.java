@@ -51,7 +51,7 @@ public class ViberServiceImpl extends AbstractNotificationProvider implements Vi
         UserRepository userRepository,
         ViberBotRepository viberBotRepository,
         NotificationTemplateRepository templateRepository) {
-        super(userRemoteClient, templateRepository, notificationType);
+        super(userRemoteClient, templateRepository, notificationType, userRepository);
         this.viberClient = viberClient;
         this.userRepository = userRepository;
         this.viberBotRepository = viberBotRepository;

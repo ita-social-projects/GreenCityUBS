@@ -2,7 +2,6 @@ package greencity.ubstelegrambot;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
-import greencity.dto.language.LanguageVO;
 import greencity.enums.NotificationType;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
@@ -10,6 +9,7 @@ import greencity.entity.telegram.TelegramBot;
 import greencity.entity.user.User;
 import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
+import greencity.repository.UserRepository;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,14 +39,13 @@ class TelegramServiceTest {
     @Mock
     private UBSTelegramBot ubsTelegramBot;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private TelegramService telegramService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(TelegramBot.builder().id(1L).chatId(1L).isNotify(true).build())
-        .build();
-    private final LanguageVO languageVO = LanguageVO.builder()
-        .id(1L)
-        .code("ua")
         .build();
     private final UserNotification notification = new UserNotification()
         .setNotificationType(NotificationType.LETS_STAY_CONNECTED)
@@ -63,12 +62,14 @@ class TelegramServiceTest {
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE))
             .thenReturn(Optional.of(template));
-        when(userRemoteClient.findLanguageByEmail(notification.getUser().getRecipientEmail()))
-            .thenReturn(languageVO);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())).thenReturn(Optional.of(uuid));
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenReturn("ua");
         when(ubsTelegramBot.execute(sendMessage)).thenReturn(null);
 
         telegramService.sendNotification(notification, MOBILE, 0L);
-        verify(userRemoteClient).findLanguageByEmail(notification.getUser().getRecipientEmail());
+        verify(userRemoteClient).findUserLanguageByUuid(uuid);
         verify(ubsTelegramBot).execute(sendMessage);
     }
 
@@ -78,8 +79,10 @@ class TelegramServiceTest {
         when(templateRepository
             .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
                 notification.getNotificationType(), MOBILE)).thenReturn(Optional.of(template));
-        when(userRemoteClient.findLanguageByEmail(notification.getUser().getRecipientEmail()))
-            .thenReturn(languageVO);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())).thenReturn(Optional.of(uuid));
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenReturn("ua");
         when(ubsTelegramBot.execute(any(SendMessage.class))).thenThrow(new TelegramApiException());
 
         assertThrows(MessageWasNotSent.class, () -> telegramService.sendNotification(notification, MOBILE, 0L));

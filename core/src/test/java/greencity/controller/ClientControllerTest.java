@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrderWayForPayClientDto;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class ClientControllerTest {
     UBSClientService ubsClientService;
 
     @Mock
-    UserRemoteClient userRemoteClient;
+    UserRepository userRepository;
 
     @InjectMocks
     ClientController clientController;
@@ -46,7 +47,7 @@ class ClientControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(clientController)
-            .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
+            .setCustomArgumentResolvers(new UserArgumentResolver(userRepository))
             .build();
     }
 

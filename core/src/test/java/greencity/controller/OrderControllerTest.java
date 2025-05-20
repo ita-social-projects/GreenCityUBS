@@ -20,6 +20,7 @@ import greencity.enums.OrderStatus;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSUserRepository;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
@@ -41,6 +42,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUbsCustomersDto;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
@@ -76,7 +79,7 @@ class OrderControllerTest {
     UBSManagementService ubsManagementService;
 
     @Mock
-    UserRemoteClient userRemoteClient;
+    UserRepository userRepository;
 
     @Mock
     OrderRepository orderRepository;
@@ -99,7 +102,7 @@ class OrderControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(orderController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .build();
     }
 
@@ -117,15 +120,15 @@ class OrderControllerTest {
 
     @Test
     void getCurrentUserPointsByOrderId() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString())))
-            .thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail((anyString())))
+            .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
 
         mockMvc.perform(get(ubsLink + "/details-for-existing-order/{orderId}", "1")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
+        verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
         verify(ubsClientService).getFirstPageDataByOrderId("35467585763t4sfgchjfuyetf", 1L);
     }
 
@@ -140,19 +143,21 @@ class OrderControllerTest {
 
     @Test
     void getUBSusers() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail((anyString())))
+                .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
 
         mockMvc.perform(get(ubsLink + "/personal-data")
             .principal(principal))
             .andExpect(status().isOk());
 
-        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
+        verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
         verify(ubsClientService).getSecondPageData("35467585763t4sfgchjfuyetf");
     }
 
     @Test
     void processOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail((anyString())))
+                .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -165,7 +170,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(ubsClientService).saveFullOrderToDB(any(), eq("35467585763t4sfgchjfuyetf"), eq(null));
-        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
+        verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
     }
 
     @Test
@@ -185,7 +190,7 @@ class OrderControllerTest {
             .build();
         String resultJson = objectMapper.writeValueAsString(resultObject);
 
-        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(anyString())).thenReturn(Optional.of(uuid));
         when(ubsManagementService.getOrderDetailStatus(orderId)).thenReturn(orderDetailStatusDto);
         when(ubsClientService.saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong()))
             .thenReturn(resultObject);
@@ -198,7 +203,7 @@ class OrderControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().json(resultJson));
 
-        verify(userRemoteClient).findUuidByEmail(anyString());
+        verify(userRepository).findUuidByRecipientEmail(anyString());
         verify(ubsManagementService).getOrderDetailStatus(orderId);
         verify(ubsClientService).saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong());
     }
@@ -208,7 +213,7 @@ class OrderControllerTest {
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
         OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
 
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -231,7 +236,7 @@ class OrderControllerTest {
         OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
         orderDetailStatusDto.setOrderStatus(orderStatus.name());
 
-        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail(anyString())).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
         when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -243,7 +248,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
 
-        verify(userRemoteClient).findUuidByEmail(anyString());
+        verify(userRepository).findUuidByRecipientEmail(anyString());
         verify(ubsManagementService).getOrderDetailStatus(orderId);
         verify(ubsClientService, never()).saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong());
     }
@@ -297,7 +302,7 @@ class OrderControllerTest {
     @Test
     void getsCancellationReason() throws Exception {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
         when(ubsClientService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
 
         mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L)
