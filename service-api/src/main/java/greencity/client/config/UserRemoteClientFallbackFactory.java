@@ -3,6 +3,8 @@ package greencity.client.config;
 import feign.hystrix.FallbackFactory;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
+import greencity.dto.SuccessSignInDto;
+import greencity.dto.TestersSignInRequest;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
@@ -17,6 +19,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -59,6 +62,11 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
 
             @Override
             public void sendScheduledEmailNotification(ScheduledEmailMessage notification) {
+                log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
+            }
+
+            @Override
+            public void sendGreenOfficeRequestNotification(ScheduledEmailMessage notification) {
                 log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
             }
 
@@ -116,6 +124,12 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
                 log.error(String.format(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED, uuid));
                 throw new RemoteServerUnavailableException(
                     String.format(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED, uuid));
+            }
+
+            @Override
+            public ResponseEntity<SuccessSignInDto> signIn(TestersSignInRequest request) {
+                log.error(ErrorMessage.TELEGRAM_BOT_ERROR_BAD_CREDENTIALS, throwable);
+                throw new RemoteServerUnavailableException(ErrorMessage.TELEGRAM_BOT_ERROR_BAD_CREDENTIALS);
             }
         };
     }
