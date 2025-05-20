@@ -1,6 +1,8 @@
 package greencity.converters;
 
 import greencity.annotations.CurrentUserUuid;
+import greencity.constant.ErrorMessage;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,6 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Principal principal = webRequest.getUserPrincipal();
         return principal != null ? userRepository.findUuidByRecipientEmail(principal.getName())
-            .orElse(null) : null;
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.UUID_NOT_FOUND_BY_EMAIL + principal.getName())) : null;
     }
 }
