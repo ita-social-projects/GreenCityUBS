@@ -12,6 +12,7 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +74,7 @@ class ManagementEmployeeControllerTest {
     @Mock
     private UBSClientService ubsClientService;
     @Mock
-    UserRemoteClient userRemoteClient;
+    UserRepository userRepository;
     @Mock
     private Validator mockValidator;
 
@@ -86,7 +87,7 @@ class ManagementEmployeeControllerTest {
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .setValidator(mockValidator)
             .build();
     }

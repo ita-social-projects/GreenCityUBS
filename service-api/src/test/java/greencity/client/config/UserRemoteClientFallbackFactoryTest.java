@@ -12,10 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(MockitoExtension.class)
 class UserRemoteClientFallbackFactoryTest {
@@ -35,11 +34,6 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void findUuidByEmail() {
         assertThrows(RemoteServerUnavailableException.class, () -> client.findUuidByEmail(USER_EMAIL));
-    }
-
-    @Test
-    void findNotDeactivatedByEmail() {
-        assertEquals(Optional.empty(), client.findNotDeactivatedByEmail(USER_EMAIL));
     }
 
     @Test

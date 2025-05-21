@@ -12,6 +12,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.notification.IncorrectTemplateException;
 import greencity.exceptions.notification.TemplateDeleteException;
+import greencity.repository.UserRepository;
 import greencity.service.notification.NotificationTemplateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,14 +57,14 @@ class ManagementNotificationControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
-    UserRemoteClient userRemoteClient;
+    UserRepository userRepository;
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .build();
     }

@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Optional;
+
+import greencity.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +26,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import greencity.client.UserRemoteClient;
-import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,6 +52,9 @@ class AccessTokenAuthenticationFilterTest {
 
     FilterChain chain = new MockFilterChain();
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private AccessTokenAuthenticationFilter authenticationFilter;
 
@@ -72,14 +76,16 @@ class AccessTokenAuthenticationFilterTest {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(providerManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
-        when(userRemoteClient.findNotDeactivatedByEmail("test@mail.com"))
-            .thenReturn(Optional.of(UserVO.builder().id(1L).build()));
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail("test@mail.com")).thenReturn(Optional.of(uuid));
+        when(userRemoteClient.checkIfUserExistsByUuid(uuid))
+            .thenReturn(true);
 
         authenticationFilter.doFilterInternal(request, response, chain);
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(any());
-        verify(userRemoteClient).findNotDeactivatedByEmail("test@mail.com");
+        verify(userRemoteClient).checkIfUserExistsByUuid(uuid);
     }
 
     @Test
@@ -106,7 +112,9 @@ class AccessTokenAuthenticationFilterTest {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
         when(providerManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
-        when(userRemoteClient.findNotDeactivatedByEmail("test@mail.com")).thenThrow(RuntimeException.class);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail("test@mail.com")).thenReturn(Optional.of(uuid));
+        when(userRemoteClient.checkIfUserExistsByUuid(uuid)).thenThrow(RuntimeException.class);
 
         authenticationFilter.doFilterInternal(request, response, chain);
 
@@ -114,6 +122,6 @@ class AccessTokenAuthenticationFilterTest {
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(any());
-        verify(userRemoteClient).findNotDeactivatedByEmail("test@mail.com");
+        verify(userRemoteClient).checkIfUserExistsByUuid(uuid);
     }
 }

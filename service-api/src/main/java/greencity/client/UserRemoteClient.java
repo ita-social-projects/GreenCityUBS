@@ -9,9 +9,7 @@ import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
-import java.util.Optional;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,15 +39,6 @@ public interface UserRemoteClient {
      */
     @GetMapping("/user/findUuidByEmail")
     String findUuidByEmail(@RequestParam(EMAIL) String email);
-
-    /**
-     * Finds {@link UserVO} that is not 'DEACTIVATED' by {@link UserVO}'s Email.
-     *
-     * @param email {@link UserVO}'s Email.
-     * @return {@link Optional} of {@link UserVO}.
-     */
-    @GetMapping("/user/findNotDeactivatedByEmail")
-    Optional<UserVO> findNotDeactivatedByEmail(@RequestParam(EMAIL) String email);
 
     /**
      * Method checks the existence of the user by uuid.
