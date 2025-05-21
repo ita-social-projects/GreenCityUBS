@@ -1,7 +1,7 @@
 package greencity.controller;
 
-import greencity.client.UserRemoteClient;
 import greencity.converters.UserArgumentResolver;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramStreamingService;
@@ -18,10 +18,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
 import java.security.Principal;
+import java.util.Optional;
 
 import static greencity.ModelUtils.getPrincipal;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TelegramControllerTest {
 
     @Mock
-    private UserRemoteClient userRemoteClient;
+    private UserRepository userRepository;
 
     @Mock
     private TelegramService telegramService;
@@ -59,7 +59,7 @@ class TelegramControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(telegramChatController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .build();
         chatId = "123";
     }
@@ -185,7 +185,7 @@ class TelegramControllerTest {
     void generateManagerLinkTest() throws Exception {
         Principal principal = getPrincipal();
         String principalUuid = "uuid";
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(principalUuid);
+        when(userRepository.findUuidByRecipientEmail((principal.getName()))).thenReturn(Optional.of(principalUuid));
 
         mockMvc.perform(post(baseUrl + "/generate-manager-link")
             .principal(principal))

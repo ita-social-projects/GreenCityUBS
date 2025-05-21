@@ -2,8 +2,6 @@ package greencity.ubstelegrambot.service;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
-import greencity.dto.language.LanguageVO;
-import greencity.dto.user.UserVO;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.AuthorizedUser;
@@ -48,7 +46,8 @@ class TelegramNotificationServiceTest {
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(new AuthorizedUser("12345", false, false, null, false))
         .build();
-    private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
+    // private final UserVO userVO =
+    // UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
     private final UserNotification notification = new UserNotification()
         .setNotificationType(NotificationType.LETS_STAY_CONNECTED)
         .setId(42L)

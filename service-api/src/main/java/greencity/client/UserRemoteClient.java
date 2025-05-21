@@ -4,7 +4,6 @@ import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.dto.SuccessSignInDto;
 import greencity.dto.TestersSignInRequest;
-import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
