@@ -69,7 +69,7 @@ import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.telegram.TelegramBot;
+import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -116,7 +116,7 @@ import greencity.repository.OrdersForUserRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
-import greencity.repository.TelegramBotRepository;
+import greencity.repository.AuthorizedUserRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
@@ -161,17 +161,19 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
+import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
 import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
@@ -245,7 +247,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final TariffLocationRepository tariffLocationRepository;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
-    private final TelegramBotRepository telegramBotRepository;
+    private final AuthorizedUserRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
@@ -441,7 +443,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Integer userPoints, Long orderId) {
         var bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
             .map(bag -> buildBagTranslationDto(orderId, bag))
-            .collect(toList());
+            .toList();
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
     }
 
@@ -589,7 +591,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
-
+        order.setTariffsInfo(tariffsInfo);
         getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
 
         String eventName = determineEventName(orderId);
@@ -733,7 +735,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private List<Integer> getBagIds(List<BagDto> dto) {
         return dto.stream()
             .map(BagDto::getId)
-            .collect(toList());
+            .toList();
     }
 
     private Bag findActiveBagById(Integer id) {
@@ -850,7 +852,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .collect(toList());
+            .toList();
 
         Long amountWithDiscountInCoins = fullPriceInCoins
             - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
@@ -942,7 +944,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsAmountInOrder);
         return bagsAmountInOrder.stream()
             .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
-            .collect(toList());
+            .toList();
     }
 
     private BagForUserDto buildBagForUserDto(OrderBag orderBag, int count) {
@@ -965,36 +967,26 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        User user = userRepository.findByUuid(uuid);
-        if (!order.getUser().equals(user)) {
+        UBSuser ubsUser = ubsUserRepository.findUbsUserByOrderId(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        User user = ubsUser.getUser();
+        if (!Objects.equals(user.getUuid(), uuid)) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
         }
-        UserInfoDto userInfoDto = UserInfoDto.builder()
-            .customerName(order.getUser().getRecipientName())
-            .customerSurName(order.getUser().getRecipientSurname())
-            .customerPhoneNumber(order.getUser().getRecipientPhone())
-            .customerEmail(order.getUser().getRecipientEmail())
-            .totalUserViolations(userRepository.countTotalUsersViolations(order.getUser().getId()))
-            .recipientId(order.getUbsUser().getId())
-            .userViolationForCurrentOrder(
-                userRepository.checkIfUserHasViolationForCurrentOrder(order.getUser().getId(), order.getId()))
+        return UserInfoDto.builder()
+            .customerName(ubsUser.getFirstName())
+            .customerSurname(ubsUser.getLastName())
+            .customerPhoneNumber(ubsUser.getPhoneNumber())
+            .customerEmail(ubsUser.getEmail())
+            .totalUserViolations(user.getViolations())
+            .customerId(user.getId())
+            .senderName(ubsUser.getSenderFirstName() == null ? ubsUser.getFirstName() : ubsUser.getSenderFirstName())
+            .senderSurname(ubsUser.getSenderLastName() == null ? ubsUser.getLastName() : ubsUser.getSenderLastName())
+            .senderEmail(ubsUser.getSenderEmail() == null ? ubsUser.getEmail() : ubsUser.getSenderEmail())
+            .senderPhoneNumber(
+                ubsUser.getSenderPhoneNumber() == null ? ubsUser.getPhoneNumber() : ubsUser.getSenderPhoneNumber())
+            .userViolationForCurrentOrder(userRepository.checkIfUserHasViolationForCurrentOrder(user.getId(), orderId))
             .build();
-        if (order.getUbsUser().getSenderFirstName() != null && !order.getUbsUser().getSenderFirstName().isEmpty()
-            && order.getUbsUser().getSenderLastName() != null && !order.getUbsUser().getSenderLastName().isEmpty()
-            && order.getUbsUser().getSenderPhoneNumber() != null
-            && !order.getUbsUser().getSenderPhoneNumber().isEmpty()) {
-            return userInfoDto.setRecipientName(order.getUbsUser().getSenderFirstName())
-                .setRecipientSurName(order.getUbsUser().getSenderLastName())
-                .setRecipientEmail(order.getUbsUser().getSenderEmail())
-                .setRecipientPhoneNumber(order.getUbsUser().getSenderPhoneNumber());
-        } else {
-            return userInfoDto.setRecipientName(order.getUbsUser().getFirstName())
-                .setRecipientSurName(order.getUbsUser().getLastName())
-                .setRecipientEmail(order.getUbsUser().getEmail())
-                .setRecipientPhoneNumber(order.getUbsUser().getPhoneNumber());
-        }
     }
 
     /**
@@ -1353,7 +1345,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             bonusForUbsUser = changeOfPointsList.stream()
                 .sorted(Comparator.comparing(ChangeOfPoints::getDate).reversed())
                 .map(m -> modelMapper.map(m, PointsForUbsUserDto.class))
-                .collect(toList());
+                .toList();
         }
         AllPointsUserDto allBonusesForUserDto = new AllPointsUserDto();
         allBonusesForUserDto.setUserBonuses(userBonuses);
@@ -1430,7 +1422,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         List<AddressDto> addressDto =
             allAddress.stream()
                 .map(a -> modelMapper.map(a, AddressDto.class))
-                .collect(toList());
+                .toList();
         userProfileDto.setAddressDto(addressDto);
         userProfileDto.setBotList(botList);
         userProfileDto.setHasPassword(userRemoteClient.getPasswordStatus().isHasPassword());
@@ -1447,7 +1439,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void setTelegramAndViberBots(User user, Boolean telegramIsNotify, Boolean viberIsNotify) {
-        TelegramBot telegramBot = telegramBotRepository.findByUser(user).orElse(null);
+        AuthorizedUser telegramBot = telegramBotRepository.findByUser(user).orElse(null);
         ViberBot viberBot = viberBotRepository.findByUser(user).orElse(null);
         if (telegramBot != null) {
             telegramBot.setIsNotify(telegramIsNotify);
@@ -1584,7 +1576,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return EnumSet.allOf(BotType.class)
             .stream()
             .map(type -> new Bot(type.name(), createLink(type, uuid)))
-            .collect(toList());
+            .toList();
     }
 
     private String createLink(BotType type, String uuid) {
@@ -1630,7 +1622,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .nameUk(x.getKey().getNameUk())
                 .locations(x.getValue())
                 .build())
-            .collect(toList());
+            .toList();
     }
 
     @Override
@@ -1803,7 +1795,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .collect(toList());
+            .toList();
 
         sumToPayInCoins = sumToPayInCoins - 100L * (order.getPointsToUse() + countCertificatesBonuses(certificateDtos));
 
@@ -1890,7 +1882,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public List<LocationsDto> getAllLocations() {
         List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
-        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).collect(toList());
+        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).toList();
     }
 
     /**
@@ -1917,7 +1909,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
                     .orElseThrow(() -> new NotFoundException(
                         String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationsDto.getId())))))
-            .collect(toList());
+            .toList();
     }
 
     /**

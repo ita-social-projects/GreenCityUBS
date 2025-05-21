@@ -256,4 +256,15 @@ public interface NotificationService {
      * @author Vladyslav Haliara
      */
     void notifyUnpaidOrderPermanently(Order order, Long sumToPay, PaymentSystemResponse paymentSystemResponse);
+
+    /**
+     * Notify manager that user requested info about green office service from
+     * telegram bot.
+     *
+     * @param userEmail {@link String} an email address that user sent in the tg bot
+     *                  chat.
+     *
+     * @author Chernenko Vitaliy
+     */
+    void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username);
 }

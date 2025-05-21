@@ -154,7 +154,7 @@ import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.entity.telegram.TelegramBot;
+import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -1465,13 +1465,13 @@ public class ModelUtils {
     public static UserInfoDto getUserInfoDto() {
         return UserInfoDto.builder()
             .customerName("Alan")
-            .customerSurName("Maym")
+            .customerSurname("Maym")
             .customerPhoneNumber("091546745")
             .customerEmail("wayn@email.com")
-            .recipientName("Anatolii")
-            .recipientSurName("Petyrov")
-            .recipientPhoneNumber("095123456")
-            .recipientEmail("anatolii.andr@gmail.com")
+            .senderName("Anatolii")
+            .senderSurname("Petyrov")
+            .senderPhoneNumber("095123456")
+            .senderEmail("anatolii.andr@gmail.com")
             .totalUserViolations(4)
             .userViolationForCurrentOrder(1)
             .build();
@@ -1604,20 +1604,12 @@ public class ModelUtils {
             .build();
     }
 
-    public static TelegramBot getTelegramBotNotifyTrue() {
-        return TelegramBot.builder()
-            .id(1L)
-            .chatId(111111L)
-            .isNotify(true)
-            .build();
+    public static AuthorizedUser getTelegramBotNotifyTrue() {
+        return new AuthorizedUser("111111", false, true, null, false);
     }
 
-    public static TelegramBot getTelegramBotNotifyFalse() {
-        return TelegramBot.builder()
-            .id(1L)
-            .chatId(111111L)
-            .isNotify(false)
-            .build();
+    public static AuthorizedUser getTelegramBotNotifyFalse() {
+        return new AuthorizedUser("111111", false, false, null, false);
     }
 
     public static ViberBot getViberBotNotifyTrue() {
@@ -2084,6 +2076,7 @@ public class ModelUtils {
             .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
             .uuid("uuid")
+            .violations(10)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .build();

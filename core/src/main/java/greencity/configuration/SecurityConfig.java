@@ -286,6 +286,12 @@ public class SecurityConfig {
                     UBS_LINK + "/check-if-tariff-exists/{id}",
                     UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.GET,
+                    UBS_LINK + "/telegram/**")
+                .hasRole(UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.POST,
+                    UBS_LINK + "/telegram/**")
+                .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(LOGS_LINKS)
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,

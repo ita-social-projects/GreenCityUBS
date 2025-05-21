@@ -200,4 +200,5 @@ public class ErrorMessage {
     public static final String LANGUAGE_NOT_SET = "Language not set";
     public static final String UNEXPECTED_404 = "404 from user service: unspecified cause. Email: ";
     public static final String UUID_NOT_FOUND_BY_EMAIL = "UUID not found by email: ";
+    public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
 }

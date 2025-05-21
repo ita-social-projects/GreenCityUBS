@@ -36,8 +36,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = {"employeePosition", "employeeOrderPositions", "orders", "tariffs",
-    "createdServices", "editedServices"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "employees")
 public class Employee {
     @Id
@@ -54,9 +53,11 @@ public class Employee {
     private String phoneNumber;
 
     @Column(length = 170, unique = true)
+    @EqualsAndHashCode.Include
     private String email;
 
     @Column(nullable = false, columnDefinition = "varchar(60)")
+    @EqualsAndHashCode.Include
     private String uuid;
 
     @Column(name = "image_path")
