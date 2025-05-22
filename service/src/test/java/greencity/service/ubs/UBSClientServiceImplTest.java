@@ -1815,11 +1815,11 @@ class UBSClientServiceImplTest {
 
     private static UbsCustomersDtoUpdate getUbsCustomer() {
         return UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
-            .recipientName("Anatolii")
-            .recipientSurName("Anatolii")
-            .recipientEmail("anatolii.andr@gmail.com")
-            .recipientPhoneNumber("095123456").build();
+            .customerId(1L)
+            .customerName("Anatolii")
+            .customerSurname("Anatolii")
+            .customerEmail("anatolii.andr@gmail.com")
+            .customerPhoneNumber("095123456").build();
     }
 
     @Test

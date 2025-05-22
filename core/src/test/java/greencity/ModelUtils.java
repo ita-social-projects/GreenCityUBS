@@ -219,11 +219,11 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .recipientId(2L)
-            .recipientName("Anatolii")
-            .recipientSurName("Petyrov")
-            .recipientPhoneNumber("095123456")
-            .recipientEmail("anatolii.andr@gmail.com")
+            .customerId(2L)
+            .customerName("Anatolii")
+            .customerSurname("Petyrov")
+            .customerPhoneNumber("095123456")
+            .customerEmail("anatolii.andr@gmail.com")
             .build();
     }
 
