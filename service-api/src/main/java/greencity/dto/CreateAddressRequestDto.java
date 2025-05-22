@@ -2,6 +2,7 @@ package greencity.dto;
 
 import greencity.dto.location.CoordinatesDto;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,9 @@ public class CreateAddressRequestDto {
     private static final String VALIDATION_MESSAGE = "Use only English, or Ukrainian letter";
     private static final String NOT_EMPTY_VALIDATION_MESSAGE = "Name must not be empty";
     private static final String HOUSE_NUMBER_NOT_VALID = "House number is invalid";
+    private static final String ADDRESS_COMMENT_LENGTH_ERROR_MESSAGE =
+        "Address comment must be 255 characters or fewer";
+    private static final String ADDRESS_COMMENT_INPUT_ERROR_MESSAGE = "Address comment must not be only whitespace";
 
     @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ’]*", message = VALIDATION_MESSAGE)
     @NotEmpty(message = NOT_EMPTY_VALIDATION_MESSAGE)
@@ -53,7 +57,8 @@ public class CreateAddressRequestDto {
 
     private String houseCorpus;
 
-    @Pattern(regexp = "[-A-Za-zА-Яа-яЇїІіЄєҐґ 0-9.,ʼ'`ʹ!?’]*", message = VALIDATION_MESSAGE)
+    @Size(max = 255, message = ADDRESS_COMMENT_LENGTH_ERROR_MESSAGE)
+    @Pattern(regexp = "^$|.*\\S.*", message = ADDRESS_COMMENT_INPUT_ERROR_MESSAGE)
     private String addressComment;
 
     private String placeId;
