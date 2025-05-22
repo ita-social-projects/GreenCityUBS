@@ -58,7 +58,7 @@ public class CreateAddressRequestDto {
     private String houseCorpus;
 
     @Size(max = 255, message = ADDRESS_COMMENT_LENGTH_ERROR_MESSAGE)
-    @Pattern(regexp = "^$|.*\\S.*", message = ADDRESS_COMMENT_INPUT_ERROR_MESSAGE)
+    @Pattern(regexp = "^$|\\s*\\S[\\s\\S]*", message = ADDRESS_COMMENT_INPUT_ERROR_MESSAGE)
     private String addressComment;
 
     private String placeId;
