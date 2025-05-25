@@ -1134,6 +1134,22 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
+    void requestToBlockOrderWhenUserNotFoundTest() {
+        String uuid = "uuid";
+        List<Long> orders = List.of(1L, 2L);
+        String expectedExceptionMessage = ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid;
+
+        when(userRepository.findByUuid(uuid))
+                .thenReturn(null);
+
+        var notFoundException = assertThrows(
+                NotFoundException.class,
+                () -> ordersAdminsPageService.requestToBlockOrder(uuid, orders)
+        );
+        assertEquals(expectedExceptionMessage, notFoundException.getMessage());
+    }
+
+    @Test
     void unblockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
         String email = user.getRecipientEmail();
