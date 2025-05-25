@@ -10,6 +10,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -30,6 +31,7 @@ import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,7 +73,6 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
-    @Disabled
     void doFilterInternalTest() throws IOException, ServletException {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(providerManager.authenticate(any()))
@@ -106,7 +107,6 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
-    @Disabled
     void doFilterInternalAccessDeniedTest() throws IOException, ServletException {
         String token = "SuperSecretAccessToken";
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
@@ -123,5 +123,17 @@ class AccessTokenAuthenticationFilterTest {
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(any());
         verify(userRemoteClient).checkIfUserExistsByUuid(uuid);
+    }
+
+    @Test
+    @SneakyThrows
+    void doFilterInternalWhenNoTokenTest() {
+        String token = null;
+        FilterChain spyChain = spy(chain);
+        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
+
+        authenticationFilter.doFilterInternal(request, response, spyChain);
+
+        verify(spyChain).doFilter(request, response);
     }
 }
