@@ -1140,12 +1140,11 @@ class OrdersAdminsPageServiceImplTest {
         String expectedExceptionMessage = ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid;
 
         when(userRepository.findByUuid(uuid))
-                .thenReturn(null);
+            .thenReturn(null);
 
         var notFoundException = assertThrows(
-                NotFoundException.class,
-                () -> ordersAdminsPageService.requestToBlockOrder(uuid, orders)
-        );
+            NotFoundException.class,
+            () -> ordersAdminsPageService.requestToBlockOrder(uuid, orders));
         assertEquals(expectedExceptionMessage, notFoundException.getMessage());
     }
 
