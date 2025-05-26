@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.client.UserRemoteClient;
+import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
@@ -1047,6 +1048,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     @Override
     public synchronized List<BlockedOrderDto> requestToBlockOrder(String userUuid, List<Long> orders) {
         User user = userRepository.findByUuid(userUuid);
+        if (user == null) {
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID + userUuid);
+        }
         String email = user.getRecipientEmail();
 
         Employee employee = employeeRepository.findByEmail(email)

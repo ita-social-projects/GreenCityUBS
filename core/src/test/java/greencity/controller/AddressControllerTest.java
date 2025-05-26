@@ -2,7 +2,6 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;

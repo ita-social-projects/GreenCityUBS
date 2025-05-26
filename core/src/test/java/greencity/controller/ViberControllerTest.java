@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import greencity.client.UserRemoteClient;
 import greencity.converters.UserArgumentResolver;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.ViberService;

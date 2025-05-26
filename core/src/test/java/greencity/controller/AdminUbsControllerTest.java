@@ -1,7 +1,6 @@
 package greencity.controller;
 
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.BlockedOrderDto;
