@@ -1523,10 +1523,10 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .recipientId(1L)
-            .recipientName("Anatolii Petyrov")
-            .recipientEmail("anatolii.andr@gmail.com")
-            .recipientPhoneNumber("095123456").build();
+            .customerId(1L)
+            .customerName("Anatolii Petyrov")
+            .customerEmail("anatolii.andr@gmail.com")
+            .customerPhoneNumber("095123456").build();
     }
 
     public static List<AddressDto> addressDtoList() {
@@ -3640,10 +3640,10 @@ public class ModelUtils {
                 .build())
             .userInfoDto(UbsCustomersDtoUpdate
                 .builder()
-                .recipientId(1L)
-                .recipientName("Anatolii Petyrov")
-                .recipientPhoneNumber("095123456")
-                .recipientEmail("anatolii.andr@gmail.com")
+                .customerId(1L)
+                .customerName("Anatolii Petyrov")
+                .customerPhoneNumber("095123456")
+                .customerEmail("anatolii.andr@gmail.com")
                 .build())
             .addressExportDetailsDto(OrderAddressExportDetailsDtoUpdate
                 .builder()

@@ -169,11 +169,9 @@ import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
 import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
@@ -998,7 +996,7 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid) {
-        var ubsUser = getUbsUserById(dtoUpdate.getRecipientId());
+        var ubsUser = getUbsUserById(dtoUpdate.getCustomerId());
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         checkUserHasAccessToUpdateData(ubsUser, userUuid, authentication);
@@ -1065,17 +1063,17 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private UBSuser updateRecipientDataInOrder(UBSuser ubsUser, UbsCustomersDtoUpdate dto) {
-        if (nonNull(dto.getRecipientEmail())) {
-            ubsUser.setSenderEmail(dto.getRecipientEmail());
+        if (nonNull(dto.getCustomerEmail())) {
+            ubsUser.setSenderEmail(dto.getCustomerEmail());
         }
-        if (nonNull(dto.getRecipientName())) {
-            ubsUser.setSenderFirstName(dto.getRecipientName());
+        if (nonNull(dto.getCustomerName())) {
+            ubsUser.setSenderFirstName(dto.getCustomerName());
         }
-        if (nonNull(dto.getRecipientSurName())) {
-            ubsUser.setSenderLastName(dto.getRecipientSurName());
+        if (nonNull(dto.getCustomerSurname())) {
+            ubsUser.setSenderLastName(dto.getCustomerSurname());
         }
-        if (nonNull(dto.getRecipientPhoneNumber())) {
-            ubsUser.setSenderPhoneNumber(dto.getRecipientPhoneNumber());
+        if (nonNull(dto.getCustomerPhoneNumber())) {
+            ubsUser.setSenderPhoneNumber(dto.getCustomerPhoneNumber());
         }
 
         return ubsUser;
