@@ -114,7 +114,7 @@ class SuperAdminController {
     public ResponseEntity<HttpStatus> deleteTariffService(
         @Valid @PathVariable Integer id) {
         superAdminService.deleteTariffService(id);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.noContent().build();
     }
 
     /**
