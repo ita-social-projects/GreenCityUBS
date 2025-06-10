@@ -143,6 +143,7 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/getDeactivatedLocations",
                     SUPER_ADMIN_LINK + "/getCouriers",
                     SUPER_ADMIN_LINK + "/tariffs",
+                    SUPER_ADMIN_LINK + "/tariff/{id}",
                     SUPER_ADMIN_LINK + "/{tariffId}/getTariffService",
                     SUPER_ADMIN_LINK + "/{tariffId}/getService",
                     SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}",
