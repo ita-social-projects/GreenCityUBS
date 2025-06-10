@@ -516,13 +516,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public GetTariffsInfoDto getTariffInfoById(Long id) {
-        return modelMapper
-                .map(
-                        tariffsInfoRepository
-                                .findTariffsInfoById(id)
-                                .orElseThrow(() -> new NotFoundException("Tariff with id " + id + " not found")),
-                        GetTariffsInfoDto.class
-                );
+        TariffsInfo tariffsInfo = tryToFindTariffById(id);
+        return modelMapper.map(tariffsInfo, GetTariffsInfoDto.class);
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
