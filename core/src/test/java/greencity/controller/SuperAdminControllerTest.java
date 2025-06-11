@@ -759,12 +759,12 @@ class SuperAdminControllerTest {
         String result = objectMapper.writeValueAsString(getTariffsInfoDto);
 
         Mockito.when(superAdminService.getTariffInfoById(id))
-                .thenReturn(getTariffsInfoDto);
+            .thenReturn(getTariffsInfoDto);
 
         mockMvc.perform(get(ubsLink + "/tariff/" + id)
-                        .content(result)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .content(result)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -773,11 +773,11 @@ class SuperAdminControllerTest {
         Long id = 1L;
 
         Mockito.doThrow(new NotFoundException("Tariff with id " + id + " not found"))
-                .when(superAdminService).getTariffInfoById(id);
+            .when(superAdminService).getTariffInfoById(id);
 
         mockMvc.perform(get(ubsLink + "/tariff/" + id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
     }
 
     @Test
