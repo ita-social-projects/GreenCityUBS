@@ -37,9 +37,11 @@ public class UbsCustomersDtoUpdate {
     @NotNull
     @NotBlank
     @ValidPhoneNumber
+    @Length(max = 20)
     private String customerPhoneNumber;
     @NotNull
     @NotBlank
     @Email(regexp = ValidationConstant.EMAIL_REGEXP)
+    @Length(max = 255)
     private String customerEmail;
 }
