@@ -31,7 +31,7 @@ public class UpdateOrderPageAdminValidator
                     .addPropertyNode("customerName")
                     .addConstraintViolation();
                 return false;
-            } else if (!name.matches("^[A-Za-zА-Яа-я\\- '\\s]+$")) {
+            } else if (!name.matches("^[A-Za-zА-Яа-я\\-'\\s]+$")) {
                 context.buildConstraintViolationWithTemplate(
                     "Only alphabetic characters and '-', ' ', and apostrophe are allowed")
                     .addPropertyNode("customerName")
@@ -47,7 +47,7 @@ public class UpdateOrderPageAdminValidator
                     .addPropertyNode("customerSurname")
                     .addConstraintViolation();
                 return false;
-            } else if (!surname.matches("^[A-Za-zА-Яа-я\\- '\\s]+$")) {
+            } else if (!surname.matches("^[A-Za-zА-Яа-я\\-'\\s]+$")) {
                 context.buildConstraintViolationWithTemplate(
                     "Only alphabetic characters and '-', ' ', and apostrophe are allowed")
                     .addPropertyNode("customerSurname")
