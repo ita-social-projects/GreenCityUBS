@@ -6,12 +6,17 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class UpdateOrderPageAdminValidatorTest {
+class UpdateOrderPageAdminValidatorTest {
     @Mock
     private ConstraintValidatorContext context;
     @InjectMocks
@@ -66,39 +71,6 @@ public class UpdateOrderPageAdminValidatorTest {
     }
 
     @Test
-    void updateOrderPageAdminValidationForBlankCustomerNameTest() {
-        UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
-            .userInfoDto(UbsCustomersDtoUpdate.builder()
-                .customerId(1L)
-                .customerName("")
-                .customerSurname("Tester")
-                .build())
-            .build();
-
-        boolean result = validator.isValid(invalidDto, context);
-
-        assertFalse(result);
-        verify(context).buildConstraintViolationWithTemplate("Customer Name cannot be blank");
-    }
-
-    @Test
-    void updateOrderPageAdminValidationForInvalidCharactersInCustomerNameTest() {
-        UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
-            .userInfoDto(UbsCustomersDtoUpdate.builder()
-                .customerId(1L)
-                .customerName("!@#$%^&*()`")
-                .customerSurname("ValidSurname")
-                .build())
-            .build();
-
-        boolean result = validator.isValid(invalidDto, context);
-
-        assertFalse(result);
-        verify(context).buildConstraintViolationWithTemplate(
-            "Only alphabetic characters and '-', ' ', and apostrophe are allowed");
-    }
-
-    @Test
     void updateOrderPageAdminValidationForNullCustomerSurnameTest() {
         UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
             .userInfoDto(UbsCustomersDtoUpdate.builder()
@@ -112,37 +84,32 @@ public class UpdateOrderPageAdminValidatorTest {
         assertTrue(result);
     }
 
-    @Test
-    void updateOrderPageAdminValidationForBlankCustomerSurnameTest() {
-        UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
-            .userInfoDto(UbsCustomersDtoUpdate.builder()
-                .customerId(1L)
-                .customerName("Tester")
-                .customerSurname("")
-                .build())
-            .build();
-
-        boolean result = validator.isValid(invalidDto, context);
-
-        assertFalse(result);
-        verify(context).buildConstraintViolationWithTemplate("Customer Surname cannot be blank");
+    private static Stream<Arguments> provideInvalidUserInfoData() {
+        return Stream.of(
+            Arguments.of("", "Tester", "Customer Name cannot be blank"),
+            Arguments.of("!@#$%^&*()`", "Tester",
+                "Only alphabetic characters and '-', ' ', and apostrophe are allowed"),
+            Arguments.of("Tester", "", "Customer Surname cannot be blank"),
+            Arguments.of("Tester", "!@#$%^&*()",
+                "Only alphabetic characters and '-', ' ', and apostrophe are allowed")
+        );
     }
 
-    @Test
-    void updateOrderPageAdminValidationForInvalidCharactersInCustomerSurnameTest() {
+    @ParameterizedTest
+    @MethodSource("provideInvalidUserInfoData")
+    void sagsagsagTest(String name, String surname, String expectedMessage) {
         UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
             .userInfoDto(UbsCustomersDtoUpdate.builder()
                 .customerId(1L)
-                .customerName("Tester")
-                .customerSurname("!@#$%^&*()")
+                .customerName(name)
+                .customerSurname(surname)
                 .build())
             .build();
 
         boolean result = validator.isValid(invalidDto, context);
 
         assertFalse(result);
-        verify(context).buildConstraintViolationWithTemplate(
-            "Only alphabetic characters and '-', ' ', and apostrophe are allowed");
+        verify(context).buildConstraintViolationWithTemplate(expectedMessage);
     }
 
     @Test
