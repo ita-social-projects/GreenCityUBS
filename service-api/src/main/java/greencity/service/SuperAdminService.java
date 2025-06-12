@@ -191,7 +191,8 @@ public interface SuperAdminService {
     /**
      * Method for getting tariff info by id.
      *
-     * @return {@link GetTariffsInfoDto}
+     * @param id the ID of the tariff to retrieve
+     * @return {@link GetTariffsInfoDto} the DTO containing tariff information
      */
     GetTariffsInfoDto getTariffInfoById(Long id);
 

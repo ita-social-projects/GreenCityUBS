@@ -143,7 +143,6 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/getDeactivatedLocations",
                     SUPER_ADMIN_LINK + "/getCouriers",
                     SUPER_ADMIN_LINK + "/tariffs",
-                    SUPER_ADMIN_LINK + "/tariff/{id}",
                     SUPER_ADMIN_LINK + "/{tariffId}/getTariffService",
                     SUPER_ADMIN_LINK + "/{tariffId}/getService",
                     SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}",
@@ -286,7 +285,8 @@ public class SecurityConfig {
                     UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + "/telegram/**")
+                    UBS_LINK + "/telegram/**",
+                    SUPER_ADMIN_LINK + "/tariff/{id}")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_LINK + "/telegram/**")

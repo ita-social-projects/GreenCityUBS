@@ -749,7 +749,7 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void getTariffInfoByIdTariffFound() throws Exception {
+    void getTariffInfoByIdTariffFoundTest() throws Exception {
         GetTariffsInfoDto getTariffsInfoDto = ModelUtils.getAllTariffsInfoDto();
 
         Long id = 1L;
