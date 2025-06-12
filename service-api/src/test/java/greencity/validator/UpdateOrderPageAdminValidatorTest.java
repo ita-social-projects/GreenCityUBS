@@ -52,6 +52,20 @@ public class UpdateOrderPageAdminValidatorTest {
     }
 
     @Test
+    void updateOrderPageAdminValidationForNullCustomerNameTest() {
+        UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
+            .userInfoDto(UbsCustomersDtoUpdate.builder()
+                .customerId(1L)
+                .customerSurname("T es'- te r")
+                .build())
+            .build();
+
+        boolean result = validator.isValid(invalidDto, context);
+
+        assertTrue(result);
+    }
+
+    @Test
     void updateOrderPageAdminValidationForBlankCustomerNameTest() {
         UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
             .userInfoDto(UbsCustomersDtoUpdate.builder()
@@ -72,7 +86,7 @@ public class UpdateOrderPageAdminValidatorTest {
         UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
             .userInfoDto(UbsCustomersDtoUpdate.builder()
                 .customerId(1L)
-                .customerName("!@#$%^&*()")
+                .customerName("!@#$%^&*()`")
                 .customerSurname("ValidSurname")
                 .build())
             .build();
@@ -82,6 +96,20 @@ public class UpdateOrderPageAdminValidatorTest {
         assertFalse(result);
         verify(context).buildConstraintViolationWithTemplate(
             "Only alphabetic characters and '-', ' ', and apostrophe are allowed");
+    }
+
+    @Test
+    void updateOrderPageAdminValidationForNullCustomerSurnameTest() {
+        UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
+            .userInfoDto(UbsCustomersDtoUpdate.builder()
+                .customerId(1L)
+                .customerName("Tester")
+                .build())
+            .build();
+
+        boolean result = validator.isValid(invalidDto, context);
+
+        assertTrue(result);
     }
 
     @Test
@@ -115,5 +143,12 @@ public class UpdateOrderPageAdminValidatorTest {
         assertFalse(result);
         verify(context).buildConstraintViolationWithTemplate(
             "Only alphabetic characters and '-', ' ', and apostrophe are allowed");
+    }
+
+    @Test
+    void updateOrderPageAdminValidationForNullDtoTest() {
+        boolean result = validator.isValid(new UpdateOrderPageAdminDto(), context);
+
+        assertTrue(result);
     }
 }
