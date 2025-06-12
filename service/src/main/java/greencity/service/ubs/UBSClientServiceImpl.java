@@ -1768,6 +1768,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .amount(-pointsToUse)
                 .date(LocalDateTime.now())
                 .order(order)
+                .reason(BonusReason.DEBIT_PAYMENT)
                 .build());
 
         orderRepository.save(order);
