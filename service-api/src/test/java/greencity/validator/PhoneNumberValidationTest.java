@@ -40,7 +40,7 @@ class PhoneNumberValidationTest {
     }
 
     @Test
-    void isValidShouldThrowEmployeeValidationException() {
+    void isValidShouldShouldReturnFalseWithInvalidPhoneNumberTest() {
         String incorrectStr = "jldjfdavn";
         assertFalse(validation.isValid(incorrectStr, context));
     }
