@@ -91,8 +91,7 @@ class UpdateOrderPageAdminValidatorTest {
                 "Only alphabetic characters and '-', ' ', and apostrophe are allowed"),
             Arguments.of("Tester", "", "Customer Surname cannot be blank"),
             Arguments.of("Tester", "!@#$%^&*()",
-                "Only alphabetic characters and '-', ' ', and apostrophe are allowed")
-        );
+                "Only alphabetic characters and '-', ' ', and apostrophe are allowed"));
     }
 
     @ParameterizedTest
