@@ -1,7 +1,6 @@
 package greencity.dto.customer;
 
 import greencity.annotations.ValidPhoneNumber;
-import greencity.constant.ValidationConstant;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
