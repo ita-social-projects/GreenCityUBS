@@ -111,7 +111,7 @@ public class TelegramController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGETMENT', authentication)")
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @PostMapping("/send-message/{chatId}")
     public ResponseEntity<String> sendMessage(@PathVariable(name = "chatId") String chatId,
         @RequestParam String message) {

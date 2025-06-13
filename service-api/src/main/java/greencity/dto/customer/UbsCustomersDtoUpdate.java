@@ -22,21 +22,21 @@ import jakarta.validation.constraints.NotNull;
 public class UbsCustomersDtoUpdate {
     @NotNull
     @Min(1)
-    private Long recipientId;
+    private Long customerId;
     @NotNull
     @Length(max = 60)
     @NotBlank
-    private String recipientName;
+    private String customerName;
     @NotNull
     @Length(max = 60)
     @NotBlank
-    private String recipientSurName;
+    private String customerSurname;
     @NotNull
     @Length(max = 9)
     @NotBlank
-    private String recipientPhoneNumber;
+    private String customerPhoneNumber;
     @NotNull
     @Length(max = 50)
     @NotBlank
-    private String recipientEmail;
+    private String customerEmail;
 }
