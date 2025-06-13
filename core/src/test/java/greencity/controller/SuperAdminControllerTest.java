@@ -768,7 +768,7 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void getTariffInfoByIdTariffIsNotFound() throws Exception {
+    void getTariffInfoByIdTariffIsNotFoundTest() throws Exception {
 
         Long id = 1L;
 
