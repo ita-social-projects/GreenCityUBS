@@ -958,7 +958,7 @@ class AddressServiceTest {
 
     @Test
     void getAllDistrictsForKyivAndCityKyivNotFoundThenExceptionThrownTest() {
-        when(cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)).thenThrow(new NotFoundException(CITY_NOT_FOUND));
+        when(cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> addressService.getAllDistrictsForKyiv());
 

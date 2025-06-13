@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface CityRepository extends JpaRepository<City, Long> {
     /**
@@ -61,5 +62,5 @@ public interface CityRepository extends JpaRepository<City, Long> {
      *         not found
      */
     @Query("SELECT c.id FROM City c WHERE LOWER(c.nameEn) = LOWER(:cityName)")
-    Optional<Long> findIdByCityNameEnIgnoreCase(String cityName);
+    Optional<Long> findIdByCityNameEnIgnoreCase(@Param("cityName") String cityName);
 }
