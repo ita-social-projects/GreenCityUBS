@@ -96,7 +96,8 @@ class UpdateOrderPageAdminValidatorTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidUserInfoData")
-    void sagsagsagTest(String name, String surname, String expectedMessage) {
+    void updateOrderPageAdminValidationWithInvalidCustomerNameOrSurnameTest(String name, String surname,
+        String expectedMessage) {
         UpdateOrderPageAdminDto invalidDto = UpdateOrderPageAdminDto.builder()
             .userInfoDto(UbsCustomersDtoUpdate.builder()
                 .customerId(1L)
