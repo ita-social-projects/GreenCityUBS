@@ -5,6 +5,7 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import static greencity.constant.ValidationConstant.NAMESURNAME_REGEXP;
 
 public class UpdateOrderPageAdminValidator
     implements ConstraintValidator<ValidUpdateOrderPageAdmin, UpdateOrderPageAdminDto> {
@@ -31,7 +32,7 @@ public class UpdateOrderPageAdminValidator
                     .addPropertyNode("customerName")
                     .addConstraintViolation();
                 return false;
-            } else if (!name.matches("^[A-Za-zА-Яа-я\\-'\\s]+$")) {
+            } else if (!name.matches(NAMESURNAME_REGEXP)) {
                 context.buildConstraintViolationWithTemplate(
                     "Only alphabetic characters and '-', ' ', and apostrophe are allowed")
                     .addPropertyNode("customerName")
@@ -47,7 +48,7 @@ public class UpdateOrderPageAdminValidator
                     .addPropertyNode("customerSurname")
                     .addConstraintViolation();
                 return false;
-            } else if (!surname.matches("^[A-Za-zА-Яа-я\\-'\\s]+$")) {
+            } else if (!surname.matches(NAMESURNAME_REGEXP)) {
                 context.buildConstraintViolationWithTemplate(
                     "Only alphabetic characters and '-', ' ', and apostrophe are allowed")
                     .addPropertyNode("customerSurname")
