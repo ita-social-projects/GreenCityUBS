@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.CreateAddressRequestDto;
@@ -47,7 +48,6 @@ import static java.util.stream.Collectors.toMap;
 @Service
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
-    private static final Long CITY_ID_KIEV = 3L;
     private static final String KYIV_CITY = "Kyiv City";
     private final OrderAddressRepository orderAddressRepository;
     private final DistrictRepository districtRepository;
@@ -198,7 +198,9 @@ public class AddressServiceImpl implements AddressService {
      */
     @Override
     public List<DistrictDto> getAllDistrictsForKyiv() {
-        return districtRepository.findAllByCityId(CITY_ID_KIEV).stream()
+        Long cityId = cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND));
+        return districtRepository.findAllByCityId(cityId).stream()
             .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
             .collect(toMap(
                 District::getNameUk,
