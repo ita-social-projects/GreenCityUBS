@@ -227,6 +227,7 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -3037,9 +3038,10 @@ class UBSClientServiceImplTest {
         User user = getUser();
         when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
-        assertThrows(BadRequestException.class, () -> {
-            ubsService.createUserProfile(userProfileCreateDto);
-        });
+        BadRequestException ex = assertThrows(BadRequestException.class,
+            () -> ubsService.createUserProfile(userProfileCreateDto));
+        assertEquals(USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS, ex.getMessage());
+        verify(userRemoteClient, times(1)).checkIfUserExistsByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(0)).save(any(User.class));
     }
