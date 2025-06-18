@@ -3037,10 +3037,11 @@ class UBSClientServiceImplTest {
         User user = getUser();
         when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
-        Long actualId = ubsService.createUserProfile(userProfileCreateDto);
+        assertThrows(BadRequestException.class, () -> {
+            ubsService.createUserProfile(userProfileCreateDto);
+        });
         verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(0)).save(any(User.class));
-        assertEquals(user.getId(), actualId);
     }
 
     @Test
