@@ -169,44 +169,7 @@ import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
-import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
-import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
-import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
-import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
-import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
-import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
-import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.*;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -1050,15 +1013,16 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
         }
         User user = userRepository.findByUuid(userProfileCreateDto.getUuid());
-        if (user == null) {
-            user = userRepository.save(User.builder()
-                .uuid(userProfileCreateDto.getUuid())
-                .recipientEmail(userProfileCreateDto.getEmail())
-                .recipientName(userProfileCreateDto.getName())
-                .currentPoints(0)
-                .violations(0)
-                .dateOfRegistration(LocalDate.now()).build());
+        if (user != null) {
+            throw new BadRequestException(USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS);
         }
+        user = userRepository.save(User.builder()
+            .uuid(userProfileCreateDto.getUuid())
+            .recipientEmail(userProfileCreateDto.getEmail())
+            .recipientName(userProfileCreateDto.getName())
+            .currentPoints(0)
+            .violations(0)
+            .dateOfRegistration(LocalDate.now()).build());
         return user.getId();
     }
 
