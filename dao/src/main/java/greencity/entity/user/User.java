@@ -5,7 +5,6 @@ import greencity.entity.order.Order;
 import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.entity.viber.ViberBot;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,7 +30,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Table(name = "users")
-@EqualsAndHashCode(exclude = {"ubsUsers", "orders", "addresses", "changeOfPointsList", "telegramBot", "viberBot"})
+@EqualsAndHashCode(exclude = {"ubsUsers", "orders", "addresses", "changeOfPointsList", "telegramBot"})
 @Entity
 public class User {
     @Id
@@ -76,9 +75,6 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     private AuthorizedUser telegramBot;
-
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
-    private ViberBot viberBot;
 
     @Column(name = "date_of_registration")
     private LocalDate dateOfRegistration;
