@@ -115,8 +115,7 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/swagger-resources/**",
-                    "/webjars/**",
-                    "/bot")
+                    "/webjars/**")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/getAllCertificates",
@@ -215,18 +214,14 @@ public class SecurityConfig {
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_MANAG_LINK + "/**",
-                    ADMIN_LINK + "/**",
-                    "/accountinfo")
+                    ADMIN_LINK + "/**")
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/**",
                     SUPER_ADMIN_LINK + "/**",
                     ADMIN_LINK + "/notification/get-all",
                     ADMIN_LINK + "/notification/{id}",
-                    ADMIN_LINK + "/**",
-                    "/accountinfo",
-                    "/removewebhook",
-                    "/setwebhook")
+                    ADMIN_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ADMIN_LINK + "/notification/remove-custom-template/{id}")
