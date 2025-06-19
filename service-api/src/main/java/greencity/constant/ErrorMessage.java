@@ -27,8 +27,6 @@ public class ErrorMessage {
     public static final String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
     public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
         "The user already has connected to Telegram bot.";
-    public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT =
-        "The user already has connected to Viber bot.";
     public static final String THE_MESSAGE_WAS_NOT_SENT = "The message was not sent.";
     public static final String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
     public static final String USER_WITH_CURRENT_ID_DOES_NOT_EXIST = "User with current id does not exist.";
