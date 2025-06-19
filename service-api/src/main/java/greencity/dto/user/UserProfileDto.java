@@ -45,6 +45,4 @@ public class UserProfileDto {
     private Boolean hasPassword;
     @NonNull
     private Boolean telegramIsNotify;
-    @NonNull
-    private Boolean viberIsNotify;
 }
