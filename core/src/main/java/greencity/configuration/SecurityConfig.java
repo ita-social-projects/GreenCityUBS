@@ -36,6 +36,7 @@ import static greencity.constant.AppConstant.UBS_EXPORT;
 import static greencity.constant.AppConstant.UBS_LINK;
 import static greencity.constant.AppConstant.UBS_MANAG_LINK;
 import static greencity.constant.AppConstant.LOGS_LINKS;
+import static greencity.constant.AppConstant.EXPORT_SETTINGS_LINKS;
 import static greencity.constant.AppConstant.USER;
 import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
@@ -290,7 +291,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,
                     UBS_LINK + "/telegram/**")
                 .hasRole(UBS_EMPLOYEE)
-                .requestMatchers(LOGS_LINKS)
+                .requestMatchers(LOGS_LINKS, EXPORT_SETTINGS_LINKS)
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",
