@@ -186,7 +186,7 @@ class SuperAdminControllerTest {
     @Test
     void deleteTariffService() throws Exception {
         mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
         verify(superAdminService).deleteTariffService(1);
         verifyNoMoreInteractions(superAdminService);
     }

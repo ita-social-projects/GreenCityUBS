@@ -20,7 +20,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.time.LocalDate;
@@ -87,8 +86,7 @@ public class Bag {
     @JoinColumn
     private Employee editedBy;
 
-    @ManyToOne(cascade = CascadeType.REMOVE,
-        fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
     private TariffsInfo tariffsInfo;
 
