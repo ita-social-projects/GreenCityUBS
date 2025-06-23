@@ -1662,6 +1662,10 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
         }
 
+        if (!locationRepository.existsById(locationId)) {
+            throw new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId);
+        }
+
         return TariffInfoByLocationDto.builder()
             .orderIsPresent(true)
             .tariffsForLocationDto(modelMapper.map(
