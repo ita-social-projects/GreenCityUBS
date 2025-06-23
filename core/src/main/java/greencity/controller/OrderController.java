@@ -520,7 +520,7 @@ public class OrderController {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
     })
     @PostMapping("/monobank/payments")
-    public void receivePaymentFromMonoBank(@RequestBody MonoBankPaymentResponseDto response) {
+    public void receivePaymentFromMonoBank(@RequestBody @Valid MonoBankPaymentResponseDto response) {
         log.info("Response from MONOBANK API: {}", response);
         ubsClientService.validatePaymentFromMonoBank(response);
     }
