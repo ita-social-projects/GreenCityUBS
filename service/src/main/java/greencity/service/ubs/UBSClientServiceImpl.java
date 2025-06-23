@@ -1900,13 +1900,16 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
+        if (!courierRepository.existsCourierById(courierId)) {
+            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
+        }
         List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
         return locations.stream()
             .map(locationToLocationsDtoMapper::convert)
             .map(locationsDto -> locationsDto.setTariffsId(
                 tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
                     .orElseThrow(() -> new NotFoundException(
-                        String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, locationsDto.getId())))))
+                        String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, locationsDto.getId(), courierId)))))
             .toList();
     }
 
