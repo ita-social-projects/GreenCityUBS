@@ -966,7 +966,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid) {
         UBSuser ubsUser = ubsUserRepository.findUbsUserByOrderId(orderId).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
         User user = ubsUser.getUser();
         if (!Objects.equals(user.getUuid(), uuid)) {
             throw new AccessDeniedException(CANNOT_ACCESS_PERSONAL_INFO);
@@ -1359,7 +1359,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Optional<Order> order = orderRepository.findById(orderId);
 
         if (order.isEmpty()) {
-            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST +  orderId);
+            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId);
         }
 
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
