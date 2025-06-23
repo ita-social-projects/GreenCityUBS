@@ -129,7 +129,6 @@ import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -692,7 +691,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
         Address address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new EntityNotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
+            .orElseThrow(() -> new NotFoundException(ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
 
         boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
 
@@ -1679,7 +1678,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (tariffsInfo.isPresent()) {
             return modelMapper.map(tariffsInfo.get(), TariffsForLocationDto.class);
         } else {
-            throw new EntityNotFoundException(TARIFF_FOR_ORDER_NOT_EXIST + id);
+            throw new NotFoundException(TARIFF_FOR_ORDER_NOT_EXIST + id);
         }
     }
 
