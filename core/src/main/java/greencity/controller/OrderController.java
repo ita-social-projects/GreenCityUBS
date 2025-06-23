@@ -44,6 +44,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -188,7 +190,7 @@ public class OrderController {
     public ResponseEntity<PaymentSystemResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
-        @Valid @PathVariable("id") Optional<Long> id) {
+        @PathVariable("id") Optional<Long> id) {
         if (id.isPresent()) {
             OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
             if (PaymentStatus.PAID.name().equals(orderDetailStatusDto.getPaymentStatus())
@@ -263,7 +265,7 @@ public class OrderController {
     @ApiLocale
     @GetMapping("/user-info/{orderId}")
     public ResponseEntity<UserInfoDto> getOrderDetailsByOrderId(
-        @Valid @PathVariable("orderId") Long id,
+        @PathVariable("orderId") Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.ok()
             .body(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(id, uuid));
@@ -288,7 +290,7 @@ public class OrderController {
     @ApiLocale
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
-        @Valid @PathVariable("orderId") Long id,
+        @PathVariable("orderId") Long id,
         Principal principal,
         @Parameter(hidden = true) Locale locale) {
         return ResponseEntity.ok()
@@ -363,7 +365,7 @@ public class OrderController {
     public ResponseEntity<OrderCourierPopUpDto> getAllActiveLocationsByCourierId(
         @RequestParam Optional<String> changeLoc,
         @Parameter(hidden = true) @CurrentUserUuid String uuid,
-        @Valid @PathVariable Long courierId) {
+        @PathVariable Long courierId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getInfoForCourierOrderingByCourierId(uuid, changeLoc, courierId));
     }
