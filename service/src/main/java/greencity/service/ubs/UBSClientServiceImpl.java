@@ -1359,7 +1359,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Optional<Order> order = orderRepository.findById(orderId);
 
         if (order.isEmpty()) {
-            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST +  orderId);
         }
 
         List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
