@@ -438,18 +438,20 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(Long tariffId,
         Integer userPoints, Long orderId) {
-        List<BagTranslationDto> bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
-            .map(bag -> buildBagTranslationDto(orderId, bag))
-            .toList();
+        List<BagTranslationDto> bagTranslationDtoList =
+            bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
+                .map(bag -> buildBagTranslationDto(orderId, bag))
+                .toList();
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
     }
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
         Integer userPoints) {
-        List<BagTranslationDto> bagTranslationDtoList = bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
-            .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
-            .sorted(Comparator.comparing(BagTranslationDto::getCapacity).reversed())
-            .toList();
+        List<BagTranslationDto> bagTranslationDtoList =
+            bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
+                .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
+                .sorted(Comparator.comparing(BagTranslationDto::getCapacity).reversed())
+                .toList();
         return new UserPointsAndAllBagsDto(bagTranslationDtoList, userPoints);
     }
 
@@ -1657,14 +1659,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public TariffInfoByLocationDto getTariffInfoForLocation(Long courierId, Long locationId) {
-        if (!courierRepository.existsCourierById(courierId)) {
-            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
-        }
-
-        if (!locationRepository.existsById(locationId)) {
-            throw new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId);
-        }
-
         return TariffInfoByLocationDto.builder()
             .orderIsPresent(true)
             .tariffsForLocationDto(modelMapper.map(
