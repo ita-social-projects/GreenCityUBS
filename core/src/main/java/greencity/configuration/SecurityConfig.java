@@ -170,9 +170,9 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/**",
                     USER_AGREEMENT_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
-                    .requestMatchers(HttpMethod.POST,
-                        LOGS_LINKS)
-                    .hasAnyRole(ADMIN, UBS_EMPLOYEE, USER)
+                .requestMatchers(HttpMethod.POST,
+                    LOGS_LINKS)
+                .hasAnyRole(ADMIN, UBS_EMPLOYEE, USER)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_MANAG_LINK + "/changeOrdersTableView",
                     UBS_MANAG_LINK + "/updateViolationToUser",
