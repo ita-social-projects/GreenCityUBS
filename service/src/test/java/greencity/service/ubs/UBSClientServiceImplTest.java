@@ -216,7 +216,17 @@ import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.ModelUtils.getUserWithLastLocation;
 import static greencity.ModelUtils.getViberBotNotifyTrue;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
+import static greencity.constant.ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
+import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -3466,7 +3476,7 @@ class UBSClientServiceImplTest {
         List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
 
         assertEquals(1, result.size());
-        assertEquals(tariffId, result.get(0).getTariffsId());
+        assertEquals(tariffId, result.getFirst().getTariffsId());
         verify(locationRepository).findAllActiveLocationsByCourierId(id);
         verify(locationToLocationsDtoMapper).convert(location);
         verify(tariffsInfoRepository).findTariffIdByLocationIdAndCourierId(id, id);
