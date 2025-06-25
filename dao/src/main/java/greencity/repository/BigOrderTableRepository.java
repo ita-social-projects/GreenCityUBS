@@ -33,6 +33,7 @@ public class BigOrderTableRepository {
     private static final String ORDER_STATUS = "orderStatus";
     private static final String ORDER_PAYMENT_STATUS = "orderPaymentStatus";
     private static final String UKRAINIAN_LANGUAGE = "ua";
+    private static final int NULL_SORT_ORDER = 99;
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -73,6 +74,38 @@ public class BigOrderTableRepository {
         var ordersCount = getOrdersCount(searchCriteria, tariffsInfoIds);
 
         return new PageImpl<>(resultList, pageable, ordersCount);
+    }
+
+    public BigOrderTableViews findSingleOrderById(Long orderId) {
+        var criteriaQuery = criteriaBuilder.createQuery(BigOrderTableViews.class);
+        var orderRoot = criteriaQuery.from(BigOrderTableViews.class);
+
+        var predicate = criteriaBuilder.equal(orderRoot.get("id"), orderId);
+        criteriaQuery.select(orderRoot).where(predicate);
+
+        var typedQuery = entityManager.createQuery(criteriaQuery);
+        typedQuery.setMaxResults(1);
+
+        return typedQuery.getResultStream()
+            .findFirst()
+            .orElse(null);
+    }
+
+    /**
+     * Method returns total number of orders by list of tariffs.
+     *
+     * @param tariffsInfoIds {@link List} list of tariff ids.
+     * @return the total number of orders, represented as a {@code long}.
+     */
+    public long getOrdersCountByTariffs(List<Long> tariffsInfoIds) {
+        var countQuery = criteriaBuilder.createQuery(Long.class);
+        var countOrderRoot = countQuery.from(BigOrderTableViews.class);
+        var predicates = new ArrayList<Predicate>();
+
+        getPredicateByTariffsInfoId(predicates, tariffsInfoIds, countOrderRoot);
+        var countPredicate = criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+        countQuery.select(criteriaBuilder.count(countOrderRoot)).where(countPredicate);
+        return entityManager.createQuery(countQuery).getSingleResult();
     }
 
     private Predicate getPredicate(OrderSearchCriteria sc, Root<BigOrderTableViews> orderRoot,
@@ -198,6 +231,8 @@ public class BigOrderTableRepository {
         sortOrderList.forEach(status -> selectCase.when(
             criteriaBuilder.equal(root.get(orderPage.getSortBy()), status.name()),
             status.getSortOrder()));
+
+        selectCase.when(criteriaBuilder.isNull(root.get(orderPage.getSortBy())), NULL_SORT_ORDER);
 
         Expression<Integer> sortOrder = selectCase.otherwise(otherwiseExpression);
         applySortingCriteria(orderPage, cq, sortOrder);

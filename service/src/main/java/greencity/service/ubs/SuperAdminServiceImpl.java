@@ -173,8 +173,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Integer bagId = bag.getId();
         Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
-        if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            if (totalBagsAmount.equals(amount.get(bagId))) {
+        if (Objects.equals(amount.get(bagId), 0)
+            || Objects.equals(order.getOrderPaymentStatus(), OrderPaymentStatus.UNPAID)) {
+            if (Objects.equals(totalBagsAmount, amount.get(bagId))) {
                 order.updateWithNewOrderBags(new ArrayList<>());
                 orderRepository.delete(order);
                 return;
@@ -224,17 +225,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         bag.setPrice(convertBillsIntoCoins(dto.getPrice()));
         bag.setCommission(convertBillsIntoCoins(dto.getCommission()));
         bag.setFullPrice(getFullPrice(dto.getPrice(), dto.getCommission()));
-        bag.setName(dto.getName());
-        bag.setNameEng(dto.getNameEng());
-        bag.setDescription(dto.getDescription());
-        bag.setDescriptionEng(dto.getDescriptionEng());
+        bag.setNameUk(dto.getNameUk());
+        bag.setNameEn(dto.getNameEn());
+        bag.setDescriptionUk(dto.getDescriptionUk());
+        bag.setDescriptionEn(dto.getDescriptionEn());
         bag.setEditedAt(LocalDate.now());
         bag.setEditedBy(tryToFindEmployeeByUuid(employeeUuid));
     }
 
     private void updateOrdersBags(Integer bagId, Bag bag) {
         orderBagRepository.updateAllByBagIdForUnpaidOrders(
-            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getName(), bag.getNameEng());
+            bagId, bag.getCapacity(), bag.getFullPrice(), bag.getNameUk(), bag.getNameEn());
     }
 
     private void updateAmountToPay(Integer bagId, Bag bag) {
@@ -294,6 +295,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (serviceRepository.findServiceByTariffsInfoId(tariffId).isEmpty()) {
             Employee employee = tryToFindEmployeeByUuid(employeeUuid);
             Service service = modelMapper.map(dto, Service.class);
+            Long amountInCoins = PaymentUtil.convertBillsIntoCoins(dto.getPrice());
+            service.setPrice(amountInCoins);
             service.setCreatedBy(employee);
             service.setCreatedAt(LocalDate.now());
             service.setTariffsInfo(tariffsInfo);
@@ -322,10 +325,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Service service = tryToFindServiceById(id);
         Employee employee = tryToFindEmployeeByUuid(employeeUuid);
         service.setPrice(convertBillsIntoCoins(dto.getPrice()));
-        service.setName(dto.getName());
-        service.setNameEng(dto.getNameEng());
-        service.setDescription(dto.getDescription());
-        service.setDescriptionEng(dto.getDescriptionEng());
+        service.setNameUk(dto.getNameUk());
+        service.setNameEn(dto.getNameEn());
+        service.setDescriptionUk(dto.getDescriptionUk());
+        service.setDescriptionEn(dto.getDescriptionEn());
         service.setEditedAt(LocalDate.now());
         service.setEditedBy(employee);
         return modelMapper.map(serviceRepository.save(service), GetServiceDto.class);
@@ -425,7 +428,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
 
-        Region region = regionRepository.findRegionByNameEnAndNameUk(enName, ukName).orElse(null);
+        Region region = regionRepository.findRegionByNameEnOrNameUk(enName, ukName).orElse(null);
 
         if (null == region) {
             region = createRegionWithTranslation(dto);

@@ -101,12 +101,12 @@ class ManagementNotificationControllerTest {
     void saveBadRequestTest() throws Exception {
         NotificationTemplateWithPlatformsUpdateDto dto = ModelUtils.getNotificationTemplateWithPlatformsUpdateDto();
         Long id = 1L;
-        String JsonDto = objectMapper.writeValueAsString(dto);
+        String jsonDto = objectMapper.writeValueAsString(dto);
         doThrow(NotFoundException.class)
             .when(notificationTemplateService).update(id, dto);
         mockMvc.perform(put(url + "/update-template/{id}", id)
             .principal(principal)
-            .content(JsonDto)
+            .content(jsonDto)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
         verify(notificationTemplateService).update(id, dto);

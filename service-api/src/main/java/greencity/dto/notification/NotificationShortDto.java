@@ -15,5 +15,6 @@ public class NotificationShortDto {
     private Long orderId;
     private boolean read;
     private String title;
+    private String body;
     private LocalDateTime notificationTime;
 }

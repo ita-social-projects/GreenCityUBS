@@ -178,16 +178,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(value = "select o from Order o "
         + "join fetch o.ubsUser "
         + "join fetch OrderBag obm on o.id = obm.order.id "
-        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID'")
+        + "where obm.bag.id = :bagId and o.orderPaymentStatus = 'UNPAID' and o.orderStatus <> 'CANCELED'")
     List<Order> findAllUnpaidOrdersWithUsersByBagId(Integer bagId);
 
     /**
      * method returns all orders that contain a bag with id.
      */
-    @Query(nativeQuery = true,
-        value = "select o.* from orders o "
-            + "left join order_bag_mapping obm on o.id = obm.order_id "
-            + "where obm.bag_id = :bagId")
+    @Query(value = "SELECT o FROM Order o JOIN o.orderBags b WHERE b.id = :bagId")
     List<Order> findAllByBagId(Integer bagId);
 
     /**
@@ -213,7 +210,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @param eventNames - names of events which are related to the order.
      */
     @Query("select o from Order o "
-        + "inner join fetch o.events e WHERE e.eventName IN (:eventNames)")
+        + "inner join fetch o.events e WHERE e.eventNameUk IN (:eventNames)")
     List<Order> findAllWithEventsByEventNames(@Param("eventNames") String... eventNames);
 
     /**
@@ -249,4 +246,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("UPDATE Order o SET o.blocked = false, o.blockedByEmployee = NULL,"
         + "o.blockedAt = NULL WHERE o.blockedAt < :expirationTime")
     void unlockExpiredOrders(@Param("expirationTime") LocalDateTime expirationTime);
+
+    List<Order> findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus orderStatus,
+        OrderPaymentStatus orderPaymentStatus);
+
+    /**
+     * Method retrieves orders by order payment id.
+     *
+     * @param paymentId - an id of payment
+     * @return {@link Order}
+     */
+    @Query("SELECT p.order FROM Payment p WHERE p.id = ?1")
+    Optional<Order> findOrderByPaymentId(long paymentId);
 }

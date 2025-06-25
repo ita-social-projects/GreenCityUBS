@@ -1,7 +1,9 @@
 package greencity.service.ubs.manager;
 
 import greencity.dto.order.BigOrderTableDTO;
+import greencity.dto.order.OrderCountDto;
 import greencity.dto.table.CustomTableViewDto;
+import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
 import org.springframework.data.domain.Page;
@@ -30,4 +32,23 @@ public interface BigOrderTableServiceView {
      * @author Sikhovskiy Rostyslav
      */
     CustomTableViewDto getCustomTableParameters(String uuid);
+
+    /**
+     * Method sets isTableFreeze field in TableColumnWidthForEmployee.
+     *
+     * @return {@link TableColumnWidthForEmployee} that has been saved
+     *
+     * @author Hrenevych Ivan
+     */
+    TableColumnWidthForEmployee changeIsFreezeStatus(String uuid, Boolean value);
+
+    /**
+     * Method returns total number of orders by employee email.
+     *
+     * @param email employee email.
+     * @return {@link OrderCountDto} object for representing count of orders.
+     *
+     * @author Chernenko Vitaliy.
+     */
+    OrderCountDto getTotalNumberOfOrdersByEmployee(String email);
 }

@@ -17,7 +17,7 @@ public class LocationToDistrictDtoMapper extends AbstractConverter<LocationDto, 
     @Override
     public DistrictDto convert(LocationDto locationDto) {
         return DistrictDto.builder()
-            .nameUa(locationDto.getLocationNameMap().get("name"))
+            .nameUk(locationDto.getLocationNameMap().get("name_uk"))
             .nameEn(locationDto.getLocationNameMap().get("name_en"))
             .build();
     }

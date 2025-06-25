@@ -6,11 +6,12 @@ name: CI/CD GreenCityUBS
 concurrency: Testing
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push or pull request events but only for the dev branch
   push:
-    branches: [ master, dev ]
+    branches: [ dev ]
   pull_request:
-    branches: [ master, dev ]
+    branches: [ dev ]
+  workflow_dispatch:
 
 env:
   repository: ubs
@@ -45,7 +46,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           git fetch --unshallow
-          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ita-social-projects-green-ubs -Dsonar.organization=ita-social-projects -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports -Dsonar.exclusions=**/EncryptionUtil.java -Dsonar.coverage.exclusions=**/configuration/*,**/entity/*,**/exceptions/*,**/exceptions/**,**/enums/NotificationType.java,**/BigOrderTableRepository.java
+          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ita-social-projects-green-ubs -Dsonar.organization=ita-social-projects -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports -Dsonar.exclusions=**/EncryptionUtil.java -Dsonar.coverage.exclusions=**/configuration/*,**/entity/*,**/exceptions/*,**/exceptions/**,**/enums/NotificationType.java,**/BigOrderTableRepository.java,**/ChatLinkDto.java,**/entity/telegram/AuthorizedUser.java,**/dto/telegram/AuthorizedUserDto.java,**/service/ubs/BASE64DecodedMultipartFile.java,**/entity/telegram/ChatFeedback.java,**/dto/telegram/FeedbackDto.java,**/entity/telegram/Image.java,**/mapping/telegrammessage/ImageConverter.java,**/ubstelegrambot/keyboards/KeyboardFactory.java,**/ubstelegrambot/messages/MessageFactory.java,**/dto/SuccessSignInDto.java,**/config/TelegramBotConfig.java,**/dto/telegram/TelegramImageDto.java,**/entity/telegram/TelegramMessage.java,**/dto/telegram/TelegramTextMessageDto.java,**/entity/telegram/TelegramUser.java,**/enums/TelegramUser.java,**/dto/TestersSignInRequest.java,**/entity/telegram/TextMessage.java,**/mapping/telegrammessage/TextMessageMapper.java,**/entity/telegram/UnknownTelegramUser.java,**/dto/telegram/UnknownTelegramUserDto.java
       
       - name: Test Reporter
         uses: dorny/test-reporter@v1.5.0

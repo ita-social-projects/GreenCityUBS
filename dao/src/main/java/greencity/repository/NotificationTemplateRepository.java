@@ -20,7 +20,7 @@ public interface NotificationTemplateRepository extends JpaRepository<Notificati
      * @return {@link Optional} of {@link NotificationTemplate} with all codes.
      * @author Ann Sakhno
      */
-    @Query("select nt from NotificationTemplate nt inner join fetch nt.notificationPlatforms as np "
+    @Query("select distinct nt from NotificationTemplate nt inner join fetch nt.notificationPlatforms as np "
         + "where nt.notificationType = :type and np.notificationReceiverType = :receiverType")
     Optional<NotificationTemplate> findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
         @Param(value = "type") NotificationType type,

@@ -2,9 +2,11 @@ package greencity.exception.handler;
 
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.courier.CourierAlreadyExists;
+import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.exceptions.notification.IncorrectTemplateException;
 import greencity.exceptions.notification.TemplateDeleteException;
@@ -13,6 +15,7 @@ import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.exceptions.api.GoogleApiException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.user.UserNotFoundException;
+import greencity.exceptions.validation.ValidationException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -171,10 +173,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Exception handler for {@link AddressNotWithinLocationAreaException}.
+     * Exception handler for {@link AddressNotWithinLocationAreaException} This
+     * method handles exceptions related to an address not being within a valid
+     * location area or an invalid address. It captures the error details from the
+     * {@link WebRequest}, wraps them in an {@link ExceptionResponse}, and returns a
+     * {@code 400 Bad Request} HTTP status along with the error message.
      *
-     * @param request {@link WebRequest} with error details.
-     * @return {@link ResponseEntity} with http status and exception message.
+     * @param request {@link WebRequest} containing the details of the error.
+     * @return {@link ResponseEntity} containing the {@link ExceptionResponse} with
+     *         the error attributes and a {@code 400 Bad Request} status.
      */
     @ExceptionHandler(AddressNotWithinLocationAreaException.class)
     public final ResponseEntity<Object> handleAddressNotWithinLocationAreaException(WebRequest request) {
@@ -195,11 +202,44 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Method intercepts exception {@link ResourceNotFoundException}.
+     *
+     * @param ex      Exception that should be intercepted.
+     * @param request Contains details about the occurred exception.
+     * @return {@code ResponseEntity} which contains the HTTP status and body with
+     *         the exception message.
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public final ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex,
+        WebRequest request) {
+        log.error(ex.getMessage(), ex);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    /**
+     * Method intercepts exception
+     * {@link greencity.exceptions.validation.ValidationException}.
+     *
+     * @param ex      Exception that should be intercepted.
+     * @param request Contains details about the occurred exception.
+     * @return {@code ResponseEntity} which contains the HTTP status and body with
+     *         the exception message.
+     */
+    @ExceptionHandler(ValidationException.class)
+    public final ResponseEntity<Object> handleValidationException(ValidationException ex,
+        WebRequest request) {
+        log.error(ex.getMessage(), ex);
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    /**
      * Exception handler for {@link GoogleApiException}.
      *
      * @param ex         Exception which should be intercepted.
      * @param webRequest contain detail about occur exception.
-     * @return ResponseEntity which contain http status and body with message of
+     * @return {@code ResponseEntity} which contain http status and body with message of
      *         exception.
      */
     @ExceptionHandler(GoogleApiException.class)

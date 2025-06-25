@@ -20,7 +20,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.CascadeType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.time.LocalDate;
@@ -58,17 +57,17 @@ public class Bag {
     @Column(nullable = false)
     private Long fullPrice;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(nullable = false, name = "name_uk")
+    private String nameUk;
 
-    @Column(nullable = false)
-    private String nameEng;
+    @Column(nullable = false, name = "name_en")
+    private String nameEn;
 
-    @Column(nullable = false)
-    private String description;
+    @Column(nullable = false, name = "description_uk")
+    private String descriptionUk;
 
-    @Column(nullable = false)
-    private String descriptionEng;
+    @Column(nullable = false, name = "description_en")
+    private String descriptionEn;
 
     @Column(nullable = false)
     private Boolean limitIncluded;
@@ -87,8 +86,7 @@ public class Bag {
     @JoinColumn
     private Employee editedBy;
 
-    @ManyToOne(cascade = CascadeType.REMOVE,
-        fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
     private TariffsInfo tariffsInfo;
 

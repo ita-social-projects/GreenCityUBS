@@ -1,5 +1,6 @@
 package greencity.entity.order;
 
+import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
 import jakarta.persistence.Column;
@@ -35,7 +36,8 @@ public class Payment {
     @Column(length = 12, nullable = false)
     private Long amount;
     @Column(length = 50, nullable = false)
-    private String orderStatus;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
     @Column(length = 50)
     private String responseStatus;
     @Column(length = 16)

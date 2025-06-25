@@ -43,7 +43,7 @@ class CoordinateServiceImplTest {
     @Mock
     OrderRepository orderRepository;
 
-    @Mock(lenient = true)
+    @Mock
     private ModelMapper modelMapper;
 
     int litres = 1000;

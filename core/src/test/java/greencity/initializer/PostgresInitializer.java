@@ -8,7 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 @UtilityClass
 public class PostgresInitializer {
-    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:13.3");
+    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest");
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
@@ -18,8 +18,10 @@ public class PostgresInitializer {
                 "spring.datasource.username=" + postgreSQLContainer.getUsername(),
                 "spring.datasource.password=" + postgreSQLContainer.getPassword(),
                 "spring.liquibase.enabled=true",
-                "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml")
+                "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml",
+                "spring.datasource.hikari.data-source-properties.timezone=UTC")
                 .applyTo(configurableApplicationContext.getEnvironment());
+
         }
     }
 }

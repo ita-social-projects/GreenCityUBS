@@ -11,9 +11,9 @@ public class OrderFilterDataProvider {
         "orderPaymentStatus", OrderSearchCriteria::getOrderPaymentStatus);
 
     private static final Map<String, Function<OrderSearchCriteria, String[]>> FILTERS_STRING_MAP = Map.of(
-        "region", OrderSearchCriteria::getRegion,
-        "city", OrderSearchCriteria::getCities,
-        "district", OrderSearchCriteria::getDistricts,
+        "regionUk", OrderSearchCriteria::getRegionUk,
+        "cityUk", OrderSearchCriteria::getCitiesUk,
+        "districtUk", OrderSearchCriteria::getDistrictsUk,
         "regionEn", OrderSearchCriteria::getRegionEn,
         "cityEn", OrderSearchCriteria::getCitiesEn,
         "districtEn", OrderSearchCriteria::getDistrictsEn);
@@ -28,7 +28,10 @@ public class OrderFilterDataProvider {
         "responsibleCallerId", OrderSearchCriteria::getResponsibleCallerId,
         "responsibleLogicManId", OrderSearchCriteria::getResponsibleLogicManId,
         "responsibleNavigatorId", OrderSearchCriteria::getResponsibleNavigatorId,
-        "responsibleDriverId", OrderSearchCriteria::getResponsibleDriverId);
+        "responsibleDriverId", OrderSearchCriteria::getResponsibleDriverId,
+        "regionId", OrderSearchCriteria::getRegionId,
+        "cityId", OrderSearchCriteria::getCityId,
+        "districtId", OrderSearchCriteria::getDistrictId);
 
     Map<String, Function<OrderSearchCriteria, Enum<?>[]>> getFiltersEnum() {
         return FILTERS_ENUM_MAP;

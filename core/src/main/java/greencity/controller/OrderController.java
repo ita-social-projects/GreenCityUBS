@@ -8,19 +8,20 @@ import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.LocationsDto;
 import greencity.dto.OrderCourierPopUpDto;
+import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.WayForPayOrderResponse;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
-import greencity.dto.payment.FondyPaymentResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -142,7 +143,7 @@ public class OrderController {
     public ResponseEntity<CertificateDto> checkIfCertificateAvailable(
         @PathVariable @Pattern(regexp = ValidationConstant.CERTIFICATE_CODE_REGEXP,
             message = ValidationConstant.CERTIFICATE_CODE_REGEXP_MESSAGE) String responseCode,
-        @CurrentUserUuid String userUuid) {
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.checkCertificate(responseCode, userUuid));
     }
@@ -184,7 +185,7 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PostMapping(value = {"/processOrder", "/processOrder/{id}"})
-    public ResponseEntity<WayForPayOrderResponse> processOrder(
+    public ResponseEntity<PaymentSystemResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
         @Valid @PathVariable("id") Optional<Long> id) {
@@ -340,29 +341,6 @@ public class OrderController {
     }
 
     /**
-     * Controller for getting status about payment from Fondy.
-     *
-     * @param orderId - current order.
-     * @param uuid    current {@link User}'s uuid.
-     * @return {@link String}
-     */
-    @Operation(summary = "Get status of Payment from Fondy")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @GetMapping(value = "/getFondyStatus/{orderId}")
-    public ResponseEntity<FondyPaymentResponse> getFondyStatusPayment(
-        @Valid @PathVariable Long orderId,
-        @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getPaymentResponseFromFondy(orderId, uuid));
-    }
-
-    /**
      * Controller for getting all Active Locations by courier ID, if user haven't
      * made any order before. If user has made an order before controller returns
      * info about tariff by which it was made Controller is used to get all active
@@ -380,7 +358,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     public ResponseEntity<OrderCourierPopUpDto> getAllActiveLocationsByCourierId(
@@ -414,18 +391,17 @@ public class OrderController {
      *
      * @param courierId  - id of courier
      * @param locationId - id of location
-     * @return {@link OrderCourierPopUpDto}
+     * @return {@link TariffInfoByLocationDto}
      * @author Anton Bondar
      */
     @Operation(summary = "Get tariff for courier and location")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/tariffinfo/{locationId}")
-    public ResponseEntity<OrderCourierPopUpDto> getInfoAboutTariff(
+    public ResponseEntity<TariffInfoByLocationDto> getInfoAboutTariff(
         @RequestParam Long courierId,
         @PathVariable Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
@@ -501,8 +477,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/tariffs/{locationId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -520,8 +494,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/locationsByCourier/{courierId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -529,5 +501,25 @@ public class OrderController {
         @PathVariable("courierId") Long courierId) {
         List<LocationsDto> locations = ubsClientService.getAllLocationsByCourierId(courierId);
         return ResponseEntity.status(HttpStatus.OK).body(locations);
+    }
+
+    /**
+     * Receives and processes payment information from the Monobank API. This method
+     * handles the incoming payment response and validates the payment details
+     * provided by Monobank. The payment details are logged and then passed to the
+     * {@code validatePaymentFromMonoBank} method for further validation and
+     * processing.
+     *
+     * @param response the payment response received from Monobank, containing
+     *                 details such as transaction ID, status, and amount.
+     */
+    @Operation(summary = "Receive payment information from Monobank API")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    })
+    @PostMapping("/monobank/payments")
+    public void receivePaymentFromMonoBank(@RequestBody MonoBankPaymentResponseDto response) {
+        log.info("Response from MONOBANK API: {}", response);
+        ubsClientService.validatePaymentFromMonoBank(response);
     }
 }

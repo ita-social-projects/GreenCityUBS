@@ -20,5 +20,5 @@ public class AllActiveLocationsDto {
     private Long regionId;
     private String nameUk;
     private String nameEn;
-    private List<LocationsDtos> locations;
+    private List<LocationWithTariffInfoDto> locations;
 }

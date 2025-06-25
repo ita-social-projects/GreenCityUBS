@@ -1,6 +1,6 @@
 package greencity.util;
 
-import greencity.dto.payment.PaymentRequestDto;
+import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import java.util.Arrays;
 import java.util.StringJoiner;
@@ -19,7 +19,7 @@ class EncryptionUtilTest {
 
     @Test
     void testFormRequestSignature() {
-        PaymentRequestDto dto = PaymentRequestDto.builder()
+        PaymentWayForPayRequestDto dto = PaymentWayForPayRequestDto.builder()
             .merchantAccount("merchant123")
             .merchantDomainName("example.com")
             .orderReference("order456")

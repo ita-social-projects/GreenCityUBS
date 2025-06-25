@@ -34,8 +34,9 @@ class LocationApiServiceTest {
     private static final String API_URL = "https://directory.org.ua/api/katottg";
     private static final String PAGE_SIZE_VALUE = "125";
     private static final String LEVEL = "level";
-    private static final String NAME = "name";
+    private static final String NAME_UK = "name_uk";
     private static final String NAME_EN = "name_en";
+    private static final String NAME = "name";
     private static final String CODE = "code";
     private static final String PAGE_SIZE = "page_size";
     private static final String PARENT = "parent";
@@ -47,10 +48,10 @@ class LocationApiServiceTest {
     @Mock
     RestTemplate restTemplate;
 
-    static Map<String, Object> getApiResult(String code, String parent_id, String name, String nameEn) {
+    static Map<String, Object> getApiResult(String code, String parentId, String name, String nameEn) {
         Map<String, Object> apiResult = new HashMap<>();
         apiResult.put(CODE, code);
-        apiResult.put(PARENT_ID, parent_id);
+        apiResult.put(PARENT_ID, parentId);
         apiResult.put(NAME, name);
         apiResult.put(NAME_EN, nameEn);
         return apiResult;
@@ -108,7 +109,7 @@ class LocationApiServiceTest {
         String expectedName, String expectedNameEn) {
         assertEquals(expectedId, locationDto.getId());
         assertEquals(expectedParentId, locationDto.getParentId());
-        assertEquals(expectedName, locationDto.getLocationNameMap().get(NAME));
+        assertEquals(expectedName, locationDto.getLocationNameMap().get(NAME_UK));
         assertEquals(expectedNameEn, locationDto.getLocationNameMap().get(NAME_EN));
     }
 
@@ -389,24 +390,27 @@ class LocationApiServiceTest {
             getApiResult("UA74040000000028062", "UA74000000000025378", "Ніжинський", "Nizhynskyi");
         Map<String, Object> bobrovytskaDistrictResult =
             getApiResult("UA74040050000013413", "UA74040000000028062", "Бобровицька", "Bobrovytska");
-        UriComponentsBuilder builder = build(LocationDivision.REGION.getLevelId());
-        UriComponentsBuilder builder4 = buildName("Миколаїв", LocationDivision.CITY.getLevelId());
-        UriComponentsBuilder builder3 = buildCode("UA74040050000013413", LocationDivision.LOCAL_COMMUNITY.getLevelId());
-        UriComponentsBuilder builder2 =
-            buildCode("UA74040000000028062", LocationDivision.DISTRICT_IN_REGION.getLevelId());
-        UriComponentsBuilder builder2_2 =
-            buildParent(LocationDivision.DISTRICT_IN_REGION.getLevelId(), "UA48000000000039575");
-        UriComponentsBuilder builder3_2 =
-            buildParent(LocationDivision.LOCAL_COMMUNITY.getLevelId(), "UA48060000000094390");
-        UriComponentsBuilder builder4_2 = buildParent(LocationDivision.CITY.getLevelId(), "UA48060150000071713");
 
-        respond(builder, Arrays.asList(mykolaivskaResult, chernihivskaResult));
-        respond(builder4, new ArrayList<>());
-        respond(builder3, List.of(bobrovytskaDistrictResult));
-        respond(builder2, List.of(nizhynskyiResult));
-        respond(builder2_2, List.of(mykolaivskyiResult));
-        respond(builder3_2, List.of(mykolaivskaDistrictResult));
-        respond(builder4_2, new ArrayList<>());
+        UriComponentsBuilder regionBuilder = build(LocationDivision.REGION.getLevelId());
+        UriComponentsBuilder cityBuilder = buildName("Миколаїв", LocationDivision.CITY.getLevelId());
+        UriComponentsBuilder localCommunityBuilder =
+            buildCode("UA74040050000013413", LocationDivision.LOCAL_COMMUNITY.getLevelId());
+        UriComponentsBuilder districtInRegionBuilder =
+            buildCode("UA74040000000028062", LocationDivision.DISTRICT_IN_REGION.getLevelId());
+        UriComponentsBuilder parentDistrictBuilder =
+            buildParent(LocationDivision.DISTRICT_IN_REGION.getLevelId(), "UA48000000000039575");
+        UriComponentsBuilder parentLocalCommunityBuilder =
+            buildParent(LocationDivision.LOCAL_COMMUNITY.getLevelId(), "UA48060000000094390");
+        UriComponentsBuilder parentCityBuilder =
+            buildParent(LocationDivision.CITY.getLevelId(), "UA48060150000071713");
+
+        respond(regionBuilder, Arrays.asList(mykolaivskaResult, chernihivskaResult));
+        respond(cityBuilder, new ArrayList<>());
+        respond(localCommunityBuilder, List.of(bobrovytskaDistrictResult));
+        respond(districtInRegionBuilder, List.of(nizhynskyiResult));
+        respond(parentDistrictBuilder, List.of(mykolaivskyiResult));
+        respond(parentLocalCommunityBuilder, List.of(mykolaivskaDistrictResult));
+        respond(parentCityBuilder, new ArrayList<>());
 
         assertThrows(NotFoundException.class,
             () -> locationApiService.getAllDistrictsInCityByNames("Миколаївська область", "Миколаїв"));

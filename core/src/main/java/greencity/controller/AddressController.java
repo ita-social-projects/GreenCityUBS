@@ -1,14 +1,18 @@
 package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
+import greencity.annotations.ValidAddress;
+import greencity.annotations.ValidUpdateAddress;
 import greencity.constants.HttpStatuses;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.user.UserVO;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.AddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -16,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +44,7 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 public class AddressController {
-    private final UBSClientService ubsClientService;
+    private final AddressService addressService;
 
     /**
      * Controller for getting all addresses for current order.
@@ -56,7 +61,7 @@ public class AddressController {
     @GetMapping("/findAll-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> getAllAddressesForCurrentUser(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.findAllAddressesForCurrentOrder(userUuid));
+        return ResponseEntity.status(HttpStatus.OK).body(addressService.findAllAddressesForCurrentOrder(userUuid));
     }
 
     /**
@@ -77,10 +82,10 @@ public class AddressController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/save-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> saveAddressForOrder(
-        @Valid @RequestBody CreateAddressRequestDto dtoRequest,
+        @Valid @ValidAddress @RequestBody CreateAddressRequestDto dtoRequest,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ubsClientService.saveCurrentAddressForOrder(dtoRequest, uuid));
+            .body(addressService.saveCurrentAddressForOrder(dtoRequest, uuid));
     }
 
     /**
@@ -101,10 +106,10 @@ public class AddressController {
     })
     @PutMapping("/update-order-address")
     public ResponseEntity<OrderWithAddressesResponseDto> updateAddressForOrder(
-        @Valid @RequestBody OrderAddressDtoRequest dtoRequest,
+        @Valid @ValidUpdateAddress @RequestBody OrderAddressDtoRequest dtoRequest,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.updateCurrentAddressForOrder(dtoRequest, uuid));
+            .body(addressService.updateCurrentAddressForOrder(dtoRequest, uuid));
     }
 
     /**
@@ -128,7 +133,7 @@ public class AddressController {
         @Valid @PathVariable("id") Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.deleteCurrentAddressForOrder(id, uuid));
+            .body(addressService.deleteCurrentAddressForOrder(id, uuid));
     }
 
     /**
@@ -152,7 +157,7 @@ public class AddressController {
         @PathVariable Long addressId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.makeAddressActual(addressId, uuid));
+            .body(addressService.makeAddressActual(addressId, uuid));
     }
 
     /**
@@ -176,6 +181,87 @@ public class AddressController {
     public ResponseEntity<List<DistrictDto>> getAllDistrictsForRegionAndCity(@RequestParam String region,
         @RequestParam String city) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getAllDistricts(region, city));
+            .body(addressService.getAllDistricts(region, city));
+    }
+
+    /**
+     * Returns a list of all districts for Kyiv.
+     *
+     * @return A list of DistrictDtos containing all districts for Kyiv.
+     */
+    @Operation(summary = "Get all districts for Kyiv")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = DistrictDto.class)))),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @GetMapping("/districts-for-kyiv")
+    public ResponseEntity<List<DistrictDto>> getAllDistrictsForKyiv() {
+        return ResponseEntity.ok(addressService.getAllDistrictsForKyiv());
+    }
+
+    /**
+     * Update address for current order. This endpoint updates a users address for
+     * their current order. The address is updated on the big order table.
+     *
+     * @param addressDto The updated address information.
+     * @param principal  The user principal.
+     * @return HTTP status of 200 if the update was successful.
+     */
+    @Operation(summary = "Update address for current order",
+        description = "Update address for current order on big order table")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @PatchMapping("/update-address")
+    public ResponseEntity<Void> updateAddress(@RequestBody @Valid UpdateAddressDto addressDto,
+        @Parameter(hidden = true) Principal principal) {
+        addressService.addressUpdate(addressDto, principal.getName());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Retrieves the address for an order with the given id.
+     *
+     * @param orderId The id of the order
+     * @return The address for the order
+     */
+    @Operation(summary = "Get address for order",
+        description = "Get address for order for given order id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @GetMapping("/get-address-for-order/{orderId}")
+    public ResponseEntity<UpdateAddressDto> getAddressForOrder(@PathVariable Long orderId) {
+        return ResponseEntity.ok(addressService.getAddressForOrder(orderId));
+    }
+
+    /**
+     * Controller read address by order id.
+     *
+     * @param id {@link Long}.
+     * @return {@link HttpStatus} - http status.
+     * @author Orest Mahdziak
+     */
+    @Operation(summary = "Get address by order id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = ReadAddressByOrderDto.class))),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @GetMapping("/read-address-order/{id}")
+    public ResponseEntity<ReadAddressByOrderDto> getAddressByOrderId(
+        @Valid @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(addressService.getAddressByOrderId(id));
     }
 }

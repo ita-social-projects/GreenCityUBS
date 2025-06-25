@@ -1,8 +1,10 @@
 package greencity.service.ubs;
 
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
-import greencity.dto.pageble.PageableDto;
+import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.Violation;
 import greencity.enums.UserCategory;
@@ -162,10 +164,11 @@ public interface NotificationService {
     /**
      * Method sends messages by e-mail/notification that order is unpaid.
      *
-     * @param order of {@link Order} Order which status was changed
-     * @author Oleh Kulbaba
+     * @param order       of {@link Order} Order which status was changed
+     * @param paymentLink payment link
+     * @author Vladyslav Haliara
      */
-    void notifyUnpaidOrder(Order order);
+    void notifyUnpaidOrder(Order order, String paymentLink);
 
     /**
      * Notifies the customer that the order status has been changed to "Brought by
@@ -177,11 +180,19 @@ public interface NotificationService {
     void notifySelfPickupOrder(Order order);
 
     /**
-     * Method that returns page with notifications for user by UUID.
+     * Method that returns page with notifications for user by email.
      *
      * @author Ann Sakhno
      */
-    PageableDto<NotificationShortDto> getAllNotificationsForUser(String userUuid,
+    PageableAdvancedDto<NotificationShortDto> getAllShortNotificationsForUser(String email,
+        String language, Pageable pageable);
+
+    /**
+     * Method that returns page with notifications for current user.
+     *
+     * @author Maksym Kozak
+     */
+    PageableAdvancedDto<NotificationFullDto> getAllNotificationsForUser(String uuid,
         String language, Pageable pageable);
 
     /**
@@ -189,14 +200,29 @@ public interface NotificationService {
      *
      * @author Ihor Volianskyi
      */
-    NotificationDto getNotification(String uuid, Long id, String language);
+    NotificationDto getNotification(String uuid, Long notificationId, String language);
 
     /**
-     * Method that return all quantity of unreaden notification.
+     * Retrieves a notification by its ID for a specific user with an option to mark
+     * it as read.
+     *
+     * @param uuid           The UUID of the user requesting the notification
+     * @param notificationId The ID of the notification to retrieve.
+     * @param language       The language code for localization.
+     * @param markAsRead     If true, marks the notification as read; if false, the
+     *                       status remains unchanged.
+     * @return A {@link NotificationDto} with notification details (title, body, and
+     *         images if present).
+     * @author Nazar Vavrushchak
+     */
+    NotificationDto getNotification(String uuid, Long notificationId, String language, boolean markAsRead);
+
+    /**
+     * Method that return all quantity of unread notification.
      *
      * @author Igor Boykov
      */
-    long getUnreadenNotifications(String userUuid);
+    long getUnreadNotifications(String userUuid);
 
     /**
      * Notifies that a new order has been created.
@@ -206,4 +232,54 @@ public interface NotificationService {
      * @author Kizerov Dmytro
      */
     void notifyCreatedOrder(Order order);
+
+    /**
+     * Method to mark specific UserNotification as read.
+     *
+     * @param notificationId id of userNotification, that should be marked
+     *
+     * @author Roman Kasarab
+     */
+    void viewNotification(Long notificationId, String userUuid);
+
+    /**
+     * Method to mark specific UserNotification as unread.
+     *
+     * @param notificationId id of userNotification, that should be marked
+     *
+     * @author Roman Kasarab
+     */
+    void unreadNotification(Long notificationId, String userUuid);
+
+    /**
+     * Method to delete specific Notification.
+     *
+     * @param notificationId id of notification, that should be deleted
+     * @param userUuid       user
+     * @author Roman Kasarab
+     */
+    void deleteNotification(Long notificationId, String userUuid);
+
+    /**
+     * Notify user that order has unpaid status when it was created and not paid.
+     * This method is used one time when user create new order.
+     *
+     * @param order                 the order to send notification for
+     * @param sumToPay              the sum to pay
+     * @param paymentSystemResponse payment system response with link to pay order
+     *
+     * @author Vladyslav Haliara
+     */
+    void notifyUnpaidOrderPermanently(Order order, Long sumToPay, PaymentSystemResponse paymentSystemResponse);
+
+    /**
+     * Notify manager that user requested info about green office service from
+     * telegram bot.
+     *
+     * @param userEmail {@link String} an email address that user sent in the tg bot
+     *                  chat.
+     *
+     * @author Chernenko Vitaliy
+     */
+    void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username);
 }

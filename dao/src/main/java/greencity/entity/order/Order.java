@@ -36,7 +36,6 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.AccessLevel;
-import org.hibernate.annotations.Cascade;
 import org.springframework.util.CollectionUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -53,18 +52,17 @@ import java.util.Set;
 @Builder
 @Table(name = "orders")
 @EqualsAndHashCode(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 @ToString(exclude = {"employeeOrderPositions", "userNotifications", "ubsUser",
-    "changeOfPointsList", "blockedByEmployee", "certificates", "payment", "employeeOrderPositions",
+    "changeOfPointsList", "blockedByEmployee", "certificates", "payment",
     "events", "imageReasonNotTakingBags", "additionalOrders"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "order")
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<UserNotification> userNotifications;
 
     @ManyToOne
@@ -122,8 +120,7 @@ public class Order {
     @Column(name = "points_to_use", columnDefinition = "int default 0")
     private Integer pointsToUse;
 
-    @OneToMany(mappedBy = "order")
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<Certificate> certificates;
 
     @Column(nullable = false, name = "order_status", length = 15)
@@ -153,12 +150,10 @@ public class Order {
     @Column(name = "additional_order")
     private Set<String> additionalOrders;
 
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<Payment> payment;
 
-    @OneToMany(mappedBy = "order")
-    @Cascade(org.hibernate.annotations.CascadeType.MERGE)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<EmployeeOrderPosition> employeeOrderPositions;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "order")
@@ -191,8 +186,7 @@ public class Order {
 
     @OneToMany(
         mappedBy = "order",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true)
+        cascade = CascadeType.ALL, orphanRemoval = true)
     @Setter(AccessLevel.PRIVATE)
     @Builder.Default
     private List<OrderBag> orderBags = new ArrayList<>();

@@ -16,7 +16,7 @@
             <column name="notification_type">HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF</column>
             <column name="trigger">HALF_PAID_ORDER_STATUS_BROUGHT_BY_HIMSELF</column>
             <column name="time">IMMEDIATELY</column>
-            <column name="title">Замовлення опалачене не повністю</column>
+            <column name="title">Замовлення оплачене не повністю</column>
             <column name="title_eng">Order is partially paid</column>
             <column name="notification_status">ACTIVE</column>
         </insert>

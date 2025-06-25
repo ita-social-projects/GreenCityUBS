@@ -1,6 +1,7 @@
 package greencity.dto.employee;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.constant.ValidationConstant;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.position.PositionDto;
 import lombok.AllArgsConstructor;
@@ -21,15 +22,15 @@ import java.util.List;
 @AllArgsConstructor
 public class AddEmployeeDto {
     @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String firstName;
     @NotNull
-    @Pattern(regexp = "[ЁёІіЇїҐґЄєА-Яа-яA-Za-z-'\\s.]{1,30}")
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String lastName;
     @NotNull
     @ValidPhoneNumber
     private String phoneNumber;
-    @Email
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String email;
     @NotEmpty
     private List<PositionDto> employeePositions;

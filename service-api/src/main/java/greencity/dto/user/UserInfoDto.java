@@ -1,30 +1,20 @@
 package greencity.dto.user;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 @Builder
-@ToString
-@EqualsAndHashCode
 public class UserInfoDto {
+    private Long customerId;
     private String customerName;
-    private String customerSurName;
+    private String customerSurname;
     private String customerPhoneNumber;
     private String customerEmail;
-    private Long recipientId;
-    private String recipientName;
-    private String recipientSurName;
-    private String recipientPhoneNumber;
-    private String recipientEmail;
+    private String senderName;
+    private String senderSurname;
+    private String senderPhoneNumber;
+    private String senderEmail;
     private int totalUserViolations;
     private int userViolationForCurrentOrder;
 }

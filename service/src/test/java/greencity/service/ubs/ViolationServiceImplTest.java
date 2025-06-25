@@ -63,7 +63,7 @@ class ViolationServiceImplTest {
     ViolationRepository violationRepository;
     @InjectMocks
     ViolationServiceImpl violationService;
-    @Mock(lenient = true)
+    @Mock
     OrderRepository orderRepository;
     @Mock
     UserRepository userRepository;
@@ -287,7 +287,7 @@ class ViolationServiceImplTest {
         verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
         verify(violationRepository).save(any(Violation.class));
         verify(userRepository).save(user);
-        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION, employee.getEmail(), order);
+        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order);
         verify(notificationService).notifyAddViolation(order.getId());
     }
 
@@ -312,7 +312,7 @@ class ViolationServiceImplTest {
         verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
         verify(violationRepository).save(any(Violation.class));
         verify(userRepository).save(user);
-        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION, employee.getEmail(), order);
+        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order);
         verify(notificationService).notifyAddViolation(order.getId());
     }
 

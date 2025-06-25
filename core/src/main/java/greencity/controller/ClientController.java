@@ -6,7 +6,7 @@ import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.order.WayForPayOrderResponse;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
@@ -165,19 +165,19 @@ public class ClientController {
      *
      * @param userUuid current user id.
      * @param dto      order info.
-     * @return {@link WayForPayOrderResponse} response with payment link.
+     * @return {@link PaymentSystemResponse} response with payment link.
      */
     @Operation(summary = "Return link for payment")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = WayForPayOrderResponse.class))),
+            content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/processOrder")
-    public ResponseEntity<WayForPayOrderResponse> processOrder(
+    public ResponseEntity<PaymentSystemResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderWayForPayClientDto dto) {
         return ResponseEntity.ok(ubsClientService.processOrder(userUuid, dto));

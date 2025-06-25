@@ -2,8 +2,10 @@ package greencity.repository;
 
 import greencity.entity.user.locations.City;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface CityRepository extends JpaRepository<City, Long> {
     /**
@@ -35,4 +37,30 @@ public interface CityRepository extends JpaRepository<City, Long> {
      */
     @Query("SELECT c from City c left join fetch c.districts")
     List<City> findAllCitiesWithDistricts();
+
+    /**
+     * Finds a city by its region ID, Ukrainian name, and English name.
+     *
+     * @param regionId the ID of the region to which the city belongs
+     * @param nameUk   the Ukrainian name of the city
+     * @param nameEn   the English name of the city
+     * @return an {@code Optional<City>} containing the found city if it exists, or
+     *         an empty {@code Optional} if not found
+     * @author Kizerov Dmytro
+     */
+    @Query(
+        value = "SELECT c.* FROM cities c WHERE c.region_id = :regionId"
+            + " AND (c.name_uk = :nameUk OR c.name_en = :nameEn) LIMIT 1",
+        nativeQuery = true)
+    Optional<City> findCityByRegionIdAndNameUkAndNameEn(Long regionId, String nameUk, String nameEn);
+
+    /**
+     * Retrieves the ID of a city by its eng name, ignoring case.
+     *
+     * @param cityName the eng name of the city to search for (case-insensitive)
+     * @return an {@link Optional} containing the city's ID if found, or empty if
+     *         not found
+     */
+    @Query("SELECT c.id FROM City c WHERE LOWER(c.nameEn) = LOWER(:cityName)")
+    Optional<Long> findIdByCityNameEnIgnoreCase(@Param("cityName") String cityName);
 }

@@ -1,6 +1,6 @@
 package greencity.util;
 
-import greencity.dto.payment.PaymentRequestDto;
+import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import java.util.StringJoiner;
 import lombok.ToString;
@@ -13,11 +13,11 @@ public class EncryptionUtil {
     /**
      * Method forms encrypted signature based on order details.
      *
-     * @param dto      {@link PaymentRequestDto} - request order data.
+     * @param dto      {@link PaymentWayForPayRequestDto} - request order data.
      * @param password - way for pay password.
      * @return {@link String} - encrypted signature.
      */
-    public String formRequestSignature(PaymentRequestDto dto, String password) {
+    public String formRequestSignature(PaymentWayForPayRequestDto dto, String password) {
         StringJoiner stringJoiner = new StringJoiner(";");
         stringJoiner.add(dto.getMerchantAccount())
             .add(dto.getMerchantDomainName())

@@ -4,18 +4,24 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.location.api.RegionInfoDto;
-import greencity.dto.order.*;
+import greencity.dto.order.BlockedOrderDto;
+import greencity.dto.order.ChangeOrderResponseDTO;
+import greencity.dto.order.RequestToChangeOrdersDataDto;
+import greencity.dto.order.UserWithSomeOrderDetailDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
+import greencity.dto.user.ChatLinkDto;
 import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.enums.SortingOrder;
+import greencity.dto.order.UserWithOrdersDto;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
-import greencity.service.ubs.OrdersAdminsPageService;
 import greencity.service.ubs.OrdersForUserService;
 import greencity.service.ubs.ValuesForUserTableService;
 import greencity.service.ubs.ViolationService;
+import greencity.service.ubs.manager.BigOrderTableServiceView;
+import greencity.service.ubs.OrdersAdminsPageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -42,6 +48,7 @@ public class AdminUbsController {
     private final ValuesForUserTableService valuesForUserTable;
     private final OrdersForUserService ordersForUserService;
     private final ViolationService violationService;
+    private final BigOrderTableServiceView bigOrderTableServiceView;
 
     /**
      * Controller for obtaining all users that made at least one order.
@@ -249,5 +256,37 @@ public class AdminUbsController {
     @GetMapping("/locations-details")
     public ResponseEntity<List<RegionInfoDto>> getAllInformationForLocations() {
         return ResponseEntity.ok(ordersAdminsPageService.getAllLocationsInfo());
+    }
+
+    @Operation(summary = "sets a isTableFreeze value for tableColumnWidthForEmployee entity")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "isTableFreeze is successfully updated",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Long.class)))),
+        @ApiResponse(
+            responseCode = "404",
+            description = HttpStatuses.NOT_FOUND,
+            content = @Content)
+    })
+    @PutMapping("/saveOrderTableColumnsWidthIsFreeze")
+    public ResponseEntity<HttpStatus> saveIsFreeze(@CurrentUserUuid String uuid,
+        @RequestParam boolean value) {
+        bigOrderTableServiceView.changeIsFreezeStatus(uuid, value);
+        return ResponseEntity.status(HttpStatus.OK).body(HttpStatus.OK);
+    }
+
+    @Operation(summary = "Add chat link to user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CLIENTS_PAGE', authentication)")
+    @PatchMapping("/addChatLink")
+    public ResponseEntity<HttpStatus> addChatLink(@RequestBody @Valid ChatLinkDto chatLink) {
+        ordersAdminsPageService.addChatLinkToUser(chatLink);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Lukovskyi-3" author="Lukovskyi Volodymyr">
+        <sql>
+            WITH duplicates AS (
+                SELECT id
+                FROM (
+                         SELECT id, ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY id) AS row_num
+                         FROM refunds
+                     ) tmp
+                WHERE row_num > 1
+            )
+            DELETE FROM refunds
+            WHERE id IN (SELECT id FROM duplicates);
+        </sql>
+        <addUniqueConstraint columnNames="order_id"
+                             tableName="refunds"
+                             constraintName="unique_order_id"/>
+    </changeSet>
+</databaseChangeLog>

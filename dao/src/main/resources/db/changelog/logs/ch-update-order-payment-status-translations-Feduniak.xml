@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="Feduniak-1" author="Feduniak Yurii">
+        <update tableName="order_payment_status_translations">
+            <column name="translation_value" value="Повернуто"/>
+            <column name="translation_value_eng" value="Refunded"/>
+            <where>order_payment_status_id = 4</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

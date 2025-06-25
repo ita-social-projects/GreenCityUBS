@@ -23,10 +23,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
@@ -145,9 +148,9 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     @Test
     void get_All_Orders_Filter_By_City_DESC() {
-        var filter = new OrderSearchCriteria().setCities(new String[] {"Київ"});
+        var filter = new OrderSearchCriteria().setCitiesUk(new String[] {"Київ"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
-            .filter(a -> a.getCity().equals("Київ"))
+            .filter(a -> a.getCityUk().equals("Київ"))
             .collect(Collectors.toList());
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -157,9 +160,9 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     @Test
     void get_All_Orders_Filter_By_Region_DESC() {
-        var filter = new OrderSearchCriteria().setRegion(new String[] {"Київська область"});
+        var filter = new OrderSearchCriteria().setRegionUk(new String[] {"Київська область"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
-            .filter(a -> a.getRegion().equals("Київська область"))
+            .filter(a -> a.getRegionUk().equals("Київська область"))
             .collect(Collectors.toList());
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
@@ -169,13 +172,13 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
 
     @Test
     void get_All_Orders_Filter_By_Districts_DESC() {
-        var filter = new OrderSearchCriteria().setDistricts(new String[] {"Подільський"});
+        var filter = new OrderSearchCriteria().setDistrictsUk(new String[] {"Подільський"});
         var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
-            .map(BigOrderTableViews::getDistrict)
+            .map(BigOrderTableViews::getDistrictUk)
             .filter(district -> district.equals("Подільський")).toList();
         var actualValue = bigOrderTableRepository
             .findAll(ORDER_PAGE_PAGE_NUMBER_0_PAGE_SIZE_12_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
-            .getContent().stream().map(BigOrderTableViews::getDistrict).toList();
+            .getContent().stream().map(BigOrderTableViews::getDistrictUk).toList();
         Assertions.assertEquals(
             expectedValue, actualValue);
     }
@@ -339,7 +342,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(false));
-        Assertions.assertTrue(isListCorrectlySorted);
+        assertTrue(isListCorrectlySorted);
     }
 
     @Test
@@ -350,7 +353,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderStatusTranslationComparator(true));
-        Assertions.assertTrue(isListCorrectlySorted);
+        assertTrue(isListCorrectlySorted);
     }
 
     @Test
@@ -454,7 +457,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(false));
-        Assertions.assertTrue(isListCorrectlySorted);
+        assertTrue(isListCorrectlySorted);
     }
 
     @Test
@@ -465,7 +468,32 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
             DEFAULT_ORDER_SEARCH_CRITERIA, TARIFFS_ID_LIST, USER_LANGUAGE_UA).getContent();
         boolean isListCorrectlySorted =
             Comparators.isInOrder(bigOrderTableViewsList, orderPaymentStatusTranslationComparator(true));
-        Assertions.assertTrue(isListCorrectlySorted);
+        assertTrue(isListCorrectlySorted);
+    }
+
+    @Test
+    void get_All_Orders_Filter_By_RegionId_And_CityId_And_DistrictId() {
+        var filter =
+            new OrderSearchCriteria().setCityId(new Long[] {100L}).setDistrictId(new Long[] {100L})
+                .setRegionId(new Long[] {100L});
+        var expectedValue = ModelUtils.getAllBOTViewsDESC().stream()
+            .filter(a -> Arrays.asList(filter.getCityId()).contains(a.getCityId()))
+            .filter(a -> Arrays.asList(filter.getDistrictId()).contains(a.getDistrictId()))
+            .filter(a -> Arrays.asList(filter.getRegionId()).contains(a.getRegionId()))
+            .collect(Collectors.toList());
+        var actualValue =
+            bigOrderTableRepository.findAll(DEFAULT_ORDER_PAGE_DESC, filter, TARIFFS_ID_LIST, USER_LANGUAGE_ENG)
+                .getContent();
+        Assertions.assertEquals(expectedValue, actualValue);
+    }
+
+    @Test
+    void getOrdersCountByTariffsTest() {
+        List<Long> tariffsInfoIds = List.of(1L, 2L, 3L);
+
+        long result = bigOrderTableRepository.getOrdersCountByTariffs(tariffsInfoIds);
+
+        assertTrue(result > 0);
     }
 
     private Comparator<BigOrderTableViews> orderStatusTranslationComparator(boolean descending) {

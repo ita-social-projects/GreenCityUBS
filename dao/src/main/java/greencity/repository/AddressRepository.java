@@ -73,7 +73,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      *         associated with the user, or an empty {@link Optional} if no such
      *         address is found
      */
-    Optional<Address> findByUserIdAndActualTrue(Long userId);
+    Optional<Address> findByUserIdAndBaseAddress_ActualTrue(Long userId);
 
     /**
      * Finds first non-deleted {@link Address} associated with the given user ID.
@@ -86,4 +86,12 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
      */
     @Query(value = "SELECT * FROM address WHERE user_id =:userId AND status != 'DELETED' LIMIT 1", nativeQuery = true)
     Optional<Address> findAnyByUserIdAndAddressStatusNotDeleted(Long userId);
+
+    /**
+     * Finds all addresses associated with a specific user.
+     *
+     * @param userId the ID of the user whose addresses are to be retrieved
+     * @return a list of {@link Address} objects associated with the specified user
+     */
+    List<Address> findAllByUserId(Long userId);
 }

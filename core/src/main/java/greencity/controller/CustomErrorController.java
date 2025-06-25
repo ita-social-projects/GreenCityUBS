@@ -27,11 +27,11 @@ public class CustomErrorController implements ErrorController {
         RequestMethod.HEAD, RequestMethod.OPTIONS, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.TRACE})
     @ResponseBody
     public String handleError(HttpServletRequest request) {
-        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
-        Exception exception = (Exception) request.getAttribute("javax.servlet.error.exception");
+        Integer statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
+        String exceptionMessage = (String) request.getAttribute("jakarta.servlet.error.message");
         return String.format("<html><body><h2>Error Page</h2><div>Status code: <b>%s</b></div>"
             + "<div>Exception Message: <b>%s</b></div><body></html>",
-            statusCode, exception == null ? "N/A" : exception.getMessage());
+            statusCode, exceptionMessage == null ? "N/A" : exceptionMessage);
     }
 
     public String getErrorPath() {

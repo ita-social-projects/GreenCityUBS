@@ -15,7 +15,7 @@ class UserProfileUpdateDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"John Doe", "абвгґіїьяюєёАБВГҐІЇЬЯЮЄЁ-ʼ'`ʹ", "John-Doe", "John Doe12", "John Doe 12", "Johnʼ'`ʹDoe",
+        strings = {"John Doe", "Лук'ян", "John-Doe", "John Doe12", "John Doe 12", "van Gogh",
             "ValidNameWithMaxLengthEquals30"})
     void testValidRecipientName(String name) throws NoSuchFieldException {
         checkRegexPattern("recipientName", name, true);
@@ -30,7 +30,7 @@ class UserProfileUpdateDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"John Doe", "абвгґіїьяюєёАБВГҐІЇЬЯЮЄЁ-ʼ'`ʹ", "John-Doe", "John Doe12", "John Doe 12", "Johnʼ'`ʹDoe",
+        strings = {"John Doe", "Лук'ян", "John-Doe", "John Doe12", "John Doe 12", "van Gogh",
             "ValidNameWithMaxLengthEquals30"})
     void testValidRecipientSurname(String name) throws NoSuchFieldException {
         checkRegexPattern("recipientSurname", name, true);
@@ -38,7 +38,7 @@ class UserProfileUpdateDtoTest {
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"InvalidLengthOfName31Characters", "", "   ", "!?+=@#$%^&*", "тест!", "тест@123", "Hello World!"})
+        strings = {"InvalidLengthOfName31Characters", "!?+=@#$%^&*", "тест!", "тест@123", "Hello World!"})
     void testInvalidRecipientSurname(String name) throws NoSuchFieldException {
         checkRegexPattern("recipientSurname", name, false);
     }

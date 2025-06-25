@@ -32,6 +32,7 @@
         <test.containers.version>1.19.3</test.containers.version>
         <junit.version>4.13.2</junit.version>
         <jjwt.version>0.12.3</jjwt.version>
+        <telegrambot.version>6.9.7.1</telegrambot.version>
         <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
         <net.java.dev.jna.version>5.13.0</net.java.dev.jna.version>
         <cloudstorage.version>2.29.1</cloudstorage.version>
@@ -49,6 +50,7 @@
         <sonar.coverage.exclusions>**/config/*,**/entity/*,**/exceptions/*</sonar.coverage.exclusions>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
+        <org.eclipse.jgit.version>7.1.0.202411261347-r</org.eclipse.jgit.version>
     </properties>
 
     <build>

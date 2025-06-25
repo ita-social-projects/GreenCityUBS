@@ -21,6 +21,8 @@
         <commons-text.version>1.11.0</commons-text.version>
         <json.version>20231013</json.version>
         <telegrambots.version>6.9.7.0</telegrambots.version>
+        <com.github.librepdf.version>2.0.3</com.github.librepdf.version>
+        <emoji-java.version>5.1.1</emoji-java.version>
     </properties>
 
     <dependencyManagement>
@@ -68,6 +70,12 @@
             <artifactId>spring-social-facebook</artifactId>
             <version>${org.springframework.social.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <!-- emoji -->
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>emoji-java</artifactId>
+            <version>${emoji-java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -159,20 +167,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.liqpay</groupId>
-            <artifactId>liqpay-sdk</artifactId>
-            <version>0.8-SNAPSHOT</version>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>${org.eclipse.jgit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>${com.github.librepdf.version}</version>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>repository</id>
-            <url>https://github.com/liqpay/sdk-java/raw/repository</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>

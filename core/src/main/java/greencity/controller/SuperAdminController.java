@@ -104,7 +104,7 @@ class SuperAdminController {
 
     @Operation(summary = "Delete tariff service by Id")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -114,7 +114,7 @@ class SuperAdminController {
     public ResponseEntity<HttpStatus> deleteTariffService(
         @Valid @PathVariable Integer id) {
         superAdminService.deleteTariffService(id);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.noContent().build();
     }
 
     /**

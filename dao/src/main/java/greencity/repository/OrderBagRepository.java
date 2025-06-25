@@ -57,7 +57,7 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
     @Transactional
     @Modifying
     @Query(value = "update order_bag_mapping obm "
-        + "set capacity = :capacity, price = :price, name = :name, name_eng = :nameEng "
+        + "set capacity = :capacity, price = :price, name_uk = :name, name_en = :nameEng "
         + "from orders o "
         + "where o.id = obm.order_id and obm.bag_id = :bagId and o.order_payment_status = 'UNPAID'", nativeQuery = true)
     void updateAllByBagIdForUnpaidOrders(Integer bagId, Integer capacity, Long price, String name, String nameEng);
@@ -83,4 +83,23 @@ public interface OrderBagRepository extends JpaRepository<OrderBag, Long> {
         + "AND obm.bag_id = :bagId", nativeQuery = true)
     Optional<Integer> getAmountOfOrderBagsByOrderIdAndBagId(@Param("orderId") Long orderId,
         @Param("bagId") Integer bagId);
+
+    /**
+     * Deletes all order bags associated with the given order ID from the
+     * ORDER_BAG_MAPPING table.
+     *
+     * @param orderId The ID of the order for which all associated order bags should
+     *                be deleted.
+     */
+    @Modifying
+    void deleteAllByOrderId(Long orderId);
+
+    /**
+     * Finds all order bags associated with the given order ID.
+     *
+     * @param orderId The ID of the order for which all associated order bags should
+     *                be returned.
+     * @return A list of order bags associated with the given order ID.
+     */
+    List<OrderBag> findAllByOrderId(Long orderId);
 }

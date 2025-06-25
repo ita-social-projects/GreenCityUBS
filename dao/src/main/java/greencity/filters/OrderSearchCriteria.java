@@ -13,12 +13,15 @@ public class OrderSearchCriteria {
     private Long[] responsibleDriverId;
     private Long[] responsibleNavigatorId;
     private Long[] responsibleLogicManId;
+    private Long[] regionId;
+    private Long[] cityId;
+    private Long[] districtId;
     private DateFilter orderDate;
     private DateFilter deliveryDate;
     private DateFilter paymentDate;
-    private String[] region;
-    private String[] cities;
-    private String[] districts;
+    private String[] regionUk;
+    private String[] citiesUk;
+    private String[] districtsUk;
     private String[] regionEn;
     private String[] citiesEn;
     private String[] districtsEn;

@@ -2,6 +2,7 @@ package greencity.dto.order;
 
 import greencity.dto.bag.BagDto;
 import greencity.dto.user.PersonalDataDto;
+import greencity.enums.PaymentSystem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +40,7 @@ public class OrderResponseDto implements Serializable {
     private Set<@Pattern(regexp = "(\\d{4}-\\d{4})|(^$)",
         message = "This certificate code is not valid") String> certificates;
 
-    private Set<@Pattern(regexp = "\\d{4,10}") String> additionalOrders;
+    private Set<@Pattern(regexp = "\\d{1,8}") String> additionalOrders;
 
     @Length(max = 255)
     private String orderComment;
@@ -52,4 +53,6 @@ public class OrderResponseDto implements Serializable {
 
     @NotNull
     private Long locationId;
+
+    private PaymentSystem paymentSystem;
 }

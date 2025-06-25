@@ -114,7 +114,7 @@ class ViberServiceImplTest {
         SendMessageToUserDto sendMessageToUserDto = SendMessageToUserDto.builder()
             .receiver(notification.getUser().getViberBot().getChatId())
             .type(MessageType.text)
-            .text(template.getTitle() + "\n\n" + template.getNotificationPlatforms().getFirst().getBody())
+            .text(template.getTitleUk() + "\n\n" + template.getNotificationPlatforms().getFirst().getBodyUk())
             .build();
 
         when(userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail()))
@@ -213,13 +213,13 @@ class ViberServiceImplTest {
     void isEnabled() {
         assertFalse(viberService.isEnabled(null));
 
-        User user = new User();
-        assertFalse(viberService.isEnabled(user));
+        User newUser = new User();
+        assertFalse(viberService.isEnabled(newUser));
 
-        user.setViberBot(new ViberBot(1L, "123", false, user));
-        assertFalse(viberService.isEnabled(user));
+        newUser.setViberBot(new ViberBot(1L, "123", false, newUser));
+        assertFalse(viberService.isEnabled(newUser));
 
-        user.getViberBot().setIsNotify(true);
-        assertTrue(viberService.isEnabled(user));
+        newUser.getViberBot().setIsNotify(true);
+        assertTrue(viberService.isEnabled(newUser));
     }
 }

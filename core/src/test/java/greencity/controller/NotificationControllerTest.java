@@ -14,14 +14,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 import java.util.List;
 import static greencity.ModelUtils.getNotificationDto;
 import static greencity.ModelUtils.getUuid;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +53,7 @@ class NotificationControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(List.of(dto));
 
-        mockMvc.perform(post(notificationLink + "/" + 1L + "?lang=ua")
+        mockMvc.perform(get(notificationLink + "/" + 1L + "?lang=ua")
             .principal(principal)
             .content(responseJSON)
             .contentType(MediaType.APPLICATION_JSON))
@@ -61,18 +62,58 @@ class NotificationControllerTest {
     }
 
     @Test
+    void getShortNotificationsForCurrentUser() throws Exception {
+        String emailQueryParam = "email";
+        String emailQueryParamValue = "email@email.com";
+
+        mockMvc.perform(get(notificationLink)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .queryParam(emailQueryParam, emailQueryParamValue))
+            .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
     void getNotificationsForCurrentUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink)
+        String emailQueryParam = "email";
+        String emailQueryParamValue = "email@email.com";
+
+        mockMvc.perform(get(notificationLink + "/images")
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .queryParam(emailQueryParam, emailQueryParamValue))
+            .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void getUnreadNotificationsTest() throws Exception {
+        mockMvc.perform(get(notificationLink + "/quantityUnreadNotifications")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    void getUnreadenNotificationsTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get(notificationLink + "/quantityUnreadenNotifications")
+    void viewNotificationTest() throws Exception {
+        mockMvc.perform(patch(notificationLink + "/{notificationId}/viewNotification", 1L)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.status().isOk());
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void unreadNotificationTest() throws Exception {
+        mockMvc.perform(patch(notificationLink + "/{notificationId}/unreadNotification", 1L)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteNotificationTest() throws Exception {
+        mockMvc.perform(delete(notificationLink + "/{notificationId}", 1L)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }

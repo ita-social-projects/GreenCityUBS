@@ -1,13 +1,14 @@
 package greencity.entity.order;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
@@ -29,16 +30,29 @@ public class BigOrderTableViews {
     private String senderPhone;
     private String senderEmail;
     private Integer violationsAmount;
-    private String region;
-    private String city;
-    private String district;
-    private String address;
+    @Column(name = "region_uk")
+    private String regionUk;
+    @Column(name = "city_uk")
+    private String cityUk;
+    @Column(name = "district_uk")
+    private String districtUk;
+    @Column(name = "address_uk")
+    private String addressUk;
     private String regionEn;
     private String cityEn;
     private String districtEn;
     private String addressEn;
     private String commentToAddressForClient;
-    private String bagAmount;
+    @Column(name = "mixed_waste_120")
+    private Long mixedWaste120;
+    @Column(name = "textile_waste_60")
+    private Long textileWaste60;
+    @Column(name = "textile_waste_20")
+    private Long textileWaste20;
+    @Column(name = "other_packages_uk")
+    private String otherPackagesUk;
+    @Column(name = "other_packages_en")
+    private String otherPackagesEn;
     private Long totalOrderSum;
     private String orderCertificateCode;
     private Long generalDiscount;
@@ -62,4 +76,7 @@ public class BigOrderTableViews {
     private Boolean isBlocked;
     private String blockedBy;
     private Long tariffsInfoId;
+    private Long regionId;
+    private Long cityId;
+    private Long districtId;
 }

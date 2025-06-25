@@ -1,5 +1,6 @@
 package greencity.dto.order;
 
+import greencity.dto.location.CoordinatesDto;
 import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -19,14 +20,19 @@ class OrderAddressDtoRequestTest {
     @MethodSource("provideFieldsAndValidValues")
     void validFieldsInAddressDtoTest(String street) {
         var dto = OrderAddressDtoRequest.builder()
-            .region("region")
+            .regionUk("region")
             .regionEn("regionEn")
-            .district("district")
+            .districtUk("district")
             .districtEn("districtEn")
             .houseNumber("1")
-            .city("city")
+            .placeId("test")
+            .coordinates(CoordinatesDto.builder()
+                .latitude(1D)
+                .longitude(1D)
+                .build())
+            .cityUk("city")
             .cityEn("cityEn")
-            .street(street)
+            .streetUk(street)
             .streetEn(street)
             .build();
 
@@ -44,14 +50,19 @@ class OrderAddressDtoRequestTest {
     @MethodSource("provideFieldsAndInvalidValues")
     void invalidFieldsInAddressDtoTest(String street) {
         var dto = OrderAddressDtoRequest.builder()
-            .region("region")
+            .regionUk("region")
             .regionEn("regionEn")
-            .district("district")
+            .districtUk("district")
             .districtEn("districtEn")
             .houseNumber("1")
-            .city("city")
+            .placeId("test")
+            .coordinates(CoordinatesDto.builder()
+                .latitude(1D)
+                .longitude(1D)
+                .build())
+            .cityUk("city")
             .cityEn("cityEn")
-            .street(street)
+            .streetUk(street)
             .streetEn(street)
             .build();
 
