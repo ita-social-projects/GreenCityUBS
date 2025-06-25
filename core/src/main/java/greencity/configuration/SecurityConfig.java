@@ -280,7 +280,7 @@ public class SecurityConfig {
                     UBS_LINK + "/certificate/{responseCode}",
                     "/notifications",
                     "/notifications/**",
-                    "/notifications/quantityUnreadenNotifications",
+                    "/notifications/quantityUnreadNotifications",
                     UBS_LINK + "/check-if-tariff-exists/{id}",
                     UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
