@@ -1659,6 +1659,12 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public TariffInfoByLocationDto getTariffInfoForLocation(Long courierId, Long locationId) {
+        if (!courierRepository.existsCourierById(courierId)) {
+            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
+        }
+        if (!locationRepository.existsById(locationId)) {
+            throw new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId);
+        }
         return TariffInfoByLocationDto.builder()
             .orderIsPresent(true)
             .tariffsForLocationDto(modelMapper.map(
