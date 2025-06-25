@@ -10,7 +10,6 @@ import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
 import greencity.dto.order.EcoNumberDto;
@@ -117,7 +116,6 @@ import static greencity.ModelUtils.TEST_ORDER_DETAILS_INFO_DTO_LIST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.TEST_USER;
 import static greencity.ModelUtils.UPDATE_ORDER_PAGE_ADMIN_DTO;
-import static greencity.ModelUtils.getAdminCommentDto;
 import static greencity.ModelUtils.getAdminEmployee;
 import static greencity.ModelUtils.getBagInfoDto;
 import static greencity.ModelUtils.getBaglist;
@@ -2307,7 +2305,7 @@ class UBSManagementServiceImplTest {
         when(certificateRepository.findCertificate(1L)).thenReturn(getCertificateList());
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(serviceRepository.findServiceByTariffsInfoId(1L)).thenReturn(Optional.of(getService()));
-        when(modelMapper.map(getBaglist().get(0), BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(getBaglist().getFirst(), BagInfoDto.class)).thenReturn(bagInfoDto);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(6L))
             .thenReturn(Optional.ofNullable(getStatusTranslation()));
         when(orderStatusTranslationRepository.findAllBy()).thenReturn(getOrderStatusTranslations());

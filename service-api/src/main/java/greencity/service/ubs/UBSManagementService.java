@@ -161,16 +161,6 @@ public interface UBSManagementService {
     void saveReason(Order order, String description, MultipartFile[] images);
 
     /**
-     * This is method which save Admin comment.
-     *
-     * @param adminCommentDto {@link AdminCommentDto}.
-     * @param email           {@link String}.
-     *
-     * @author Yuriy Bahlay.
-     */
-    void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String email);
-
-    /**
      * This is method updates eco id from the shop for order by id.
      *
      * @param ecoNumberDto {@link EcoNumberDto}.
