@@ -212,7 +212,7 @@ class CustomExceptionHandlerTest {
         ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
         when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
             .thenReturn(objectMap);
-        assertEquals(customExceptionHandler.handleWrongSignatureExceptionn(wrongSignatureException, webRequest),
+        assertEquals(customExceptionHandler.handleWrongSignatureException(wrongSignatureException, webRequest),
             ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }

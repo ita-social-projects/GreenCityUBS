@@ -235,7 +235,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *         exception.
      */
     @ExceptionHandler(WrongSignatureException.class)
-    public final ResponseEntity<Object> handleWrongSignatureExceptionn(WrongSignatureException ex,
+    public final ResponseEntity<Object> handleWrongSignatureException(WrongSignatureException ex,
         WebRequest webRequest) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
