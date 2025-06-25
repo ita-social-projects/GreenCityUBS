@@ -1008,6 +1008,17 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void getTariffInfoByIdTest() {
+        when(tariffsInfoRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(ModelUtils.getTariffsInfo()));
+        when(modelMapper.map(any(TariffsInfo.class), eq(GetTariffsInfoDto.class))).thenReturn(getAllTariffsInfoDto());
+
+        superAdminService.getTariffInfoById(1L);
+
+        verify(tariffsInfoRepository).findById(any(Long.class));
+    }
+
+    @Test
     void CreateReceivingStation() {
         String test = TEST_USER.getUuid();
         AddingReceivingStationDto stationDto = AddingReceivingStationDto.builder().name("Петрівка").build();

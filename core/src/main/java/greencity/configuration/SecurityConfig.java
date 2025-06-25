@@ -285,7 +285,8 @@ public class SecurityConfig {
                     UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + "/telegram/**")
+                    UBS_LINK + "/telegram/**",
+                    SUPER_ADMIN_LINK + "/tariff/{id}")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_LINK + "/telegram/**")

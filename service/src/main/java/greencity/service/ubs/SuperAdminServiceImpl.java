@@ -513,6 +513,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .collect(Collectors.toList());
     }
 
+    @Override
+    public GetTariffsInfoDto getTariffInfoById(Long id) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(id);
+        return modelMapper.map(tariffsInfo, GetTariffsInfoDto.class);
+    }
+
     private Region createRegionWithTranslation(LocationCreateDto dto) {
         String enName = getRegionTranslation(dto, "en");
         String uaName = getRegionTranslation(dto, "ua");

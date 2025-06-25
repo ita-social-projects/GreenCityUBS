@@ -554,6 +554,26 @@ class SuperAdminController {
     }
 
     /**
+     * Controller for get tariff info by id.
+     *
+     * @return {@link GetTariffsInfoDto}
+     * @author Volodymyr Saienko
+     */
+    @Operation(summary = "Get tariff info by id.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_PRICING_CARD', authentication)")
+    @GetMapping("/tariff/{id}")
+    public ResponseEntity<GetTariffsInfoDto> getTariffInfoById(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffInfoById(id));
+    }
+
+    /**
      * Controller for add new tariff info.
      *
      * @return {@link AddNewTariffResponseDto}
