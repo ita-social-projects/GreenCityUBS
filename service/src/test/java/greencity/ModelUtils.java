@@ -67,7 +67,6 @@ import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -3316,13 +3315,6 @@ public class ModelUtils {
             .descriptionEn("DescriptionEng")
             .nameUk("name")
             .nameEn("nameEng")
-            .build();
-    }
-
-    public static AdminCommentDto getAdminCommentDto() {
-        return AdminCommentDto.builder()
-            .orderId(1L)
-            .adminComment("Admin")
             .build();
     }
 
