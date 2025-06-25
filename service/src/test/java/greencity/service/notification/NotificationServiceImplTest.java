@@ -245,7 +245,7 @@ class NotificationServiceImplTest {
             created.setNotificationTime(LocalDateTime.now(fixedClock));
             created.setUser(getUser());
             created.setId(1L);
-            created.setOrder(orders.get(0));
+            created.setOrder(orders.getFirst());
 
             when(userNotificationRepository.save(any())).thenReturn(created);
 
@@ -960,7 +960,7 @@ class NotificationServiceImplTest {
             parameters.add(NotificationParameter.builder().key("amountToPay")
                 .value(String.format("%.2f", (double) amountToPay)).build());
             parameters.add(NotificationParameter.builder().key("orderNumber")
-                .value(orders.get(0).getId().toString()).build());
+                .value(orders.getFirst().getId().toString()).build());
 
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag1list());
             when(userNotificationRepository.save(any())).thenReturn(notification);
@@ -1122,8 +1122,8 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getUnreadenNotificationsTest() {
-        assertEquals(0, notificationService.getUnreadenNotifications("Test"));
+    void getUnreadNotificationsTest() {
+        assertEquals(0, notificationService.getUnreadNotifications("Test"));
     }
 
     @Test

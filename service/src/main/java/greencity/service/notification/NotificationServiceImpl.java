@@ -829,7 +829,7 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * {@inheritDoc}
      */
-    public long getUnreadenNotifications(String userUuid) {
+    public long getUnreadNotifications(String userUuid) {
         User user = userRepository.findByUuid(userUuid);
         return userNotificationRepository.countUserNotificationByUserAndReadIsFalse(user);
     }
@@ -914,8 +914,8 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public NotificationDto getNotification(String uuid, Long id, String language) {
-        return getNotification(uuid, id, language, true);
+    public NotificationDto getNotification(String uuid, Long notificationId, String language) {
+        return getNotification(uuid, notificationId, language, true);
     }
 
     /**
