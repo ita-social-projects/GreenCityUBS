@@ -17,7 +17,6 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -1159,24 +1158,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private String processImage(MultipartFile image) {
         return (image != null) ? fileService.upload(image) : DEFAULT_IMAGE_PATH;
-    }
-
-    /**
-     * This is service method which is save adminComment.
-     *
-     * @param adminCommentDto {@link AdminCommentDto}.
-     * @param email           {@link String}.
-     * @author Yuriy Bahlay.
-     */
-    @Override
-    public void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String email) {
-        Order order = orderRepository.findById(adminCommentDto.getOrderId()).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + adminCommentDto.getOrderId()));
-        checkAvailableOrderForEmployee(order, email);
-        order.setAdminComment(adminCommentDto.getAdminComment());
-        orderRepository.save(order);
-        eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, email
-            + "  " + email, order);
     }
 
     /**
