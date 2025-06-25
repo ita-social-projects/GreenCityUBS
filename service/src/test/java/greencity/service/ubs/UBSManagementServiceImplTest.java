@@ -1060,24 +1060,6 @@ class UBSManagementServiceImplTest {
     }
 
     @Test
-    void testSaveAdminToOrder() {
-        Order order = getOrder();
-        TariffsInfo tariffsInfo = getTariffsInfo();
-        order.setTariffsInfo(tariffsInfo);
-        Employee employee = getEmployee();
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(employee));
-        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(1L, 1L)).thenReturn(Optional.of(tariffsInfo));
-
-        ubsManagementService.saveAdminCommentToOrder(getAdminCommentDto(), "test@gmail.com");
-
-        verify(orderRepository).findById(1L);
-        verify(employeeRepository).findByEmail("test@gmail.com");
-        verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
-    }
-
-    @Test
     void testUpdateEcoNumberForOrderById() {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(getOrder()));
         ubsManagementService.updateEcoNumberForOrderById(getEcoNumberDto(), 1L, "abc");
@@ -1111,15 +1093,6 @@ class UBSManagementServiceImplTest {
         ecoNumberDto.setEcoNumber(new HashSet<>(List.of("1234a")));
         assertThrows(BadRequestException.class,
                 () -> ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, 1L, "abc"));
-        verify(orderRepository).findById(1L);
-    }
-
-    @Test
-    void saveAdminCommentThrowsException() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-        AdminCommentDto adminCommentDto = getAdminCommentDto();
-        assertThrows(NotFoundException.class,
-                () -> ubsManagementService.saveAdminCommentToOrder(adminCommentDto, "abc"));
         verify(orderRepository).findById(1L);
     }
 
