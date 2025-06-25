@@ -35,7 +35,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class TelegramController {
     private final TelegramService telegramService;
     private final TelegramPhotoService telegramPhotoService;
-    private final TelegramStreamingService telegramStrimingService;
+    private final TelegramStreamingService telegramStreamingService;
 
     /**
      * Retrieves a list of TelegramUserMessages for a given chatId.
@@ -204,10 +204,10 @@ public class TelegramController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@RequestParam String chatId) {
         SseEmitter emitter = new SseEmitter(0L);
-        telegramStrimingService.addEmitter(emitter, chatId);
+        telegramStreamingService.addEmitter(emitter, chatId);
 
-        emitter.onCompletion(() -> telegramStrimingService.removeEmitter(emitter));
-        emitter.onTimeout(() -> telegramStrimingService.removeEmitter(emitter));
+        emitter.onCompletion(() -> telegramStreamingService.removeEmitter(emitter));
+        emitter.onTimeout(() -> telegramStreamingService.removeEmitter(emitter));
 
         return emitter;
     }
