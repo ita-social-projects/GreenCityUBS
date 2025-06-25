@@ -239,8 +239,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      *
      * @param ex         Exception which should be intercepted.
      * @param webRequest contain detail about occur exception.
-     * @return {@code ResponseEntity} which contain http status and body with message of
-     *         exception.
+     * @return {@code ResponseEntity} which contain http status and body with
+     *         message of exception.
      */
     @ExceptionHandler(GoogleApiException.class)
     public final ResponseEntity<Object> handleGoogleApiException(GoogleApiException ex,
