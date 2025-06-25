@@ -189,6 +189,14 @@ public interface SuperAdminService {
     List<GetTariffsInfoDto> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria);
 
     /**
+     * Method for getting tariff info by id.
+     *
+     * @param id the ID of the tariff to retrieve
+     * @return {@link GetTariffsInfoDto} the DTO containing tariff information
+     */
+    GetTariffsInfoDto getTariffInfoById(Long id);
+
+    /**
      * Method creates new receiving station.
      *
      * @param dto {@link AddingReceivingStationDto}
