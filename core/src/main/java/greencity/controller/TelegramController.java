@@ -57,12 +57,12 @@ public class TelegramController {
     }
 
     /**
-     * Retrieves a list of TelegramUserPhotos for a given chatId.
+     * Retrieves a list of TelegramPhotos for a given chatId.
      *
      * @param chatId the Telegram chat ID
-     * @return a list of TelegramUserPhotos
+     * @return a list of TelegramPhotos
      */
-    @Operation(summary = "Get all user photos by chatId")
+    @Operation(summary = "Get all photos by chatId")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
@@ -70,8 +70,8 @@ public class TelegramController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/user-photos/{chatId}")
-    public ResponseEntity<PageableDto<TelegramImageDto>> gerUserPhotos(@PathVariable(name = "chatId") String chatId,
-        Pageable page) {
+    public ResponseEntity<PageableDto<TelegramImageDto>> getUserPhotos(@PathVariable(name = "chatId") String chatId,
+                                                                       Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.findUserPhotosByChatId(chatId, page));
     }
 
