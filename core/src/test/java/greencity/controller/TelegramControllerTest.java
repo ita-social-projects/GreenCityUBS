@@ -89,7 +89,7 @@ class TelegramControllerTest {
         mockMvc.perform(get(baseUrl + "/get-all-authorized-users"))
             .andExpect(status().isOk());
 
-        verify(telegramService).getAllUsers(any(PageRequest.class));
+        verify(telegramService).getAllUsers(anyString(), any(PageRequest.class));
     }
 
     @Test

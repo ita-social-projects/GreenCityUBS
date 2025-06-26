@@ -2,15 +2,13 @@ package greencity.repository;
 
 import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.user.User;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AuthorizedUserRepository extends JpaRepository<AuthorizedUser, Long> {
+public interface AuthorizedUserRepository extends JpaRepository<AuthorizedUser, Long>, JpaSpecificationExecutor<AuthorizedUser> {
     /**
      * The method finds telegram bot by user and chat id and isNotify.
      *
@@ -40,14 +38,4 @@ public interface AuthorizedUserRepository extends JpaRepository<AuthorizedUser, 
      * @return {@link AuthorizedUser}.
      */
     Optional<AuthorizedUser> findByChatId(String chatId);
-
-    /**
-     * The method finds all telegram users.
-     *
-     * @param pageable {@link Pageable}.
-     * @return {@link Page} of {@link AuthorizedUser}.
-     *
-     */
-    @Query("select a from AuthorizedUser a ")
-    Page<AuthorizedUser> findAllUsers(Pageable pageable);
 }

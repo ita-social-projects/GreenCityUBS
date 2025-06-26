@@ -30,6 +30,7 @@ import greencity.service.ubs.TelegramAuthorizationService;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramStreamingService;
+import greencity.specification.AuthorizedUserSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -248,8 +250,10 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public PageableDto<AuthorizedUserDto> getAllUsers(Pageable pageable) {
-        Page<AuthorizedUser> authorizedUsers = authorizedUserRepository.findAllUsers(pageable);
+    public PageableDto<AuthorizedUserDto> getAllUsers(String searchTerm, Pageable pageable) {
+        Specification<AuthorizedUser> spec = AuthorizedUserSpecifications.hasNameLike(searchTerm);
+
+        Page<AuthorizedUser> authorizedUsers = authorizedUserRepository.findAll(spec, pageable);
         List<AuthorizedUserDto> authorizedUserDtos = authorizedUsers
             .getContent()
             .stream()

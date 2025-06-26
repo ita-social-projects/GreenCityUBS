@@ -124,13 +124,14 @@ public interface TelegramService {
     PageableDto<TelegramTextMessageDto> findUserMessageByChatId(String chatId, Pageable pageable);
 
     /**
-     * Retrieves all authorized users.
+     * Retrieves a paginated list of authorized users, optionally filtered by a search term.
      *
-     * @param pageable the page to retrieve
-     *
-     * @return a list of TelegramBotDto associated with the specified pageable
+     * @param searchTerm optional keyword to filter users by recipient name or surname;
+     *                   if null or empty, all users are returned
+     * @param pageable   pagination and sorting information
+     * @return a page of {@link AuthorizedUserDto} matching the given criteria
      */
-    PageableDto<AuthorizedUserDto> getAllUsers(Pageable pageable);
+    PageableDto<AuthorizedUserDto> getAllUsers(String searchTerm, Pageable pageable);
 
     /**
      * Retrieves all unauthorized users.

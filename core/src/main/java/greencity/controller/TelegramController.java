@@ -76,9 +76,12 @@ public class TelegramController {
     }
 
     /**
-     * Retrieves a list of TelegramBots (authorized Telegram users).
+     * Retrieves a paginated list of authorized Telegram users (TelegramBots),
+     * optionally filtered by a search term.
      *
-     * @return a list of TelegramBotDtos
+     * @param search   optional keyword to filter users by recipient name or surname
+     * @param pageable pagination and sorting information
+     * @return {@link ResponseEntity} containing a {@link PageableDto} of {@link AuthorizedUserDto}
      */
     @Operation(summary = "Get all authorized tg users")
     @ApiResponses(value = {
@@ -88,8 +91,8 @@ public class TelegramController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-authorized-users")
-    public ResponseEntity<PageableDto<AuthorizedUserDto>> getAllAuthoredUsers(Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUsers(pageable));
+    public ResponseEntity<PageableDto<AuthorizedUserDto>> getAllAuthoredUsers(@RequestParam(required = false) String search, Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUsers(search, pageable));
     }
 
     @GetMapping("/get-all-unauthorized-users")
