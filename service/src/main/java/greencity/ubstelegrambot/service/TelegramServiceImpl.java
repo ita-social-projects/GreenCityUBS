@@ -424,14 +424,13 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public void processImageCommand(Update update) {
         var message = update.getMessage();
-        var user = telegramManagerRepository.findByChatId(message.getChatId().toString()).orElseThrow(
-                ()-> new BadRequestException(String.format(TelegramBotConstants.MESSAGES_NOT_FOUND_FOR_CHAT,
-                        message.getChatId())));
         var photos = telegramPhotoService.downloadPhotoFromTelegram(message);
-        //todo fix it
+        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
         if (isUserInSupportMode(message.getChatId().toString())) {
-            telegramPhotoService.saveToDB(photos, message.getChatId().toString(), message.getCaption(),
-                    true, user.getEmployee().getId());
+            telegramPhotoService.saveToDB(photos, message.getChatId().toString(), message.getCaption(), false);
+        }
+        else {
+            executor.executeCommand(ubsTelegramBot, MessageFactory.createUnknownCommandMessage(message.getChatId().toString()));
         }
     }
 

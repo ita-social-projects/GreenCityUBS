@@ -15,13 +15,11 @@ public class Image extends TelegramMessage {
     private String caption;
 
     private boolean isManagerPhoto;
-    private Long managerId;
 
-    public Image(String chatId, String fileUrl, String caption, boolean isManagerPhoto, Long managerId) {
+    public Image(String chatId, String fileUrl, String caption, boolean isManagerPhoto) {
         super(chatId);
         this.fileUrl = fileUrl;
         this.caption = caption;
         this.isManagerPhoto = isManagerPhoto;
-        this.managerId = managerId;
     }
 }

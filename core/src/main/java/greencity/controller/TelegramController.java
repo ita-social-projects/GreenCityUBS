@@ -71,8 +71,8 @@ public class TelegramController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/user-photos/{chatId}")
-    public ResponseEntity<PageableDto<TelegramImageDto>> getUserPhotos(@PathVariable(name = "chatId") String chatId,
-                                                                       Pageable page) {
+    public ResponseEntity<PageableDto<TelegramImageDto>> getAllPhotosInChat(@PathVariable(name = "chatId") String chatId,
+                                                                            Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.findUserPhotosByChatId(chatId, page));
     }
 
@@ -116,6 +116,19 @@ public class TelegramController {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getLastOrderByChatId(chatId));
     }
 
+    /**
+     * Retrieves a paginated list of unauthorized Telegram users (TelegramBots).
+     *
+     * @param pageable pagination and sorting information
+     * @return {@link ResponseEntity} containing a {@link PageableDto} of {@link UnknownTelegramUserDto}
+     */
+    @Operation(summary = "Get all authorized tg users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
     @GetMapping("/get-all-unauthorized-users")
     public ResponseEntity<PageableDto<UnknownTelegramUserDto>> getAllUnauthorizedUsers(Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUnauthorizedUsers(pageable));
