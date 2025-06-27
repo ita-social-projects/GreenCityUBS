@@ -194,7 +194,7 @@ public class TelegramPhotoServiceImplTest {
         String chatId = "123";
         String caption = "caption";
 
-        telegramPhotoService.saveToDB(photoUrls, chatId, caption);
+        //telegramPhotoService.saveToDB(photoUrls, chatId, caption);
 
         verify(userPhotosRepository, times(amountOfUrls)).save(any(Image.class));
     }

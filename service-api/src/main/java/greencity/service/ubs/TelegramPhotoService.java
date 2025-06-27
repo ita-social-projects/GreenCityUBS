@@ -43,7 +43,7 @@ public interface TelegramPhotoService {
      * @param chatId    the Telegram chat ID
      * @param caption   the caption for the photos
      */
-    void saveToDB(List<String> photoUrls, String chatId, String caption);
+    void saveToDB(List<String> photoUrls, String chatId, String caption, boolean isManagerPhoto, Long managerId);
 
     /**
      * Sends a photo to a Telegram user.

@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.Image;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -7,6 +8,7 @@ import greencity.exceptions.image.FileNotSavedException;
 import greencity.mapping.telegrammessage.ImageConverter;
 import greencity.repository.AuthorizedUserRepository;
 import greencity.repository.TelegramImageRepository;
+import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.BASE64DecodedMultipartFile;
@@ -37,6 +39,7 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
     private final TelegramImageRepository telegramImageRepository;
     private final ApplicationContext applicationContext;
     private final AuthorizedUserRepository telegramBotRepository;
+    private final TelegramManagerRepository telegramManagerRepository;
     private final ImageConverter imageConverter;
     private final TelegramStreamingService telegramStrimingService;
     private static final String PHOTO_NOT_FOUND = "Photo not found in message";
@@ -88,12 +91,9 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
     }
 
     @Override
-    public void saveToDB(List<String> photoUrl, String chatId, String caption) {
+    public void saveToDB(List<String> photoUrl, String chatId, String caption, boolean isManagerPhoto, Long managerId) {
         for (String url : photoUrl) {
-            Image telegramUserPhotos = new Image(
-                chatId,
-                url,
-                caption);
+            Image telegramUserPhotos = new Image(chatId, url, caption, isManagerPhoto, managerId);
             telegramImageRepository.save(telegramUserPhotos);
             telegramStrimingService.streamMessages(chatId, imageConverter.map(telegramUserPhotos));
         }
@@ -115,7 +115,11 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
 
         var variable = file.getFileUrl(bot.getBotToken());
 
-        saveToDB(List.of(variable), chatId, caption);
+        var manager = telegramManagerRepository.findByChatId(chatId).orElseThrow(
+                ()-> new BadRequestException(String.format(TelegramBotConstants.MESSAGES_NOT_FOUND_FOR_CHAT,
+                        message.getChatId())));
+
+        saveToDB(List.of(variable), chatId, caption, true, manager.getEmployee().getId());
     }
 
     private String getFileNameFromUrl(String fileUrl) {
