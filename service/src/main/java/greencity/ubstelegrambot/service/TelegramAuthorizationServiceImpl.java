@@ -53,7 +53,7 @@ public class TelegramAuthorizationServiceImpl implements TelegramAuthorizationSe
             }
         } else {
             Optional<UnknownTelegramUser> unknownSavedTelegramUser =
-                unknownTelegramUserRepository.findById(tgUserId);
+                unknownTelegramUserRepository.findByChatId(tgUserId);
             if (unknownSavedTelegramUser.isPresent()) {
                 if (user.isPresent()) {
                     telegramBotRepository.save(createTelegramBotEntity(user.get(), tgUserId, false));

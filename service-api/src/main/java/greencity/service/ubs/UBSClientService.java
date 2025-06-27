@@ -31,6 +31,7 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import org.springframework.data.domain.Pageable;
@@ -345,4 +346,6 @@ public interface UBSClientService {
      *                 details such as transaction ID, status, and amount.
      */
     void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
+
+    public OrdersDataForUserDto getOrdersData(Order order);
 }

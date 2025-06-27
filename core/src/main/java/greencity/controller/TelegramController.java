@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
+import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.FeedbackDto;
@@ -76,9 +77,12 @@ public class TelegramController {
     }
 
     /**
-     * Retrieves a list of TelegramBots (authorized Telegram users).
+     * Retrieves a paginated list of authorized Telegram users (TelegramBots),
+     * optionally filtered by a search term.
      *
-     * @return a list of TelegramBotDtos
+     * @param search   optional keyword to filter users by recipient name or surname
+     * @param pageable pagination and sorting information
+     * @return {@link ResponseEntity} containing a {@link PageableDto} of {@link AuthorizedUserDto}
      */
     @Operation(summary = "Get all authorized tg users")
     @ApiResponses(value = {
@@ -88,8 +92,28 @@ public class TelegramController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/get-all-authorized-users")
-    public ResponseEntity<PageableDto<AuthorizedUserDto>> getAllAuthoredUsers(Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUsers(pageable));
+    public ResponseEntity<PageableDto<AuthorizedUserDto>> getAllAuthoredUsers(@RequestParam(required = false) String search, Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUsers(search, pageable));
+    }
+
+
+    /**
+     * Retrieves the most recent order data for a user identified by their chat ID.
+     *
+     * @param chatId the chat identifier of the user
+     * @return ResponseEntity containing {@link OrdersDataForUserDto} with the latest order information
+     *         or a 404 status if no order is found for the given chat ID
+     */
+    @Operation(summary = "Get last user order by chatId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/last-order")
+    public ResponseEntity<OrdersDataForUserDto> getLastOrderByChatId(@RequestParam String chatId) {
+        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getLastOrderByChatId(chatId));
     }
 
     @GetMapping("/get-all-unauthorized-users")
