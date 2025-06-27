@@ -835,7 +835,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return getOrdersData(order);
     }
 
-    private OrdersDataForUserDto getOrdersData(Order order) {
+    public OrdersDataForUserDto getOrdersData(Order order) {
         List<Payment> payments = order.getPayment();
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository

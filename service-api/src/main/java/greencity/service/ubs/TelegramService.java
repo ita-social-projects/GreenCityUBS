@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.FeedbackDto;
@@ -132,6 +133,16 @@ public interface TelegramService {
      * @return a page of {@link AuthorizedUserDto} matching the given criteria
      */
     PageableDto<AuthorizedUserDto> getAllUsers(String searchTerm, Pageable pageable);
+
+
+    /**
+     * Retrieves the most recent order data for the user identified by the given chat ID.
+     *
+     * @param chatId the chat identifier of the user
+     * @return {@link OrdersDataForUserDto} containing details of the latest order,
+     *         or throws an exception / returns null if no order is found (depending on implementation)
+     */
+    OrdersDataForUserDto getLastOrderByChatId(String chatId);
 
     /**
      * Retrieves all unauthorized users.

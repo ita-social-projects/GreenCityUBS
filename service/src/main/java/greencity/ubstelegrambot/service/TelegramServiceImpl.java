@@ -3,12 +3,14 @@ package greencity.ubstelegrambot.service;
 import greencity.client.UserRemoteClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.TestersSignInRequest;
+import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.TelegramImageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
 import greencity.dto.telegram.UnknownTelegramUserDto;
+import greencity.entity.order.Order;
 import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.Image;
@@ -17,6 +19,7 @@ import greencity.entity.telegram.TextMessage;
 import greencity.entity.telegram.UnknownTelegramUser;
 import greencity.enums.TelegramUser;
 import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.mapping.telegrammessage.TextMessageMapper;
 import greencity.repository.AuthorizedUserRepository;
 import greencity.repository.ChatFeedbackRepository;
@@ -30,6 +33,8 @@ import greencity.service.ubs.TelegramAuthorizationService;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramStreamingService;
+import greencity.service.ubs.UBSClientService;
+import greencity.repository.OrderRepository;
 import greencity.specification.AuthorizedUserSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -49,10 +54,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
@@ -72,10 +75,12 @@ public class TelegramServiceImpl implements TelegramService {
     private final UnknownTelegramUserRepository unknownTelegramUserRepository;
     private final TextMessageMapper textMessageMapper;
     private final TelegramPhotoService telegramPhotoService;
+    private final UBSClientService ubsClientService;
     private final TelegramExecutor executor;
     private final Map<String, String> userState = new HashMap<>();
     private final TelegramStreamingService telegramStreamingService;
     private final ChatFeedbackRepository chatFeedbackRepository;
+    private final OrderRepository orderRepository;
     private final NotificationTimestampRepository notificationTimestampRepository;
     private NotificationService notificationService;
     private Integer messageIdForDeleting;
@@ -561,5 +566,15 @@ public class TelegramServiceImpl implements TelegramService {
     @Autowired
     public void setNotificationService(NotificationService notificationService) {
         this.notificationService = notificationService;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrdersDataForUserDto getLastOrderByChatId(String chatId) {
+        AuthorizedUser authorizedUser = authorizedUserRepository.findByChatId(chatId).orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
+        Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(authorizedUser.getUser().getId()).orElseThrow(() -> new NotFoundException("Order not found"));
+        return ubsClientService.getOrdersData(order);
     }
 }
