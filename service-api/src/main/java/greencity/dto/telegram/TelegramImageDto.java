@@ -1,5 +1,12 @@
 package greencity.dto.telegram;
 
-public record TelegramImageDto(Long messageId, String chatId, String fileUrl,
-    String caption, boolean isManagerPhoto) implements TelegramMessageDto {
-}
+import java.time.LocalDateTime;
+
+public record TelegramImageDto(
+        Long messageId,
+        String chatId,
+        LocalDateTime sendAt,
+        String fileUrl,
+        String caption,
+        boolean isManagerPhoto
+) implements TelegramMessageDto { }

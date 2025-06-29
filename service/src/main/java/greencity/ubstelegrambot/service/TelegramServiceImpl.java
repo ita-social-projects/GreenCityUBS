@@ -26,7 +26,7 @@ import greencity.repository.ChatFeedbackRepository;
 import greencity.repository.NotificationTimestampRepository;
 import greencity.repository.TelegramImageRepository;
 import greencity.repository.TelegramManagerRepository;
-import greencity.repository.TelegramMessageRepository;
+import greencity.repository.TelegramTextMessageRepository;
 import greencity.repository.UnknownTelegramUserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.TelegramAuthorizationService;
@@ -64,7 +64,7 @@ import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 @RequiredArgsConstructor
 public class TelegramServiceImpl implements TelegramService {
     private final UserRemoteClient userRemoteClient;
-    private final TelegramMessageRepository telegramMessageRepository;
+    private final TelegramTextMessageRepository telegramTextMessageRepository;
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramManagerNotificationServiceImpl telegramManagerNotification;
     private final ApplicationContext applicationContext;
@@ -153,7 +153,7 @@ public class TelegramServiceImpl implements TelegramService {
             message,
             false);
         telegramManagerNotification.shouldNotifyManager(chatId);
-        telegramMessageRepository.save(telegramMessage);
+        telegramTextMessageRepository.save(telegramMessage);
         telegramStreamingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
     }
 
@@ -163,7 +163,7 @@ public class TelegramServiceImpl implements TelegramService {
             chatId,
             message,
             isManager);
-        telegramMessageRepository.save(telegramMessage);
+        telegramTextMessageRepository.save(telegramMessage);
     }
 
     @Override
@@ -214,7 +214,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public boolean isManager(String chatId) {
-        return telegramMessageRepository.existsByChatId(chatId);
+        return telegramTextMessageRepository.existsByChatId(chatId);
     }
 
     @Override
@@ -234,7 +234,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public PageableDto<TelegramTextMessageDto> findUserMessageByChatId(String chatId, Pageable pageable) {
-        Page<TextMessage> textMessages = telegramMessageRepository.findByChatId(chatId, pageable);
+        Page<TextMessage> textMessages = telegramTextMessageRepository.findByChatId(chatId, pageable);
         if (textMessages.isEmpty()) {
             throw new BadRequestException(String.format(TelegramBotConstants.MESSAGES_NOT_FOUND_FOR_CHAT, chatId));
         }

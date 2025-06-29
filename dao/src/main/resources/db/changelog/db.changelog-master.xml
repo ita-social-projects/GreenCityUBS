@@ -279,4 +279,6 @@
     <include file="db/changelog/logs/2025-02-11-edit-order-address-table-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-update-order-payment-status-translations-Feduniak.xml"/>
     <include file="db/changelog/logs/ch-update-column-names-Bulhakova.xml"/>
+    <include file="db/changelog/logs/ch-update-telegram-message-changes-Pampukha.xml"/>
+
 </databaseChangeLog>

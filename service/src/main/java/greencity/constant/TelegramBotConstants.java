@@ -150,6 +150,7 @@ public class TelegramBotConstants {
         "Ви закінчили розмову з менеджером, оцініть будь ласка роботу нашої підтримки від 1 до 5";
     public static final String CLIENT_END_SUPPORT_MODE_NOTIFICATION = "Клієнт %s закінчив розмову";
     public static final String MESSAGES_NOT_FOUND_FOR_CHAT = "There are no messages in the chat %s";
+    public static final String CHAT_IS_EMPTY = "Chat %s is empty";
     public static final String CLIENT_MESSAGE_AFTER_FEEDBACK = "Дякуємо за ваш відгук";
     public static final String SCORE = "Score%s";
     public static final String CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY =

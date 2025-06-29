@@ -12,6 +12,7 @@ public class ImageConverter extends AbstractConverter<Image, TelegramImageDto> {
         return new TelegramImageDto(
             source.getMessageId(),
             source.getChatId(),
+            source.getSendAt(),
             source.getFileUrl(),
             source.getCaption(),
             source.isManagerPhoto());

@@ -7,13 +7,16 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.AuthorizedUserDto;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.TelegramImageDto;
+import greencity.dto.telegram.TelegramMessageDto;
 import greencity.dto.telegram.TelegramTextMessageDto;
 import greencity.dto.telegram.UnknownTelegramUserDto;
+import greencity.service.ubs.TelegramMessageService;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramStreamingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,16 +38,18 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class TelegramController {
     private final TelegramService telegramService;
+    private final TelegramMessageService telegramMessageService;
     private final TelegramPhotoService telegramPhotoService;
     private final TelegramStreamingService telegramStrimingService;
 
+
     /**
-     * Retrieves a list of TelegramUserMessages for a given chatId.
+     * Retrieves a list of TelegramMessages desc via sendAt for a given chatId.
      *
      * @param chatId the Telegram chat ID
      * @return a list of TelegramUserMessages
      */
-    @Operation(summary = "Get all user messages by chatId")
+    @Operation(summary = "Get all messages in chat by chatId")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
@@ -52,6 +57,25 @@ public class TelegramController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/user-messages/{chatId}")
+    public ResponseEntity<PageableDto<TelegramMessageDto>> getMessagesByChatId(
+        @PathVariable(name = "chatId") String chatId, @PageableDefault(size = 15, sort = "sendAt") Pageable page) {
+        return ResponseEntity.status(HttpStatus.OK).body(telegramMessageService.getMessagesByChatId(chatId, page));
+    }
+
+    /**
+     * Retrieves a list of TelegramUserMessages for a given chatId.
+     *
+     * @param chatId the Telegram chat ID
+     * @return a list of TelegramUserMessages
+     */
+    @Operation(summary = "Get all text messages in chat by chatId")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping("/user-text-messages/{chatId}")
     public ResponseEntity<PageableDto<TelegramTextMessageDto>> getUserMessages(
         @PathVariable(name = "chatId") String chatId, Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.findUserMessageByChatId(chatId, page));
