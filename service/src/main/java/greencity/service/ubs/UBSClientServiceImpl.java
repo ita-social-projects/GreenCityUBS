@@ -542,7 +542,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
         }
 
-        TariffsInfo tariffsInfo = tryToFindTariffsInfoByBagIds(getBagIds(dto.getBags()), dto.getLocationId());
+        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
 
         adjustPaymentDetails(dto);
@@ -569,7 +569,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderBagRepository.deleteAllByOrderId(orderId);
 
             order.getOrderBags().clear();
-            order.updateWithNewOrderBags(bagsOrdered);
+            order.setOrderBags(bagsOrdered);
             order.setPointsToUse(dto.getPointsToUse())
                 .setAdditionalOrders(dto.getAdditionalOrders())
                 .setComment(dto.getOrderComment())
@@ -578,7 +578,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setOrderStatus(OrderStatus.FORMED);
             order.setOrderDate(LocalDateTime.now());
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-            order.updateWithNewOrderBags(bagsOrdered);
+            order.setOrderBags(bagsOrdered);
         }
 
         Set<Certificate> orderCertificates = new HashSet<>();
@@ -741,7 +741,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new NotFoundException(BAG_NOT_FOUND + id));
     }
 
-    private TariffsInfo tryToFindTariffsInfoByBagIds(List<Integer> bagIds, Long locationId) {
+    private TariffsInfo findTariffsInfoByBagIdsWithinLocation(List<Integer> bagIds, Long locationId) {
         return tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(bagIds, locationId)
             .orElseThrow(
                 () -> new NotFoundException(String.format(TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST, bagIds, locationId)));
@@ -1084,7 +1084,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         User currentUser, long sumToPayInCoins) {
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCertificates(orderCertificates);
-        order.updateWithNewOrderBags(bagsOrdered);
+        order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(calculateOrderSumWithoutDiscounts(bagsOrdered));

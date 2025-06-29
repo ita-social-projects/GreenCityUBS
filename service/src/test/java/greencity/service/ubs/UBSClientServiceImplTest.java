@@ -738,7 +738,7 @@ class UBSClientServiceImplTest {
         }
 
         tariffsInfo.setBags(Collections.singletonList(bag));
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
 
         when(locationRepository.findAddressAndLocationNamesMatch(anyLong(), anyLong()))
             .thenReturn(Optional.of("Bearded Lady"));
@@ -859,7 +859,7 @@ class UBSClientServiceImplTest {
             }
         }
         tariffsInfo.setBags(Collections.singletonList(bag));
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         when(addressRepository.findById(any())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -912,7 +912,7 @@ class UBSClientServiceImplTest {
             }
         }
         tariffsInfo.setBags(Collections.singletonList(bag));
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         when(addressRepository.findById(any())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user.setId(null), user);
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
@@ -966,10 +966,10 @@ class UBSClientServiceImplTest {
         Payment payment1 = getPayment();
         payment1.setId(1L);
         order1.getPayment().add(payment1);
-        order.updateWithNewOrderBags(
+        order.setOrderBags(
             Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         order1
-            .updateWithNewOrderBags(
+            .setOrderBags(
                 Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -1171,7 +1171,7 @@ class UBSClientServiceImplTest {
         dto.getBags().getFirst().setAmount(1);
         Bag bag = getBagForOrder();
         Order order = getOrder();
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         TariffsInfo tariffsInfo = getTariffInfo();
         tariffsInfo.setBags(Collections.singletonList(bag));
         user.setOrders(new ArrayList<>());
@@ -1412,7 +1412,7 @@ class UBSClientServiceImplTest {
         dto.getBags().getFirst().setAmount(5);
         Order order = getOrder();
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
 
         Bag bag = getBagForOrder();
         TariffsInfo tariffsInfo = getTariffInfo();
@@ -2198,8 +2198,8 @@ class UBSClientServiceImplTest {
         Payment payment1 = getPayment();
         payment1.setId(1L);
         order1.getPayment().add(payment1);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
-        order1.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order1.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
 
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
@@ -2249,7 +2249,7 @@ class UBSClientServiceImplTest {
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
-        order.updateWithNewOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
+        order.setOrderBags(Arrays.asList(ModelUtils.getOrderBag(), ModelUtils.getOrderBag()));
         Bag bag = getBagForOrder();
         UBSuser ubSuser = getUBSuser().setId(null);
         Address address = getAddress();
@@ -2460,7 +2460,7 @@ class UBSClientServiceImplTest {
         bag.setFullPrice(1200_00L);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         order.setUser(user);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
@@ -2512,7 +2512,7 @@ class UBSClientServiceImplTest {
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
 
         when(ordersForUserRepository.getAllByUserUuid(pageable, user.getUuid()))
             .thenReturn(page);
@@ -2544,7 +2544,7 @@ class UBSClientServiceImplTest {
         OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
         Order order = getOrderTest();
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         User user = getTestUser();
         Bag bag = bagDto();
         List<Order> orderList = new ArrayList<>();
@@ -2596,7 +2596,7 @@ class UBSClientServiceImplTest {
         bag.setFullPrice(1200_00L);
         order.setConfirmedQuantity(Map.of(1, 10));
         order.setUser(user);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
@@ -2638,7 +2638,7 @@ class UBSClientServiceImplTest {
         order.setAmountOfBagsOrdered(Map.of(1, 10));
         order.setUser(user);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
         Page<Order> page = new PageImpl<>(orderList, pageable, 1);
@@ -2802,7 +2802,7 @@ class UBSClientServiceImplTest {
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         Bag bag = getBagForOrder();
 
         UBSuser ubSuser = getUBSuser();
@@ -2978,7 +2978,7 @@ class UBSClientServiceImplTest {
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setUser(user);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("order_date").descending());
@@ -3223,7 +3223,7 @@ class UBSClientServiceImplTest {
 
         order.setCertificates(Set.of(ModelUtils.getCertificate()));
         order.setPayment(TEST_PAYMENT_LIST);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
             if (f.getName().equals("merchantId")) {
@@ -3234,7 +3234,7 @@ class UBSClientServiceImplTest {
 
         order.setPointsToUse(-10000);
         CertificateDto certificateDto = createCertificateDto();
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
@@ -3283,7 +3283,7 @@ class UBSClientServiceImplTest {
 
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
             .thenReturn(ModelUtils.getAmount());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
@@ -3332,7 +3332,7 @@ class UBSClientServiceImplTest {
         CertificateDto certificateDto = createCertificateDto();
         certificateDto.setPoints(1500);
         order.setPointsToUse(-1000);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
         when(certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
@@ -3368,7 +3368,7 @@ class UBSClientServiceImplTest {
         user.setChangeOfPointsList(new ArrayList<>());
         order.setUser(user);
         order.setPointsToUse(-10000);
-        order.updateWithNewOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
         Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
         for (Field f : fields) {
