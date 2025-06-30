@@ -302,6 +302,9 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public PaymentResponseWayForPay validatePayment(PaymentResponseDto response) {
         String decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
+        if (!decodedOrderReference.matches("\\d+_\\d+_\\d+")) {
+            throw new BadRequestException(PAYMENT_VALIDATION_ERROR);
+        }
         Payment orderPayment = mapPayment(response, decodedOrderReference);
         String[] ids = decodedOrderReference.split("_");
         Order order = orderRepository.findById(Long.valueOf(ids[0]))
@@ -320,11 +323,19 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (response.getFee() == null) {
             response.setFee("0");
         }
+
+        long amount;
+        try {
+            amount = Long.parseLong(response.getAmount()) * 100;
+        } catch (NumberFormatException e) {
+            throw new BadRequestException(PAYMENT_VALIDATION_ERROR);
+        }
+
         return Payment.builder()
             .id(Long.valueOf(decodedOrderReference
                 .substring(decodedOrderReference.lastIndexOf("_") + 1)))
             .currency(response.getCurrency())
-            .amount(Long.parseLong(response.getAmount()) * 100)
+            .amount(amount)
             .orderStatus(OrderStatus.FORMED)
             .senderCellPhone(response.getPhone())
             .maskedCard(response.getCardPan())
