@@ -22,8 +22,19 @@ public class ValidationConstant {
     public static final String COURIER_NAME_EN_REGEXP = "^[A-Z][A-Za-zА0-9'\\s]{1,29}$";
     public static final String COURIER_NAME_UK_REGEXP = "^[ЁІЇҐЄА-Я][ЁёІіЇїҐґЄєА-Яа-яA[0-9]'\\s]{1,29}$";
 
-    public static final String NAME_REGEXP = "^(?!\\.)(?!.*\\.$)(?!.*?\\.\\.)(?!.*?\\-\\-)(?!.*?\\'\\')(?!\\s*$)"
-        + "(?<![ЭэЁёъЪЫы])[-'ʼ ґҐіІєЄїЇА-Яа-я+\\w.]{1,30}$";
+    public static final String NAME_REGEXP =
+        "^[ґҐіІєЄїЇА-Яа-яa-zA-Z]"
+            + "(?!.*\\.$)"
+            + "(?!.*\\.\\.)"
+            + "(?!.*--)"
+            + "(?!.*'')"
+            + "[-'ʼ’ ґҐіІєЄїЇА-Яа-я\\w\\.]{0,29}$";
+    public static final String NAME_VALIDATION_MESSAGE =
+        "Name must start with an English or Ukrainian letter, "
+            + "be 1 to 30 characters long, "
+            + "cannot end with a dot, "
+            + "and cannot contain consecutive dots, dashes or apostrophes. "
+            + "Allowed: English/Ukrainian letters, digits, underscore, space, dot, hyphen and apostrophe.";
     public static final String STREET_REGEXP = "^(?![0-9]+$)[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ0-9-]*$";
     public static final String STREET_VALIDATION_MESSAGE =
         "Use only English, or Ukrainian letters. Both English or Ukrainian letters valid, "
