@@ -301,7 +301,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     @Transactional
     public PaymentResponseWayForPay validatePayment(PaymentResponseDto response) {
-        String decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
+        String decodedOrderReference;
+        try{
+            decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(PAYMENT_VALIDATION_ERROR);
+        }
         if (!decodedOrderReference.matches("\\d+_\\d+_\\d+")) {
             throw new BadRequestException(PAYMENT_VALIDATION_ERROR);
         }
