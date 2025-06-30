@@ -531,75 +531,102 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
+    @Transactional
+    public PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid) {
+        validateOrderRequestAddress(dto);
+
+        Order order = modelMapper.map(dto, Order.class);
+        order.setOrderDate(LocalDateTime.now());
+        order.setOrderStatus(OrderStatus.FORMED);
+
+        User currentUser = userRepository.findByUuid(uuid);
+        UBSuser userData =
+            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+
+        order = formAndSaveOrderRequest(dto, order, currentUser, userData);
+        long sumToPayInCoins = order.getPayment().getLast().getAmount();
+
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+
+        saveOrderEvent(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
+
+        PaymentSystemResponse paymentSystemResponse =
+            processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
+
+        notificationService.notifyCreatedOrder(order);
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
+        }
+
+        return paymentSystemResponse;
+    }
+
+    @Transactional
+    public PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId) {
+        validateOrderRequestAddress(dto);
+
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+        if (order.getOrderStatus() != OrderStatus.FORMED
+            || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
+            throw new IllegalStateException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
+        }
+
+        order.setPointsToUse(dto.getPointsToUse());
+        order.setAdditionalOrders(dto.getAdditionalOrders());
+        order.setComment(dto.getOrderComment());
+
+        User currentUser = userRepository.findByUuid(uuid);
+        checkIsOrderOfCurrentUser(currentUser, order);
+
+        UBSuser userData =
+            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+
+        order = formAndSaveOrderRequest(dto, order, currentUser, userData);
+        long sumToPayInCoins = order.getPayment().getLast().getAmount();
+
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+
+        saveOrderEvent(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
+
+        return processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
+    }
+
+    private void validateOrderRequestAddress(OrderResponseDto dto) {
+        if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
+            throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
+        }
+    }
+
+    private Order formAndSaveOrderRequest(OrderResponseDto dto, Order order, User currentUser, UBSuser userData) {
+        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
+        List<OrderBag> bagsOrdered = new ArrayList<>();
+        long sumToPayInCoins =
+            formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
+
+        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayInCoins, dto.getPointsToUse());
+
+        Set<Certificate> orderCertificates = new HashSet<>();
+        sumToPayInCoins =
+            formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPayInCoins);
+        if (sumToPayInCoins <= 0) {
+            dto.setShouldBePaid(false);
+        }
+
+        return formAndSaveOrder(order, orderCertificates, bagsOrdered, userData, currentUser, sumToPayInCoins, tariffsInfo);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     @Transactional
     public PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
-        User currentUser = userRepository.findByUuid(uuid);
-        if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
-            throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
-        }
-
-        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
-        List<OrderBag> bagsOrdered = new ArrayList<>();
-
-        adjustPaymentDetails(dto);
-
-        long sumToPayWithoutDiscountInCoins =
-            formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
-        checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayWithoutDiscountInCoins, dto.getPointsToUse());
-
-        Order order = isExistOrder(dto, orderId);
         if (orderId != null) {
-            checkIsOrderOfCurrentUser(currentUser, order);
-            if (order.getOrderStatus() != OrderStatus.FORMED
-                || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
-                throw new IllegalStateException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
-            }
-
-            entityManager.clear();
-
-            currentUser = userRepository.findByUuid(uuid);
-            order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
-
-            orderBagRepository.deleteAllByOrderId(orderId);
-
-            order.getOrderBags().clear();
-            order.setOrderBags(bagsOrdered);
-            order.setPointsToUse(dto.getPointsToUse())
-                .setAdditionalOrders(dto.getAdditionalOrders())
-                .setComment(dto.getOrderComment())
-                .setTariffsInfo(tariffsInfo);
-        } else {
-            order.setOrderStatus(OrderStatus.FORMED);
-            order.setOrderDate(LocalDateTime.now());
-            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-            order.setOrderBags(bagsOrdered);
+            return processExistingOrder(dto, uuid, orderId);
         }
-
-        Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPayInCoins = formCertificatesToBeSavedAndCalculateOrderSum(dto, orderCertificates, order, sumToPayInCoins);
-        if (sumToPayInCoins <= 0) {
-            dto.setShouldBePaid(false);
-        }
-
-        UBSuser userData =
-            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
-        order.setTariffsInfo(tariffsInfo);
-        getOrder(dto, currentUser, bagsOrdered, sumToPayInCoins, order, orderCertificates, userData);
-
-        String eventName = determineEventName(orderId);
-        saveOrderEvent(eventName, OrderHistory.CLIENT_UK, order);
-
-        PaymentSystemResponse paymentSystemResponse = processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
-
-        handleOrderNotifications(order, orderId, sumToPayInCoins, paymentSystemResponse);
-
-        return paymentSystemResponse;
+        return processNewOrder(dto, uuid);
     }
 
     private void adjustPaymentDetails(OrderResponseDto dto) {
@@ -1079,10 +1106,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         return ubsUser;
     }
 
-    private void formAndSaveOrder(Order order, Set<Certificate> orderCertificates,
-        List<OrderBag> bagsOrdered, UBSuser userData,
-        User currentUser, long sumToPayInCoins) {
-        order.setOrderStatus(OrderStatus.FORMED);
+    private Order formAndSaveOrder(
+        Order order, Set<Certificate> orderCertificates, List<OrderBag> bagsOrdered,
+        UBSuser userData, User currentUser, long sumToPayInCoins, TariffsInfo tariffsInfo) {
+        order.setTariffsInfo(tariffsInfo);
         order.setCertificates(orderCertificates);
         order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
@@ -1102,7 +1129,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setPayment(new ArrayList<>());
         }
         order.getPayment().add(payment);
-        orderRepository.save(order);
+        return orderRepository.save(order);
     }
 
     private void setOrderPaymentStatus(Order order, long sumToPay) {
@@ -1476,13 +1503,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             sumToPayInCoins -= pointsToUse * 100L;
         }
         return sumToPayInCoins;
-    }
-
-    private void getOrder(OrderResponseDto dto, User currentUser, List<OrderBag> amountOfBagsOrdered,
-        long sumToPayInCoins, Order order, Set<Certificate> orderCertificates, UBSuser userData) {
-        formAndSaveOrder(order, orderCertificates, amountOfBagsOrdered, userData, currentUser, sumToPayInCoins);
-
-        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
     }
 
     private OrderAddress saveOrderAddressWithLocation(Long addressId, Long locationId, User currentUser) {
