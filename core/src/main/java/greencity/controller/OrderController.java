@@ -212,7 +212,7 @@ public class OrderController {
      *                 format.
      * @param servlet  The HttpServletResponse object to handle the redirection.
      * @return A PaymentResponseWayForPay object representing the validated payment
-     *         response.
+     * response.
      * @throws IOException If an input or output exception occurred during the
      *                     redirection.
      */
@@ -238,11 +238,11 @@ public class OrderController {
             objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
         log.info("PaymentResponseDto: {}", paymentResponseDto);
 
-        if (HttpStatus.OK.is2xxSuccessful()) {
-            servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
-        }
+        PaymentResponseWayForPay result = ubsClientService.validatePayment(paymentResponseDto);
 
-        return ubsClientService.validatePayment(paymentResponseDto);
+        servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
+
+        return result;
     }
 
     /**
