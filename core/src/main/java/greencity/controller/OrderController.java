@@ -212,7 +212,7 @@ public class OrderController {
      *                 format.
      * @param servlet  The HttpServletResponse object to handle the redirection.
      * @return A PaymentResponseWayForPay object representing the validated payment
-     * response.
+     *         response.
      * @throws IOException If an input or output exception occurred during the
      *                     redirection.
      */

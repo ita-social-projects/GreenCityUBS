@@ -302,7 +302,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Transactional
     public PaymentResponseWayForPay validatePayment(PaymentResponseDto response) {
         String decodedOrderReference;
-        try{
+        try {
             decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(PAYMENT_VALIDATION_ERROR);
