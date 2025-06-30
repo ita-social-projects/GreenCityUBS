@@ -4,12 +4,7 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.AuthorizedUserDto;
-import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.TelegramImageDto;
-import greencity.dto.telegram.TelegramMessageDto;
-import greencity.dto.telegram.TelegramTextMessageDto;
-import greencity.dto.telegram.UnknownTelegramUserDto;
+import greencity.dto.telegram.*;
 import greencity.service.ubs.TelegramMessageService;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
@@ -115,9 +110,9 @@ public class TelegramController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/get-all-authorized-users")
-    public ResponseEntity<PageableDto<AuthorizedUserDto>> getAllAuthoredUsers(@RequestParam(required = false) String search, Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUsers(search, pageable));
+    @GetMapping("/chats")
+    public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search, Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getChats(search, pageable));
     }
 
 
@@ -138,24 +133,6 @@ public class TelegramController {
     @GetMapping("/last-order")
     public ResponseEntity<OrdersDataForUserDto> getLastOrderByChatId(@RequestParam String chatId) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getLastOrderByChatId(chatId));
-    }
-
-    /**
-     * Retrieves a paginated list of unauthorized Telegram users (TelegramBots).
-     *
-     * @param pageable pagination and sorting information
-     * @return {@link ResponseEntity} containing a {@link PageableDto} of {@link UnknownTelegramUserDto}
-     */
-    @Operation(summary = "Get all authorized tg users")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
-    })
-    @GetMapping("/get-all-unauthorized-users")
-    public ResponseEntity<PageableDto<UnknownTelegramUserDto>> getAllUnauthorizedUsers(Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllUnauthorizedUsers(pageable));
     }
 
     /**

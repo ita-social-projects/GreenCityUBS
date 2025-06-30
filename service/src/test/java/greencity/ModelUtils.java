@@ -153,7 +153,7 @@ import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -1603,12 +1603,12 @@ public class ModelUtils {
             .build();
     }
 
-    public static AuthorizedUser getTelegramBotNotifyTrue() {
-        return new AuthorizedUser("111111", false, true, null, false);
+    public static TelegramChat getTelegramBotNotifyTrue() {
+        return new TelegramChat("111111", false, true, null, false);
     }
 
-    public static AuthorizedUser getTelegramBotNotifyFalse() {
-        return new AuthorizedUser("111111", false, false, null, false);
+    public static TelegramChat getTelegramBotNotifyFalse() {
+        return new TelegramChat("111111", false, false, null, false);
     }
 
     public static ViberBot getViberBotNotifyTrue() {

@@ -5,37 +5,23 @@ import greencity.constant.TelegramBotConstants;
 import greencity.dto.TestersSignInRequest;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.AuthorizedUserDto;
-import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.TelegramImageDto;
-import greencity.dto.telegram.TelegramTextMessageDto;
-import greencity.dto.telegram.UnknownTelegramUserDto;
+import greencity.dto.telegram.*;
 import greencity.entity.order.Order;
-import greencity.entity.telegram.AuthorizedUser;
-import greencity.entity.telegram.ChatFeedback;
-import greencity.entity.telegram.Image;
-import greencity.entity.telegram.TelegramManager;
-import greencity.entity.telegram.TextMessage;
-import greencity.entity.telegram.UnknownTelegramUser;
-import greencity.enums.TelegramUser;
+import greencity.entity.telegram.*;
+import greencity.entity.telegram.TelegramChat;
+import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
+import greencity.entity.user.employee.Position;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.mapping.telegrammessage.TextMessageMapper;
-import greencity.repository.AuthorizedUserRepository;
-import greencity.repository.ChatFeedbackRepository;
-import greencity.repository.NotificationTimestampRepository;
-import greencity.repository.TelegramImageRepository;
-import greencity.repository.TelegramManagerRepository;
-import greencity.repository.TelegramTextMessageRepository;
-import greencity.repository.UnknownTelegramUserRepository;
+import greencity.repository.*;
 import greencity.service.ubs.NotificationService;
-import greencity.service.ubs.TelegramAuthorizationService;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramStreamingService;
 import greencity.service.ubs.UBSClientService;
-import greencity.repository.OrderRepository;
-import greencity.specification.AuthorizedUserSpecifications;
+import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +44,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND;
 import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 
 @Service
@@ -68,11 +56,9 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramManagerNotificationServiceImpl telegramManagerNotification;
     private final ApplicationContext applicationContext;
-    private final TelegramAuthorizationService telegramAuthorizationService;
     private final ModelMapper modelMapper;
     private final TelegramImageRepository telegramImageRepository;
-    private final AuthorizedUserRepository authorizedUserRepository;
-    private final UnknownTelegramUserRepository unknownTelegramUserRepository;
+    private final TelegramChatRepository telegramChatRepository;
     private final TextMessageMapper textMessageMapper;
     private final TelegramPhotoService telegramPhotoService;
     private final UBSClientService ubsClientService;
@@ -80,7 +66,10 @@ public class TelegramServiceImpl implements TelegramService {
     private final Map<String, String> userState = new HashMap<>();
     private final TelegramStreamingService telegramStreamingService;
     private final ChatFeedbackRepository chatFeedbackRepository;
+    private final PositionRepository positionRepository;
+    private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
     private final NotificationTimestampRepository notificationTimestampRepository;
     private NotificationService notificationService;
     private Integer messageIdForDeleting;
@@ -121,24 +110,70 @@ public class TelegramServiceImpl implements TelegramService {
         return MessageFactory.createSuccessClientSupportMessageSend(chatId);
     }
 
+    private boolean checkIsEmployeeManager(Employee employee) {
+        var employeePositions = employee.getEmployeePosition();
+
+        Position serviceManager = positionRepository.findById(1L)
+                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
+
+        Position manager = positionRepository.findById(2L)
+                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
+
+        return employeePositions.contains(manager) || employeePositions.contains(serviceManager);
+    }
+
     @Override
     public void processStartCommand(Message message) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
+
         final String uuId = message.getText().replace(TelegramBotConstants.START_COMMAND, "").trim();
-        final String tgUserId = String.valueOf(message.getFrom().getId());
-        if (uuId.isEmpty()) {
-            telegramAuthorizationService.handleUnknownTelegramUser(message);
-            executor.executeCommand(ubsTelegramBot, MessageFactory.createWelcomeMessage(tgUserId));
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createAvailableCommandOption(message.getChatId().toString()));
-        } else if (telegramAuthorizationService.handleAuthorizedUser(uuId, tgUserId) == TelegramUser.MANAGER) {
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createSuccessLoginMessage(tgUserId, String.valueOf(TelegramUser.MANAGER)));
-        } else {
-            executor.executeCommand(ubsTelegramBot, MessageFactory.createWelcomeMessage(tgUserId));
-            executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createAvailableCommandOption(message.getChatId().toString()));
+        final String chatId = message.getFrom().getId().toString();
+
+        Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(chatId);
+
+        if (!uuId.isEmpty()) {
+            Optional<Employee> employee = employeeRepository.findByUuid(chatId);
+
+            if (employee.isPresent()) {
+                boolean isManager = checkIsEmployeeManager(employee.get());
+                if (isManager) {
+                    telegramChat.ifPresent(telegramChatRepository::delete);
+                    //show login as a manager form
+                }
+            }
         }
+
+        if (telegramChat.isPresent() && telegramChat.get().getUser() != null) {
+            Optional<Employee> employee = employeeRepository.findByUuid(telegramChat.get().getUser().getUuid());
+
+            if (employee.isPresent()) {
+                boolean isManager = checkIsEmployeeManager(employee.get());
+                if (isManager) {
+                    telegramChat.ifPresent(telegramChatRepository::delete);
+                    //show login as a manager form
+                }
+            }
+        }
+
+        if (telegramChat.isEmpty()) {
+            TelegramChat.TelegramChatBuilder newChatBuilder = TelegramChat
+                    .builder()
+                    .chatId(chatId)
+                    .username(message.getFrom().getUserName())
+                    .firstName(message.getFrom().getFirstName())
+                    .lastName(message.getFrom().getLastName())
+                    .isNotify(true) //need to specify a correct value
+                    .isSupportStatusActive(false);
+
+            if (!uuId.isEmpty()) {
+                Optional<User> user = userRepository.findUserByUuid(uuId);
+                user.ifPresent(newChatBuilder::user);
+            }
+
+            telegramChatRepository.save(newChatBuilder.build());
+        }
+
+        executor.executeCommand(ubsTelegramBot, MessageFactory.createWelcomeMessage(chatId));
     }
 
     @Override
@@ -168,43 +203,26 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public boolean isUserInSupportMode(String chatId) {
-        return authorizedUserRepository.findByChatId(chatId)
-            .map(AuthorizedUser::getIsSupportStatusActive)
-            .orElseGet(() -> unknownTelegramUserRepository.findByChatId(chatId)
-                .map(UnknownTelegramUser::getIsSupportStatusActive)
-                .orElse(false));
+        return telegramChatRepository.findByChatId(chatId)
+            .map(TelegramChat::getIsSupportStatusActive).orElse(false);
     }
 
     @Override
     public void startSupportMode(String chatId) {
-        var authorizedUser = authorizedUserRepository.findByChatId(chatId);
-        if (authorizedUser.isPresent()) {
-            authorizedUser.get().setIsSupportStatusActive(true);
-            authorizedUserRepository.save(authorizedUser.get());
-        } else {
-            var unknownTelegramUser = unknownTelegramUserRepository.findByChatId(chatId);
-            if (unknownTelegramUser.isPresent()) {
-                UnknownTelegramUser user = unknownTelegramUser.get();
-                user.setIsSupportStatusActive(true);
-                unknownTelegramUserRepository.save(user);
-            }
+        var chat = telegramChatRepository.findByChatId(chatId);
+        if (chat.isPresent()) {
+            chat.get().setIsSupportStatusActive(true);
+            telegramChatRepository.save(chat.get());
         }
     }
 
     @Override
     public SendMessage stopSupportMode(Message message) {
         var chatId = message.getChatId().toString();
-        var supportModeUser = authorizedUserRepository.findByChatId(message.getChatId().toString());
-        if (supportModeUser.isPresent()) {
-            supportModeUser.get().setIsSupportStatusActive(false);
-            authorizedUserRepository.save(supportModeUser.get());
-        } else {
-            var unknownTelegramUser = unknownTelegramUserRepository.findByChatId(chatId);
-            if (unknownTelegramUser.isPresent()) {
-                UnknownTelegramUser user = unknownTelegramUser.get();
-                user.setIsSupportStatusActive(false);
-                unknownTelegramUserRepository.save(user);
-            }
+        var chat = telegramChatRepository.findByChatId(message.getChatId().toString());
+        if (chat.isPresent()) {
+            chat.get().setIsSupportStatusActive(false);
+            telegramChatRepository.save(chat.get());
         }
         telegramManagerNotification.notifyManagerAboutEndSupportModeFromUser(chatId);
         notificationTimestampRepository.deleteById(chatId);
@@ -255,49 +273,42 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public PageableDto<AuthorizedUserDto> getAllUsers(String searchTerm, Pageable pageable) {
-        Specification<AuthorizedUser> spec = AuthorizedUserSpecifications.hasNameLike(searchTerm);
+    public PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable) {
+        Specification<TelegramChat> spec = ChatSpecifications.hasNameLike(searchTerm);
 
-        Page<AuthorizedUser> authorizedUsers = authorizedUserRepository.findAll(spec, pageable);
-        List<AuthorizedUserDto> authorizedUserDtos = authorizedUsers
+        Page<TelegramChat> chats = telegramChatRepository.findAll(spec, pageable);
+        List<ChatDto> chatDtos = chats
             .getContent()
             .stream()
-            .map(user -> new AuthorizedUserDto(
-                user.getId(),
-                user.getChatId(),
-                user.getIsSupportStatusActive(),
-                user.getIsNotify(),
-                user.getUser().getId()))
+            .map(chat -> {
+               ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
+                       .id(chat.getId())
+                       .chatId(chat.getChatId())
+                       .firstName(chat.getFirstName())
+                       .lastName(chat.getLastName())
+                       .username(chat.getUsername());
+
+               if (chat.getUser() != null) {
+                   ChatUserDto chatUserDto = ChatUserDto
+                           .builder()
+                           .firstName(chat.getUser().getRecipientName())
+                           .firstName(chat.getUser().getRecipientSurname())
+                           .email(chat.getUser().getRecipientEmail())
+                           .build();
+
+                   chatDtoBuilder
+                           .user(chatUserDto);
+               }
+
+               return chatDtoBuilder.build();
+            })
             .toList();
 
         return new PageableDto<>(
-            authorizedUserDtos,
-            authorizedUsers.getTotalElements(),
-            authorizedUsers.getNumber(),
-            authorizedUsers.getTotalPages());
-    }
-
-    @Override
-    public PageableDto<UnknownTelegramUserDto> getAllUnauthorizedUsers(Pageable pageable) {
-        Page<UnknownTelegramUser> unknownTelegramUsers = unknownTelegramUserRepository.findAllUsers(pageable);
-        List<UnknownTelegramUserDto> unknownTelegramUserDtos = unknownTelegramUsers
-            .getContent()
-            .stream()
-            .map(user -> new UnknownTelegramUserDto(
-                user.getId(),
-                user.getChatId(),
-                user.getIsSupportStatusActive(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getUserName(),
-                user.getMobileNumber()))
-            .toList();
-
-        return new PageableDto<>(
-            unknownTelegramUserDtos,
-            unknownTelegramUsers.getTotalElements(),
-            unknownTelegramUsers.getNumber(),
-            unknownTelegramUsers.getTotalPages());
+                chatDtos,
+                chats.getTotalElements(),
+                chats.getNumber(),
+                chats.getTotalPages());
     }
 
     @Override
@@ -559,7 +570,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     private void notifyManagerOfGreenOfficeRequest(Message message, String email) {
         String chatId = String.valueOf(message.getChatId());
-        Optional<AuthorizedUser> userOpt = authorizedUserRepository.findByChatId(chatId);
+        Optional<TelegramChat> userOpt = telegramChatRepository.findByChatId(chatId);
 
         String username = userOpt
             .map(u -> u.getUser().getRecipientName() + " " + u.getUser().getRecipientSurname())
@@ -579,8 +590,8 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public OrdersDataForUserDto getLastOrderByChatId(String chatId) {
-        AuthorizedUser authorizedUser = authorizedUserRepository.findByChatId(chatId).orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
-        Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(authorizedUser.getUser().getId()).orElseThrow(() -> new NotFoundException("Order not found"));
+        TelegramChat telegramChat = telegramChatRepository.findByChatId(chatId).orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
+        Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId()).orElseThrow(() -> new NotFoundException("Order not found"));
         return ubsClientService.getOrdersData(order);
     }
 }

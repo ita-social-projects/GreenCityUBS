@@ -2,11 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.AuthorizedUserDto;
-import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.TelegramImageDto;
-import greencity.dto.telegram.TelegramTextMessageDto;
-import greencity.dto.telegram.UnknownTelegramUserDto;
+import greencity.dto.telegram.*;
 import org.springframework.data.domain.Pageable;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -132,7 +128,7 @@ public interface TelegramService {
      * @param pageable   pagination and sorting information
      * @return a page of {@link AuthorizedUserDto} matching the given criteria
      */
-    PageableDto<AuthorizedUserDto> getAllUsers(String searchTerm, Pageable pageable);
+    PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable);
 
 
     /**
@@ -143,15 +139,6 @@ public interface TelegramService {
      *         or throws an exception / returns null if no order is found (depending on implementation)
      */
     OrdersDataForUserDto getLastOrderByChatId(String chatId);
-
-    /**
-     * Retrieves all unauthorized users.
-     *
-     * @param pageable the page to retrieve
-     *
-     * @return a list of TelegramBotDto associated with the specified pageable
-     */
-    PageableDto<UnknownTelegramUserDto> getAllUnauthorizedUsers(Pageable pageable);
 
     /**
      * Generates the start link for a manager based on the user's UUID.

@@ -6,7 +6,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.image.FileNotSavedException;
 import greencity.mapping.telegrammessage.ImageConverter;
-import greencity.repository.AuthorizedUserRepository;
+import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramImageRepository;
 import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.AzureCloudStorageService;
@@ -37,7 +37,7 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
     private final AzureCloudStorageService azureCloudStorageService;
     private final TelegramImageRepository telegramImageRepository;
     private final ApplicationContext applicationContext;
-    private final AuthorizedUserRepository telegramBotRepository;
+    private final TelegramChatRepository telegramBotRepository;
     private final ImageConverter imageConverter;
     private final TelegramStreamingService telegramStrimingService;
     private static final String PHOTO_NOT_FOUND = "Photo not found in message";

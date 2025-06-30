@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -8,34 +8,34 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AuthorizedUserRepository extends JpaRepository<AuthorizedUser, Long>, JpaSpecificationExecutor<AuthorizedUser> {
+public interface TelegramChatRepository extends JpaRepository<TelegramChat, String>, JpaSpecificationExecutor<TelegramChat> {
     /**
      * The method finds telegram bot by user and chat id and isNotify.
      *
      * @param user     {@link User}.
      * @param chatId   {@link Long}.
      * @param isNotify {@link Boolean}
-     * @return {@link Optional} {@link AuthorizedUser}.
+     * @return {@link Optional} {@link TelegramChat}.
      *
      * @author Julia Seti
      */
-    Optional<AuthorizedUser> findByUserAndChatIdAndIsNotify(User user, String chatId, Boolean isNotify);
+    Optional<TelegramChat> findByUserAndChatIdAndIsNotify(User user, String chatId, Boolean isNotify);
 
     /**
      * The method finds telegram bot by user.
      *
      * @param user {@link User}.
-     * @return {@link Optional} {@link AuthorizedUser}.
+     * @return {@link Optional} {@link TelegramChat}.
      *
      * @author Julia Seti
      */
-    Optional<AuthorizedUser> findByUser(User user);
+    Optional<TelegramChat> findByUser(User user);
 
     /**
      * The method finds telegram bot by chatId.
      *
      * @param chatId {@link Long}.
-     * @return {@link AuthorizedUser}.
+     * @return {@link TelegramChat}.
      */
-    Optional<AuthorizedUser> findByChatId(String chatId);
+    Optional<TelegramChat> findByChatId(String chatId);
 }

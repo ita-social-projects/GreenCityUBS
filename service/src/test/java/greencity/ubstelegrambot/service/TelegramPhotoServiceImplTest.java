@@ -1,12 +1,12 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.Image;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.image.FileNotSavedException;
 import greencity.mapping.telegrammessage.ImageConverter;
-import greencity.repository.AuthorizedUserRepository;
+import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramImageRepository;
 import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.TelegramService;
@@ -65,7 +65,7 @@ public class TelegramPhotoServiceImplTest {
     private TelegramExecutor telegramExecutor;
 
     @Mock
-    private AuthorizedUserRepository authorizedUserRepository;
+    private TelegramChatRepository telegramChatRepository;
 
     @Mock
     private TelegramService telegramService;
@@ -204,7 +204,7 @@ public class TelegramPhotoServiceImplTest {
         String chatId = "123";
         String photoUrl = "url";
         String caption = "caption";
-        AuthorizedUser authorizedUser = new AuthorizedUser();
+        TelegramChat telegramChat = new TelegramChat();
         SendPhoto sendPhoto = new SendPhoto();
         Message message = new Message();
         PhotoSize largestPhotoSize = new PhotoSize(
@@ -222,8 +222,8 @@ public class TelegramPhotoServiceImplTest {
         String botToken = "botToken";
 
         try (MockedStatic<MessageFactory> mockedStatic = Mockito.mockStatic(MessageFactory.class)) {
-            when(authorizedUserRepository.findByChatId(chatId))
-                .thenReturn(Optional.of(authorizedUser));
+            when(telegramChatRepository.findByChatId(chatId))
+                .thenReturn(Optional.of(telegramChat));
             when(applicationContext.getBean(UBSTelegramBot.class))
                 .thenReturn(ubsTelegramBot);
             mockedStatic.when(() -> MessageFactory.createPhotoSender(chatId, photoUrl, caption))
@@ -242,7 +242,7 @@ public class TelegramPhotoServiceImplTest {
                 photoUrl,
                 caption);
 
-            verify(authorizedUserRepository).findByChatId(chatId);
+            verify(telegramChatRepository).findByChatId(chatId);
             verify(applicationContext, times(2)).getBean(UBSTelegramBot.class);
             verify(telegramExecutor).executeSendPhoto(ubsTelegramBot, sendPhoto);
             verify(telegramExecutor).executeGetFile(eq(ubsTelegramBot), any(GetFile.class));
@@ -256,14 +256,14 @@ public class TelegramPhotoServiceImplTest {
         String chatId = "123";
         String photoUrl = "url";
         String caption = "caption";
-        AuthorizedUser authorizedUser = new AuthorizedUser();
+        TelegramChat telegramChat = new TelegramChat();
         SendPhoto emptySendPhoto = new SendPhoto();
         Message emptyMessage = new Message();
         emptyMessage.setPhoto(Collections.emptyList());
 
         try (MockedStatic<MessageFactory> mockedStatic = Mockito.mockStatic(MessageFactory.class)) {
-            when(authorizedUserRepository.findByChatId(chatId))
-                .thenReturn(Optional.of(authorizedUser));
+            when(telegramChatRepository.findByChatId(chatId))
+                .thenReturn(Optional.of(telegramChat));
             when(applicationContext.getBean(UBSTelegramBot.class))
                 .thenReturn(ubsTelegramBot);
             mockedStatic.when(() -> MessageFactory.createPhotoSender(chatId, photoUrl, caption))
@@ -277,7 +277,7 @@ public class TelegramPhotoServiceImplTest {
                     chatId,
                     photoUrl,
                     caption));
-            verify(authorizedUserRepository).findByChatId(chatId);
+            verify(telegramChatRepository).findByChatId(chatId);
             verify(applicationContext, times(2)).getBean(UBSTelegramBot.class);
             verify(telegramExecutor).executeSendPhoto(ubsTelegramBot, emptySendPhoto);
         }
@@ -289,7 +289,7 @@ public class TelegramPhotoServiceImplTest {
         String photoUrl = "url";
         String caption = "caption";
 
-        when(authorizedUserRepository.findByChatId(chatId))
+        when(telegramChatRepository.findByChatId(chatId))
             .thenReturn(Optional.empty());
 
         assertThrows(
@@ -298,6 +298,6 @@ public class TelegramPhotoServiceImplTest {
                 chatId,
                 photoUrl,
                 caption));
-        verify(authorizedUserRepository).findByChatId(chatId);
+        verify(telegramChatRepository).findByChatId(chatId);
     }
 }
