@@ -31,16 +31,16 @@ public class TelegramChat {
     @Column(nullable = false, name = "notify")
     private Boolean isNotify;
 
-    @Column(nullable = false)
+    @Column(name = "username")
     private String username;
 
-    @Column(nullable = false)
+    @Column(name = "first_name")
     private String firstName;
 
-    @Column(nullable = false)
+    @Column(name = "last_name")
     private String lastName;
 
     @OneToOne
-    @JoinColumn(nullable = false, name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }

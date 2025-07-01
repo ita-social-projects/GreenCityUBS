@@ -1604,11 +1604,11 @@ public class ModelUtils {
     }
 
     public static TelegramChat getTelegramBotNotifyTrue() {
-        return new TelegramChat("111111", false, true, null, false);
+        return new TelegramChat(1L, "12345", false, true, "username", "first_name", "last_name", null);
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
-        return new TelegramChat("111111", false, false, null, false);
+        return new TelegramChat(1L, "12345", false, false, "username", "first_name", "last_name", null);
     }
 
     public static ViberBot getViberBotNotifyTrue() {

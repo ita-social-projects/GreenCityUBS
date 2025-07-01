@@ -280,5 +280,7 @@
     <include file="db/changelog/logs/ch-update-order-payment-status-translations-Feduniak.xml"/>
     <include file="db/changelog/logs/ch-update-column-names-Bulhakova.xml"/>
     <include file="db/changelog/logs/2025-07-01-ch-update-telegram-message-changes-Pampukha.xml"/>
+    <include file="db/changelog/logs/2025-06-30-ch-entity-rename-add-columns-drop-tables.xml"/>
+    <include file="db/changelog/logs/2025-07-01-ch-telegram-chat-user-nullable.xml"/>
 
 </databaseChangeLog>

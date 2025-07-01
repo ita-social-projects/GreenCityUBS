@@ -174,6 +174,8 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         executor.executeCommand(ubsTelegramBot, MessageFactory.createWelcomeMessage(chatId));
+        executor.executeCommand(ubsTelegramBot,
+                MessageFactory.createAvailableCommandOption(message.getChatId().toString()));
     }
 
     @Override
