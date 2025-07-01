@@ -1,5 +1,6 @@
 package greencity.exception.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -72,6 +73,9 @@ class CustomExceptionHandlerTest {
 
     @Mock
     NotFoundException notFoundException;
+
+    @Mock
+    JsonProcessingException jsonProcessingException;
 
     @Mock
     HttpStatus status;
@@ -245,6 +249,16 @@ class CustomExceptionHandlerTest {
             .thenReturn(objectMap);
         assertEquals(customExceptionHandler.handleWrongSignatureException(wrongSignatureException, webRequest),
             ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleJsonProcessingExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleJsonProcessingException(jsonProcessingException, webRequest),
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
 }

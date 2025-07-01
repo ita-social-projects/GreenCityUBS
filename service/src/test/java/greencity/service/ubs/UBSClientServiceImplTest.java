@@ -3131,6 +3131,68 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testValidatePaymentInvalidOrderReference() {
+        PaymentResponseDto response = getPaymentResponseDto();
+
+        try (MockedStatic<OrderUtils> orderUtilsMock = mockStatic(OrderUtils.class)) {
+            orderUtilsMock.when(() -> OrderUtils.decodeOrderReference(anyString()))
+                .thenThrow(new IllegalArgumentException());
+
+            BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> ubsClientService.validatePayment(response));
+
+            assertEquals(PAYMENT_VALIDATION_ERROR, exception.getMessage());
+            orderUtilsMock.verify(() -> OrderUtils.decodeOrderReference(anyString()));
+        }
+    }
+
+    @Test
+    void testValidatePaymentInvalidOrderReferenceFormat() {
+        PaymentResponseDto response = getPaymentResponseDto();
+
+        try (MockedStatic<OrderUtils> orderUtilsMock = mockStatic(OrderUtils.class)) {
+            orderUtilsMock.when(() -> OrderUtils.decodeOrderReference(anyString()))
+                .thenReturn("invalid_format");
+
+            BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> ubsClientService.validatePayment(response));
+
+            assertEquals(PAYMENT_VALIDATION_ERROR, exception.getMessage());
+            orderUtilsMock.verify(() -> OrderUtils.decodeOrderReference(anyString()));
+        }
+    }
+
+    @Test
+    void testValidatePaymentInvalidAmount() {
+        PaymentResponseDto response = PaymentResponseDto.builder()
+            .orderReference(getPaymentResponseDto().getOrderReference())
+            .currency(getPaymentResponseDto().getCurrency())
+            .amount("invalid_amount")
+            .transactionStatus(getPaymentResponseDto().getTransactionStatus())
+            .phone(getPaymentResponseDto().getPhone())
+            .cardPan(getPaymentResponseDto().getCardPan())
+            .cardType(getPaymentResponseDto().getCardType())
+            .createdDate(getPaymentResponseDto().getCreatedDate())
+            .paymentSystem(getPaymentResponseDto().getPaymentSystem())
+            .email(getPaymentResponseDto().getEmail())
+            .build();
+
+        try (MockedStatic<OrderUtils> orderUtilsMock = mockStatic(OrderUtils.class)) {
+            orderUtilsMock.when(() -> OrderUtils.decodeOrderReference(anyString()))
+                .thenReturn("1_2_3");
+
+            BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> ubsClientService.validatePayment(response));
+
+            assertEquals(PAYMENT_VALIDATION_ERROR, exception.getMessage());
+            orderUtilsMock.verify(() -> OrderUtils.decodeOrderReference(anyString()));
+        }
+    }
+
+    @Test
     void testMapPayment() {
         PaymentResponseDto response = PaymentResponseDto.builder()
             .orderReference("MV8xXzE=")
