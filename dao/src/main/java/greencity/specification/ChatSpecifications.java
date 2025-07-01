@@ -12,12 +12,10 @@ public class ChatSpecifications {
                 return criteriaBuilder.conjunction();
             }
 
-            String pattern = "%" + searchTerm.toLowerCase() + "%";
-            Join<TelegramChat, User> userJoin = root.join("user");
-
             return criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("recipientName")), pattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(userJoin.get("recipientSurname")), pattern)
+                    criteriaBuilder.like(root.get("firstName"), "%" + searchTerm + "%"),
+                    criteriaBuilder.like(root.get("lastName"), "%" + searchTerm + "%"),
+                    criteriaBuilder.like(root.get("username"), "%" + searchTerm + "%")
             );
         };
     }
