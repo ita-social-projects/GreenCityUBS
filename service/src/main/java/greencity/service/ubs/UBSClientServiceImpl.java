@@ -531,6 +531,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
+    @Override
     @Transactional
     public PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid) {
         validateOrderRequestAddress(dto);
@@ -561,6 +562,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return paymentSystemResponse;
     }
 
+    @Override
     @Transactional
     public PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId) {
         validateOrderRequestAddress(dto);
