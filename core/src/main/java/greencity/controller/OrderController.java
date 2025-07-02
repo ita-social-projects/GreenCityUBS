@@ -29,7 +29,6 @@ import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.exceptions.NotFoundException;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -431,7 +430,6 @@ public class OrderController {
      *
      * @param id The ID of the tariff to check.
      * @return ResponseEntity with a boolean indicating whether the tariff exists.
-     * @throws NotFoundException if the tariff with the specified ID is not found.
      * @author Yurii Ososvskyi
      */
     @Operation(summary = "Check if tariff exists by Id")
@@ -443,9 +441,12 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/check-if-tariff-exists/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> checkIfTariffExistsById(@PathVariable Long id) {
-        Boolean exists = ubsClientService.checkIfTariffExistsById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(exists);
+    public ResponseEntity<Void> checkIfTariffExistsById(@PathVariable Long id) {
+        boolean exists = ubsClientService.checkIfTariffExistsById(id);
+        if (!exists) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
