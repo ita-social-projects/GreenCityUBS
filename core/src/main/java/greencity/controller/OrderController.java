@@ -429,7 +429,8 @@ public class OrderController {
      * Check if a tariff exists by its ID.
      *
      * @param id The ID of the tariff to check.
-     * @return ResponseEntity with a boolean indicating whether the tariff exists.
+     * @return {@code ResponseEntity} with HTTP 200 OK if tariff exists, HTTP 404
+     *         NOT FOUND if it doesn't exist.
      * @author Yurii Ososvskyi
      */
     @Operation(summary = "Check if tariff exists by Id")
