@@ -245,7 +245,6 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -2224,7 +2223,6 @@ class UBSClientServiceImplTest {
         Order order = getOrder();
         order.setOrderStatus(OrderStatus.FORMED);
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-        order.setPayment(null);
         user.setOrders(new ArrayList<>());
         user.getOrders().add(order);
         user.setChangeOfPointsList(new ArrayList<>());

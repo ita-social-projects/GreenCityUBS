@@ -56,6 +56,7 @@ public class OrderUtils {
      */
     public static Payment getLastPayment(Order order) {
         return order.getPayment().stream()
+            .filter(payment -> payment.getId() != null)
             .max(Comparator.comparing(Payment::getId))
             .orElseThrow(() -> new IllegalStateException("No payment found"));
     }
