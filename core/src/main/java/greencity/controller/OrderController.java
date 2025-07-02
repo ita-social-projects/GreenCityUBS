@@ -434,7 +434,7 @@ public class OrderController {
      */
     @Operation(summary = "Check if tariff exists by Id")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
