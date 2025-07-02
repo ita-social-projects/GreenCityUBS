@@ -238,11 +238,13 @@ public class OrderController {
             objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
         log.info("PaymentResponseDto: {}", paymentResponseDto);
 
+        PaymentResponseWayForPay paymentResponseWayForPay = ubsClientService.validatePayment(paymentResponseDto);
+
         if (HttpStatus.OK.is2xxSuccessful()) {
             servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
         }
 
-        return ubsClientService.validatePayment(paymentResponseDto);
+        return paymentResponseWayForPay;
     }
 
     /**
