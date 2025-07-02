@@ -601,11 +601,15 @@ public class UBSClientServiceImpl implements UBSClientService {
     private Order formAndSaveOrderRequest(OrderResponseDto dto, Order order, User currentUser, UBSuser userData) {
         TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
-        long sumToPayInCoins =
+        long sumToPayInCoinsWithoutDiscount =
             formBagsToBeSavedAndCalculateOrderSum(bagsOrdered, dto.getBags(), tariffsInfo);
 
         checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayInCoins, dto.getPointsToUse());
+        long sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayInCoinsWithoutDiscount, dto.getPointsToUse());
+        if (sumToPayInCoinsWithoutDiscount == sumToPayInCoins) {
+            order.setPointsToUse(0);
+            dto.setPointsToUse(0);
+        }
 
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins =
