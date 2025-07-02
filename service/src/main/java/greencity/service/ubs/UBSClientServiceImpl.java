@@ -201,7 +201,7 @@ import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
-import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
+import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
@@ -569,7 +569,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         if (order.getOrderStatus() != OrderStatus.FORMED
             || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
-            throw new IllegalStateException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
+            throw new BadRequestException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
         }
 
         order.setPointsToUse(dto.getPointsToUse());
@@ -1291,7 +1291,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 throw new BadRequestException(NOT_ENOUGH_BAGS_EXCEPTION + courierLocation.getMin());
             }
             if (courierLocation.getMax() != null && courierLocation.getMax() < countOfBigBag) {
-                throw new BadRequestException(TO_MUCH_BAG_EXCEPTION + courierLocation.getMax());
+                throw new BadRequestException(TOO_MANY_BAGS_EXCEPTION + courierLocation.getMax());
             }
         }
     }
