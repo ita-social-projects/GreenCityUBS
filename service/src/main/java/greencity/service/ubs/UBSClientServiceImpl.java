@@ -1515,7 +1515,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
         order.getOrderBags().clear();
-        orderRepository.save(order);
+        orderRepository.saveAndFlush(order);
         orderRepository.delete(order);
     }
 

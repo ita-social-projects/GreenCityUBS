@@ -2157,7 +2157,7 @@ class UBSClientServiceImplTest {
 
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
 
-        verify(orderRepository).save(order);
+        verify(orderRepository).saveAndFlush(order);
         verify(ordersForUserRepository).getAllByUserUuidAndId(order.getUser().getUuid(), order.getId());
     }
 
