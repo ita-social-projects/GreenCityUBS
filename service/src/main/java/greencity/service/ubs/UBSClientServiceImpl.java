@@ -207,6 +207,7 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIS
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
+import static greencity.util.OrderUtils.getLastPayment;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -545,7 +546,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         order = formAndSaveOrderRequest(dto, order, currentUser, userData);
-        long sumToPayInCoins = order.getPayment().getLast().getAmount();
+        long sumToPayInCoins = getLastPayment(order).getAmount();
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
 
@@ -585,7 +586,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         order = formAndSaveOrderRequest(dto, order, currentUser, userData);
-        long sumToPayInCoins = order.getPayment().getLast().getAmount();
+        long sumToPayInCoins = getLastPayment(order).getAmount();
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
 
