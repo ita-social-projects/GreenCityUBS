@@ -17,8 +17,11 @@ public class UpdateOrderPageAdminValidator
     @Override
     public boolean isValid(UpdateOrderPageAdminDto updateOrderPageAdminDto,
         ConstraintValidatorContext context) {
-        UbsCustomersDtoUpdate userInfo = updateOrderPageAdminDto.getUserInfoDto();
+        if (updateOrderPageAdminDto == null) {
+            return true;
+        }
 
+        UbsCustomersDtoUpdate userInfo = updateOrderPageAdminDto.getUserInfoDto();
         if (userInfo == null) {
             return true;
         }
