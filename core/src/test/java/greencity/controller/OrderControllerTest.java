@@ -164,7 +164,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).saveFullOrderToDB(any(), eq("35467585763t4sfgchjfuyetf"), eq(null));
+        verify(ubsClientService).processNewOrder(any(), eq("35467585763t4sfgchjfuyetf"));
         verify(userRemoteClient).findUuidByEmail("test@gmail.com");
     }
 
@@ -176,9 +176,6 @@ class OrderControllerTest {
         OrderResponseDto dto = ModelUtils.getOrderResponseDto();
         String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
 
-        OrderDetailStatusDto orderDetailStatusDto = getUnpaidOrderDetailStatusDto();
-        orderDetailStatusDto.setOrderStatus(OrderStatus.FORMED.name());
-
         PaymentSystemResponse resultObject = PaymentSystemResponse.builder()
             .orderId(orderId)
             .link("Link")
@@ -186,8 +183,7 @@ class OrderControllerTest {
         String resultJson = objectMapper.writeValueAsString(resultObject);
 
         when(userRemoteClient.findUuidByEmail(anyString())).thenReturn(uuid);
-        when(ubsManagementService.getOrderDetailStatus(orderId)).thenReturn(orderDetailStatusDto);
-        when(ubsClientService.saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong()))
+        when(ubsClientService.processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong()))
             .thenReturn(resultObject);
 
         mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
@@ -199,53 +195,7 @@ class OrderControllerTest {
             .andExpect(content().json(resultJson));
 
         verify(userRemoteClient).findUuidByEmail(anyString());
-        verify(ubsManagementService).getOrderDetailStatus(orderId);
-        verify(ubsClientService).saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong());
-    }
-
-    @Test
-    void processPaidOrderId() throws Exception {
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-        OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
-
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
-        when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/processOrder/{id}", 1L)
-            .content(orderResponseDtoJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = OrderStatus.class,
-        names = "FORMED",
-        mode = EnumSource.Mode.EXCLUDE)
-    void processPaidOrderIdWithUnacceptableOrderStatusesTest(OrderStatus orderStatus) throws Exception {
-        Long orderId = 1L;
-        OrderResponseDto dto = ModelUtils.getOrderResponseDto();
-        OrderDetailStatusDto orderDetailStatusDto = ModelUtils.getPaidOrderDetailStatusDto();
-        orderDetailStatusDto.setOrderStatus(orderStatus.name());
-
-        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn("35467585763t4sfgchjfuyetf");
-        when(ubsManagementService.getOrderDetailStatus(anyLong())).thenReturn(orderDetailStatusDto);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String orderResponseDtoJSON = objectMapper.writeValueAsString(dto);
-
-        mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
-            .content(orderResponseDtoJSON)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
-
-        verify(userRemoteClient).findUuidByEmail(anyString());
-        verify(ubsManagementService).getOrderDetailStatus(orderId);
-        verify(ubsClientService, never()).saveFullOrderToDB(any(OrderResponseDto.class), anyString(), anyLong());
+        verify(ubsClientService).processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong());
     }
 
     @Test
