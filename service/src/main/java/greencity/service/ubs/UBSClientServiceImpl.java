@@ -617,7 +617,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             dto.setShouldBePaid(false);
         }
 
-        return formAndSaveOrder(order, orderCertificates, bagsOrdered, userData, currentUser, sumToPayInCoins, tariffsInfo);
+        return formAndSaveOrder(order, orderCertificates, bagsOrdered, userData, currentUser, sumToPayInCoins,
+            tariffsInfo);
     }
 
     /**

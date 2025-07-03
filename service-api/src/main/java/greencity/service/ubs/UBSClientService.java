@@ -100,23 +100,23 @@ public interface UBSClientService {
     PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
-     * Methods creates and adjusts new order and generates payment link for the order.
+     * Methods creates and adjusts new order and generates payment link for the
+     * order.
      *
-     * @param dto     {@link OrderResponseDto} user entered data;
-     * @param uuid    current {@link User}'s uuid;
-     * @return {@link PaymentSystemResponse} which contains data to pay order
-     *         out.
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentSystemResponse} which contains data to pay order out.
      * @author Oleksandr Ilnytskyi
      */
     PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid);
 
     /**
-     * Methods adjusts existing order and generates payment link for the order if order is unpaid.
+     * Methods adjusts existing order and generates payment link for the order if
+     * order is unpaid.
      *
-     * @param dto     {@link OrderResponseDto} user entered data;
-     * @param uuid    current {@link User}'s uuid;
-     * @return {@link PaymentSystemResponse} which contains data to pay order
-     *         out.
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentSystemResponse} which contains data to pay order out.
      * @author Oleksandr Ilnytskyi
      */
     PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId);

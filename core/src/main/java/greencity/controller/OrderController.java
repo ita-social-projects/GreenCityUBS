@@ -44,7 +44,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -172,7 +171,8 @@ public class OrderController {
     }
 
     /**
-     * Controller adjusts and creates new order and generates payment link for the order.
+     * Controller adjusts and creates new order and generates payment link for the
+     * order.
      *
      * @param userUuid current {@link User}'s uuid.
      * @param dto      {@link OrderResponseDto} order data.
@@ -194,7 +194,8 @@ public class OrderController {
     }
 
     /**
-     * Controller adjusts and saves existing order to database and generates payment link for the order.
+     * Controller adjusts and saves existing order to database and generates payment
+     * link for the order.
      *
      * @param userUuid current {@link User}'s uuid.
      * @param dto      {@link OrderResponseDto} order data.

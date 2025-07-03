@@ -1,11 +1,10 @@
 package greencity.util;
 
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Comparator;
-
-import greencity.entity.order.Payment;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
 
@@ -47,11 +46,11 @@ public class OrderUtils {
     }
 
     /**
-     * Iterates through order payments and gets one whit maximum id
-     * which is corresponding the last one
+     * Iterates through order payments and gets one with maximum id, which is
+     * corresponding the last one.
      *
-     * @param order   The {@link Order} object containing details such as payment
-     *                and counterOrderPaymentId.
+     * @param order The {@link Order} object containing details such as payment and
+     *              counterOrderPaymentId.
      * @return An {@link Payment} object containing corresponding data.
      */
     public static Payment getLastPayment(Order order) {

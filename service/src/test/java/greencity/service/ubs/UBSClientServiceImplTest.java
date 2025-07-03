@@ -1184,7 +1184,8 @@ class UBSClientServiceImplTest {
         UBSuser ubsUser = getUBSuser();
         OrderAddress orderAddress = ubsUser.getOrderAddress();
 
-        when(locationRepository.findAddressAndLocationNamesMatch(anyLong(), anyLong())).thenReturn(Optional.of("Test City"));
+        when(locationRepository.findAddressAndLocationNamesMatch(anyLong(), anyLong()))
+            .thenReturn(Optional.of("Test City"));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
@@ -1296,7 +1297,8 @@ class UBSClientServiceImplTest {
         UBSuser ubsUser = getUBSuser();
         OrderAddress orderAddress = ubsUser.getOrderAddress();
 
-        when(locationRepository.findAddressAndLocationNamesMatch(anyLong(), anyLong())).thenReturn(Optional.of("Test City"));
+        when(locationRepository.findAddressAndLocationNamesMatch(anyLong(), anyLong()))
+            .thenReturn(Optional.of("Test City"));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(userRepository.findByUuid(anyString())).thenReturn(user);
