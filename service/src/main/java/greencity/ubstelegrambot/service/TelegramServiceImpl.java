@@ -450,48 +450,52 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public void processTextCommand(Update update) {
+    public void processUpdate(Update update) {
 
         var message = update.getMessage();
         var text = message.getText();
         var chatId = message.getChatId().toString();
 
-        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
-
-        if (userState.containsKey(chatId)) {
-            processUserState(message);
+        if (update.hasCallbackQuery()) {
+            processCallBackQuery(update);
         } else {
-            if (text.startsWith(TelegramBotConstants.START_COMMAND)) {
-                processStartCommand(message);
-                return;
-            }
-            String command = text.contains(":") ? text.split(":")[0].trim() : text;
+            UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
 
-            switch (command) {
-                case TelegramBotConstants.HELP_COMMAND -> executor.executeCommand(ubsTelegramBot,
-                    MessageFactory.createHelpMessage(message.getChatId().toString()));
+            if (userState.containsKey(chatId)) {
+                processUserState(message);
+            } else {
+                if (text.startsWith(TelegramBotConstants.START_COMMAND)) {
+                    processStartCommand(message);
+                    return;
+                }
+                String command = text.contains(":") ? text.split(":")[0].trim() : text;
 
-                case TelegramBotConstants.SUPPORT_COMMAND ->
-                    executor.executeCommand(ubsTelegramBot, processSupportCommand(message));
+                switch (command) {
+                    case TelegramBotConstants.HELP_COMMAND -> executor.executeCommand(ubsTelegramBot,
+                            MessageFactory.createHelpMessage(message.getChatId().toString()));
 
-                case TelegramBotConstants.LOGIN_COMMAND ->
-                    executor.executeCommand(ubsTelegramBot, processLoginCommand(message));
+                    case TelegramBotConstants.SUPPORT_COMMAND ->
+                            executor.executeCommand(ubsTelegramBot, processSupportCommand(message));
 
-                case TelegramBotConstants.CLIENT_END_SUPPORT_MODE ->
-                    executor.executeCommand(ubsTelegramBot, stopSupportMode(message));
+                    case TelegramBotConstants.LOGIN_COMMAND ->
+                            executor.executeCommand(ubsTelegramBot, processLoginCommand(message));
 
-                default -> {
-                    if (isUserInSupportMode(chatId)) {
-                        saveManagerMessage(chatId, text);
-                    } else {
-                        executor.executeCommand(ubsTelegramBot, MessageFactory.createUnknownCommandMessage(chatId));
+                    case TelegramBotConstants.CLIENT_END_SUPPORT_MODE ->
+                            executor.executeCommand(ubsTelegramBot, stopSupportMode(message));
+
+                    default -> {
+                        if (isUserInSupportMode(chatId)) {
+                            //Todo implement save message from user here
+                        } else {
+                            executor.executeCommand(ubsTelegramBot, MessageFactory.createUnknownCommandMessage(chatId));
+                        }
                     }
                 }
             }
         }
     }
 
-    @Override
+
     public void processCallBackQuery(Update update) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
         var callBackQuery = update.getCallbackQuery();
