@@ -159,7 +159,5 @@ public interface TelegramService {
 
     void processTextCommand(Update update);
 
-//    void processImageCommand(Update update);
-
     void processCallBackQuery(Update update);
 }
