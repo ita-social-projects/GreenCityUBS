@@ -17,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,7 +40,7 @@ class TelegramNotificationServiceTest {
     @InjectMocks
     private TelegramNotificationService telegramNotificationService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
-        .telegramBot(new TelegramChat(1L, "12345", false, true, "username", "first_name", "last_name", null))
+        .telegramBot(new TelegramChat(1L, "12345", false, true, "username", "first_name", "last_name", null, new ArrayList<>()))
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
     private final UserNotification notification = new UserNotification()
@@ -89,7 +91,7 @@ class TelegramNotificationServiceTest {
         userEntity.setTelegramBot(new TelegramChat());
         assertFalse(telegramNotificationService.isEnabled(userEntity));
 
-        userEntity.setTelegramBot(new TelegramChat(1L, "12345", false, true, "username", "first_name", "last_name", userEntity));
+        userEntity.setTelegramBot(new TelegramChat(1L, "12345", false, true, "username", "first_name", "last_name", userEntity, new ArrayList<>()));
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 
     }

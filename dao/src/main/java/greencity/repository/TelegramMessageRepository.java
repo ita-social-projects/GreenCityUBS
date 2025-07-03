@@ -6,5 +6,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TelegramMessageRepository extends JpaRepository<TelegramMessage, Long> {
-    Page<TelegramMessage> findByChatIdOrderBySendAtDesc(String chatId, Pageable pageable);
+    /**
+     * Retrieves all TelegramUserMessages by chatId.
+     *
+     * @param chatId the telegram chat ID
+     * @return a list of TelegramUserMessages associated with the specified chatId
+     */
+    Page<TelegramMessage> findByChatId(Long chatId, Pageable pageable);
+
+    boolean existsByChatId(Long chatId);
 }

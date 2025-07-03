@@ -1,26 +1,26 @@
 package greencity.dto.telegram;
 
+import greencity.enums.AssetType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TelegramMessageDto {
+public class MessageAssetDto {
 
     private Long id;
 
-    private LocalDateTime sendAt;
+    private String url;
 
-    private String text;
+    private AssetType type;
 
-    private Boolean fromManager;
+    private String fileName;
 
-    private List<MessageAssetDto> assets;
+    private Long size;
+
+    private String contentType;
 }

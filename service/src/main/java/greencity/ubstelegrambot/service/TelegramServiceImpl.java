@@ -12,20 +12,14 @@ import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
-import greencity.exceptions.BadRequestException;
+import greencity.enums.AssetType;
 import greencity.exceptions.NotFoundException;
-import greencity.mapping.telegrammessage.TextMessageMapper;
 import greencity.repository.*;
-import greencity.service.ubs.NotificationService;
-import greencity.service.ubs.TelegramPhotoService;
-import greencity.service.ubs.TelegramService;
-import greencity.service.ubs.TelegramStreamingService;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.*;
 import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -34,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -41,6 +36,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,19 +48,15 @@ import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 @RequiredArgsConstructor
 public class TelegramServiceImpl implements TelegramService {
     private final UserRemoteClient userRemoteClient;
-    private final TelegramTextMessageRepository telegramTextMessageRepository;
+    private final TelegramMessageRepository telegramMessageRepository;
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramManagerNotificationServiceImpl telegramManagerNotification;
     private final ApplicationContext applicationContext;
-    private final ModelMapper modelMapper;
-    private final TelegramImageRepository telegramImageRepository;
     private final TelegramChatRepository telegramChatRepository;
-    private final TextMessageMapper textMessageMapper;
-    private final TelegramPhotoService telegramPhotoService;
+    private final AzureCloudStorageService azureCloudStorageService;
     private final UBSClientService ubsClientService;
     private final TelegramExecutor executor;
     private final Map<String, String> userState = new HashMap<>();
-    private final TelegramStreamingService telegramStreamingService;
     private final ChatFeedbackRepository chatFeedbackRepository;
     private final PositionRepository positionRepository;
     private final EmployeeRepository employeeRepository;
@@ -185,22 +177,22 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public void saveManagerMessage(String chatId, String message) {
-        var telegramMessage = new TextMessage(
-            chatId,
-            message,
-            false);
-        telegramManagerNotification.shouldNotifyManager(chatId);
-        telegramTextMessageRepository.save(telegramMessage);
-        telegramStreamingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
+//        var telegramMessage = new TextMessage(
+//            chatId,
+//            message,
+//            false);
+//        telegramManagerNotification.shouldNotifyManager(chatId);
+//        telegramMessageRepository.save(telegramMessage);
+//        telegramStreamingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
     }
 
     @Override
     public void saveManagerMessage(String chatId, String message, boolean isManager) {
-        var telegramMessage = new TextMessage(
-            chatId,
-            message,
-            isManager);
-        telegramTextMessageRepository.save(telegramMessage);
+//        var telegramMessage = new TextMessage(
+//            chatId,
+//            message,
+//            isManager);
+//        telegramMessageRepository.save(telegramMessage);
     }
 
     @Override
@@ -233,45 +225,123 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public boolean isManager(String chatId) {
-        return telegramTextMessageRepository.existsByChatId(chatId);
-    }
-
-    @Override
     public void managerMode(String chatId) {
         telegramManagerRepository.save(new TelegramManager(
             chatId,
             null));
     }
 
-    @Override
-    public void sendMessageToUser(String chatId, String message) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-        var sendMessage = MessageFactory.buildMessage(chatId, message);
-        saveManagerMessage(chatId, message, true);
-        executor.executeCommand(bot, sendMessage);
+    /**
+     * Detects the {@link AssetType} of the given file based on its MIME type.
+     *
+     * <p>This method analyzes the MIME type (Content-Type) of the provided {@link MultipartFile}
+     * and returns the corresponding {@link AssetType}:</p>
+     * <ul>
+     *     <li>{@code image/*} → {@link AssetType#IMAGE}</li>
+     *     <li>{@code video/*} → {@link AssetType#VIDEO}</li>
+     *     <li>{@code audio/*} → {@link AssetType#AUDIO}</li>
+     *     <li>{@code application/pdf} → {@link AssetType#FILE}</li>
+     *     <li>Any other or unknown types → {@link AssetType#FILE}</li>
+     * </ul>
+     *
+     * @param file the uploaded file for which the asset type should be determined
+     * @return the detected {@link AssetType}; defaults to {@link AssetType#FILE} if unknown
+     */
+    private AssetType detectAssetType(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null) return AssetType.FILE;
+
+        if (contentType.startsWith("image/")) return AssetType.IMAGE;
+        if (contentType.startsWith("video/")) return AssetType.VIDEO;
+        if (contentType.startsWith("audio/")) return AssetType.AUDIO;
+
+        return AssetType.FILE;
     }
 
     @Override
-    public PageableDto<TelegramTextMessageDto> findUserMessageByChatId(String chatId, Pageable pageable) {
-        Page<TextMessage> textMessages = telegramTextMessageRepository.findByChatId(chatId, pageable);
-        if (textMessages.isEmpty()) {
-            throw new BadRequestException(String.format(TelegramBotConstants.MESSAGES_NOT_FOUND_FOR_CHAT, chatId));
+    public void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files) {
+        var bot = applicationContext.getBean(UBSTelegramBot.class);
+
+        TelegramChat chat = telegramChatRepository.findByChatId(request.getChatId().toString())
+                .orElseThrow(() -> new NotFoundException("Chat not found"));
+
+        TelegramMessage message = TelegramMessage.builder()
+                .chat(chat)
+                .text(request.getText())
+                .fromManager(true)
+                .sendAt(LocalDateTime.now())
+                .build();
+
+        List<MessageAsset> assets = new ArrayList<>();
+
+        if (request.getText() != null) {
+            var sendTextMessage = MessageFactory.buildMessage(request.getChatId().toString(), message.getText());
+            executor.executeCommand(bot, sendTextMessage);
         }
-        List<TelegramTextMessageDto> messageDtoList = textMessages.stream()
-            .map(message -> new TelegramTextMessageDto(
-                message.getMessageId(),
-                message.getChatId(),
-                message.getSendAt(),
-                message.getText(),
-                message.isManagerMessage()))
-            .toList();
+
+        if (files != null) {
+            for (MultipartFile file : files) {
+                System.out.println(file);
+                String url = azureCloudStorageService.upload(file);
+                AssetType assetType = detectAssetType(file);
+                MessageAsset asset = MessageAsset.builder()
+                        .url(url)
+                        .fileName(file.getOriginalFilename())
+                        .size(file.getSize())
+                        .contentType(file.getContentType())
+                        .type(assetType)
+                        .message(message)
+                        .build();
+                assets.add(asset);
+
+                if (assetType == AssetType.IMAGE) {
+                    var sendPhotoMessage = MessageFactory.createPhotoSender(request.getChatId().toString(), url, "");
+                    executor.executeSendPhoto(bot, sendPhotoMessage);
+                }
+
+            }
+        }
+
+        message.setAssets(assets);
+        telegramMessageRepository.save(message);
+
+    }
+
+    @Override
+    public PageableDto<TelegramMessageDto> findUserMessageByChatId(Long chatId, Pageable pageable) {
+        Page<TelegramMessage> messages = telegramMessageRepository.findByChatId(chatId, pageable);
+        if (messages.isEmpty()) {
+            throw new NotFoundException(String.format(TelegramBotConstants.MESSAGES_NOT_FOUND_FOR_CHAT, chatId));
+        }
+
+        List<TelegramMessageDto> messageDtoList = messages.stream()
+            .map(message -> {
+                List<MessageAssetDto> assetDtos = message
+                        .getAssets()
+                        .stream()
+                        .map(asset -> new MessageAssetDto(
+                                asset.getId(),
+                                asset.getUrl(),
+                                asset.getType(),
+                                asset.getFileName(),
+                                asset.getSize(),
+                                asset.getContentType()
+                        )).toList();
+
+               return new TelegramMessageDto(
+                       message.getId(),
+                       message.getSendAt(),
+                       message.getText(),
+                       message.getFromManager(),
+                       assetDtos
+               );
+            }).toList();
 
         return new PageableDto<>(
             messageDtoList,
-            textMessages.getTotalElements(),
-            textMessages.getPageable().getPageNumber(),
-            textMessages.getTotalPages());
+            messages.getTotalElements(),
+            messages.getPageable().getPageNumber(),
+            messages.getTotalPages());
     }
 
     @Override
@@ -380,27 +450,14 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
-    public PageableDto<TelegramImageDto> findUserPhotosByChatId(String chatId, Pageable page) {
-        Page<Image> telegramImages = telegramImageRepository.findByChatId(chatId, page);
-        if (telegramImages.isEmpty()) {
-            throw new BadRequestException(String.format(TelegramBotConstants.MESSAGES_NOT_FOUND_FOR_CHAT, chatId));
-        }
-        List<TelegramImageDto> messages = telegramImages.stream()
-            .map(message -> modelMapper.map(message, TelegramImageDto.class))
-            .toList();
-        return new PageableDto<>(
-            messages,
-            telegramImages.getTotalElements(),
-            telegramImages.getPageable().getPageNumber(),
-            telegramImages.getTotalPages());
-    }
-
-    @Override
     public void processTextCommand(Update update) {
+
         var message = update.getMessage();
         var text = message.getText();
         var chatId = message.getChatId().toString();
+
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
+
         if (userState.containsKey(chatId)) {
             processUserState(message);
         } else {
@@ -431,19 +488,6 @@ public class TelegramServiceImpl implements TelegramService {
                     }
                 }
             }
-        }
-    }
-
-    @Override
-    public void processImageCommand(Update update) {
-        var message = update.getMessage();
-        var photos = telegramPhotoService.downloadPhotoFromTelegram(message);
-        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
-        if (isUserInSupportMode(message.getChatId().toString())) {
-            telegramPhotoService.saveToDB(photos, message.getChatId().toString(), message.getCaption(), false);
-        }
-        else {
-            executor.executeCommand(ubsTelegramBot, MessageFactory.createUnknownCommandMessage(message.getChatId().toString()));
         }
     }
 
@@ -593,6 +637,11 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public OrdersDataForUserDto getLastOrderByChatId(String chatId) {
         TelegramChat telegramChat = telegramChatRepository.findByChatId(chatId).orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
+
+        if (telegramChat.getUser() == null ) {
+            throw new NotFoundException("Order not found");
+        }
+
         Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId()).orElseThrow(() -> new NotFoundException("Order not found"));
         return ubsClientService.getOrdersData(order);
     }

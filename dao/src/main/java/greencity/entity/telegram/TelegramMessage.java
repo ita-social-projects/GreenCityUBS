@@ -1,47 +1,49 @@
 package greencity.entity.telegram;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import greencity.enums.MessageDeliveryStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type"
-)
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = TextMessage.class, name = "text"),
-        @JsonSubTypes.Type(value = Image.class, name = "photo")
-})
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 @Data
+@Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public abstract class TelegramMessage {
+public class TelegramMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long messageId;
-    private String chatId;
-    @Column(updatable = false)
+    private Long id;
+
     @CreatedDate
+    @Column(updatable = false, nullable = false)
     private LocalDateTime sendAt;
 
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
-    protected TelegramMessage(String chatId) {
-        this.chatId = chatId;
-    }
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
+    private List<MessageAsset> assets;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_id", nullable = false)
+    private TelegramChat chat;
+
+    @Enumerated(EnumType.STRING)
+    private MessageDeliveryStatus status;
+
+    @Column(name = "from_manager", nullable = false)
+    private Boolean fromManager;
+
+    @Column(name = "text", length = 1000)
+    private String text;
 }

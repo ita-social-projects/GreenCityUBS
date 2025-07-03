@@ -4,6 +4,7 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.*;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -87,29 +88,13 @@ public interface TelegramService {
     SendMessage stopSupportMode(Message message);
 
     /**
-     * Checks if user is manager.
-     *
-     * @param chatId {@link String} chat ID
-     *
-     * @return {@link boolean} true if user is manager, false otherwise
-     */
-    boolean isManager(String chatId);
-
-    /**
      * Activates manager mode for the specified user.
      *
      * @param chatId {@link String} chat ID
      */
     void managerMode(String chatId);
 
-    /**
-     * Sends message to user.
-     *
-     * @param chatId  {@link String} chat ID
-     * @param message {@link String} message content
-     *
-     */
-    void sendMessageToUser(String chatId, String message);
+    void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files);
 
     /**
      * Retrieves all TelegramUserMessages by chatId.
@@ -118,7 +103,7 @@ public interface TelegramService {
      *
      * @return a list of TelegramUserMessages associated with the specified chatId
      */
-    PageableDto<TelegramTextMessageDto> findUserMessageByChatId(String chatId, Pageable pageable);
+    PageableDto<TelegramMessageDto> findUserMessageByChatId(Long chatId, Pageable pageable);
 
     /**
      * Retrieves a paginated list of authorized users, optionally filtered by a search term.
@@ -158,15 +143,15 @@ public interface TelegramService {
      */
     SendMessage handleUserChatScope(String data, String chatId, Integer messageId);
 
-    /**
-     * Retrieves all TelegramUserPhotos by chatId.
-     *
-     * @param chatId the telegram chat ID
-     * @param page   the page to retrieve
-     *
-     * @return a list of TelegramUserPhotos associated with the specified chatId
-     */
-    PageableDto<TelegramImageDto> findUserPhotosByChatId(String chatId, Pageable page);
+//    /**
+//     * Retrieves all TelegramUserPhotos by chatId.
+//     *
+//     * @param chatId the telegram chat ID
+//     * @param page   the page to retrieve
+//     *
+//     * @return a list of TelegramUserPhotos associated with the specified chatId
+//     */
+//    PageableDto<TelegramImageDto> findUserPhotosByChatId(String chatId, Pageable page);
 
     PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable);
 
@@ -174,7 +159,7 @@ public interface TelegramService {
 
     void processTextCommand(Update update);
 
-    void processImageCommand(Update update);
+//    void processImageCommand(Update update);
 
     void processCallBackQuery(Update update);
 }

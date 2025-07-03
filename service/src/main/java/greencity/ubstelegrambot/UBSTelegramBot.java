@@ -30,8 +30,6 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             telegramService.processTextCommand(update);
-        } else if (update.hasMessage() && update.getMessage().hasPhoto()) {
-            telegramService.processImageCommand(update);
         } else if (update.hasCallbackQuery()) {
             telegramService.processCallBackQuery(update);
         }
