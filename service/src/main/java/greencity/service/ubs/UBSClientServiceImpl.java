@@ -128,9 +128,7 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -220,8 +218,6 @@ import static java.util.stream.Collectors.toMap;
 @RequiredArgsConstructor
 @Slf4j
 public class UBSClientServiceImpl implements UBSClientService {
-    @PersistenceContext
-    private EntityManager entityManager;
     private static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
     private static final String PAY_BUTTON = "payButton";
     private final UserRepository userRepository;
@@ -636,17 +632,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return processNewOrder(dto, uuid);
     }
 
-    private void adjustPaymentDetails(OrderResponseDto dto) {
-        if (!dto.isShouldBePaid()) {
-            dto.setCertificates(Collections.emptySet());
-            dto.setPointsToUse(0);
-        }
-    }
-
-    private String determineEventName(Long orderId) {
-        return (orderId == null) ? OrderHistory.ORDER_FORMED_UK : OrderHistory.ORDER_STATUS_UPDATED_UK;
-    }
-
     private void saveOrderEvent(String eventName, String author, Order order) {
         eventService.save(eventName, author, order);
         log.info("Saved event: eventName={}, author={}, orderId={}", eventName, author, order.getId());
@@ -779,20 +764,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(bagIds, locationId)
             .orElseThrow(
                 () -> new NotFoundException(String.format(TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST, bagIds, locationId)));
-    }
-
-    private Order isExistOrder(OrderResponseDto dto, Long orderId) {
-        if (orderId != null) {
-            Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-            checkIsOrderPaid(order.getOrderPaymentStatus());
-            order.setPointsToUse(dto.getPointsToUse())
-                .setAdditionalOrders(dto.getAdditionalOrders())
-                .setComment(dto.getOrderComment());
-            return order;
-        } else {
-            return modelMapper.map(dto, Order.class);
-        }
     }
 
     private PaymentSystemResponse getPaymentRequestDto(Order order, String link) {
@@ -1549,12 +1520,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .movePointRight(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
             .setScale(AppConstant.NO_DECIMALS_AFTER_POINT_IN_CURRENCY, RoundingMode.HALF_UP)
             .longValue();
-    }
-
-    private void checkIsOrderPaid(OrderPaymentStatus orderPaymentStatus) {
-        if (OrderPaymentStatus.PAID.equals(orderPaymentStatus)) {
-            throw new BadRequestException(ORDER_ALREADY_PAID);
-        }
     }
 
     private String getLinkFromWayForPayCheckoutResponse(String wayForPayResponse) {
