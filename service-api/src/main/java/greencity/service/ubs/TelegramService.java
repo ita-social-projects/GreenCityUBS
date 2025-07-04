@@ -96,6 +96,8 @@ public interface TelegramService {
 
     void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files);
 
+    ChatDto getChatById(Long chatId);
+
     /**
      * Retrieves all TelegramUserMessages by chatId.
      *

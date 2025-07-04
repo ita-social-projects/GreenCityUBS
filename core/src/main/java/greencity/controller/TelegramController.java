@@ -82,6 +82,21 @@ public class TelegramController {
         return ResponseEntity.ok("OK");
     }
 
+    @Operation(summary = "Get chat by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @GetMapping(value = "/chat/{chatId}")
+    public ResponseEntity<ChatDto> getChat(
+            @PathVariable Long chatId
+    ) {
+        return ResponseEntity.ok(telegramService.getChatById(chatId));
+    }
+
     /**
      * Generates a link for a manager to communicate with a user.
      *

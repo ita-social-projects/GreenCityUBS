@@ -649,4 +649,20 @@ public class TelegramServiceImpl implements TelegramService {
         Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId()).orElseThrow(() -> new NotFoundException("Order not found"));
         return ubsClientService.getOrdersData(order);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ChatDto getChatById(Long chatId) {
+        TelegramChat chat =telegramChatRepository.findById(chatId).orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
+        return ChatDto.builder()
+                .id(chat.getId())
+                .chatId(chat.getChatId())
+                .firstName(chat.getFirstName())
+                .lastName(chat.getLastName())
+                .username(chat.getUsername())
+                .build();
+
+    }
 }
