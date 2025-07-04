@@ -174,22 +174,23 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public void saveManagerMessage(String chatId, String message) {
-                //        var telegramMessage = new TextMessage(
-                //            chatId,
-                //            message,
-                //            false);
-                //        telegramManagerNotification.shouldNotifyManager(chatId);
-                //        telegramMessageRepository.save(telegramMessage);
-                //        telegramStreamingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
+        // var telegramMessage = new TextMessage(
+        // chatId,
+        // message,
+        // false);
+        // telegramManagerNotification.shouldNotifyManager(chatId);
+        // telegramMessageRepository.save(telegramMessage);
+        // telegramStreamingService.streamMessages(chatId,
+        // textMessageMapper.map(telegramMessage));
     }
 
     @Override
     public void saveManagerMessage(String chatId, String message, boolean isManager) {
-                //        var telegramMessage = new TextMessage(
-                //            chatId,
-                //            message,
-                //            isManager);
-                //        telegramMessageRepository.save(telegramMessage);
+        // var telegramMessage = new TextMessage(
+        // chatId,
+        // message,
+        // isManager);
+        // telegramMessageRepository.save(telegramMessage);
     }
 
     @Override

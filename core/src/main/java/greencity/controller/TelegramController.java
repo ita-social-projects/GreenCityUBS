@@ -112,24 +112,26 @@ public class TelegramController {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.generateManagerStartLink(employeeUUID));
     }
 
-    //    /**
-    //     * Starts a server-sent event stream for the given chat ID. The stream will send
-    //     * any messages sent by the user with the given chat ID to the client.
-    //     *
-    //     * @param chatId the Telegram chat ID
-    //     * @return an SseEmitter that sends messages to the client
-    //     */
-    //    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
-    //    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    //    public SseEmitter stream(@RequestParam String chatId) {
-    //        SseEmitter emitter = new SseEmitter(0L);
-    //        telegramStrimingService.addEmitter(emitter, chatId);
+    // /**
+    // * Starts a server-sent event stream for the given chat ID. The stream will
+    // send
+    // * any messages sent by the user with the given chat ID to the client.
+    // *
+    // * @param chatId the Telegram chat ID
+    // * @return an SseEmitter that sends messages to the client
+    // */
+    // @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT',
+    // authentication)")
+    // @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    // public SseEmitter stream(@RequestParam String chatId) {
+    // SseEmitter emitter = new SseEmitter(0L);
+    // telegramStrimingService.addEmitter(emitter, chatId);
     //
-    //        emitter.onCompletion(() -> telegramStrimingService.removeEmitter(emitter));
-    //        emitter.onTimeout(() -> telegramStrimingService.removeEmitter(emitter));
+    // emitter.onCompletion(() -> telegramStrimingService.removeEmitter(emitter));
+    // emitter.onTimeout(() -> telegramStrimingService.removeEmitter(emitter));
     //
-    //        return emitter;
-    //    }
+    // return emitter;
+    // }
 
     /**
      * Retrieves a list of {@link FeedbackDto} for all users.
