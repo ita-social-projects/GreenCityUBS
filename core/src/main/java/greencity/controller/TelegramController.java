@@ -59,7 +59,7 @@ public class TelegramController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/last-order")
-    public ResponseEntity<OrdersDataForUserDto> getLastOrderByChatId(@RequestParam String chatId) {
+    public ResponseEntity<OrdersDataForUserDto> getLastOrderByChatId(@RequestParam Long chatId) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getLastOrderByChatId(chatId));
     }
 

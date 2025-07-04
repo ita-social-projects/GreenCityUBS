@@ -127,7 +127,7 @@ public interface TelegramService {
      *         or throws an exception / returns null if no order is found (depending
      *         on implementation)
      */
-    OrdersDataForUserDto getLastOrderByChatId(String chatId);
+    OrdersDataForUserDto getLastOrderByChatId(Long chatId);
 
     /**
      * Generates the start link for a manager based on the user's UUID.

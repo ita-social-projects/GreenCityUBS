@@ -640,8 +640,8 @@ public class TelegramServiceImpl implements TelegramService {
      * {@inheritDoc}
      */
     @Override
-    public OrdersDataForUserDto getLastOrderByChatId(String chatId) {
-        TelegramChat telegramChat = telegramChatRepository.findByChatId(chatId)
+    public OrdersDataForUserDto getLastOrderByChatId(Long chatId) {
+        TelegramChat telegramChat = telegramChatRepository.findById(chatId)
             .orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
 
         if (telegramChat.getUser() == null) {
