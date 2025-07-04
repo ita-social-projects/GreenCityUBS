@@ -566,6 +566,10 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+
+        User currentUser = userRepository.findByUuid(uuid);
+        checkIsOrderOfCurrentUser(currentUser, order);
+
         if (order.getOrderStatus() != OrderStatus.FORMED
             || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
             throw new BadRequestException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
@@ -574,9 +578,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setPointsToUse(dto.getPointsToUse());
         order.setAdditionalOrders(dto.getAdditionalOrders());
         order.setComment(dto.getOrderComment());
-
-        User currentUser = userRepository.findByUuid(uuid);
-        checkIsOrderOfCurrentUser(currentUser, order);
 
         UBSuser userData =
             formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
