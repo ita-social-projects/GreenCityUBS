@@ -35,12 +35,10 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND;
 import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 
@@ -106,18 +104,16 @@ public class TelegramServiceImpl implements TelegramService {
         var employeePositions = employee.getEmployeePosition();
 
         Position serviceManager = positionRepository.findById(1L)
-                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
 
         Position manager = positionRepository.findById(2L)
-                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
 
         return employeePositions.contains(manager) || employeePositions.contains(serviceManager);
     }
 
     @Override
     public void processStartCommand(Message message) {
-        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
-
         final String uuId = message.getText().replace(TelegramBotConstants.START_COMMAND, "").trim();
         final String chatId = message.getFrom().getId().toString();
 
@@ -130,7 +126,7 @@ public class TelegramServiceImpl implements TelegramService {
                 boolean isManager = checkIsEmployeeManager(employee.get());
                 if (isManager) {
                     telegramChat.ifPresent(telegramChatRepository::delete);
-                    //show login as a manager form
+                    // show login as a manager form
                 }
             }
         }
@@ -142,32 +138,33 @@ public class TelegramServiceImpl implements TelegramService {
                 boolean isManager = checkIsEmployeeManager(employee.get());
                 if (isManager) {
                     telegramChat.ifPresent(telegramChatRepository::delete);
-                    //show login as a manager form
+                    // show login as a manager form
                 }
             }
         }
 
         if (telegramChat.isEmpty()) {
             TelegramChat.TelegramChatBuilder newChatBuilder = TelegramChat
-                    .builder()
-                    .chatId(chatId)
-                    .username(message.getFrom().getUserName())
-                    .firstName(message.getFrom().getFirstName())
-                    .lastName(message.getFrom().getLastName())
-                    .isNotify(true) //need to specify a correct value
-                    .isSupportStatusActive(false);
+                .builder()
+                .chatId(chatId)
+                .username(message.getFrom().getUserName())
+                .firstName(message.getFrom().getFirstName())
+                .lastName(message.getFrom().getLastName())
+                .isNotify(true) // need to specify a correct value
+                .isSupportStatusActive(false);
 
             if (!uuId.isEmpty()) {
                 Optional<User> user = userRepository.findUserByUuid(uuId);
                 user.ifPresent(newChatBuilder::user);
             }
-
             telegramChatRepository.save(newChatBuilder.build());
         }
 
+        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
+
         executor.executeCommand(ubsTelegramBot, MessageFactory.createWelcomeMessage(chatId));
         executor.executeCommand(ubsTelegramBot,
-                MessageFactory.createAvailableCommandOption(message.getChatId().toString()));
+            MessageFactory.createAvailableCommandOption(message.getChatId().toString()));
     }
 
     @Override
@@ -177,22 +174,22 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public void saveManagerMessage(String chatId, String message) {
-//        var telegramMessage = new TextMessage(
-//            chatId,
-//            message,
-//            false);
-//        telegramManagerNotification.shouldNotifyManager(chatId);
-//        telegramMessageRepository.save(telegramMessage);
-//        telegramStreamingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
+                //        var telegramMessage = new TextMessage(
+                //            chatId,
+                //            message,
+                //            false);
+                //        telegramManagerNotification.shouldNotifyManager(chatId);
+                //        telegramMessageRepository.save(telegramMessage);
+                //        telegramStreamingService.streamMessages(chatId, textMessageMapper.map(telegramMessage));
     }
 
     @Override
     public void saveManagerMessage(String chatId, String message, boolean isManager) {
-//        var telegramMessage = new TextMessage(
-//            chatId,
-//            message,
-//            isManager);
-//        telegramMessageRepository.save(telegramMessage);
+                //        var telegramMessage = new TextMessage(
+                //            chatId,
+                //            message,
+                //            isManager);
+                //        telegramMessageRepository.save(telegramMessage);
     }
 
     @Override
@@ -234,26 +231,37 @@ public class TelegramServiceImpl implements TelegramService {
     /**
      * Detects the {@link AssetType} of the given file based on its MIME type.
      *
-     * <p>This method analyzes the MIME type (Content-Type) of the provided {@link MultipartFile}
-     * and returns the corresponding {@link AssetType}:</p>
+     * <p>
+     * This method analyzes the MIME type (Content-Type) of the provided
+     * {@link MultipartFile} and returns the corresponding {@link AssetType}:
+     * </p>
      * <ul>
-     *     <li>{@code image/*} → {@link AssetType#IMAGE}</li>
-     *     <li>{@code video/*} → {@link AssetType#VIDEO}</li>
-     *     <li>{@code audio/*} → {@link AssetType#AUDIO}</li>
-     *     <li>{@code application/pdf} → {@link AssetType#FILE}</li>
-     *     <li>Any other or unknown types → {@link AssetType#FILE}</li>
+     * <li>{@code image/*} → {@link AssetType#IMAGE}</li>
+     * <li>{@code video/*} → {@link AssetType#VIDEO}</li>
+     * <li>{@code audio/*} → {@link AssetType#AUDIO}</li>
+     * <li>{@code application/pdf} → {@link AssetType#FILE}</li>
+     * <li>Any other or unknown types → {@link AssetType#FILE}</li>
      * </ul>
      *
      * @param file the uploaded file for which the asset type should be determined
-     * @return the detected {@link AssetType}; defaults to {@link AssetType#FILE} if unknown
+     * @return the detected {@link AssetType}; defaults to {@link AssetType#FILE} if
+     *         unknown
      */
     private AssetType detectAssetType(MultipartFile file) {
         String contentType = file.getContentType();
-        if (contentType == null) return AssetType.FILE;
+        if (contentType == null) {
+            return AssetType.FILE;
+        }
 
-        if (contentType.startsWith("image/")) return AssetType.IMAGE;
-        if (contentType.startsWith("video/")) return AssetType.VIDEO;
-        if (contentType.startsWith("audio/")) return AssetType.AUDIO;
+        if (contentType.startsWith("image/")) {
+            return AssetType.IMAGE;
+        }
+        if (contentType.startsWith("video/")) {
+            return AssetType.VIDEO;
+        }
+        if (contentType.startsWith("audio/")) {
+            return AssetType.AUDIO;
+        }
 
         return AssetType.FILE;
     }
@@ -263,14 +271,14 @@ public class TelegramServiceImpl implements TelegramService {
         var bot = applicationContext.getBean(UBSTelegramBot.class);
 
         TelegramChat chat = telegramChatRepository.findByChatId(request.getChatId().toString())
-                .orElseThrow(() -> new NotFoundException("Chat not found"));
+            .orElseThrow(() -> new NotFoundException("Chat not found"));
 
         TelegramMessage message = TelegramMessage.builder()
-                .chat(chat)
-                .text(request.getText())
-                .fromManager(true)
-                .sendAt(LocalDateTime.now())
-                .build();
+            .chat(chat)
+            .text(request.getText())
+            .fromManager(true)
+            .sendAt(LocalDateTime.now())
+            .build();
 
         List<MessageAsset> assets = new ArrayList<>();
 
@@ -285,26 +293,24 @@ public class TelegramServiceImpl implements TelegramService {
                 String url = azureCloudStorageService.upload(file);
                 AssetType assetType = detectAssetType(file);
                 MessageAsset asset = MessageAsset.builder()
-                        .url(url)
-                        .fileName(file.getOriginalFilename())
-                        .size(file.getSize())
-                        .contentType(file.getContentType())
-                        .type(assetType)
-                        .message(message)
-                        .build();
+                    .url(url)
+                    .fileName(file.getOriginalFilename())
+                    .size(file.getSize())
+                    .contentType(file.getContentType())
+                    .type(assetType)
+                    .message(message)
+                    .build();
                 assets.add(asset);
 
                 if (assetType == AssetType.IMAGE) {
                     var sendPhotoMessage = MessageFactory.createPhotoSender(request.getChatId().toString(), url, "");
                     executor.executeSendPhoto(bot, sendPhotoMessage);
                 }
-
             }
         }
 
         message.setAssets(assets);
         telegramMessageRepository.save(message);
-
     }
 
     @Override
@@ -317,24 +323,23 @@ public class TelegramServiceImpl implements TelegramService {
         List<TelegramMessageDto> messageDtoList = messages.stream()
             .map(message -> {
                 List<MessageAssetDto> assetDtos = message
-                        .getAssets()
-                        .stream()
-                        .map(asset -> new MessageAssetDto(
-                                asset.getId(),
-                                asset.getUrl(),
-                                asset.getType(),
-                                asset.getFileName(),
-                                asset.getSize(),
-                                asset.getContentType()
-                        )).toList();
+                    .getAssets()
+                    .stream()
+                    .map(asset -> new MessageAssetDto(
+                        asset.getId(),
+                        asset.getUrl(),
+                        asset.getType(),
+                        asset.getFileName(),
+                        asset.getSize(),
+                        asset.getContentType()))
+                    .toList();
 
-               return new TelegramMessageDto(
-                       message.getId(),
-                       message.getSendAt(),
-                       message.getText(),
-                       message.getFromManager(),
-                       assetDtos
-               );
+                return new TelegramMessageDto(
+                    message.getId(),
+                    message.getSendAt(),
+                    message.getText(),
+                    message.getFromManager(),
+                    assetDtos);
             }).toList();
 
         return new PageableDto<>(
@@ -353,34 +358,33 @@ public class TelegramServiceImpl implements TelegramService {
             .getContent()
             .stream()
             .map(chat -> {
-               ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
-                       .id(chat.getId())
-                       .chatId(chat.getChatId())
-                       .firstName(chat.getFirstName())
-                       .lastName(chat.getLastName())
-                       .username(chat.getUsername());
+                ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
+                    .id(chat.getId())
+                    .chatId(chat.getChatId())
+                    .firstName(chat.getFirstName())
+                    .lastName(chat.getLastName())
+                    .username(chat.getUsername());
 
-               if (chat.getUser() != null) {
-                   ChatUserDto chatUserDto = ChatUserDto
-                           .builder()
-                           .firstName(chat.getUser().getRecipientName())
-                           .firstName(chat.getUser().getRecipientSurname())
-                           .email(chat.getUser().getRecipientEmail())
-                           .build();
+                if (chat.getUser() != null) {
+                    ChatUserDto chatUserDto = ChatUserDto
+                        .builder()
+                        .firstName(chat.getUser().getRecipientName())
+                        .firstName(chat.getUser().getRecipientSurname())
+                        .email(chat.getUser().getRecipientEmail())
+                        .build();
 
-                   chatDtoBuilder
-                           .user(chatUserDto);
-               }
-
-               return chatDtoBuilder.build();
+                    chatDtoBuilder
+                        .user(chatUserDto);
+                }
+                return chatDtoBuilder.build();
             })
             .toList();
 
         return new PageableDto<>(
-                chatDtos,
-                chats.getTotalElements(),
-                chats.getNumber(),
-                chats.getTotalPages());
+            chatDtos,
+            chats.getTotalElements(),
+            chats.getNumber(),
+            chats.getTotalPages());
     }
 
     @Override
@@ -451,7 +455,6 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public void processUpdate(Update update) {
-
         var message = update.getMessage();
         var text = message.getText();
         var chatId = message.getChatId().toString();
@@ -472,20 +475,20 @@ public class TelegramServiceImpl implements TelegramService {
 
                 switch (command) {
                     case TelegramBotConstants.HELP_COMMAND -> executor.executeCommand(ubsTelegramBot,
-                            MessageFactory.createHelpMessage(message.getChatId().toString()));
+                        MessageFactory.createHelpMessage(message.getChatId().toString()));
 
                     case TelegramBotConstants.SUPPORT_COMMAND ->
-                            executor.executeCommand(ubsTelegramBot, processSupportCommand(message));
+                        executor.executeCommand(ubsTelegramBot, processSupportCommand(message));
 
                     case TelegramBotConstants.LOGIN_COMMAND ->
-                            executor.executeCommand(ubsTelegramBot, processLoginCommand(message));
+                        executor.executeCommand(ubsTelegramBot, processLoginCommand(message));
 
                     case TelegramBotConstants.CLIENT_END_SUPPORT_MODE ->
-                            executor.executeCommand(ubsTelegramBot, stopSupportMode(message));
+                        executor.executeCommand(ubsTelegramBot, stopSupportMode(message));
 
                     default -> {
                         if (isUserInSupportMode(chatId)) {
-                            //Todo implement save message from user here
+                            // Todo implement save message from user here
                         } else {
                             executor.executeCommand(ubsTelegramBot, MessageFactory.createUnknownCommandMessage(chatId));
                         }
@@ -494,7 +497,6 @@ public class TelegramServiceImpl implements TelegramService {
             }
         }
     }
-
 
     public void processCallBackQuery(Update update) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
@@ -566,7 +568,6 @@ public class TelegramServiceImpl implements TelegramService {
                             }
                         }
                     }
-
                     inlineKeyboardMarkup.setKeyboard(keyboard);
 
                     EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup();
@@ -640,13 +641,15 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public OrdersDataForUserDto getLastOrderByChatId(String chatId) {
-        TelegramChat telegramChat = telegramChatRepository.findByChatId(chatId).orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
+        TelegramChat telegramChat = telegramChatRepository.findByChatId(chatId)
+            .orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
 
-        if (telegramChat.getUser() == null ) {
+        if (telegramChat.getUser() == null) {
             throw new NotFoundException("Order not found");
         }
 
-        Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId()).orElseThrow(() -> new NotFoundException("Order not found"));
+        Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId())
+            .orElseThrow(() -> new NotFoundException("Order not found"));
         return ubsClientService.getOrdersData(order);
     }
 
@@ -655,14 +658,14 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public ChatDto getChatById(Long chatId) {
-        TelegramChat chat =telegramChatRepository.findById(chatId).orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
+        TelegramChat chat = telegramChatRepository.findById(chatId)
+            .orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
         return ChatDto.builder()
-                .id(chat.getId())
-                .chatId(chat.getChatId())
-                .firstName(chat.getFirstName())
-                .lastName(chat.getLastName())
-                .username(chat.getUsername())
-                .build();
-
+            .id(chat.getId())
+            .chatId(chat.getChatId())
+            .firstName(chat.getFirstName())
+            .lastName(chat.getLastName())
+            .username(chat.getUsername())
+            .build();
     }
 }

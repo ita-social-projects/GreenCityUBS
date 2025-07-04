@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface TelegramChatRepository extends JpaRepository<TelegramChat, Long>, JpaSpecificationExecutor<TelegramChat> {
+public interface TelegramChatRepository
+    extends JpaRepository<TelegramChat, Long>, JpaSpecificationExecutor<TelegramChat> {
     /**
      * The method finds telegram bot by user and chat id and isNotify.
      *

@@ -13,10 +13,9 @@ public class ChatSpecifications {
             }
 
             return criteriaBuilder.or(
-                    criteriaBuilder.like(root.get("firstName"), "%" + searchTerm + "%"),
-                    criteriaBuilder.like(root.get("lastName"), "%" + searchTerm + "%"),
-                    criteriaBuilder.like(root.get("username"), "%" + searchTerm + "%")
-            );
+                criteriaBuilder.like(root.get("firstName"), "%" + searchTerm + "%"),
+                criteriaBuilder.like(root.get("lastName"), "%" + searchTerm + "%"),
+                criteriaBuilder.like(root.get("username"), "%" + searchTerm + "%"));
         };
     }
 }

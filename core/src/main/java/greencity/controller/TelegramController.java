@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public class TelegramController {
     private final TelegramService telegramService;
 
-
     @Operation(summary = "Get all messages in chat by chatId")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
@@ -39,7 +38,6 @@ public class TelegramController {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.findUserMessageByChatId(chatId, page));
     }
 
-
     @Operation(summary = "Get all chats")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
@@ -48,17 +46,17 @@ public class TelegramController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/chats")
-    public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search, Pageable pageable) {
+    public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search,
+        Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getChats(search, pageable));
     }
 
-
     @Operation(summary = "Get last user order by chatId")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/last-order")
     public ResponseEntity<OrdersDataForUserDto> getLastOrderByChatId(@RequestParam String chatId) {
@@ -75,25 +73,23 @@ public class TelegramController {
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @PostMapping(value = "/messages", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> sendMessage(
-            @RequestPart("data") @Valid CreateTelegramMessageRequest request,
-            @RequestPart(value = "files", required = false) MultipartFile[] files
-    ) {
+        @RequestPart("data") @Valid CreateTelegramMessageRequest request,
+        @RequestPart(value = "files", required = false) MultipartFile[] files) {
         telegramService.sendMessageToUser(request, files);
         return ResponseEntity.ok("OK");
     }
 
     @Operation(summary = "Get chat by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/chat/{chatId}")
     public ResponseEntity<ChatDto> getChat(
-            @PathVariable Long chatId
-    ) {
+        @PathVariable Long chatId) {
         return ResponseEntity.ok(telegramService.getChatById(chatId));
     }
 
@@ -116,24 +112,24 @@ public class TelegramController {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.generateManagerStartLink(employeeUUID));
     }
 
-//    /**
-//     * Starts a server-sent event stream for the given chat ID. The stream will send
-//     * any messages sent by the user with the given chat ID to the client.
-//     *
-//     * @param chatId the Telegram chat ID
-//     * @return an SseEmitter that sends messages to the client
-//     */
-//    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
-//    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-//    public SseEmitter stream(@RequestParam String chatId) {
-//        SseEmitter emitter = new SseEmitter(0L);
-//        telegramStrimingService.addEmitter(emitter, chatId);
-//
-//        emitter.onCompletion(() -> telegramStrimingService.removeEmitter(emitter));
-//        emitter.onTimeout(() -> telegramStrimingService.removeEmitter(emitter));
-//
-//        return emitter;
-//    }
+    //    /**
+    //     * Starts a server-sent event stream for the given chat ID. The stream will send
+    //     * any messages sent by the user with the given chat ID to the client.
+    //     *
+    //     * @param chatId the Telegram chat ID
+    //     * @return an SseEmitter that sends messages to the client
+    //     */
+    //    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    //    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    //    public SseEmitter stream(@RequestParam String chatId) {
+    //        SseEmitter emitter = new SseEmitter(0L);
+    //        telegramStrimingService.addEmitter(emitter, chatId);
+    //
+    //        emitter.onCompletion(() -> telegramStrimingService.removeEmitter(emitter));
+    //        emitter.onTimeout(() -> telegramStrimingService.removeEmitter(emitter));
+    //
+    //        return emitter;
+    //    }
 
     /**
      * Retrieves a list of {@link FeedbackDto} for all users.

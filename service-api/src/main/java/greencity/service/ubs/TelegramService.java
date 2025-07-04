@@ -108,22 +108,24 @@ public interface TelegramService {
     PageableDto<TelegramMessageDto> findUserMessageByChatId(Long chatId, Pageable pageable);
 
     /**
-     * Retrieves a paginated list of authorized users, optionally filtered by a search term.
+     * Retrieves a paginated list of authorized users, optionally filtered by a
+     * search term.
      *
-     * @param searchTerm optional keyword to filter users by recipient name or surname;
-     *                   if null or empty, all users are returned
+     * @param searchTerm optional keyword to filter users by recipient name or
+     *                   surname; if null or empty, all users are returned
      * @param pageable   pagination and sorting information
      * @return a page of {@link AuthorizedUserDto} matching the given criteria
      */
     PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable);
 
-
     /**
-     * Retrieves the most recent order data for the user identified by the given chat ID.
+     * Retrieves the most recent order data for the user identified by the given
+     * chat ID.
      *
      * @param chatId the chat identifier of the user
      * @return {@link OrdersDataForUserDto} containing details of the latest order,
-     *         or throws an exception / returns null if no order is found (depending on implementation)
+     *         or throws an exception / returns null if no order is found (depending
+     *         on implementation)
      */
     OrdersDataForUserDto getLastOrderByChatId(String chatId);
 
@@ -144,16 +146,6 @@ public interface TelegramService {
      * @return a SendMessage with the response
      */
     SendMessage handleUserChatScope(String data, String chatId, Integer messageId);
-
-//    /**
-//     * Retrieves all TelegramUserPhotos by chatId.
-//     *
-//     * @param chatId the telegram chat ID
-//     * @param page   the page to retrieve
-//     *
-//     * @return a list of TelegramUserPhotos associated with the specified chatId
-//     */
-//    PageableDto<TelegramImageDto> findUserPhotosByChatId(String chatId, Pageable page);
 
     PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable);
 
