@@ -271,7 +271,7 @@ public class TelegramServiceImpl implements TelegramService {
     public void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files) {
         var bot = applicationContext.getBean(UBSTelegramBot.class);
 
-        TelegramChat chat = telegramChatRepository.findByChatId(request.getChatId().toString())
+        TelegramChat chat = telegramChatRepository.findById(request.getChatId())
             .orElseThrow(() -> new NotFoundException("Chat not found"));
 
         TelegramMessage message = TelegramMessage.builder()
@@ -304,7 +304,7 @@ public class TelegramServiceImpl implements TelegramService {
                 assets.add(asset);
 
                 if (assetType == AssetType.IMAGE) {
-                    var sendPhotoMessage = MessageFactory.createPhotoSender(request.getChatId().toString(), url, "");
+                    var sendPhotoMessage = MessageFactory.createPhotoSender(chat.getChatId(), url, "");
                     executor.executeSendPhoto(bot, sendPhotoMessage);
                 }
             }
