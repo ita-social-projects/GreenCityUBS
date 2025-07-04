@@ -588,7 +588,14 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         saveOrderEvent(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
 
-        return processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
+        PaymentSystemResponse paymentSystemResponse =
+            processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
+
+        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
+            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
+        }
+
+        return paymentSystemResponse;
     }
 
     private void validateOrderRequestAddress(OrderResponseDto dto) {
@@ -1165,7 +1172,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .doubleValue();
     }
 
-    private UBSuser formUserDataToBeSaved(PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
+    private UBSuser formUserDataToBeSaved(
+        PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
         UBSuser ubsUserFromDatabaseById = null;
         if (dto.getUbsUserId() != null) {
             ubsUserFromDatabaseById =
