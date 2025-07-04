@@ -369,7 +369,7 @@ public class TelegramServiceImpl implements TelegramService {
                     ChatUserDto chatUserDto = ChatUserDto
                         .builder()
                         .firstName(chat.getUser().getRecipientName())
-                        .firstName(chat.getUser().getRecipientSurname())
+                        .lastName(chat.getUser().getRecipientSurname())
                         .email(chat.getUser().getRecipientEmail())
                         .build();
 
