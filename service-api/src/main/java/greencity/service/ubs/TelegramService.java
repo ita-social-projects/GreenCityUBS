@@ -87,13 +87,6 @@ public interface TelegramService {
      */
     SendMessage stopSupportMode(Message message);
 
-    /**
-     * Activates manager mode for the specified user.
-     *
-     * @param chatId {@link String} chat ID
-     */
-    void managerMode(String chatId);
-
     void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files);
 
     ChatDto getChatById(Long chatId);

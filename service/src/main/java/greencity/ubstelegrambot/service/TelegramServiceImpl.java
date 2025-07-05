@@ -73,19 +73,46 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public SendMessage processLoginCommand(Message message) {
         String[] parts = message.getText().split(":");
+
         if (parts.length < 3) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(), INCORRECT_LOGIN_FORMAT);
         }
+
         String login = parts[1];
         String password = parts[2];
-        managerMode(message.getChatId().toString());
+
+        Optional<Employee> employee = employeeRepository.findByEmail(login);
+
+        if (employee.isEmpty()) {
+            return MessageFactory.createFailLoginMessage(message.getChatId().toString(), "User is not employee");
+        }
+
+        boolean isManager = checkIsEmployeeManager(employee.get());
+
+        if (!isManager) {
+            return MessageFactory.createFailLoginMessage(message.getChatId().toString(), "User is not manager");
+        }
+
         var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, secretToken));
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            return MessageFactory.createFailLoginMessage(message.getChatId().toString(), "Something went wrong please try again later");
+        }
+
         var responseBody = response.getBody();
-        String username = (responseBody != null && responseBody.name() != null) ? responseBody.name() : USERNAME;
+        String name = (responseBody != null && responseBody.name() != null) ? responseBody.name() : USERNAME;
+
+        telegramManagerRepository.save(
+                TelegramManager
+                        .builder()
+                        .chatId(message.getChatId().toString())
+                        .employee(employee.get())
+                        .build()
+        );
 
         return MessageFactory.createSuccessLoginMessage(
-            message.getChatId().toString(),
-            username);
+                message.getChatId().toString(),
+                name);
     }
 
     @Override
@@ -220,13 +247,6 @@ public class TelegramServiceImpl implements TelegramService {
         notificationTimestampRepository.deleteById(chatId);
         messageIdForDeleting = message.getMessageId();
         return MessageFactory.createEndSupportMessage(chatId);
-    }
-
-    @Override
-    public void managerMode(String chatId) {
-        telegramManagerRepository.save(new TelegramManager(
-            chatId,
-            null));
     }
 
     /**
