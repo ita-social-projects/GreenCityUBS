@@ -9,12 +9,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-import static greencity.constant.TelegramBotConstants.BACK_TO_MAIN_MENU;
-import static greencity.constant.TelegramBotConstants.SCORE;
+import static greencity.constant.TelegramBotConstants.*;
 
 public class KeyboardFactory {
     public static final String YES = "Так";
-    public static final String CHAT_WITH_PEOPLE = "Чат з людиною";
 
     private KeyboardFactory() {
     }
@@ -28,7 +26,7 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup createHelpKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
-        keyboard.add(createRow(CHAT_WITH_PEOPLE, TelegramBotConstants.CLIENT_SUPPORT_CALLBACK));
+        keyboard.add(createRow("Чат з людиною", TelegramBotConstants.CLIENT_SUPPORT_CALLBACK));
         keyboard.add(createRow("Графік роботи станції", TelegramBotConstants.WORK_SCHEDULE_CALLBACK));
         keyboard.add(createRow("Правила прийому сировини", TelegramBotConstants.ADMISSION_RULES_CALLBACK));
         keyboard.add(createRow("Зелений офіс", TelegramBotConstants.GREEN_OFFICE_CALLBACK));
@@ -50,11 +48,13 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup createChatFeedbackRatingKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         String star = EmojiParser.parseToUnicode(":star:%s");
-        keyboard.add(createRow(
-            List.of(String.format(star, 1), String.format(star, 2), String.format(star, 3), String.format(star, 4),
-                String.format(star, 5)),
-            List.of(String.format(SCORE, 1), String.format(SCORE, 2), String.format(SCORE, 3), String.format(SCORE, 4),
-                String.format(SCORE, 5))));
+
+        keyboard.add(createRow(String.format(star, 1), RATING_TERRIBLY_CALLBACK));
+        keyboard.add(createRow(String.format(star, 2), RATING_BADLY_CALLBACK));
+        keyboard.add(createRow(String.format(star, 3), RATING_SATISFACTORILY_CALLBACK));
+        keyboard.add(createRow(String.format(star, 4), RATING_GOOD_CALLBACK));
+        keyboard.add(createRow(String.format(star, 5), RATING_PERFECTLY_CALLBACK));
+
         return InlineKeyboardMarkup
             .builder()
             .keyboard(keyboard)

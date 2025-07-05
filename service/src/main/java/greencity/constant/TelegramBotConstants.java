@@ -77,6 +77,11 @@ public class TelegramBotConstants {
     public static final String FEEDBACK_CALLBACK = "feedback_command";
     public static final String GREEN_OFFICE_CALLBACK = "green_office_command";
     public static final String GREEN_OFFICE_PROCESS_CALLBACK = "green_office_process_command";
+    public static final String RATING_TERRIBLY_CALLBACK = "rating_terribly_callback";
+    public static final String RATING_BADLY_CALLBACK = "rating_badly_callback";
+    public static final String RATING_SATISFACTORILY_CALLBACK = "rating_satisfactorily_callback";
+    public static final String RATING_GOOD_CALLBACK = "rating_good_callback";
+    public static final String RATING_PERFECTLY_CALLBACK = "rating_perfectly_callback";
     public static final String SORTING_CALLBACK = "sorting_command";
     public static final String SORTING_PROCESS_CALLBACK = "sorting_process_command";
     public static final String SORTING_PRICES_CALLBACK = "sorting_prices_command";
@@ -160,4 +165,6 @@ public class TelegramBotConstants {
             чат слово БОТ або одну з команд — /options, /courier чи /post 🤖
             """;
     public static final String GREEN_OFFICE_SUBJECT = "Цікавить Зелений офіс";
+    public static final String UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN =
+        "Сталася невідома помилка, спробуйте, будь ласка, знову";
 }

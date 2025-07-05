@@ -93,24 +93,24 @@ public class TelegramController {
         return ResponseEntity.ok(telegramService.getChatById(chatId));
     }
 
-    /**
-     * Generates a link for a manager to communicate with a user.
-     *
-     * @param employeeUUID the UUID of the user to communicate with
-     * @return a link to communicate with the user
-     */
-    @Operation(summary = "Generate manager authorization link")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
-    @PostMapping("/generate-manager-link")
-    public ResponseEntity<String> generateManagerLink(@CurrentUserUuid String employeeUUID) {
-        return ResponseEntity.status(HttpStatus.OK).body(telegramService.generateManagerStartLink(employeeUUID));
-    }
+    //    /**
+    //     * Generates a link for a manager to communicate with a user.
+    //     *
+    //     * @param employeeUUID the UUID of the user to communicate with
+    //     * @return a link to communicate with the user
+    //     */
+    //    @Operation(summary = "Generate manager authorization link")
+    //    @ApiResponses(value = {
+    //        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+    //        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+    //        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+    //        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+    //    })
+    //    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    //    @PostMapping("/generate-manager-link")
+    //    public ResponseEntity<String> generateManagerLink(@CurrentUserUuid String employeeUUID) {
+    //        return ResponseEntity.status(HttpStatus.OK).body(telegramService.generateManagerStartLink(employeeUUID));
+    //    }
 
     // /**
     // * Starts a server-sent event stream for the given chat ID. The stream will

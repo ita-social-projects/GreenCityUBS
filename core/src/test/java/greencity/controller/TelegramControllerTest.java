@@ -171,19 +171,19 @@ class TelegramControllerTest {
 //            any());
 //    }
 
-    @Test
-    void generateManagerLinkTest() throws Exception {
-        Principal principal = getPrincipal();
-        String principalUuid = "uuid";
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(principalUuid);
-
-        mockMvc.perform(post(baseUrl + "/generate-manager-link")
-            .principal(principal))
-            .andExpect(status().isOk());
-
-        verify(telegramService).generateManagerStartLink(
-            principalUuid);
-    }
+//    @Test
+//    void generateManagerLinkTest() throws Exception {
+//        Principal principal = getPrincipal();
+//        String principalUuid = "uuid";
+//        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(principalUuid);
+//
+//        mockMvc.perform(post(baseUrl + "/generate-manager-link")
+//            .principal(principal))
+//            .andExpect(status().isOk());
+//
+//        verify(telegramService).generateManagerStartLink(
+//            principalUuid);
+//    }
 
 //    @Test
 //    void streamTest() throws Exception {

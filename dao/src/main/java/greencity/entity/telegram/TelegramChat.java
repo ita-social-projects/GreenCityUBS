@@ -1,6 +1,7 @@
 package greencity.entity.telegram;
 
 import greencity.entity.user.User;
+import greencity.enums.ChatState;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -21,8 +22,9 @@ public class TelegramChat {
     @Column(nullable = false)
     private String chatId;
 
-    @Column(nullable = false, columnDefinition = "boolean default false")
-    private Boolean isSupportStatusActive;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ChatState chatState = ChatState.NORMAL;
 
     @Column(nullable = false, name = "notify")
     private Boolean isNotify;
@@ -42,4 +44,7 @@ public class TelegramChat {
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TelegramMessage> messages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatFeedback> feedbacks = new ArrayList<>();
 }

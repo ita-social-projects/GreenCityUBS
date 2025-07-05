@@ -284,5 +284,6 @@
     <include file="db/changelog/logs/2025-07-01-ch-telegram-chat-user-nullable.xml"/>
     <include file="db/changelog/logs/2025-07-02-ch-update-text-message-and-image-table-Pampukha.xml"/>
     <include file="db/changelog/logs/2025-07-04-ch-add-telegram-message-entity.xml"/>
+    <include file="db/changelog/logs/2025-07-06-ch-add-feedback-to-chat.xml"/>
 
 </databaseChangeLog>

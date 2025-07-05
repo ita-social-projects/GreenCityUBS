@@ -171,24 +171,7 @@ import greencity.entity.user.ubs.BaseAddress;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.entity.viber.ViberBot;
-import greencity.enums.AddressStatus;
-import greencity.enums.BagStatus;
-import greencity.enums.CancellationReason;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.CourierStatus;
-import greencity.enums.EmployeeStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.NotificationReceiverType;
-import greencity.enums.NotificationTime;
-import greencity.enums.NotificationTrigger;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentSystem;
-import greencity.enums.TariffStatus;
-import greencity.enums.UserCategory;
+import greencity.enums.*;
 import greencity.util.Bot;
 
 import java.time.Clock;
@@ -1604,13 +1587,13 @@ public class ModelUtils {
     }
 
     public static TelegramChat getTelegramBotNotifyTrue() {
-        return new TelegramChat(1L, "12345", false, true, "username", "first_name", "last_name", null,
-            new ArrayList<>());
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, true, "username", "first_name", "last_name", null,
+            new ArrayList<>(), new ArrayList<>());
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
-        return new TelegramChat(1L, "12345", false, false, "username", "first_name", "last_name", null,
-            new ArrayList<>());
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, false, "username", "first_name", "last_name", null,
+            new ArrayList<>(), new ArrayList<>());
     }
 
     public static ViberBot getViberBotNotifyTrue() {

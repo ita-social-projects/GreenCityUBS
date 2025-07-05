@@ -345,7 +345,24 @@ public class MessageFactory {
         }
     }
 
+    public static SendMessage createGreatFeedbackMessage(String chatId) {
+        return buildMessage(chatId, TelegramBotConstants.GREAT_FEEDBACK_MESSAGE);
+    }
+
+    public static SendMessage createBadFeedbackMessage(String chatId) {
+        return buildMessage(chatId, TelegramBotConstants.BAD_FEEDBACK_MESSAGE);
+    }
+
     public static SendMessage createFeedbackThanksMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE);
+    }
+
+    public static SendMessage createUnknownErrorOccurredMessage(String chatId) {
+        return SendMessage
+            .builder()
+            .chatId(chatId)
+            .text(TelegramBotConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN)
+            .replyMarkup(KeyboardFactory.userSupportKeyboard())
+            .build();
     }
 }

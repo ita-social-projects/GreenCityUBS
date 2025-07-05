@@ -8,6 +8,7 @@ import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
+import greencity.enums.ChatState;
 import greencity.enums.NotificationType;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.ubstelegrambot.UBSTelegramBot;
@@ -41,7 +42,8 @@ class TelegramNotificationServiceTest {
     private TelegramNotificationService telegramNotificationService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(
-            new TelegramChat(1L, "12345", false, true, "username", "first_name", "last_name", null, new ArrayList<>()))
+            new TelegramChat(1L, "12345", ChatState.NORMAL, true, "username", "first_name", "last_name", null,
+                new ArrayList<>(), new ArrayList<>()))
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
     private final UserNotification notification = new UserNotification()
@@ -92,8 +94,9 @@ class TelegramNotificationServiceTest {
         userEntity.setTelegramBot(new TelegramChat());
         assertFalse(telegramNotificationService.isEnabled(userEntity));
 
-        userEntity.setTelegramBot(new TelegramChat(1L, "12345", false, true, "username", "first_name", "last_name",
-            userEntity, new ArrayList<>()));
+        userEntity
+            .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, true, "username", "first_name", "last_name",
+                userEntity, new ArrayList<>(), new ArrayList<>()));
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 
     }
