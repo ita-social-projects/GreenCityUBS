@@ -760,7 +760,7 @@ class UBSClientServiceImplTest {
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
             .thenReturn(mockWayForPayResponse);
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf");
         Assertions.assertNotNull(result);
         Assertions.assertEquals("http://example.com/invoice", result.link());
     }
@@ -775,7 +775,7 @@ class UBSClientServiceImplTest {
         when(locationRepository.findAddressAndLocationNamesMatch(anyLong(), anyLong())).thenReturn(Optional.empty());
 
         assertThrows(AddressNotWithinLocationAreaException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(addressRepository, times(1)).findById(anyLong());
         verify(locationRepository, times(1)).findAddressAndLocationNamesMatch(anyLong(), anyLong());
@@ -804,7 +804,7 @@ class UBSClientServiceImplTest {
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(addressWithNullCoordinates));
 
         assertThrows(AddressNotWithinLocationAreaException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(addressRepository).findById(anyLong());
     }
@@ -822,7 +822,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         assertThrows(EntityNotFoundException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -875,7 +875,7 @@ class UBSClientServiceImplTest {
         when(locationRepository.findById(any())).thenReturn(Optional.of(getLocation()));
 
         assertThrows(NotFoundException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
 
     }
 
@@ -930,7 +930,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.of(address));
         when(locationRepository.findById(any())).thenReturn(Optional.of(getLocation()));
         assertThrows(NotFoundException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
 
     }
 
@@ -997,7 +997,7 @@ class UBSClientServiceImplTest {
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
             .thenReturn(mockWayForPayResponse);
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf");
         Assertions.assertNotNull(result);
 
     }
@@ -1056,7 +1056,7 @@ class UBSClientServiceImplTest {
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
             .thenReturn(mockWayForPayResponse);
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf");
         Assertions.assertNotNull(result);
     }
 
@@ -1096,7 +1096,8 @@ class UBSClientServiceImplTest {
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
             .thenReturn(getCheckoutResponseFromMonoBank());
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
+        PaymentSystemResponse result = ubsService
+            .processExistingOrder(dto, "35467585763t4sfgchjfuyetf", order.getId());
         Assertions.assertNotNull(result);
 
         verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
@@ -1156,7 +1157,7 @@ class UBSClientServiceImplTest {
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
             .thenReturn(mockWayForPayResponse);
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf");
         Assertions.assertNotNull(result);
 
     }
@@ -1201,7 +1202,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(userRepository, times(1)).findByUuid(anyString());
         verify(tariffsInfoRepository, times(1))
@@ -1242,7 +1243,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(PersonalDataDto.class), eq(UBSuser.class))).thenReturn(ubsUser);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
         assertEquals(exception.getMessage(), PRICE_OF_ORDER_GREATER_THAN_LIMIT + tariffsInfo.getMax());
 
         verify(userRepository, times(1)).findByUuid(anyString());
@@ -1280,7 +1281,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(PersonalDataDto.class), eq(UBSuser.class))).thenReturn(ubsUser);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
         assertEquals(exception.getMessage(), TOO_MANY_BAGS_EXCEPTION + tariffsInfo.getMax());
 
         verify(userRepository, times(1)).findByUuid(anyString());
@@ -1314,7 +1315,7 @@ class UBSClientServiceImplTest {
             .thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
 
         verify(tariffsInfoRepository).findTariffsInfoByBagIdAndLocationId(anyList(), anyLong());
     }
@@ -1343,7 +1344,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(3)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
         assertTrue(exception.getMessage().contains(BAG_NOT_FOUND));
 
         verify(userRepository, times(1)).findByUuid(anyString());
@@ -1388,7 +1389,8 @@ class UBSClientServiceImplTest {
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
             .thenReturn(getCheckoutResponseFromMonoBank());
 
-        PaymentSystemResponse result = ubsClientService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L);
+        PaymentSystemResponse result = ubsClientService
+            .processExistingOrder(dto, "35467585763t4sfgchjfuyetf", 1L);
         Assertions.assertNotNull(result);
 
         verify(userRepository, times(1)).findByUuid("35467585763t4sfgchjfuyetf");
@@ -1412,7 +1414,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
 
         assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", 1L));
+            () -> ubsService.processExistingOrder(dto, "35467585763t4sfgchjfuyetf", 1L));
     }
 
     @Test
@@ -1448,7 +1450,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(any(PersonalDataDto.class), eq(UBSuser.class))).thenReturn(ubsUser);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
         assertEquals(exception.getMessage(), NOT_ENOUGH_BAGS_EXCEPTION + tariffsInfo.getMin());
     }
 
@@ -2205,7 +2207,7 @@ class UBSClientServiceImplTest {
         when(wayForPayClient.getCheckOutResponse(any(PaymentWayForPayRequestDto.class)))
             .thenReturn(mockWayForPayResponse);
 
-        PaymentSystemResponse result = ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null);
+        PaymentSystemResponse result = ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf");
         Assertions.assertNotNull(result);
     }
 
@@ -2252,7 +2254,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         PaymentSystemResponse result =
-            ubsClientService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", order.getId());
+            ubsClientService.processExistingOrder(dto, "35467585763t4sfgchjfuyetf", order.getId());
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.link() == null || result.link().isEmpty());
@@ -2305,7 +2307,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -2349,7 +2351,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -2392,7 +2394,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(3)).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -2792,7 +2794,7 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(mappedFromDtoUser);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
         assertTrue(exception.getMessage().contains(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER));
     }
 
@@ -2823,7 +2825,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(anyLong())).thenReturn(Optional.of(ubsUser));
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
         assertTrue(exception.getMessage().contains(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER));
     }
 
@@ -2862,7 +2864,7 @@ class UBSClientServiceImplTest {
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> ubsService.saveFullOrderToDB(dto, "35467585763t4sfgchjfuyetf", null));
+            () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
     }
 
     @Test
@@ -3493,7 +3495,7 @@ class UBSClientServiceImplTest {
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
             .thenReturn(getCheckoutResponseFromMonoBank());
 
-        PaymentSystemResponse result = ubsClientService.saveFullOrderToDB(dto, user.getUuid(), 1L);
+        PaymentSystemResponse result = ubsClientService.processExistingOrder(dto, user.getUuid(), 1L);
         Assertions.assertNotNull(result);
 
         verify(userRepository, times(1)).findByUuid(anyString());
@@ -3574,7 +3576,8 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
-        PaymentSystemResponse paymentSystemResponse = ubsClientService.saveFullOrderToDB(dto, uuid, 1L);
+        PaymentSystemResponse paymentSystemResponse = ubsClientService
+            .processExistingOrder(dto, uuid, 1L);
 
         assertEquals("", paymentSystemResponse.link());
         assertEquals(1L, paymentSystemResponse.orderId());
