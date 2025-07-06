@@ -456,7 +456,8 @@ public class TelegramServiceImpl implements TelegramService {
     private SendMessage processInputManagerCredentialsRequest(Message message) {
         String[] parts = message.getText().split(":");
 
-        //todo need to add reset chat state to NORMAL in case of bad credentials request
+        // todo need to add reset chat state to NORMAL in case of bad credentials
+        // request
 
         if (parts.length < 3) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(), INCORRECT_LOGIN_FORMAT);
