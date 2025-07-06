@@ -629,18 +629,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             tariffsInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId) {
-        if (orderId != null) {
-            return processExistingOrder(dto, uuid, orderId);
-        }
-        return processNewOrder(dto, uuid);
-    }
-
     private void saveOrderEvent(String eventName, String author, Order order) {
         eventService.save(eventName, author, order);
         log.info("Saved event: eventName={}, author={}, orderId={}", eventName, author, order.getId());

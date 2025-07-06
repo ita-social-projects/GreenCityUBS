@@ -88,18 +88,6 @@ public interface UBSClientService {
     CertificateDto checkCertificate(String code, String userUuid);
 
     /**
-     * Methods saves all entered by user data to database.
-     *
-     * @param dto     {@link OrderResponseDto} user entered data;
-     * @param uuid    current {@link User}'s uuid;
-     * @param orderId {@link Long} order id;
-     * @return {@link PaymentWayForPayRequestDto} which contains data to pay order
-     *         out.
-     * @author Oleh Bilonizhka
-     */
-    PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
-
-    /**
      * Methods creates and adjusts new order and generates payment link for the
      * order.
      *
