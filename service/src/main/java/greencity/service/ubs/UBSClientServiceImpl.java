@@ -655,16 +655,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void handleOrderNotifications(Order order, Long orderId, long sumToPayInCoins,
-        PaymentSystemResponse paymentSystemResponse) {
-        if (orderId == null) {
-            notificationService.notifyCreatedOrder(order);
-        }
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            notificationServiceImpl.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
-        }
-    }
-
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
         User currentUser) {
         return switch (dto.getPaymentSystem()) {
