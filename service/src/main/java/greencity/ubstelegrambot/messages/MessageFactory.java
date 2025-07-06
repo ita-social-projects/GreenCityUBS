@@ -20,7 +20,12 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the welcome message.
      */
     public static SendMessage createWelcomeMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.GREETING_MESSAGE);
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.GREETING_MESSAGE,
+            KeyboardFactory.createHelpKeyboard());
+    }
+
+    public static SendMessage createWelcomeManagerMessage(String chatId) {
+        return buildMessage(chatId, TelegramBotConstants.GREETING_MANAGER_MESSAGE);
     }
 
     public static SendMessage createAvailableCommandOption(String chatId) {

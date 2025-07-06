@@ -13,6 +13,10 @@ public class TelegramBotConstants {
             Привіт! Я бот і допомагаю своїм колегам-менеджеркам обробляти запити.
             Будь ласка, поставте своє запитання, обравши чат з людиною або виберіть варіант інший варіант.
             """;
+    public static final String GREETING_MANAGER_MESSAGE =
+        """
+            Привіт менеджер!
+            """;
     public static final String CLIENT_SUPPORT_MESSAGE =
         "Будь ласка введіть своє повідомлення в форматі /support:повідомлення";
     public static final String LOGIN_MESSAGE = "Введіть логін та пароль в форматі /login:логін:пароль";

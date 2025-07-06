@@ -76,15 +76,13 @@ public class TelegramServiceImpl implements TelegramService {
         return employeePositions.contains(manager) || employeePositions.contains(serviceManager);
     }
 
-    public void processStartBotRequest(Message message) {
+    public SendMessage processStartBotRequest(Message message) {
         final String uuId = message.getText().replace(TelegramBotConstants.START_COMMAND, "").trim();
         final String chatId = message.getFrom().getId().toString();
 
         Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(chatId);
 
-        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
-
-        if (!uuId.isEmpty()) {
+        if (!uuId.isEmpty() || (telegramChat.isPresent() && telegramChat.get().getUser() != null)) {
             Optional<Employee> employee = employeeRepository.findByUuid(uuId);
 
             if (employee.isPresent()) {
@@ -96,30 +94,9 @@ public class TelegramServiceImpl implements TelegramService {
                         telegramManagerRepository.findById(employee.get().getId().toString());
 
                     if (telegramManager.isEmpty()) {
-                        executor.executeCommand(ubsTelegramBot, MessageFactory.createLoginMessage(chatId));
+                        return processLoginRequest(chatId);
                     } else {
-                        // manager already authorized, show a manger menu to him
-                    }
-                    return;
-                }
-            }
-        }
-
-        if (telegramChat.isPresent() && telegramChat.get().getUser() != null) {
-            Optional<Employee> employee = employeeRepository.findByUuid(telegramChat.get().getUser().getUuid());
-
-            if (employee.isPresent()) {
-                boolean isManager = checkIsEmployeeManager(employee.get());
-                if (isManager) {
-                    telegramChat.ifPresent(telegramChatRepository::delete);
-
-                    Optional<TelegramManager> telegramManager =
-                        telegramManagerRepository.findById(employee.get().getId().toString());
-
-                    if (telegramManager.isEmpty()) {
-                        executor.executeCommand(ubsTelegramBot, MessageFactory.createLoginMessage(chatId));
-                    } else {
-                        // manager already authorized, show a manger menu to him
+                        return MessageFactory.createWelcomeManagerMessage(chatId);
                     }
                 }
             }
@@ -142,9 +119,7 @@ public class TelegramServiceImpl implements TelegramService {
             telegramChatRepository.save(newChatBuilder.build());
         }
 
-        executor.executeCommand(ubsTelegramBot, MessageFactory.createWelcomeMessage(chatId));
-        executor.executeCommand(ubsTelegramBot,
-            MessageFactory.createAvailableCommandOption(message.getChatId().toString()));
+        return MessageFactory.createWelcomeMessage(chatId);
     }
 
     /**
@@ -299,27 +274,26 @@ public class TelegramServiceImpl implements TelegramService {
                 }
 
                 telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat).ifPresent(message -> {
-
                     List<MessageAssetDto> assetDtos = message
-                            .getAssets()
-                            .stream()
-                            .map(asset -> new MessageAssetDto(
-                                    asset.getId(),
-                                    asset.getUrl(),
-                                    asset.getType(),
-                                    asset.getFileName(),
-                                    asset.getSize(),
-                                    asset.getContentType()))
-                            .toList();
+                        .getAssets()
+                        .stream()
+                        .map(asset -> new MessageAssetDto(
+                            asset.getId(),
+                            asset.getUrl(),
+                            asset.getType(),
+                            asset.getFileName(),
+                            asset.getSize(),
+                            asset.getContentType()))
+                        .toList();
 
                     TelegramMessageDto lastMessage = TelegramMessageDto.builder()
-                            .id(message.getId())
-                            .text(message.getText())
-                            .sendAt(message.getSendAt())
-                            .fromManager(message.getFromManager())
-                            .deliveryStatus(message.getStatus())
-                            .assets(assetDtos)
-                            .build();
+                        .id(message.getId())
+                        .text(message.getText())
+                        .sendAt(message.getSendAt())
+                        .fromManager(message.getFromManager())
+                        .deliveryStatus(message.getStatus())
+                        .assets(assetDtos)
+                        .build();
 
                     chatDtoBuilder.lastMessage(lastMessage);
                 });
@@ -438,6 +412,10 @@ public class TelegramServiceImpl implements TelegramService {
         return MessageFactory.createAvailableCommandOption(chatId);
     }
 
+    private SendMessage processUnknownRequest(String chatId) {
+        return MessageFactory.createUnknownCommandMessage(chatId);
+    }
+
     private SendMessage processRatingFeedbackRequest(String chatId, int rating) {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
 
@@ -464,6 +442,13 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private SendMessage processLoginRequest(String chatId) {
+        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
+
+        if (chat.isEmpty()) {
+            return MessageFactory.createUnknownErrorOccurredMessage(chatId);
+        }
+
+        chat.get().setChatState(ChatState.LOGGING_AS_MANAGER);
         return MessageFactory.createLoginMessage(chatId);
     }
 
@@ -509,6 +494,28 @@ public class TelegramServiceImpl implements TelegramService {
         return MessageFactory.createSuccessLoginMessage(
             message.getChatId().toString(),
             name);
+    }
+
+    private SendMessage processNormalMessageRequest(Message message) {
+        String text = message.getText();
+
+        switch (text) {
+            case TelegramBotConstants.START_COMMAND -> {
+                return processStartBotRequest(message);
+            }
+            case TelegramBotConstants.SUPPORT_COMMAND -> {
+                return processSupportRequest(message.getChatId().toString());
+            }
+            case TelegramBotConstants.LOGIN_COMMAND -> {
+                return processLoginRequest(message.getChatId().toString());
+            }
+            case TelegramBotConstants.HELP_COMMAND -> {
+                return processMainMenuRequest(message.getChatId().toString());
+            }
+            default -> {
+                return processUnknownRequest(message.getChatId().toString());
+            }
+        }
     }
 
     private SendMessage processInputCommentRequest(Message message) {
@@ -568,42 +575,40 @@ public class TelegramServiceImpl implements TelegramService {
 
             if (chat.isEmpty()) {
                 if (text.contains(TelegramBotConstants.START_COMMAND)) {
-                    processStartBotRequest(update.getMessage());
+                    executor.executeCommand(ubsTelegramBot, processStartBotRequest(message));
                 }
             } else {
                 switch (chat.get().getChatState()) {
                     case IN_SUPPORT -> {
                         // save a message to db, also we need to check for end support mode command
                     }
-                    case MAKING_FEEDBACK -> {
-                        executor.executeCommand(ubsTelegramBot, processInputCommentRequest(update.getMessage()));
-                    }
-                    case LOGGING_AS_MANAGER -> {
-                        executor.executeCommand(ubsTelegramBot,
-                            processInputManagerCredentialsRequest(update.getMessage()));
-                    }
-                    default -> {
-                        // the user in normal mode and we need to check only available commands
-                    }
+                    case MAKING_FEEDBACK ->
+                        executor.executeCommand(ubsTelegramBot, processInputCommentRequest(message));
+                    case LOGGING_AS_MANAGER ->
+                        executor.executeCommand(ubsTelegramBot, processInputManagerCredentialsRequest(message));
+                    default -> executor.executeCommand(ubsTelegramBot, processNormalMessageRequest(message));
                 }
             }
         }
     }
 
-    //    private void notifyManagerOfGreenOfficeRequest(Message message, String email) {
-    //        String chatId = String.valueOf(message.getChatId());
-    //        Optional<TelegramChat> userOpt = telegramChatRepository.findByChatId(chatId);
+    // private void notifyManagerOfGreenOfficeRequest(Message message, String email)
+    // {
+    // String chatId = String.valueOf(message.getChatId());
+    // Optional<TelegramChat> userOpt = telegramChatRepository.findByChatId(chatId);
     //
-    //        String username = userOpt
-    //            .map(u -> u.getUser().getRecipientName() + " " + u.getUser().getRecipientSurname())
-    //            .orElse(message.getFrom().getUserName());
+    // String username = userOpt
+    // .map(u -> u.getUser().getRecipientName() + " " +
+    // u.getUser().getRecipientSurname())
+    // .orElse(message.getFrom().getUserName());
     //
-    //        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email, username);
-    //    }
+    // notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email,
+    // username);
+    // }
 
-    //    @Lazy
-    //    @Autowired
-    //    public void setNotificationService(NotificationService notificationService) {
-    //        this.notificationService = notificationService;
-    //    }
+    // @Lazy
+    // @Autowired
+    // public void setNotificationService(NotificationService notificationService) {
+    // this.notificationService = notificationService;
+    // }
 }
