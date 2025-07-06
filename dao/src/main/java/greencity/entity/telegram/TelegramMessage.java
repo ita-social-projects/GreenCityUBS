@@ -33,6 +33,9 @@ public class TelegramMessage {
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
     private List<MessageAsset> assets;
 
+    @Column(length = 50, unique = true)
+    private String mediaGroupId;
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id", nullable = false)
     private TelegramChat chat;
