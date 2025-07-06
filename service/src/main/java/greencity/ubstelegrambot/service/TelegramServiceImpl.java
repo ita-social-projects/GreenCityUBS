@@ -15,6 +15,7 @@ import greencity.entity.user.employee.Position;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.FeedbackState;
+import greencity.enums.MessageDeliveryStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.*;
 import greencity.service.ubs.*;
@@ -195,13 +196,14 @@ public class TelegramServiceImpl implements TelegramService {
             .chat(chat)
             .text(request.getText())
             .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
             .sendAt(LocalDateTime.now())
             .build();
 
         List<MessageAsset> assets = new ArrayList<>();
 
         if (request.getText() != null) {
-            var sendTextMessage = MessageFactory.buildMessage(request.getChatId().toString(), message.getText());
+            var sendTextMessage = MessageFactory.buildMessage(chat.getChatId(), message.getText());
             executor.executeCommand(bot, sendTextMessage);
         }
 
@@ -257,6 +259,7 @@ public class TelegramServiceImpl implements TelegramService {
                     message.getSendAt(),
                     message.getText(),
                     message.getFromManager(),
+                    message.getStatus(),
                     assetDtos);
             }).toList();
 
@@ -294,6 +297,32 @@ public class TelegramServiceImpl implements TelegramService {
                     chatDtoBuilder
                         .user(chatUserDto);
                 }
+
+                telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat).ifPresent(message -> {
+
+                    List<MessageAssetDto> assetDtos = message
+                            .getAssets()
+                            .stream()
+                            .map(asset -> new MessageAssetDto(
+                                    asset.getId(),
+                                    asset.getUrl(),
+                                    asset.getType(),
+                                    asset.getFileName(),
+                                    asset.getSize(),
+                                    asset.getContentType()))
+                            .toList();
+
+                    TelegramMessageDto lastMessage = TelegramMessageDto.builder()
+                            .id(message.getId())
+                            .text(message.getText())
+                            .sendAt(message.getSendAt())
+                            .fromManager(message.getFromManager())
+                            .deliveryStatus(message.getStatus())
+                            .assets(assetDtos)
+                            .build();
+
+                    chatDtoBuilder.lastMessage(lastMessage);
+                });
                 return chatDtoBuilder.build();
             })
             .toList();

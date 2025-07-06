@@ -16,4 +16,5 @@ public class ChatDto {
     private String lastName;
     private String username;
     private ChatUserDto user;
+    private TelegramMessageDto lastMessage;
 }

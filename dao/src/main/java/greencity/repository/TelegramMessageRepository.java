@@ -1,9 +1,12 @@
 package greencity.repository;
 
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
 
 public interface TelegramMessageRepository extends JpaRepository<TelegramMessage, Long> {
     /**
@@ -15,4 +18,6 @@ public interface TelegramMessageRepository extends JpaRepository<TelegramMessage
     Page<TelegramMessage> findByChatId(Long chatId, Pageable pageable);
 
     boolean existsByChatId(Long chatId);
+
+    Optional<TelegramMessage> findFirstByChatOrderBySendAtDesc(TelegramChat chat);
 }

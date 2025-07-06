@@ -1,5 +1,6 @@
 package greencity.dto.telegram;
 
+import greencity.enums.MessageDeliveryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,8 @@ public class TelegramMessageDto {
     private String text;
 
     private Boolean fromManager;
+
+    private MessageDeliveryStatus deliveryStatus;
 
     private List<MessageAssetDto> assets;
 }
