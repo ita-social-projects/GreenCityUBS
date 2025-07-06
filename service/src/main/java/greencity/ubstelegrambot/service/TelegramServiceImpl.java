@@ -38,12 +38,10 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-
 import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
-
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND;
 
 @Service
@@ -69,7 +67,6 @@ public class TelegramServiceImpl implements TelegramService {
     private String secretToken;
     private static final String USERNAME = "username";
     private static final String INCORRECT_LOGIN_FORMAT = "Incorrect login format. Please use format: login:password";
-
 
     private boolean checkIsEmployeeManager(Employee employee) {
         var employeePositions = employee.getEmployeePosition();
@@ -137,24 +134,23 @@ public class TelegramServiceImpl implements TelegramService {
         var bot = applicationContext.getBean(UBSTelegramBot.class);
 
         TelegramChat chat = telegramChatRepository.findByChatId(chatId)
-                .orElseThrow(() -> new NotFoundException("Chat not found"));
+            .orElseThrow(() -> new NotFoundException("Chat not found"));
 
         TelegramMessage telegramMessage = telegramMessageRepository
-                .findByMediaGroupId(mediaMessage.getMediaGroupId())
-                .orElseGet(() -> telegramMessageRepository.save(
-                        TelegramMessage.builder()
-                                .chat(chat)
-                                .fromManager(false)
-                                .mediaGroupId(mediaMessage.getMediaGroupId())
-                                .status(MessageDeliveryStatus.SENT)
-                                .sendAt(LocalDateTime.now())
-                                .text(mediaMessage.getCaption())
-                                .build()
-                ));
+            .findByMediaGroupId(mediaMessage.getMediaGroupId())
+            .orElseGet(() -> telegramMessageRepository.save(
+                TelegramMessage.builder()
+                    .chat(chat)
+                    .fromManager(false)
+                    .mediaGroupId(mediaMessage.getMediaGroupId())
+                    .status(MessageDeliveryStatus.SENT)
+                    .sendAt(LocalDateTime.now())
+                    .text(mediaMessage.getCaption())
+                    .build()));
 
         PhotoSize largestPhoto = mediaMessage.getPhoto().stream()
-                .max(Comparator.comparing(PhotoSize::getFileSize))
-                .orElse(null);
+            .max(Comparator.comparing(PhotoSize::getFileSize))
+            .orElse(null);
 
         if (largestPhoto == null) {
             log.warn("No photo found in media group message");
@@ -166,35 +162,33 @@ public class TelegramServiceImpl implements TelegramService {
             if (telegramFile != null && telegramFile.getFilePath() != null) {
                 try (InputStream inputStream = new URL(telegramFile.getFileUrl(bot.getBotToken())).openStream()) {
                     String azureFileUrl = azureCloudStorageService.upload(
-                            inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
+                        inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
 
                     AssetType assetType = detectAssetType(getFileContentType(telegramFile.getFilePath()));
 
                     MessageAsset asset = MessageAsset.builder()
-                            .url(azureFileUrl)
-                            .fileName(getFileNameFromPath(telegramFile.getFilePath()))
-                            .size(largestPhoto.getFileSize().longValue())
-                            .contentType(getFileContentType(telegramFile.getFilePath()))
-                            .type(assetType)
-                            .message(telegramMessage)
-                            .build();
+                        .url(azureFileUrl)
+                        .fileName(getFileNameFromPath(telegramFile.getFilePath()))
+                        .size(largestPhoto.getFileSize().longValue())
+                        .contentType(getFileContentType(telegramFile.getFilePath()))
+                        .type(assetType)
+                        .message(telegramMessage)
+                        .build();
 
                     messageAssetRepository.save(asset);
-
                 }
             }
         } catch (Exception e) {
             log.error("Error loading photo: {}", e.getMessage());
         }
 
-//        if (!mediaList.isEmpty()) {
-//            SendMediaGroup sendMediaGroup = new SendMediaGroup();
-//            sendMediaGroup.setChatId(chatId);
-//            sendMediaGroup.setMedias(mediaList);
-//            executor.executeCommand(bot, sendMediaGroup);
-//        }
+        // if (!mediaList.isEmpty()) {
+        // SendMediaGroup sendMediaGroup = new SendMediaGroup();
+        // sendMediaGroup.setChatId(chatId);
+        // sendMediaGroup.setMedias(mediaList);
+        // executor.executeCommand(bot, sendMediaGroup);
+        // }
     }
-
 
     /**
      * {@inheritDoc}
@@ -204,32 +198,31 @@ public class TelegramServiceImpl implements TelegramService {
         var bot = applicationContext.getBean(UBSTelegramBot.class);
 
         TelegramChat chat = telegramChatRepository.findByChatId(chatId)
-                .orElseThrow(() -> new NotFoundException("Chat not found"));
+            .orElseThrow(() -> new NotFoundException("Chat not found"));
 
         String text = message.hasText() ? message.getText() : message.getCaption();
 
         TelegramMessage telegramMessage = TelegramMessage.builder()
-                .chat(chat)
-                .text(text)
-                .fromManager(false)
-                .status(MessageDeliveryStatus.SENT)
-                .sendAt(LocalDateTime.now())
-                .build();
+            .chat(chat)
+            .text(text)
+            .fromManager(false)
+            .status(MessageDeliveryStatus.SENT)
+            .sendAt(LocalDateTime.now())
+            .build();
 
         MessageAsset messageAsset = null;
 
         boolean hasPhoto = message.hasPhoto();
 
         if (!hasPhoto && text != null && !text.isEmpty()) {
-            //notify manager in another option
-            //executor.executeCommand(bot, MessageFactory.buildMessage(chatId, text));
+            // notify manager in another option
+            // executor.executeCommand(bot, MessageFactory.buildMessage(chatId, text));
         }
-
 
         if (hasPhoto) {
             PhotoSize largestPhoto = message.getPhoto().stream()
-                    .max(Comparator.comparing(PhotoSize::getFileSize))
-                    .orElse(null);
+                .max(Comparator.comparing(PhotoSize::getFileSize))
+                .orElse(null);
 
             if (largestPhoto != null) {
                 try {
@@ -241,36 +234,35 @@ public class TelegramServiceImpl implements TelegramService {
 
                         try (InputStream inputStream = url.openStream()) {
                             String azureFileUrl = azureCloudStorageService.upload(
-                                    inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
+                                inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
 
                             AssetType assetType = detectAssetType(getFileContentType(telegramFile.getFilePath()));
 
                             messageAsset = MessageAsset.builder()
-                                    .url(azureFileUrl)
-                                    .fileName(getFileNameFromPath(telegramFile.getFilePath()))
-                                    .size(largestPhoto.getFileSize().longValue())
-                                    .contentType(getFileContentType(telegramFile.getFilePath()))
-                                    .type(assetType)
-                                    .message(telegramMessage)
-                                    .build();
+                                .url(azureFileUrl)
+                                .fileName(getFileNameFromPath(telegramFile.getFilePath()))
+                                .size(largestPhoto.getFileSize().longValue())
+                                .contentType(getFileContentType(telegramFile.getFilePath()))
+                                .type(assetType)
+                                .message(telegramMessage)
+                                .build();
 
-                            //notify manager in another option
-                            //var sendPhotoMessage = MessageFactory.createPhotoSender(chatId, azureFileUrl, message.getCaption());
-
+                            // notify manager in another option
+                            // var sendPhotoMessage = MessageFactory.createPhotoSender(chatId, azureFileUrl,
+                            // message.getCaption());
                         }
                     }
                 } catch (Exception e) {
                     log.error("Error by loading photo: {}", e.getMessage());
                 }
-
             }
         }
 
-        if(messageAsset != null)
+        if (messageAsset != null) {
             telegramMessage.setAssets(List.of(messageAsset));
+        }
         telegramMessageRepository.save(telegramMessage);
         // use telegramStreamService to notify special managers
-
     }
 
     private String getFileNameFromPath(String filePath) {
@@ -285,7 +277,9 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private String getFileContentType(String filePath) {
-        if (filePath == null) return "application/octet-stream";
+        if (filePath == null) {
+            return "application/octet-stream";
+        }
         if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg")) {
             return "image/jpeg";
         } else if (filePath.endsWith(".png")) {
@@ -321,7 +315,9 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private AssetType detectAssetType(String file) {
-        if (file == null) return AssetType.FILE;
+        if (file == null) {
+            return AssetType.FILE;
+        }
 
         if (file.startsWith("image/")) {
             return AssetType.IMAGE;
@@ -364,13 +360,13 @@ public class TelegramServiceImpl implements TelegramService {
                 String url = azureCloudStorageService.upload(file);
                 AssetType assetType = detectAssetType(file);
                 MessageAsset asset = MessageAsset.builder()
-                        .url(url)
-                        .fileName(file.getOriginalFilename())
-                        .size(file.getSize())
-                        .contentType(file.getContentType())
-                        .type(assetType)
-                        .message(message)
-                        .build();
+                    .url(url)
+                    .fileName(file.getOriginalFilename())
+                    .size(file.getSize())
+                    .contentType(file.getContentType())
+                    .type(assetType)
+                    .message(message)
+                    .build();
                 assets.add(asset);
 
                 if (assetType == AssetType.IMAGE) {
@@ -392,18 +388,18 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         List<TelegramMessageDto> messageDtoList = messages.stream()
-                .map(message -> {
-                    List<MessageAssetDto> assetDtos = message
-                            .getAssets()
-                            .stream()
-                            .map(asset -> new MessageAssetDto(
-                                    asset.getId(),
-                                    asset.getUrl(),
-                                    asset.getType(),
-                                    asset.getFileName(),
-                                    asset.getSize(),
-                                    asset.getContentType()))
-                            .toList();
+            .map(message -> {
+                List<MessageAssetDto> assetDtos = message
+                    .getAssets()
+                    .stream()
+                    .map(asset -> new MessageAssetDto(
+                        asset.getId(),
+                        asset.getUrl(),
+                        asset.getType(),
+                        asset.getFileName(),
+                        asset.getSize(),
+                        asset.getContentType()))
+                    .toList();
 
                 return new TelegramMessageDto(
                     message.getId(),
@@ -488,14 +484,14 @@ public class TelegramServiceImpl implements TelegramService {
     public PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable) {
         Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findAll(pageable);
         List<FeedbackDto> feedbackDtos = chatFeedbacks
-                .getContent()
-                .stream()
-                .map(feedback -> new FeedbackDto(
-                        feedback.getId(),
-                        feedback.getChat().getId().toString(),
-                        feedback.getRating(),
-                        feedback.getComment()))
-                .toList();
+            .getContent()
+            .stream()
+            .map(feedback -> new FeedbackDto(
+                feedback.getId(),
+                feedback.getChat().getId().toString(),
+                feedback.getRating(),
+                feedback.getComment()))
+            .toList();
 
         return new PageableDto<>(
             feedbackDtos,
@@ -508,14 +504,14 @@ public class TelegramServiceImpl implements TelegramService {
     public PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable) {
         Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatIdPageable(chatId, pageable);
         List<FeedbackDto> feedbackDtos = chatFeedbacks
-                .getContent()
-                .stream()
-                .map(feedback -> new FeedbackDto(
-                        feedback.getId(),
-                        feedback.getChat().getChatId(),
-                        feedback.getRating(),
-                        feedback.getComment()))
-                .toList();
+            .getContent()
+            .stream()
+            .map(feedback -> new FeedbackDto(
+                feedback.getId(),
+                feedback.getChat().getChatId(),
+                feedback.getRating(),
+                feedback.getComment()))
+            .toList();
 
         return new PageableDto<>(
             feedbackDtos,
@@ -760,10 +756,10 @@ public class TelegramServiceImpl implements TelegramService {
             } else {
                 switch (chat.get().getChatState()) {
                     case IN_SUPPORT -> {
-                        //TODO do this more tidier :)
-                        if(message.getMediaGroupId() != null)
+                        // TODO do this more tidier :)
+                        if (message.getMediaGroupId() != null) {
                             saveMediaGroup(chatId, message);
-                        else if (message.hasText()) {
+                        } else if (message.hasText()) {
                             saveUserMessage(chatId, message);
                         }
                     }

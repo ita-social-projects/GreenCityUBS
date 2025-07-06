@@ -32,9 +32,10 @@ public class TelegramExecutor {
     /**
      * Method sends message to telegram user.
      *
-     * @param bot    {@link TelegramLongPollingBot} is realisation of
-     *               TelegramLongPollingBot.
-     * @param sendMediaGroup {@link SendMediaGroup} is group of sending telegram messages.
+     * @param bot            {@link TelegramLongPollingBot} is realisation of
+     *                       TelegramLongPollingBot.
+     * @param sendMediaGroup {@link SendMediaGroup} is group of sending telegram
+     *                       messages.
      */
     public void executeCommand(TelegramLongPollingBot bot, SendMediaGroup sendMediaGroup) {
         try {

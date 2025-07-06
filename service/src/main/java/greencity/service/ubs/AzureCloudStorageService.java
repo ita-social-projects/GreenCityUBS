@@ -52,15 +52,18 @@ public class AzureCloudStorageService implements FileService {
     }
 
     /**
-     * Uploads a file to Azure Blob Storage from an InputStream.
-     * This method is intended for uploading files obtained, for example, from a URL (as in the case of Telegram).
+     * Uploads a file to Azure Blob Storage from an InputStream. This method is
+     * intended for uploading files obtained, for example, from a URL (as in the
+     * case of Telegram).
      *
-     *  @param inputStream The file data stream.
-     *  @param originalFileName The desired file name with an extension (for example, "image.jpg").
-     *   You can get it from Telegram's file_path.
-     *  @param fileSize The size of the file in bytes. You can get it using Telegram's PhotoSize.getFileSize() .
-     *  @return The URL of the uploaded file to Azure Blob Storage.
-     *  @throws FileNotSavedException if the file could not be saved.
+     * @param inputStream      The file data stream.
+     * @param originalFileName The desired file name with an extension (for example,
+     *                         "image.jpg"). You can get it from Telegram's
+     *                         file_path.
+     * @param fileSize         The size of the file in bytes. You can get it using
+     *                         Telegram's PhotoSize.getFileSize() .
+     * @return The URL of the uploaded file to Azure Blob Storage.
+     * @throws FileNotSavedException if the file could not be saved.
      */
     @Override
     public String upload(InputStream inputStream, String originalFileName, long fileSize) {
