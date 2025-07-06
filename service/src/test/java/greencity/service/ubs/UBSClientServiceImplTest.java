@@ -2256,7 +2256,7 @@ class UBSClientServiceImplTest {
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.link() == null || result.link().isEmpty());
-        Assertions.assertEquals(user.getCurrentPoints(), 0);
+        Assertions.assertEquals(0, user.getCurrentPoints());
 
         verify(monoBankClient, never()).getCheckoutResponse(any(), any());
         verify(wayForPayClient, never()).getCheckOutResponse(any());
