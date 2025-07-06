@@ -449,6 +449,7 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         chat.get().setChatState(ChatState.LOGGING_AS_MANAGER);
+        telegramChatRepository.save(chat.get());
         return MessageFactory.createLoginMessage(chatId);
     }
 

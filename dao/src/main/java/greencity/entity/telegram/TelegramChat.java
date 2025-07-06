@@ -12,8 +12,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = "user", callSuper = false)
-@ToString(exclude = "user")
+@ToString(exclude = {"messages", "feedbacks", "user"})
+@EqualsAndHashCode(exclude = {"messages", "feedbacks", "user"})
 public class TelegramChat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
