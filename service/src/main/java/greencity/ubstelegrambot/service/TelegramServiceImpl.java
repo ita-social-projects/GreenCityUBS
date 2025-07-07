@@ -44,6 +44,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND;
 
 @Service
@@ -155,25 +156,6 @@ public class TelegramServiceImpl implements TelegramService {
         return "application/octet-stream";
     }
 
-    /**
-     * Detects the {@link AssetType} of the given file based on its MIME type.
-     *
-     * <p>
-     * This method analyzes the MIME type (Content-Type) of the provided
-     * {@link MultipartFile} and returns the corresponding {@link AssetType}:
-     * </p>
-     * <ul>
-     * <li>{@code image/*} → {@link AssetType#IMAGE}</li>
-     * <li>{@code video/*} → {@link AssetType#VIDEO}</li>
-     * <li>{@code audio/*} → {@link AssetType#AUDIO}</li>
-     * <li>{@code application/pdf} → {@link AssetType#FILE}</li>
-     * <li>Any other or unknown types → {@link AssetType#FILE}</li>
-     * </ul>
-     *
-     * @param file the uploaded file for which the asset type should be determined
-     * @return the detected {@link AssetType}; defaults to {@link AssetType#FILE} if
-     *         unknown
-     */
     private AssetType detectAssetType(MultipartFile file) {
         String contentType = file.getContentType();
         return detectAssetType(contentType);
@@ -385,9 +367,6 @@ public class TelegramServiceImpl implements TelegramService {
             chatFeedbacks.getTotalPages());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public OrdersDataForUserDto getLastOrderByChatId(Long chatId) {
         TelegramChat telegramChat = telegramChatRepository.findById(chatId)
@@ -418,40 +397,58 @@ public class TelegramServiceImpl implements TelegramService {
             .build();
     }
 
-    private SendMessage processSupportRequest(String chatId) {
+    private SendMessage updateChatStateAndRespond(
+        String chatId,
+        ChatState newState,
+        Function<String, SendMessage> messageSupplier) {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
-        if (chat.isPresent()) {
-            chat.get().setChatState(ChatState.IN_SUPPORT);
-            chat.get().setChatStateUpdatedAt(LocalDateTime.now());
-            telegramChatRepository.save(chat.get());
-            return MessageFactory.createSupportMessageCallBackQuery(chatId);
-        } else {
+        if (chat.isEmpty()) {
             return MessageFactory.createUnknownErrorOccurredMessage(chatId);
         }
+        chat.get().setChatState(newState);
+        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
+        telegramChatRepository.save(chat.get());
+        return messageSupplier.apply(chatId);
+    }
+
+    private SendMessage processSupportRequest(String chatId) {
+        return updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
+            MessageFactory::createSupportMessageCallBackQuery);
     }
 
     private SendMessage processWorkScheduleRequest(String chatId) {
-        return MessageFactory.createWorkScheduleMessage(chatId);
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createWorkScheduleMessage);
     }
 
     private SendMessage processAdmissionRulesRequest(String chatId) {
-        return MessageFactory.createAdmissionRulesMessage(chatId);
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createAdmissionRulesMessage);
     }
 
     private SendMessage processGreenOfficeRequest(String chatId) {
-        return MessageFactory.createGreenOfficeMessage(chatId);
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createGreenOfficeMessage);
     }
 
     private SendMessage processFeedbackRequest(String chatId) {
-        return MessageFactory.createFeedbackMessage(chatId);
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createFeedbackMessage);
     }
 
     private SendMessage processMainMenuRequest(String chatId) {
-        return MessageFactory.createAvailableCommandOption(chatId);
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createAvailableCommandOption);
     }
 
     private SendMessage processUnknownRequest(String chatId) {
-        return MessageFactory.createUnknownCommandMessage(chatId);
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createUnknownCommandMessage);
+    }
+
+    private SendMessage processLoginRequest(String chatId) {
+        return updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
+            MessageFactory::createLoginMessage);
     }
 
     private SendMessage processRatingFeedbackRequest(String chatId, int rating) {
@@ -478,19 +475,6 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         return MessageFactory.createBadFeedbackMessage(chatId);
-    }
-
-    private SendMessage processLoginRequest(String chatId) {
-        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
-
-        if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId);
-        }
-
-        chat.get().setChatState(ChatState.LOGGING_AS_MANAGER);
-        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
-        telegramChatRepository.save(chat.get());
-        return MessageFactory.createLoginMessage(chatId);
     }
 
     private SendMessage processInputManagerCredentialsRequest(Message message) {
@@ -721,24 +705,4 @@ public class TelegramServiceImpl implements TelegramService {
             }
         }
     }
-
-    // private void notifyManagerOfGreenOfficeRequest(Message message, String email)
-    // {
-    // String chatId = String.valueOf(message.getChatId());
-    // Optional<TelegramChat> userOpt = telegramChatRepository.findByChatId(chatId);
-    //
-    // String username = userOpt
-    // .map(u -> u.getUser().getRecipientName() + " " +
-    // u.getUser().getRecipientSurname())
-    // .orElse(message.getFrom().getUserName());
-    //
-    // notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email,
-    // username);
-    // }
-
-    // @Lazy
-    // @Autowired
-    // public void setNotificationService(NotificationService notificationService) {
-    // this.notificationService = notificationService;
-    // }
 }

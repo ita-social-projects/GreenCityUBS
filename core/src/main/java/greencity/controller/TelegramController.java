@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -19,12 +18,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
+/**
+ * REST controller that handles Telegram-related endpoints. Provides
+ * functionality for managing chats, messages, feedback, and orders related to
+ * Telegram bot users.
+ */
 @RestController
 @RequestMapping("/ubs/telegram")
 @RequiredArgsConstructor
 public class TelegramController {
     private final TelegramService telegramService;
 
+    /**
+     * Retrieves all messages for a given chat ID with pagination support.
+     *
+     * @param chatId the chat identifier
+     * @param page   pagination parameters
+     * @return pageable list of Telegram messages belonging to the chat
+     */
     @Operation(summary = "Get all messages in chat by chatId")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
@@ -38,6 +49,13 @@ public class TelegramController {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.findUserMessageByChatId(chatId, page));
     }
 
+    /**
+     * Retrieves all chats with optional filtering by search term and pagination.
+     *
+     * @param search   optional search term to filter chats
+     * @param pageable pagination parameters
+     * @return pageable list of chats matching the criteria
+     */
     @Operation(summary = "Get all chats")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
@@ -51,6 +69,12 @@ public class TelegramController {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getChats(search, pageable));
     }
 
+    /**
+     * Retrieves the last order details associated with the specified chat ID.
+     *
+     * @param chatId the chat identifier
+     * @return last order data for the user linked to the chat
+     */
     @Operation(summary = "Get last user order by chatId")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
@@ -63,6 +87,14 @@ public class TelegramController {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getLastOrderByChatId(chatId));
     }
 
+    /**
+     * Sends a message to a user chat, optionally with attached files. Access
+     * restricted to users with TELEGRAM_MANAGEMENT authority.
+     *
+     * @param request the message request data
+     * @param files   optional files to attach to the message
+     * @return HTTP 200 OK response if message sent successfully
+     */
     @Operation(summary = "Send message to user chat")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
@@ -79,6 +111,13 @@ public class TelegramController {
         return ResponseEntity.ok("OK");
     }
 
+    /**
+     * Retrieves chat information by its ID. Access restricted to users with
+     * TELEGRAM_MANAGEMENT authority.
+     *
+     * @param chatId the chat identifier
+     * @return chat data
+     */
     @Operation(summary = "Get chat by id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
@@ -88,66 +127,22 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/chat/{chatId}")
-    public ResponseEntity<ChatDto> getChat(
-        @PathVariable Long chatId) {
+    public ResponseEntity<ChatDto> getChat(@PathVariable Long chatId) {
         return ResponseEntity.ok(telegramService.getChatById(chatId));
     }
 
-    // /**
-    // * Generates a link for a manager to communicate with a user.
-    // *
-    // * @param employeeUUID the UUID of the user to communicate with
-    // * @return a link to communicate with the user
-    // */
-    // @Operation(summary = "Generate manager authorization link")
-    // @ApiResponses(value = {
-    // @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-    // @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-    // @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-    // @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-    // })
-    // @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT',
-    // authentication)")
-    // @PostMapping("/generate-manager-link")
-    // public ResponseEntity<String> generateManagerLink(@CurrentUserUuid String
-    // employeeUUID) {
-    // return
-    // ResponseEntity.status(HttpStatus.OK).body(telegramService.generateManagerStartLink(employeeUUID));
-    // }
-
-    // /**
-    // * Starts a server-sent event stream for the given chat ID. The stream will
-    // send
-    // * any messages sent by the user with the given chat ID to the client.
-    // *
-    // * @param chatId the Telegram chat ID
-    // * @return an SseEmitter that sends messages to the client
-    // */
-    // @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT',
-    // authentication)")
-    // @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    // public SseEmitter stream(@RequestParam String chatId) {
-    // SseEmitter emitter = new SseEmitter(0L);
-    // telegramStrimingService.addEmitter(emitter, chatId);
-    //
-    // emitter.onCompletion(() -> telegramStrimingService.removeEmitter(emitter));
-    // emitter.onTimeout(() -> telegramStrimingService.removeEmitter(emitter));
-    //
-    // return emitter;
-    // }
-
     /**
-     * Retrieves a list of {@link FeedbackDto} for all users.
+     * Retrieves all feedback entries with pagination. Access restricted to users
+     * with TELEGRAM_MANAGEMENT authority.
      *
-     * @param pageable the page to retrieve
-     *
-     * @return a list of {@link FeedbackDto} associated with the specified pageable
+     * @param pageable pagination parameters
+     * @return pageable list of feedback DTOs
      */
     @Operation(summary = "Get all feedbacks")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -155,6 +150,20 @@ public class TelegramController {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllFeedbacks(pageable));
     }
 
+    /**
+     * Retrieves all feedback entries filtered by a specific chat ID with
+     * pagination. Access restricted to users with TELEGRAM_MANAGEMENT authority.
+     *
+     * @param chatId   the chat identifier as a string
+     * @param pageable pagination parameters
+     * @return pageable list of feedback DTOs for the given chat
+     */
+    @Operation(summary = "Get all feedbacks by chatId")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(
