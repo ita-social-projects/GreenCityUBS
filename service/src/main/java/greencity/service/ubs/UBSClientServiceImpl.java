@@ -538,8 +538,12 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setOrderStatus(OrderStatus.FORMED);
 
         User currentUser = userRepository.findByUuid(uuid);
-        UBSuser userData =
-            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+
+        OrderAddress orderAddress = formAndSaveOrderAddress(
+            dto.getAddressId(), dto.getLocationId(), currentUser);
+
+        UBSuser userData = formAndSaveUbsUser(
+            dto.getPersonalData(), null, orderAddress, currentUser);
 
         order = formAndSaveOrderRequest(dto, order, currentUser, userData);
         long sumToPayInCoins = getLastPayment(order).getAmount();
@@ -579,8 +583,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setAdditionalOrders(dto.getAdditionalOrders());
         order.setComment(dto.getOrderComment());
 
-        UBSuser userData =
-            formUserDataToBeSaved(dto.getPersonalData(), dto.getAddressId(), dto.getLocationId(), currentUser);
+        OrderAddress orderAddress = getOrUpdateOrderAddress(
+            order.getUbsUser().getOrderAddress(), dto.getAddressId(), dto.getLocationId(), currentUser);
+
+        UBSuser userData = formAndSaveUbsUser(
+            dto.getPersonalData(), order.getUbsUser().getId(), orderAddress, currentUser);
 
         order = formAndSaveOrderRequest(dto, order, currentUser, userData);
         long sumToPayInCoins = getLastPayment(order).getAmount();
@@ -1151,6 +1158,35 @@ public class UBSClientServiceImpl implements UBSClientService {
             .doubleValue();
     }
 
+    private UBSuser formAndSaveUbsUser(
+        PersonalDataDto dto, Long id, OrderAddress orderAddress, User currentUser) {
+        UBSuser userData = modelMapper.map(dto, UBSuser.class);
+        userData.setId(id);
+        userData.setUser(currentUser);
+        userData.setPhoneNumber(
+            UAPhoneNumberUtil.getE164PhoneNumberFormat(userData.getPhoneNumber()));
+        userData.setOrderAddress(orderAddress);
+        userData = ubsUserRepository.save(userData);
+
+        currentUser.getUbsUsers().add(userData);
+        currentUser.setRecipientSurname(dto.getLastName());
+        currentUser.setRecipientName(dto.getFirstName());
+        currentUser.setRecipientPhone(dto.getPhoneNumber());
+        userRepository.save(currentUser);
+
+        return userData;
+    }
+
+    private OrderAddress getOrUpdateOrderAddress(
+        OrderAddress currentOrderAddress, Long newAddressId, Long newLocationId, User currentUser) {
+        OrderAddress newOrderAddress = formOrderAddress(newAddressId, newLocationId, currentUser);
+        newOrderAddress.setId(currentOrderAddress.getId());
+        if (currentOrderAddress.equals(newOrderAddress)) {
+            return currentOrderAddress;
+        }
+        return orderAddressRepository.save(newOrderAddress);
+    }
+
     private UBSuser formUserDataToBeSaved(
         PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
         UBSuser ubsUserFromDatabaseById = null;
@@ -1166,7 +1202,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
         if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
             mappedFromDtoUser.setId(null);
-            mappedFromDtoUser.setOrderAddress(saveOrderAddressWithLocation(addressId, locationId, currentUser));
+            mappedFromDtoUser.setOrderAddress(formAndSaveOrderAddress(addressId, locationId, currentUser));
             if (mappedFromDtoUser.getOrderAddress().getBaseAddress().getAddressComment() == null) {
                 mappedFromDtoUser.getOrderAddress().getBaseAddress().setAddressComment(dto.getAddressComment());
             }
@@ -1471,22 +1507,21 @@ public class UBSClientServiceImpl implements UBSClientService {
         return sumToPayInCoins;
     }
 
-    private OrderAddress saveOrderAddressWithLocation(Long addressId, Long locationId, User currentUser) {
-        var address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+    private OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser) {
+        return orderAddressRepository.save(formOrderAddress(addressId, locationId, currentUser));
+    }
 
-        var location = locationRepository.findById(locationId)
+    private OrderAddress formOrderAddress(Long addressId, Long locationId, User currentUser) {
+        Address address = addressRepo.findById(addressId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+        Location location = locationRepository.findById(locationId)
             .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
 
         checkIfAddressHasBeenDeleted(address);
-
         checkAddressUser(address, currentUser);
 
-        var orderAddress = modelMapper.map(address, OrderAddress.class);
-
-        location.addOrderAddress(orderAddress);
-
-        orderAddressRepository.save(orderAddress);
+        OrderAddress orderAddress = modelMapper.map(address, OrderAddress.class);
+        orderAddress.setLocation(location);
 
         return orderAddress;
     }
