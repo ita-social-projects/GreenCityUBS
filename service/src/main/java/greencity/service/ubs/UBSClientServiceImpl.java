@@ -123,7 +123,6 @@ import greencity.repository.UserRepository;
 import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
-import greencity.service.notification.NotificationServiceImpl;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
@@ -196,7 +195,6 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
 import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
@@ -250,7 +248,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final WayForPayClient wayForPayClient;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
     private final MonoBankClient monoBankClient;
-    private final NotificationServiceImpl notificationServiceImpl;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
@@ -1185,39 +1182,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             return currentOrderAddress;
         }
         return orderAddressRepository.save(newOrderAddress);
-    }
-
-    private UBSuser formUserDataToBeSaved(
-        PersonalDataDto dto, Long addressId, Long locationId, User currentUser) {
-        UBSuser ubsUserFromDatabaseById = null;
-        if (dto.getUbsUserId() != null) {
-            ubsUserFromDatabaseById =
-                ubsUserRepository.findById(dto.getUbsUserId())
-                    .orElseThrow(() -> new BadRequestException(THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST
-                        + dto.getUbsUserId()));
-        }
-        UBSuser mappedFromDtoUser = modelMapper.map(dto, UBSuser.class);
-        mappedFromDtoUser.setUser(currentUser);
-        mappedFromDtoUser.setPhoneNumber(
-            UAPhoneNumberUtil.getE164PhoneNumberFormat(mappedFromDtoUser.getPhoneNumber()));
-        if (mappedFromDtoUser.getId() == null || !mappedFromDtoUser.equals(ubsUserFromDatabaseById)) {
-            mappedFromDtoUser.setId(null);
-            mappedFromDtoUser.setOrderAddress(formAndSaveOrderAddress(addressId, locationId, currentUser));
-            if (mappedFromDtoUser.getOrderAddress().getBaseAddress().getAddressComment() == null) {
-                mappedFromDtoUser.getOrderAddress().getBaseAddress().setAddressComment(dto.getAddressComment());
-            }
-            ubsUserRepository.save(mappedFromDtoUser);
-            currentUser.getUbsUsers().add(mappedFromDtoUser);
-
-            currentUser.setRecipientSurname(dto.getLastName());
-            currentUser.setRecipientName(dto.getFirstName());
-            currentUser.setRecipientPhone(dto.getPhoneNumber());
-
-            userRepository.save(currentUser);
-            return mappedFromDtoUser;
-        } else {
-            return ubsUserFromDatabaseById;
-        }
     }
 
     /**
