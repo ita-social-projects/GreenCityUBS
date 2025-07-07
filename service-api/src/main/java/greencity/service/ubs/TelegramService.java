@@ -5,26 +5,9 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public interface TelegramService {
-    /**
-     * Saves user media message(ex: message with some photos) in one message.
-     *
-     * @param chatId       {@link String} chat ID
-     * @param mediaMessage {@link Message} message with content
-     */
-    void saveMediaGroup(String chatId, Message mediaMessage);
-
-    /**
-     * Saves user message.
-     *
-     * @param chatId  {@link String} chat ID
-     * @param message {@link Message} message content
-     */
-    void saveUserMessage(String chatId, Message message);
-
     void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files);
 
     ChatDto getChatById(Long chatId);

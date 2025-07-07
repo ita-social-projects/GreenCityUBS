@@ -39,7 +39,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -67,6 +67,8 @@ public class TelegramServiceImpl implements TelegramService {
     private final UserRepository userRepository;
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
+    @Value("${greencity.telegram.bot.token}")
+    private String telegramBotToken;
     private static final String USERNAME = "username";
 
     private boolean checkIsEmployeeManager(Employee employee) {
@@ -126,145 +128,6 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         return MessageFactory.createWelcomeMessage(chatId);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void saveMediaGroup(String chatId, Message mediaMessage) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-
-        TelegramChat chat = telegramChatRepository.findByChatId(chatId)
-            .orElseThrow(() -> new NotFoundException("Chat not found"));
-
-        TelegramMessage telegramMessage = telegramMessageRepository
-            .findByMediaGroupId(mediaMessage.getMediaGroupId())
-            .orElseGet(() -> telegramMessageRepository.save(
-                TelegramMessage.builder()
-                    .chat(chat)
-                    .fromManager(false)
-                    .mediaGroupId(mediaMessage.getMediaGroupId())
-                    .status(MessageDeliveryStatus.SENT)
-                    .sendAt(LocalDateTime.now())
-                    .text(mediaMessage.getCaption())
-                    .build()));
-
-        PhotoSize largestPhoto = mediaMessage.getPhoto().stream()
-            .max(Comparator.comparing(PhotoSize::getFileSize))
-            .orElse(null);
-
-        if (largestPhoto == null) {
-            log.warn("No photo found in media group message");
-            return;
-        }
-
-        try {
-            File telegramFile = executor.executeGetFile(bot, new GetFile(largestPhoto.getFileId()));
-            if (telegramFile != null && telegramFile.getFilePath() != null) {
-                try (InputStream inputStream = new URL(telegramFile.getFileUrl(bot.getBotToken())).openStream()) {
-                    String azureFileUrl = azureCloudStorageService.upload(
-                        inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
-
-                    AssetType assetType = detectAssetType(getFileContentType(telegramFile.getFilePath()));
-
-                    MessageAsset asset = MessageAsset.builder()
-                        .url(azureFileUrl)
-                        .fileName(getFileNameFromPath(telegramFile.getFilePath()))
-                        .size(largestPhoto.getFileSize().longValue())
-                        .contentType(getFileContentType(telegramFile.getFilePath()))
-                        .type(assetType)
-                        .message(telegramMessage)
-                        .build();
-
-                    messageAssetRepository.save(asset);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error loading photo: {}", e.getMessage());
-        }
-
-        // if (!mediaList.isEmpty()) {
-        // SendMediaGroup sendMediaGroup = new SendMediaGroup();
-        // sendMediaGroup.setChatId(chatId);
-        // sendMediaGroup.setMedias(mediaList);
-        // executor.executeCommand(bot, sendMediaGroup);
-        // }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void saveUserMessage(String chatId, Message message) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-
-        TelegramChat chat = telegramChatRepository.findByChatId(chatId)
-            .orElseThrow(() -> new NotFoundException("Chat not found"));
-
-        String text = message.hasText() ? message.getText() : message.getCaption();
-
-        TelegramMessage telegramMessage = TelegramMessage.builder()
-            .chat(chat)
-            .text(text)
-            .fromManager(false)
-            .status(MessageDeliveryStatus.SENT)
-            .sendAt(LocalDateTime.now())
-            .build();
-
-        MessageAsset messageAsset = null;
-
-        boolean hasPhoto = message.hasPhoto();
-
-        if (!hasPhoto && text != null && !text.isEmpty()) {
-            // notify manager in another option
-            // executor.executeCommand(bot, MessageFactory.buildMessage(chatId, text));
-        }
-
-        if (hasPhoto) {
-            PhotoSize largestPhoto = message.getPhoto().stream()
-                .max(Comparator.comparing(PhotoSize::getFileSize))
-                .orElse(null);
-
-            if (largestPhoto != null) {
-                try {
-                    File telegramFile = executor.executeGetFile(bot, new GetFile(largestPhoto.getFileId()));
-
-                    if (telegramFile != null && telegramFile.getFilePath() != null) {
-                        String telegramDownloadUrl = telegramFile.getFileUrl(bot.getBotToken());
-                        URL url = new URL(telegramDownloadUrl);
-
-                        try (InputStream inputStream = url.openStream()) {
-                            String azureFileUrl = azureCloudStorageService.upload(
-                                inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
-
-                            AssetType assetType = detectAssetType(getFileContentType(telegramFile.getFilePath()));
-
-                            messageAsset = MessageAsset.builder()
-                                .url(azureFileUrl)
-                                .fileName(getFileNameFromPath(telegramFile.getFilePath()))
-                                .size(largestPhoto.getFileSize().longValue())
-                                .contentType(getFileContentType(telegramFile.getFilePath()))
-                                .type(assetType)
-                                .message(telegramMessage)
-                                .build();
-
-                            // notify manager in another option
-                            // var sendPhotoMessage = MessageFactory.createPhotoSender(chatId, azureFileUrl,
-                            // message.getCaption());
-                        }
-                    }
-                } catch (Exception e) {
-                    log.error("Error by loading photo: {}", e.getMessage());
-                }
-            }
-        }
-
-        if (messageAsset != null) {
-            telegramMessage.setAssets(List.of(messageAsset));
-        }
-        telegramMessageRepository.save(telegramMessage);
-        // use telegramStreamService to notify special managers
     }
 
     private String getFileNameFromPath(String filePath) {
@@ -699,6 +562,82 @@ public class TelegramServiceImpl implements TelegramService {
         }
     }
 
+    private SendMessage processSupportMessage(Message message) {
+        var bot = applicationContext.getBean(UBSTelegramBot.class);
+
+        TelegramChat chat = telegramChatRepository.findByChatId(message.getFrom().getId().toString())
+            .orElseThrow(() -> new NotFoundException("Chat not found"));
+
+        TelegramMessage telegramMessage = null;
+
+        if (message.hasPhoto()) {
+            telegramMessage = telegramMessageRepository.findByMediaGroupId(message.getMediaGroupId())
+                .orElseGet(() -> TelegramMessage.builder()
+                    .chat(chat)
+                    .fromManager(false)
+                    .mediaGroupId(message.getMediaGroupId())
+                    .status(MessageDeliveryStatus.SENT)
+                    .sendAt(LocalDateTime.now())
+                    .build());
+
+            PhotoSize largestPhoto = message.getPhoto().stream()
+                .max(Comparator.comparing(PhotoSize::getFileSize))
+                .orElse(null);
+
+            if (largestPhoto == null) {
+                log.warn("No photo found in media group message");
+                return MessageFactory.buildMessage(message.getChatId().toString(),
+                    TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+            }
+
+            try {
+                File telegramFile = executor.executeGetFile(bot, new GetFile(largestPhoto.getFileId()));
+                if (telegramFile == null || telegramFile.getFilePath() == null) {
+                    return MessageFactory.buildMessage(message.getChatId().toString(),
+                        TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+                }
+
+                URI uri = URI.create(telegramFile.getFileUrl(telegramBotToken));
+
+                try (InputStream inputStream = uri.toURL().openStream()) {
+                    String azureFileUrl = azureCloudStorageService.upload(
+                        inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
+
+                    AssetType assetType = detectAssetType(getFileContentType(telegramFile.getFilePath()));
+
+                    MessageAsset asset = MessageAsset.builder()
+                        .url(azureFileUrl)
+                        .fileName(getFileNameFromPath(telegramFile.getFilePath()))
+                        .size(largestPhoto.getFileSize().longValue())
+                        .contentType(getFileContentType(telegramFile.getFilePath()))
+                        .type(assetType)
+                        .message(telegramMessage)
+                        .build();
+
+                    messageAssetRepository.save(asset);
+                }
+            } catch (Exception e) {
+                log.error("Error loading photo: {}", e.getMessage());
+                return MessageFactory.buildMessage(message.getChatId().toString(),
+                    TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+            }
+        }
+
+        if (telegramMessage == null) {
+            telegramMessage = TelegramMessage.builder()
+                .chat(chat)
+                .fromManager(false)
+                .mediaGroupId(message.getMediaGroupId())
+                .status(MessageDeliveryStatus.SENT)
+                .sendAt(LocalDateTime.now())
+                .build();
+        }
+
+        telegramMessage.setText(message.hasText() ? message.getText() : message.getCaption());
+        telegramMessageRepository.save(telegramMessage);
+        return MessageFactory.buildMessage(chat.getChatId(), TelegramBotConstants.GREETING_MANAGER_MESSAGE);
+    }
+
     private SendMessage processInputCommentRequest(Message message) {
         Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(message.getChatId().toString());
 
@@ -771,14 +710,8 @@ public class TelegramServiceImpl implements TelegramService {
                 }
             } else {
                 switch (chat.get().getChatState()) {
-                    case IN_SUPPORT -> {
-                        // TODO do this more tidier :)
-                        if (message.getMediaGroupId() != null) {
-                            saveMediaGroup(chatId, message);
-                        } else if (message.hasText()) {
-                            saveUserMessage(chatId, message);
-                        }
-                    }
+                    case IN_SUPPORT ->
+                        executor.executeCommand(ubsTelegramBot, processSupportMessage(message));
                     case MAKING_FEEDBACK ->
                         executor.executeCommand(ubsTelegramBot, processInputCommentRequest(message));
                     case LOGGING_AS_MANAGER ->
