@@ -172,4 +172,6 @@ public class TelegramBotConstants {
     public static final String GREEN_OFFICE_SUBJECT = "Цікавить Зелений офіс";
     public static final String UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN =
         "Сталася невідома помилка, спробуйте, будь ласка, знову";
+    public static final String MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE =
+        "Ваше повідомлення надіслано менеджеру, очікуйте на відповідь";
 }

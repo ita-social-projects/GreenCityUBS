@@ -95,6 +95,7 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.GET,
+                    "/socket/**",
                     UBS_LINK + "/getAllActiveCouriers",
                     UBS_LINK + "/locations/{courierId}",
                     UBS_LINK + "/order-details-for-tariff",
