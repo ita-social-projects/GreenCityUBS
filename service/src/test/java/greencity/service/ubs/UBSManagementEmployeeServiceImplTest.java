@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.EmployeeWithTariffsDto;
@@ -72,7 +73,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Mock
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
-    private FileService fileService;
+    private UserRemoteWebClient userRemoteWebClient;
     @Mock
     private UserRemoteClient userRemoteClient;
     @Mock
@@ -237,13 +238,13 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(repository.save(any())).thenReturn(employee);
-        doNothing().when(fileService).delete(retrievedEmployee.getImagePath());
+        doNothing().when(userRemoteWebClient).deleteFile(retrievedEmployee.getImagePath());
         when(repository.findById(anyLong())).thenReturn(Optional.of(retrievedEmployee));
         employeeService.update(dto, file);
 
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository).save(any());
-        verify(fileService).delete(retrievedEmployee.getImagePath());
+        verify(userRemoteWebClient).deleteFile(retrievedEmployee.getImagePath());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
         verify(repository, times(2)).findById(anyLong());
     }
@@ -486,7 +487,7 @@ class UBSManagementEmployeeServiceImplTest {
         employeeService.deleteEmployeeImage(anyLong());
 
         verify(repository, times(1)).findById(anyLong());
-        verify(fileService, times(1)).delete("path");
+        verify(userRemoteWebClient, times(1)).deleteFile("path");
         verify(repository, times(1)).save(employee);
     }
 

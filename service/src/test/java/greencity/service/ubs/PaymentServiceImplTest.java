@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.OrderHistory;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
@@ -101,7 +102,7 @@ class PaymentServiceImplTest {
     @Mock
     OrderAddressRepository orderAddressRepository;
     @Mock
-    private FileService fileService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock
     OrderRepository orderRepository;
@@ -264,7 +265,7 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1L);
-        doNothing().when(fileService).delete("");
+        doNothing().when(userRemoteWebClient).deleteFile("");
         doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + getManualPayment().getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(),
             getOrder());
@@ -288,7 +289,7 @@ class PaymentServiceImplTest {
         verify(employeeRepository).findByUuid("abc");
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
-        verify(fileService).delete(payment.getImagePath());
+        verify(userRemoteWebClient).deleteFile(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
 
@@ -310,7 +311,7 @@ class PaymentServiceImplTest {
         verify(employeeRepository).findByUuid("abc");
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
-        verify(fileService, times(0)).delete(payment.getImagePath());
+        verify(userRemoteWebClient, times(0)).deleteFile(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
     }
@@ -346,7 +347,7 @@ class PaymentServiceImplTest {
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
         verify(eventService, times(2)).save(any(), any(), any());
-        verify(fileService, times(0)).delete(null);
+        verify(userRemoteWebClient, times(0)).deleteFile(null);
     }
 
     @Test
@@ -361,7 +362,7 @@ class PaymentServiceImplTest {
             "", "application/json", "random Bytes".getBytes());
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
-        when(fileService.upload(file)).thenReturn("path");
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("path");
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK + 1, "Yuriy" + "  " + "Gerasum",
             getOrder());
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");

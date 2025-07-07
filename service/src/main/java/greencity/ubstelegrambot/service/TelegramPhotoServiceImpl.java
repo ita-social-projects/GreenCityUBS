@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.config.UserRemoteWebClient;
 import greencity.entity.telegram.Image;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -7,12 +8,17 @@ import greencity.exceptions.image.FileNotSavedException;
 import greencity.mapping.telegrammessage.ImageConverter;
 import greencity.repository.AuthorizedUserRepository;
 import greencity.repository.TelegramImageRepository;
-import greencity.service.ubs.TelegramPhotoService;
-import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.BASE64DecodedMultipartFile;
+import greencity.service.ubs.TelegramPhotoService;
 import greencity.service.ubs.TelegramStreamingService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -22,18 +28,12 @@ import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TelegramPhotoServiceImpl implements TelegramPhotoService {
     private final TelegramExecutor executor;
-    private final AzureCloudStorageService azureCloudStorageService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final TelegramImageRepository telegramImageRepository;
     private final ApplicationContext applicationContext;
     private final AuthorizedUserRepository telegramBotRepository;
@@ -68,7 +68,7 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
                         .contentType(IMAGE_CONTENT_TYPE)
                         .build();
 
-                    savedPhotoUrls.add(azureCloudStorageService.upload(file));
+                    savedPhotoUrls.add(userRemoteWebClient.uploadFile(file));
                 }
             } catch (IOException | IllegalArgumentException e) {
                 throw new FileNotSavedException(FAILED_TO_SAVE_PHOTO_TO_AZURE);
@@ -79,12 +79,12 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
 
     @Override
     public String savePhotoToAzureBlob(MultipartFile file) {
-        return azureCloudStorageService.upload(file);
+        return userRemoteWebClient.uploadFile(file);
     }
 
     @Override
     public void deletePhotoFromAzureBlob(String url) {
-        azureCloudStorageService.delete(url);
+        userRemoteWebClient.deleteFile(url);
     }
 
     @Override

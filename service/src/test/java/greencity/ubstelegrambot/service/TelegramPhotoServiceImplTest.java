@@ -1,5 +1,16 @@
 package greencity.ubstelegrambot.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.entity.telegram.AuthorizedUser;
 import greencity.entity.telegram.Image;
 import greencity.exceptions.BadRequestException;
@@ -8,11 +19,13 @@ import greencity.exceptions.image.FileNotSavedException;
 import greencity.mapping.telegrammessage.ImageConverter;
 import greencity.repository.AuthorizedUserRepository;
 import greencity.repository.TelegramImageRepository;
-import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramStreamingService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,19 +42,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TelegramPhotoServiceImplTest {
@@ -56,7 +56,7 @@ public class TelegramPhotoServiceImplTest {
     private TelegramStreamingService telegramStreamingService;
 
     @Mock
-    private AzureCloudStorageService azureCloudStorageService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock
     private TelegramImageRepository userPhotosRepository;
@@ -134,14 +134,14 @@ public class TelegramPhotoServiceImplTest {
             mockUrl,
             mockUrl);
 
-        when(azureCloudStorageService.upload(any(MultipartFile.class)))
+        when(userRemoteWebClient.uploadFile(any(MultipartFile.class)))
             .thenReturn(mockUrl);
 
         List<String> actualResult = telegramPhotoService.savePhotoToAzureBlob(photoUrls);
 
         assertEquals(expectedResult, actualResult);
-        verify(azureCloudStorageService, times(photoUrls.size()))
-            .upload(any(MultipartFile.class));
+        verify(userRemoteWebClient, times(photoUrls.size()))
+            .uploadFile(any(MultipartFile.class));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class TelegramPhotoServiceImplTest {
         assertThrows(
             FileNotSavedException.class,
             () -> telegramPhotoService.savePhotoToAzureBlob(photoUrls));
-        verify(azureCloudStorageService, never()).upload(any());
+        verify(userRemoteWebClient, never()).uploadFile(any());
     }
 
     @Test
@@ -165,14 +165,14 @@ public class TelegramPhotoServiceImplTest {
             "content".getBytes());
         String expectedResult = "url";
 
-        when(azureCloudStorageService.upload(multipartFile))
+        when(userRemoteWebClient.uploadFile(multipartFile))
             .thenReturn(expectedResult);
 
         String actualResult = telegramPhotoService
             .savePhotoToAzureBlob(multipartFile);
 
         assertEquals(expectedResult, actualResult);
-        verify(azureCloudStorageService).upload(multipartFile);
+        verify(userRemoteWebClient).uploadFile(multipartFile);
     }
 
     @Test
@@ -181,7 +181,7 @@ public class TelegramPhotoServiceImplTest {
 
         telegramPhotoService.deletePhotoFromAzureBlob(url);
 
-        verify(azureCloudStorageService).delete(url);
+        verify(userRemoteWebClient).deleteFile(url);
     }
 
     @Test

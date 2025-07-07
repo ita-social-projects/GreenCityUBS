@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.client.config.UserRemoteWebClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,7 @@ class ViolationServiceImplTest {
     @Mock
     UserRepository userRepository;
     @Mock
-    private FileService fileService;
+    private UserRemoteWebClient userRemoteWebClient;
     @Mock
     private EventService eventService;
     @Mock
@@ -205,7 +206,7 @@ class ViolationServiceImplTest {
         if (updateViolationToUserDto.getImagesToDelete() != null) {
             List<String> images = updateViolationToUserDto.getImagesToDelete();
             for (String image : images) {
-                doNothing().when(fileService).delete(image);
+                doNothing().when(userRemoteWebClient).deleteFile(image);
                 violationImages.remove(image);
             }
         }

@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.pageble.PageableDto;
@@ -58,7 +59,7 @@ public class ViolationServiceImpl implements ViolationService {
 
     private EventService eventService;
     private NotificationServiceImpl notificationService;
-    private FileService fileService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Override
     public UserViolationsWithUserName getAllViolations(Pageable page, Long userId, String columnName,
@@ -181,6 +182,7 @@ public class ViolationServiceImpl implements ViolationService {
 
     /**
      * Deletes an active violation associated with the specified order.
+     *
      * <p>
      * This method retrieves the employee corresponding to the provided uuid and
      * locates the active violation for the given order id. If found, it marks the
@@ -238,7 +240,7 @@ public class ViolationServiceImpl implements ViolationService {
         if (add.getImagesToDelete() != null) {
             List<String> images = add.getImagesToDelete();
             for (String image : images) {
-                fileService.delete(image);
+                userRemoteWebClient.deleteFile(image);
                 violationImages.remove(image);
             }
         }
@@ -256,7 +258,7 @@ public class ViolationServiceImpl implements ViolationService {
 
     private void setImages(MultipartFile[] multipartFiles, List<String> images) {
         for (MultipartFile multipartFile : multipartFiles) {
-            images.add(fileService.upload(multipartFile));
+            images.add(userRemoteWebClient.uploadFile(multipartFile));
         }
     }
 }

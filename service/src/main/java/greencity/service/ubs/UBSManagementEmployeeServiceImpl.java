@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
@@ -56,7 +57,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final ReceivingStationRepository stationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final UserRemoteClient userRemoteClient;
-    private final FileService fileService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final ModelMapper modelMapper;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
@@ -92,7 +93,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = buildEmployeeFromEmployeeWithTariffsIdDto(dto);
         employee.setUuid(UUID.randomUUID().toString());
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-        employee.setImagePath(image != null ? fileService.upload(image) : defaultImagePath);
+        employee.setImagePath(image != null ? userRemoteWebClient.uploadFile(image) : defaultImagePath);
         if (employee.getTariffsInfoReceivingEmployees() == null) {
             employee.setTariffsInfoReceivingEmployees(new ArrayList<>());
         }
@@ -271,9 +272,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
         if (image != null) {
             String imageUrlToDelete = upEmployee.getImagePath();
-            updatedEmployee.setImagePath(fileService.upload(image));
+            updatedEmployee.setImagePath(userRemoteWebClient.uploadFile(image));
             if (!imageUrlToDelete.equals(defaultImagePath)) {
-                fileService.delete(upEmployee.getImagePath());
+                userRemoteWebClient.deleteFile(upEmployee.getImagePath());
             }
         } else {
             updatedEmployee.setImagePath(dto.getEmployeeDto().getImage());
@@ -350,7 +351,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         if (!employee.getImagePath().equals(defaultImagePath)) {
-            fileService.delete(employee.getImagePath());
+            userRemoteWebClient.deleteFile(employee.getImagePath());
             employee.setImagePath(defaultImagePath);
             employeeRepository.save(employee);
         } else {
