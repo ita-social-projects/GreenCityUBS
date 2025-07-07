@@ -106,9 +106,6 @@ public class SecurityConfig {
                     UBS_LINK + "/districts-for-kyiv",
                     COMMIT_INFO)
                 .permitAll()
-                .requestMatchers(HttpMethod.POST,
-                    UBS_LINK + "/userProfile/user/create")
-                .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
                     "/swagger.json",
@@ -297,6 +294,9 @@ public class SecurityConfig {
                     "/notifications/{notificationId}/viewNotification",
                     "/notifications/{notificationId}/unreadNotification")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.POST,
+                    UBS_LINK + "/userProfile/user/create")
+                .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/update-order-address")
