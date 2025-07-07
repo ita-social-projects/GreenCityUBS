@@ -4,6 +4,7 @@ import greencity.entity.user.User;
 import greencity.enums.ChatState;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +23,13 @@ public class TelegramChat {
     @Column(nullable = false)
     private String chatId;
 
+    @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ChatState chatState = ChatState.NORMAL;
+
+    @Column(name = "chat_state_updated_at", nullable = false)
+    private LocalDateTime chatStateUpdatedAt;
 
     @Column(nullable = false, name = "notify")
     private Boolean isNotify;
@@ -42,9 +47,11 @@ public class TelegramChat {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @Builder.Default
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TelegramMessage> messages = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatFeedback> feedbacks = new ArrayList<>();
 }

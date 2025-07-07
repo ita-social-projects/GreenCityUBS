@@ -8,6 +8,11 @@ public class TelegramBotConstants {
     public static final String SUPPORT_COMMAND = "/support";
     public static final String LOGIN_COMMAND = "/login";
     public static final String HELP_COMMAND = "/help";
+    public static final String INCORRECT_LOGIN_FORMAT =
+        "Некоректний формат. Будь ласка, введіть дані в форматі login:password";
+    public static final String USER_IS_NOT_EMPLOYEE = "Користувач не є співробітником";
+    public static final String EMPLOYEE_IS_NOT_MANAGER = "Співробітник не є менеджером";
+    public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Щось пішло не так спробуйте, будь ласка, знову";
     public static final String GREETING_MESSAGE =
         """
             Привіт! Я бот і допомагаю своїм колегам-менеджеркам обробляти запити.
@@ -17,11 +22,7 @@ public class TelegramBotConstants {
         """
             Привіт менеджер!
             """;
-    public static final String CLIENT_SUPPORT_MESSAGE =
-        "Будь ласка введіть своє повідомлення в форматі /support:повідомлення";
     public static final String LOGIN_MESSAGE = "Введіть логін та пароль в форматі /login:логін:пароль";
-    public static final String ERROR_IN_REQUEST_MESSAGE = "Будь ласка введіть повідомлення в форматі %s";
-    public static final String CLIENT_SUPPORT_MESSAGE_SEND = "Ваше повідомлення надіслано менеджеру, очікуй відповіді";
     public static final String SUCCESS_LOGIN = "Вітаємо, %s ! Ви успішно авторизувалися.";
     public static final String SUPPORTED_COMMANDS = "Список доступних команд :";
     public static final String LOGIN_ERROR = "Авторизація не вдалася: %s";
@@ -149,7 +150,7 @@ public class TelegramBotConstants {
         """
             Щиро дякую за ваш відгук! 🙏
 
-            Передаю його нашій менеджерці в роботу. Все виправимо! 👩\u200D💼
+            Список доступних команд :
             """;
 
     public static final String BACK_TO_MAIN_MENU = "⏪ В головне меню\n";

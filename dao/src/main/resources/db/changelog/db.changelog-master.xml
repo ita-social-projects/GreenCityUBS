@@ -286,5 +286,6 @@
     <include file="db/changelog/logs/2025-07-04-ch-add-telegram-message-entity.xml"/>
     <include file="/db/changelog/logs/2025-07-05-ch-add-column-media-group-id-to-telegram-message-Pampukha.xml"/>
     <include file="db/changelog/logs/2025-07-06-ch-add-feedback-to-chat.xml"/>
+    <include file="db/changelog/logs/2025-07-07-ch-add-chat-state-updated-at-column.xml"/>
 
 </databaseChangeLog>

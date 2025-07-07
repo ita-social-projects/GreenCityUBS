@@ -69,42 +69,6 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating client support message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the client support message.
-     */
-    public static SendMessage createClientSupportMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.CLIENT_SUPPORT_MESSAGE);
-    }
-
-    /**
-     * Method for creating success client support message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the success client support
-     *         message.
-     */
-    public static SendMessage createSuccessClientSupportMessageSend(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_SEND);
-    }
-
-    /**
-     * Method for creating help message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the help message and help
-     *         keyboard.
-     */
-    public static SendMessage createHelpMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
-            KeyboardFactory.createHelpKeyboard());
-    }
-
-    /**
      * Method for creating unknown command message.
      *
      * @param chatId {@link String} is telegram chat id.
@@ -342,14 +306,6 @@ public class MessageFactory {
             KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard());
     }
 
-    public static SendMessage createEnteringFeedbackMessage(String chatId, String feedback) {
-        if (feedback != null && !feedback.isEmpty() && feedback.equals(TelegramBotConstants.GREAT_FEEDBACK_CALLBACK)) {
-            return buildMessage(chatId, TelegramBotConstants.GREAT_FEEDBACK_MESSAGE);
-        } else {
-            return buildMessage(chatId, TelegramBotConstants.BAD_FEEDBACK_MESSAGE);
-        }
-    }
-
     public static SendMessage createGreatFeedbackMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.GREAT_FEEDBACK_MESSAGE);
     }
@@ -359,7 +315,8 @@ public class MessageFactory {
     }
 
     public static SendMessage createFeedbackThanksMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE);
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE,
+            KeyboardFactory.createHelpKeyboard());
     }
 
     public static SendMessage createUnknownErrorOccurredMessage(String chatId) {

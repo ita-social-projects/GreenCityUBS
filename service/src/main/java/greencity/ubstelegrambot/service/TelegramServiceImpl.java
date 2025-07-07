@@ -40,6 +40,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND;
@@ -66,7 +68,6 @@ public class TelegramServiceImpl implements TelegramService {
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
     private static final String USERNAME = "username";
-    private static final String INCORRECT_LOGIN_FORMAT = "Incorrect login format. Please use format: login:password";
 
     private boolean checkIsEmployeeManager(Employee employee) {
         var employeePositions = employee.getEmployeePosition();
@@ -114,7 +115,8 @@ public class TelegramServiceImpl implements TelegramService {
                 .firstName(message.getFrom().getFirstName())
                 .lastName(message.getFrom().getLastName())
                 .isNotify(true) // need to specify a correct value
-                .chatState(ChatState.NORMAL);
+                .chatState(ChatState.NORMAL)
+                .chatStateUpdatedAt(LocalDateTime.now());
 
             if (!uuId.isEmpty()) {
                 Optional<User> user = userRepository.findUserByUuid(uuId);
@@ -557,6 +559,7 @@ public class TelegramServiceImpl implements TelegramService {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
         if (chat.isPresent()) {
             chat.get().setChatState(ChatState.IN_SUPPORT);
+            chat.get().setChatStateUpdatedAt(LocalDateTime.now());
             telegramChatRepository.save(chat.get());
             return MessageFactory.createSupportMessageCallBackQuery(chatId);
         } else {
@@ -596,6 +599,7 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         chat.get().setChatState(ChatState.MAKING_FEEDBACK);
+        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
         telegramChatRepository.save(chat.get());
 
         ChatFeedback chatFeedback = ChatFeedback.builder()
@@ -621,6 +625,7 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         chat.get().setChatState(ChatState.LOGGING_AS_MANAGER);
+        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
         telegramChatRepository.save(chat.get());
         return MessageFactory.createLoginMessage(chatId);
     }
@@ -628,11 +633,9 @@ public class TelegramServiceImpl implements TelegramService {
     private SendMessage processInputManagerCredentialsRequest(Message message) {
         String[] parts = message.getText().split(":");
 
-        // todo need to add reset chat state to NORMAL in case of bad credentials
-        // request
-
         if (parts.length < 3) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(), INCORRECT_LOGIN_FORMAT);
+            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
+                TelegramBotConstants.INCORRECT_LOGIN_FORMAT);
         }
 
         String login = parts[1];
@@ -641,20 +644,22 @@ public class TelegramServiceImpl implements TelegramService {
         Optional<Employee> employee = employeeRepository.findByEmail(login);
 
         if (employee.isEmpty()) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(), "User is not employee");
+            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
+                TelegramBotConstants.USER_IS_NOT_EMPLOYEE);
         }
 
         boolean isManager = checkIsEmployeeManager(employee.get());
 
         if (!isManager) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(), "User is not manager");
+            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
+                TelegramBotConstants.EMPLOYEE_IS_NOT_MANAGER);
         }
 
         var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, secretToken));
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                "Something went wrong please try again later");
+                TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
         }
 
         var responseBody = response.getBody();
@@ -695,9 +700,15 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private SendMessage processInputCommentRequest(Message message) {
+        Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(message.getChatId().toString());
+
+        if (telegramChat.isEmpty()) {
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
+        }
+
         Optional<ChatFeedback> chatFeedback = chatFeedbackRepository
             .findByChatIdAndFeedbackState(
-                message.getChatId(),
+                telegramChat.get().getId(),
                 FeedbackState.IN_PROGRESS);
 
         if (chatFeedback.isEmpty()) {
@@ -712,9 +723,18 @@ public class TelegramServiceImpl implements TelegramService {
     public void processUpdate(Update update) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
 
+        var message = update.getMessage();
+        String chatId = message.getChatId().toString();
+
+        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
+
+        if (chat.isPresent() && Duration.between(chat.get().getChatStateUpdatedAt(), Instant.now()).toMinutes() > 10) {
+            chat.get().setChatState(ChatState.NORMAL);
+            telegramChatRepository.save(chat.get());
+        }
+
         if (update.hasCallbackQuery()) {
             CallbackQuery callBackQuery = update.getCallbackQuery();
-            String chatId = callBackQuery.getFrom().getId().toString();
 
             switch (callBackQuery.getData()) {
                 case TelegramBotConstants.CLIENT_SUPPORT_CALLBACK ->
@@ -743,11 +763,7 @@ public class TelegramServiceImpl implements TelegramService {
                     executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
             }
         } else {
-            var message = update.getMessage();
             var text = message.getText();
-            var chatId = message.getChatId().toString();
-
-            Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
 
             if (chat.isEmpty()) {
                 if (text.contains(TelegramBotConstants.START_COMMAND)) {

@@ -18,13 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramNotificationServiceTest {
@@ -42,7 +40,8 @@ class TelegramNotificationServiceTest {
     private TelegramNotificationService telegramNotificationService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(
-            new TelegramChat(1L, "12345", ChatState.NORMAL, true, "username", "first_name", "last_name", null,
+            new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
+                "last_name", null,
                 new ArrayList<>(), new ArrayList<>()))
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
@@ -95,7 +94,8 @@ class TelegramNotificationServiceTest {
         assertFalse(telegramNotificationService.isEnabled(userEntity));
 
         userEntity
-            .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, true, "username", "first_name", "last_name",
+            .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username",
+                "first_name", "last_name",
                 userEntity, new ArrayList<>(), new ArrayList<>()));
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 

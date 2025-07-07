@@ -1587,12 +1587,14 @@ public class ModelUtils {
     }
 
     public static TelegramChat getTelegramBotNotifyTrue() {
-        return new TelegramChat(1L, "12345", ChatState.NORMAL, true, "username", "first_name", "last_name", null,
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
+            "last_name", null,
             new ArrayList<>(), new ArrayList<>());
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
-        return new TelegramChat(1L, "12345", ChatState.NORMAL, false, "username", "first_name", "last_name", null,
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), false, "username", "first_name",
+            "last_name", null,
             new ArrayList<>(), new ArrayList<>());
     }
 
