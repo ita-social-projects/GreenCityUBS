@@ -31,6 +31,7 @@ public class KeyboardFactory {
         keyboard.add(createRow("Правила прийому сировини", TelegramBotConstants.ADMISSION_RULES_CALLBACK));
         keyboard.add(createRow("Зелений офіс", TelegramBotConstants.GREEN_OFFICE_CALLBACK));
         keyboard.add(createRow("Залишити відгук", TelegramBotConstants.FEEDBACK_CALLBACK));
+        keyboard.add(createRow("Ціни на сортування", TelegramBotConstants.SORTING_PRICES_CALLBACK));
         keyboard.add(createRow("Увійти як менеджер", TelegramBotConstants.LOGIN_CALLBACK));
 
         return InlineKeyboardMarkup
@@ -99,7 +100,7 @@ public class KeyboardFactory {
             .build();
     }
 
-    public static InlineKeyboardMarkup createBackToMainMenuButton() {
+    public static InlineKeyboardMarkup createBackToMainMenuKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(createRow(BACK_TO_MAIN_MENU, TelegramBotConstants.MAIN_MENU_CALLBACK));
         return InlineKeyboardMarkup

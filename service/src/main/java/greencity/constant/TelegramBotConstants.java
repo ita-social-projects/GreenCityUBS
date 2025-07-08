@@ -27,7 +27,7 @@ public class TelegramBotConstants {
     public static final String SUPPORTED_COMMANDS = "Список доступних команд :";
     public static final String LOGIN_ERROR = "Авторизація не вдалася: %s";
     public static final String UNKNOWN_COMMAND =
-        " Невідома команда, щоб поглянути список доступних команд скористайтеся командою /help";
+        " Невідома команда. Оберіть команду зі списку доступних.";
     public static final String WORK_SCHEDULE_MESSAGE =
         """
             <b>Станція No Waste Recycling Station</b>
@@ -43,7 +43,7 @@ public class TelegramBotConstants {
 
             <b>Платна послуга «Досортування»</b>
             Доступна 24/7
-                    """;
+            """;
 
     public static final String SORTING_RULES_PRICING_MESSAGE =
         """
@@ -70,8 +70,6 @@ public class TelegramBotConstants {
             130 грн/20 л
 
             295 грн/60 л
-
-            Бажаєте замовити послугу?
             """;
 
     public static final String CLIENT_SUPPORT_CALLBACK = "client_support_command";
@@ -87,17 +85,7 @@ public class TelegramBotConstants {
     public static final String RATING_SATISFACTORILY_CALLBACK = "rating_satisfactorily_callback";
     public static final String RATING_GOOD_CALLBACK = "rating_good_callback";
     public static final String RATING_PERFECTLY_CALLBACK = "rating_perfectly_callback";
-    public static final String SORTING_CALLBACK = "sorting_command";
-    public static final String SORTING_PROCESS_CALLBACK = "sorting_process_command";
     public static final String SORTING_PRICES_CALLBACK = "sorting_prices_command";
-    public static final String GREAT_FEEDBACK_CALLBACK = "great_feedback_command";
-    public static final String BAD_FEEDBACK_CALLBACK = "bad_feedback_command";
-    public static final String SORTING_MESSAGE =
-        """
-            Якщо ви не встигаєте розсортувати свою вторсировину на станції самостійно,
-            ви можете скористатися послугою «Досортування».
-            Бажаєте скористатись послугою?
-            """;
     public static final String ADMISSION_RULES_TEXT =
         """
             Все, що ми приймаємо на станції на переробку або безпечне спалення (перелік тут — <a href="https://nowaste.com.ua/sort-station">Посилання</a>)
@@ -154,15 +142,11 @@ public class TelegramBotConstants {
             """;
 
     public static final String BACK_TO_MAIN_MENU = "⏪ В головне меню\n";
-    public static final String NEW_SUPPORT_MESSAGE_NOTIFICATION = "%s нових повідомлень від клієнта %s";
     public static final String CLIENT_END_SUPPORT_MODE = "Закінчити розмову з менеджером";
     public static final String CLIENT_STOP_SUPPORT_MODE =
         "Ви закінчили розмову з менеджером, оцініть будь ласка роботу нашої підтримки від 1 до 5";
     public static final String CLIENT_END_SUPPORT_MODE_NOTIFICATION = "Клієнт %s закінчив розмову";
     public static final String MESSAGES_NOT_FOUND_FOR_CHAT = "There are no messages in the chat %s";
-    public static final String CHAT_IS_EMPTY = "Chat %s is empty";
-    public static final String CLIENT_MESSAGE_AFTER_FEEDBACK = "Дякуємо за ваш відгук";
-    public static final String SCORE = "Score%s";
     public static final String CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY =
         """
             Поставте, будь ласка, своє запитання — і я покличу когось із моїх колег-людей ✍️👇
@@ -174,4 +158,13 @@ public class TelegramBotConstants {
         "Сталася невідома помилка, спробуйте, будь ласка, знову";
     public static final String MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE =
         "Ваше повідомлення надіслано менеджеру, очікуйте на відповідь";
+
+    public static final String CLIENT_WANT_TO_SPEAK =
+        """
+            👨@%s хоче поговорити з людиною
+
+            👉 %s
+
+            💬 http://localhost:4200/chat/%s
+            """;
 }

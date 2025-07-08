@@ -61,7 +61,6 @@ public class TelegramController {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/chats")
     public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search,
@@ -93,7 +92,7 @@ public class TelegramController {
      *
      * @param request the message request data
      * @param files   optional files to attach to the message
-     * @return HTTP 200 OK response if message sent successfully
+     * @return HTTP 200 OK response if a message sent successfully
      */
     @Operation(summary = "Send message to user chat")
     @ApiResponses(value = {
