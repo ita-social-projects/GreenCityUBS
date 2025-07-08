@@ -71,7 +71,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final SimpMessagingTemplate messagingTemplate;
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
-    @Value("${greencity.telegram.bot.token}")
+    @Value("${greencity.bots.ubs-bot-token}")
     private String telegramBotToken;
     private static final String USERNAME = "username";
 
