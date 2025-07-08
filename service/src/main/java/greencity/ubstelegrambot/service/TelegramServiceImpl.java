@@ -757,6 +757,7 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         chatFeedback.get().setComment(message.getText());
+        chatFeedbackRepository.save(chatFeedback.get());
         return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString());
     }
 
