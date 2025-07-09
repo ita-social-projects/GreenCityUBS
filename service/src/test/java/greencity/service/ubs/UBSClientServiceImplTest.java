@@ -128,6 +128,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -225,6 +226,7 @@ import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF
 import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
 import static greencity.constant.ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER;
+import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
@@ -1421,21 +1423,44 @@ class UBSClientServiceImplTest {
         verify(orderRepository, times(1)).findById(anyLong());
     }
 
-    @Test
-    void saveToDBFailPaidOrder() {
-        User user = getUserWithLastLocation();
+    @ParameterizedTest
+    @EnumSource(value = OrderPaymentStatus.class, mode = EnumSource.Mode.EXCLUDE, names = "UNPAID")
+    void saveToDBFailPaidOrder(OrderPaymentStatus orderPaymentStatus) {
+        User user = getUserWithInitializedFields();
         user.setCurrentPoints(1000);
 
         OrderResponseDto dto = getOrderResponseDto();
         Order order = getOrder();
-        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setOrderPaymentStatus(orderPaymentStatus);
 
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
 
-        assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsService.processExistingOrder(dto, "35467585763t4sfgchjfuyetf", 1L));
+        assertTrue(exception.getMessage().contains(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = OrderStatus.class, mode = EnumSource.Mode.EXCLUDE, names = "FORMED")
+    void saveToDBFailOrderStatusNotFormed(OrderStatus orderStatus) {
+        User user = getUserWithInitializedFields();
+        user.setCurrentPoints(1000);
+
+        OrderResponseDto dto = getOrderResponseDto();
+        Order order = getOrder();
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        order.setOrderStatus(orderStatus);
+
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(ModelUtils.getAddress()));
+        when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsService.processExistingOrder(dto, "35467585763t4sfgchjfuyetf", 1L));
+        assertTrue(exception.getMessage().contains(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED));
     }
 
     @Test
