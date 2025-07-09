@@ -116,8 +116,7 @@ class TelegramServiceTest {
         when(file.getContentType()).thenReturn("image/png");
         when(azureCloudStorageService.upload(file)).thenReturn("http://azure.com/image.png");
 
-
-        telegramService.sendMessageToUser(request, new MultipartFile[]{file});
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
         verify(azureCloudStorageService).upload(file);
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
@@ -140,7 +139,7 @@ class TelegramServiceTest {
         when(file.getContentType()).thenReturn("image/png");
         when(azureCloudStorageService.upload(file)).thenReturn("http://image");
 
-        telegramService.sendMessageToUser(request, new MultipartFile[]{file});
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
         verify(executor).executeCommand(eq(bot), any(SendMessage.class));
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
@@ -155,7 +154,7 @@ class TelegramServiceTest {
         when(telegramChatRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-                () -> telegramService.sendMessageToUser(request, null));
+            () -> telegramService.sendMessageToUser(request, null));
 
         verify(telegramMessageRepository, never()).save(any());
     }
@@ -167,25 +166,24 @@ class TelegramServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         TelegramMessage message = TelegramMessage.builder()
-                .id(100L)
-                .text("Hello")
-                .sendAt(LocalDateTime.now())
-                .fromManager(false)
-                .status(MessageDeliveryStatus.SENT)
-                .assets(List.of(MessageAsset.builder()
-                        .id(1L)
-                        .url("http://example.com/file.png")
-                        .type(AssetType.IMAGE)
-                        .fileName("file.png")
-                        .size(1024L)
-                        .contentType("image/png")
-                        .build()))
-                .build();
+            .id(100L)
+            .text("Hello")
+            .sendAt(LocalDateTime.now())
+            .fromManager(false)
+            .status(MessageDeliveryStatus.SENT)
+            .assets(List.of(MessageAsset.builder()
+                .id(1L)
+                .url("http://example.com/file.png")
+                .type(AssetType.IMAGE)
+                .fileName("file.png")
+                .size(1024L)
+                .contentType("image/png")
+                .build()))
+            .build();
 
         Page<TelegramMessage> messagePage = new PageImpl<>(List.of(message), pageable, 1);
 
         when(telegramMessageRepository.findByChatId(chatId, pageable)).thenReturn(messagePage);
-
 
         PageableDto<TelegramMessageDto> result = telegramService.findUserMessageByChatId(chatId, pageable);
 
@@ -215,9 +213,8 @@ class TelegramServiceTest {
         when(telegramMessageRepository.findByChatId(chatId, pageable)).thenReturn(emptyPage);
 
         NotFoundException exception = assertThrows(
-                NotFoundException.class,
-                () -> telegramService.findUserMessageByChatId(chatId, pageable)
-        );
+            NotFoundException.class,
+            () -> telegramService.findUserMessageByChatId(chatId, pageable));
 
         Assertions.assertEquals("There are no messages in the chat 1", exception.getMessage());
     }
@@ -228,37 +225,37 @@ class TelegramServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         User user = User.builder()
-                .recipientName("Іван")
-                .recipientSurname("Петренко")
-                .recipientEmail("ivan@example.com")
-                .build();
+            .recipientName("Іван")
+            .recipientSurname("Петренко")
+            .recipientEmail("ivan@example.com")
+            .build();
 
         TelegramChat chat = TelegramChat.builder()
-                .id(1L)
-                .chatId("123456789")
-                .firstName("Test")
-                .lastName("User")
-                .username("testuser")
-                .user(user)
-                .build();
+            .id(1L)
+            .chatId("123456789")
+            .firstName("Test")
+            .lastName("User")
+            .username("testuser")
+            .user(user)
+            .build();
 
         MessageAsset asset = MessageAsset.builder()
-                .id(10L)
-                .url("http://image.png")
-                .type(AssetType.IMAGE)
-                .fileName("image.png")
-                .size(1234L)
-                .contentType("image/png")
-                .build();
+            .id(10L)
+            .url("http://image.png")
+            .type(AssetType.IMAGE)
+            .fileName("image.png")
+            .size(1234L)
+            .contentType("image/png")
+            .build();
 
         TelegramMessage message = TelegramMessage.builder()
-                .id(100L)
-                .text("Hello")
-                .sendAt(LocalDateTime.now())
-                .fromManager(true)
-                .status(MessageDeliveryStatus.SENT)
-                .assets(List.of(asset))
-                .build();
+            .id(100L)
+            .text("Hello")
+            .sendAt(LocalDateTime.now())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .assets(List.of(asset))
+            .build();
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
@@ -289,13 +286,13 @@ class TelegramServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         TelegramChat chat = TelegramChat.builder()
-                .id(1L)
-                .chatId("123456789")
-                .firstName("No")
-                .lastName("User")
-                .username("nouser")
-                .user(null)
-                .build();
+            .id(1L)
+            .chatId("123456789")
+            .firstName("No")
+            .lastName("User")
+            .username("nouser")
+            .user(null)
+            .build();
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
@@ -331,15 +328,15 @@ class TelegramServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         TelegramChat chat = TelegramChat.builder()
-                .chatId(chatId)
-                .build();
+            .chatId(chatId)
+            .build();
 
         ChatFeedback feedback = ChatFeedback.builder()
-                .id(1L)
-                .chat(chat)
-                .rating(5)
-                .comment("Great service")
-                .build();
+            .id(1L)
+            .chat(chat)
+            .rating(5)
+            .comment("Great service")
+            .build();
 
         Page<ChatFeedback> feedbackPage = new PageImpl<>(List.of(feedback), pageable, 1);
 
@@ -375,23 +372,23 @@ class TelegramServiceTest {
         Long chatId = 1L;
 
         User user = User.builder()
-                .id(42L)
-                .build();
+            .id(42L)
+            .build();
 
         TelegramChat chat = TelegramChat.builder()
-                .id(chatId)
-                .user(user)
-                .build();
+            .id(chatId)
+            .user(user)
+            .build();
 
         Order order = Order.builder()
-                .id(100L)
-                .orderDate(LocalDateTime.now())
-                .user(user)
-                .build();
+            .id(100L)
+            .orderDate(LocalDateTime.now())
+            .user(user)
+            .build();
 
         OrdersDataForUserDto expectedDto = OrdersDataForUserDto.builder()
-                .id(100L)
-                .build();
+            .id(100L)
+            .build();
 
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
         when(orderRepository.findFirstByUserIdOrderByOrderDateDesc(user.getId())).thenReturn(Optional.of(order));
@@ -409,7 +406,7 @@ class TelegramServiceTest {
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> telegramService.getLastOrderByChatId(chatId));
+            () -> telegramService.getLastOrderByChatId(chatId));
 
         Assertions.assertEquals("Chat with id 2 not found", exception.getMessage());
     }
@@ -418,14 +415,14 @@ class TelegramServiceTest {
     void testGetLastOrderByChatId_UserIsNull_NotFoundExceptionThrown() {
         Long chatId = 3L;
         TelegramChat chat = TelegramChat.builder()
-                .id(chatId)
-                .user(null)
-                .build();
+            .id(chatId)
+            .user(null)
+            .build();
 
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> telegramService.getLastOrderByChatId(chatId));
+            () -> telegramService.getLastOrderByChatId(chatId));
 
         Assertions.assertEquals("Order not found", exception.getMessage());
     }
@@ -435,15 +432,15 @@ class TelegramServiceTest {
         Long chatId = 4L;
         User user = User.builder().id(55L).build();
         TelegramChat chat = TelegramChat.builder()
-                .id(chatId)
-                .user(user)
-                .build();
+            .id(chatId)
+            .user(user)
+            .build();
 
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
         when(orderRepository.findFirstByUserIdOrderByOrderDateDesc(user.getId())).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> telegramService.getLastOrderByChatId(chatId));
+            () -> telegramService.getLastOrderByChatId(chatId));
 
         Assertions.assertEquals("Order not found", exception.getMessage());
     }
@@ -452,12 +449,12 @@ class TelegramServiceTest {
     void testGetChatById_ChatFound_ChatDtoReturned() {
         Long chatId = 1L;
         TelegramChat chat = TelegramChat.builder()
-                .id(chatId)
-                .chatId("123456789")
-                .firstName("Іван")
-                .lastName("Петренко")
-                .username("ivan_pet")
-                .build();
+            .id(chatId)
+            .chatId("123456789")
+            .firstName("Іван")
+            .lastName("Петренко")
+            .username("ivan_pet")
+            .build();
 
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
@@ -477,7 +474,7 @@ class TelegramServiceTest {
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> telegramService.getChatById(chatId));
+            () -> telegramService.getChatById(chatId));
 
         Assertions.assertEquals("Chat with id 99 not found", exception.getMessage());
     }
