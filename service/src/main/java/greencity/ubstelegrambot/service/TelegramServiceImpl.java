@@ -126,6 +126,10 @@ public class TelegramServiceImpl implements TelegramService {
         telegramMessageRepository.save(message);
     }
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<TelegramMessageDto> findUserMessageByChatId(Long chatId, Pageable pageable) {
         Page<TelegramMessage> messages = telegramMessageRepository.findByChatId(chatId, pageable);
@@ -163,6 +167,10 @@ public class TelegramServiceImpl implements TelegramService {
             messages.getTotalPages());
     }
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable) {
         Specification<TelegramChat> spec = ChatSpecifications.hasNameLike(searchTerm);
@@ -226,6 +234,10 @@ public class TelegramServiceImpl implements TelegramService {
             chats.getTotalPages());
     }
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable) {
         Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findAll(pageable);
@@ -246,6 +258,10 @@ public class TelegramServiceImpl implements TelegramService {
             chatFeedbacks.getTotalPages());
     }
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable) {
         Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatIdPageable(chatId, pageable);
@@ -266,6 +282,10 @@ public class TelegramServiceImpl implements TelegramService {
             chatFeedbacks.getTotalPages());
     }
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public OrdersDataForUserDto getLastOrderByChatId(Long chatId) {
         TelegramChat telegramChat = telegramChatRepository.findById(chatId)
@@ -280,6 +300,10 @@ public class TelegramServiceImpl implements TelegramService {
         return ubsClientService.getOrdersData(order);
     }
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public ChatDto getChatById(Long chatId) {
         TelegramChat chat = telegramChatRepository.findById(chatId)
@@ -293,6 +317,10 @@ public class TelegramServiceImpl implements TelegramService {
             .build();
     }
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void processUpdate(Update update) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
