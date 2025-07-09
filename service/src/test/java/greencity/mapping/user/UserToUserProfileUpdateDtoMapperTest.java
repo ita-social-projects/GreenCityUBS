@@ -2,7 +2,7 @@ package greencity.mapping.user;
 
 import greencity.ModelUtils;
 import greencity.dto.user.UserProfileUpdateDto;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
 import greencity.repository.DistrictRepository;
@@ -48,7 +48,7 @@ class UserToUserProfileUpdateDtoMapperTest {
         assertEquals(userProfileUpdateDto.getViberIsNotify(), converted.getViberIsNotify());
 
         viberBot = ModelUtils.getViberBotNotifyFalse();
-        AuthorizedUser telegramBot = ModelUtils.getTelegramBotNotifyFalse();
+        TelegramChat telegramBot = ModelUtils.getTelegramBotNotifyFalse();
         user.setViberBot(viberBot);
         user.setTelegramBot(telegramBot);
         userProfileUpdateDto.setViberIsNotify(false);
