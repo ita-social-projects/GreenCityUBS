@@ -29,7 +29,6 @@ import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.exceptions.NotFoundException;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -430,22 +429,24 @@ public class OrderController {
      * Check if a tariff exists by its ID.
      *
      * @param id The ID of the tariff to check.
-     * @return ResponseEntity with a boolean indicating whether the tariff exists.
-     * @throws NotFoundException if the tariff with the specified ID is not found.
+     * @return {@code ResponseEntity} with HTTP 200 OK if tariff exists, HTTP 404
+     *         NOT FOUND if it doesn't exist.
      * @author Yurii Ososvskyi
      */
     @Operation(summary = "Check if tariff exists by Id")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/check-if-tariff-exists/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> checkIfTariffExistsById(@PathVariable Long id) {
-        Boolean exists = ubsClientService.checkIfTariffExistsById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(exists);
+    public ResponseEntity<Void> checkIfTariffExistsById(@PathVariable Long id) {
+        boolean exists = ubsClientService.checkIfTariffExistsById(id);
+        if (!exists) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
