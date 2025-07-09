@@ -81,24 +81,16 @@ public class MessageFactory {
      *         username.
      */
     public static SendMessage createSuccessLoginMessage(String chatId, String userName) {
-        return buildMessage(chatId, String.format(TelegramBotConstants.SUCCESS_LOGIN, userName));
+        return buildReplyMarkUpMessage(chatId, String.format(TelegramBotConstants.SUCCESS_LOGIN, userName), KeyboardFactory.createHelpKeyboard());
     }
 
     public static SendMessage createNotificationMessageForManager(String telegramChatId, String username,
         String messageText, Long innerChatId) {
-        return buildMessage(telegramChatId,
-            String.format(TelegramBotConstants.CLIENT_WANT_TO_SPEAK, username, messageText, innerChatId));
-    }
-
-    /**
-     * Method for creating stop support mode message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the stop support mode message.
-     */
-    public static SendMessage createStopSupportModeMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.CLIENT_END_SUPPORT_MODE);
+        SendMessage message = buildMessage(telegramChatId,
+                String.format(TelegramBotConstants.CLIENT_WANT_TO_SPEAK, username, messageText, innerChatId));
+        message.enableHtml(true);
+        message.setParseMode(ParseMode.HTML);
+        return message;
     }
 
     /**

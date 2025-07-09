@@ -119,4 +119,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         value = "SELECT e FROM Employee e JOIN e.tariffsInfoReceivingEmployees t"
             + " WHERE t.tariffsInfo.id = :tariffId AND t.hasChat = true")
     List<Employee> selectAllEmployeesByTariffIdAndChatEqualsTrue(@Param("tariffId") Long tariffId);
+
+    @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.employeePosition WHERE e.email = :email")
+    Optional<Employee> findByEmailWithPositions(@Param("email") String email);
 }

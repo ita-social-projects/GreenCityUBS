@@ -22,7 +22,7 @@ public class TelegramBotConstants {
         """
             Привіт менеджер!
             """;
-    public static final String LOGIN_MESSAGE = "Введіть логін та пароль в форматі /login:логін:пароль";
+    public static final String LOGIN_MESSAGE = "Введіть логін та пароль в форматі логін:пароль";
     public static final String SUCCESS_LOGIN = "Вітаємо, %s ! Ви успішно авторизувалися.";
     public static final String SUPPORTED_COMMANDS = "Список доступних команд :";
     public static final String LOGIN_ERROR = "Авторизація не вдалася: %s";

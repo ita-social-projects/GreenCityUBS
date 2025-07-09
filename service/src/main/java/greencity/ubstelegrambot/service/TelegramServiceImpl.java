@@ -396,26 +396,6 @@ public class TelegramServiceImpl implements TelegramService {
 
         Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(chatId);
 
-        if (!uuId.isEmpty() || (telegramChat.isPresent() && telegramChat.get().getUser() != null)) {
-            Optional<Employee> employee = employeeRepository.findByUuid(uuId);
-
-            if (employee.isPresent()) {
-                boolean isManager = checkIsEmployeeManager(employee.get());
-                if (isManager) {
-                    telegramChat.ifPresent(telegramChatRepository::delete);
-
-                    Optional<TelegramManager> telegramManager =
-                        telegramManagerRepository.findById(employee.get().getId().toString());
-
-                    if (telegramManager.isEmpty()) {
-                        return processLoginRequest(chatId);
-                    } else {
-                        return MessageFactory.createWelcomeManagerMessage(chatId);
-                    }
-                }
-            }
-        }
-
         if (telegramChat.isEmpty()) {
             TelegramChat.TelegramChatBuilder newChatBuilder = TelegramChat
                 .builder()
@@ -495,6 +475,13 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private SendMessage processLoginRequest(String chatId) {
+        Optional<TelegramManager> telegramManager = telegramManagerRepository.findByChatId(chatId);
+
+        if (telegramManager.isPresent()) {
+            return MessageFactory.createSuccessLoginMessage(
+                    chatId,
+                    telegramManager.get().getEmployee().getFirstName() + " " + telegramManager.get().getEmployee().getLastName());
+        }
         return updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
             MessageFactory::createLoginMessage);
     }
@@ -536,15 +523,15 @@ public class TelegramServiceImpl implements TelegramService {
     private SendMessage processInputManagerCredentialsRequest(Message message) {
         String[] parts = message.getText().split(":");
 
-        if (parts.length < 3) {
+        if (parts.length < 2) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
                 TelegramBotConstants.INCORRECT_LOGIN_FORMAT);
         }
 
-        String login = parts[1];
-        String password = parts[2];
+        String login = parts[0];
+        String password = parts[1];
 
-        Optional<Employee> employee = employeeRepository.findByEmail(login);
+        Optional<Employee> employee = employeeRepository.findByEmailWithPositions(login);
 
         if (employee.isEmpty()) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
