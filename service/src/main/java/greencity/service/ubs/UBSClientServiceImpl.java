@@ -525,6 +525,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid) {
@@ -560,6 +563,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         return paymentSystemResponse;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId) {
