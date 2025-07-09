@@ -3565,7 +3565,9 @@ class UBSClientServiceImplTest {
         OrderAddress orderAddress = getOrderAddress();
         orderAddress.setLocation(location);
 
-        UBSuser ubSuser = getUBSuser();
+        UBSuser ubsUser = getUBSuser();
+        ubsUser.setOrderAddress(orderAddress);
+        order.setUbsUser(ubsUser);
 
         when(userRepository.findByUuid(anyString())).thenReturn(user);
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
@@ -3574,7 +3576,7 @@ class UBSClientServiceImplTest {
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubSuser);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
