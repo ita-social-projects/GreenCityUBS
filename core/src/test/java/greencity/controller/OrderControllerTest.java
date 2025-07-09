@@ -363,14 +363,27 @@ class OrderControllerTest {
     }
 
     @Test
-    void checkIfTariffExistsByIdTest() throws Exception {
+    void checkIfTariffExistsById_Returns200_WhenTariffExists() throws Exception {
         Long tariffId = 1L;
         when(ubsClientService.checkIfTariffExistsById(tariffId)).thenReturn(true);
 
         mockMvc.perform(get(ubsLink + "/check-if-tariff-exists/{id}", tariffId)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().string("true"));
+            .andExpect(content().string(""));
+
+        verify(ubsClientService).checkIfTariffExistsById(tariffId);
+    }
+
+    @Test
+    void checkIfTariffExistsById_Returns404_WhenTariffDoesNotExist() throws Exception {
+        Long tariffId = 999999L;
+        when(ubsClientService.checkIfTariffExistsById(tariffId)).thenReturn(false);
+
+        mockMvc.perform(get(ubsLink + "/check-if-tariff-exists/{id}", tariffId)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string(""));
 
         verify(ubsClientService).checkIfTariffExistsById(tariffId);
     }
