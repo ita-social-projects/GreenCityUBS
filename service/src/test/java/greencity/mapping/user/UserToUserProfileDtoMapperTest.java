@@ -2,7 +2,7 @@ package greencity.mapping.user;
 
 import greencity.ModelUtils;
 import greencity.dto.user.UserProfileDto;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
 import greencity.entity.viber.ViberBot;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class UserToUserProfileDtoMapperTest {
         expected.setTelegramIsNotify(false);
         assertEquals(expected, mapper.convert(user));
 
-        AuthorizedUser telegramBot = ModelUtils.getTelegramBotNotifyFalse();
+        TelegramChat telegramBot = ModelUtils.getTelegramBotNotifyFalse();
         viberBot = ModelUtils.getViberBotNotifyFalse();
         user.setViberBot(viberBot);
         user.setTelegramBot(telegramBot);

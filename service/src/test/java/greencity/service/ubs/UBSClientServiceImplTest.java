@@ -55,7 +55,7 @@ import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -97,7 +97,7 @@ import greencity.repository.OrdersForUserRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
-import greencity.repository.AuthorizedUserRepository;
+import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
@@ -324,7 +324,7 @@ class UBSClientServiceImplTest {
     private GoogleApiService googleApiService;
 
     @Mock
-    private AuthorizedUserRepository telegramBotRepository;
+    private TelegramChatRepository telegramBotRepository;
 
     @Mock
     private ViberBotRepository viberBotRepository;
@@ -1828,7 +1828,7 @@ class UBSClientServiceImplTest {
         UBSClientServiceImpl ubsClientServiceSpy = spy(ubsService);
 
         User user = getUserWithBotNotifyTrue();
-        AuthorizedUser telegramBot = getTelegramBotNotifyTrue();
+        TelegramChat telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
         List<Bot> botList = botList();
@@ -1884,7 +1884,7 @@ class UBSClientServiceImplTest {
         UBSClientServiceImpl ubsClientServiceSpy = spy(ubsService);
 
         User user = getUserWithBotNotifyTrue();
-        AuthorizedUser telegramBot = getTelegramBotNotifyTrue();
+        TelegramChat telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoListWithNullPlaceId();
 
