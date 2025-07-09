@@ -2550,6 +2550,25 @@ public class ModelUtils {
             .build();
     }
 
+    public static User getUserWithInitializedFields() {
+        return User.builder()
+            .id(1L)
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .alternateEmail("test@mail.com")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .violations(0)
+            .currentPoints(0)
+            .dateOfRegistration(LocalDate.now())
+            .addresses(new ArrayList<>())
+            .ubsUsers(new HashSet<>())
+            .orders(new ArrayList<>())
+            .changeOfPointsList(new ArrayList<>())
+            .build();
+    }
+
     public static List<Location> getLocationList() {
         return List.of(Location.builder()
             .locationStatus(LocationStatus.ACTIVE)
