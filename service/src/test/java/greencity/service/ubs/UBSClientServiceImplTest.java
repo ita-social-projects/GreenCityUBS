@@ -2826,7 +2826,6 @@ class UBSClientServiceImplTest {
 
         Location location = getLocation();
 
-        UBSuser ubsUser = getUBSuser();
         UBSuser mappedFromDtoUser = getUBSuser();
         mappedFromDtoUser.setId(null);
 
@@ -2855,7 +2854,6 @@ class UBSClientServiceImplTest {
 
         Location location = getLocation();
 
-        UBSuser ubsUser = getUBSuser();
         UBSuser mappedFromDtoUser = getUBSuser();
         mappedFromDtoUser.setId(null);
         Order order = getOrder();
