@@ -3516,6 +3516,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(900);
         OrderResponseDto dto = getOrderResponseDto();
         dto.setPaymentSystem(PaymentSystem.MONOBANK);
+        dto.setPointsToUse(0);
 
         List<BagDto> bags = new ArrayList<>();
         bags.add(new BagDto(1, 5));
