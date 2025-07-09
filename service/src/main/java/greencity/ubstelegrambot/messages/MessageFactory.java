@@ -81,13 +81,14 @@ public class MessageFactory {
      *         username.
      */
     public static SendMessage createSuccessLoginMessage(String chatId, String userName) {
-        return buildReplyMarkUpMessage(chatId, String.format(TelegramBotConstants.SUCCESS_LOGIN, userName), KeyboardFactory.createHelpKeyboard());
+        return buildReplyMarkUpMessage(chatId, String.format(TelegramBotConstants.SUCCESS_LOGIN, userName),
+            KeyboardFactory.createHelpKeyboard());
     }
 
     public static SendMessage createNotificationMessageForManager(String telegramChatId, String username,
         String messageText, Long innerChatId) {
         SendMessage message = buildMessage(telegramChatId,
-                String.format(TelegramBotConstants.CLIENT_WANT_TO_SPEAK, username, messageText, innerChatId));
+            String.format(TelegramBotConstants.CLIENT_WANT_TO_SPEAK, username, messageText, innerChatId));
         message.enableHtml(true);
         message.setParseMode(ParseMode.HTML);
         return message;

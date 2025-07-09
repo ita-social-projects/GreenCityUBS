@@ -479,8 +479,9 @@ public class TelegramServiceImpl implements TelegramService {
 
         if (telegramManager.isPresent()) {
             return MessageFactory.createSuccessLoginMessage(
-                    chatId,
-                    telegramManager.get().getEmployee().getFirstName() + " " + telegramManager.get().getEmployee().getLastName());
+                chatId,
+                telegramManager.get().getEmployee().getFirstName() + " "
+                    + telegramManager.get().getEmployee().getLastName());
         }
         return updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
             MessageFactory::createLoginMessage);
