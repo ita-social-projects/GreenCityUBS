@@ -89,10 +89,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public void addressUpdate(UpdateAddressDto addressDto, String email) {
+    public Optional<OrderAddressDtoResponse> addressUpdate(UpdateAddressDto addressDto, String email) {
         Order order = orderRepository.findById(addressDto.getOrderId())
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
-        updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
+        return updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
     }
 
     /**

@@ -42,9 +42,10 @@ public interface AddressService {
      *
      * @param addressDto {@link UpdateAddressDto}
      * @param email      {@link String} the user's email
+     * @return {@link OrderAddressDtoResponse} that contains address.
      * @author Kizerov Dmytro
      */
-    void addressUpdate(UpdateAddressDto addressDto, String email);
+    Optional<OrderAddressDtoResponse> addressUpdate(UpdateAddressDto addressDto, String email);
 
     /**
      * Method that save address for current user.
