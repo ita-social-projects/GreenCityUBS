@@ -221,7 +221,7 @@ public class ModelUtils {
             .customerId(2L)
             .customerName("Anatolii")
             .customerSurname("Petyrov")
-            .customerPhoneNumber("095123456")
+            .customerPhoneNumber("0951234561")
             .customerEmail("anatolii.andr@gmail.com")
             .build();
     }
