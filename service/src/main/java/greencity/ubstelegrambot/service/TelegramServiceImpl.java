@@ -346,7 +346,8 @@ public class TelegramServiceImpl implements TelegramService {
                 if (chat.get().getChatState() != ChatState.NORMAL) {
                     chat.get().setChatState(ChatState.NORMAL);
                     telegramChatRepository.save(chat.get());
-                    executor.executeCommand(ubsTelegramBot, MessageFactory.buildMessage(chatId, TelegramBotConstants.PREVIOUS_SESSION_HAS_EXPIRED));
+                    executor.executeCommand(ubsTelegramBot,
+                        MessageFactory.buildMessage(chatId, TelegramBotConstants.PREVIOUS_SESSION_HAS_EXPIRED));
                     return;
                 }
             }
@@ -675,17 +676,17 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         TelegramMessage telegramMessage = TelegramMessage.builder()
-                .chat(chat.get())
-                .fromManager(false)
-                .mediaGroupId(message.getMediaGroupId())
-                .status(MessageDeliveryStatus.SENT)
-                .sendAt(LocalDateTime.now())
-                .build();
+            .chat(chat.get())
+            .fromManager(false)
+            .mediaGroupId(message.getMediaGroupId())
+            .status(MessageDeliveryStatus.SENT)
+            .sendAt(LocalDateTime.now())
+            .build();
 
         if (message.hasPhoto()) {
-
             if (message.getMediaGroupId() != null) {
-                telegramMessage = telegramMessageRepository.findByMediaGroupId(message.getMediaGroupId()).orElse(telegramMessage);
+                telegramMessage =
+                    telegramMessageRepository.findByMediaGroupId(message.getMediaGroupId()).orElse(telegramMessage);
             }
 
             telegramMessageRepository.save(telegramMessage);

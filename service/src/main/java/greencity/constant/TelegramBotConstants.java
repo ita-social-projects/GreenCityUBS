@@ -140,7 +140,6 @@ public class TelegramBotConstants {
 
             Список доступних команд :
             """;
-
     public static final String BACK_TO_MAIN_MENU = "⏪ В головне меню\n";
     public static final String CLIENT_END_SUPPORT_MODE = "Закінчити розмову з менеджером";
     public static final String CLIENT_STOP_SUPPORT_MODE =
@@ -150,7 +149,8 @@ public class TelegramBotConstants {
     public static final String CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY =
         """
             Поставте, будь ласка, своє запитання — і я покличу когось із моїх колег-людей ✍️👇
-            Якщо після спілкування з людиною ви захочете повернутися до моїх функцій, просто натисніть кнопку "Завершити розмову з менеджером"
+            Якщо після спілкування з людиною ви захочете повернутися до моїх функцій, 
+            просто натисніть кнопку "Завершити розмову з менеджером"
             """;
     public static final String GREEN_OFFICE_SUBJECT = "Цікавить Зелений офіс";
     public static final String UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN =
@@ -167,5 +167,6 @@ public class TelegramBotConstants {
             💬 http://localhost:4200/chat/%s
             """;
 
-    public static final String PREVIOUS_SESSION_HAS_EXPIRED = "Час попередньої сесії минув. Оберіть, будь ласка, команду зі списку щоб продовжити";
+    public static final String PREVIOUS_SESSION_HAS_EXPIRED =
+        "Час попередньої сесії минув. Оберіть, будь ласка, команду зі списку щоб продовжити";
 }
