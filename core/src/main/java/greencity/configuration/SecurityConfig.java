@@ -201,12 +201,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH,
                     SUPER_ADMIN_LINK + "/deactivateCourier/{id}",
                     SUPER_ADMIN_LINK + "/switchTariffStatus/{tariffId}",
-                    UBS_MANAG_LINK + "/addChatLink",
-                    UBS_LINK + "/update-address")
+                    UBS_MANAG_LINK + "/addChatLink")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     UBS_MANAG_LINK + "/update-order-page-admin-info/{id}",
-                    SUPER_ADMIN_LINK + "/activeLocations/{id}")
+                    SUPER_ADMIN_LINK + "/activeLocations/{id}",
+                    UBS_LINK + "/update-address")
                 .hasAnyRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     ADMIN_LINK + "/notification/add-template")
