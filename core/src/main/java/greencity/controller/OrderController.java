@@ -191,7 +191,7 @@ public class OrderController {
     public ResponseEntity<PaymentSystemResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
-        @Positive @PathVariable("id") Optional<Long> id) {
+        @PathVariable("id") Optional<Long> id) {
         if (id.isPresent()) {
             OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
             if (PaymentStatus.PAID.name().equals(orderDetailStatusDto.getPaymentStatus())
