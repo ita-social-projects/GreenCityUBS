@@ -29,6 +29,8 @@ public class ErrorMessage {
         "The user already has connected to Telegram bot.";
     public static final String THE_MESSAGE_WAS_NOT_SENT = "The message was not sent.";
     public static final String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
+    public static final String USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS =
+        "User with current uuid already exists in UBS.";
     public static final String USER_WITH_CURRENT_ID_DOES_NOT_EXIST = "User with current id does not exist.";
     public static final String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist: ";
     public static final String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";

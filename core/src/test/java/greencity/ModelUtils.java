@@ -28,7 +28,6 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
@@ -221,7 +220,7 @@ public class ModelUtils {
             .customerId(2L)
             .customerName("Anatolii")
             .customerSurname("Petyrov")
-            .customerPhoneNumber("095123456")
+            .customerPhoneNumber("0951234561")
             .customerEmail("anatolii.andr@gmail.com")
             .build();
     }
@@ -329,12 +328,6 @@ public class ModelUtils {
             .descriptionUk("Description")
             .limitIncluded(true)
             .build();
-    }
-
-    public static AdminCommentDto getAdminComment() {
-        return AdminCommentDto.builder()
-            .orderId(1L)
-            .adminComment("Admin").build();
     }
 
     public static EcoNumberDto getEcoNumberDto() {

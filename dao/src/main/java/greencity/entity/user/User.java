@@ -2,7 +2,7 @@ package greencity.entity.user;
 
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
 import jakarta.persistence.CascadeType;
@@ -74,7 +74,7 @@ public class User {
     private String uuid;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
-    private AuthorizedUser telegramBot;
+    private TelegramChat telegramBot;
 
     @Column(name = "date_of_registration")
     private LocalDate dateOfRegistration;

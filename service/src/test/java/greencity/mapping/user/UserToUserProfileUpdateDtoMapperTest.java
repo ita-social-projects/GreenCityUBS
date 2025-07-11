@@ -2,7 +2,7 @@ package greencity.mapping.user;
 
 import greencity.ModelUtils;
 import greencity.dto.user.UserProfileUpdateDto;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
 import greencity.repository.DistrictRepository;
 import java.util.Collections;
@@ -41,7 +41,7 @@ class UserToUserProfileUpdateDtoMapperTest {
         converted = mapper.convert(user);
         assertEquals(userProfileUpdateDto.getTelegramIsNotify(), converted.getTelegramIsNotify());
 
-        AuthorizedUser telegramBot = ModelUtils.getTelegramBotNotifyFalse();
+        TelegramChat telegramBot = ModelUtils.getTelegramBotNotifyFalse();
         user.setTelegramBot(telegramBot);
         userProfileUpdateDto.setTelegramIsNotify(false);
         converted = mapper.convert(user);

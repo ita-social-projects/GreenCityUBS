@@ -21,10 +21,10 @@ import java.util.List;
 public class EmployeeDto {
     private Long id;
     @NotNull
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
     private String firstName;
     @NotNull
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
     private String lastName;
     @NotNull
     @ValidPhoneNumber
