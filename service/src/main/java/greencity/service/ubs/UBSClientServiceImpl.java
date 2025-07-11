@@ -69,7 +69,7 @@ import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -116,7 +116,7 @@ import greencity.repository.OrdersForUserRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
-import greencity.repository.AuthorizedUserRepository;
+import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
@@ -204,6 +204,7 @@ import static greencity.constant.ErrorMessage.TO_MUCH_BAG_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static java.util.Objects.nonNull;
@@ -244,7 +245,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final TariffLocationRepository tariffLocationRepository;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
-    private final AuthorizedUserRepository telegramBotRepository;
+    private final TelegramChatRepository telegramBotRepository;
     private final ViberBotRepository viberBotRepository;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
@@ -836,7 +837,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return getOrdersData(order);
     }
 
-    private OrdersDataForUserDto getOrdersData(Order order) {
+    public OrdersDataForUserDto getOrdersData(Order order) {
         List<Payment> payments = order.getPayment();
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
@@ -1051,15 +1052,16 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
         }
         User user = userRepository.findByUuid(userProfileCreateDto.getUuid());
-        if (user == null) {
-            user = userRepository.save(User.builder()
-                .uuid(userProfileCreateDto.getUuid())
-                .recipientEmail(userProfileCreateDto.getEmail())
-                .recipientName(userProfileCreateDto.getName())
-                .currentPoints(0)
-                .violations(0)
-                .dateOfRegistration(LocalDate.now()).build());
+        if (user != null) {
+            throw new BadRequestException(USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS);
         }
+        user = userRepository.save(User.builder()
+            .uuid(userProfileCreateDto.getUuid())
+            .recipientEmail(userProfileCreateDto.getEmail())
+            .recipientName(userProfileCreateDto.getName())
+            .currentPoints(0)
+            .violations(0)
+            .dateOfRegistration(LocalDate.now()).build());
         return user.getId();
     }
 
@@ -1438,7 +1440,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void setTelegramAndViberBots(User user, Boolean telegramIsNotify, Boolean viberIsNotify) {
-        AuthorizedUser telegramBot = telegramBotRepository.findByUser(user).orElse(null);
+        TelegramChat telegramBot = telegramBotRepository.findByUser(user).orElse(null);
         ViberBot viberBot = viberBotRepository.findByUser(user).orElse(null);
         if (telegramBot != null) {
             telegramBot.setIsNotify(telegramIsNotify);
@@ -1514,7 +1516,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
         order.getOrderBags().clear();
-        orderRepository.save(order);
+        orderRepository.saveAndFlush(order);
         orderRepository.delete(order);
     }
 

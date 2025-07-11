@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -46,6 +47,34 @@ public class AzureCloudStorageService implements FileService {
             client.upload(new BufferedInputStream(multipartFile.getInputStream()), multipartFile.getSize(), true);
         } catch (IOException e) {
             throw new FileNotSavedException(ErrorMessage.FILE_NOT_SAVED);
+        }
+        return client.getBlobUrl();
+    }
+
+    /**
+     * Uploads a file to Azure Blob Storage from an InputStream. This method is
+     * intended for uploading files obtained, for example, from a URL (as in the
+     * case of Telegram).
+     *
+     * @param inputStream      The file data stream.
+     * @param originalFileName The desired file name with an extension (for example,
+     *                         "image.jpg"). You can get it from Telegram's
+     *                         file_path.
+     * @param fileSize         The size of the file in bytes. You can get it using
+     *                         Telegram's PhotoSize.getFileSize() .
+     * @return The URL of the uploaded file to Azure Blob Storage.
+     * @throws FileNotSavedException if the file could not be saved.
+     */
+    @Override
+    public String upload(InputStream inputStream, String originalFileName, long fileSize) {
+        final String blobName = UUID.randomUUID() + "_" + originalFileName;
+
+        BlobClient client = containerClient().getBlobClient(blobName);
+
+        try {
+            client.upload(new BufferedInputStream(inputStream), fileSize, true);
+        } catch (Exception e) {
+            throw new FileNotSavedException(ErrorMessage.FILE_NOT_SAVED, e);
         }
         return client.getBlobUrl();
     }

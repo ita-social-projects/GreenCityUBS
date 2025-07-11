@@ -9,7 +9,6 @@ import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.location.CoordinatesDto;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -829,29 +828,6 @@ public class ManagementOrderController {
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         violationService.updateUserViolation(add, multipartFiles, uuid);
         return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    /**
-     * Controller for saving Admin comment.
-     *
-     * @param adminCommentDto {@link AdminCommentDto}.
-     * @author Bahlay Yuriy.
-     */
-    @Operation(summary = "Save admin comment")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
-        @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
-    })
-    @PostMapping("/save-admin-comment")
-    public ResponseEntity<HttpStatus> saveAdminCommentToOrder(
-        @RequestBody @Valid AdminCommentDto adminCommentDto,
-        Principal principal) {
-        ubsManagementService.saveAdminCommentToOrder(adminCommentDto, principal.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**

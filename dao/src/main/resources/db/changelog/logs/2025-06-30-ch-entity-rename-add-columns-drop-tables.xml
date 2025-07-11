@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="2025-06-30-rename-table" author="vovasaienko">
+        <renameTable oldTableName="authorized_user" newTableName="telegram_chat"/>
+    </changeSet>
+
+    <changeSet id="2025-06-30-add-columns" author="vovasaienko">
+        <addColumn tableName="telegram_chat">
+            <column name="username" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_name" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2025-06-30-drop-table-unknown_telegram_user" author="vovasaienko">
+        <dropTable tableName="unknown_telegram_user"/>
+    </changeSet>
+
+</databaseChangeLog>

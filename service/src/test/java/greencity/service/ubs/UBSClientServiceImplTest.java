@@ -55,7 +55,7 @@ import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
@@ -97,7 +97,7 @@ import greencity.repository.OrdersForUserRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
-import greencity.repository.AuthorizedUserRepository;
+import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
@@ -227,6 +227,7 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -323,7 +324,7 @@ class UBSClientServiceImplTest {
     private GoogleApiService googleApiService;
 
     @Mock
-    private AuthorizedUserRepository telegramBotRepository;
+    private TelegramChatRepository telegramBotRepository;
 
     @Mock
     private ViberBotRepository viberBotRepository;
@@ -1827,7 +1828,7 @@ class UBSClientServiceImplTest {
         UBSClientServiceImpl ubsClientServiceSpy = spy(ubsService);
 
         User user = getUserWithBotNotifyTrue();
-        AuthorizedUser telegramBot = getTelegramBotNotifyTrue();
+        TelegramChat telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
         List<Bot> botList = botList();
@@ -1883,7 +1884,7 @@ class UBSClientServiceImplTest {
         UBSClientServiceImpl ubsClientServiceSpy = spy(ubsService);
 
         User user = getUserWithBotNotifyTrue();
-        AuthorizedUser telegramBot = getTelegramBotNotifyTrue();
+        TelegramChat telegramBot = getTelegramBotNotifyTrue();
         ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoListWithNullPlaceId();
 
@@ -2156,7 +2157,7 @@ class UBSClientServiceImplTest {
 
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
 
-        verify(orderRepository).save(order);
+        verify(orderRepository).saveAndFlush(order);
         verify(ordersForUserRepository).getAllByUserUuidAndId(order.getUser().getUuid(), order.getId());
     }
 
@@ -3039,10 +3040,12 @@ class UBSClientServiceImplTest {
         User user = getUser();
         when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
-        Long actualId = ubsService.createUserProfile(userProfileCreateDto);
+        BadRequestException ex = assertThrows(BadRequestException.class,
+            () -> ubsService.createUserProfile(userProfileCreateDto));
+        assertEquals(USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS, ex.getMessage());
+        verify(userRemoteClient, times(1)).checkIfUserExistsByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(0)).save(any(User.class));
-        assertEquals(user.getId(), actualId);
     }
 
     @Test
