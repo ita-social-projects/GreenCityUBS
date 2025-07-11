@@ -170,7 +170,6 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.BaseAddress;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.entity.viber.ViberBot;
 import greencity.enums.*;
 import greencity.util.Bot;
 
@@ -1572,7 +1571,6 @@ public class ModelUtils {
             .recipientPhone("0666051373")
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -1598,22 +1596,6 @@ public class ModelUtils {
             new ArrayList<>(), new ArrayList<>());
     }
 
-    public static ViberBot getViberBotNotifyTrue() {
-        return ViberBot.builder()
-            .id(1L)
-            .chatId("111111L")
-            .isNotify(true)
-            .build();
-    }
-
-    public static ViberBot getViberBotNotifyFalse() {
-        return ViberBot.builder()
-            .id(1L)
-            .chatId("111111L")
-            .isNotify(false)
-            .build();
-    }
-
     public static UserProfileUpdateDto getUserProfileUpdateDto() {
         User user = getUserWithBotNotifyTrue();
         return UserProfileUpdateDto.builder().addressDto(addressDtoList())
@@ -1621,7 +1603,6 @@ public class ModelUtils {
             .recipientPhone(user.getRecipientPhone())
             .alternateEmail("test@email.com")
             .telegramIsNotify(true)
-            .viberIsNotify(true)
             .build();
     }
 
@@ -1632,7 +1613,6 @@ public class ModelUtils {
             .recipientPhone(user.getRecipientPhone())
             .alternateEmail("test@email.com")
             .telegramIsNotify(false)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -3776,7 +3756,6 @@ public class ModelUtils {
             .recipientPhone("962473289")
             .addressDto(addressDtoList())
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -4298,9 +4277,6 @@ public class ModelUtils {
         botList.add(new Bot()
             .setType("TELEGRAM")
             .setLink("https://telegram.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8"));
-        botList.add(new Bot()
-            .setType("VIBER")
-            .setLink("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8"));
         return botList;
     }
 

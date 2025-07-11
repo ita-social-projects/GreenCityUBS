@@ -39,5 +39,4 @@ public class UserProfileUpdateDto implements Serializable {
     private List<AddressDto> addressDto;
     @NotNull
     private Boolean telegramIsNotify;
-    private Boolean viberIsNotify;
 }

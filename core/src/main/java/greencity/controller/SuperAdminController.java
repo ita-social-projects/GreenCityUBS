@@ -771,7 +771,7 @@ class SuperAdminController {
         @RequestParam(name = "regionsIds", required = false) Optional<List<Long>> regionsIds,
         @RequestParam(name = "citiesIds", required = false) Optional<List<Long>> citiesIds,
         @RequestParam(name = "stationsIds", required = false) Optional<List<Long>> stationsIds,
-        @Positive @RequestParam(name = "courierId", required = false) Optional<Long> courierId,
+        @RequestParam(name = "courierId", required = false) Optional<Long> courierId,
         @Valid @RequestParam @Parameter(name = "status", required = true, description = "status",
             schema = @Schema(type = "string", allowableValues = {"Active", "Deactivated"})) String status) {
         if (regionsIds.isPresent() || citiesIds.isPresent() || stationsIds.isPresent() || courierId.isPresent()) {

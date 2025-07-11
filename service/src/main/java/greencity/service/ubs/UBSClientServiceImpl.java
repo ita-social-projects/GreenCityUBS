@@ -76,7 +76,6 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.BagStatus;
 import greencity.enums.BonusReason;
@@ -120,7 +119,6 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.ViberBotRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.notification.NotificationServiceImpl;
@@ -246,7 +244,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final TelegramChatRepository telegramBotRepository;
-    private final ViberBotRepository viberBotRepository;
     private final OrderBagRepository orderBagRepository;
     private final OrderBagService orderBagService;
     private final NotificationService notificationService;
@@ -258,8 +255,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
 
-    @Value("${greencity.bots.viber-bot-uri}")
-    private String viberBotUri;
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
     @Value("${greencity.redirect.result-way-for-pay-url}")
@@ -279,8 +274,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "Approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
-    private static final String VIBER_PART_1_OF_LINK = "viber://pa?chatURI=";
-    private static final String VIBER_PART_3_OF_LINK = "&context=";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final String LANGUAGE_EN = "en";
     private static final String LANGUAGE_UK = "ua";
@@ -1404,8 +1397,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         User user = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
         setUserData(user, userProfileUpdateDto);
-        setTelegramAndViberBots(user, userProfileUpdateDto.getTelegramIsNotify(),
-            userProfileUpdateDto.getViberIsNotify());
+        setTelegramBot(user, userProfileUpdateDto.getTelegramIsNotify());
         userProfileUpdateDto.getAddressDto().stream()
             .map(a -> modelMapper.map(a, OrderAddressDtoRequest.class))
             .forEach(addressRequestDto -> addressService.updateCurrentAddressForOrder(addressRequestDto, uuid));
@@ -1439,16 +1431,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             (phone == null || phone.trim().isEmpty()) ? null : UAPhoneNumberUtil.getE164PhoneNumberFormat(phone));
     }
 
-    private void setTelegramAndViberBots(User user, Boolean telegramIsNotify, Boolean viberIsNotify) {
+    private void setTelegramBot(User user, Boolean telegramIsNotify) {
         TelegramChat telegramBot = telegramBotRepository.findByUser(user).orElse(null);
-        ViberBot viberBot = viberBotRepository.findByUser(user).orElse(null);
         if (telegramBot != null) {
             telegramBot.setIsNotify(telegramIsNotify);
             user.setTelegramBot(telegramBot);
-        }
-        if (viberBot != null) {
-            viberBot.setIsNotify(viberIsNotify);
-            user.setViberBot(viberBot);
         }
     }
 
@@ -1585,10 +1572,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         if ("TELEGRAM".equals(type.name())) {
             linkTemplate = String.format("%s%s%s%s",
                 TELEGRAM_PART_1_OF_LINK, telegramBotName, TELEGRAM_PART_3_OF_LINK, uuid);
-        }
-        if ("VIBER".equals(type.name())) {
-            linkTemplate = String.format("%s%s%s%s",
-                VIBER_PART_1_OF_LINK, viberBotUri, VIBER_PART_3_OF_LINK, uuid);
         }
         return linkTemplate;
     }

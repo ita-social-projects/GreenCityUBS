@@ -12,7 +12,4 @@ import org.springframework.context.annotation.Configuration;
 public class BotsConfgProp {
     private String ubsBotName;
     private String ubsBotToken;
-    private String viberBotUri;
-    private String viberBotUrl;
-    private String viberBotToken;
 }
