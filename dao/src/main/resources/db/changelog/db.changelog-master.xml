@@ -288,5 +288,5 @@
     <include file="db/changelog/logs/2025-07-06-ch-add-feedback-to-chat.xml"/>
     <include file="db/changelog/logs/2025-07-07-ch-add-chat-state-updated-at-column.xml"/>
     <include file="db/changelog/logs/2025-07-09-ch-drop-telegram-old-tables-and-columns.xml"/>
-
+    <include file="db/changelog/logs/ch-drop-viber-bot-table-Popovych.xml"/>
 </databaseChangeLog>

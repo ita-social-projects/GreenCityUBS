@@ -62,7 +62,6 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -101,7 +100,6 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import greencity.util.Bot;
@@ -214,7 +212,6 @@ import static greencity.ModelUtils.getUserProfileUpdateDto;
 import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
 import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.ModelUtils.getUserWithLastLocation;
-import static greencity.ModelUtils.getViberBotNotifyTrue;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
@@ -325,9 +322,6 @@ class UBSClientServiceImplTest {
 
     @Mock
     private TelegramChatRepository telegramBotRepository;
-
-    @Mock
-    private ViberBotRepository viberBotRepository;
 
     @InjectMocks
     private UBSClientServiceImpl ubsClientService;
@@ -1829,7 +1823,6 @@ class UBSClientServiceImplTest {
 
         User user = getUserWithBotNotifyTrue();
         TelegramChat telegramBot = getTelegramBotNotifyTrue();
-        ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
         List<Bot> botList = botList();
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
@@ -1838,7 +1831,6 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
-        when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         doReturn(new OrderWithAddressesResponseDto())
@@ -1855,11 +1847,9 @@ class UBSClientServiceImplTest {
         Assertions.assertNotNull(userProfileUpdateDto);
         Assertions.assertNotNull(addressDto);
         Assertions.assertTrue(userProfileUpdateDto.getTelegramIsNotify());
-        Assertions.assertTrue(userProfileUpdateDto.getViberIsNotify());
 
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
-        verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
         verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -1885,7 +1875,6 @@ class UBSClientServiceImplTest {
 
         User user = getUserWithBotNotifyTrue();
         TelegramChat telegramBot = getTelegramBotNotifyTrue();
-        ViberBot viberBot = getViberBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoListWithNullPlaceId();
 
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
@@ -1897,7 +1886,6 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
-        when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         doReturn(new OrderWithAddressesResponseDto()).when(addressService)
@@ -1909,7 +1897,6 @@ class UBSClientServiceImplTest {
 
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
-        verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
         verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -1929,7 +1916,6 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.empty());
-        when(viberBotRepository.findByUser(user)).thenReturn(Optional.empty());
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         doReturn(new OrderWithAddressesResponseDto())
@@ -1943,7 +1929,6 @@ class UBSClientServiceImplTest {
 
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
-        verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
         verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
