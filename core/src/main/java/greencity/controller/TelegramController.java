@@ -6,6 +6,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.*;
 import greencity.service.ubs.TelegramService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -39,13 +40,14 @@ public class TelegramController {
     @Operation(summary = "Get all messages in chat by chatId")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/messages/{chatId}")
     public ResponseEntity<PageableDto<TelegramMessageDto>> getUserMessages(
-        @PathVariable(name = "chatId") Long chatId, Pageable page) {
+        @Positive @PathVariable(name = "chatId") Long chatId, Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.findUserMessageByChatId(chatId, page));
     }
 
@@ -77,12 +79,13 @@ public class TelegramController {
     @Operation(summary = "Get last user order by chatId")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping("/last-order")
-    public ResponseEntity<OrdersDataForUserDto> getLastOrderByChatId(@RequestParam Long chatId) {
+    public ResponseEntity<OrdersDataForUserDto> getLastOrderByChatId(@Positive @RequestParam Long chatId) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getLastOrderByChatId(chatId));
     }
 
@@ -97,6 +100,7 @@ public class TelegramController {
     @Operation(summary = "Send message to user chat")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
@@ -120,13 +124,14 @@ public class TelegramController {
     @Operation(summary = "Get chat by id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/chat/{chatId}")
-    public ResponseEntity<ChatDto> getChat(@PathVariable Long chatId) {
+    public ResponseEntity<ChatDto> getChat(@Positive @PathVariable Long chatId) {
         return ResponseEntity.ok(telegramService.getChatById(chatId));
     }
 
