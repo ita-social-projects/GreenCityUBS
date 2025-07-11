@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.security.Principal;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -221,7 +220,7 @@ public class AddressController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PatchMapping("/update-address")
-    public ResponseEntity<Optional<OrderAddressDtoResponse>> updateAddress(
+    public ResponseEntity<OrderAddressDtoResponse> updateAddress(
         @RequestBody @Valid UpdateAddressDto addressDto, @Parameter(hidden = true) Principal principal) {
         return ResponseEntity.ok(addressService.addressUpdate(addressDto, principal.getName()));
     }

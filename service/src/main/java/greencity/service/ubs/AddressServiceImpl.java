@@ -89,7 +89,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public Optional<OrderAddressDtoResponse> addressUpdate(UpdateAddressDto addressDto, String email) {
+    public OrderAddressDtoResponse addressUpdate(UpdateAddressDto addressDto, String email) {
         Order order = orderRepository.findById(addressDto.getOrderId())
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
         return updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
@@ -144,7 +144,7 @@ public class AddressServiceImpl implements AddressService {
      */
     @Override
     @Transactional
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
+    public OrderAddressDtoResponse updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email) {
         OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
             .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ADDRESS_BY_ID, dtoUpdate.getId())));
@@ -152,7 +152,7 @@ public class AddressServiceImpl implements AddressService {
         mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
         orderAddressRepository.save(updatedOrderAddress);
         eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_UK, email, order);
-        return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
+        return modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class);
     }
 
     /**
