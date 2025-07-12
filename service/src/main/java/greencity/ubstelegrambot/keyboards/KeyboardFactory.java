@@ -40,6 +40,17 @@ public class KeyboardFactory {
             .build();
     }
 
+    public static InlineKeyboardMarkup createHelpKeyboardForManager() {
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+
+        keyboard.add(createRow(LOGOUT_MANAGER, LOGOUT_MANAGER_CALLBACK));
+
+        return InlineKeyboardMarkup
+            .builder()
+            .keyboard(keyboard)
+            .build();
+    }
+
     /**
      * Creates InlineKeyboardMarkup for chat feedback rating.
      *

@@ -28,9 +28,18 @@ public class MessageFactory {
         return buildMessage(chatId, TelegramBotConstants.GREETING_MANAGER_MESSAGE);
     }
 
+    public static SendMessage createLogoutManagerMessage(String chatId) {
+        return buildMessage(chatId, TelegramBotConstants.SUCCESSFUL_LOGOUT_MANAGER);
+    }
+
     public static SendMessage createAvailableCommandsMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
             KeyboardFactory.createHelpKeyboard());
+    }
+
+    public static SendMessage createAvailableForManagerCommandsMessage(String chatId) {
+        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
+            KeyboardFactory.createHelpKeyboardForManager());
     }
 
     /**
@@ -82,7 +91,7 @@ public class MessageFactory {
      */
     public static SendMessage createSuccessLoginMessage(String chatId, String userName) {
         return buildReplyMarkUpMessage(chatId, String.format(TelegramBotConstants.SUCCESS_LOGIN, userName),
-            KeyboardFactory.createHelpKeyboard());
+            KeyboardFactory.createHelpKeyboardForManager());
     }
 
     public static SendMessage createNotificationMessageForManager(String telegramChatId, String username,
