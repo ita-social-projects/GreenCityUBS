@@ -12,6 +12,7 @@ public class TelegramBotConstants {
         "Некоректний формат. Будь ласка, введіть дані в форматі login:password";
     public static final String LOGOUT_MANAGER = "Вийти з ролі менеджера";
     public static final String SUCCESSFUL_LOGOUT_MANAGER = "Успішно вийшли з ролі менеджера!";
+    public static final String FORBIDDEN_COMMANDS_MANAGER = "Менеджеру заборонено викликати команди";
     public static final String USER_IS_NOT_EMPLOYEE = "Користувач не є співробітником";
     public static final String EMPLOYEE_IS_NOT_MANAGER = "Співробітник не є менеджером";
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Щось пішло не так спробуйте, будь ласка, знову";

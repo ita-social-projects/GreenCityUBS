@@ -32,6 +32,10 @@ public class MessageFactory {
         return buildMessage(chatId, TelegramBotConstants.SUCCESSFUL_LOGOUT_MANAGER);
     }
 
+    public static SendMessage createForbiddenCommandsManagerMessage(String chatId) {
+        return buildMessage(chatId, TelegramBotConstants.FORBIDDEN_COMMANDS_MANAGER);
+    }
+
     public static SendMessage createAvailableCommandsMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
             KeyboardFactory.createHelpKeyboard());

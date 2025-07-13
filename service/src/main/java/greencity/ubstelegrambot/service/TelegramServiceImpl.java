@@ -354,7 +354,8 @@ public class TelegramServiceImpl implements TelegramService {
                 } default ->
                         executor.executeCommand(ubsTelegramBot, processManagerMenuRequest(chatId));
             }
-        } else {
+        } else if(update.hasMessage()) {
+            executor.executeCommand(ubsTelegramBot, processManagerMessageRequest(chatId));
             //TODO implement logic when update has a message
             //executor.executeCommand(ubsTelegramBot, processUnknownManagerRequest(chatId));
         }
@@ -549,6 +550,11 @@ public class TelegramServiceImpl implements TelegramService {
     private SendMessage processLogoutManagerRequest(String chatId) {
         return updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory::createLogoutManagerMessage);
+    }
+
+    private SendMessage processManagerMessageRequest(String chatId) {
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createForbiddenCommandsManagerMessage);
     }
 
     private SendMessage processLoginRequest(String chatId) {
