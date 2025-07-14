@@ -95,9 +95,9 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.GET,
+                    "/socket/**",
                     UBS_LINK + "/getAllActiveCouriers",
                     UBS_LINK + "/locations/{courierId}",
-                    UBS_LINK + "/order-details-for-tariff",
                     UBS_LINK + "/tariffinfo/**",
                     ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
                     UBS_LINK + "/locationsByCourier/{courierId}",
@@ -106,17 +106,13 @@ public class SecurityConfig {
                     UBS_LINK + "/districts-for-kyiv",
                     COMMIT_INFO)
                 .permitAll()
-                .requestMatchers(HttpMethod.POST,
-                    UBS_LINK + "/userProfile/user/create")
-                .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
                     "/swagger.json",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/swagger-resources/**",
-                    "/webjars/**",
-                    "/bot")
+                    "/webjars/**")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/getAllCertificates",
@@ -215,18 +211,14 @@ public class SecurityConfig {
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_MANAG_LINK + "/**",
-                    ADMIN_LINK + "/**",
-                    "/accountinfo")
+                    ADMIN_LINK + "/**")
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/**",
                     SUPER_ADMIN_LINK + "/**",
                     ADMIN_LINK + "/notification/get-all",
                     ADMIN_LINK + "/notification/{id}",
-                    ADMIN_LINK + "/**",
-                    "/accountinfo",
-                    "/removewebhook",
-                    "/setwebhook")
+                    ADMIN_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ADMIN_LINK + "/notification/remove-custom-template/{id}")
@@ -280,12 +272,13 @@ public class SecurityConfig {
                     UBS_LINK + "/certificate/{responseCode}",
                     "/notifications",
                     "/notifications/**",
-                    "/notifications/quantityUnreadenNotifications",
+                    "/notifications/quantityUnreadNotifications",
                     UBS_LINK + "/check-if-tariff-exists/{id}",
                     UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + "/telegram/**")
+                    UBS_LINK + "/telegram/**",
+                    SUPER_ADMIN_LINK + "/tariff/{id}")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_LINK + "/telegram/**")
@@ -296,6 +289,9 @@ public class SecurityConfig {
                     "/notifications/{notificationId}/viewNotification",
                     "/notifications/{notificationId}/unreadNotification")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.POST,
+                    UBS_LINK + "/userProfile/user/create")
+                .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_LINK + "/userProfile/**",
                     UBS_LINK + "/update-order-address")

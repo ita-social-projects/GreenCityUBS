@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
@@ -947,8 +948,22 @@ class AddressServiceTest {
     void getAllDistrictsForKyivTest() {
         List<District> district = List.of(ModelUtils.getDistrict());
         when(districtRepository.findAllByCityId(1L)).thenReturn(district);
+        when(cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)).thenReturn(Optional.of(1L));
+
         addressService.getAllDistrictsForKyiv();
+
+        verify(cityRepository, times(1)).findIdByCityNameEnIgnoreCase(AppConstant.KYIV);
         verify(districtRepository, times(1)).findAllByCityId(anyLong());
+    }
+
+    @Test
+    void getAllDistrictsForKyivAndCityKyivNotFoundThenExceptionThrownTest() {
+        when(cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> addressService.getAllDistrictsForKyiv());
+
+        verify(cityRepository, times(1)).findIdByCityNameEnIgnoreCase(AppConstant.KYIV);
+        verify(districtRepository, times(0)).findAllByCityId(anyLong());
     }
 
     @Test
