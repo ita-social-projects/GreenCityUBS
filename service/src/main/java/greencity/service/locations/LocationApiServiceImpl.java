@@ -5,6 +5,7 @@ import greencity.dto.location.api.LocationDto;
 import greencity.enums.LocationDivision;
 import greencity.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.ParameterizedTypeReference;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.Cacheable;
 
+@Slf4j
 @Service
 @EnableCaching
 @RequiredArgsConstructor
@@ -55,9 +57,11 @@ public class LocationApiServiceImpl implements LocationApiService {
     @Override
     @Cacheable(value = "districtList", key = "#regionName + '_' + #cityName")
     public List<LocationDto> getAllDistrictsInCityByNames(String regionName, String cityName) {
+        log.info("City before normalization: {}", cityName);
         checkIfNotNull(regionName, cityName);
         regionName = removeWordRegion(regionName);
         cityName = removeWordCity(cityName);
+        log.info("City after normalization: {}", replaceAllQuotes(cityName));
         if (cityName.equals(KYIV.getLocationNameMap().get(NAME_UK))
             || cityName.equals(KYIV.getLocationNameMap().get(NAME_EN))) {
             return getAllDistrictsInCityByCityID(KYIV.getId());
@@ -73,7 +77,7 @@ public class LocationApiServiceImpl implements LocationApiService {
     }
 
     static String replaceAllQuotes(String input) {
-        Pattern pattern = Pattern.compile("[`'‘’“”‛‟ʼ«»\"]");
+        Pattern pattern = Pattern.compile("\"[`‘’“”‛‟ʼ«»‚ʹʽʾʿˊˋ΄´ˆˇ\"′]\"");
         Matcher matcher = pattern.matcher(input);
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
@@ -105,10 +109,18 @@ public class LocationApiServiceImpl implements LocationApiService {
     @Override
     @Cacheable(value = "locationByName", key = "#locations.size() + '_' + #locationName")
     public LocationDto findLocationByName(List<LocationDto> locations, String locationName) {
-        return locations.stream()
-            .filter(location -> location.getLocationNameMap().containsValue(locationName))
-            .findFirst()
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND + locationName));
+        //        return locations.stream()
+        //            .filter(location -> location.getLocationNameMap().containsValue(locationName))
+        //            .findFirst()
+        //            .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND + locationName));
+        try {
+            return locations.stream()
+                .filter(location -> location.getLocationNameMap().containsValue(locationName))
+                .findFirst()
+                .orElseGet(() -> findClosestLocationByName(locations, locationName, 2));
+        } catch (NotFoundException e) {
+            throw new NotFoundException(ErrorMessage.CITY_NOT_FOUND + locationName);
+        }
     }
 
     /**
@@ -300,6 +312,35 @@ public class LocationApiServiceImpl implements LocationApiService {
         return getResultFromUrl(builder.build().encode().toUri());
     }
 
+    private LocationDto findClosestLocationByName(List<LocationDto> locations, String targetName, int maxDistance) {
+        log.info("[findClosestLocationByName] Start fuzzy search for '{}', maxDistance={}", targetName, maxDistance);
+
+        LocationDto closest = locations.stream()
+            .filter(loc -> loc.getLocationNameMap() != null)
+            .peek(loc -> {
+                String candidateName = getBestName(loc);
+                int distance = levenshteinDistance(candidateName, targetName);
+                log.debug("[findClosestLocationByName] Comparing '{}' <-> '{}', distance={}",
+                    candidateName, targetName, distance);
+            })
+            .min((a, b) -> Integer.compare(
+                levenshteinDistance(getBestName(a), targetName),
+                levenshteinDistance(getBestName(b), targetName)
+            ))
+            .filter(loc -> {
+                int distance = levenshteinDistance(getBestName(loc), targetName);
+                log.info("[findClosestLocationByName] Best match '{}' with distance {}", getBestName(loc), distance);
+                return distance <= maxDistance;
+            })
+            .orElseThrow(() -> {
+                log.error("[findClosestLocationByName] No match found within max distance for '{}'", targetName);
+                return new NotFoundException("Closest match not found for: " + targetName);
+            });
+
+        log.info("[findClosestLocationByName] Final match: '{}'", getBestName(closest));
+        return closest;
+    }
+
     private UriComponentsBuilder buildUrl() {
         return UriComponentsBuilder.fromHttpUrl(API_URL)
             .queryParam(PAGE_SIZE, DEFAULT_PAGE_SIZE);
@@ -333,5 +374,35 @@ public class LocationApiServiceImpl implements LocationApiService {
     private static String removeWordCity(String sentence) {
         String withoutRegion = sentence.replaceAll("(?iu)city", "").trim();
         return replaceAllQuotes(withoutRegion.replaceAll("(?iu)місто", "").trim());
+    }
+
+    private String getBestName(LocationDto dto) {
+        String rawName = dto.getLocationNameMap().getOrDefault("name_uk", "").trim();
+        String normalized = replaceAllQuotes(removeWordCity(rawName));
+        log.debug("[getBestName] Original: '{}', Normalized: '{}'", rawName, normalized);
+        return normalized;
+    }
+
+    private static int levenshteinDistance(String a, String b) {
+        int[][] dp = new int[a.length() + 1][b.length() + 1];
+
+        for (int i = 0; i <= a.length(); i++) {
+            dp[i][0] = i;
+        }
+        for (int j = 0; j <= b.length(); j++) {
+            dp[0][j] = j;
+        }
+        for (int i = 1; i <= a.length(); i++) {
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                dp[i][j] = Math.min(
+                    Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1),
+                    dp[i - 1][j - 1] + cost
+                );
+            }
+        }
+        int result = dp[a.length()][b.length()];
+        log.trace("[levenshteinDistance] Distance between '{}' and '{}' = {}", a, b, result);
+        return result;
     }
 }

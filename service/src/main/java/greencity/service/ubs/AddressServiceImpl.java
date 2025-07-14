@@ -31,8 +31,10 @@ import greencity.repository.RegionRepository;
 import greencity.repository.CityRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.OrderRepository;
+import greencity.service.google.GoogleApiService;
 import greencity.service.locations.LocationApiService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +46,7 @@ import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
@@ -56,6 +59,7 @@ public class AddressServiceImpl implements AddressService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepo;
     private final OrderRepository orderRepository;
+    private final GoogleApiService googleApiService;
     private final EventService eventService;
     private final LocationApiService locationApiService;
     private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
@@ -353,6 +357,8 @@ public class AddressServiceImpl implements AddressService {
             .sorted(Comparator.comparing(Address::getId))
             .map(u -> modelMapper.map(u, AddressDto.class))
             .toList();
+        log.info("Found " + addressDtoList.size() + " addresses");
+        log.info(addressDtoList.toString());
         return new OrderWithAddressesResponseDto(addressDtoList);
     }
 
