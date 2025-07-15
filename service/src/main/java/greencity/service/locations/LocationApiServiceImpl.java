@@ -109,10 +109,12 @@ public class LocationApiServiceImpl implements LocationApiService {
     @Override
     @Cacheable(value = "locationByName", key = "#locations.size() + '_' + #locationName")
     public LocationDto findLocationByName(List<LocationDto> locations, String locationName) {
-        //        return locations.stream()
-        //            .filter(location -> location.getLocationNameMap().containsValue(locationName))
-        //            .findFirst()
-        //            .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND + locationName));
+        // return locations.stream()
+        // .filter(location ->
+        // location.getLocationNameMap().containsValue(locationName))
+        // .findFirst()
+        // .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND +
+        // locationName));
         try {
             return locations.stream()
                 .filter(location -> location.getLocationNameMap().containsValue(locationName))
@@ -325,8 +327,7 @@ public class LocationApiServiceImpl implements LocationApiService {
             })
             .min((a, b) -> Integer.compare(
                 levenshteinDistance(getBestName(a), targetName),
-                levenshteinDistance(getBestName(b), targetName)
-            ))
+                levenshteinDistance(getBestName(b), targetName)))
             .filter(loc -> {
                 int distance = levenshteinDistance(getBestName(loc), targetName);
                 log.info("[findClosestLocationByName] Best match '{}' with distance {}", getBestName(loc), distance);
@@ -397,8 +398,7 @@ public class LocationApiServiceImpl implements LocationApiService {
                 int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
                 dp[i][j] = Math.min(
                     Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1),
-                    dp[i - 1][j - 1] + cost
-                );
+                    dp[i - 1][j - 1] + cost);
             }
         }
         int result = dp[a.length()][b.length()];
