@@ -14,14 +14,18 @@ import static greencity.constant.TelegramBotConstants.*;
 public class KeyboardFactory {
     public static final String YES = "Так";
 
+    /**
+     * Private constructor to prevent instantiation of the utility class.
+     */
     private KeyboardFactory() {
     }
 
     /**
-     * Method creates InlineKeyboardMarkup for help command for user.
+     * Creates an inline keyboard for the user help command with predefined options.
      *
-     * @return InlineKeyboardMarkup with four buttons: start command, help command,
-     *         login command and client support command.
+     * The keyboard contains seven rows, each with a single button for user actions such as contacting support, viewing work schedules, admission rules, green office information, leaving feedback, sorting prices, and manager login.
+     *
+     * @return an InlineKeyboardMarkup with user help options as buttons.
      */
     public static InlineKeyboardMarkup createHelpKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -41,9 +45,9 @@ public class KeyboardFactory {
     }
 
     /**
-     * Method creates InlineKeyboardMarkup for help command for manager.
+     * Creates an inline keyboard for the manager help command with a single logout button.
      *
-     * @return {@link InlineKeyboardMarkup} with one buttons: logout command.
+     * @return an {@link InlineKeyboardMarkup} containing one row with a logout button for managers.
      */
     public static InlineKeyboardMarkup createHelpKeyboardForManager() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -97,10 +101,9 @@ public class KeyboardFactory {
     }
 
     /**
-     * Creates ReplyKeyboardMarkup for user support keyboard.
+     * Creates a reply keyboard for user support mode with a button to stop support.
      *
-     * @return ReplyKeyboardMarkup with one row containing button for stopping
-     *         support mode and resize keyboard flag is set to true.
+     * @return a ReplyKeyboardMarkup containing a single row with a button to end support mode, with keyboard resizing enabled.
      */
     public static ReplyKeyboardMarkup userSupportKeyboard() {
         KeyboardRow firstRow = new KeyboardRow();
@@ -116,11 +119,10 @@ public class KeyboardFactory {
             .build();
     }
 
-    /**
-     * Creates InlineKeyboardMarkup for back to the main menu.
+    /****
+     * Creates an inline keyboard with a single button that returns the user to the main menu.
      *
-     * @return {@link InlineKeyboardMarkup} with one row containing button for
-     *         returning to the main menu.
+     * @return an {@link InlineKeyboardMarkup} containing one row with a main menu button.
      */
     public static InlineKeyboardMarkup createBackToMainMenuKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -132,13 +134,12 @@ public class KeyboardFactory {
     }
 
     /**
-     * Creates InlineKeyboardMarkup for processing or backing to the main menu
-     * keyboard.
+     * Creates an inline keyboard with options to confirm an action or return to the main menu.
      *
-     * @param callBackData {@link String} is callback data.
+     * The keyboard consists of two rows: the first row contains a "Yes" button with the provided callback data, and the second row contains a button to return to the main menu.
      *
-     * @return {@link InlineKeyboardMarkup} with two rows containing buttons for say
-     *         yes and for returning to the main menu keyboard.
+     * @param callBackData the callback data to associate with the "Yes" button
+     * @return an {@link InlineKeyboardMarkup} with "Yes" and "Back to Main Menu" buttons
      */
     public static InlineKeyboardMarkup createProcessOrBackToMainMenuKeyboard(String callBackData) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();

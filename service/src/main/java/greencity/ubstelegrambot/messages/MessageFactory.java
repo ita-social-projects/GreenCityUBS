@@ -13,11 +13,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageFactory {
     /**
-     * Method for creating welcome SendMessage for TelegramLongPollingBot.
+     * Creates a welcome message for a Telegram chat with a help keyboard attached.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the welcome message.
+     * @param chatId the Telegram chat ID to send the welcome message to
+     * @return a SendMessage object containing the greeting message and help keyboard
      */
     public static SendMessage createWelcomeMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.GREETING_MESSAGE,
@@ -25,47 +24,40 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating welcome manager SendMessage.
+     * Creates a welcome message for a manager in a Telegram chat.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the welcome manager message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage configured with the manager-specific greeting
      */
     public static SendMessage createWelcomeManagerMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.GREETING_MANAGER_MESSAGE);
     }
 
     /**
-     * Method for creating successful logout manager SendMessage for
-     * TelegramLongPollingBot.
+     * Creates a message indicating successful logout for a manager user.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the successful logout manager
-     *         message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage configured with the successful logout message for managers
      */
     public static SendMessage createLogoutManagerMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.SUCCESSFUL_LOGOUT_MANAGER);
     }
 
     /**
-     * Method for creating forbidden manager SendMessage for TelegramLongPollingBot.
+     * Creates a message indicating that certain commands are forbidden for managers.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the forbidden manager messages.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage configured with the forbidden commands notification for managers
      */
     public static SendMessage createForbiddenCommandsManagerMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.FORBIDDEN_COMMANDS_MANAGER);
     }
 
     /**
-     * Method for creating list of available commands message.
+     * Creates a message listing the available commands for the user, including a help keyboard.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the list of available commands
-     *         message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage object containing the list of available commands and a help keyboard
      */
     public static SendMessage createAvailableCommandsMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
@@ -73,13 +65,10 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating list of supported manager commands for
-     * TelegramLongPollingBot.
+     * Creates a message listing the available commands for managers, including a manager-specific help keyboard.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the list of supported manager
-     *         commands message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage containing the list of manager commands and the manager help keyboard
      */
     public static SendMessage createAvailableForManagerCommandsMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
@@ -125,13 +114,11 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating success login message.
+     * Creates a success login message for a manager, including the username and a manager-specific help keyboard.
      *
-     * @param chatId   {@link String} is telegram chat id.
-     * @param userName {@link String} is username.
-     *
-     * @return {@link SendMessage} configured with the success login message with
-     *         username.
+     * @param chatId the Telegram chat ID to send the message to
+     * @param userName the username to include in the success message
+     * @return a SendMessage object configured with the success login message and manager help keyboard
      */
     public static SendMessage createSuccessLoginMessage(String chatId, String userName) {
         return buildReplyMarkUpMessage(chatId, String.format(TelegramBotConstants.SUCCESS_LOGIN, userName),
@@ -139,14 +126,15 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating manager notification message.
+     * Creates a notification message for a manager indicating that a client wants to initiate a conversation.
      *
-     * @param telegramChatId {@link String} is telegram chat id.
-     * @param username       {@link String} is username in telegram.
-     * @param messageText    {@link String} is message.
-     * @param innerChatId    {@link Long} is id for link.
+     * The message is formatted with HTML and includes the client's username, message text, and an internal chat ID.
      *
-     * @return {@link SendMessage} configured with the manager notification message.
+     * @param telegramChatId the Telegram chat ID of the manager
+     * @param username the username of the client requesting to speak
+     * @param messageText the message from the client
+     * @param innerChatId the internal chat ID associated with the conversation
+     * @return a {@link SendMessage} object configured with the notification message and HTML formatting
      */
     public static SendMessage createNotificationMessageForManager(String telegramChatId, String username,
         String messageText, Long innerChatId) {
@@ -158,11 +146,10 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating end support mode message.
+     * Creates a message indicating the end of support mode, including a chat feedback rating keyboard.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the end support mode message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage configured with the end support mode text and feedback rating keyboard
      */
     public static SendMessage createEndSupportMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.CLIENT_STOP_SUPPORT_MODE,
@@ -170,13 +157,11 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating user notification end support mode message.
+     * Creates a notification message informing the user that support mode has ended, including the specified username.
      *
-     * @param chatId   {@link String} is telegram chat id.
-     * @param username {@link String} is username in telegram.
-     *
-     * @return {@link SendMessage} configured with the user notification end support
-     *         mode message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @param username the username to include in the notification message
+     * @return a SendMessage object configured with the end support mode notification
      */
     public static SendMessage createEndSupportModeNotification(String chatId, String username) {
         return buildMessage(chatId,
@@ -302,11 +287,10 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating feedback message.
+     * Creates a feedback prompt message with a keyboard for submitting feedback or returning to the main menu.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the feedback message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage configured with the feedback prompt and appropriate keyboard
      */
     public static SendMessage createFeedbackMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.FEEDBACK_MESSAGE,
@@ -314,33 +298,30 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating great feedback message.
+     * Creates a message acknowledging receipt of great feedback.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the great feedback message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage object containing the great feedback acknowledgment
      */
     public static SendMessage createGreatFeedbackMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.GREAT_FEEDBACK_MESSAGE);
     }
 
     /**
-     * Method for creating bad feedback message.
+     * Creates a message acknowledging receipt of negative feedback.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the bad feedback message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage object containing the bad feedback acknowledgment
      */
     public static SendMessage createBadFeedbackMessage(String chatId) {
         return buildMessage(chatId, TelegramBotConstants.BAD_FEEDBACK_MESSAGE);
     }
 
     /**
-     * Method for creating thanks feedback message.
+     * Creates a message thanking the user for their feedback, including a help keyboard.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the thanks feedback message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage object with a thank you message and help keyboard
      */
     public static SendMessage createFeedbackThanksMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE,
@@ -348,12 +329,10 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating unknown error occurred message.
+     * Creates a message indicating that an unknown error has occurred, with a keyboard to return to the main menu.
      *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the unknown error occurred
-     *         message.
+     * @param chatId the Telegram chat ID to send the message to
+     * @return a SendMessage object configured with the unknown error message and back-to-main-menu keyboard
      */
     public static SendMessage createUnknownErrorOccurredMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId, TelegramBotConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN,

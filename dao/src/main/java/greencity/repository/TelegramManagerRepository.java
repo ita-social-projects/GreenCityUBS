@@ -7,7 +7,19 @@ import java.util.Optional;
 
 @Repository
 public interface TelegramManagerRepository extends JpaRepository<TelegramManager, String> {
-    Optional<TelegramManager> findByChatId(String chatId);
+    /**
+ * Retrieves a TelegramManager entity by its chat ID.
+ *
+ * @param chatId the chat ID to search for
+ * @return an Optional containing the TelegramManager if found, or empty if not found
+ */
+Optional<TelegramManager> findByChatId(String chatId);
 
-    boolean existsByChatId(String chatId);
+    /**
+ * Checks if a TelegramManager entity exists with the specified chat ID.
+ *
+ * @param chatId the chat ID to search for
+ * @return true if an entity with the given chat ID exists, false otherwise
+ */
+boolean existsByChatId(String chatId);
 }

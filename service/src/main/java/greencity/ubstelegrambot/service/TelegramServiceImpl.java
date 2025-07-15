@@ -318,8 +318,11 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     /**
+     * Processes an incoming Telegram update, routing it to either user or manager handling logic based on the chat ID.
      *
-     * {@inheritDoc}
+     * Determines the chat context, resets chat state if inactive for over 10 minutes, and delegates update processing to the appropriate handler for users or managers.
+     *
+     * @param update the incoming Telegram update to process
      */
     @Override
     public void processUpdate(Update update) {
@@ -342,11 +345,12 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     /**
-     * Processes an incoming update from Telegram for Manager(e.g., message,
-     * callback query)
+     * Handles incoming Telegram updates for manager chats, processing messages and callback queries.
      *
-     * @param update {@link Update}
-     * @param chatId {@link String}
+     * For logout callback queries, logs out the manager and sends logout and main menu messages. For other callbacks, sends the manager menu message. For regular messages, sends a forbidden commands message.
+     *
+     * @param update the incoming Telegram update
+     * @param chatId the chat ID associated with the manager
      */
     private void processUpdateManager(Update update, String chatId) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
@@ -367,18 +371,24 @@ public class TelegramServiceImpl implements TelegramService {
         }
     }
 
+    /**
+     * Logs out a manager by deleting the manager entity associated with the given chat ID, if present.
+     *
+     * @param chatId the Telegram chat ID of the manager to log out
+     */
     private void logoutManager(String chatId) {
         telegramManagerRepository.findByChatId(chatId)
             .ifPresent(telegramManagerRepository::delete);
     }
 
     /**
-     * Processes an incoming update from Telegram for User(e.g., message, callback
-     * query)
+     * Processes an incoming Telegram update for a user, handling both callback queries and messages based on chat state.
      *
-     * @param update  {@link Update}
-     * @param chatOpt {@link TelegramChat}
-     * @param chatId  {@link String}
+     * Depending on the callback data or the current chat state, routes the update to the appropriate handler for support, feedback, green office requests, login, or other user interactions. If the chat does not exist and the message contains the start command, initiates the bot start process.
+     *
+     * @param update the incoming Telegram update
+     * @param chatOpt an optional TelegramChat entity associated with the chat ID
+     * @param chatId the Telegram chat ID as a string
      */
     private void processUpdateUser(Update update, Optional<TelegramChat> chatOpt, String chatId) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
@@ -442,11 +452,24 @@ public class TelegramServiceImpl implements TelegramService {
         }
     }
 
+    /**
+     * Determines whether the specified chat ID belongs to a manager.
+     *
+     * @param chatId the chat ID to check
+     * @return true if the chat ID is associated with a manager; false otherwise
+     */
     private boolean isManager(String chatId) {
         // maybe some improvement here
         return telegramManagerRepository.existsByChatId(chatId);
     }
 
+    /**
+     * Extracts the chat ID from a Telegram update, supporting both callback queries and messages.
+     *
+     * @param update the Telegram update object
+     * @return the chat ID as a string
+     * @throws IllegalArgumentException if the update does not contain a callback query or message
+     */
     private static String getChatId(Update update) {
         if (update.hasCallbackQuery()) {
             return update.getCallbackQuery().getFrom().getId().toString();
@@ -456,6 +479,17 @@ public class TelegramServiceImpl implements TelegramService {
         throw new IllegalArgumentException("Bad type update");
     }
 
+    /**
+     * Updates the chat state for the specified chat ID and returns a response message.
+     *
+     * If the chat does not exist, returns a generic error message. Otherwise, sets the new chat state,
+     * updates the timestamp, saves the chat, and generates a response using the provided message supplier.
+     *
+     * @param chatId the unique identifier of the chat to update
+     * @param newState the new state to set for the chat
+     * @param messageSupplier a function that generates a response message based on the chat ID
+     * @return the response message after updating the chat state, or an error message if the chat is not found
+     */
     private SendMessage updateChatStateAndRespond(
         String chatId,
         ChatState newState,
@@ -544,31 +578,70 @@ public class TelegramServiceImpl implements TelegramService {
             MessageFactory::createFeedbackMessage);
     }
 
+    /**
+     * Sets the chat state to NORMAL and returns a message with available main menu commands.
+     *
+     * @param chatId the identifier of the chat to update
+     * @return a SendMessage containing the main menu commands
+     */
     private SendMessage processMainMenuRequest(String chatId) {
         return updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory::createAvailableCommandsMessage);
     }
 
+    /**
+     * Updates the chat state to NORMAL and returns a message listing available manager commands.
+     *
+     * @param chatId the unique identifier of the chat
+     * @return a SendMessage object containing the manager commands menu
+     */
     private SendMessage processManagerMenuRequest(String chatId) {
         return updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory::createAvailableForManagerCommandsMessage);
     }
 
+    /**
+     * Resets the chat state to NORMAL and returns a message indicating an unknown command was received.
+     *
+     * @param chatId the identifier of the chat to update
+     * @return a SendMessage object with an unknown command response
+     */
     private SendMessage processUnknownRequest(String chatId) {
         return updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory::createUnknownCommandMessage);
     }
 
+    /**
+     * Resets the chat state to NORMAL for the specified manager and returns a logout confirmation message.
+     *
+     * @param chatId the Telegram chat ID of the manager
+     * @return a SendMessage containing the logout confirmation
+     */
     private SendMessage processLogoutManagerRequest(String chatId) {
         return updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory::createLogoutManagerMessage);
     }
 
+    /**
+     * Resets the manager's chat state to NORMAL and returns a message indicating that the command is forbidden for managers.
+     *
+     * @param chatId the Telegram chat ID of the manager
+     * @return a SendMessage object with the forbidden command notification
+     */
     private SendMessage processManagerMessageRequest(String chatId) {
         return updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory::createForbiddenCommandsManagerMessage);
     }
 
+    /**
+     * Initiates the manager login process for the specified chat.
+     *
+     * If the chat is already associated with a logged-in manager, returns a success login message.
+     * Otherwise, updates the chat state to prompt for manager credentials and returns a login prompt message.
+     *
+     * @param chatId the Telegram chat ID
+     * @return a SendMessage prompting for login or confirming successful login
+     */
     private SendMessage processLoginRequest(String chatId) {
         Optional<TelegramManager> telegramManager = telegramManagerRepository.findByChatId(chatId);
 
@@ -711,6 +784,14 @@ public class TelegramServiceImpl implements TelegramService {
         return MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString());
     }
 
+    /**
+     * Processes a user's support message, handling text and photo attachments, saving the message and assets, and notifying managers.
+     *
+     * If the message ends support mode, resets the chat state and notifies managers. For photo messages, uploads the photo to cloud storage and associates it with the message. Notifies managers and the frontend about new messages.
+     *
+     * @param message the Telegram message sent by the user in support mode
+     * @return a SendMessage response to the user indicating the result of the operation
+     */
     private SendMessage processSupportMessage(Message message) {
         var bot = applicationContext.getBean(UBSTelegramBot.class);
 
