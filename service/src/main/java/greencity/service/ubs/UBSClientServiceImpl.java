@@ -533,6 +533,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     public PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid) {
         validateOrderRequestAddress(dto);
 
+        adjustPaymentDetails(dto);
+
+        Order order = modelMapper.map(dto, Order.class);
+        order.setOrderDate(LocalDateTime.now());
+        order.setOrderStatus(OrderStatus.FORMED);
+
         User currentUser = userRepository.findByUuid(uuid);
 
         OrderAddress orderAddress = formAndSaveOrderAddress(
@@ -540,12 +546,6 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         UBSuser userData = formAndSaveUbsUser(
             dto.getPersonalData(), null, orderAddress, currentUser);
-
-        adjustPaymentDetails(dto);
-
-        Order order = modelMapper.map(dto, Order.class);
-        order.setOrderDate(LocalDateTime.now());
-        order.setOrderStatus(OrderStatus.FORMED);
 
         order = formAndSaveOrderRequest(dto, order, currentUser, userData);
         long sumToPayInCoins = getLastPayment(order).getAmount();
