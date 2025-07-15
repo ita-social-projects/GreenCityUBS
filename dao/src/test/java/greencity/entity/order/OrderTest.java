@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class OrderTest {
     @Test
-    void updateWithNewOrderBagsTest() {
+    void setOrderBagsTest() {
         Order order = new Order();
         OrderBag oldBag = OrderBag.builder().id(4L).build();
         order.addOrderedBag(oldBag);
@@ -23,7 +23,7 @@ class OrderTest {
             OrderBag.builder().id(2L).build(),
             OrderBag.builder().id(3L).build());
 
-        order.updateWithNewOrderBags(bags);
+        order.setOrderBags(bags);
 
         assertSame(previous, order.getOrderBags());
         assertNotSame(bags, order.getOrderBags());
@@ -32,7 +32,7 @@ class OrderTest {
     }
 
     @Test
-    void updateWithNewOrderBagsNullOrderBagsTest() {
+    void setOrderBagsNullOrderBagsTest() {
         Order order = Order.builder()
             .orderBags(null)
             .build();
@@ -42,7 +42,7 @@ class OrderTest {
             OrderBag.builder().id(2L).build(),
             OrderBag.builder().id(3L).build());
 
-        order.updateWithNewOrderBags(bags);
+        order.setOrderBags(bags);
 
         assertNotNull(order.getOrderBags());
         assertNull(previous);
@@ -52,10 +52,10 @@ class OrderTest {
     }
 
     @Test
-    void updateWithNewOrderBagsNullArgExceptionTest() {
+    void setOrderBagsNullArgExceptionTest() {
         Order order = Order.builder().build();
         List<OrderBag> bags = null;
-        assertThrows(NullPointerException.class, () -> order.updateWithNewOrderBags(bags));
+        assertThrows(NullPointerException.class, () -> order.setOrderBags(bags));
     }
 
     @Test
@@ -100,7 +100,7 @@ class OrderTest {
             OrderBag.builder().id(1L).build(),
             OrderBag.builder().id(2L).build(),
             OrderBag.builder().id(3L).build()));
-        order.updateWithNewOrderBags(bags);
+        order.setOrderBags(bags);
         order.removeOrderBag(bags.getFirst());
         bags.remove(bags.getFirst());
 

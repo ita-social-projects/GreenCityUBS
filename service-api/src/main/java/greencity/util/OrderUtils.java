@@ -1,8 +1,10 @@
 package greencity.util;
 
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Comparator;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
 
@@ -23,10 +25,9 @@ public class OrderUtils {
      * @return A Base64-encoded string representing the generated order ID.
      */
     public static String generateEncodedOrderReference(Long orderId, Order order) {
-        int lastNumber = order.getPayment().size() - 1;
         String rawOrderId = String.format("%s_%s_%s", orderId,
             (order.getCounterOrderPaymentId() == null) ? 1 : order.getCounterOrderPaymentId(),
-            order.getPayment().get(lastNumber).getId());
+            getLastPayment(order).getId());
 
         return Base64.getEncoder().encodeToString(rawOrderId.getBytes(StandardCharsets.UTF_8));
     }
@@ -42,5 +43,20 @@ public class OrderUtils {
     public static String decodeOrderReference(String encodedOrderId) {
         byte[] decodedBytes = Base64.getDecoder().decode(encodedOrderId);
         return new String(decodedBytes, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Iterates through order payments and gets one with maximum id, which is
+     * corresponding the last one.
+     *
+     * @param order The {@link Order} object containing details such as payment and
+     *              counterOrderPaymentId.
+     * @return An {@link Payment} object containing corresponding data.
+     */
+    public static Payment getLastPayment(Order order) {
+        return order.getPayment().stream()
+            .filter(payment -> payment.getId() != null)
+            .max(Comparator.comparing(Payment::getId))
+            .orElseThrow(() -> new IllegalStateException("No payment found"));
     }
 }
