@@ -64,6 +64,6 @@ public interface CityRepository extends JpaRepository<City, Long> {
     @Query("SELECT c.id FROM City c WHERE LOWER(c.nameEn) = LOWER(:cityName)")
     Optional<Long> findIdByCityNameEnIgnoreCase(@Param("cityName") String cityName);
 
-    @Query("SELECT d.id FROM District d WHERE d.nameUk = :name OR d.nameEn = :name")
+    @Query("SELECT d.id FROM City d WHERE d.nameUk = :name OR d.nameEn = :name")
     Long findIdByNameUkOrNameEn(@Param("name") String name);
 }
