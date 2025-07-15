@@ -341,31 +341,45 @@ public class TelegramServiceImpl implements TelegramService {
         }
     }
 
+    /**
+     * Processes an incoming update from Telegram for Manager(e.g., message,
+     * callback query)
+     *
+     * @param update {@link Update}
+     * @param chatId {@link String}
+     */
     private void processUpdateManager(Update update, String chatId) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
 
         if (update.hasCallbackQuery()) {
             CallbackQuery callBackQuery = update.getCallbackQuery();
             switch (callBackQuery.getData()) {
-                case TelegramBotConstants.LOGOUT_MANAGER_CALLBACK ->{
-                        logoutManager(chatId);
-                        executor.executeCommand(ubsTelegramBot, processLogoutManagerRequest(chatId));
-                        executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
-                } default ->
-                        executor.executeCommand(ubsTelegramBot, processManagerMenuRequest(chatId));
+                case TelegramBotConstants.LOGOUT_MANAGER_CALLBACK -> {
+                    logoutManager(chatId);
+                    executor.executeCommand(ubsTelegramBot, processLogoutManagerRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
+                }
+                default ->
+                    executor.executeCommand(ubsTelegramBot, processManagerMenuRequest(chatId));
             }
-        } else if(update.hasMessage()) {
+        } else if (update.hasMessage()) {
             executor.executeCommand(ubsTelegramBot, processManagerMessageRequest(chatId));
-            //TODO implement logic when update has a message
-            //executor.executeCommand(ubsTelegramBot, processUnknownManagerRequest(chatId));
         }
     }
 
     private void logoutManager(String chatId) {
         telegramManagerRepository.findByChatId(chatId)
-                .ifPresent(telegramManagerRepository::delete);
+            .ifPresent(telegramManagerRepository::delete);
     }
 
+    /**
+     * Processes an incoming update from Telegram for User(e.g., message, callback
+     * query)
+     *
+     * @param update  {@link Update}
+     * @param chatOpt {@link TelegramChat}
+     * @param chatId  {@link String}
+     */
     private void processUpdateUser(Update update, Optional<TelegramChat> chatOpt, String chatId) {
         UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
 
@@ -373,33 +387,33 @@ public class TelegramServiceImpl implements TelegramService {
             CallbackQuery callBackQuery = update.getCallbackQuery();
             switch (callBackQuery.getData()) {
                 case TelegramBotConstants.CLIENT_SUPPORT_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processSupportRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processSupportRequest(chatId));
                 case TelegramBotConstants.SORTING_PRICES_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processSortingPricesRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processSortingPricesRequest(chatId));
                 case TelegramBotConstants.WORK_SCHEDULE_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processWorkScheduleRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processWorkScheduleRequest(chatId));
                 case TelegramBotConstants.ADMISSION_RULES_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processAdmissionRulesRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processAdmissionRulesRequest(chatId));
                 case TelegramBotConstants.GREEN_OFFICE_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processGreenOfficeRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processGreenOfficeRequest(chatId));
                 case TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processGreenOfficeAgreeRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processGreenOfficeAgreeRequest(chatId));
                 case TelegramBotConstants.FEEDBACK_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processFeedbackRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processFeedbackRequest(chatId));
                 case TelegramBotConstants.RATING_TERRIBLY_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 1));
+                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 1));
                 case TelegramBotConstants.RATING_BADLY_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 2));
+                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 2));
                 case TelegramBotConstants.RATING_SATISFACTORILY_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 3));
+                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 3));
                 case TelegramBotConstants.RATING_GOOD_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 4));
+                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 4));
                 case TelegramBotConstants.RATING_PERFECTLY_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 5));
+                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 5));
                 case TelegramBotConstants.LOGIN_CALLBACK ->
-                        executor.executeCommand(ubsTelegramBot, processLoginRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processLoginRequest(chatId));
                 default ->
-                        executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
             }
         } else {
             var message = update.getMessage();
@@ -415,30 +429,28 @@ public class TelegramServiceImpl implements TelegramService {
             TelegramChat chat = chatOpt.get();
             switch (chat.getChatState()) {
                 case IN_SUPPORT ->
-                        executor.executeCommand(ubsTelegramBot, processSupportMessage(message));
+                    executor.executeCommand(ubsTelegramBot, processSupportMessage(message));
                 case ENTERING_GREEN_OFFICE_EMAIL ->
-                        executor.executeCommand(ubsTelegramBot, processGreenOfficeEmail(message));
+                    executor.executeCommand(ubsTelegramBot, processGreenOfficeEmail(message));
                 case MAKING_FEEDBACK ->
-                        executor.executeCommand(ubsTelegramBot, processInputCommentRequest(message));
+                    executor.executeCommand(ubsTelegramBot, processInputCommentRequest(message));
                 case LOGGING_AS_MANAGER ->
-                        executor.executeCommand(ubsTelegramBot, processInputManagerCredentialsRequest(message));
+                    executor.executeCommand(ubsTelegramBot, processInputManagerCredentialsRequest(message));
                 default ->
-                        executor.executeCommand(ubsTelegramBot, processNormalMessageRequest(message));
+                    executor.executeCommand(ubsTelegramBot, processNormalMessageRequest(message));
             }
         }
     }
 
-
     private boolean isManager(String chatId) {
-        //maybe some improvement here
+        // maybe some improvement here
         return telegramManagerRepository.existsByChatId(chatId);
     }
 
     private static String getChatId(Update update) {
         if (update.hasCallbackQuery()) {
             return update.getCallbackQuery().getFrom().getId().toString();
-        }
-        else if (update.hasMessage()) {
+        } else if (update.hasMessage()) {
             return update.getMessage().getFrom().getId().toString();
         }
         throw new IllegalArgumentException("Bad type update");
@@ -534,7 +546,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     private SendMessage processMainMenuRequest(String chatId) {
         return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createAvailableCommandsMessage);
+            MessageFactory::createAvailableCommandsMessage);
     }
 
     private SendMessage processManagerMenuRequest(String chatId) {
@@ -560,7 +572,7 @@ public class TelegramServiceImpl implements TelegramService {
     private SendMessage processLoginRequest(String chatId) {
         Optional<TelegramManager> telegramManager = telegramManagerRepository.findByChatId(chatId);
 
-        //TODO maybe this condition will never happen
+        // maybe this condition will never happen
         if (telegramManager.isPresent()) {
             return MessageFactory.createSuccessLoginMessage(
                 chatId,
@@ -809,8 +821,9 @@ public class TelegramServiceImpl implements TelegramService {
 
         notifyNewMessage(telegramMessageDto, chat.get().getId());
         notifyManagerAboutNewMessagesFromUser(
-                message.getFrom().getUserName() == null ? message.getFrom().getFirstName(): message.getFrom().getUserName(),
-                messageText, chat.get().getId());
+            message.getFrom().getUserName() == null ? message.getFrom().getFirstName()
+                : message.getFrom().getUserName(),
+            messageText, chat.get().getId());
         return MessageFactory.buildMessage(chat.get().getChatId(),
             TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
     }

@@ -18,7 +18,7 @@ public class KeyboardFactory {
     }
 
     /**
-     * Method creates InlineKeyboardMarkup for help command.
+     * Method creates InlineKeyboardMarkup for help command for user.
      *
      * @return InlineKeyboardMarkup with four buttons: start command, help command,
      *         login command and client support command.
@@ -40,6 +40,11 @@ public class KeyboardFactory {
             .build();
     }
 
+    /**
+     * Method creates InlineKeyboardMarkup for help command for manager.
+     *
+     * @return {@link InlineKeyboardMarkup} with one buttons: logout command.
+     */
     public static InlineKeyboardMarkup createHelpKeyboardForManager() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
@@ -111,6 +116,12 @@ public class KeyboardFactory {
             .build();
     }
 
+    /**
+     * Creates InlineKeyboardMarkup for back to the main menu.
+     *
+     * @return {@link InlineKeyboardMarkup} with one row containing button for
+     *         returning to the main menu.
+     */
     public static InlineKeyboardMarkup createBackToMainMenuKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(createRow(BACK_TO_MAIN_MENU, TelegramBotConstants.MAIN_MENU_CALLBACK));
@@ -120,6 +131,15 @@ public class KeyboardFactory {
             .build();
     }
 
+    /**
+     * Creates InlineKeyboardMarkup for processing or backing to the main menu
+     * keyboard.
+     *
+     * @param callBackData {@link String} is callback data.
+     *
+     * @return {@link InlineKeyboardMarkup} with two rows containing buttons for say
+     *         yes and for returning to the main menu keyboard.
+     */
     public static InlineKeyboardMarkup createProcessOrBackToMainMenuKeyboard(String callBackData) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(createRow(YES, callBackData));
