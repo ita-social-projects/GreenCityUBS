@@ -176,7 +176,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (Objects.equals(amount.get(bagId), 0)
             || Objects.equals(order.getOrderPaymentStatus(), OrderPaymentStatus.UNPAID)) {
             if (Objects.equals(totalBagsAmount, amount.get(bagId))) {
-                order.updateWithNewOrderBags(new ArrayList<>());
+                order.setOrderBags(new ArrayList<>());
                 orderRepository.delete(order);
                 return;
             }

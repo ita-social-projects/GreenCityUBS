@@ -171,15 +171,15 @@ public class OrderController {
     }
 
     /**
-     * Controller saves all entered by user data to database.
+     * Controller adjusts and creates new order and generates payment link for the
+     * order.
      *
-     * @param userUuid {@link UserVO} id.
+     * @param userUuid current {@link User}'s uuid.
      * @param dto      {@link OrderResponseDto} order data.
-     * @param id       {@link Long} orderId.
-     * @return {@link HttpStatus}.
+     * @return {@link PaymentSystemResponse}.
      * @author Oleh Bilonizhka
      */
-    @Operation(summary = "Process user order.")
+    @Operation(summary = "Process new order.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),
@@ -187,22 +187,36 @@ public class OrderController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @PostMapping(value = {"/processOrder", "/processOrder/{id}"})
-    public ResponseEntity<PaymentSystemResponse> processOrder(
+    @PostMapping("/processOrder")
+    public ResponseEntity<PaymentSystemResponse> processNewOrder(
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @Valid @RequestBody OrderResponseDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processNewOrder(dto, userUuid));
+    }
+
+    /**
+     * Controller adjusts and saves existing order to database and generates payment
+     * link for the order.
+     *
+     * @param userUuid current {@link User}'s uuid.
+     * @param dto      {@link OrderResponseDto} order data.
+     * @return {@link PaymentSystemResponse}.
+     * @author Oleksandr Ilnytskyi
+     */
+    @Operation(summary = "Process existing order.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @PostMapping("/processOrder/{id}")
+    public ResponseEntity<PaymentSystemResponse> processExistingOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
-        @PathVariable("id") Optional<Long> id) {
-        if (id.isPresent()) {
-            OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
-            if (PaymentStatus.PAID.name().equals(orderDetailStatusDto.getPaymentStatus())
-                || !OrderStatus.FORMED.name().equals(orderDetailStatusDto.getOrderStatus())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
-            return ResponseEntity.status(HttpStatus.OK)
-                .body(ubsClientService.saveFullOrderToDB(dto, userUuid, id.get()));
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid, null));
-        }
+        @Positive @PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processExistingOrder(dto, userUuid, id));
     }
 
     /**
