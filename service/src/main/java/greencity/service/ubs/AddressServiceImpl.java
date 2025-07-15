@@ -356,8 +356,6 @@ public class AddressServiceImpl implements AddressService {
             .sorted(Comparator.comparing(Address::getId))
             .map(u -> modelMapper.map(u, AddressDto.class))
             .toList();
-        log.info("Found " + addressDtoList.size() + " addresses");
-        log.info(addressDtoList.toString());
         return new OrderWithAddressesResponseDto(addressDtoList);
     }
 
