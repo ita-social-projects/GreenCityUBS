@@ -16,9 +16,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 public class AddressValidator implements ConstraintValidator<ValidAddress, CreateAddressRequestDto> {
     private final GoogleApiService googleApiService;
@@ -27,30 +25,22 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
 
     @Override
     public boolean isValid(CreateAddressRequestDto createAddressRequestDto, ConstraintValidatorContext context) {
-        log.info("[AddressValidator] Validating address: {}", createAddressRequestDto);
-
         String placeId = createAddressRequestDto.getPlaceId();
 
         if (Objects.isNull(placeId)) {
-            log.warn("[AddressValidator] placeId is null.");
             return false;
         }
 
         CoordinatesDto coordinates = createAddressRequestDto.getCoordinates();
         LatLng latLng = new LatLng(coordinates.getLatitude(), coordinates.getLongitude());
-        log.info("[AddressValidator] placeId: {}, Coordinates: {}", placeId, latLng);
 
         GeocodingResult geoResult;
         AddressResponseFromGoogleAPI resultFromCoordinates;
 
         try {
             geoResult = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UK);
-            log.info("[AddressValidator] geoResult from placeId: {}", geoResult);
-
             resultFromCoordinates = googleApiService.getResultFromGoogleByCoordinates(latLng);
-            log.info("[AddressValidator] result from coordinates: {}", resultFromCoordinates);
         } catch (NotFoundException | GoogleApiException e) {
-            log.error("[AddressValidator] Google API exception: {}", e.getMessage(), e);
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Google API error: " + e.getMessage())
                 .addConstraintViolation();
@@ -58,7 +48,6 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
         }
 
         if (resultFromCoordinates == null || !isCoordinatesValid(geoResult, coordinates)) {
-            log.warn("[AddressValidator] Invalid coordinates or null response from Google.");
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Invalid coordinates or address.")
                 .addConstraintViolation();
@@ -66,28 +55,19 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
         }
 
         if (!areCityAndRegionValid(geoResult, resultFromCoordinates, createAddressRequestDto)) {
-            log.warn("[AddressValidator] City or region mismatch.");
-            log.info("[AddressValidator] geoResult: {}", geoResult);
-            log.info("[AddressValidator] resultFromCoordinates: {}", resultFromCoordinates);
-            log.info("[AddressValidator] DTO: {}", createAddressRequestDto);
-
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("City and region do not match the provided address.")
                 .addConstraintViolation();
             return false;
         }
 
-        log.info("[AddressValidator] Address is valid.");
         return true;
     }
 
     private boolean isCoordinatesValid(GeocodingResult geoResult, CoordinatesDto coordinates) {
         double geoLat = geoResult.geometry.location.lat;
         double geoLng = geoResult.geometry.location.lng;
-        boolean isValid = isWithinDelta(coordinates.getLatitude(), coordinates.getLongitude(), geoLat, geoLng);
-        log.info("[AddressValidator] Comparing coordinates: input=({}, {}), geo=({}, {}), valid={}",
-            coordinates.getLatitude(), coordinates.getLongitude(), geoLat, geoLng, isValid);
-        return isValid;
+        return isWithinDelta(coordinates.getLatitude(), coordinates.getLongitude(), geoLat, geoLng);
     }
 
     private boolean isWithinDelta(double lat1, double lon1, double lat2, double lon2) {
@@ -97,10 +77,6 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
     private boolean areCityAndRegionValid(GeocodingResult geoResult, AddressResponseFromGoogleAPI resultFromCoordinates,
         CreateAddressRequestDto dto) {
         String apiCity = getLongName(geoResult.addressComponents, AddressComponentType.LOCALITY);
-
-        log.info("[AddressValidator] City from Google API: '{}'", apiCity);
-        log.info("[AddressValidator] City in DTO: '{}'", dto.getCityUk());
-        log.info("[AddressValidator] City from coordinates: '{}'", resultFromCoordinates.getCity());
 
         if (apiCity == null) {
             return false;
