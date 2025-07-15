@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="03-update-text-message" author="Anton Pampukha">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="text_message"/>
+        </preConditions>
+
+        <dropTable tableName="text_message"/>
+
+        <createTable tableName="text_message">
+            <column name="message_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"
+                             referencedTableName="telegram_message"
+                             referencedColumnNames="message_id"
+                             foreignKeyName="fk_text_message_base"/>
+            </column>
+            <column name="text" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_manager_message" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="04-update-image-table" author="Anton Pampukha">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="image"/>
+        </preConditions>
+
+        <dropTable tableName="image"/>
+
+        <createTable tableName="image">
+            <column name="message_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"
+                             referencedTableName="telegram_message"
+                             referencedColumnNames="message_id"
+                             foreignKeyName="fk_image_base"/>
+            </column>
+            <column name="file_url" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="caption" type="TEXT"/>
+            <column name="is_manager_photo" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

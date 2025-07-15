@@ -192,7 +192,6 @@ public class ModelUtils {
             .recipientPhone("666051373")
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -221,7 +220,7 @@ public class ModelUtils {
             .customerId(2L)
             .customerName("Anatolii")
             .customerSurname("Petyrov")
-            .customerPhoneNumber("095123456")
+            .customerPhoneNumber("0951234561")
             .customerEmail("anatolii.andr@gmail.com")
             .build();
     }
@@ -717,7 +716,6 @@ public class ModelUtils {
      * This method creates an AddingViolationsToUserDto using its builder pattern,
      * setting the order ID to 1, the violation description to "Violation
      * description", and the violation level to "LOW".
-     *
      * </p>
      *
      * @return an AddingViolationsToUserDto instance populated with preset values

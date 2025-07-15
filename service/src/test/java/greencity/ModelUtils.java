@@ -153,7 +153,7 @@ import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -170,25 +170,7 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.BaseAddress;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.entity.viber.ViberBot;
-import greencity.enums.AddressStatus;
-import greencity.enums.BagStatus;
-import greencity.enums.CancellationReason;
-import greencity.enums.CertificateStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.CourierStatus;
-import greencity.enums.EmployeeStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.NotificationReceiverType;
-import greencity.enums.NotificationTime;
-import greencity.enums.NotificationTrigger;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentSystem;
-import greencity.enums.TariffStatus;
-import greencity.enums.UserCategory;
+import greencity.enums.*;
 import greencity.util.Bot;
 
 import java.time.Clock;
@@ -1589,7 +1571,6 @@ public class ModelUtils {
             .recipientPhone("0666051373")
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -1603,28 +1584,16 @@ public class ModelUtils {
             .build();
     }
 
-    public static AuthorizedUser getTelegramBotNotifyTrue() {
-        return new AuthorizedUser("111111", false, true, null, false);
+    public static TelegramChat getTelegramBotNotifyTrue() {
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
+            "last_name", null,
+            new ArrayList<>(), new ArrayList<>());
     }
 
-    public static AuthorizedUser getTelegramBotNotifyFalse() {
-        return new AuthorizedUser("111111", false, false, null, false);
-    }
-
-    public static ViberBot getViberBotNotifyTrue() {
-        return ViberBot.builder()
-            .id(1L)
-            .chatId("111111L")
-            .isNotify(true)
-            .build();
-    }
-
-    public static ViberBot getViberBotNotifyFalse() {
-        return ViberBot.builder()
-            .id(1L)
-            .chatId("111111L")
-            .isNotify(false)
-            .build();
+    public static TelegramChat getTelegramBotNotifyFalse() {
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), false, "username", "first_name",
+            "last_name", null,
+            new ArrayList<>(), new ArrayList<>());
     }
 
     public static UserProfileUpdateDto getUserProfileUpdateDto() {
@@ -1634,7 +1603,6 @@ public class ModelUtils {
             .recipientPhone(user.getRecipientPhone())
             .alternateEmail("test@email.com")
             .telegramIsNotify(true)
-            .viberIsNotify(true)
             .build();
     }
 
@@ -1645,7 +1613,6 @@ public class ModelUtils {
             .recipientPhone(user.getRecipientPhone())
             .alternateEmail("test@email.com")
             .telegramIsNotify(false)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -3808,7 +3775,6 @@ public class ModelUtils {
             .recipientPhone("962473289")
             .addressDto(addressDtoList())
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -4330,9 +4296,6 @@ public class ModelUtils {
         botList.add(new Bot()
             .setType("TELEGRAM")
             .setLink("https://telegram.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8"));
-        botList.add(new Bot()
-            .setType("VIBER")
-            .setLink("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8"));
         return botList;
     }
 
