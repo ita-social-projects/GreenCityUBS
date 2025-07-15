@@ -107,7 +107,6 @@ import greencity.service.notification.NotificationServiceImpl;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
-import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -815,7 +814,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testSaveToDBWithoutAddressThrowsEntityNotFoundException() throws EntityNotFoundException {
+    void testSaveToDBWithoutAddressThrowsNotFoundException() throws NotFoundException {
         User user = getUserWithLastLocation();
         user.setAlternateEmail("test@mail.com");
         user.setCurrentPoints(900);
@@ -827,7 +826,7 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
 
-        assertThrows(EntityNotFoundException.class,
+        assertThrows(NotFoundException.class,
             () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
     }
 
