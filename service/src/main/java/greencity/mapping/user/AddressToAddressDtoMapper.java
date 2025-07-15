@@ -5,9 +5,9 @@ import greencity.dto.location.api.DistrictDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
+import greencity.repository.CityRepository;
 import greencity.repository.DistrictRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
  * Class that used by {@link ModelMapper} to map {@link Address} into
  * {@link AddressDto}.
  */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AddressToAddressDtoMapper extends AbstractConverter<Address, AddressDto> {
     private final DistrictRepository districtRepository;
+    private final CityRepository cityRepository;
 
     /**
      * Method convert {@link Address} to {@link AddressDto}.
@@ -31,8 +31,6 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
      */
     @Override
     public AddressDto convert(Address address) {
-        log.info("Start mapping Address to DTO: ID = {}", address != null ? address.getId() : null);
-        log.info(address.toString());
         try {
             return AddressDto.builder()
                 .id(address.getId())
@@ -57,33 +55,21 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
                 .actual(address.getBaseAddress().getActual())
                 .build();
         } catch (Exception e) {
-            log.error("Error in mapping Address (ID={}): {}", address.getId(), e.getMessage(), e);
             throw e;
         }
     }
 
     private List<DistrictDto> getAllDistricts(String region, String city) {
-        log.info("Fetching districts for region: {}, city: {}", region, city);
-        //List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
-        List<District> locationDtos = districtRepository.findAllByCityId(1L);
+        List<District> districtDtos = districtRepository.findAllByCityId(cityRepository.findIdByNameUkOrNameEn(city));
 
-        if (locationDtos == null) {
-            log.warn("Received null from locationApiService");
+        if (districtDtos == null) {
             return List.of();
         }
 
-        log.info(locationDtos.toString());
-        //        return locationDtos.stream()
-        //            .map(locationDto -> DistrictDto.builder()
-        //                .nameUk(locationDto.getLocationNameMap().get("name_uk"))
-        //                .nameEn(locationDto.getLocationNameMap().get("name_en"))
-        //                .build())
-        //            .collect(Collectors.toList());
-
-        return locationDtos.stream()
-            .map(locationDto -> DistrictDto.builder()
-                .nameUk(locationDto.getNameUk())
-                .nameEn(locationDto.getNameEn())
+        return districtDtos.stream()
+            .map(districtDto -> DistrictDto.builder()
+                .nameUk(districtDto.getNameUk())
+                .nameEn(districtDto.getNameEn())
                 .build())
             .collect(Collectors.toList());
     }

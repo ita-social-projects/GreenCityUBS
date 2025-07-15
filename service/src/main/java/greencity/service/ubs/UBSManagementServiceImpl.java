@@ -66,27 +66,7 @@ import greencity.enums.PaymentStatus;
 import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.BagRepository;
-import greencity.repository.BigOrderTableRepository;
-import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.EventRepository;
-import greencity.repository.NotificationParameterRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderDetailRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
-import greencity.repository.ServiceRepository;
-import greencity.repository.TariffsInfoRepository;
-import greencity.repository.UserNotificationRepository;
-import greencity.repository.UserRepository;
-import greencity.service.locations.LocationApiService;
+import greencity.repository.*;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -128,6 +108,7 @@ import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -155,7 +136,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
     private final OrdersAdminsPageService ordersAdminsPageService;
-    private final LocationApiService locationApiService;
     private final OrderLockService orderLockService;
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
@@ -174,6 +154,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
     private static final String PAY_BUTTON = "payButton";
+    private final CityRepository cityRepository;
+    private final DistrictRepository districtRepository;
 
     /**
      * {@inheritDoc}
@@ -372,12 +354,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .regionUk(address.getBaseAddress().getRegionUk())
             .regionEn(address.getBaseAddress().getRegionEn())
             .addressRegionDistrictList(
-                locationApiService
-                    .getAllDistrictsInCityByNames(address.getBaseAddress().getRegionUk(),
-                        address.getBaseAddress().getCityUk())
-                    .stream()
-                    .map(p -> modelMapper.map(p, DistrictDto.class))
-                    .collect(Collectors.toList()))
+                districtRepository.findAllByCityId(cityRepository.findIdByNameUkOrNameEn(
+                    address.getBaseAddress().getCityUk()))
+                    .stream().map(p -> modelMapper.map(p, DistrictDto.class))
+                    .collect(toList()))
             .build();
     }
 
