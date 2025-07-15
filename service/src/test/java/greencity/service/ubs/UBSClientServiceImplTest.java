@@ -826,7 +826,7 @@ class UBSClientServiceImplTest {
         dto.setLocationId(1L);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
-        
+
         assertThrows(EntityNotFoundException.class,
             () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
     }
