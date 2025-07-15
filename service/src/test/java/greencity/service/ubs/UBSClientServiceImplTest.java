@@ -1450,6 +1450,7 @@ class UBSClientServiceImplTest {
         user.setCurrentPoints(1000);
 
         OrderResponseDto dto = getOrderResponseDto();
+        dto.setShouldBePaid(false);
         Order order = getOrder();
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         order.setOrderStatus(orderStatus);
@@ -1470,6 +1471,7 @@ class UBSClientServiceImplTest {
 
         OrderResponseDto dto = getOrderResponseDto();
         dto.getBags().getFirst().setAmount(3);
+        dto.setShouldBePaid(false);
         Order order = getOrder();
         user.setOrders(new ArrayList<>(List.of(order)));
         user.setChangeOfPointsList(new ArrayList<>());
