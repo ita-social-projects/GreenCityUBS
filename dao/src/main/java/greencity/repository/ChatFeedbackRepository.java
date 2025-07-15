@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.telegram.ChatFeedback;
+import greencity.enums.FeedbackState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +17,6 @@ public interface ChatFeedbackRepository extends JpaRepository<ChatFeedback, Long
 
     @Query(value = "SELECT * FROM chat_feedback WHERE chat_id = :chatId", nativeQuery = true)
     Page<ChatFeedback> findByChatIdPageable(String chatId, Pageable pageable);
+
+    Optional<ChatFeedback> findByChatIdAndFeedbackState(Long chatId, FeedbackState feedbackState);
 }

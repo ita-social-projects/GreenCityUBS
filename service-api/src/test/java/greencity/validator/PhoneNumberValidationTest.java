@@ -1,15 +1,11 @@
 package greencity.validator;
 
-import greencity.constant.ErrorMessage;
-import greencity.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.validation.ConstraintValidatorContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,11 +40,9 @@ class PhoneNumberValidationTest {
     }
 
     @Test
-    void isValidShouldThrowEmployeeValidationException() {
+    void isValidShouldShouldReturnFalseWithInvalidPhoneNumberTest() {
         String incorrectStr = "jldjfdavn";
-        Exception thrown = assertThrows(NotFoundException.class,
-            () -> validation.isValid(incorrectStr, context));
-        assertEquals(thrown.getMessage(), ErrorMessage.PHONE_NUMBER_PARSING_FAIL + incorrectStr);
+        assertFalse(validation.isValid(incorrectStr, context));
     }
 
     @Test

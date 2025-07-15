@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -35,7 +36,7 @@ public class OrderPdfExporterController {
     })
     @GetMapping(produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<Resource> exportOrderPdf(@Parameter(hidden = true) @CurrentUserUuid String userUuid,
-        @Parameter @RequestParam("id") Long orderId,
+        @Positive @Parameter @RequestParam("id") Long orderId,
         @Parameter @RequestParam(name = "lang") @ValidLanguage Locale locale) {
         Resource resource = pdfExporterService.generatePdfFileByObjectId(orderId, locale, userUuid);
         HttpHeaders headers = new HttpHeaders();

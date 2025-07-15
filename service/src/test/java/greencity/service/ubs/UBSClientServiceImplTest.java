@@ -57,14 +57,13 @@ import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Payment;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
@@ -99,11 +98,10 @@ import greencity.repository.OrdersForUserRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
-import greencity.repository.AuthorizedUserRepository;
+import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.ViberBotRepository;
 import greencity.service.google.GoogleApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import greencity.util.Bot;
@@ -218,7 +216,6 @@ import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
 import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.ModelUtils.getUserWithInitializedFields;
 import static greencity.ModelUtils.getUserWithLastLocation;
-import static greencity.ModelUtils.getViberBotNotifyTrue;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
@@ -228,6 +225,7 @@ import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_U
 import static greencity.constant.ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
@@ -235,11 +233,11 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EX
 import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -335,10 +333,7 @@ class UBSClientServiceImplTest {
     private GoogleApiService googleApiService;
 
     @Mock
-    private AuthorizedUserRepository telegramBotRepository;
-
-    @Mock
-    private ViberBotRepository viberBotRepository;
+    private TelegramChatRepository telegramBotRepository;
 
     @InjectMocks
     private UBSClientServiceImpl ubsClientService;
@@ -831,6 +826,7 @@ class UBSClientServiceImplTest {
         dto.setLocationId(1L);
 
         when(userRepository.findByUuid("35467585763t4sfgchjfuyetf")).thenReturn(user);
+        
         assertThrows(EntityNotFoundException.class,
             () -> ubsService.processNewOrder(dto, "35467585763t4sfgchjfuyetf"));
     }
@@ -1856,8 +1852,7 @@ class UBSClientServiceImplTest {
         UBSClientServiceImpl ubsClientServiceSpy = spy(ubsService);
 
         User user = getUserWithBotNotifyTrue();
-        AuthorizedUser telegramBot = getTelegramBotNotifyTrue();
-        ViberBot viberBot = getViberBotNotifyTrue();
+        TelegramChat telegramBot = getTelegramBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoList();
         List<Bot> botList = botList();
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
@@ -1866,7 +1861,6 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
-        when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         doReturn(new OrderWithAddressesResponseDto())
@@ -1883,11 +1877,9 @@ class UBSClientServiceImplTest {
         Assertions.assertNotNull(userProfileUpdateDto);
         Assertions.assertNotNull(addressDto);
         Assertions.assertTrue(userProfileUpdateDto.getTelegramIsNotify());
-        Assertions.assertTrue(userProfileUpdateDto.getViberIsNotify());
 
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
-        verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
         verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -1912,8 +1904,7 @@ class UBSClientServiceImplTest {
         UBSClientServiceImpl ubsClientServiceSpy = spy(ubsService);
 
         User user = getUserWithBotNotifyTrue();
-        AuthorizedUser telegramBot = getTelegramBotNotifyTrue();
-        ViberBot viberBot = getViberBotNotifyTrue();
+        TelegramChat telegramBot = getTelegramBotNotifyTrue();
         List<AddressDto> addressDto = addressDtoListWithNullPlaceId();
 
         UserProfileUpdateDto userProfileUpdateDto = getUserProfileUpdateDto();
@@ -1925,7 +1916,6 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.of(telegramBot));
-        when(viberBotRepository.findByUser(user)).thenReturn(Optional.of(viberBot));
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         doReturn(new OrderWithAddressesResponseDto()).when(addressService)
@@ -1937,7 +1927,6 @@ class UBSClientServiceImplTest {
 
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
-        verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
         verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -1957,7 +1946,6 @@ class UBSClientServiceImplTest {
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(telegramBotRepository.findByUser(user)).thenReturn(Optional.empty());
-        when(viberBotRepository.findByUser(user)).thenReturn(Optional.empty());
         when(modelMapper.map(addressDto.get(0), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         when(modelMapper.map(addressDto.get(1), OrderAddressDtoRequest.class)).thenReturn(updateAddressRequestDto);
         doReturn(new OrderWithAddressesResponseDto())
@@ -1971,7 +1959,6 @@ class UBSClientServiceImplTest {
 
         verify(userRepository).findUserByUuid(uuid);
         verify(telegramBotRepository).findByUser(user);
-        verify(viberBotRepository).findByUser(user);
         verify(modelMapper).map(addressDto.get(0), OrderAddressDtoRequest.class);
         verify(modelMapper).map(addressDto.get(1), OrderAddressDtoRequest.class);
         verify(addressService, times(2)).updateCurrentAddressForOrder(updateAddressRequestDto, uuid);
@@ -2185,7 +2172,7 @@ class UBSClientServiceImplTest {
 
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
 
-        verify(orderRepository).save(order);
+        verify(orderRepository).saveAndFlush(order);
         verify(ordersForUserRepository).getAllByUserUuidAndId(order.getUser().getUuid(), order.getId());
     }
 
@@ -2716,6 +2703,7 @@ class UBSClientServiceImplTest {
     void getTariffInfoForLocationTest() {
         var tariff = getTariffInfo();
         when(courierRepository.existsCourierById(1L)).thenReturn(true);
+        when(locationRepository.existsById(1L)).thenReturn(true);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(anyLong(), anyLong()))
             .thenReturn(Optional.of(tariff));
         TariffInfoByLocationDto dto = ubsService.getTariffInfoForLocation(1L, 1L);
@@ -2737,6 +2725,7 @@ class UBSClientServiceImplTest {
     void getTariffInfoForLocationWhenTariffForCourierAndLocationNotFoundTest() {
         var expectedErrorMessage = String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, 1L, 1L);
         when(courierRepository.existsCourierById(1L)).thenReturn(true);
+        when(locationRepository.existsById(1L)).thenReturn(true);
         var exception = assertThrows(NotFoundException.class,
             () -> ubsService.getTariffInfoForLocation(1L, 1L));
 
@@ -2959,7 +2948,7 @@ class UBSClientServiceImplTest {
     @Test
     void getTariffForOrderFailTest() {
         when(tariffsInfoRepository.findByOrdersId(anyLong())).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> ubsService.getTariffForOrder(1L));
+        assertThrows(NotFoundException.class, () -> ubsService.getTariffForOrder(1L));
     }
 
     @Test
@@ -3063,10 +3052,12 @@ class UBSClientServiceImplTest {
         User user = getUser();
         when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
         when(userRepository.findByUuid(userProfileCreateDto.getUuid())).thenReturn(user);
-        Long actualId = ubsService.createUserProfile(userProfileCreateDto);
+        BadRequestException ex = assertThrows(BadRequestException.class,
+            () -> ubsService.createUserProfile(userProfileCreateDto));
+        assertEquals(USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS, ex.getMessage());
+        verify(userRemoteClient, times(1)).checkIfUserExistsByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(1)).findByUuid(userProfileCreateDto.getUuid());
         verify(userRepository, times(0)).save(any(User.class));
-        assertEquals(user.getId(), actualId);
     }
 
     @Test
@@ -3495,11 +3486,12 @@ class UBSClientServiceImplTest {
         when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(List.of(location));
         when(locationToLocationsDtoMapper.convert(location)).thenReturn(locationsDto);
         when(tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(id, id)).thenReturn(Optional.of(tariffId));
+        when(courierRepository.existsCourierById(id)).thenReturn(true);
 
         List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
 
         assertEquals(1, result.size());
-        assertEquals(tariffId, result.get(0).getTariffsId());
+        assertEquals(tariffId, result.getFirst().getTariffsId());
         verify(locationRepository).findAllActiveLocationsByCourierId(id);
         verify(locationToLocationsDtoMapper).convert(location);
         verify(tariffsInfoRepository).findTariffIdByLocationIdAndCourierId(id, id);
@@ -3521,16 +3513,17 @@ class UBSClientServiceImplTest {
             ubsClientService.getAllLocationsByCourierId(id);
         });
 
-        assertEquals(String.format(TARIFF_NOT_FOUND_BY_LOCATION_ID, id), exception.getMessage());
-        verify(locationRepository).findAllActiveLocationsByCourierId(id);
-        verify(locationToLocationsDtoMapper).convert(location);
-        verify(tariffsInfoRepository).findTariffIdByLocationIdAndCourierId(id, id);
+        assertEquals(COURIER_IS_NOT_FOUND_BY_ID + id, exception.getMessage());
+        verify(locationRepository, never()).findAllActiveLocationsByCourierId(id);
+        verify(locationToLocationsDtoMapper, never()).convert(location);
+        verify(tariffsInfoRepository, never()).findTariffIdByLocationIdAndCourierId(id, id);
     }
 
     @Test
     void getAllLocationsByCourierId_ShouldReturnEmptyList_WhenNoLocationsExist() {
         Long id = 1L;
         when(locationRepository.findAllActiveLocationsByCourierId(id)).thenReturn(Arrays.asList());
+        when(courierRepository.existsCourierById(id)).thenReturn(true);
 
         List<LocationsDto> result = ubsClientService.getAllLocationsByCourierId(id);
 

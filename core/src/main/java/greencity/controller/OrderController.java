@@ -29,7 +29,6 @@ import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.exceptions.NotFoundException;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -113,6 +112,7 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = UserPointsAndAllBagsDto.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -120,7 +120,7 @@ public class OrderController {
     @GetMapping("/details-for-existing-order/{orderId}")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByOrderId(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
-        @PathVariable Long orderId) {
+        @Positive @PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getFirstPageDataByOrderId(userUuid, orderId));
     }
@@ -181,7 +181,8 @@ public class OrderController {
      */
     @Operation(summary = "Process new order.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -204,7 +205,8 @@ public class OrderController {
      */
     @Operation(summary = "Process existing order.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -271,6 +273,7 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = UserInfoDto.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -278,7 +281,7 @@ public class OrderController {
     @ApiLocale
     @GetMapping("/user-info/{orderId}")
     public ResponseEntity<UserInfoDto> getOrderDetailsByOrderId(
-        @Valid @PathVariable("orderId") Long id,
+        @Positive @PathVariable("orderId") Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.ok()
             .body(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(id, uuid));
@@ -296,6 +299,7 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = EventDto.class)))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -303,7 +307,7 @@ public class OrderController {
     @ApiLocale
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
-        @Valid @PathVariable("orderId") Long id,
+        @Positive @PathVariable("orderId") Long id,
         Principal principal,
         @Parameter(hidden = true) Locale locale) {
         return ResponseEntity.ok()
@@ -350,7 +354,7 @@ public class OrderController {
     })
     @GetMapping("/order/{id}/cancellation")
     public ResponseEntity<OrderCancellationReasonDto> getCancellationReason(
-        @PathVariable("id") final Long id,
+        @Positive @PathVariable("id") final Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id, uuid));
     }
@@ -378,7 +382,7 @@ public class OrderController {
     public ResponseEntity<OrderCourierPopUpDto> getAllActiveLocationsByCourierId(
         @RequestParam Optional<String> changeLoc,
         @Parameter(hidden = true) @CurrentUserUuid String uuid,
-        @Valid @PathVariable Long courierId) {
+        @Positive @PathVariable Long courierId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getInfoForCourierOrderingByCourierId(uuid, changeLoc, courierId));
     }
@@ -417,8 +421,8 @@ public class OrderController {
     })
     @GetMapping("/tariffinfo/{locationId}")
     public ResponseEntity<TariffInfoByLocationDto> getInfoAboutTariff(
-        @RequestParam Long courierId,
-        @PathVariable Long locationId) {
+        @Positive @RequestParam Long courierId,
+        @Positive @PathVariable Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getTariffInfoForLocation(courierId, locationId));
     }
@@ -437,7 +441,7 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/orders/{id}/tariff")
-    public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@PathVariable Long id) {
+    public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@Positive @PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffForOrder(id));
     }
 
@@ -445,22 +449,24 @@ public class OrderController {
      * Check if a tariff exists by its ID.
      *
      * @param id The ID of the tariff to check.
-     * @return ResponseEntity with a boolean indicating whether the tariff exists.
-     * @throws NotFoundException if the tariff with the specified ID is not found.
+     * @return {@code ResponseEntity} with HTTP 200 OK if tariff exists, HTTP 404
+     *         NOT FOUND if it doesn't exist.
      * @author Yurii Ososvskyi
      */
     @Operation(summary = "Check if tariff exists by Id")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/check-if-tariff-exists/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> checkIfTariffExistsById(@PathVariable Long id) {
-        Boolean exists = ubsClientService.checkIfTariffExistsById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(exists);
+    public ResponseEntity<Void> checkIfTariffExistsById(@Positive @PathVariable Long id) {
+        boolean exists = ubsClientService.checkIfTariffExistsById(id);
+        if (!exists) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -471,7 +477,6 @@ public class OrderController {
     @Operation(summary = "Get All Active Locations")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -495,7 +500,7 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/tariffs/{locationId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Long>> getTariffIdByLocationId(@PathVariable("locationId") Long locationId) {
+    public ResponseEntity<List<Long>> getTariffIdByLocationId(@Positive @PathVariable("locationId") Long locationId) {
         List<Long> tariffId = ubsClientService.getTariffIdByLocationId(locationId);
         return ResponseEntity.status(HttpStatus.OK).body(tariffId);
     }
@@ -513,7 +518,7 @@ public class OrderController {
     })
     @GetMapping(value = "/locationsByCourier/{courierId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<LocationsDto>> getAllLocationsByCourierId(
-        @PathVariable("courierId") Long courierId) {
+        @Positive @PathVariable("courierId") Long courierId) {
         List<LocationsDto> locations = ubsClientService.getAllLocationsByCourierId(courierId);
         return ResponseEntity.status(HttpStatus.OK).body(locations);
     }
@@ -533,7 +538,7 @@ public class OrderController {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
     })
     @PostMapping("/monobank/payments")
-    public void receivePaymentFromMonoBank(@RequestBody MonoBankPaymentResponseDto response) {
+    public void receivePaymentFromMonoBank(@RequestBody @Valid MonoBankPaymentResponseDto response) {
         log.info("Response from MONOBANK API: {}", response);
         ubsClientService.validatePaymentFromMonoBank(response);
     }

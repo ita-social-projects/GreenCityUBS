@@ -150,24 +150,6 @@ spec:
               name: {{ .Values.externalSecret.secretName }}
               key: TELEGRAM-BOT-NAME
 
-        - name: VIBER_BOT_URL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: VIBER-BOT-URL
-
-        - name: VIBER_BOT_URI
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: VIBER-BOT-URI
-
-        - name: VIBER_BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: VIBER-BOT-TOKEN
-
         - name: GOOGLE_API_KEY
           valueFrom:
             secretKeyRef:

@@ -258,4 +258,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT p.order FROM Payment p WHERE p.id = ?1")
     Optional<Order> findOrderByPaymentId(long paymentId);
+
+    /**
+     * Returns the most recent order of the user by order date.
+     *
+     * @param userId the ID of the user
+     * @return an Optional containing the latest order, or empty if no orders exist
+     */
+    Optional<Order> findFirstByUserIdOrderByOrderDateDesc(Long userId);
 }
