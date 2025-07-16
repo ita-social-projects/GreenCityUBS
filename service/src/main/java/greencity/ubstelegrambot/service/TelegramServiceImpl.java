@@ -323,39 +323,68 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public void processUpdate(Update update) {
-        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
-
-        var message = update.getMessage();
-        String chatId = null;
-
-        if (update.hasCallbackQuery()) {
-            chatId = update.getCallbackQuery().getFrom().getId().toString();
-        }
-
-        if (update.hasMessage()) {
-            chatId = update.getMessage().getFrom().getId().toString();
-        }
-
+        String chatId = getChatId(update);
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
 
-        if (chat.isPresent()) {
-            LocalDateTime updatedAt = chat.get().getChatStateUpdatedAt();
-            Instant updatedAtInstant = updatedAt.atZone(ZoneId.systemDefault()).toInstant();
-
-            if (Duration.between(updatedAtInstant, Instant.now()).toMinutes() > 10) {
-                if (chat.get().getChatState() != ChatState.NORMAL) {
-                    chat.get().setChatState(ChatState.NORMAL);
-                    telegramChatRepository.save(chat.get());
-                    executor.executeCommand(ubsTelegramBot,
-                        MessageFactory.buildMessage(chatId, TelegramBotConstants.PREVIOUS_SESSION_HAS_EXPIRED));
-                    return;
-                }
+        chat.ifPresent(ch -> {
+            Instant updatedAt = ch.getChatStateUpdatedAt().atZone(ZoneId.systemDefault()).toInstant();
+            if (Duration.between(updatedAt, Instant.now()).toMinutes() > 10) {
+                ch.setChatState(ChatState.NORMAL);
+                telegramChatRepository.save(ch);
             }
+        });
+
+        if (isManager(chatId)) {
+            processUpdateManager(update, chatId);
+        } else {
+            processUpdateUser(update, chat, chatId);
         }
+    }
+
+    /**
+     * Processes an incoming update from Telegram for Manager(e.g., message,
+     * callback query)
+     *
+     * @param update {@link Update}
+     * @param chatId {@link String}
+     */
+    private void processUpdateManager(Update update, String chatId) {
+        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
 
         if (update.hasCallbackQuery()) {
             CallbackQuery callBackQuery = update.getCallbackQuery();
+            switch (callBackQuery.getData()) {
+                case TelegramBotConstants.LOGOUT_MANAGER_CALLBACK -> {
+                    logoutManager(chatId);
+                    executor.executeCommand(ubsTelegramBot, processLogoutManagerRequest(chatId));
+                    executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
+                }
+                default ->
+                    executor.executeCommand(ubsTelegramBot, processManagerMenuRequest(chatId));
+            }
+        } else if (update.hasMessage()) {
+            executor.executeCommand(ubsTelegramBot, processManagerMessageRequest(chatId));
+        }
+    }
 
+    private void logoutManager(String chatId) {
+        telegramManagerRepository.findByChatId(chatId)
+            .ifPresent(telegramManagerRepository::delete);
+    }
+
+    /**
+     * Processes an incoming update from Telegram for User(e.g., message, callback
+     * query)
+     *
+     * @param update  {@link Update}
+     * @param chatOpt {@link TelegramChat}
+     * @param chatId  {@link String}
+     */
+    private void processUpdateUser(Update update, Optional<TelegramChat> chatOpt, String chatId) {
+        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
+
+        if (update.hasCallbackQuery()) {
+            CallbackQuery callBackQuery = update.getCallbackQuery();
             switch (callBackQuery.getData()) {
                 case TelegramBotConstants.CLIENT_SUPPORT_CALLBACK ->
                     executor.executeCommand(ubsTelegramBot, processSupportRequest(chatId));
@@ -387,26 +416,44 @@ public class TelegramServiceImpl implements TelegramService {
                     executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
             }
         } else {
+            var message = update.getMessage();
             var text = message.getText();
 
-            if (chat.isEmpty()) {
+            if (chatOpt.isEmpty()) {
                 if (text.contains(TelegramBotConstants.START_COMMAND)) {
                     executor.executeCommand(ubsTelegramBot, processStartBotRequest(message));
                 }
-            } else {
-                switch (chat.get().getChatState()) {
-                    case IN_SUPPORT ->
-                        executor.executeCommand(ubsTelegramBot, processSupportMessage(message));
-                    case ENTERING_GREEN_OFFICE_EMAIL ->
-                        executor.executeCommand(ubsTelegramBot, processGreenOfficeEmail(message));
-                    case MAKING_FEEDBACK ->
-                        executor.executeCommand(ubsTelegramBot, processInputCommentRequest(message));
-                    case LOGGING_AS_MANAGER ->
-                        executor.executeCommand(ubsTelegramBot, processInputManagerCredentialsRequest(message));
-                    default -> executor.executeCommand(ubsTelegramBot, processNormalMessageRequest(message));
-                }
+                return;
+            }
+
+            TelegramChat chat = chatOpt.get();
+            switch (chat.getChatState()) {
+                case IN_SUPPORT ->
+                    executor.executeCommand(ubsTelegramBot, processSupportMessage(message));
+                case ENTERING_GREEN_OFFICE_EMAIL ->
+                    executor.executeCommand(ubsTelegramBot, processGreenOfficeEmail(message));
+                case MAKING_FEEDBACK ->
+                    executor.executeCommand(ubsTelegramBot, processInputCommentRequest(message));
+                case LOGGING_AS_MANAGER ->
+                    executor.executeCommand(ubsTelegramBot, processInputManagerCredentialsRequest(message));
+                default ->
+                    executor.executeCommand(ubsTelegramBot, processNormalMessageRequest(message));
             }
         }
+    }
+
+    private boolean isManager(String chatId) {
+        // maybe some improvement here
+        return telegramManagerRepository.existsByChatId(chatId);
+    }
+
+    private static String getChatId(Update update) {
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getFrom().getId().toString();
+        } else if (update.hasMessage()) {
+            return update.getMessage().getFrom().getId().toString();
+        }
+        throw new IllegalArgumentException("Bad type update");
     }
 
     private SendMessage updateChatStateAndRespond(
@@ -508,14 +555,30 @@ public class TelegramServiceImpl implements TelegramService {
             MessageFactory::createAvailableCommandsMessage);
     }
 
+    private SendMessage processManagerMenuRequest(String chatId) {
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createAvailableForManagerCommandsMessage);
+    }
+
     private SendMessage processUnknownRequest(String chatId) {
         return updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory::createUnknownCommandMessage);
     }
 
+    private SendMessage processLogoutManagerRequest(String chatId) {
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createLogoutManagerMessage);
+    }
+
+    private SendMessage processManagerMessageRequest(String chatId) {
+        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createForbiddenCommandsManagerMessage);
+    }
+
     private SendMessage processLoginRequest(String chatId) {
         Optional<TelegramManager> telegramManager = telegramManagerRepository.findByChatId(chatId);
 
+        // maybe this condition will never happen
         if (telegramManager.isPresent()) {
             return MessageFactory.createSuccessLoginMessage(
                 chatId,
@@ -608,7 +671,11 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private SendMessage processNormalMessageRequest(Message message) {
-        String text = message.getText();
+        if (message.getText() == null) {
+            return processUnknownRequest(message.getChatId().toString());
+        }
+
+        String text = message.getText().split(" ")[0];
 
         if (text == null) {
             return processUnknownRequest(message.getChatId().toString());
@@ -762,7 +829,10 @@ public class TelegramServiceImpl implements TelegramService {
             .build();
 
         notifyNewMessage(telegramMessageDto, chat.get().getId());
-        notifyManagerAboutNewMessagesFromUser(message.getFrom().getUserName(), messageText, chat.get().getId());
+        notifyManagerAboutNewMessagesFromUser(
+            message.getFrom().getUserName() == null ? message.getFrom().getFirstName()
+                : message.getFrom().getUserName(),
+            messageText, chat.get().getId());
         return MessageFactory.buildMessage(chat.get().getChatId(),
             TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
     }
