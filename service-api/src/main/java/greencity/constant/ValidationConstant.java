@@ -48,6 +48,7 @@ public class ValidationConstant {
         {1,30}\
         (?<![ЭэЁёъЪЫы])$\
         """;
+    public static final String NAMESURNAME_REGEXP = "^[A-Za-zА-Яа-я\\-'\\s]+$";
     public static final String USERNAME_MESSAGE = """
         Name must start with a letter, \
         cannot end with dot \
