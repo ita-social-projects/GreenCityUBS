@@ -20,7 +20,7 @@ public class TelegramManager {
     @Id
     private String chatId;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "employee_id", referencedColumnName = "id")
     private Employee employee;
 }

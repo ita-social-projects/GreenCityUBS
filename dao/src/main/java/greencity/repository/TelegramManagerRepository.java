@@ -8,4 +8,6 @@ import java.util.Optional;
 @Repository
 public interface TelegramManagerRepository extends JpaRepository<TelegramManager, String> {
     Optional<TelegramManager> findByChatId(String chatId);
+
+    boolean existsByChatId(String chatId);
 }
