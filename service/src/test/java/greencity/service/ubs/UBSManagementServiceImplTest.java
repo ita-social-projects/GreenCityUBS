@@ -65,7 +65,8 @@ import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.service.locations.LocationApiService;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -256,9 +257,6 @@ class UBSManagementServiceImplTest {
     TariffsInfoRepository tariffsInfoRepository;
 
     @Mock
-    private LocationApiService locationApiService;
-
-    @Mock
     RefundRepository refundRepository;
     @Mock
     private OrderBagService orderBagService;
@@ -276,6 +274,10 @@ class UBSManagementServiceImplTest {
     private UserNotificationRepository userNotificationRepository;
     @Mock
     private NotificationParameterRepository notificationParameterRepository;
+    @Mock
+    private CityRepository cityRepository;
+    @Mock
+    private DistrictRepository districtRepository;
 
     @Test
     void getAllCertificates() {

@@ -7,7 +7,6 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
@@ -32,8 +31,8 @@ import greencity.repository.RegionRepository;
 import greencity.repository.CityRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.OrderRepository;
-import greencity.service.locations.LocationApiService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,10 +44,12 @@ import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
     private static final String KYIV_CITY = "Kyiv City";
+    private static final String KYIV = "Kyiv";
     private final OrderAddressRepository orderAddressRepository;
     private final DistrictRepository districtRepository;
     private final CityRepository cityRepository;
@@ -57,7 +58,6 @@ public class AddressServiceImpl implements AddressService {
     private final AddressRepository addressRepo;
     private final OrderRepository orderRepository;
     private final EventService eventService;
-    private final LocationApiService locationApiService;
     private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
     private final ModelMapper modelMapper;
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
@@ -188,8 +188,8 @@ public class AddressServiceImpl implements AddressService {
      */
     @Override
     public List<DistrictDto> getAllDistricts(String region, String city) {
-        List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
-        return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
+        List<District> districts = districtRepository.findAllByCityId(cityRepository.findIdByNameUkOrNameEn(city));
+        return districts.stream().map(p -> modelMapper.map(p, DistrictDto.class))
             .collect(toList());
     }
 
@@ -201,7 +201,8 @@ public class AddressServiceImpl implements AddressService {
         Long cityId = cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND));
         return districtRepository.findAllByCityId(cityId).stream()
-            .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
+            .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn())
+                && !KYIV.equalsIgnoreCase(district.getNameEn()))
             .collect(toMap(
                 District::getNameUk,
                 district -> district,
