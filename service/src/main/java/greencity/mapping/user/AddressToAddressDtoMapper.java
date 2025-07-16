@@ -31,35 +31,31 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
      */
     @Override
     public AddressDto convert(Address address) {
-        try {
-            return AddressDto.builder()
-                .id(address.getId())
-                .regionUk(address.getBaseAddress().getRegionUk())
-                .regionEn(address.getBaseAddress().getRegionEn())
-                .cityUk(address.getBaseAddress().getCityUk())
-                .cityEn(address.getBaseAddress().getCityEn())
-                .streetUk(address.getBaseAddress().getStreetUk())
-                .streetEn(address.getBaseAddress().getStreetEn())
-                .districtUk(address.getBaseAddress().getDistrictUk())
-                .districtEn(address.getBaseAddress().getDistrictEn())
-                .entranceNumber(address.getBaseAddress().getEntranceNumber())
-                .houseCorpus(address.getBaseAddress().getHouseCorpus())
-                .houseNumber(address.getBaseAddress().getHouseNumber())
-                .addressComment(address.getBaseAddress().getAddressComment())
-                .coordinates(Coordinates.builder()
-                    .latitude(address.getCoordinates().getLatitude())
-                    .longitude(address.getCoordinates().getLongitude())
-                    .build())
-                .addressRegionDistrictList(
-                    getAllDistricts((address.getBaseAddress().getRegionUk()), address.getBaseAddress().getCityUk()))
-                .actual(address.getBaseAddress().getActual())
-                .build();
-        } catch (Exception e) {
-            throw e;
-        }
+        return AddressDto.builder()
+            .id(address.getId())
+            .regionUk(address.getBaseAddress().getRegionUk())
+            .regionEn(address.getBaseAddress().getRegionEn())
+            .cityUk(address.getBaseAddress().getCityUk())
+            .cityEn(address.getBaseAddress().getCityEn())
+            .streetUk(address.getBaseAddress().getStreetUk())
+            .streetEn(address.getBaseAddress().getStreetEn())
+            .districtUk(address.getBaseAddress().getDistrictUk())
+            .districtEn(address.getBaseAddress().getDistrictEn())
+            .entranceNumber(address.getBaseAddress().getEntranceNumber())
+            .houseCorpus(address.getBaseAddress().getHouseCorpus())
+            .houseNumber(address.getBaseAddress().getHouseNumber())
+            .addressComment(address.getBaseAddress().getAddressComment())
+            .coordinates(Coordinates.builder()
+                .latitude(address.getCoordinates().getLatitude())
+                .longitude(address.getCoordinates().getLongitude())
+                .build())
+            .addressRegionDistrictList(
+                getAllDistricts(address.getBaseAddress().getCityUk()))
+            .actual(address.getBaseAddress().getActual())
+            .build();
     }
 
-    private List<DistrictDto> getAllDistricts(String region, String city) {
+    private List<DistrictDto> getAllDistricts(String city) {
         List<District> districtDtos = districtRepository.findAllByCityId(cityRepository.findIdByNameUkOrNameEn(city));
 
         if (districtDtos == null) {
