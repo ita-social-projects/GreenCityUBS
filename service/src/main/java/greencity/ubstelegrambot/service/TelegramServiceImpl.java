@@ -665,7 +665,7 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private SendMessage processNormalMessageRequest(Message message) {
-        String text = message.getText();
+        String text = message.getText().split(" ")[0];
 
         switch (text) {
             case TelegramBotConstants.START_COMMAND -> {
