@@ -665,6 +665,11 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private SendMessage processNormalMessageRequest(Message message) {
+
+        if (message.getText() == null) {
+            return processUnknownRequest(message.getChatId().toString());
+        }
+
         String text = message.getText().split(" ")[0];
 
         switch (text) {
