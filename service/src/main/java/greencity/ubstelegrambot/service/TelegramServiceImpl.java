@@ -504,6 +504,12 @@ public class TelegramServiceImpl implements TelegramService {
                 .username(createdChat.getUsername()).build();
 
             notifyNewChat(chatDto);
+        } else {
+            if (!uuId.isEmpty()) {
+                Optional<User> user = userRepository.findUserByUuid(uuId);
+                user.ifPresent(value -> telegramChat.get().setUser(value));
+                telegramChatRepository.save(telegramChat.get());
+            }
         }
 
         return MessageFactory.createWelcomeMessage(chatId);
@@ -671,6 +677,10 @@ public class TelegramServiceImpl implements TelegramService {
 
         String text = message.getText().split(" ")[0];
 
+        if (text == null) {
+            return processUnknownRequest(message.getChatId().toString());
+        }
+
         switch (text) {
             case TelegramBotConstants.START_COMMAND -> {
                 return processStartBotRequest(message);
@@ -732,17 +742,21 @@ public class TelegramServiceImpl implements TelegramService {
             return MessageFactory.createEndSupportMessage(chat.get().getChatId());
         }
 
-        TelegramMessage telegramMessage = null;
+        TelegramMessage telegramMessage = TelegramMessage.builder()
+            .chat(chat.get())
+            .fromManager(false)
+            .mediaGroupId(message.getMediaGroupId())
+            .status(MessageDeliveryStatus.SENT)
+            .sendAt(LocalDateTime.now())
+            .build();
 
         if (message.hasPhoto()) {
-            telegramMessage = telegramMessageRepository.findByMediaGroupId(message.getMediaGroupId())
-                .orElseGet(() -> TelegramMessage.builder()
-                    .chat(chat.get())
-                    .fromManager(false)
-                    .mediaGroupId(message.getMediaGroupId())
-                    .status(MessageDeliveryStatus.SENT)
-                    .sendAt(LocalDateTime.now())
-                    .build());
+            if (message.getMediaGroupId() != null) {
+                telegramMessage =
+                    telegramMessageRepository.findByMediaGroupId(message.getMediaGroupId()).orElse(telegramMessage);
+            }
+
+            telegramMessageRepository.save(telegramMessage);
 
             PhotoSize largestPhoto = message.getPhoto().stream()
                 .max(Comparator.comparing(PhotoSize::getFileSize))
@@ -787,15 +801,6 @@ public class TelegramServiceImpl implements TelegramService {
             }
         }
 
-        if (telegramMessage == null) {
-            telegramMessage = TelegramMessage.builder()
-                .chat(chat.get())
-                .fromManager(false)
-                .mediaGroupId(message.getMediaGroupId())
-                .status(MessageDeliveryStatus.SENT)
-                .sendAt(LocalDateTime.now())
-                .build();
-        }
         String messageText = message.hasText() ? message.getText() : message.getCaption();
         telegramMessage.setText(messageText);
         telegramMessageRepository.save(telegramMessage);
