@@ -130,6 +130,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 @RequiredArgsConstructor
@@ -1159,7 +1161,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String processImage(MultipartFile image) {
-        return (image != null) ? userRemoteWebClient.uploadFile(image) : DEFAULT_IMAGE_PATH;
+        if (image != null) {
+            try {
+                return  userRemoteWebClient.uploadFile(image);
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
+        }
+        return DEFAULT_IMAGE_PATH;
     }
 
     /**

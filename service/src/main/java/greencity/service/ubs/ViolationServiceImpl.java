@@ -27,6 +27,7 @@ import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_HAS_VIOLATION;
@@ -50,6 +53,7 @@ import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ViolationServiceImpl implements ViolationService {
     private ViolationRepository violationRepository;
     private UserRepository userRepository;
@@ -240,7 +244,11 @@ public class ViolationServiceImpl implements ViolationService {
         if (add.getImagesToDelete() != null) {
             List<String> images = add.getImagesToDelete();
             for (String image : images) {
-                userRemoteWebClient.deleteFile(image);
+                try {
+                    userRemoteWebClient.deleteFile(image);
+                } catch (WebClientRequestException | WebClientResponseException e) {
+                    log.warn("User service is unavailable: {}", e.getMessage());
+                }
                 violationImages.remove(image);
             }
         }
@@ -258,7 +266,11 @@ public class ViolationServiceImpl implements ViolationService {
 
     private void setImages(MultipartFile[] multipartFiles, List<String> images) {
         for (MultipartFile multipartFile : multipartFiles) {
-            images.add(userRemoteWebClient.uploadFile(multipartFile));
+            try {
+                images.add(userRemoteWebClient.uploadFile(multipartFile));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
         }
     }
 }

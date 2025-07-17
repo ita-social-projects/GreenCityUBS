@@ -39,4 +39,5 @@ public class AppConstant {
     public static final String LOCALE_UK_NAME = "ua";
     public static final String LOCALE_EN_NAME = "en";
     public static final String TOKEN_PREFIX = "Bearer ";
+    public static final String MESSAGE = "message";
 }

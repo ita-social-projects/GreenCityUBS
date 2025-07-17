@@ -61,6 +61,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -113,7 +115,7 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String email) {
+                                                         MultipartFile image, String email) {
         if (Objects.isNull(image) && StringUtils.isBlank(paymentRequestDto.getReceiptLink())) {
             throw new BadRequestException("Receipt link or image must be present");
         }
@@ -138,7 +140,11 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found"));
         if (payment.getImagePath() != null) {
-            userRemoteWebClient.deleteFile(payment.getImagePath());
+            try {
+                userRemoteWebClient.deleteFile(payment.getImagePath());
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
         }
         paymentRepository.deletePaymentById(paymentId);
         eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
@@ -151,7 +157,7 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     public ManualPaymentResponseDto updateManualPayment(Long paymentId, ManualPaymentRequestDto paymentRequestDto,
-        MultipartFile image, String uuid) {
+                                                        MultipartFile image, String uuid) {
         Employee employee = employeeRepository.findByUuid(uuid)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(
@@ -170,7 +176,7 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     public boolean processRefundForOrder(Order order, RefundDto refundDto,
-        String employeeEmail) {
+                                         String employeeEmail) {
         if (OrderStatus.BROUGHT_IT_HIMSELF == order.getOrderStatus()) {
             processRefundForBroughtItHimselfOrder(order, refundDto, employeeEmail);
             return false;
@@ -321,7 +327,7 @@ public class PaymentServiceImpl implements PaymentService {
         CounterOrderDetailsDto dto =
             PaymentUtil.getPriceDetails(order.getId(), orderRepository, orderBagService, certificateRepository);
         double paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
-            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(PaymentUtil::convertCoinsIntoBills)
+                .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(PaymentUtil::convertCoinsIntoBills)
             .reduce(Double::sum)
             .orElse((double) 0);
         double totalPaidAmount = paymentsForCurrentOrder + dto.getCertificateBonus() + dto.getBonus();
@@ -352,20 +358,28 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private Payment changePaymentEntity(Payment updatePayment,
-        ManualPaymentRequestDto requestDto,
-        MultipartFile image) {
+                                        ManualPaymentRequestDto requestDto,
+                                        MultipartFile image) {
         updatePayment.setSettlementDate(requestDto.getSettlementDate());
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
         updatePayment.setReceiptLink(requestDto.getReceiptLink());
         if (requestDto.getImagePath().isEmpty()) {
             if (updatePayment.getImagePath() != null) {
-                userRemoteWebClient.deleteFile(updatePayment.getImagePath());
+                try {
+                    userRemoteWebClient.deleteFile(updatePayment.getImagePath());
+                } catch (WebClientRequestException | WebClientResponseException e) {
+                    log.warn("User service is unavailable: {}", e.getMessage());
+                }
             }
             updatePayment.setImagePath(null);
         }
         if (image != null) {
-            updatePayment.setImagePath(userRemoteWebClient.uploadFile(image));
+            try {
+                updatePayment.setImagePath(userRemoteWebClient.uploadFile(image));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
         }
         return updatePayment;
     }
@@ -384,7 +398,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
-        String email) {
+                                       String email) {
         Payment payment = Payment.builder()
             .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .amount(paymentRequestDto.getAmount())
@@ -397,7 +411,11 @@ public class PaymentServiceImpl implements PaymentService {
             .orderStatus(order.getOrderStatus())
             .build();
         if (image != null) {
-            payment.setImagePath(userRemoteWebClient.uploadFile(image));
+            try {
+                payment.setImagePath(userRemoteWebClient.uploadFile(image));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}}", e.getMessage());
+            }
         }
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));

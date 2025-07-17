@@ -20,9 +20,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.objects.File;
@@ -31,6 +34,7 @@ import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TelegramPhotoServiceImpl implements TelegramPhotoService {
     private final TelegramExecutor executor;
     private final UserRemoteWebClient userRemoteWebClient;
@@ -68,7 +72,11 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
                         .contentType(IMAGE_CONTENT_TYPE)
                         .build();
 
-                    savedPhotoUrls.add(userRemoteWebClient.uploadFile(file));
+                    try {
+                        savedPhotoUrls.add(userRemoteWebClient.uploadFile(file));
+                    } catch (WebClientRequestException | WebClientResponseException e) {
+                        log.warn("User service is unavailable: {}", e.getMessage());
+                    }
                 }
             } catch (IOException | IllegalArgumentException e) {
                 throw new FileNotSavedException(FAILED_TO_SAVE_PHOTO_TO_AZURE);
@@ -79,12 +87,22 @@ public class TelegramPhotoServiceImpl implements TelegramPhotoService {
 
     @Override
     public String savePhotoToAzureBlob(MultipartFile file) {
-        return userRemoteWebClient.uploadFile(file);
+        String photoUrl = "";
+        try {
+            photoUrl = userRemoteWebClient.uploadFile(file);
+        } catch (WebClientRequestException | WebClientResponseException e) {
+            log.warn("User service is unavailable: {}", e.getMessage());
+        }
+        return photoUrl;
     }
 
     @Override
     public void deletePhotoFromAzureBlob(String url) {
-        userRemoteWebClient.deleteFile(url);
+        try {
+            userRemoteWebClient.deleteFile(url);
+        } catch (WebClientRequestException | WebClientResponseException e) {
+            log.warn("User service is unavailable: {}", e.getMessage());
+        }
     }
 
     @Override

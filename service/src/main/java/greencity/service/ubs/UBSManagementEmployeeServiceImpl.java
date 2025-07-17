@@ -36,6 +36,7 @@ import greencity.repository.TariffsInfoRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -47,9 +48,12 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 @Data
+@Slf4j
 public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeService {
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
@@ -93,7 +97,16 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = buildEmployeeFromEmployeeWithTariffsIdDto(dto);
         employee.setUuid(UUID.randomUUID().toString());
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-        employee.setImagePath(image != null ? userRemoteWebClient.uploadFile(image) : defaultImagePath);
+        if (image != null) {
+            try {
+                employee.setImagePath(userRemoteWebClient.uploadFile(image));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
+        } else {
+            employee.setImagePath(defaultImagePath);
+        }
+
         if (employee.getTariffsInfoReceivingEmployees() == null) {
             employee.setTariffsInfoReceivingEmployees(new ArrayList<>());
         }
@@ -272,9 +285,17 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
         if (image != null) {
             String imageUrlToDelete = upEmployee.getImagePath();
-            updatedEmployee.setImagePath(userRemoteWebClient.uploadFile(image));
+            try {
+                updatedEmployee.setImagePath(userRemoteWebClient.uploadFile(image));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
             if (!imageUrlToDelete.equals(defaultImagePath)) {
-                userRemoteWebClient.deleteFile(upEmployee.getImagePath());
+                try {
+                    userRemoteWebClient.deleteFile(upEmployee.getImagePath());
+                } catch (WebClientRequestException | WebClientResponseException e) {
+                    log.warn("User service is unavailable: {}", e.getMessage());
+                }
             }
         } else {
             updatedEmployee.setImagePath(dto.getEmployeeDto().getImage());
@@ -351,7 +372,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         if (!employee.getImagePath().equals(defaultImagePath)) {
-            userRemoteWebClient.deleteFile(employee.getImagePath());
+            try {
+                userRemoteWebClient.deleteFile(employee.getImagePath());
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
             employee.setImagePath(defaultImagePath);
             employeeRepository.save(employee);
         } else {

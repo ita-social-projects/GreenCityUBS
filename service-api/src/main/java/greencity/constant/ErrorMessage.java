@@ -200,4 +200,6 @@ public class ErrorMessage {
     public static final String ORDER_NOT_FOUND_BY_ID = "Order not found with id: ";
     public static final String UUID_NOT_FOUND_BY_EMAIL = "UUID not found by email: ";
     public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
+    public static final String USER_APP_UNAVAILABLE = "the User service is unavailable";
+    public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
 }

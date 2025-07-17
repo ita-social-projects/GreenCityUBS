@@ -1,6 +1,12 @@
 package greencity.client.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.GreenCityUserServiceException;
+import greencity.exceptions.NotFoundException;
 import greencity.security.JwtTool;
 import io.netty.channel.ChannelOption;
 import java.time.Duration;
@@ -9,6 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -19,7 +27,7 @@ import reactor.netty.http.client.HttpClient;
 
 @Configuration
 @RequiredArgsConstructor
-public class UserRemoteClientConfig {
+public class UserRemoteWebClientConfig {
     @Value("${greencity.redirect.user-server-address}")
     private String greenCityUserBaseUrl;
 
@@ -58,5 +66,38 @@ public class UserRemoteClientConfig {
 
             return Mono.just(authorizedRequest);
         });
+    }
+
+    private ExchangeFilterFunction handlingWebClientExceptions() {
+        return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
+            HttpStatusCode statusCode = clientResponse.statusCode();
+            if (!(statusCode.is4xxClientError() || statusCode.is5xxServerError())) {
+                return Mono.just(clientResponse);
+            }
+
+            return clientResponse.bodyToMono(String.class)
+                .handle((errorBody, sink) -> {
+                    switch (clientResponse.statusCode()) {
+                        case HttpStatus.NOT_FOUND -> sink.error(new NotFoundException(populateErrorMessage(errorBody)));
+                        case HttpStatus.BAD_REQUEST -> sink
+                            .error(new BadRequestException(populateErrorMessage(errorBody)));
+                        case HttpStatus.INTERNAL_SERVER_ERROR -> sink
+                            .error(new GreenCityUserServiceException(populateErrorMessage(errorBody)));
+                        default -> sink
+                            .error(new IllegalStateException(ErrorMessage.INTERNAL_SERVER_ERROR + errorBody));
+                    }
+                });
+        });
+    }
+
+    private String populateErrorMessage(String errorBody) {
+        record JsonMessage(String timestamp, short status, String error, String trace, String message, String path) {
+        }
+
+        try {
+            return new ObjectMapper().readValue(errorBody, JsonMessage.class).message();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
