@@ -32,7 +32,7 @@ public class UserRemoteWebClient {
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(multipartInserter(multipartFiles))
             .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<List<String>>(){
+            .bodyToMono(new ParameterizedTypeReference<List<String>>() {
             })
             .block();
     }

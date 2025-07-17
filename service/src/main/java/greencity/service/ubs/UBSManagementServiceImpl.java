@@ -1163,7 +1163,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private String processImage(MultipartFile image) {
         if (image != null) {
             try {
-                return  userRemoteWebClient.uploadFile(image);
+                return userRemoteWebClient.uploadFile(image);
             } catch (WebClientRequestException | WebClientResponseException e) {
                 log.warn("User service is unavailable: {}", e.getMessage());
             }

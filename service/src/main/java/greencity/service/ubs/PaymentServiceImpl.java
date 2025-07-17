@@ -115,7 +115,7 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     public ManualPaymentResponseDto saveNewManualPayment(Long orderId, ManualPaymentRequestDto paymentRequestDto,
-                                                         MultipartFile image, String email) {
+        MultipartFile image, String email) {
         if (Objects.isNull(image) && StringUtils.isBlank(paymentRequestDto.getReceiptLink())) {
             throw new BadRequestException("Receipt link or image must be present");
         }
@@ -157,7 +157,7 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     public ManualPaymentResponseDto updateManualPayment(Long paymentId, ManualPaymentRequestDto paymentRequestDto,
-                                                        MultipartFile image, String uuid) {
+        MultipartFile image, String uuid) {
         Employee employee = employeeRepository.findByUuid(uuid)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(
@@ -176,7 +176,7 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     public boolean processRefundForOrder(Order order, RefundDto refundDto,
-                                         String employeeEmail) {
+        String employeeEmail) {
         if (OrderStatus.BROUGHT_IT_HIMSELF == order.getOrderStatus()) {
             processRefundForBroughtItHimselfOrder(order, refundDto, employeeEmail);
             return false;
@@ -327,7 +327,7 @@ public class PaymentServiceImpl implements PaymentService {
         CounterOrderDetailsDto dto =
             PaymentUtil.getPriceDetails(order.getId(), orderRepository, orderBagService, certificateRepository);
         double paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
-                .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(PaymentUtil::convertCoinsIntoBills)
+            .equals(PaymentStatus.PAID)).map(Payment::getAmount).map(PaymentUtil::convertCoinsIntoBills)
             .reduce(Double::sum)
             .orElse((double) 0);
         double totalPaidAmount = paymentsForCurrentOrder + dto.getCertificateBonus() + dto.getBonus();
@@ -358,8 +358,8 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private Payment changePaymentEntity(Payment updatePayment,
-                                        ManualPaymentRequestDto requestDto,
-                                        MultipartFile image) {
+        ManualPaymentRequestDto requestDto,
+        MultipartFile image) {
         updatePayment.setSettlementDate(requestDto.getSettlementDate());
         updatePayment.setAmount(requestDto.getAmount());
         updatePayment.setPaymentId(requestDto.getPaymentId());
@@ -398,7 +398,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private Payment buildPaymentEntity(Order order, ManualPaymentRequestDto paymentRequestDto, MultipartFile image,
-                                       String email) {
+        String email) {
         Payment payment = Payment.builder()
             .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
             .amount(paymentRequestDto.getAmount())
