@@ -74,8 +74,10 @@ public class UserRemoteWebClient {
      */
     public void deleteFile(String path) {
         webClient.method(HttpMethod.DELETE)
-            .uri("/files/single")
-            .bodyValue(path)
+            .uri(uriBuilder -> uriBuilder
+                .path("/files/single")
+                .queryParam("path", path)
+                .build())
             .retrieve()
             .bodyToMono(Void.class)
             .block();
