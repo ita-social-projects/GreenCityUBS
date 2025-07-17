@@ -78,5 +78,5 @@ public interface TelegramService {
      *
      * @param update the Telegram update object to process
      */
-    void processUpdate(Update update);
+    TelegramUpdateProcessor processUpdate(Update update);
 }

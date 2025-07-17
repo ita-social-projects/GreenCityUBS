@@ -1,0 +1,47 @@
+package greencity.ubstelegrambot.service;
+
+import greencity.constant.TelegramBotConstants;
+import greencity.enums.ChatState;
+import greencity.repository.TelegramManagerRepository;
+import greencity.service.ubs.TelegramUpdateProcessor;
+import greencity.ubstelegrambot.messages.MessageFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Update;
+
+@Service("managerUpdateProcessor")
+@RequiredArgsConstructor
+public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
+    private final TelegramManagerRepository telegramManagerRepository;
+    private final TelegramUtils telegramUtils;
+
+    @Override
+    public SendMessage process(Update update) {
+        if (update.hasCallbackQuery()) {
+            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+            CallbackQuery callBackQuery = update.getCallbackQuery();
+            if (callBackQuery.getData().equals(TelegramBotConstants.LOGOUT_MANAGER_CALLBACK)) {
+                logoutManager(chatId);
+            }
+            return processMainMenuRequest(chatId);
+        }
+        return processManagerMessageRequest(update.getMessage().getChatId().toString());
+    }
+
+    private void logoutManager(String chatId) {
+        telegramManagerRepository.findByChatId(chatId)
+            .ifPresent(telegramManagerRepository::delete);
+    }
+
+    private SendMessage processMainMenuRequest(String chatId) {
+        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                MessageFactory::createAvailableCommandsMessage);
+    }
+
+    private SendMessage processManagerMessageRequest(String chatId) {
+        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createAvailableForManagerCommandsMessage);
+    }
+}
