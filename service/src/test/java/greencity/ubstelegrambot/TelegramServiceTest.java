@@ -13,7 +13,6 @@ import greencity.entity.user.employee.Employee;
 import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.ChatFeedbackRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
@@ -30,6 +29,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
@@ -309,7 +309,7 @@ class TelegramServiceTest {
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
-        when(telegramChatRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(chatPage);
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable))).thenReturn(chatPage);
         when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.of(message));
 
         PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
@@ -317,7 +317,7 @@ class TelegramServiceTest {
         assertEquals(0, result.getCurrentPage());
         assertEquals(1, result.getTotalElements());
 
-        ChatDto chatDto = result.getPage().get(0);
+        ChatDto chatDto = result.getPage().getFirst();
         assertEquals("123456789", chatDto.getChatId());
         assertEquals("Test", chatDto.getFirstName());
         Assertions.assertNotNull(chatDto.getUser());
@@ -327,7 +327,7 @@ class TelegramServiceTest {
         Assertions.assertNotNull(lastMessage);
         assertEquals("Hello", lastMessage.getText());
         assertEquals(1, lastMessage.getAssets().size());
-        assertEquals("http://image.png", lastMessage.getAssets().get(0).getUrl());
+        assertEquals("http://image.png", lastMessage.getAssets().getFirst().getUrl());
     }
 
     @Test
@@ -346,7 +346,7 @@ class TelegramServiceTest {
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
-        when(telegramChatRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(chatPage);
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable))).thenReturn(chatPage);
         when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.empty());
 
         // when
@@ -363,7 +363,7 @@ class TelegramServiceTest {
     @Test
     void testGetChats_EmptyResult_EmptyPageableDtoReturned() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(telegramChatRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(Page.empty());
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable))).thenReturn(Page.empty());
 
         PageableDto<ChatDto> result = telegramService.getChats("nothing", pageable);
 
