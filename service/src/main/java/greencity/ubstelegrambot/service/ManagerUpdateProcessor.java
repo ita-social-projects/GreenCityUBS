@@ -32,7 +32,7 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
 
     private SendMessage processMainMenuRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createAvailableCommandsMessage);
+            MessageFactory::createAvailableCommandsMessage);
     }
 
     private SendMessage processManagerMessageRequest(String chatId) {

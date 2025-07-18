@@ -22,7 +22,8 @@ public class TelegramBotConfig {
     private String botToken;
 
     @Bean
-    public UBSTelegramBot ubsTelegramBot(TelegramService telegramService, ApplicationContext applicationContext, TelegramExecutor executor) {
+    public UBSTelegramBot ubsTelegramBot(TelegramService telegramService, ApplicationContext applicationContext,
+        TelegramExecutor executor) {
         return new UBSTelegramBot(botToken, botName, telegramService, applicationContext, executor);
     }
 

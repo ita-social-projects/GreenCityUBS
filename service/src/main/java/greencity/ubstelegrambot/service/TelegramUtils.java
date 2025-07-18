@@ -90,18 +90,18 @@ public class TelegramUtils {
         var employeePositions = employee.getEmployeePosition();
 
         Position serviceManager = positionRepository.findById(1L)
-                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
 
         Position manager = positionRepository.findById(2L)
-                .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
 
         return employeePositions.contains(manager) || employeePositions.contains(serviceManager);
     }
 
     public SendMessage updateChatStateAndRespond(
-            String chatId,
-            ChatState newState,
-            Function<String, SendMessage> messageSupplier) {
+        String chatId,
+        ChatState newState,
+        Function<String, SendMessage> messageSupplier) {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
         if (chat.isEmpty()) {
             return MessageFactory.createUnknownErrorOccurredMessage(chatId);

@@ -1,21 +1,14 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.client.UserRemoteClient;
 import greencity.constant.TelegramBotConstants;
-import greencity.dto.TestersSignInRequest;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.*;
-import greencity.entity.user.employee.Employee;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
-import greencity.enums.FeedbackState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.repository.*;
-import greencity.service.ubs.AzureCloudStorageService;
-import greencity.service.ubs.NotificationService;
-import greencity.service.ubs.TelegramLoginService;
-import greencity.service.ubs.TelegramUpdateProcessor;
+import greencity.service.ubs.*;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +46,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
     private String telegramBotToken;
     private final TelegramUtils telegramUtils;
     private final TelegramLoginService telegramLoginService;
+    private final TelegramFeedbackService telegramFeedbackService;
 
     @Override
     public SendMessage process(Update update) {
@@ -82,19 +76,19 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     return processFeedbackRequest(chatId);
                 }
                 case TelegramBotConstants.RATING_TERRIBLY_CALLBACK -> {
-                    return processRatingFeedbackRequest(chatId, 1);
+                    return telegramFeedbackService.processRatingFeedbackRequest(chatId, 1);
                 }
                 case TelegramBotConstants.RATING_BADLY_CALLBACK -> {
-                    return processRatingFeedbackRequest(chatId, 2);
+                    return telegramFeedbackService.processRatingFeedbackRequest(chatId, 2);
                 }
                 case TelegramBotConstants.RATING_SATISFACTORILY_CALLBACK -> {
-                    return processRatingFeedbackRequest(chatId, 3);
+                    return telegramFeedbackService.processRatingFeedbackRequest(chatId, 3);
                 }
                 case TelegramBotConstants.RATING_GOOD_CALLBACK -> {
-                    return processRatingFeedbackRequest(chatId, 4);
+                    return telegramFeedbackService.processRatingFeedbackRequest(chatId, 4);
                 }
                 case TelegramBotConstants.RATING_PERFECTLY_CALLBACK -> {
-                    return processRatingFeedbackRequest(chatId, 5);
+                    return telegramFeedbackService.processRatingFeedbackRequest(chatId, 5);
                 }
                 case TelegramBotConstants.LOGIN_CALLBACK -> {
                     return processLoginRequest(chatId);
@@ -121,7 +115,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     return processGreenOfficeEmail(message);
                 }
                 case MAKING_FEEDBACK -> {
-                    return processInputCommentRequest(message);
+                    return telegramFeedbackService.processInputCommentRequest(message);
                 }
                 case LOGGING_AS_MANAGER -> {
                     return telegramLoginService.processInputManagerCredentialsRequest(message);
@@ -133,73 +127,39 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
         }
     }
 
-    private SendMessage processRatingFeedbackRequest(String chatId, int rating) {
-        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
-
-        if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId);
-        }
-
-        chat.get().setChatState(ChatState.MAKING_FEEDBACK);
-        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
-        telegramChatRepository.save(chat.get());
-
-        Optional<ChatFeedback> inProgressFeedback = chatFeedbackRepository
-                .findByChatIdAndFeedbackState(chat.get().getId(), FeedbackState.IN_PROGRESS);
-
-        if (inProgressFeedback.isPresent()) {
-            inProgressFeedback.get().setFeedbackState(FeedbackState.CLOSED);
-            chatFeedbackRepository.save(inProgressFeedback.get());
-        }
-
-        ChatFeedback chatFeedback = ChatFeedback.builder()
-                .rating(rating)
-                .feedbackState(FeedbackState.IN_PROGRESS)
-                .chat(chat.get())
-                .build();
-
-        chatFeedbackRepository.save(chatFeedback);
-
-        if (rating >= 4) {
-            return MessageFactory.createGreatFeedbackMessage(chatId);
-        }
-
-        return MessageFactory.createBadFeedbackMessage(chatId);
-    }
-
     private SendMessage processSupportRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
-                MessageFactory::createSupportMessageCallBackQuery);
+            MessageFactory::createSupportMessageCallBackQuery);
     }
 
     private SendMessage processSortingPricesRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createSortingPricesMessage);
+            MessageFactory::createSortingPricesMessage);
     }
 
     private SendMessage processWorkScheduleRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createWorkScheduleMessage);
+            MessageFactory::createWorkScheduleMessage);
     }
 
     private SendMessage processAdmissionRulesRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createAdmissionRulesMessage);
+            MessageFactory::createAdmissionRulesMessage);
     }
 
     private SendMessage processGreenOfficeRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createGreenOfficeMessage);
+            MessageFactory::createGreenOfficeMessage);
     }
 
     private SendMessage processGreenOfficeAgreeRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.ENTERING_GREEN_OFFICE_EMAIL,
-                MessageFactory::createEnteringEmailMessage);
+            MessageFactory::createEnteringEmailMessage);
     }
 
     private SendMessage processFeedbackRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createFeedbackMessage);
+            MessageFactory::createFeedbackMessage);
     }
 
     private SendMessage processLoginRequest(String chatId) {
@@ -272,7 +232,8 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     String azureFileUrl = azureCloudStorageService.upload(
                         inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
 
-                    AssetType assetType = TelegramUtils.detectAssetType(TelegramUtils.getFileContentType(telegramFile.getFilePath()));
+                    AssetType assetType =
+                        TelegramUtils.detectAssetType(TelegramUtils.getFileContentType(telegramFile.getFilePath()));
 
                     MessageAsset asset = MessageAsset.builder()
                         .url(azureFileUrl)
@@ -375,31 +336,6 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
         chat.setChatStateUpdatedAt(LocalDateTime.now());
         telegramChatRepository.save(chat);
         return MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString());
-    }
-
-    private SendMessage processInputCommentRequest(Message message) {
-        Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(message.getChatId().toString());
-
-        if (telegramChat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
-        }
-
-        Optional<ChatFeedback> chatFeedback = chatFeedbackRepository
-            .findByChatIdAndFeedbackState(
-                telegramChat.get().getId(),
-                FeedbackState.IN_PROGRESS);
-
-        if (chatFeedback.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
-        }
-
-        chatFeedback.get().setComment(message.getText());
-        chatFeedback.get().setFeedbackState(FeedbackState.CLOSED);
-        chatFeedbackRepository.save(chatFeedback.get());
-        telegramChat.get().setChatState(ChatState.NORMAL);
-        telegramChat.get().setChatStateUpdatedAt(LocalDateTime.now());
-        telegramChatRepository.save(telegramChat.get());
-        return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString());
     }
 
     private SendMessage processNormalMessageRequest(Message message) {

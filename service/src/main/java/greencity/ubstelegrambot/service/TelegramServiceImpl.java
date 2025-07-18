@@ -318,25 +318,25 @@ public class TelegramServiceImpl implements TelegramService {
 
     private boolean isStartCommand(Message message) {
         return message != null &&
-                message.getText() != null &&
-                message.getText().contains(TelegramBotConstants.START_COMMAND);
+            message.getText() != null &&
+            message.getText().contains(TelegramBotConstants.START_COMMAND);
     }
 
     private String extractUuid(Message message) {
         return message.getText()
-                .replace(TelegramBotConstants.START_COMMAND, "")
-                .trim();
+            .replace(TelegramBotConstants.START_COMMAND, "")
+            .trim();
     }
 
     private TelegramUpdateProcessor handleNewChat(String uuid, Message message, Long chatId) {
         TelegramChat.TelegramChatBuilder newChatBuilder = TelegramChat.builder()
-                .chatId(chatId.toString())
-                .username(message.getFrom().getUserName())
-                .firstName(message.getFrom().getFirstName())
-                .lastName(message.getFrom().getLastName())
-                .isNotify(true)
-                .chatState(ChatState.NORMAL)
-                .chatStateUpdatedAt(LocalDateTime.now());
+            .chatId(chatId.toString())
+            .username(message.getFrom().getUserName())
+            .firstName(message.getFrom().getFirstName())
+            .lastName(message.getFrom().getLastName())
+            .isNotify(true)
+            .chatState(ChatState.NORMAL)
+            .chatStateUpdatedAt(LocalDateTime.now());
 
         if (!uuid.isEmpty()) {
             userRepository.findUserByUuid(uuid).ifPresent(newChatBuilder::user);
@@ -347,13 +347,13 @@ public class TelegramServiceImpl implements TelegramService {
         telegramChatRepository.save(createdChat);
 
         ChatDto chatDto = ChatDto.builder()
-                .id(createdChat.getId())
-                .chatId(createdChat.getChatId())
-                .firstName(createdChat.getFirstName())
-                .lastName(createdChat.getLastName())
-                .username(createdChat.getUsername()).build();
+            .id(createdChat.getId())
+            .chatId(createdChat.getChatId())
+            .firstName(createdChat.getFirstName())
+            .lastName(createdChat.getLastName())
+            .username(createdChat.getUsername()).build();
 
-            notifyNewChat(chatDto);
+        notifyNewChat(chatDto);
 
         return resolveProcessorByUuid(uuid, chatId);
     }
@@ -378,11 +378,10 @@ public class TelegramServiceImpl implements TelegramService {
             Employee employee = employeeOpt.get();
             if (telegramUtils.checkIsEmployeeManager(employee)) {
                 telegramManagerRepository.save(
-                        TelegramManager.builder()
-                                .chatId(chatId.toString())
-                                .employee(employee)
-                                .build()
-                );
+                    TelegramManager.builder()
+                        .chatId(chatId.toString())
+                        .employee(employee)
+                        .build());
                 return telegramUpdateProcessorMap.get("managerUpdateProcessor");
             }
         }
@@ -392,8 +391,8 @@ public class TelegramServiceImpl implements TelegramService {
 
     private TelegramUpdateProcessor handleDefaultUpdate(Update update) {
         String chatId = update.hasCallbackQuery()
-                ? update.getCallbackQuery().getFrom().getId().toString()
-                : update.getMessage().getChatId().toString();
+            ? update.getCallbackQuery().getFrom().getId().toString()
+            : update.getMessage().getChatId().toString();
 
         telegramChatRepository.findByChatId(chatId).ifPresent(chat -> {
             Instant updatedAt = chat.getChatStateUpdatedAt().atZone(ZoneId.systemDefault()).toInstant();
@@ -404,8 +403,8 @@ public class TelegramServiceImpl implements TelegramService {
         });
 
         return telegramManagerRepository.findByChatId(chatId)
-                .map(m -> telegramUpdateProcessorMap.get("managerUpdateProcessor"))
-                .orElseGet(() -> telegramUpdateProcessorMap.get("userUpdateProcessor"));
+            .map(m -> telegramUpdateProcessorMap.get("managerUpdateProcessor"))
+            .orElseGet(() -> telegramUpdateProcessorMap.get("userUpdateProcessor"));
     }
 
     private void notifyNewChat(ChatDto chatDto) {

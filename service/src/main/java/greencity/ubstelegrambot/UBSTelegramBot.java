@@ -18,7 +18,8 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     private ApplicationContext applicationContext;
     private TelegramExecutor executor;
 
-    public UBSTelegramBot(String botToken, String botName, TelegramService telegramService, ApplicationContext applicationContext, TelegramExecutor executor) {
+    public UBSTelegramBot(String botToken, String botName, TelegramService telegramService,
+        ApplicationContext applicationContext, TelegramExecutor executor) {
         super(botToken);
         this.botName = botName;
         this.telegramService = telegramService;
