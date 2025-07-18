@@ -2,7 +2,7 @@ package greencity.ubstelegrambot.service;
 
 import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
-import greencity.repository.TelegramManagerRepository;
+import greencity.service.ubs.TelegramLoginService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Service("managerUpdateProcessor")
 @RequiredArgsConstructor
 public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
-    private final TelegramManagerRepository telegramManagerRepository;
+    private final TelegramLoginService telegramLoginService;
     private final TelegramUtils telegramUtils;
 
     @Override
@@ -23,16 +23,11 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
             String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             CallbackQuery callBackQuery = update.getCallbackQuery();
             if (callBackQuery.getData().equals(TelegramBotConstants.LOGOUT_MANAGER_CALLBACK)) {
-                logoutManager(chatId);
+                telegramLoginService.logoutManager(chatId);
             }
             return processMainMenuRequest(chatId);
         }
         return processManagerMessageRequest(update.getMessage().getChatId().toString());
-    }
-
-    private void logoutManager(String chatId) {
-        telegramManagerRepository.findByChatId(chatId)
-            .ifPresent(telegramManagerRepository::delete);
     }
 
     private SendMessage processMainMenuRequest(String chatId) {

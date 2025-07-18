@@ -14,6 +14,7 @@ import greencity.enums.MessageDeliveryStatus;
 import greencity.repository.*;
 import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.NotificationService;
+import greencity.service.ubs.TelegramLoginService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -50,12 +51,8 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
     private final NotificationService notificationService;
     @Value("${greencity.bots.ubs-bot-token}")
     private String telegramBotToken;
-    private final EmployeeRepository employeeRepository;
     private final TelegramUtils telegramUtils;
-    private final UserRemoteClient userRemoteClient;
-    @Value("${greencity.sing-in.secret-token}")
-    private String secretToken;
-    private static final String USERNAME = "username";
+    private final TelegramLoginService telegramLoginService;
 
     @Override
     public SendMessage process(Update update) {
@@ -127,7 +124,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     return processInputCommentRequest(message);
                 }
                 case LOGGING_AS_MANAGER -> {
-                    return processInputManagerCredentialsRequest(message);
+                    return telegramLoginService.processInputManagerCredentialsRequest(message);
                 }
                 default -> {
                     return processNormalMessageRequest(message);
@@ -403,53 +400,6 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
         telegramChat.get().setChatStateUpdatedAt(LocalDateTime.now());
         telegramChatRepository.save(telegramChat.get());
         return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString());
-    }
-
-    private SendMessage processInputManagerCredentialsRequest(Message message) {
-        String[] parts = message.getText().split(":");
-
-        if (parts.length < 2) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.INCORRECT_LOGIN_FORMAT);
-        }
-
-        String login = parts[0];
-        String password = parts[1];
-
-        Optional<Employee> employee = employeeRepository.findByEmailWithPositions(login);
-
-        if (employee.isEmpty()) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.USER_IS_NOT_EMPLOYEE);
-        }
-
-        boolean isManager = telegramUtils.checkIsEmployeeManager(employee.get());
-
-        if (!isManager) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.EMPLOYEE_IS_NOT_MANAGER);
-        }
-
-        var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, secretToken));
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-        }
-
-        var responseBody = response.getBody();
-        String name = (responseBody != null && responseBody.name() != null) ? responseBody.name() : USERNAME;
-
-        telegramManagerRepository.save(
-            TelegramManager
-                .builder()
-                .chatId(message.getChatId().toString())
-                .employee(employee.get())
-                .build());
-
-        return MessageFactory.createSuccessLoginMessage(
-            message.getChatId().toString(),
-            name);
     }
 
     private SendMessage processNormalMessageRequest(Message message) {
