@@ -534,6 +534,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = modelMapper.map(dto, Order.class);
         order.setOrderDate(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.FORMED);
+        order.setCounterOrderPaymentId(0L);
 
         User currentUser = userRepository.findByUuid(uuid);
 
@@ -1098,6 +1099,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(calculateOrderSumWithoutDiscounts(bagsOrdered));
+        order.setCounterOrderPaymentId(order.getCounterOrderPaymentId() + 1);
         setOrderPaymentStatus(order, sumToPayInCoins);
 
         Payment payment = Payment.builder()
