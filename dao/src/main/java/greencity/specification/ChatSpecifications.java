@@ -15,10 +15,9 @@ public class ChatSpecifications {
             String pattern = "%" + searchTerm.toLowerCase() + "%";
 
             return criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), pattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), pattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("username")), pattern)
-            );
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("username")), pattern));
         };
     }
 }
