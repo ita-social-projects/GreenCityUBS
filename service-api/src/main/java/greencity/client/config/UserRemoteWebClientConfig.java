@@ -47,6 +47,7 @@ public class UserRemoteWebClientConfig {
         return builder.baseUrl(greenCityUserBaseUrl)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .filter(authorizationHeaderFilter())
+            .filter(handlingWebClientExceptions())
             .clientConnector(
                 new ReactorClientHttpConnector(
                     HttpClient.create()
