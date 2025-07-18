@@ -4,6 +4,7 @@ import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.*;
+import greencity.service.ubs.TelegramFeedbackService;
 import greencity.service.ubs.TelegramService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -29,6 +30,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequiredArgsConstructor
 public class TelegramController {
     private final TelegramService telegramService;
+    private final TelegramFeedbackService telegramFeedbackService;
 
     /**
      * Retrieves all messages for a given chat ID with pagination support.
@@ -151,7 +153,7 @@ public class TelegramController {
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacks(Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllFeedbacks(pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(telegramFeedbackService.getAllFeedbacks(pageable));
     }
 
     /**
@@ -172,6 +174,7 @@ public class TelegramController {
     @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(
         @PathVariable(name = "chatId") String chatId, Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(telegramService.getAllFeedbacksByChatId(chatId, pageable));
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable));
     }
 }

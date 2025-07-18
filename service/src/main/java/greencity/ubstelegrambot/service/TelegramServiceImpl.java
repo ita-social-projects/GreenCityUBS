@@ -46,7 +46,6 @@ public class TelegramServiceImpl implements TelegramService {
     private final AzureCloudStorageService azureCloudStorageService;
     private final UBSClientService ubsClientService;
     private final TelegramExecutor executor;
-    private final ChatFeedbackRepository chatFeedbackRepository;
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
@@ -208,54 +207,6 @@ public class TelegramServiceImpl implements TelegramService {
             chats.getTotalElements(),
             chats.getNumber(),
             chats.getTotalPages());
-    }
-
-    /**
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable) {
-        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findAll(pageable);
-        List<FeedbackDto> feedbackDtos = chatFeedbacks
-            .getContent()
-            .stream()
-            .map(feedback -> new FeedbackDto(
-                feedback.getId(),
-                feedback.getChat().getId().toString(),
-                feedback.getRating(),
-                feedback.getComment()))
-            .toList();
-
-        return new PageableDto<>(
-            feedbackDtos,
-            chatFeedbacks.getTotalElements(),
-            chatFeedbacks.getNumber(),
-            chatFeedbacks.getTotalPages());
-    }
-
-    /**
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable) {
-        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatIdPageable(chatId, pageable);
-        List<FeedbackDto> feedbackDtos = chatFeedbacks
-            .getContent()
-            .stream()
-            .map(feedback -> new FeedbackDto(
-                feedback.getId(),
-                feedback.getChat().getChatId(),
-                feedback.getRating(),
-                feedback.getComment()))
-            .toList();
-
-        return new PageableDto<>(
-            feedbackDtos,
-            chatFeedbacks.getTotalElements(),
-            chatFeedbacks.getNumber(),
-            chatFeedbacks.getTotalPages());
     }
 
     /**

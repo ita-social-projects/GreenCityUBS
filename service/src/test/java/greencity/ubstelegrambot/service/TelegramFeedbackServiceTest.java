@@ -1,5 +1,7 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.telegram.FeedbackDto;
 import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
@@ -7,16 +9,22 @@ import greencity.enums.FeedbackState;
 import greencity.repository.ChatFeedbackRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.ubstelegrambot.constant.TelegramConstants;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static greencity.ubstelegrambot.constant.TelegramConstants.*;
@@ -302,4 +310,104 @@ public class TelegramFeedbackServiceTest {
         assertTrue(chat.getChatStateUpdatedAt().isAfter(LocalDateTime.now().minusMinutes(1)));
         verify(telegramChatRepository).save(chat);
     }
+
+    @Test
+    void testGetAllFeedbacksByChatId_FeedbacksFound_FeedbackDtoReturned() {
+        String chatId = "123456789";
+        Pageable pageable = PageRequest.of(0, 5);
+
+        TelegramChat chat = TelegramChat.builder()
+            .chatId(chatId)
+            .build();
+
+        ChatFeedback feedback = ChatFeedback.builder()
+            .id(1L)
+            .chat(chat)
+            .rating(5)
+            .comment("Great service")
+            .build();
+
+        Page<ChatFeedback> feedbackPage = new PageImpl<>(List.of(feedback), pageable, 1);
+
+        when(chatFeedbackRepository.findByChatIdPageable(chatId, pageable)).thenReturn(feedbackPage);
+
+        PageableDto<FeedbackDto> result = telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getPage().size());
+
+        FeedbackDto dto = result.getPage().getFirst();
+        assertEquals(Optional.of(1L).get(), dto.id());
+        assertEquals("123456789", dto.chatId());
+        assertEquals(5, dto.rating());
+        assertEquals("Great service", dto.comment());
+    }
+
+    @Test
+    void testGetAllFeedbacksByChatId_ChatNotFound_EmptyPageableDtoReturned() {
+        String chatId = "999999999";
+        Pageable pageable = PageRequest.of(0, 5);
+        when(chatFeedbackRepository.findByChatIdPageable(chatId, pageable)).thenReturn(Page.empty());
+
+        PageableDto<FeedbackDto> result = telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable);
+
+        Assertions.assertTrue(result.getPage().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+    }
+
+    @Test
+    void getAllFeedbacks_shouldReturnMappedDtos_whenFeedbacksExist() {
+        // arrange
+        Pageable pageable = PageRequest.of(0, 10);
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(100L)
+            .build();
+
+        ChatFeedback feedback = ChatFeedback.builder()
+            .id(1L)
+            .chat(chat)
+            .rating(5)
+            .comment("Great job")
+            .build();
+
+        Page<ChatFeedback> page = new PageImpl<>(List.of(feedback), pageable, 1);
+
+        when(chatFeedbackRepository.findAll(pageable)).thenReturn(page);
+
+        // act
+        PageableDto<FeedbackDto> result = telegramFeedbackService.getAllFeedbacks(pageable);
+
+        // assert
+        assertEquals(1, result.getPage().size());
+
+        FeedbackDto dto = result.getPage().getFirst();
+        assertEquals(1L, dto.id());
+        assertEquals("100", dto.chatId()); // .toString()
+        assertEquals(5, dto.rating());
+        assertEquals("Great job", dto.comment());
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(0, result.getCurrentPage());
+        assertEquals(1, result.getTotalPages());
+    }
+
+    @Test
+    void getAllFeedbacks_shouldReturnEmptyList_whenNoFeedbacksExist() {
+        // arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ChatFeedback> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(chatFeedbackRepository.findAll(pageable)).thenReturn(emptyPage);
+
+        // act
+        PageableDto<FeedbackDto> result = telegramFeedbackService.getAllFeedbacks(pageable);
+
+        // assert
+        assertTrue(result.getPage().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
+    }
+
 }

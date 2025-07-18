@@ -57,23 +57,6 @@ public interface TelegramService {
     OrdersDataForUserDto getLastOrderByChatId(Long chatId);
 
     /**
-     * Retrieves a pageable list of all feedback entries.
-     *
-     * @param pageable the pagination information
-     * @return a pageable DTO containing feedback data
-     */
-    PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable);
-
-    /**
-     * Retrieves a pageable list of feedback entries filtered by chat ID.
-     *
-     * @param chatId   the unique identifier of the chat as a String
-     * @param pageable the pagination information
-     * @return a pageable DTO containing feedback data for the specified chat
-     */
-    PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable);
-
-    /**
      * Processes an incoming update from Telegram (e.g., message, callback query).
      *
      * @param update the Telegram update object to process

@@ -1,5 +1,7 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.dto.pageble.PageableDto;
+import greencity.dto.telegram.FeedbackDto;
 import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
@@ -9,11 +11,14 @@ import greencity.repository.TelegramChatRepository;
 import greencity.service.ubs.TelegramFeedbackService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -82,5 +87,53 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         }
 
         return MessageFactory.createBadFeedbackMessage(chatId);
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable) {
+        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findAll(pageable);
+        List<FeedbackDto> feedbackDtos = chatFeedbacks
+            .getContent()
+            .stream()
+            .map(feedback -> new FeedbackDto(
+                feedback.getId(),
+                feedback.getChat().getId().toString(),
+                feedback.getRating(),
+                feedback.getComment()))
+            .toList();
+
+        return new PageableDto<>(
+            feedbackDtos,
+            chatFeedbacks.getTotalElements(),
+            chatFeedbacks.getNumber(),
+            chatFeedbacks.getTotalPages());
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable) {
+        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatIdPageable(chatId, pageable);
+        List<FeedbackDto> feedbackDtos = chatFeedbacks
+            .getContent()
+            .stream()
+            .map(feedback -> new FeedbackDto(
+                feedback.getId(),
+                feedback.getChat().getChatId(),
+                feedback.getRating(),
+                feedback.getComment()))
+            .toList();
+
+        return new PageableDto<>(
+            feedbackDtos,
+            chatFeedbacks.getTotalElements(),
+            chatFeedbacks.getNumber(),
+            chatFeedbacks.getTotalPages());
     }
 }
