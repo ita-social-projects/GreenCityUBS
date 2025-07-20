@@ -38,4 +38,5 @@ public class AppConstant {
     public static final String UNKNOWN_UK = "Невідомо";
     public static final String LOCALE_UK_NAME = "ua";
     public static final String LOCALE_EN_NAME = "en";
+    public static final String KYIV = "Kyiv";
 }

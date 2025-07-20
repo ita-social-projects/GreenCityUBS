@@ -27,10 +27,10 @@ public class ErrorMessage {
     public static final String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
     public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
         "The user already has connected to Telegram bot.";
-    public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT =
-        "The user already has connected to Viber bot.";
     public static final String THE_MESSAGE_WAS_NOT_SENT = "The message was not sent.";
     public static final String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
+    public static final String USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS =
+        "User with current uuid already exists in UBS.";
     public static final String USER_WITH_CURRENT_ID_DOES_NOT_EXIST = "User with current id does not exist.";
     public static final String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist: ";
     public static final String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
@@ -89,7 +89,7 @@ public class ErrorMessage {
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String TO_MUCH_BAG_EXCEPTION = "You choose to much bags, maximum amount is: ";
+    public static final String TOO_MANY_BAGS_EXCEPTION = "You chose too many bags, maximum amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =
         "The price of you're order without discount is greater than allowable limit: ";
     public static final String PRICE_OF_ORDER_LOWER_THAN_LIMIT =

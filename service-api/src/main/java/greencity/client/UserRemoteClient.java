@@ -162,6 +162,6 @@ public interface UserRemoteClient {
     @PutMapping("/user/markUserAsActivated")
     void activateEmployee(@RequestParam String uuid);
 
-    @PostMapping("/sign-in")
+    @PostMapping("/api/testers/sign-in")
     ResponseEntity<SuccessSignInDto> signIn(@RequestBody TestersSignInRequest request);
 }

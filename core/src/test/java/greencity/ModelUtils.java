@@ -28,7 +28,6 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
@@ -193,7 +192,6 @@ public class ModelUtils {
             .recipientPhone("666051373")
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -222,7 +220,7 @@ public class ModelUtils {
             .customerId(2L)
             .customerName("Anatolii")
             .customerSurname("Petyrov")
-            .customerPhoneNumber("095123456")
+            .customerPhoneNumber("0951234561")
             .customerEmail("anatolii.andr@gmail.com")
             .build();
     }
@@ -330,12 +328,6 @@ public class ModelUtils {
             .descriptionUk("Description")
             .limitIncluded(true)
             .build();
-    }
-
-    public static AdminCommentDto getAdminComment() {
-        return AdminCommentDto.builder()
-            .orderId(1L)
-            .adminComment("Admin").build();
     }
 
     public static EcoNumberDto getEcoNumberDto() {
@@ -724,7 +716,6 @@ public class ModelUtils {
      * This method creates an AddingViolationsToUserDto using its builder pattern,
      * setting the order ID to 1, the violation description to "Violation
      * description", and the violation level to "LOW".
-     *
      * </p>
      *
      * @return an AddingViolationsToUserDto instance populated with preset values

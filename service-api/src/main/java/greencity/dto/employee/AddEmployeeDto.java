@@ -22,10 +22,10 @@ import java.util.List;
 @AllArgsConstructor
 public class AddEmployeeDto {
     @NotNull
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
     private String firstName;
     @NotNull
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
     private String lastName;
     @NotNull
     @ValidPhoneNumber

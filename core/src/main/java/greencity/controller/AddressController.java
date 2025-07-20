@@ -9,6 +9,7 @@ import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.service.ubs.AddressService;
@@ -20,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.security.Principal;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -129,7 +131,7 @@ public class AddressController {
     })
     @DeleteMapping("/order-addresses/{id}")
     public ResponseEntity<OrderWithAddressesResponseDto> deleteOrderAddress(
-        @Valid @PathVariable("id") Long id,
+        @Positive @PathVariable("id") Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(addressService.deleteCurrentAddressForOrder(id, uuid));
@@ -153,7 +155,7 @@ public class AddressController {
     })
     @PatchMapping("/makeAddressActual/{addressId}")
     public ResponseEntity<AddressDto> makeAddressActual(
-        @PathVariable Long addressId,
+        @Positive @PathVariable Long addressId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(addressService.makeAddressActual(addressId, uuid));
@@ -192,6 +194,7 @@ public class AddressController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = DistrictDto.class)))),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/districts-for-kyiv")
     public ResponseEntity<List<DistrictDto>> getAllDistrictsForKyiv() {
@@ -204,22 +207,22 @@ public class AddressController {
      *
      * @param addressDto The updated address information.
      * @param principal  The user principal.
-     * @return HTTP status of 200 if the update was successful.
+     * @return {@link HttpStatus}
      */
     @Operation(summary = "Update address for current order",
         description = "Update address for current order on big order table")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = OrderAddressDtoResponse.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PatchMapping("/update-address")
-    public ResponseEntity<Void> updateAddress(@RequestBody @Valid UpdateAddressDto addressDto,
-        @Parameter(hidden = true) Principal principal) {
-        addressService.addressUpdate(addressDto, principal.getName());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<OrderAddressDtoResponse> updateAddress(
+        @RequestBody @Valid UpdateAddressDto addressDto, @Parameter(hidden = true) Principal principal) {
+        return ResponseEntity.ok(addressService.addressUpdate(addressDto, principal.getName()));
     }
 
     /**
@@ -232,12 +235,13 @@ public class AddressController {
         description = "Get address for order for given order id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/get-address-for-order/{orderId}")
-    public ResponseEntity<UpdateAddressDto> getAddressForOrder(@PathVariable Long orderId) {
+    public ResponseEntity<UpdateAddressDto> getAddressForOrder(@Positive @PathVariable Long orderId) {
         return ResponseEntity.ok(addressService.getAddressForOrder(orderId));
     }
 
@@ -252,13 +256,14 @@ public class AddressController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = ReadAddressByOrderDto.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/read-address-order/{id}")
     public ResponseEntity<ReadAddressByOrderDto> getAddressByOrderId(
-        @Valid @PathVariable("id") Long id) {
+        @Positive @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(addressService.getAddressByOrderId(id));
     }

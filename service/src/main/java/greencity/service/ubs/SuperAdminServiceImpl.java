@@ -176,7 +176,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         if (Objects.equals(amount.get(bagId), 0)
             || Objects.equals(order.getOrderPaymentStatus(), OrderPaymentStatus.UNPAID)) {
             if (Objects.equals(totalBagsAmount, amount.get(bagId))) {
-                order.updateWithNewOrderBags(new ArrayList<>());
+                order.setOrderBags(new ArrayList<>());
                 orderRepository.delete(order);
                 return;
             }
@@ -511,6 +511,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffsInfoDto.class))
             .sorted(Comparator.comparing(tariff -> tariff.getRegionDto().getNameUk()))
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public GetTariffsInfoDto getTariffInfoById(Long id) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(id);
+        return modelMapper.map(tariffsInfo, GetTariffsInfoDto.class);
     }
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
