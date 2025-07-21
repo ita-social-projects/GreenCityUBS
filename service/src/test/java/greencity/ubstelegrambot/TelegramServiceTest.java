@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -54,16 +55,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
@@ -642,6 +640,174 @@ class TelegramServiceTest {
         // assert
         assertEquals(expected.getText(), result.getText());
         assertEquals(expected.getChatId(), result.getChatId());
+    }
+
+    @Test
+    void processUpdate_shouldReturnUserProcessor_whenStartWithUserUuidAndChatExists() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+                .id(1L)
+                .chatId(chatId.toString())
+                .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(existingChat));
+
+        Employee employee = new Employee();
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
+
+        when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(false);
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "Hello user!");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+    }
+
+    @Test
+    void processUpdate_shouldCreateNewChatWithoutUser_whenStartWithUuidAndUserNotFound() {
+        Long chatId = 12345L;
+        String uuid = "some-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setFirstName("TestFirst");
+        apiUser.setLastName("TestLast");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.empty());
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        when(telegramChatRepository.save(chatCaptor.capture())).thenAnswer(invocation -> {
+            TelegramChat chat = invocation.getArgument(0);
+            chat.setId(1L);
+            return chat;
+        });
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "response after creating chat without user");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(chatId.toString(), savedChat.getChatId());
+        assertEquals("TestFirst", savedChat.getFirstName());
+        assertEquals("TestLast", savedChat.getLastName());
+        assertNull(savedChat.getUser());
+    }
+
+    @Test
+    void processUpdate_shouldReturnUserProcessor_whenMessageTextIsNull() {
+        Long chatId = 12345L;
+
+        var apiUser = getTelegramAPIUser(chatId);
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(null);
+
+        Chat chat = new Chat();
+        chat.setId(chatId);
+        message.setChat(chat);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat telegramChat = TelegramChat.builder()
+                .chatId(chatId.toString())
+                .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+                .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+                .thenReturn(Optional.of(telegramChat));
+
+        when(telegramManagerRepository.findByChatId(chatId.toString()))
+                .thenReturn(Optional.empty());
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "default user reply");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+
+        verify(telegramChatRepository).save(telegramChat);
+    }
+
+    @Test
+    void processUpdate_shouldNotSaveUser_whenUuidIsEmptyInExistingChat() {
+        Long chatId = 12345L;
+        String startCommand = "/start";
+
+        var apiUser = getTelegramAPIUser(chatId);
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Chat chat = new Chat();
+        chat.setId(chatId);
+
+        message.setChat(chat);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+                .id(1L)
+                .chatId(chatId.toString())
+                .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+                .thenReturn(Optional.of(existingChat));
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "Hello user!");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+
+        verify(userRepository, never()).findUserByUuid(any());
+        verify(telegramChatRepository, never()).save(any());
     }
 
     private static org.telegram.telegrambots.meta.api.objects.User getTelegramAPIUser(Long chatId) {
