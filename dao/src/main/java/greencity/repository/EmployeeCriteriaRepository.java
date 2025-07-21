@@ -47,7 +47,11 @@ public class EmployeeCriteriaRepository {
         CriteriaQuery<EmployeeFilterView> criteriaQuery = criteriaBuilder.createQuery(EmployeeFilterView.class);
         Root<EmployeeFilterView> employeeRoot = criteriaQuery.from(EmployeeFilterView.class);
         Predicate predicate = composePredicateForFiltering(employeeFilterCriteria, employeeRoot, criteriaQuery);
-        criteriaQuery.select(employeeRoot).where(predicate).orderBy(getOrderBy(employeePage, employeeRoot));
+        criteriaQuery
+            .select(employeeRoot)
+            .distinct(true)
+            .where(predicate)
+            .orderBy(getOrderBy(employeePage, employeeRoot));
         return processEmployees(employeePage, criteriaQuery);
     }
 
@@ -78,7 +82,6 @@ public class EmployeeCriteriaRepository {
         CriteriaQuery<EmployeeFilterView> criteriaQuery) {
         List<Predicate> predicates = new ArrayList<>();
 
-        addPredicateDistinctUniqueEmployeesFromQuery(criteriaQuery, employeeFilterViewRoot, predicates);
         addSearchLinePredicates(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         addEmployeeStatusPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         addEmployeePositionPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
@@ -86,16 +89,6 @@ public class EmployeeCriteriaRepository {
         addLocationPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         addCourierPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         return predicates;
-    }
-
-    private void addPredicateDistinctUniqueEmployeesFromQuery(CriteriaQuery<EmployeeFilterView> criteriaQuery,
-        Root<EmployeeFilterView> employeeFilterViewRoot,
-        List<Predicate> predicates) {
-        Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
-        Root<EmployeeFilterView> subQueryRoot = subQuery.from(EmployeeFilterView.class);
-        subQuery.select(criteriaBuilder.min(subQueryRoot.get(POSITION_ID)))
-            .where(criteriaBuilder.equal(subQueryRoot.get(EMPLOYEE_ID), employeeFilterViewRoot.get(EMPLOYEE_ID)));
-        predicates.add(criteriaBuilder.equal(employeeFilterViewRoot.get(POSITION_ID), subQuery));
     }
 
     private void addCourierPredicate(EmployeeFilterCriteria employeeFilterCriteria,
