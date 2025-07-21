@@ -12,10 +12,12 @@ public class ChatSpecifications {
                 return criteriaBuilder.conjunction();
             }
 
+            String pattern = "%" + searchTerm.toLowerCase() + "%";
+
             return criteriaBuilder.or(
-                criteriaBuilder.like(root.get("firstName"), "%" + searchTerm + "%"),
-                criteriaBuilder.like(root.get("lastName"), "%" + searchTerm + "%"),
-                criteriaBuilder.like(root.get("username"), "%" + searchTerm + "%"));
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("username")), pattern));
         };
     }
 }
