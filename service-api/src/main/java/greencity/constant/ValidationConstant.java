@@ -28,6 +28,7 @@ public class ValidationConstant {
             + "(?!.*\\.\\.)"
             + "(?!.*--)"
             + "(?!.*'')"
+            + "(?!.*(?:[-'ʼ’\\.]\\s+[-'ʼ’\\.]))"
             + "[-'ʼ’ ґҐіІєЄїЇА-Яа-я\\w\\.]{0,29}$";
     public static final String NAME_VALIDATION_MESSAGE =
         "Name must start with an English or Ukrainian letter, "
