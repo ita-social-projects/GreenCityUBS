@@ -82,6 +82,34 @@ public class ManagerUpdateProcessorTest {
     }
 
     @Test
+    void testProcess_WithOtherCallback_ShouldNotLogoutManagerAndReturnMainMenu() {
+        String chatId = "123";
+        Update update = new Update();
+
+        CallbackQuery callbackQuery = new CallbackQuery();
+        callbackQuery.setData("OTHER_CALLBACK");
+
+        Chat chat = new Chat();
+        chat.setId(Long.parseLong(chatId));
+        Message message = new Message();
+        message.setChat(chat);
+        callbackQuery.setMessage(message);
+        update.setCallbackQuery(callbackQuery);
+
+        SendMessage expectedMessage = new SendMessage(chatId, "Main menu message");
+
+        when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
+                .thenReturn(expectedMessage);
+
+        SendMessage actualMessage = managerUpdateProcessor.process(update);
+
+        verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any());
+        verifyNoInteractions(telegramLoginService);
+
+        assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
     void testProcess_WhenUpdateIsEmpty_ShouldThrowException() {
         Update update = new Update();
 
