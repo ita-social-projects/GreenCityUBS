@@ -71,6 +71,10 @@
             <version>${org.springframework.social.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
         <!-- emoji -->
         <dependency>
             <groupId>com.vdurmont</groupId>
