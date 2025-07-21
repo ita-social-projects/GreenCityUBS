@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -307,7 +306,8 @@ class TelegramServiceTest {
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
-        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable))).thenReturn(chatPage);
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
+            .thenReturn(chatPage);
         when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.of(message));
 
         PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
@@ -344,7 +344,8 @@ class TelegramServiceTest {
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
-        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable))).thenReturn(chatPage);
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
+            .thenReturn(chatPage);
         when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.empty());
 
         // when
@@ -361,7 +362,8 @@ class TelegramServiceTest {
     @Test
     void testGetChats_EmptyResult_EmptyPageableDtoReturned() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable))).thenReturn(Page.empty());
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
+            .thenReturn(Page.empty());
 
         PageableDto<ChatDto> result = telegramService.getChats("nothing", pageable);
 
@@ -658,9 +660,9 @@ class TelegramServiceTest {
         update.setMessage(message);
 
         TelegramChat existingChat = TelegramChat.builder()
-                .id(1L)
-                .chatId(chatId.toString())
-                .build();
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(existingChat));
 
@@ -723,7 +725,7 @@ class TelegramServiceTest {
         assertEquals(chatId.toString(), savedChat.getChatId());
         assertEquals("TestFirst", savedChat.getFirstName());
         assertEquals("TestLast", savedChat.getLastName());
-        assertNull(savedChat.getUser());
+        Assertions.assertNull(savedChat.getUser());
     }
 
     @Test
@@ -744,15 +746,15 @@ class TelegramServiceTest {
         update.setMessage(message);
 
         TelegramChat telegramChat = TelegramChat.builder()
-                .chatId(chatId.toString())
-                .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
-                .build();
+            .chatId(chatId.toString())
+            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString()))
-                .thenReturn(Optional.of(telegramChat));
+            .thenReturn(Optional.of(telegramChat));
 
         when(telegramManagerRepository.findByChatId(chatId.toString()))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
         telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
@@ -788,12 +790,12 @@ class TelegramServiceTest {
         update.setMessage(message);
 
         TelegramChat existingChat = TelegramChat.builder()
-                .id(1L)
-                .chatId(chatId.toString())
-                .build();
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString()))
-                .thenReturn(Optional.of(existingChat));
+            .thenReturn(Optional.of(existingChat));
 
         TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
         telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
