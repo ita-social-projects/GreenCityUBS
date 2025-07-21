@@ -12,7 +12,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.criteria.Expression;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,6 @@ public class EmployeeCriteriaRepository {
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
     private static final String POSITION_ID = "positionId";
-    private static final String EMPLOYEE_ID = "employeeId";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -46,7 +44,7 @@ public class EmployeeCriteriaRepository {
         EmployeeFilterCriteria employeeFilterCriteria) {
         CriteriaQuery<EmployeeFilterView> criteriaQuery = criteriaBuilder.createQuery(EmployeeFilterView.class);
         Root<EmployeeFilterView> employeeRoot = criteriaQuery.from(EmployeeFilterView.class);
-        Predicate predicate = composePredicateForFiltering(employeeFilterCriteria, employeeRoot, criteriaQuery);
+        Predicate predicate = composePredicateForFiltering(employeeFilterCriteria, employeeRoot);
         criteriaQuery
             .select(employeeRoot)
             .distinct(true)
@@ -70,16 +68,14 @@ public class EmployeeCriteriaRepository {
     }
 
     private Predicate composePredicateForFiltering(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<EmployeeFilterView> employeeFilterViewRoot,
-        CriteriaQuery<EmployeeFilterView> criteriaQuery) {
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
         List<Predicate> predicates = collectAllPredicatesToList(
-            employeeFilterCriteria, employeeFilterViewRoot, criteriaQuery);
+            employeeFilterCriteria, employeeFilterViewRoot);
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
     private List<Predicate> collectAllPredicatesToList(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<EmployeeFilterView> employeeFilterViewRoot,
-        CriteriaQuery<EmployeeFilterView> criteriaQuery) {
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
         List<Predicate> predicates = new ArrayList<>();
 
         addSearchLinePredicates(employeeFilterCriteria, employeeFilterViewRoot, predicates);
