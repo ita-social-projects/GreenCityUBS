@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -268,8 +267,10 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private boolean isStartCommand(Message message) {
-        return message != null &&
-            message.getText() != null &&
+        return message != null
+                &&
+            message.getText() != null
+                &&
             message.getText().contains(TelegramBotConstants.START_COMMAND);
     }
 

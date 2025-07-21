@@ -650,4 +650,24 @@ class TelegramServiceTest {
         apiUser.setUserName("testUser");
         return apiUser;
     }
+
+    @Test
+    void testProcessUpdate_ChatNotExistsUuidIsEmpty_ChatCreatedUserUpdateProcessorReturned() {
+
+    }
+
+    @Test
+    void testProcessUpdate_ChatExistsUuidIsEmpty_UserUpdateProcessorReturned() {
+
+    }
+
+    @Test
+    void testProcessUpdate_ChatNotExistsUuidIsPresentIsManagerUuid_ManagerUpdateProcessorReturned() {
+
+    }
+
+    @Test
+    void testProcessUpdate_ChatNotExistsUuidIsPresentIsUserUuid_UserUpdateProcessorReturned() {
+
+    }
 }

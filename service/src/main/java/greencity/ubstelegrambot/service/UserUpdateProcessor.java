@@ -1,52 +1,29 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.constant.TelegramBotConstants;
-import greencity.dto.telegram.MessageAssetDto;
-import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.*;
-import greencity.enums.AssetType;
 import greencity.enums.ChatState;
-import greencity.enums.MessageDeliveryStatus;
 import greencity.repository.*;
 import greencity.service.ubs.*;
-import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
-import java.io.InputStream;
-import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 @Service("userUpdateProcessor")
 @RequiredArgsConstructor
 public class UserUpdateProcessor implements TelegramUpdateProcessor {
-    private final ApplicationContext applicationContext;
     private final TelegramChatRepository telegramChatRepository;
-    private final ChatFeedbackRepository chatFeedbackRepository;
-    private final TelegramManagerRepository telegramManagerRepository;
-    private final AzureCloudStorageService azureCloudStorageService;
-    private final TelegramMessageRepository telegramMessageRepository;
-    private final MessageAssetRepository messageAssetRepository;
-    private final TelegramExecutor executor;
-    private final SimpMessagingTemplate messagingTemplate;
-    private final NotificationService notificationService;
-    @Value("${greencity.bots.ubs-bot-token}")
-    private String telegramBotToken;
     private final TelegramUtils telegramUtils;
     private final TelegramLoginService telegramLoginService;
     private final TelegramFeedbackService telegramFeedbackService;
+    private final TelegramSupportService telegramSupportService;
+    private final TelegramGreenOfficeService telegramGreenOfficeService;
+    private final TelegramCommandsService telegramCommandsService;
 
     @Override
     public SendMessage process(Update update) {
@@ -55,25 +32,32 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
             String chatId = callBackQuery.getMessage().getChatId().toString();
             switch (callBackQuery.getData()) {
                 case TelegramBotConstants.CLIENT_SUPPORT_CALLBACK -> {
-                    return processSupportRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
+                            MessageFactory::createSupportMessageCallBackQuery);
                 }
                 case TelegramBotConstants.SORTING_PRICES_CALLBACK -> {
-                    return processSortingPricesRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                            MessageFactory::createSortingPricesMessage);
                 }
                 case TelegramBotConstants.WORK_SCHEDULE_CALLBACK -> {
-                    return processWorkScheduleRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                            MessageFactory::createWorkScheduleMessage);
                 }
                 case TelegramBotConstants.ADMISSION_RULES_CALLBACK -> {
-                    return processAdmissionRulesRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                            MessageFactory::createAdmissionRulesMessage);
                 }
                 case TelegramBotConstants.GREEN_OFFICE_CALLBACK -> {
-                    return processGreenOfficeRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                            MessageFactory::createGreenOfficeMessage);
                 }
                 case TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK -> {
-                    return processGreenOfficeAgreeRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.ENTERING_GREEN_OFFICE_EMAIL,
+                            MessageFactory::createEnteringEmailMessage);
                 }
                 case TelegramBotConstants.FEEDBACK_CALLBACK -> {
-                    return processFeedbackRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                            MessageFactory::createFeedbackMessage);
                 }
                 case TelegramBotConstants.RATING_TERRIBLY_CALLBACK -> {
                     return telegramFeedbackService.processRatingFeedbackRequest(chatId, 1);
@@ -91,10 +75,12 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     return telegramFeedbackService.processRatingFeedbackRequest(chatId, 5);
                 }
                 case TelegramBotConstants.LOGIN_CALLBACK -> {
-                    return processLoginRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
+                            MessageFactory::createLoginMessage);
                 }
                 default -> {
-                    return processMainMenuRequest(chatId);
+                    return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                            MessageFactory::createAvailableCommandsMessage);
                 }
             }
         } else {
@@ -109,10 +95,10 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
             TelegramChat chat = chatOpt.get();
             switch (chat.getChatState()) {
                 case IN_SUPPORT -> {
-                    return processSupportMessage(message);
+                    return telegramSupportService.processSupportMessage(message);
                 }
                 case ENTERING_GREEN_OFFICE_EMAIL -> {
-                    return processGreenOfficeEmail(message);
+                    return telegramGreenOfficeService.processGreenOfficeEmail(message);
                 }
                 case MAKING_FEEDBACK -> {
                     return telegramFeedbackService.processInputCommentRequest(message);
@@ -121,246 +107,8 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     return telegramLoginService.processInputManagerCredentialsRequest(message);
                 }
                 default -> {
-                    return processNormalMessageRequest(message);
+                    return telegramCommandsService.processCommand(message);
                 }
-            }
-        }
-    }
-
-    private SendMessage processSupportRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
-            MessageFactory::createSupportMessageCallBackQuery);
-    }
-
-    private SendMessage processSortingPricesRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createSortingPricesMessage);
-    }
-
-    private SendMessage processWorkScheduleRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createWorkScheduleMessage);
-    }
-
-    private SendMessage processAdmissionRulesRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createAdmissionRulesMessage);
-    }
-
-    private SendMessage processGreenOfficeRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createGreenOfficeMessage);
-    }
-
-    private SendMessage processGreenOfficeAgreeRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.ENTERING_GREEN_OFFICE_EMAIL,
-            MessageFactory::createEnteringEmailMessage);
-    }
-
-    private SendMessage processFeedbackRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createFeedbackMessage);
-    }
-
-    private SendMessage processLoginRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
-            MessageFactory::createLoginMessage);
-    }
-
-    private SendMessage processMainMenuRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createAvailableCommandsMessage);
-    }
-
-    private SendMessage processUnknownRequest(String chatId) {
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createUnknownCommandMessage);
-    }
-
-    private SendMessage processSupportMessage(Message message) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
-
-        if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
-        }
-
-        if (message.hasText() && message.getText().contains(TelegramBotConstants.CLIENT_END_SUPPORT_MODE)) {
-            chat.get().setChatState(ChatState.NORMAL);
-            chat.get().setChatStateUpdatedAt(LocalDateTime.now());
-            telegramChatRepository.save(chat.get());
-            notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
-            return MessageFactory.createEndSupportMessage(chat.get().getChatId());
-        }
-
-        TelegramMessage telegramMessage = TelegramMessage.builder()
-            .chat(chat.get())
-            .fromManager(false)
-            .mediaGroupId(message.getMediaGroupId())
-            .status(MessageDeliveryStatus.SENT)
-            .sendAt(LocalDateTime.now())
-            .build();
-
-        if (message.hasPhoto()) {
-            if (message.getMediaGroupId() != null) {
-                telegramMessage =
-                    telegramMessageRepository.findByMediaGroupId(message.getMediaGroupId()).orElse(telegramMessage);
-            }
-
-            telegramMessageRepository.save(telegramMessage);
-
-            PhotoSize largestPhoto = message.getPhoto().stream()
-                .max(Comparator.comparing(PhotoSize::getFileSize))
-                .orElse(null);
-
-            if (largestPhoto == null) {
-                log.warn("No photo found in media group message");
-                return MessageFactory.buildMessage(message.getChatId().toString(),
-                    TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-            }
-
-            try {
-                File telegramFile = executor.executeGetFile(bot, new GetFile(largestPhoto.getFileId()));
-                if (telegramFile == null || telegramFile.getFilePath() == null) {
-                    return MessageFactory.buildMessage(message.getChatId().toString(),
-                        TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-                }
-
-                URI uri = URI.create(telegramFile.getFileUrl(telegramBotToken));
-
-                try (InputStream inputStream = uri.toURL().openStream()) {
-                    String azureFileUrl = azureCloudStorageService.upload(
-                        inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
-
-                    AssetType assetType =
-                        TelegramUtils.detectAssetType(TelegramUtils.getFileContentType(telegramFile.getFilePath()));
-
-                    MessageAsset asset = MessageAsset.builder()
-                        .url(azureFileUrl)
-                        .fileName(TelegramUtils.getFileNameFromPath(telegramFile.getFilePath()))
-                        .size(largestPhoto.getFileSize().longValue())
-                        .contentType(TelegramUtils.getFileContentType(telegramFile.getFilePath()))
-                        .type(assetType)
-                        .message(telegramMessage)
-                        .build();
-
-                    messageAssetRepository.save(asset);
-                }
-            } catch (Exception e) {
-                log.error("Error loading photo: {}", e.getMessage());
-                return MessageFactory.buildMessage(message.getChatId().toString(),
-                    TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-            }
-        }
-
-        String messageText = message.hasText() ? message.getText() : message.getCaption();
-        telegramMessage.setText(messageText);
-        telegramMessageRepository.save(telegramMessage);
-
-        List<MessageAssetDto> assetDtos = Optional.ofNullable(telegramMessage.getAssets())
-            .orElse(Collections.emptyList())
-            .stream()
-            .map(asset -> MessageAssetDto.builder()
-                .id(asset.getId())
-                .url(asset.getUrl())
-                .type(asset.getType())
-                .fileName(asset.getFileName())
-                .size(asset.getSize())
-                .contentType(asset.getContentType())
-                .build())
-            .toList();
-
-        TelegramMessageDto telegramMessageDto = TelegramMessageDto
-            .builder()
-            .id(telegramMessage.getId())
-            .sendAt(telegramMessage.getSendAt())
-            .text(telegramMessage.getText())
-            .fromManager(telegramMessage.getFromManager())
-            .deliveryStatus(telegramMessage.getStatus())
-            .assets(assetDtos)
-            .build();
-
-        notifyNewMessage(telegramMessageDto, chat.get().getId());
-        notifyManagerAboutNewMessagesFromUser(
-            message.getFrom().getUserName() == null ? message.getFrom().getFirstName()
-                : message.getFrom().getUserName(),
-            messageText, chat.get().getId());
-        return MessageFactory.buildMessage(chat.get().getChatId(),
-            TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
-    }
-
-    private void notifyManagerAboutEndSupportModeFromUser(String username) {
-        var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
-        List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
-        for (TelegramManager manager : telegramManagers) {
-            var notification = MessageFactory.createEndSupportModeNotification(manager.getChatId(), username);
-            executor.executeCommand(telegramBot, notification);
-        }
-    }
-
-    private void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId) {
-        var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
-        List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
-        for (TelegramManager manager : telegramManagers) {
-            SendMessage notification =
-                MessageFactory.createNotificationMessageForManager(manager.getChatId(), username, messageText,
-                    innerChatId);
-            executor.executeCommand(telegramBot, notification);
-        }
-    }
-
-    private void notifyNewMessage(TelegramMessageDto messageDto, Long chatId) {
-        messagingTemplate.convertAndSend("/topic/messages/" + chatId, messageDto);
-    }
-
-    private SendMessage processGreenOfficeEmail(Message message) {
-        String email = message.getText();
-        if (!TelegramUtils.isValidEmail(email)) {
-            return MessageFactory.createInvalidEmailMessage(message.getChatId().toString());
-        }
-
-        Optional<TelegramChat> optChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
-
-        if (optChat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
-        }
-
-        TelegramChat chat = optChat.get();
-
-        String username =
-            chat.getUser() != null ? chat.getUser().getRecipientName() + " " + chat.getUser().getRecipientSurname()
-                : message.getFrom().getUserName();
-
-        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email, username);
-        chat.setChatState(ChatState.NORMAL);
-        chat.setChatStateUpdatedAt(LocalDateTime.now());
-        telegramChatRepository.save(chat);
-        return MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString());
-    }
-
-    private SendMessage processNormalMessageRequest(Message message) {
-        if (message.getText() == null) {
-            return processUnknownRequest(message.getChatId().toString());
-        }
-
-        String text = message.getText().split(" ")[0];
-
-        if (text == null) {
-            return processUnknownRequest(message.getChatId().toString());
-        }
-
-        switch (text) {
-            case TelegramBotConstants.START_COMMAND, TelegramBotConstants.HELP_COMMAND -> {
-                return processMainMenuRequest(message.getChatId().toString());
-            }
-            case TelegramBotConstants.SUPPORT_COMMAND -> {
-                return processSupportRequest(message.getChatId().toString());
-            }
-            case TelegramBotConstants.LOGIN_COMMAND -> {
-                return processLoginRequest(message.getChatId().toString());
-            }
-            default -> {
-                return processUnknownRequest(message.getChatId().toString());
             }
         }
     }

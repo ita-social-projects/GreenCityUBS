@@ -13,13 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND;
 import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 

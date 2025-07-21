@@ -7,7 +7,6 @@ import greencity.entity.telegram.TelegramManager;
 import greencity.entity.user.employee.Employee;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
-
 import greencity.service.ubs.TelegramLoginService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
 import java.util.Optional;
 
 @Service
