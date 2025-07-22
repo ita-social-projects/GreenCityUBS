@@ -1,6 +1,5 @@
 package greencity.ubstelegrambot.service;
 
-
 import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
 import greencity.service.ubs.TelegramCommandsService;
@@ -21,7 +20,7 @@ public class TelegramCommandsServiceImpl implements TelegramCommandsService {
 
         if (message.getText() == null) {
             return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                    MessageFactory::createUnknownCommandMessage);
+                MessageFactory::createUnknownCommandMessage);
         }
 
         String text = message.getText().split(" ")[0];
@@ -29,23 +28,23 @@ public class TelegramCommandsServiceImpl implements TelegramCommandsService {
         switch (text) {
             case TelegramBotConstants.START_COMMAND, TelegramBotConstants.HELP_COMMAND -> {
                 return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory::createAvailableCommandsMessage);
+                    MessageFactory::createAvailableCommandsMessage);
             }
             case TelegramBotConstants.SUPPORT_COMMAND -> {
                 telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
-                        MessageFactory::createSupportMessageCallBackQuery);
+                    MessageFactory::createSupportMessageCallBackQuery);
             }
             case TelegramBotConstants.LOGIN_COMMAND -> {
                 return telegramUtils.updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
-                        MessageFactory::createLoginMessage);
+                    MessageFactory::createLoginMessage);
             }
             default -> {
                 return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory::createUnknownCommandMessage);
+                    MessageFactory::createUnknownCommandMessage);
             }
         }
 
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createUnknownCommandMessage);
+            MessageFactory::createUnknownCommandMessage);
     }
 }

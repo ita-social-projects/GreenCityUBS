@@ -16,7 +16,8 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -50,7 +51,7 @@ public class ManagerUpdateProcessorTest {
         SendMessage expectedMessage = new SendMessage(chatId, "Some message");
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage actualMessage = managerUpdateProcessor.process(update);
 
@@ -72,7 +73,7 @@ public class ManagerUpdateProcessorTest {
         SendMessage expectedMessage = new SendMessage(chatId, "Available manager commands");
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage actualMessage = managerUpdateProcessor.process(update);
 
@@ -99,7 +100,7 @@ public class ManagerUpdateProcessorTest {
         SendMessage expectedMessage = new SendMessage(chatId, "Main menu message");
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage actualMessage = managerUpdateProcessor.process(update);
 

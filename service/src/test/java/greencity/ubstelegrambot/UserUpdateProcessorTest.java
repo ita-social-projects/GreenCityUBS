@@ -20,7 +20,8 @@ import org.telegram.telegrambots.meta.api.objects.*;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserUpdateProcessorTest {
@@ -51,7 +52,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createSupportMessageCallBackQuery(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.IN_SUPPORT), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -65,7 +66,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createSupportMessageCallBackQuery(CHAT_ID);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(eq(CHAT_ID), anyInt()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -75,14 +76,15 @@ public class UserUpdateProcessorTest {
 
     @Test
     void shouldHandleSupportTextMessage() {
-        Update update = createUpdateWithMessage(TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY, ChatState.IN_SUPPORT);
+        Update update =
+            createUpdateWithMessage(TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY, ChatState.IN_SUPPORT);
         SendMessage expected = MessageFactory.createSupportMessageCallBackQuery(CHAT_ID);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
-                .thenReturn(Optional.of(createTelegramChat(ChatState.IN_SUPPORT)));
+            .thenReturn(Optional.of(createTelegramChat(ChatState.IN_SUPPORT)));
 
         when(telegramSupportService.processSupportMessage(any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -92,14 +94,15 @@ public class UserUpdateProcessorTest {
 
     @Test
     void shouldHandleFeedbackCommentMessage() {
-        Update update = createUpdateWithMessage(TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE, ChatState.MAKING_FEEDBACK);
+        Update update =
+            createUpdateWithMessage(TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE, ChatState.MAKING_FEEDBACK);
         SendMessage expected = MessageFactory.createFeedbackThanksMessage(CHAT_ID);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
-                .thenReturn(Optional.of(createTelegramChat(ChatState.MAKING_FEEDBACK)));
+            .thenReturn(Optional.of(createTelegramChat(ChatState.MAKING_FEEDBACK)));
 
         when(telegramFeedbackService.processInputCommentRequest(any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -113,17 +116,16 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createFeedbackThanksMessage(CHAT_ID);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
-                .thenReturn(Optional.of(createTelegramChat(ChatState.LOGGING_AS_MANAGER)));
+            .thenReturn(Optional.of(createTelegramChat(ChatState.LOGGING_AS_MANAGER)));
 
         when(telegramLoginService.processInputManagerCredentialsRequest(any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
         assertMessageEquals(expected, result);
         verify(telegramLoginService).processInputManagerCredentialsRequest(any());
     }
-
 
     private Update createUpdateWithCallback(String callbackData) {
         Update update = new Update();
@@ -156,9 +158,9 @@ public class UserUpdateProcessorTest {
 
     private TelegramChat createTelegramChat(ChatState state) {
         return TelegramChat.builder()
-                .chatId(CHAT_ID)
-                .chatState(state)
-                .build();
+            .chatId(CHAT_ID)
+            .chatState(state)
+            .build();
     }
 
     private void assertMessageEquals(SendMessage expected, SendMessage actual) {

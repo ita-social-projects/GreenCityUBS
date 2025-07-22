@@ -268,9 +268,9 @@ public class TelegramServiceImpl implements TelegramService {
 
     private boolean isStartCommand(Message message) {
         return message != null
-                &&
+            &&
             message.getText() != null
-                &&
+            &&
             message.getText().contains(TelegramBotConstants.START_COMMAND);
     }
 
