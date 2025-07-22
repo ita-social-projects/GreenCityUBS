@@ -5,6 +5,7 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="increase-email-length-in-employees-table-to-72" author="Oleh Popovych">
+        <dropView viewName="employees_filters"/>
         <modifyDataType tableName="employees" columnName="email" newDataType="VARCHAR(72)"/>
         <createView viewName="employees_filters" replaceIfExists="true">
             SELECT empl.id         AS employee_id,
