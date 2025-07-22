@@ -35,8 +35,8 @@ public class TelegramGreenOfficeServiceImpl implements TelegramGreenOfficeServic
         TelegramChat chat = optChat.get();
 
         String username =
-                chat.getUser() != null ? chat.getUser().getRecipientName() + " " + chat.getUser().getRecipientSurname()
-                        : message.getFrom().getUserName();
+            chat.getUser() != null ? chat.getUser().getRecipientName() + " " + chat.getUser().getRecipientSurname()
+                : message.getFrom().getUserName();
 
         notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email, username);
         chat.setChatState(ChatState.NORMAL);

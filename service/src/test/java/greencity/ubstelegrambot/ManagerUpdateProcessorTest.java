@@ -5,7 +5,6 @@ import greencity.enums.ChatState;
 import greencity.service.ubs.TelegramLoginService;
 import greencity.ubstelegrambot.service.ManagerUpdateProcessor;
 import greencity.ubstelegrambot.service.TelegramUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -57,7 +57,7 @@ public class ManagerUpdateProcessorTest {
 
         verify(telegramLoginService).logoutManager(chatId);
         verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any());
-        Assertions.assertEquals(expectedMessage, actualMessage);
+        assertEquals(expectedMessage, actualMessage);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class ManagerUpdateProcessorTest {
 
         verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any());
         verifyNoInteractions(telegramLoginService);
-        Assertions.assertEquals(expectedMessage, actualMessage);
+        assertEquals(expectedMessage, actualMessage);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class ManagerUpdateProcessorTest {
         SendMessage expectedMessage = new SendMessage(chatId, "Main menu message");
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage actualMessage = managerUpdateProcessor.process(update);
 
