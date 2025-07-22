@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
+import java.util.Objects;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import jakarta.persistence.EntityManager;
@@ -58,7 +59,9 @@ public class EmployeeCriteriaRepository {
         TypedQuery<EmployeeFilterView> employeeTypedQuery = entityManager.createQuery(criteriaQuery);
         employeeTypedQuery.setFirstResult(employeePage.getPageNumber() * employeePage.getPageSize());
         employeeTypedQuery.setMaxResults(employeePage.getPageSize());
-        return employeeTypedQuery.getResultList();
+        return employeeTypedQuery.getResultList().stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
     private Order getOrderBy(EmployeePage employeePage, Root<EmployeeFilterView> root) {
