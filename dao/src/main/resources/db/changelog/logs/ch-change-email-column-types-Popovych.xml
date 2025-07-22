@@ -5,16 +5,303 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="increase-email-length-in-employees-table-to-72" author="Oleh Popovych">
+        <dropView viewName="employees_filters"/>
         <modifyDataType tableName="employees" columnName="email" newDataType="VARCHAR(72)"/>
+        <createView viewName="employees_filters" replaceIfExists="true">
+            SELECT empl.id         AS employee_id,
+                   empl.first_name,
+                   empl.last_name,
+                   empl.phone_number,
+                   empl.email,
+                   empl.image_path,
+                   empl.status     AS employee_status,
+                   pos.id          AS position_id,
+                   pos.name_en     AS position_name,
+                   ti.id           AS tariffs_info_id,
+                   reg.id          AS region_id,
+                   reg.name_en     AS region_name_en,
+                   reg.name_uk     AS region_name_uk,
+                   loc.id          AS location_id,
+                   loc.name_en     AS location_name_en,
+                   loc.name_uk     AS location_name_uk,
+                   recev_stat.id   AS receiving_station_id,
+                   recev_stat.name AS receiving_station_name,
+                   cour.id         AS courier_id,
+                   cour.name_en    AS courier_name_en,
+                   cour.name_uk    AS courier_name_uk
+            FROM employees empl
+                     LEFT JOIN employee_position ep ON empl.id = ep.employee_id
+                     LEFT JOIN positions pos ON ep.position_id = pos.id
+                     LEFT JOIN tariff_infos_receiving_employee_mapping tirem ON empl.id = tirem.employee_id
+                     LEFT JOIN tariffs_info ti ON tirem.tariffs_info_id = ti.id
+                     LEFT JOIN tariffs_locations tl ON ti.id = tl.tariffs_info_id
+                     LEFT JOIN locations loc ON loc.id = tl.location_id
+                     LEFT JOIN tariffs_info_receiving_stations_mapping tirsm ON ti.id = tirsm.tariffs_info_id
+                     LEFT JOIN receiving_stations recev_stat ON tirsm.receiving_station_id = recev_stat.id
+                     LEFT JOIN regions reg ON loc.region_id = reg.id
+                     LEFT JOIN courier cour ON cour.id = ti.courier_id;
+        </createView>
+
+        <rollback>
+            <dropView viewName="employees_filters"/>
+            <modifyDataType tableName="employees" columnName="email" newDataType="VARCHAR(50)"/>
+        </rollback>
     </changeSet>
     <changeSet id="increase-email-length-in-payment-table-to-72" author="Oleh Popovych">
         <modifyDataType tableName="payment" columnName="sender_email" newDataType="VARCHAR(72)"/>
     </changeSet>
-    <changeSet id="increase-sender_email-length-in-ubs_user-table-to-72" author="Oleh Popovych">
+    <changeSet id="increase-emails-length-in-ubs_user-table-to-72" author="Oleh Popovych">
+        <dropView viewName="big_order_table"/>
         <modifyDataType tableName="ubs_user" columnName="sender_email" newDataType="VARCHAR(72)"/>
-    </changeSet>
-    <changeSet id="increase-email-length-in-ubs_user-table-to-72" author="Oleh Popovych">
         <modifyDataType tableName="ubs_user" columnName="email" newDataType="VARCHAR(72)"/>
+
+        <createView viewName="big_order_table" replaceIfExists="true">
+            WITH order_sums AS (SELECT obm.order_id,
+                                       sum(obm.confirmed_quantity) AS total_confirmed_quantity,
+                                       sum(obm.exported_quantity)  AS total_exported_quantity,
+                                       sum(obm.amount)             AS total_amount
+                                FROM order_bag_mapping obm
+                                GROUP BY obm.order_id),
+                 group_capacity AS (SELECT obm.order_id,
+                                           sum(
+                                                   CASE
+                                                       WHEN bag.capacity = 120 AND bag.name_en::text = 'Mix waste'::text THEN
+                                                           CASE
+                                                               WHEN os.total_confirmed_quantity IS NULL AND
+                                                                    os.total_exported_quantity IS NULL THEN obm.amount
+                                                               WHEN os.total_exported_quantity IS NULL THEN obm.confirmed_quantity
+                                                               ELSE obm.exported_quantity
+                                                               END
+                                                       ELSE 0
+                                                       END)             AS mixed_waste_120,
+                                           sum(
+                                                   CASE
+                                                       WHEN bag.capacity = 60 AND bag.name_en::text = 'Textile waste'::text THEN
+                                                           CASE
+                                                               WHEN os.total_confirmed_quantity IS NULL AND
+                                                                    os.total_exported_quantity IS NULL THEN obm.amount
+                                                               WHEN os.total_exported_quantity IS NULL THEN obm.confirmed_quantity
+                                                               ELSE obm.exported_quantity
+                                                               END
+                                                       ELSE 0
+                                                       END)             AS textile_waste_60,
+                                           sum(
+                                                   CASE
+                                                       WHEN bag.capacity = 20 AND bag.name_en::text = 'Textile waste'::text THEN
+                                                           CASE
+                                                               WHEN os.total_confirmed_quantity IS NULL AND
+                                                                    os.total_exported_quantity IS NULL THEN obm.amount
+                                                               WHEN os.total_exported_quantity IS NULL THEN obm.confirmed_quantity
+                                                               ELSE obm.exported_quantity
+                                                               END
+                                                       ELSE 0
+                                                       END)             AS textile_waste_20,
+                                           string_agg(
+                                                   CASE
+                                                       WHEN bag.name_en::text != ALL
+                                                (ARRAY ['Mix waste'::character varying, 'Textile waste'::character varying]::text[])
+                                               THEN
+                                               CASE
+                                                   WHEN os.total_confirmed_quantity IS NULL AND
+                                                        os.total_exported_quantity IS NULL THEN
+                                                       CASE
+                                                           WHEN obm.amount = 0 THEN NULL::text
+                                                           ELSE concat(bag.name_uk, ' ', bag.capacity, 'л - ', obm.amount, 'шт')
+        END
+        WHEN os.total_exported_quantity IS NULL THEN
+                                                       CASE
+                                                           WHEN obm.confirmed_quantity = 0 THEN NULL::text
+                                                           ELSE concat(bag.name_uk, ' ', bag.capacity, 'л - ',
+                                                                       obm.confirmed_quantity, 'шт')
+        END
+        ELSE
+                                                       CASE
+                                                           WHEN obm.exported_quantity = 0 THEN NULL::text
+                                                           ELSE concat(bag.name_uk, ' ', bag.capacity, 'л - ',
+                                                                       obm.exported_quantity, 'шт')
+        END
+        END
+        ELSE NULL::text
+        END, ', '::text) AS other_packages,
+                               string_agg(
+                                       CASE
+                                           WHEN bag.name_en::text != ALL
+                                                (ARRAY ['Mix waste'::character varying, 'Textile waste'::character varying]::text[])
+                                               THEN
+                                               CASE
+                                                   WHEN os.total_confirmed_quantity IS NULL AND
+                                                        os.total_exported_quantity IS NULL THEN
+                                                       CASE
+                                                           WHEN obm.amount = 0 THEN NULL::text
+                                                           ELSE concat(bag.name_en, ' ', bag.capacity, 'l - ', obm.amount, 'pcs')
+        END
+        WHEN os.total_exported_quantity IS NULL THEN
+                                                       CASE
+                                                           WHEN obm.confirmed_quantity = 0 THEN NULL::text
+                                                           ELSE concat(bag.name_en, ' ', bag.capacity, 'l - ',
+                                                                       obm.confirmed_quantity, 'pcs')
+        END
+        ELSE
+                                                       CASE
+                                                           WHEN obm.exported_quantity = 0 THEN NULL::text
+                                                           ELSE concat(bag.name_en, ' ', bag.capacity, 'l - ',
+                                                                       obm.exported_quantity, 'pcs')
+        END
+        END
+        ELSE NULL::text
+        END, ', '::text) AS other_packages_eng
+                        FROM order_bag_mapping obm
+                                 LEFT JOIN bag ON obm.bag_id = bag.id
+                                 LEFT JOIN order_sums os ON obm.order_id = os.order_id
+                        GROUP BY obm.order_id
+                        ORDER BY obm.order_id)
+        SELECT o.id,
+               o.order_status,
+               o.order_payment_status,
+               o.order_date::date                                                                                 AS order_date,
+                (SELECT max(p.settlement_date::date) AS max
+        FROM payment p
+        WHERE p.order_id = o.id
+          AND o.order_payment_status::text = 'PAID'::text)                                                AS payment_date,
+            concat_ws(' '::text, uu.first_name, uu.last_name)                                                  AS client_name,
+            uu.phone_number                                                                                    AS client_phone_number,
+            uu.email                                                                                           AS client_email,
+            concat_ws(' '::text, uu.sender_first_name, uu.sender_last_name)                                    AS sender_name,
+            uu.sender_phone_number                                                                             AS sender_phone,
+            uu.sender_email,
+            u.violations                                                                                       AS violations_amount,
+            a.region_uk,
+            a.city_uk,
+            a.district_uk,
+            concat_ws(', '::text, concat(a.street_uk, ' ', a.house_number),
+            CASE
+            WHEN a.house_corpus IS NOT NULL AND a.house_corpus::text != ''::text
+                         THEN concat('корп.', a.house_corpus)
+                     ELSE 'корп.- '::text
+        END,
+                 CASE
+                     WHEN a.entrance_number IS NOT NULL AND a.entrance_number::text != ''::text
+                         THEN concat('п.', a.entrance_number)
+                     ELSE 'п.- '::text
+        END)                                                                                 AS address_uk,
+       a.address_comment                                                                                  AS comment_to_address_for_client,
+       gc.mixed_waste_120,
+       gc.textile_waste_60,
+       gc.textile_waste_20,
+       gc.other_packages                                                                                  AS other_packages_uk,
+       gc.other_packages_eng                                                                              AS other_packages_en,
+       o.sum_total_amount_without_discounts                                                               AS total_order_sum,
+       (SELECT string_agg(c.code::text, ', '::text) AS string_agg
+        FROM certificate c
+        WHERE c.order_id = o.id)                                                                          AS order_certificate_code,
+       COALESCE((SELECT sum(c.points) AS sum
+                 FROM certificate c
+                 WHERE c.order_id = o.id), 0::bigint) +
+       COALESCE(o.points_to_use, 0)                                                                       AS general_discount,
+       (COALESCE(o.sum_total_amount_without_discounts, 0::bigint)::numeric - (COALESCE((SELECT sum(p.amount) AS sum
+                                                                                        FROM payment p
+                                                                                        WHERE p.order_id = o.id
+                                                                                          AND p.payment_status::text = 'PAID'::text),
+                                                                                       0::numeric) +
+                                                                              (COALESCE((SELECT sum(c.points) AS sum
+                                                                                         FROM certificate c
+                                                                                         WHERE c.order_id = o.id),
+                                                                                        0::bigint) * 100 +
+                                                                               COALESCE(o.points_to_use, 0) *
+                                                                               100)::numeric))::bigint    AS amount_due,
+       o.comment                                                                                          AS comment_for_order_by_client,
+       (COALESCE((SELECT sum(p.amount) AS sum
+                  FROM payment p
+                  WHERE p.order_id = o.id
+                    AND p.payment_status::text = 'PAID'::text), 0::numeric) + (COALESCE((SELECT sum(c.points) AS sum
+                                                                                         FROM certificate c
+                                                                                         WHERE c.order_id = o.id),
+                                                                                        0::bigint) * 100 +
+                                                                               COALESCE(o.points_to_use, 0) *
+                                                                               100)::numeric)::bigint     AS total_payment,
+       o.date_of_export,
+       concat_ws('-'::text, o.deliver_from::time without time zone,
+                 o.deliver_to::time without time zone)                                                    AS time_of_export,
+       (SELECT string_agg(oe.additional_order::text, '; '::text) AS string_agg
+        FROM order_additional oe
+        WHERE oe.orders_id = o.id)                                                                        AS id_order_from_shop,
+       r.name                                                                                             AS receiving_station,
+       r.id                                                                                               AS receiving_station_id,
+       (SELECT concat_ws(', '::text, e_1.first_name, e_1.last_name) AS concat_ws
+        FROM employee_order_position eop
+                 LEFT JOIN employees e_1 ON eop.employee_id = e_1.id
+        WHERE eop.order_id = o.id
+          AND eop.position_id = 3)                                                                        AS responsible_logic_man,
+       (SELECT e_1.id
+        FROM employee_order_position eop
+                 LEFT JOIN employees e_1 ON eop.employee_id = e_1.id
+        WHERE eop.order_id = o.id
+          AND eop.position_id = 3)                                                                        AS responsible_logic_man_id,
+       (SELECT concat_ws(', '::text, e_1.first_name, e_1.last_name) AS concat_ws
+        FROM employee_order_position eop
+                 LEFT JOIN employees e_1 ON eop.employee_id = e_1.id
+        WHERE eop.order_id = o.id
+          AND eop.position_id = 5)                                                                        AS responsible_driver,
+       (SELECT e_1.id
+        FROM employee_order_position eop
+                 LEFT JOIN employees e_1 ON eop.employee_id = e_1.id
+        WHERE eop.order_id = o.id
+          AND eop.position_id = 5)                                                                        AS responsible_driver_id,
+       (SELECT concat_ws(', '::text, e_1.first_name, e_1.last_name) AS concat_ws
+        FROM employee_order_position eop
+                 LEFT JOIN employees e_1 ON eop.employee_id = e_1.id
+        WHERE eop.order_id = o.id
+          AND eop.position_id = 2)                                                                        AS responsible_caller,
+       (SELECT e_1.id
+        FROM employee_order_position eop
+                 LEFT JOIN employees e_1 ON eop.employee_id = e_1.id
+        WHERE eop.order_id = o.id
+          AND eop.position_id = 2)                                                                        AS responsible_caller_id,
+       (SELECT concat_ws(', '::text, e_1.first_name, e_1.last_name) AS concat_ws
+        FROM employee_order_position eop
+                 LEFT JOIN employees e_1 ON eop.employee_id = e_1.id
+        WHERE eop.order_id = o.id
+          AND eop.position_id = 4)                                                                        AS responsible_navigator,
+       (SELECT e_1.id
+        FROM employee_order_position eop
+                 LEFT JOIN employees e_1 ON eop.employee_id = e_1.id
+        WHERE eop.order_id = o.id
+          AND eop.position_id = 4)                                                                        AS responsible_navigator_id,
+       o.blocked                                                                                          AS is_blocked,
+       concat_ws(', '::text, e.first_name, e.last_name)                                                   AS blocked_by,
+       a.region_en,
+       a.city_en,
+       a.district_en,
+       a.region_id,
+       a.city_id,
+       a.district_id,
+       concat_ws(', '::text, concat(a.street_en, ' ', a.house_number),
+                 CASE
+                     WHEN a.house_corpus IS NOT NULL AND a.house_corpus::text != ''::text
+                         THEN concat('b.', a.house_corpus)
+                     ELSE 'b.- '::text
+        END,
+                 CASE
+                     WHEN a.entrance_number IS NOT NULL AND a.entrance_number::text != ''::text
+                         THEN concat('e.', a.entrance_number)
+                     ELSE 'e.- '::text
+        END)                                                                                 AS address_en,
+       o.tariffs_info_id,
+       o.admin_comment                                                                                    AS comment_for_order_by_admin
+FROM orders o
+         LEFT JOIN group_capacity gc ON o.id = gc.order_id
+         LEFT JOIN employees e ON o.employee_id = e.id
+         LEFT JOIN receiving_stations r ON o.receiving_station_id = r.id
+         LEFT JOIN ubs_user uu ON o.ubs_user_id = uu.id
+         LEFT JOIN order_address a ON uu.id = a.id
+         LEFT JOIN users u ON o.users_id = u.id;
+        </createView>
+
+        <rollback>
+            <dropView viewName="big_order_table"/>
+            <modifyDataType tableName="ubs_user" columnName="email" newDataType="VARCHAR(50)"/>
+            <modifyDataType tableName="ubs_user" columnName="sender_email" newDataType="VARCHAR(50)"/>
+        </rollback>
     </changeSet>
     <changeSet id="increase-alternate_email-in-ubs_user-table-to-72" author="Oleh Popovych">
         <modifyDataType tableName="ubs_user" columnName="alternate_email" newDataType="VARCHAR(72)"/>
