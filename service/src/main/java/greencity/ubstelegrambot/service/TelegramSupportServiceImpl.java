@@ -5,13 +5,13 @@ import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
-import greencity.entity.telegram.TelegramManager;
 import greencity.entity.telegram.TelegramMessage;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.repository.*;
 import greencity.service.ubs.AzureCloudStorageService;
+import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramSupportService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -47,7 +46,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final TelegramMessageRepository telegramMessageRepository;
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramExecutor executor;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final TelegramNotificationService telegramNotificationService;
 
     public SendMessage processSupportMessage(Message message) {
         var bot = applicationContext.getBean(UBSTelegramBot.class);
@@ -60,7 +59,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             chat.get().setChatState(ChatState.NORMAL);
             chat.get().setChatStateUpdatedAt(LocalDateTime.now());
             telegramChatRepository.save(chat.get());
-            notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
+            telegramNotificationService.notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
             return MessageFactory.createEndSupportMessage(chat.get().getChatId());
         }
 
@@ -151,36 +150,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .assets(assetDtos)
                 .build();
 
-        notifyNewMessage(telegramMessageDto, chat.get().getId());
-        notifyManagerAboutNewMessagesFromUser(
+        telegramNotificationService.notifyNewMessage(telegramMessageDto, chat.get().getId());
+        telegramNotificationService.notifyManagerAboutNewMessagesFromUser(
                 message.getFrom().getUserName() == null ? message.getFrom().getFirstName()
                         : message.getFrom().getUserName(),
                 messageText, chat.get().getId());
         return MessageFactory.buildMessage(chat.get().getChatId(),
                 TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
-    }
-
-    private void notifyManagerAboutEndSupportModeFromUser(String username) {
-        var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
-        List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
-        for (TelegramManager manager : telegramManagers) {
-            var notification = MessageFactory.createEndSupportModeNotification(manager.getChatId(), username);
-            executor.executeCommand(telegramBot, notification);
-        }
-    }
-
-    private void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId) {
-        var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
-        List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
-        for (TelegramManager manager : telegramManagers) {
-            SendMessage notification =
-                    MessageFactory.createNotificationMessageForManager(manager.getChatId(), username, messageText,
-                            innerChatId);
-            executor.executeCommand(telegramBot, notification);
-        }
-    }
-
-    private void notifyNewMessage(TelegramMessageDto messageDto, Long chatId) {
-        messagingTemplate.convertAndSend("/topic/messages/" + chatId, messageDto);
     }
 }
