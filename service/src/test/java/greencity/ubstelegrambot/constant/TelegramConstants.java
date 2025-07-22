@@ -33,4 +33,14 @@ public class TelegramConstants {
             Ваші відгуки допомагають нам розвиватися! Будемо й надалі вдосконалювати нашу роботу 💪
             Залиште, будь ляска, кілька слів, що саме вам вподобалося в нашому сервісі 👇
             """;
+    public static final String INVALID_EMAIL_MESSAGE =
+        """
+            Це не схоже на e-mail. Спробуймо ще раз ⬅️
+
+            Напишіть ваш e-mail ✍️👇
+            """;
+    public static final String GREEN_OFFICE_THANK_YOU_MESSAGE =
+        """
+            Дякую! Упродовж доби вам прийде лист із описом послуги «Зелений Офіс» 👌
+            """;
 }

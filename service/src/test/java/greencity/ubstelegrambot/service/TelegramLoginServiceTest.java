@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -47,7 +46,7 @@ public class TelegramLoginServiceTest {
         String chatId = "123";
         TelegramManager manager = new TelegramManager();
         when(telegramManagerRepository.findByChatId(chatId))
-                .thenReturn(Optional.of(manager));
+            .thenReturn(Optional.of(manager));
 
         telegramLoginService.logoutManager(chatId);
 
@@ -58,7 +57,7 @@ public class TelegramLoginServiceTest {
     void testLogoutManager_WithNonExistingManager_ShouldDoNothing() {
         String chatId = "123";
         when(telegramManagerRepository.findByChatId(chatId))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         telegramLoginService.logoutManager(chatId);
 
@@ -73,22 +72,21 @@ public class TelegramLoginServiceTest {
 
         Employee employee = mock(Employee.class);
         when(employeeRepository.findByEmailWithPositions("manager@test.com"))
-                .thenReturn(Optional.of(employee));
+            .thenReturn(Optional.of(employee));
         when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(true);
 
         SuccessSignInDto successDto = new SuccessSignInDto(
-                1L,
-                "access-token",
-                "refresh-token",
-                "Manager Name",
-                false
-        );
+            1L,
+            "access-token",
+            "refresh-token",
+            "Manager Name",
+            false);
 
         ResponseEntity<SuccessSignInDto> responseEntity = new ResponseEntity<>(successDto, HttpStatus.OK);
         when(userRemoteClient.signIn(any(TestersSignInRequest.class))).thenReturn(responseEntity);
 
         when(telegramManagerRepository.save(any(TelegramManager.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
         SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
 
@@ -165,12 +163,12 @@ public class TelegramLoginServiceTest {
 
         Employee employee = new Employee();
         when(employeeRepository.findByEmailWithPositions("test@test.com"))
-                .thenReturn(Optional.of(employee));
+            .thenReturn(Optional.of(employee));
 
         when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(true);
 
         ResponseEntity<SuccessSignInDto> responseEntity =
-                new ResponseEntity<>(null, HttpStatus.OK);
+            new ResponseEntity<>(null, HttpStatus.OK);
 
         when(userRemoteClient.signIn(any())).thenReturn(responseEntity);
 
@@ -190,20 +188,19 @@ public class TelegramLoginServiceTest {
 
         Employee employee = new Employee();
         when(employeeRepository.findByEmailWithPositions("test@test.com"))
-                .thenReturn(Optional.of(employee));
+            .thenReturn(Optional.of(employee));
 
         when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(true);
 
         SuccessSignInDto successDto = new SuccessSignInDto(
-                1L,
-                "token",
-                "refresh",
-                null,
-                true
-        );
+            1L,
+            "token",
+            "refresh",
+            null,
+            true);
 
         ResponseEntity<SuccessSignInDto> responseEntity =
-                new ResponseEntity<>(successDto, HttpStatus.OK);
+            new ResponseEntity<>(successDto, HttpStatus.OK);
 
         when(userRemoteClient.signIn(any())).thenReturn(responseEntity);
 
