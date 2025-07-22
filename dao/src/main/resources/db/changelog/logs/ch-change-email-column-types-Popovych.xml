@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="increase-email-length-in-employees-table-to-72" author="Oleh Popovych">
+        <modifyDataType tableName="employees" columnName="email" newDataType="VARCHAR(72)"/>
+    </changeSet>
+    <changeSet id="increase-email-length-in-payment-table-to-72" author="Oleh Popovych">
+        <modifyDataType tableName="payment" columnName="sender_email" newDataType="VARCHAR(72)"/>
+    </changeSet>
+    <changeSet id="increase-sender_email-length-in-ubs_user-table-to-72" author="Oleh Popovych">
+        <modifyDataType tableName="ubs_user" columnName="sender_email" newDataType="VARCHAR(72)"/>
+    </changeSet>
+    <changeSet id="increase-email-length-in-ubs_user-table-to-72" author="Oleh Popovych">
+        <modifyDataType tableName="ubs_user" columnName="email" newDataType="VARCHAR(72)"/>
+    </changeSet>
+    <changeSet id="increase-alternate_email-in-ubs_user-table-to-72" author="Oleh Popovych">
+        <modifyDataType tableName="ubs_user" columnName="alternate_email" newDataType="VARCHAR(72)"/>
+    </changeSet>
+    <changeSet id="increase-recipient_email-in-users-table-to-72" author="Oleh Popovych">
+        <modifyDataType tableName="users" columnName="recipient_email" newDataType="VARCHAR(72)"/>
+    </changeSet>
+    <changeSet id="increase-alternate_email-in-users-table-to-72" author="Oleh Popovych">
+        <modifyDataType tableName="users" columnName="alternate_email" newDataType="VARCHAR(72)"/>
+    </changeSet>
+</databaseChangeLog>
