@@ -289,4 +289,5 @@
     <include file="db/changelog/logs/2025-07-07-ch-add-chat-state-updated-at-column.xml"/>
     <include file="db/changelog/logs/2025-07-09-ch-drop-telegram-old-tables-and-columns.xml"/>
     <include file="db/changelog/logs/ch-drop-viber-bot-table-Popovych.xml"/>
+    <include file="db/changelog/logs/ch-add-quartz-tables-Ilnytskyi.xml"/>
 </databaseChangeLog>
