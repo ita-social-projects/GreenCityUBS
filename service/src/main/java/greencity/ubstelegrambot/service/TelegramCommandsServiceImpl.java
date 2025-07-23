@@ -31,7 +31,7 @@ public class TelegramCommandsServiceImpl implements TelegramCommandsService {
                     MessageFactory::createAvailableCommandsMessage);
             }
             case TelegramBotConstants.SUPPORT_COMMAND -> {
-                telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
+                return telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
                     MessageFactory::createSupportMessageCallBackQuery);
             }
             case TelegramBotConstants.LOGIN_COMMAND -> {
@@ -43,8 +43,5 @@ public class TelegramCommandsServiceImpl implements TelegramCommandsService {
                     MessageFactory::createUnknownCommandMessage);
             }
         }
-
-        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createUnknownCommandMessage);
     }
 }
