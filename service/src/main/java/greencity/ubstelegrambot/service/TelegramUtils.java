@@ -10,9 +10,15 @@ import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.File;
+
+import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.function.Function;
@@ -24,6 +30,8 @@ import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 @Service
 @RequiredArgsConstructor
 public class TelegramUtils {
+    @Value("${greencity.bots.ubs-bot-token}")
+    private String telegramBotToken;
     private final PositionRepository positionRepository;
     private final TelegramChatRepository telegramChatRepository;
 
@@ -108,5 +116,10 @@ public class TelegramUtils {
         chat.get().setChatStateUpdatedAt(LocalDateTime.now());
         telegramChatRepository.save(chat.get());
         return messageSupplier.apply(chatId);
+    }
+
+    public byte[] fileToByteArray(File file) throws IOException {
+        URI uri = URI.create(file.getFileUrl(telegramBotToken));
+        return IOUtils.toByteArray(uri.toURL().openStream());
     }
 }

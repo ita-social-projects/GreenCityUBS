@@ -11,7 +11,6 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
-import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.TelegramNotificationService;
@@ -21,8 +20,6 @@ import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.util.SimpleMultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +28,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,16 +38,14 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class TelegramSupportServiceImpl implements TelegramSupportService {
-    @Value("${greencity.bots.ubs-bot-token}")
-    private String telegramBotToken;
     private final ApplicationContext applicationContext;
     private final TelegramChatRepository telegramChatRepository;
-    private final TelegramManagerRepository telegramManagerRepository;
     private final FileService fileService;
     private final TelegramMessageRepository telegramMessageRepository;
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramExecutor executor;
     private final TelegramNotificationService telegramNotificationService;
+    private final TelegramUtils telegramUtils;
 
     /**
      * {@inheritDoc}
@@ -94,7 +88,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             telegramMessage = TelegramMessage.builder()
                 .chat(chat)
                 .fromManager(false)
-                .mediaGroupId(message.getMediaGroupId())
+                .mediaGroupId(mediaGroupId)
                 .status(MessageDeliveryStatus.SENT)
                 .sendAt(LocalDateTime.now())
                 .text(messageText)
@@ -153,9 +147,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                     TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
             }
 
-            URI uri = URI.create(telegramFile.getFileUrl(telegramBotToken));
-
-            byte[] content = IOUtils.toByteArray(uri.toURL().openStream());
+            byte[] content = telegramUtils.fileToByteArray(telegramFile);
 
             MultipartFile multipartFile = new SimpleMultipartFile(content,
                 TelegramUtils.getFileNameFromPath(telegramFile.getFilePath()),
