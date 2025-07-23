@@ -196,8 +196,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .toList();
 
         telegramMessageDtoBuilder.assets(assetDtos).build();
-        if (previouslySavedMessage.isPresent())
+        if (previouslySavedMessage.isPresent()) {
             return null;
+        }
 
         telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
         telegramNotificationService.notifyManagerAboutNewMessagesFromUser(

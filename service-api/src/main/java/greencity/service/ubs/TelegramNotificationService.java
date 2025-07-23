@@ -8,5 +8,4 @@ public interface TelegramNotificationService {
     void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId);
 
     void notifyManagerAboutEndSupportModeFromUser(String username);
-
 }
