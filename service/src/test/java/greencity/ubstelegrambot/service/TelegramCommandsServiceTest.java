@@ -37,7 +37,7 @@ public class TelegramCommandsServiceTest {
         SendMessage expectedMessage = MessageFactory.createUnknownCommandMessage("123");
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage result = telegramCommandsService.processCommand(message);
 
@@ -56,7 +56,7 @@ public class TelegramCommandsServiceTest {
         SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage("123");
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage result = telegramCommandsService.processCommand(message);
 
@@ -75,7 +75,7 @@ public class TelegramCommandsServiceTest {
         SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage("123");
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage result = telegramCommandsService.processCommand(message);
 
@@ -94,7 +94,7 @@ public class TelegramCommandsServiceTest {
         SendMessage expectedMessage = MessageFactory.createSupportMessageCallBackQuery("123");
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.IN_SUPPORT), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage result = telegramCommandsService.processCommand(message);
 
@@ -113,7 +113,7 @@ public class TelegramCommandsServiceTest {
         SendMessage expectedMessage = MessageFactory.createLoginMessage("123");
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.LOGGING_AS_MANAGER), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage result = telegramCommandsService.processCommand(message);
 
@@ -132,7 +132,7 @@ public class TelegramCommandsServiceTest {
         SendMessage expectedMessage = MessageFactory.createUnknownCommandMessage("123");
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage result = telegramCommandsService.processCommand(message);
 

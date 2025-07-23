@@ -77,7 +77,7 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
         assertEquals(TelegramBotConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN,
-                result.getText());
+            result.getText());
     }
 
     @Test
@@ -94,8 +94,8 @@ class TelegramSupportServiceTest {
         when(message.getText()).thenReturn(TelegramBotConstants.CLIENT_END_SUPPORT_MODE);
 
         TelegramChat chatEntity = TelegramChat.builder()
-                .chatId(chatId)
-                .build();
+            .chatId(chatId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chatEntity));
 
@@ -125,10 +125,10 @@ class TelegramSupportServiceTest {
         when(message.getMediaGroupId()).thenReturn(null);
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .chatId(chatId)
-                .build();
+            .builder()
+            .id(id)
+            .chatId(chatId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
 
@@ -158,9 +158,9 @@ class TelegramSupportServiceTest {
         when(message.getPhoto()).thenReturn(List.of());
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .build();
+            .builder()
+            .id(id)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
 
@@ -169,7 +169,8 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
 //    @Test

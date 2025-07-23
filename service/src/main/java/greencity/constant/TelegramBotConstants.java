@@ -16,7 +16,8 @@ public class TelegramBotConstants {
     public static final String USER_IS_NOT_EMPLOYEE = "Користувач не є співробітником";
     public static final String EMPLOYEE_IS_NOT_MANAGER = "Співробітник не є менеджером";
     public static final String SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN = "Щось пішло не так спробуйте, будь ласка, знову";
-    public static final String MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN = "Менеджер не зміг отримати ваше фото, спробуйте будь ласка, знову";
+    public static final String MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN =
+        "Менеджер не зміг отримати ваше фото, спробуйте будь ласка, знову";
     public static final String GREETING_MESSAGE =
         """
             Привіт! Я бот і допомагаю своїм колегам-менеджеркам обробляти запити.
@@ -176,5 +177,5 @@ public class TelegramBotConstants {
         "Час попередньої сесії минув. Оберіть, будь ласка, команду зі списку щоб продовжити";
 
     public static final String PHOTO_CONTENT =
-            "Фото контент";
+        "Фото контент";
 }

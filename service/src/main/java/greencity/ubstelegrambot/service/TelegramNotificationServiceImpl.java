@@ -32,8 +32,8 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
         List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
         for (TelegramManager manager : telegramManagers) {
             SendMessage notification =
-                    MessageFactory.createNotificationMessageForManager(manager.getChatId(), username, messageText,
-                            innerChatId);
+                MessageFactory.createNotificationMessageForManager(manager.getChatId(), username, messageText,
+                    innerChatId);
             executor.executeCommand(telegramBot, notification);
         }
     }
