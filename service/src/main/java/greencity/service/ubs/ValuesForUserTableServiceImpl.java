@@ -27,7 +27,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
     UserRepository userRepository;
     UserTableRepo userTableRepo;
     private final EmployeeRepository employeeRepository;
-    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     @Override
     public PageableDto<UserWithSomeOrderDetailDto> getAllFields(CustomerPage page, String columnName,
