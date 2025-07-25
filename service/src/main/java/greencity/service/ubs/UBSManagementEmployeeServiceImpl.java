@@ -446,6 +446,10 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         List<Employee> employeeWithEnabledChat =
             employeeRepository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
 
+        if (employeeWithEnabledChat.isEmpty()) {
+            throw new NotFoundException("No employees found with enabled chat for tariff id: " + tariffId);
+        }
+
         return employeeWithEnabledChat
             .stream()
             .map(employee -> modelMapper.map(employee, EmployeeWithTariffsDto.class))
