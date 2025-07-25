@@ -164,8 +164,8 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private List<GetEmployeeDto> mapEmployeeFilterViewsToGetEmployeeDtos(List<EmployeeFilterView> employeeFilterViews) {
         List<Employee> employees = employeeRepository.findAll();
         Map<Long, GetEmployeeDto> getEmployeeDtoMap = new LinkedHashMap<>();
-        for (var employeeFilterView : employeeFilterViews) {
-            var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
+        for (EmployeeFilterView employeeFilterView : employeeFilterViews) {
+            GetEmployeeDto getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
                 id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
             getEmployeeDto.setTariffs(employees.stream()
                 .filter(employee -> employee.getId().equals(employeeFilterView.getEmployeeId()))
@@ -296,7 +296,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void updateEmployeeAuthoritiesToRelatedPositions(EmployeeWithTariffsIdDto dto) {
-        var positions = EmployeePositionsDto.builder()
+        EmployeePositionsDto positions = EmployeePositionsDto.builder()
             .email(dto.getEmployeeDto().getEmail())
             .positions(dto.getEmployeeDto().getEmployeePositions())
             .build();
