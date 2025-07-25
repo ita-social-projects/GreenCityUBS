@@ -181,7 +181,8 @@ class TelegramSupportServiceTest {
     }
 
     @Test
-    void testProcessSupportMessage_HasOnePhotoMessageUploadingSuccess_ShouldReturnMessageSentToManagerMessage() throws IOException {
+    void testProcessSupportMessage_HasOnePhotoMessageUploadingSuccess_ShouldReturnMessageSentToManagerMessage()
+        throws IOException {
         long id = 1L;
         String chatId = "1";
         String username = "tg_user";
@@ -202,14 +203,14 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn("/path/to/file");
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .chatId(chatId)
-                .build();
+            .builder()
+            .id(id)
+            .chatId(chatId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
-        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[]{1, 2, 3});
+        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
         SendMessage result = telegramSupportService.processSupportMessage(message);
@@ -217,13 +218,15 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
+            TelegramBotConstants.PHOTO_CONTENT, id);
         verify(fileService).upload(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
 
     @Test
-    void testProcessSupportMessage_HasMoreThanOnePhotoMessageUploadingSuccess_ShouldReturnMessageSentToManagerMessage() throws IOException {
+    void testProcessSupportMessage_HasMoreThanOnePhotoMessageUploadingSuccess_ShouldReturnMessageSentToManagerMessage()
+        throws IOException {
         long id = 1L;
         String chatId = "1";
         String username = "tg_user";
@@ -245,14 +248,14 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn("/path/to/file");
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .chatId(chatId)
-                .build();
+            .builder()
+            .id(id)
+            .chatId(chatId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
-        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[]{1, 2, 3});
+        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
         SendMessage result = telegramSupportService.processSupportMessage(message);
@@ -260,7 +263,8 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
+            TelegramBotConstants.PHOTO_CONTENT, id);
         verify(fileService).upload(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
         verify(telegramMessageRepository).findByMediaGroupId(mediaGroupId);

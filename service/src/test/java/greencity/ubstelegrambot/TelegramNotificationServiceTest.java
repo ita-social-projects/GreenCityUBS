@@ -56,13 +56,13 @@ public class TelegramNotificationServiceTest {
         when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
 
         TelegramManager telegramManager1 = TelegramManager
-                .builder()
-                .chatId("123456789")
-                .build();
+            .builder()
+            .chatId("123456789")
+            .build();
         TelegramManager telegramManager2 = TelegramManager
-                .builder()
-                .chatId("123456711")
-                .build();
+            .builder()
+            .chatId("123456711")
+            .build();
 
         when(telegramManagerRepository.findAll()).thenReturn(List.of(telegramManager1, telegramManager2));
 
