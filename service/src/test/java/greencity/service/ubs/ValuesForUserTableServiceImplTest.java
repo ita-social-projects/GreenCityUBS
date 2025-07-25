@@ -82,6 +82,7 @@ class ValuesForUserTableServiceImplTest {
         assertThat(result.getPage())
             .extracting("clientName")
             .containsExactly("John Doe", "Jane Smith");
+        assertThat(result.getPage()).allSatisfy(user -> assertThat(user.getChatId()).isNull());
         Mockito.verify(employeeRepository).findByEmail(TEST_EMAIL);
         Mockito.verify(employeeRepository).findTariffsInfoForEmployee(employeeId);
         Mockito.verify(userRepository, Mockito.times(tariffsInfoIds.size()))

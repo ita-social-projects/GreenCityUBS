@@ -91,9 +91,8 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
                 .setLastOrderDate(optional
                     .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
         }
-        if (telegramChatRepository.findByUser(u).isPresent()) {
-            allFieldsFromTableDto.setChatId(telegramChatRepository.findByUser(u).get().getId());
-        }
+        telegramChatRepository.findByUser(u)
+            .ifPresent(chat -> allFieldsFromTableDto.setChatId(chat.getId()));
         return allFieldsFromTableDto;
     }
 }
