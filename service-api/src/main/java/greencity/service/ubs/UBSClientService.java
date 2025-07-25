@@ -110,6 +110,20 @@ public interface UBSClientService {
     PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
+     * Methods removes specified certificates and points from order and returns them
+     * to user with proper change of points reason.
+     *
+     * @param orderId          {@link Long} id of order to modify;
+     * @param pointsToUse      {@link Integer} amount of points to be returned;
+     * @param certificateCodes {@link List} of certificate {@link String} codes to
+     *                         be refunded;
+     * @return up-to-date {@link Order} with all changes applied.
+     * @author Oleksandr Ilnytskyi
+     */
+    Order unlockSpecifiedPointsAndCertificatesFromOrder(
+        Long orderId, int pointsToUse, Set<String> certificateCodes);
+
+    /**
      * Method that returns info about all orders for specified userID.
      *
      * @param uuid current {@link User}'s uuid;

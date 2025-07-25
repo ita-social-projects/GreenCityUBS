@@ -119,6 +119,7 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
+import greencity.scheduler.OrderExpiryJob;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
@@ -132,6 +133,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -147,11 +155,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -202,6 +212,8 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EX
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
+import static greencity.constant.QuartzConstants.MONOBANK_LINK_VALIDITY_SECONDS;
+import static greencity.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
 import static greencity.util.OrderUtils.getLastPayment;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
@@ -249,6 +261,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
+    private final Scheduler quartzScheduler;
 
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
@@ -664,21 +677,29 @@ public class UBSClientServiceImpl implements UBSClientService {
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
         User currentUser) {
         return switch (dto.getPaymentSystem()) {
-            case WAY_FOR_PAY -> processWayForPay(order, sumToPayInCoins);
-            case MONOBANK -> processMonoBank(order, sumToPayInCoins, currentUser);
+            case WAY_FOR_PAY -> processWayForPay(dto, order, sumToPayInCoins);
+            case MONOBANK -> processMonoBank(dto, order, sumToPayInCoins, currentUser);
         };
     }
 
-    private PaymentSystemResponse processWayForPay(Order order, long sumToPayInCoins) {
+    private PaymentSystemResponse processWayForPay(
+        OrderResponseDto dto, Order order, long sumToPayInCoins) {
         PaymentWayForPayRequestDto requestDto = formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(requestDto));
+        scheduleOrderExpiryJob(
+            order.getId(), dto.getPointsToUse(),
+            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS);
         return getPaymentRequestDto(order, link);
     }
 
-    private PaymentSystemResponse processMonoBank(Order order, long sumToPayInCoins, User currentUser) {
+    private PaymentSystemResponse processMonoBank(
+        OrderResponseDto dto, Order order, long sumToPayInCoins, User currentUser) {
         MonoBankPaymentRequestDto requestDto =
             formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
         CheckoutResponseFromMonoBank checkoutResponse = monoBankClient.getCheckoutResponse(requestDto, token);
+        scheduleOrderExpiryJob(
+            order.getId(), dto.getPointsToUse(),
+            dto.getCertificates(), MONOBANK_LINK_VALIDITY_SECONDS);
         return getPaymentRequestDto(order, checkoutResponse.pageUrl());
     }
 
@@ -811,6 +832,82 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .build());
         }
         userRepository.save(currentUser);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Transactional
+    @Override
+    public Order unlockSpecifiedPointsAndCertificatesFromOrder(
+        Long orderId, int pointsToUse, Set<String> certificateCodes) {
+        unlockSpecifiedCertificatesFromOrder(orderId, certificateCodes);
+
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        return unlockSpecifiedPointsFromOrder(order, pointsToUse);
+    }
+
+    private void unlockSpecifiedCertificatesFromOrder(Long orderId, Set<String> certificateCodes) {
+        certificateCodes.stream().map(certificateRepository::findById)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .filter(certificate -> orderId.equals(certificate.getOrder().getId()))
+            .peek(certificate -> certificate
+                .setOrder(null)
+                .setDateOfUse(null)
+                .setCertificateStatus(CertificateStatus.ACTIVE)
+                .setPoints(certificate.getInitialPointsValue()))
+            .forEach(certificateRepository::save);
+    }
+
+    private Order unlockSpecifiedPointsFromOrder(Order order, int pointsToUse) {
+        User user = order.getUser();
+
+        order.setPointsToUse(order.getPointsToUse() - pointsToUse);
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToUse);
+        user.getChangeOfPointsList()
+            .add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(pointsToUse)
+                .date(LocalDateTime.now())
+                .order(order)
+                .reason(BonusReason.RETURN_UNPAID_ORDER)
+                .build());
+
+        userRepository.save(user);
+        return orderRepository.save(order);
+    }
+
+    private void scheduleOrderExpiryJob(
+        Long orderId, int pointsUsed, Set<String> certificateCodes, Long linkValiditySeconds) {
+        if (certificateCodes == null) {
+            certificateCodes = new HashSet<>();
+        }
+        if (pointsUsed <= 0 && certificateCodes.isEmpty()) {
+            return;
+        }
+
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("orderId", orderId);
+        jobDataMap.put("pointsUsed", pointsUsed);
+        jobDataMap.put("certificateCodes", certificateCodes);
+
+        JobDetail job = JobBuilder.newJob(OrderExpiryJob.class)
+            .withIdentity("paymentExpiry-" + orderId, "paymentExpiry")
+            .usingJobData(jobDataMap)
+            .build();
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+            .withIdentity("paymentExpiryTrigger-" + orderId, "paymentExpiry")
+            .startAt(Date.from(Instant.now().plus(linkValiditySeconds, ChronoUnit.SECONDS)))
+            .build();
+
+        try {
+            quartzScheduler.scheduleJob(job, trigger);
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException("Couldn't schedule payment expiry job");
+        }
     }
 
     /**
@@ -1706,6 +1803,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             return getPaymentRequestDto(order, null);
         } else {
             String link = formedLink(order, sumToPayInCoins);
+            scheduleOrderExpiryJob(
+                order.getId(), dto.getPointsToUse(),
+                dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS);
             return getPaymentRequestDto(order, link);
         }
     }
