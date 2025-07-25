@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
+
 import static greencity.constant.TelegramBotConstants.*;
 
 public class KeyboardFactory {
@@ -85,15 +85,6 @@ public class KeyboardFactory {
             .callbackData(callbackData)
             .build();
         return List.of(button);
-    }
-
-    private static List<InlineKeyboardButton> createRow(List<String> text, List<String> callbackData) {
-        return IntStream.range(0, text.size())
-            .mapToObj(i -> InlineKeyboardButton.builder()
-                .text(text.get(i))
-                .callbackData(callbackData.get(i))
-                .build())
-            .toList();
     }
 
     /**

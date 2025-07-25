@@ -36,9 +36,7 @@ public class UBSTelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         TelegramUpdateProcessor updateProcessor = telegramService.processUpdate(update);
         SendMessage sendMessage = updateProcessor.process(update);
-        if (sendMessage != null) {
-            var bot = applicationContext.getBean(UBSTelegramBot.class);
-            executor.executeCommand(bot, sendMessage);
-        }
+        var bot = applicationContext.getBean(UBSTelegramBot.class);
+        executor.executeCommand(bot, sendMessage);
     }
 }

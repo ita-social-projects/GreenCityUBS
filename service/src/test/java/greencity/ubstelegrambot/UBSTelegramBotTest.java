@@ -13,6 +13,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,8 +35,6 @@ class UBSTelegramBotTest {
 
     @Mock
     private ApplicationContext applicationContext;
-
-    private final String botName = "testBot";
 
     @Test
     void onUpdateReceived_shouldCallExecutorWithCorrectMessage() {
@@ -65,21 +65,16 @@ class UBSTelegramBotTest {
         // then
         verify(executor).executeCommand(ubsTelegramBot, expectedSendMessage);
     }
-//    @BeforeEach
-//    void setUp() {
-//        String botToken = "testToken";
-//        ubsTelegramBot = new UBSTelegramBot(botToken, botName, telegramService);
-//    }
-//
-//    @Test
-//    void testGetBotUsername() {
-//        assertEquals(botName, ubsTelegramBot.getBotUsername());
-//    }
-//
-//    @Test
-//    void testOnUpdateReceived_withTextMessage() {
-//        Update update = mock(Update.class);
-//        ubsTelegramBot.onUpdateReceived(update);
-//        verify(telegramService, times(1)).processUpdate(update);
-//    }
+
+    @Test
+    public void getBotUsername_shouldReturnBotName(){
+        String botName = "testBotName";
+        String botToken = "testBotToken";
+        ubsTelegramBot = new UBSTelegramBot(botToken, botName, telegramService, applicationContext, executor);
+        assertNotNull(ubsTelegramBot, "Instance UBSTelegramBot don't have to be null after creating.");
+
+        String returnedBotName = ubsTelegramBot.getBotUsername();
+
+        assertEquals(botName, returnedBotName, "The getBotUsername() should return the botName provided.");
+    }
 }
