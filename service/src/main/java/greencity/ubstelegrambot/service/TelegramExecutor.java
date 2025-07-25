@@ -30,22 +30,6 @@ public class TelegramExecutor {
     }
 
     /**
-     * Method sends message to telegram user.
-     *
-     * @param bot            {@link TelegramLongPollingBot} is realisation of
-     *                       TelegramLongPollingBot.
-     * @param sendMediaGroup {@link SendMediaGroup} is group of sending telegram
-     *                       messages.
-     */
-    public void executeCommand(TelegramLongPollingBot bot, SendMediaGroup sendMediaGroup) {
-        try {
-            bot.execute(sendMediaGroup);
-        } catch (TelegramApiException e) {
-            throw new MessageWasNotSent(e.getMessage());
-        }
-    }
-
-    /**
      * Executes a GetFile request to retrieve a file from Telegram.
      *
      * @param bot    the Telegram bot instance
