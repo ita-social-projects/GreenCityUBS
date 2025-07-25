@@ -447,7 +447,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             employeeRepository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
 
         if (employeeWithEnabledChat.isEmpty()) {
-            throw new NotFoundException("No employees found with enabled chat for tariff id: " + tariffId);
+            throw new NotFoundException(ErrorMessage.EMPLOYEE_WITH_ENABLED_CHAT_NOT_FOUND_BY_TARIFF_ID + tariffId);
         }
 
         return employeeWithEnabledChat
