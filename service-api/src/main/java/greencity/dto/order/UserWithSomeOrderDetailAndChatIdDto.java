@@ -20,7 +20,7 @@ import lombok.ToString;
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserWithSomeOrderDetailDto {
+public class UserWithSomeOrderDetailAndChatIdDto {
     @JsonProperty("userId")
     private Long userId;
     @JsonProperty("clientName")
@@ -39,5 +39,5 @@ public class UserWithSomeOrderDetailDto {
     private int violation;
     @JsonProperty("currentPoints")
     private String userBonuses;
-    private String chatLink;
+    private Long chatId;
 }
