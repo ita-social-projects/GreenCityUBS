@@ -3,17 +3,31 @@ package greencity.ubstelegrambot.service;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.ChatUserDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.MessageAssetDto;
+import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.order.Order;
-import greencity.entity.telegram.*;
+import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
+import greencity.entity.telegram.TelegramManager;
+import greencity.entity.telegram.TelegramMessage;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
-import greencity.service.ubs.*;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.TelegramChatRepository;
+import greencity.repository.TelegramManagerRepository;
+import greencity.repository.TelegramMessageRepository;
+import greencity.repository.UserRepository;
+import greencity.service.ubs.AzureCloudStorageService;
+import greencity.service.ubs.TelegramService;
+import greencity.service.ubs.TelegramUpdateProcessor;
+import greencity.service.ubs.UBSClientService;
 import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -28,11 +42,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -76,7 +95,10 @@ public class TelegramServiceImpl implements TelegramService {
 
         if (files != null) {
             for (MultipartFile file : files) {
-                log.info(file.toString());
+                if (file.getSize() > 50 * 1024 * 1024) {
+                    log.warn("File \"{}\" size has over than 50MB", file.getName());
+                    throw new IllegalArgumentException("File size exceeds Telegram bot limit (50MB)");
+                }
                 String url = azureCloudStorageService.upload(file);
                 AssetType assetType = TelegramUtils.detectAssetType(file);
                 MessageAsset asset = MessageAsset.builder()
@@ -90,8 +112,13 @@ public class TelegramServiceImpl implements TelegramService {
                 assets.add(asset);
 
                 if (assetType == AssetType.IMAGE) {
-                    var sendPhotoMessage = MessageFactory.createPhotoSender(chat.getChatId(), url, "");
-                    executor.executeSendPhoto(bot, sendPhotoMessage);
+                    try {
+                        var sendPhotoMessage = MessageFactory.createMultipartFileSender(chat.getChatId(), file);
+                        executor.executeSendPhoto(bot, sendPhotoMessage);
+                    } catch (IOException e) {
+                        log.error("Failed to send image to Telegram", e);
+                        throw new RuntimeException("Unable to send image to Telegram", e);
+                    }
                 }
             }
         }

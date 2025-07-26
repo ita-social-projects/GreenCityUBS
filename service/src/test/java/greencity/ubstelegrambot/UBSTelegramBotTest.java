@@ -67,7 +67,7 @@ class UBSTelegramBotTest {
     }
 
     @Test
-    public void getBotUsername_shouldReturnBotName(){
+    public void getBotUsername_shouldReturnBotName() {
         String botName = "testBotName";
         String botToken = "testBotToken";
         ubsTelegramBot = new UBSTelegramBot(botToken, botName, telegramService, applicationContext, executor);
