@@ -1,12 +1,12 @@
 package greencity.validators;
 
-import greencity.annotations.ImageValidation;
+import greencity.annotations.ValidImage;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.web.multipart.MultipartFile;
 
 public class ImageValidator {
-    public static class Single implements ConstraintValidator<ImageValidation, MultipartFile> {
+    public static class Single implements ConstraintValidator<ValidImage, MultipartFile> {
         @Override
         public boolean isValid(MultipartFile file, ConstraintValidatorContext constraintValidatorContext) {
             if (file == null) {
@@ -18,7 +18,7 @@ public class ImageValidator {
         }
     }
 
-    public static class Array implements ConstraintValidator<ImageValidation, MultipartFile[]> {
+    public static class Array implements ConstraintValidator<ValidImage, MultipartFile[]> {
         @Override
         public boolean isValid(MultipartFile[] files, ConstraintValidatorContext constraintValidatorContext) {
             if (files == null) {

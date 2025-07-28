@@ -2,7 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
-import greencity.annotations.ImageValidation;
+import greencity.annotations.ValidImage;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.bag.AdditionalBagInfoDto;
@@ -302,7 +302,7 @@ public class ManagementOrderController {
     @PostMapping(value = "/addViolationToUser",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @RequestPart(required = false) @Nullable @ImageValidation MultipartFile[] files,
+        @RequestPart(required = false) @Nullable @ValidImage MultipartFile[] files,
         Principal principal) {
         violationService.addUserViolation(add, files, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -727,8 +727,8 @@ public class ManagementOrderController {
     @PostMapping(value = "/add-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@Positive @PathVariable(name = "id") Long orderId,
-        @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) @ImageValidation MultipartFile image, Principal principal) {
+                                                                     @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
+                                                                     @RequestPart(required = false) @ValidImage MultipartFile image, Principal principal) {
         manualPaymentRequestValidator.validate(manualPaymentDto, orderId, ADD);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(paymentService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
@@ -776,9 +776,9 @@ public class ManagementOrderController {
     @PutMapping(value = "/update-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(
-        @Positive @PathVariable(name = "id") Long paymentId,
-        @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) @ImageValidation MultipartFile image, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
+            @Positive @PathVariable(name = "id") Long paymentId,
+            @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
+            @RequestPart(required = false) @ValidImage MultipartFile image, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         manualPaymentRequestValidator.validate(manualPaymentDto, paymentId, UPDATE);
         return ResponseEntity.status(HttpStatus.OK)
             .body(paymentService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
@@ -825,7 +825,7 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PutMapping(value = "/updateViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart UpdateViolationToUserDto add,
-        @Nullable @RequestPart(required = false) @ImageValidation MultipartFile[] multipartFiles,
+        @Nullable @RequestPart(required = false) @ValidImage MultipartFile[] multipartFiles,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         violationService.updateUserViolation(add, multipartFiles, uuid);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -883,7 +883,7 @@ public class ManagementOrderController {
         @Valid @RequestPart UpdateOrderPageAdminDto updateOrderPageAdminDto,
         @RequestParam String language,
         @Parameter(hidden = true) Principal principal,
-        @RequestPart(required = false) @Nullable @ImageValidation MultipartFile[] images) {
+        @RequestPart(required = false) @Nullable @ValidImage MultipartFile[] images) {
         BigOrderTableDTO bigOrderTableDTO =
             ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
                 principal.getName(), images);

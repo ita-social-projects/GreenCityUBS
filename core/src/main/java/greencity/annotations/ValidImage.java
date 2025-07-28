@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {ImageValidator.Single.class, ImageValidator.Array.class})
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface ImageValidation {
+public @interface ValidImage {
     String message() default "Invalid file type. Only image files are allowed.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
