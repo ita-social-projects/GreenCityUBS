@@ -17,7 +17,6 @@ import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.exceptions.validation.ValidationException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
@@ -299,11 +298,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex,
         WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
-        log.trace(ex.getMessage());
+        log.debug("Constraint violation occurred: {}", ex.getMessage());
+
         String detailedMessage = ex.getConstraintViolations().stream()
-            .map(ConstraintViolation::getMessage)
-            .collect(Collectors.joining(" "));
-        exceptionResponse.setMessage(detailedMessage);
+            .map(violation -> String.format("%s: %s", violation.getPropertyPath(), violation.getMessage()))
+            .collect(Collectors.joining(", ", "Validation failed: ", ""));
+
+        exceptionResponse
+            .setMessage(detailedMessage.isEmpty() ? "Validation failed with no specific details." : detailedMessage);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 }
