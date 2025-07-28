@@ -2772,6 +2772,7 @@ public class ModelUtils {
             .id(1L)
             .build());
         notification.setNotificationType(UNPAID_ORDER);
+        notification.setTemplateId(1L);
         return List.of(
             notification);
     }
