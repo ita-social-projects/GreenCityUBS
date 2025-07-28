@@ -17,6 +17,7 @@ import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.exceptions.validation.ValidationException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
@@ -33,9 +34,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import jakarta.validation.ConstraintViolationException;
+
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -300,12 +304,19 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.debug("Constraint violation occurred: {}", ex.getMessage());
 
-        String detailedMessage = ex.getConstraintViolations().stream()
-            .map(violation -> String.format("%s: %s", violation.getPropertyPath(), violation.getMessage()))
-            .collect(Collectors.joining(", ", "Validation failed: ", ""));
+        Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
 
-        exceptionResponse
-            .setMessage(detailedMessage.isEmpty() ? "Validation failed with no specific details." : detailedMessage);
+        String detailedMessage;
+        if (violations == null || violations.isEmpty()) {
+            detailedMessage = "Validation failed with no specific details.";
+        } else {
+            detailedMessage = violations.stream()
+                .sorted(Comparator.comparing(v -> v.getPropertyPath().toString()))
+                .map(violation -> String.format("%s: %s", violation.getPropertyPath(), violation.getMessage()))
+                .collect(Collectors.joining(", ", "Validation failed: ", ""));
+        }
+
+        exceptionResponse.setMessage(detailedMessage);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 }

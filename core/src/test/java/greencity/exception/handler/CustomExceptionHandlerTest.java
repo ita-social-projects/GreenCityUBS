@@ -314,4 +314,23 @@ class CustomExceptionHandlerTest {
 
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
+
+    @Test
+    void handleConstraintViolationExceptionWithNoViolations() {
+        ConstraintViolationException ex = new ConstraintViolationException(Collections.emptySet());
+
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+
+        ExceptionResponse expectedResponse = new ExceptionResponse(objectMap);
+        expectedResponse.setMessage("Validation failed with no specific details.");
+
+        ResponseEntity<Object> response =
+            customExceptionHandler.handleConstraintViolationException(ex, webRequest);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
 }
