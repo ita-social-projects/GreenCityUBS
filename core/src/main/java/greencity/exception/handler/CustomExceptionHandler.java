@@ -285,7 +285,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     /**
      * Handles exceptions of type {@link ConstraintViolationException} thrown during
      * validation of method parameters or path variables.
-     * <p>
      * Extracts detailed violation messages from the exception and sets them into a
      * custom {@link ExceptionResponse} object. The response is sent with HTTP
      * status 400 (Bad Request).
