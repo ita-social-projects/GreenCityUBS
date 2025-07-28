@@ -104,7 +104,7 @@ public class ClientController {
     }
 
     /**
-     * Controller returns all bonuses of user..
+     * Controller returns all bonuses of user.
      *
      * @param uuid {@link String} id.
      * @return list of {@link AllPointsUserDto}.
