@@ -176,8 +176,7 @@ class EmployeeWithTariffsIdDtoTest {
             Arguments.of("gmail.com"),
             Arguments.of("@gmail.com"),
             Arguments.of("mail@gmail"),
-            Arguments.of("mail@gmailcom"),
-            Arguments.of("ma!il@gmail.com"));
+            Arguments.of("mail@gmailcom"));
     }
 
     private static EmployeeWithTariffsIdDto createEmployeeWithTariffsDto(

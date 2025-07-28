@@ -1,6 +1,7 @@
 package greencity.dto.customer;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.constant.ValidationConstant;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +40,6 @@ public class UbsCustomersDtoUpdate {
     private String customerPhoneNumber;
     @NotNull
     @NotBlank
-    @Email
-    @Length(max = 255)
+    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String customerEmail;
 }

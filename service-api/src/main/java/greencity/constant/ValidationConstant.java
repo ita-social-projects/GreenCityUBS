@@ -4,7 +4,15 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ValidationConstant {
-    public static final String EMAIL_REGEXP = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+    public static final String EMAIL_REGEXP =
+        "^(?=.{3,72}$)"
+            + "([a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+"
+            + "(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*)"
+            + "@"
+            + "(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+"
+            + "[a-zA-Z]{2,63}|"
+            + "\\[(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)"
+            + "(?:\\.(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)){3}\\])$";
     public static final String CERTIFICATE_CODE_REGEXP = "\\d{4}-\\d{4}";
     public static final String CERTIFICATE_CODE_REGEXP_MESSAGE = "This certificate code is not valid";
     public static final String SELECT_CORRECT_LANGUAGE = "Select correct language: 'en' or 'ua'";
