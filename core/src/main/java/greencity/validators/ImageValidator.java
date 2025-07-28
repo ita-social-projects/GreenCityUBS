@@ -6,7 +6,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.web.multipart.MultipartFile;
 
 public class ImageValidator {
-    public static class Single implements ConstraintValidator<ValidImage, MultipartFile> {
+    public static class SingleImageValidator implements ConstraintValidator<ValidImage, MultipartFile> {
         @Override
         public boolean isValid(MultipartFile file, ConstraintValidatorContext constraintValidatorContext) {
             if (file == null) {
@@ -18,7 +18,7 @@ public class ImageValidator {
         }
     }
 
-    public static class Array implements ConstraintValidator<ValidImage, MultipartFile[]> {
+    public static class ArrayImageValidator implements ConstraintValidator<ValidImage, MultipartFile[]> {
         @Override
         public boolean isValid(MultipartFile[] files, ConstraintValidatorContext constraintValidatorContext) {
             if (files == null) {
