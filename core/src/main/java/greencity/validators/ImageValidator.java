@@ -16,6 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class ImageValidator {
     /**
+     * Private constructor to prevent instantiation.
+     */
+    private ImageValidator() {
+    }
+
+    /**
      * Validator for a single {@link MultipartFile}.
      * <p>
      * Validation passes if:
