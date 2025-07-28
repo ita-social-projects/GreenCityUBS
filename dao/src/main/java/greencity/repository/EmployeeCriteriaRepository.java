@@ -12,7 +12,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Order;
-import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.criteria.Expression;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,6 @@ public class EmployeeCriteriaRepository {
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
     private static final String POSITION_ID = "positionId";
-    private static final String EMPLOYEE_ID = "employeeId";
 
     /**
      * Constructor to initialize EntityManager and CriteriaBuilder.
@@ -46,8 +44,12 @@ public class EmployeeCriteriaRepository {
         EmployeeFilterCriteria employeeFilterCriteria) {
         CriteriaQuery<EmployeeFilterView> criteriaQuery = criteriaBuilder.createQuery(EmployeeFilterView.class);
         Root<EmployeeFilterView> employeeRoot = criteriaQuery.from(EmployeeFilterView.class);
-        Predicate predicate = composePredicateForFiltering(employeeFilterCriteria, employeeRoot, criteriaQuery);
-        criteriaQuery.select(employeeRoot).where(predicate).orderBy(getOrderBy(employeePage, employeeRoot));
+        Predicate predicate = composePredicateForFiltering(employeeFilterCriteria, employeeRoot);
+        criteriaQuery
+            .select(employeeRoot)
+            .distinct(true)
+            .where(predicate)
+            .orderBy(getOrderBy(employeePage, employeeRoot));
         return processEmployees(employeePage, criteriaQuery);
     }
 
@@ -66,19 +68,16 @@ public class EmployeeCriteriaRepository {
     }
 
     private Predicate composePredicateForFiltering(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<EmployeeFilterView> employeeFilterViewRoot,
-        CriteriaQuery<EmployeeFilterView> criteriaQuery) {
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
         List<Predicate> predicates = collectAllPredicatesToList(
-            employeeFilterCriteria, employeeFilterViewRoot, criteriaQuery);
+            employeeFilterCriteria, employeeFilterViewRoot);
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
     }
 
     private List<Predicate> collectAllPredicatesToList(EmployeeFilterCriteria employeeFilterCriteria,
-        Root<EmployeeFilterView> employeeFilterViewRoot,
-        CriteriaQuery<EmployeeFilterView> criteriaQuery) {
+        Root<EmployeeFilterView> employeeFilterViewRoot) {
         List<Predicate> predicates = new ArrayList<>();
 
-        addPredicateDistinctUniqueEmployeesFromQuery(criteriaQuery, employeeFilterViewRoot, predicates);
         addSearchLinePredicates(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         addEmployeeStatusPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         addEmployeePositionPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
@@ -86,16 +85,6 @@ public class EmployeeCriteriaRepository {
         addLocationPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         addCourierPredicate(employeeFilterCriteria, employeeFilterViewRoot, predicates);
         return predicates;
-    }
-
-    private void addPredicateDistinctUniqueEmployeesFromQuery(CriteriaQuery<EmployeeFilterView> criteriaQuery,
-        Root<EmployeeFilterView> employeeFilterViewRoot,
-        List<Predicate> predicates) {
-        Subquery<Long> subQuery = criteriaQuery.subquery(Long.class);
-        Root<EmployeeFilterView> subQueryRoot = subQuery.from(EmployeeFilterView.class);
-        subQuery.select(criteriaBuilder.min(subQueryRoot.get(POSITION_ID)))
-            .where(criteriaBuilder.equal(subQueryRoot.get(EMPLOYEE_ID), employeeFilterViewRoot.get(EMPLOYEE_ID)));
-        predicates.add(criteriaBuilder.equal(employeeFilterViewRoot.get(POSITION_ID), subQuery));
     }
 
     private void addCourierPredicate(EmployeeFilterCriteria employeeFilterCriteria,

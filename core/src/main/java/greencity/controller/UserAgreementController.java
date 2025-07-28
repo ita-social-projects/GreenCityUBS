@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -81,7 +82,7 @@ public class UserAgreementController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_ALL_AGREEMENTS', authentication)")
     @GetMapping("/{id}")
-    public ResponseEntity<UserAgreementDetailDto> getUserAgreementById(@PathVariable Long id) {
+    public ResponseEntity<UserAgreementDetailDto> getUserAgreementById(@Positive @PathVariable Long id) {
         UserAgreementDetailDto userAgreement = userAgreementService.read(id);
         return ResponseEntity.status(HttpStatus.OK).body(userAgreement);
     }
@@ -123,7 +124,7 @@ public class UserAgreementController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_AGREEMENT', authentication)")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUserAgreement(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUserAgreement(@Positive @PathVariable Long id) {
         userAgreementService.delete(id);
         return ResponseEntity.noContent().build();
     }
