@@ -988,8 +988,8 @@ class NotificationServiceImplTest {
         when(userRepository.findByUuid(uuid)).thenReturn(TEST_USER);
         when(userNotificationRepository.findAllByUserAndIsDeletedFalse(TEST_USER, TEST_PAGEABLE))
             .thenReturn(TEST_PAGE);
-        when(templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(
-            1L,
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.UNPAID_ORDER,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
         PageableAdvancedDto<NotificationShortDto> actual = notificationService
@@ -1035,9 +1035,6 @@ class NotificationServiceImplTest {
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
             notificationType,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
-        when(templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(
-            0L,
-            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
         when(userNotification.getParameters())
             .thenReturn(notificationParameters);
         when(userNotification.getOrder())
@@ -1076,8 +1073,10 @@ class NotificationServiceImplTest {
             .thenReturn(page);
         when(userNotificationRepository.findById(notificationId))
             .thenReturn(Optional.of(userNotification));
-        when(templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(
-            0L,
+        when(userNotification.getNotificationType())
+            .thenReturn(notificationType);
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            notificationType,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
         when(userNotification.getUser())
             .thenReturn(anotherUser);
@@ -1110,6 +1109,15 @@ class NotificationServiceImplTest {
             .thenReturn(user);
         when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE))
             .thenReturn(page);
+        when(userNotification.getNotificationType())
+            .thenReturn(notificationType);
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            notificationType,
+            SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(userNotification.getId())
+            .thenReturn(notificationId);
+        when(userNotificationRepository.findById(notificationId))
+            .thenReturn(notFoundNotification);
 
         assertThrows(
             NotFoundException.class,
