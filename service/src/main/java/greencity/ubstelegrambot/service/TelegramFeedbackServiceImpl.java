@@ -26,6 +26,10 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
     private final TelegramChatRepository telegramChatRepository;
     private final ChatFeedbackRepository chatFeedbackRepository;
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SendMessage processInputCommentRequest(Message message) {
         Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(message.getChatId().toString());
@@ -52,6 +56,9 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SendMessage processRatingFeedbackRequest(String chatId, int rating) {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
@@ -88,7 +95,6 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
     }
 
     /**
-     *
      * {@inheritDoc}
      */
     @Override
@@ -112,7 +118,6 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
     }
 
     /**
-     *
      * {@inheritDoc}
      */
     @Override
