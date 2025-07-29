@@ -27,8 +27,8 @@ public class OrderExpiryJob implements Job {
         @SuppressWarnings("unchecked")
         HashSet<String> certificateCodes = (HashSet<String>) jobDataMap.get("certificateCodes");
 
-        log.info("Unlocking certificates/points from order {}", orderId);
+        log.info("Unlocking {} certificates and {} points from order {}", certificateCodes.size(), pointsUsed, orderId);
         ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
-        log.info("Successfully unlocked certificates/points from order {}", orderId);
+        log.info("Successfully unlocked {} certificates and {} points from order {}", certificateCodes.size(), pointsUsed, orderId);
     }
 }
