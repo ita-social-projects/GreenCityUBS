@@ -1218,10 +1218,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (sumToPay <= 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         } else {
-            order.setOrderPaymentStatus(
-                order.getPointsToUse() > 0 || CollectionUtils.isNotEmpty(order.getCertificates())
-                    ? OrderPaymentStatus.HALF_PAID
-                    : OrderPaymentStatus.UNPAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         }
     }
 
