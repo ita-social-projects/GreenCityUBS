@@ -2,6 +2,7 @@ package greencity.scheduler;
 
 import greencity.service.ubs.UBSClientService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -10,10 +11,10 @@ import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
-import java.util.List;
 
 @Component
 @DisallowConcurrentExecution
+@Slf4j
 @RequiredArgsConstructor
 public class OrderExpiryJob implements Job {
     private final UBSClientService ubsClientService;
@@ -26,6 +27,8 @@ public class OrderExpiryJob implements Job {
         @SuppressWarnings("unchecked")
         HashSet<String> certificateCodes = (HashSet<String>) jobDataMap.get("certificateCodes");
 
+        log.info("Unlocking certificates/points from order {}", orderId);
         ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
+        log.info("Successfully unlocked certificates/points from order {}", orderId);
     }
 }
