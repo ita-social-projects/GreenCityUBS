@@ -965,9 +965,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language,
         Long monthsOfAccountInactivity) {
-        NotificationTemplate template = templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(
-            notification.getTemplateId(), SITE)
-            .orElseThrow(() -> new NotFoundException("Template not found"));
+        NotificationTemplate template = getNotificationTemplate(notification, SITE, templateRepository);
 
         String templateBody = resolveTemplateBody(language, SITE, template);
         if (notification.getParameters() == null) {
