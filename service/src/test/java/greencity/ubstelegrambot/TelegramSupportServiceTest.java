@@ -198,14 +198,14 @@ class TelegramSupportServiceTest {
         when(message.getPhoto()).thenReturn(List.of());
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .build();
+            .builder()
+            .id(id)
+            .build();
 
         TelegramMessage telegramMessage = TelegramMessage
-                .builder()
-                .mediaGroupId(mediaGroupId)
-                .build();
+            .builder()
+            .mediaGroupId(mediaGroupId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
@@ -215,7 +215,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
         verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-                TelegramBotConstants.PHOTO_CONTENT, id);
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -238,9 +238,9 @@ class TelegramSupportServiceTest {
         when(photoSize.getFileId()).thenReturn("123456789");
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .build();
+            .builder()
+            .id(id)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(null);
@@ -250,7 +250,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
         verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-                TelegramBotConstants.PHOTO_CONTENT, id);
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -273,14 +273,14 @@ class TelegramSupportServiceTest {
         when(photoSize.getFileId()).thenReturn("123456789");
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .build();
+            .builder()
+            .id(id)
+            .build();
 
         TelegramMessage telegramMessage = TelegramMessage
-                .builder()
-                .mediaGroupId(mediaGroupId)
-                .build();
+            .builder()
+            .mediaGroupId(mediaGroupId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
@@ -291,7 +291,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
         verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-                TelegramBotConstants.PHOTO_CONTENT, id);
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -314,14 +314,14 @@ class TelegramSupportServiceTest {
         when(photoSize.getFileId()).thenReturn("123456789");
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .build();
+            .builder()
+            .id(id)
+            .build();
 
         TelegramMessage telegramMessage = TelegramMessage
-                .builder()
-                .mediaGroupId(mediaGroupId)
-                .build();
+            .builder()
+            .mediaGroupId(mediaGroupId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
@@ -332,7 +332,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
         verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-                TelegramBotConstants.PHOTO_CONTENT, id);
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -355,9 +355,9 @@ class TelegramSupportServiceTest {
         when(photoSize.getFileId()).thenReturn("123456789");
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .build();
+            .builder()
+            .id(id)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenThrow(new RuntimeException());
@@ -367,7 +367,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
         verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-                TelegramBotConstants.PHOTO_CONTENT, id);
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -391,10 +391,10 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn(null);
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .chatId(chatId)
-                .build();
+            .builder()
+            .id(id)
+            .chatId(chatId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
@@ -405,7 +405,7 @@ class TelegramSupportServiceTest {
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-                TelegramBotConstants.PHOTO_CONTENT, id);
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -429,15 +429,15 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn(null);
 
         TelegramChat chat = TelegramChat
-                .builder()
-                .id(id)
-                .chatId(chatId)
-                .build();
+            .builder()
+            .id(id)
+            .chatId(chatId)
+            .build();
 
         TelegramMessage telegramMessage = TelegramMessage
-                .builder()
-                .mediaGroupId(mediaGroupId)
-                .build();
+            .builder()
+            .mediaGroupId(mediaGroupId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
@@ -448,7 +448,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
         verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-                TelegramBotConstants.PHOTO_CONTENT, id);
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -523,9 +523,9 @@ class TelegramSupportServiceTest {
             .build();
 
         TelegramMessage telegramMessage = TelegramMessage
-                .builder()
-                .mediaGroupId(mediaGroupId)
-                .build();
+            .builder()
+            .mediaGroupId(mediaGroupId)
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));

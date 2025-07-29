@@ -69,7 +69,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createSortingPricesMessage(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -83,7 +83,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createWorkScheduleMessage(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -97,7 +97,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createAdmissionRulesMessage(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -111,7 +111,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createGreenOfficeMessage(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -125,7 +125,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createEnteringEmailMessage(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.ENTERING_GREEN_OFFICE_EMAIL), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -139,7 +139,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createFeedbackMessage(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -153,7 +153,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 1))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -167,7 +167,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 2))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -181,7 +181,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 3))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -195,7 +195,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 4))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -209,7 +209,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 5))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -223,7 +223,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createLoginMessage(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.LOGGING_AS_MANAGER), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -237,7 +237,7 @@ public class UserUpdateProcessorTest {
         SendMessage expected = MessageFactory.createAvailableCommandsMessage(CHAT_ID);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -248,11 +248,11 @@ public class UserUpdateProcessorTest {
     @Test
     void testProcess_HasSupportMessageChatNotFound_MessageReturned() {
         Update update =
-                createUpdateWithMessage(TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY, ChatState.IN_SUPPORT);
+            createUpdateWithMessage(TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY, ChatState.IN_SUPPORT);
         SendMessage expected = MessageFactory.createUnknownErrorOccurredMessage(CHAT_ID);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         SendMessage result = updateProcessor.process(update);
 
@@ -299,14 +299,15 @@ public class UserUpdateProcessorTest {
     @Test
     void testProcess_HasGreenOfficeEmail_MessageReturned() {
         Update update =
-                createUpdateWithMessage(TelegramBotConstants.GREEN_OFFICE_THANK_YOU_MESSAGE, ChatState.ENTERING_GREEN_OFFICE_EMAIL);
+            createUpdateWithMessage(TelegramBotConstants.GREEN_OFFICE_THANK_YOU_MESSAGE,
+                ChatState.ENTERING_GREEN_OFFICE_EMAIL);
         SendMessage expected = MessageFactory.createGreenOfficeThanksMessage(CHAT_ID);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
-                .thenReturn(Optional.of(createTelegramChat(ChatState.ENTERING_GREEN_OFFICE_EMAIL)));
+            .thenReturn(Optional.of(createTelegramChat(ChatState.ENTERING_GREEN_OFFICE_EMAIL)));
 
         when(telegramGreenOfficeService.processGreenOfficeEmail(any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
@@ -317,14 +318,14 @@ public class UserUpdateProcessorTest {
     @Test
     void testProcess_HasCommand_MessageReturned() {
         Update update =
-                createUpdateWithMessage(TelegramBotConstants.SUPPORTED_COMMANDS, ChatState.NORMAL);
+            createUpdateWithMessage(TelegramBotConstants.SUPPORTED_COMMANDS, ChatState.NORMAL);
         SendMessage expected = MessageFactory.createAvailableCommandsMessage(CHAT_ID);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
-                .thenReturn(Optional.of(createTelegramChat(ChatState.NORMAL)));
+            .thenReturn(Optional.of(createTelegramChat(ChatState.NORMAL)));
 
         when(telegramCommandsService.processCommand(any()))
-                .thenReturn(expected);
+            .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
