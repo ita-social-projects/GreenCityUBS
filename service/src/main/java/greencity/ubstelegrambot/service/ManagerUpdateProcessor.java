@@ -17,6 +17,10 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
     private final TelegramLoginService telegramLoginService;
     private final TelegramUtils telegramUtils;
 
+    /**
+     * Handles incoming updates related to manager interactions in Telegram.
+     * {@inheritDoc}
+     */
     @Override
     public SendMessage process(Update update) {
         if (update.hasCallbackQuery()) {

@@ -25,6 +25,10 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
     private final TelegramGreenOfficeService telegramGreenOfficeService;
     private final TelegramCommandsService telegramCommandsService;
 
+    /**
+     * Handles incoming updates related to user interactions in Telegram.
+     * {@inheritDoc}
+     */
     @Override
     public SendMessage process(Update update) {
         if (update.hasCallbackQuery()) {

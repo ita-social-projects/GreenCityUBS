@@ -14,6 +14,9 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 public class TelegramCommandsServiceImpl implements TelegramCommandsService {
     private final TelegramUtils telegramUtils;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SendMessage processCommand(Message message) {
         String chatId = message.getChatId().toString();

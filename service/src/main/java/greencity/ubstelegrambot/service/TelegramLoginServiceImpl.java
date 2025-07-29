@@ -27,12 +27,18 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
     private String secretToken;
     private static final String USERNAME = "username";
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void logoutManager(String chatId) {
         telegramManagerRepository.findByChatId(chatId)
             .ifPresent(telegramManagerRepository::delete);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SendMessage processInputManagerCredentialsRequest(Message message) {
         String[] parts = message.getText().split(":");

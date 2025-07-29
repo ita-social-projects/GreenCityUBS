@@ -19,6 +19,9 @@ public class TelegramGreenOfficeServiceImpl implements TelegramGreenOfficeServic
     private final TelegramChatRepository telegramChatRepository;
     private final NotificationService notificationService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SendMessage processGreenOfficeEmail(Message message) {
         String email = message.getText();
