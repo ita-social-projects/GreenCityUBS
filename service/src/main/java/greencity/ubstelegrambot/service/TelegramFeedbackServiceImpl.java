@@ -26,7 +26,6 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
     private final TelegramChatRepository telegramChatRepository;
     private final ChatFeedbackRepository chatFeedbackRepository;
 
-
     /**
      * {@inheritDoc}
      */
