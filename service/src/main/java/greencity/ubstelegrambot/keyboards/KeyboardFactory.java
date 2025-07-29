@@ -77,6 +77,13 @@ public class KeyboardFactory {
             .build();
     }
 
+    /**
+     * Creates a single-row inline keyboard with one button.
+     *
+     * @param text {@link String} the button text
+     * @param callbackData {@link String} the callback data sent when the button is pressed
+     * @return a list containing one {@link InlineKeyboardButton}
+     */
     private static List<InlineKeyboardButton> createRow(String text, String callbackData) {
         var button = InlineKeyboardButton
             .builder()
@@ -141,6 +148,12 @@ public class KeyboardFactory {
             .build();
     }
 
+    /**
+     * Creates an inline keyboard with feedback rating buttons and an additional
+     * "Back to Main Menu" button.
+     *
+     * @return an {@link InlineKeyboardMarkup} containing rating options and a back button
+     */
     public static InlineKeyboardMarkup createFeedbackOrBackToMainMenuKeyboard() {
         InlineKeyboardMarkup keyboard = createChatFeedbackRatingKeyboard();
         List<List<InlineKeyboardButton>> originalRows = keyboard.getKeyboard();
