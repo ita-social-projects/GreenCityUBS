@@ -136,6 +136,7 @@ import org.modelmapper.ModelMapper;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -213,6 +214,13 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXI
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.QuartzConstants.MONOBANK_LINK_VALIDITY_SECONDS;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_NOT_FOUND_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
+import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
 import static greencity.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
 import static greencity.util.OrderUtils.getLastPayment;
 import static java.util.Objects.nonNull;
@@ -894,19 +902,46 @@ public class UBSClientServiceImpl implements UBSClientService {
         jobDataMap.put("certificateCodes", certificateCodes);
 
         JobDetail job = JobBuilder.newJob(OrderExpiryJob.class)
-            .withIdentity("paymentExpiry-" + orderId, "paymentExpiry")
+            .withIdentity(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)
             .usingJobData(jobDataMap)
             .build();
 
         Trigger trigger = TriggerBuilder.newTrigger()
-            .withIdentity("paymentExpiryTrigger-" + orderId, "paymentExpiry")
+            .withIdentity(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)
             .startAt(Date.from(Instant.now().plus(linkValiditySeconds, ChronoUnit.SECONDS)))
             .build();
 
         try {
             quartzScheduler.scheduleJob(job, trigger);
         } catch (SchedulerException exception) {
-            throw new IllegalStateException("Couldn't schedule payment expiry job");
+            throw new IllegalStateException(PAYMENT_EXPIRY_SCHEDULE_EXCEPTION);
+        }
+    }
+
+    private void cancelOrderExpiryJob(Long orderId) {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        try {
+            quartzScheduler.deleteJob(jobKey);
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(PAYMENT_EXPIRY_CANCEL_EXCEPTION);
+        }
+    }
+
+    private JobDetail getOrderExpiryJob(Long orderId) {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        try {
+            return quartzScheduler.getJobDetail(jobKey);
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(PAYMENT_EXPIRY_JOB_NOT_FOUND_EXCEPTION + orderId);
+        }
+    }
+
+    private boolean checkExistsOrderExpiryJob(Long orderId) {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        try {
+            return quartzScheduler.checkExists(jobKey);
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
         }
     }
 
@@ -1642,6 +1677,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
                 OrderHistory.SYSTEM_UK, order);
+            cancelOrderExpiryJob(order.getId());
         }
     }
 
@@ -2063,6 +2099,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.PAID, OrderPaymentStatus.PAID);
                 logPaymentEvent(order, payment.getPaymentId());
                 removePaymentLinkForOrder(order);
+                cancelOrderExpiryJob(order.getId());
             }
             case REVERSED -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
