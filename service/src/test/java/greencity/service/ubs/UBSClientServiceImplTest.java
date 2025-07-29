@@ -134,6 +134,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -333,6 +334,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private TelegramChatRepository telegramBotRepository;
+
+    @Mock
+    private Scheduler quartzScheduler;
 
     @InjectMocks
     private UBSClientServiceImpl ubsClientService;
