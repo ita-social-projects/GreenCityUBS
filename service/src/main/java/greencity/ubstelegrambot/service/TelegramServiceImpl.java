@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -24,24 +25,12 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -52,6 +41,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Service
 @Slf4j
@@ -61,7 +63,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramManagerRepository telegramManagerRepository;
     private final ApplicationContext applicationContext;
     private final TelegramChatRepository telegramChatRepository;
-    private final AzureCloudStorageService azureCloudStorageService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final UBSClientService ubsClientService;
     private final TelegramExecutor executor;
     private final EmployeeRepository employeeRepository;
@@ -99,7 +101,12 @@ public class TelegramServiceImpl implements TelegramService {
                     log.warn("File \"{}\" size has over than 50MB", file.getName());
                     throw new IllegalArgumentException("File size exceeds Telegram bot limit (50MB)");
                 }
-                String url = azureCloudStorageService.upload(file);
+                String url = "";
+                try {
+                    url = userRemoteWebClient.uploadFile(file);
+                } catch (WebClientRequestException | WebClientResponseException e) {
+                    log.warn("User service is unavailable: {}", e.getMessage());
+                }
                 AssetType assetType = TelegramUtils.detectAssetType(file);
                 MessageAsset asset = MessageAsset.builder()
                     .url(url)

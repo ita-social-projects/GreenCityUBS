@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
@@ -12,27 +13,28 @@ import greencity.enums.MessageDeliveryStatus;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
-import greencity.service.ubs.FileService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramSupportService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.util.SimpleMultipartFile;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.File;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 
 @Service
 @Slf4j
@@ -40,7 +42,7 @@ import java.util.Optional;
 public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final ApplicationContext applicationContext;
     private final TelegramChatRepository telegramChatRepository;
-    private final FileService fileService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final TelegramMessageRepository telegramMessageRepository;
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramExecutor executor;
@@ -153,8 +155,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 TelegramUtils.getFileNameFromPath(telegramFile.getFilePath()),
                 TelegramUtils.getFileNameFromPath(telegramFile.getFilePath()),
                 TelegramUtils.getFileContentType(telegramFile.getFilePath()));
-
-            String azureFileUrl = fileService.upload(multipartFile);
+            String azureFileUrl = "";
+            try {
+                azureFileUrl = userRemoteWebClient.uploadFile(multipartFile);
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
             AssetType assetType =
                 TelegramUtils.detectAssetType(TelegramUtils.getFileContentType(telegramFile.getFilePath()));
 

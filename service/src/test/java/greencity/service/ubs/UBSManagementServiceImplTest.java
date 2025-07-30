@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.OrderHistory;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
@@ -189,7 +190,7 @@ class UBSManagementServiceImplTest {
     OrderAddressRepository orderAddressRepository;
 
     @Mock
-    private FileService fileService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock(strictness = Mock.Strictness.LENIENT)
     OrderRepository orderRepository;

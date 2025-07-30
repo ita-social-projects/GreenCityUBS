@@ -1,5 +1,17 @@
 package greencity.ubstelegrambot;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
@@ -8,11 +20,13 @@ import greencity.entity.telegram.TelegramMessage;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
-import greencity.service.ubs.FileService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramSupportServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,12 +41,6 @@ import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramSupportServiceTest {
@@ -50,7 +58,7 @@ class TelegramSupportServiceTest {
     private TelegramMessageRepository telegramMessageRepository;
 
     @Mock
-    private FileService fileService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock
     private UBSTelegramBot bot;
@@ -482,7 +490,7 @@ class TelegramSupportServiceTest {
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
-        when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
+        when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
@@ -491,7 +499,7 @@ class TelegramSupportServiceTest {
         verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
             TelegramBotConstants.PHOTO_CONTENT, id);
-        verify(fileService).upload(any(MultipartFile.class));
+        verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
 
@@ -531,12 +539,12 @@ class TelegramSupportServiceTest {
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
-        when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
+        when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
         assertNull(result);
-        verify(fileService).upload(any(MultipartFile.class));
+        verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
         verify(telegramMessageRepository).findByMediaGroupId(mediaGroupId);
     }
