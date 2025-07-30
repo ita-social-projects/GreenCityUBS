@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserUpdateProcessorTest {
+class UserUpdateProcessorTest {
 
     @InjectMocks
     private UserUpdateProcessor updateProcessor;

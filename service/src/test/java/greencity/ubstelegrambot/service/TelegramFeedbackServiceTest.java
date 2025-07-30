@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TelegramFeedbackServiceTest {
+class TelegramFeedbackServiceTest {
     @Mock
     private TelegramChatRepository telegramChatRepository;
 

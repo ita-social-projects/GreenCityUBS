@@ -20,12 +20,12 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TelegramLoginServiceTest {
+class TelegramLoginServiceTest {
     @InjectMocks
     private TelegramLoginServiceImpl telegramLoginService;
 
