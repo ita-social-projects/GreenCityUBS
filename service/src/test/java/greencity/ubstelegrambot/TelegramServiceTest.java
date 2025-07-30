@@ -4,26 +4,33 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.*;
 import greencity.entity.order.Order;
-import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
+import greencity.entity.telegram.TelegramManager;
 import greencity.entity.telegram.TelegramMessage;
 import greencity.entity.user.User;
+import greencity.entity.user.employee.Employee;
 import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.ChatFeedbackRepository;
+import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
+import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.AzureCloudStorageService;
+import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
+import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
@@ -32,27 +39,31 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
-
-    @InjectMocks
-    private TelegramServiceImpl telegramService;
-
     @Mock
     private ApplicationContext applicationContext;
 
@@ -64,9 +75,6 @@ class TelegramServiceTest {
 
     @Mock
     private TelegramMessageRepository telegramMessageRepository;
-
-    @Mock
-    private ChatFeedbackRepository chatFeedbackRepository;
 
     @Mock
     private OrderRepository orderRepository;
@@ -82,6 +90,45 @@ class TelegramServiceTest {
 
     @Mock
     private MultipartFile file;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Mock
+    private TelegramManagerRepository telegramManagerRepository;
+
+    @Mock
+    private EmployeeRepository employeeRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private TelegramUtils telegramUtils;
+
+    private TelegramServiceImpl telegramService;
+
+    public Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
+
+    @BeforeEach
+    void setUp() {
+        telegramUpdateProcessorMap = new HashMap<>();
+
+        telegramService = new TelegramServiceImpl(
+            telegramMessageRepository,
+            telegramManagerRepository,
+            applicationContext,
+            telegramChatRepository,
+            azureCloudStorageService,
+            ubsClientService,
+            executor,
+            employeeRepository,
+            orderRepository,
+            userRepository,
+            messagingTemplate,
+            telegramUtils,
+            telegramUpdateProcessorMap);
+    }
 
     @Test
     void testSendMessageToUser_OnlyText_MessageSent() {
@@ -187,21 +234,21 @@ class TelegramServiceTest {
 
         PageableDto<TelegramMessageDto> result = telegramService.findUserMessageByChatId(chatId, pageable);
 
-        Assertions.assertEquals(0, result.getCurrentPage());
-        Assertions.assertEquals(1, result.getTotalElements());
-        Assertions.assertEquals(1, result.getTotalPages());
+        assertEquals(0, result.getCurrentPage());
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
 
         TelegramMessageDto dto = result.getPage().getFirst();
-        Assertions.assertEquals("Hello", dto.getText());
+        assertEquals("Hello", dto.getText());
         Assertions.assertFalse(dto.getFromManager());
-        Assertions.assertEquals(MessageDeliveryStatus.SENT, dto.getDeliveryStatus());
-        Assertions.assertEquals(1, dto.getAssets().size());
+        assertEquals(MessageDeliveryStatus.SENT, dto.getDeliveryStatus());
+        assertEquals(1, dto.getAssets().size());
 
         MessageAssetDto assetDto = dto.getAssets().getFirst();
-        Assertions.assertEquals("http://example.com/file.png", assetDto.getUrl());
-        Assertions.assertEquals("file.png", assetDto.getFileName());
-        Assertions.assertEquals(AssetType.IMAGE, assetDto.getType());
-        Assertions.assertEquals(Optional.of(1024L).get(), assetDto.getSize());
+        assertEquals("http://example.com/file.png", assetDto.getUrl());
+        assertEquals("file.png", assetDto.getFileName());
+        assertEquals(AssetType.IMAGE, assetDto.getType());
+        assertEquals(Optional.of(1024L).get(), assetDto.getSize());
     }
 
     @Test
@@ -216,7 +263,7 @@ class TelegramServiceTest {
             NotFoundException.class,
             () -> telegramService.findUserMessageByChatId(chatId, pageable));
 
-        Assertions.assertEquals("There are no messages in the chat 1", exception.getMessage());
+        assertEquals("There are no messages in the chat 1", exception.getMessage());
     }
 
     @Test
@@ -259,25 +306,26 @@ class TelegramServiceTest {
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
-        when(telegramChatRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(chatPage);
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
+            .thenReturn(chatPage);
         when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.of(message));
 
         PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
 
-        Assertions.assertEquals(0, result.getCurrentPage());
-        Assertions.assertEquals(1, result.getTotalElements());
+        assertEquals(0, result.getCurrentPage());
+        assertEquals(1, result.getTotalElements());
 
-        ChatDto chatDto = result.getPage().get(0);
-        Assertions.assertEquals("123456789", chatDto.getChatId());
-        Assertions.assertEquals("Test", chatDto.getFirstName());
+        ChatDto chatDto = result.getPage().getFirst();
+        assertEquals("123456789", chatDto.getChatId());
+        assertEquals("Test", chatDto.getFirstName());
         Assertions.assertNotNull(chatDto.getUser());
-        Assertions.assertEquals("ivan@example.com", chatDto.getUser().getEmail());
+        assertEquals("ivan@example.com", chatDto.getUser().getEmail());
 
         TelegramMessageDto lastMessage = chatDto.getLastMessage();
         Assertions.assertNotNull(lastMessage);
-        Assertions.assertEquals("Hello", lastMessage.getText());
-        Assertions.assertEquals(1, lastMessage.getAssets().size());
-        Assertions.assertEquals("http://image.png", lastMessage.getAssets().get(0).getUrl());
+        assertEquals("Hello", lastMessage.getText());
+        assertEquals(1, lastMessage.getAssets().size());
+        assertEquals("http://image.png", lastMessage.getAssets().getFirst().getUrl());
     }
 
     @Test
@@ -296,14 +344,15 @@ class TelegramServiceTest {
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
-        when(telegramChatRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(chatPage);
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
+            .thenReturn(chatPage);
         when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.empty());
 
         // when
         PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
 
-        Assertions.assertEquals(0, result.getCurrentPage());
-        Assertions.assertEquals(1, result.getTotalElements());
+        assertEquals(0, result.getCurrentPage());
+        assertEquals(1, result.getTotalElements());
 
         ChatDto chatDto = result.getPage().getFirst();
         Assertions.assertNull(chatDto.getUser());
@@ -313,58 +362,14 @@ class TelegramServiceTest {
     @Test
     void testGetChats_EmptyResult_EmptyPageableDtoReturned() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(telegramChatRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(Page.empty());
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
+            .thenReturn(Page.empty());
 
         PageableDto<ChatDto> result = telegramService.getChats("nothing", pageable);
 
         Assertions.assertTrue(result.getPage().isEmpty());
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertEquals(1, result.getTotalPages());
-    }
-
-    @Test
-    void testGetAllFeedbacksByChatId_FeedbacksFound_FeedbackDtoReturned() {
-        String chatId = "123456789";
-        Pageable pageable = PageRequest.of(0, 5);
-
-        TelegramChat chat = TelegramChat.builder()
-            .chatId(chatId)
-            .build();
-
-        ChatFeedback feedback = ChatFeedback.builder()
-            .id(1L)
-            .chat(chat)
-            .rating(5)
-            .comment("Great service")
-            .build();
-
-        Page<ChatFeedback> feedbackPage = new PageImpl<>(List.of(feedback), pageable, 1);
-
-        when(chatFeedbackRepository.findByChatIdPageable(chatId, pageable)).thenReturn(feedbackPage);
-
-        PageableDto<FeedbackDto> result = telegramService.getAllFeedbacksByChatId(chatId, pageable);
-
-        Assertions.assertEquals(1, result.getTotalElements());
-        Assertions.assertEquals(1, result.getPage().size());
-
-        FeedbackDto dto = result.getPage().getFirst();
-        Assertions.assertEquals(Optional.of(1L).get(), dto.id());
-        Assertions.assertEquals("123456789", dto.chatId());
-        Assertions.assertEquals(5, dto.rating());
-        Assertions.assertEquals("Great service", dto.comment());
-    }
-
-    @Test
-    void testGetAllFeedbacksByChatId_ChatNotFound_EmptyPageableDtoReturned() {
-        String chatId = "999999999";
-        Pageable pageable = PageRequest.of(0, 5);
-        when(chatFeedbackRepository.findByChatIdPageable(chatId, pageable)).thenReturn(Page.empty());
-
-        PageableDto<FeedbackDto> result = telegramService.getAllFeedbacksByChatId(chatId, pageable);
-
-        Assertions.assertTrue(result.getPage().isEmpty());
-        Assertions.assertEquals(0, result.getTotalElements());
-        Assertions.assertEquals(1, result.getTotalPages());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
     }
 
     @Test
@@ -397,7 +402,7 @@ class TelegramServiceTest {
         OrdersDataForUserDto result = telegramService.getLastOrderByChatId(chatId);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(Optional.of(100L).get(), result.getId());
+        assertEquals(Optional.of(100L).get(), result.getId());
     }
 
     @Test
@@ -408,7 +413,7 @@ class TelegramServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> telegramService.getLastOrderByChatId(chatId));
 
-        Assertions.assertEquals("Chat with id 2 not found", exception.getMessage());
+        assertEquals("Chat with id 2 not found", exception.getMessage());
     }
 
     @Test
@@ -424,7 +429,7 @@ class TelegramServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> telegramService.getLastOrderByChatId(chatId));
 
-        Assertions.assertEquals("Order not found", exception.getMessage());
+        assertEquals("Order not found", exception.getMessage());
     }
 
     @Test
@@ -442,7 +447,7 @@ class TelegramServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> telegramService.getLastOrderByChatId(chatId));
 
-        Assertions.assertEquals("Order not found", exception.getMessage());
+        assertEquals("Order not found", exception.getMessage());
     }
 
     @Test
@@ -461,11 +466,11 @@ class TelegramServiceTest {
         ChatDto result = telegramService.getChatById(chatId);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(chatId, result.getId());
-        Assertions.assertEquals("123456789", result.getChatId());
-        Assertions.assertEquals("Іван", result.getFirstName());
-        Assertions.assertEquals("Петренко", result.getLastName());
-        Assertions.assertEquals("ivan_pet", result.getUsername());
+        assertEquals(chatId, result.getId());
+        assertEquals("123456789", result.getChatId());
+        assertEquals("Іван", result.getFirstName());
+        assertEquals("Петренко", result.getLastName());
+        assertEquals("ivan_pet", result.getUsername());
     }
 
     @Test
@@ -476,6 +481,361 @@ class TelegramServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> telegramService.getChatById(chatId));
 
-        Assertions.assertEquals("Chat with id 99 not found", exception.getMessage());
+        assertEquals("Chat with id 99 not found", exception.getMessage());
+    }
+
+    @Test
+    void processUpdate_shouldReturnUserProcessor_whenStartWithoutUuid() {
+        Long chatId = 12345L;
+        String startCommand = "/start";
+
+        var from = getTelegramAPIUser(chatId);
+
+        Message message = new Message();
+        message.setFrom(from);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        doNothing().when(messagingTemplate).convertAndSend(anyString(), Optional.ofNullable(any()));
+
+        TelegramChat savedChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.empty());
+        when(telegramChatRepository.save(any())).thenReturn(savedChat);
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "Hello user!");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        // act
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        // assert
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+    }
+
+    @Test
+    void processUpdate_shouldReturnManagerProcessor_whenStartWithManagerUuidAndChatExists() {
+        // arrange
+        Long chatId = 12345L;
+        String uuid = "some-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(existingChat));
+
+        Employee employee = new Employee(); // або просто mock(Employee.class)
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
+        when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(true);
+
+        TelegramUpdateProcessor managerProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("managerUpdateProcessor", managerProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "Hello manager!");
+        when(managerProcessor.process(update)).thenReturn(expected);
+
+        // act
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        // assert
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+    }
+
+    @Test
+    void processUpdate_shouldReturnUserProcessor_whenNoStartCommand() {
+        // arrange
+        Long chatId = 12345L;
+        String text = "Some regular text";
+
+        var apiUser = getTelegramAPIUser(chatId);
+
+        Chat chat = new Chat();
+        chat.setId(chatId);
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(text);
+        message.setChat(chat);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat telegramChat = TelegramChat.builder()
+            .chatId(chatId.toString())
+            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(telegramChat));
+        when(telegramManagerRepository.findByChatId(chatId.toString())).thenReturn(Optional.empty());
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "default user reply");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        // act
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        // assert
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+
+        verify(telegramChatRepository).save(telegramChat);
+    }
+
+    @Test
+    void processUpdate_shouldReturnManagerProcessor_whenCallbackFromManager() {
+        // arrange
+        Long chatId = 12345L;
+
+        var telegramUser = getTelegramAPIUser(chatId);
+
+        CallbackQuery callbackQuery = new CallbackQuery();
+        callbackQuery.setFrom(telegramUser);
+
+        Chat chat = new Chat();
+        chat.setId(chatId);
+
+        Message callbackMessage = new Message();
+        callbackMessage.setChat(chat);
+
+        callbackQuery.setMessage(callbackMessage);
+
+        var update = new Update();
+        update.setCallbackQuery(callbackQuery);
+
+        when(telegramManagerRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(mock(TelegramManager.class)));
+
+        TelegramUpdateProcessor managerProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("managerUpdateProcessor", managerProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "manager callback response");
+        when(managerProcessor.process(update)).thenReturn(expected);
+
+        // act
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        // assert
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+    }
+
+    @Test
+    void processUpdate_shouldReturnUserProcessor_whenStartWithUserUuidAndChatExists() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(existingChat));
+
+        Employee employee = new Employee();
+        when(employeeRepository.findByUuid(uuid)).thenReturn(Optional.of(employee));
+
+        when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(false);
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "Hello user!");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+    }
+
+    @Test
+    void processUpdate_shouldCreateNewChatWithoutUser_whenStartWithUuidAndUserNotFound() {
+        Long chatId = 12345L;
+        String uuid = "some-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setFirstName("TestFirst");
+        apiUser.setLastName("TestLast");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.empty());
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        when(telegramChatRepository.save(chatCaptor.capture())).thenAnswer(invocation -> {
+            TelegramChat chat = invocation.getArgument(0);
+            chat.setId(1L);
+            return chat;
+        });
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "response after creating chat without user");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(chatId.toString(), savedChat.getChatId());
+        assertEquals("TestFirst", savedChat.getFirstName());
+        assertEquals("TestLast", savedChat.getLastName());
+        Assertions.assertNull(savedChat.getUser());
+    }
+
+    @Test
+    void processUpdate_shouldReturnUserProcessor_whenMessageTextIsNull() {
+        Long chatId = 12345L;
+
+        var apiUser = getTelegramAPIUser(chatId);
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(null);
+
+        Chat chat = new Chat();
+        chat.setId(chatId);
+        message.setChat(chat);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat telegramChat = TelegramChat.builder()
+            .chatId(chatId.toString())
+            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(telegramChat));
+
+        when(telegramManagerRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.empty());
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "default user reply");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+
+        verify(telegramChatRepository).save(telegramChat);
+    }
+
+    @Test
+    void processUpdate_shouldNotSaveUser_whenUuidIsEmptyInExistingChat() {
+        Long chatId = 12345L;
+        String startCommand = "/start";
+
+        var apiUser = getTelegramAPIUser(chatId);
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Chat chat = new Chat();
+        chat.setId(chatId);
+
+        message.setChat(chat);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(existingChat));
+
+        TelegramUpdateProcessor userProcessor = mock(TelegramUpdateProcessor.class);
+        telegramUpdateProcessorMap.put("userUpdateProcessor", userProcessor);
+
+        SendMessage expected = new SendMessage(chatId.toString(), "Hello user!");
+        when(userProcessor.process(update)).thenReturn(expected);
+
+        SendMessage result = telegramService.processUpdate(update).process(update);
+
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+
+        verify(userRepository, never()).findUserByUuid(any());
+        verify(telegramChatRepository, never()).save(any());
+    }
+
+    private static org.telegram.telegrambots.meta.api.objects.User getTelegramAPIUser(Long chatId) {
+        org.telegram.telegrambots.meta.api.objects.User apiUser = new org.telegram.telegrambots.meta.api.objects.User();
+        apiUser.setId(chatId);
+        apiUser.setUserName("testUser");
+        return apiUser;
+    }
+
+    @Test
+    void testProcessUpdate_ChatNotExistsUuidIsEmpty_ChatCreatedUserUpdateProcessorReturned() {
+
+    }
+
+    @Test
+    void testProcessUpdate_ChatExistsUuidIsEmpty_UserUpdateProcessorReturned() {
+
+    }
+
+    @Test
+    void testProcessUpdate_ChatNotExistsUuidIsPresentIsManagerUuid_ManagerUpdateProcessorReturned() {
+
+    }
+
+    @Test
+    void testProcessUpdate_ChatNotExistsUuidIsPresentIsUserUuid_UserUpdateProcessorReturned() {
+
     }
 }

@@ -9,7 +9,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.image.FileNotSavedException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.PropertyResolver;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedInputStream;
@@ -30,7 +30,7 @@ public class AzureCloudStorageService implements FileService {
      * Constructor with parameters.
      */
     @Autowired
-    public AzureCloudStorageService(@Autowired PropertyResolver propertyResolver) {
+    public AzureCloudStorageService(Environment propertyResolver) {
         this.connectionString = propertyResolver.getProperty("azure.connection.string");
         this.containerName = propertyResolver.getProperty("azure.container.name");
     }

@@ -4,11 +4,13 @@ import greencity.constant.TelegramBotConstants;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import java.io.IOException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageFactory {
@@ -393,5 +395,21 @@ public class MessageFactory {
             .replyMarkup(inlineKeyboardMarkup)
             .text(text)
             .build();
+    }
+
+    /**
+     * Creates a {@link SendPhoto} object to send a photo from a
+     * {@link MultipartFile} to a Telegram chat.
+     *
+     * @param chatId {@link String} the ID of the target chat
+     * @param file   {@link MultipartFile} the file to be sent as a photo
+     * @return a configured {@link SendPhoto} object
+     * @throws IOException if reading the file input stream fails
+     */
+    public static SendPhoto createMultipartFileSender(String chatId, MultipartFile file) throws IOException {
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(chatId);
+        sendPhoto.setPhoto(new InputFile(file.getInputStream(), file.getOriginalFilename()));
+        return sendPhoto;
     }
 }
