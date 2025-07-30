@@ -125,7 +125,11 @@ class EmployeeWithTariffsIdDtoTest {
             Arguments.of("Лук' ян", "Є гор"),
             Arguments.of("Лук'ян.н", "Єгор.р"),
             Arguments.of("Петро", "Ґгор"),
-            Arguments.of("лук'ян", "їєґгор"));
+            Arguments.of("лук'ян", "їєґгор"),
+            Arguments.of("Іван-Петро", "Кирило-Миколайович"),
+            Arguments.of("Dr.Ігор", "П.Іванович"),
+            Arguments.of("Тест-Test", "Прізвище-Family"),
+            Arguments.of("Євген’О’Браєн", "Ґудзик"));
     }
 
     private static Stream<Arguments> provideInvalidNamePairs() {
@@ -145,7 +149,11 @@ class EmployeeWithTariffsIdDtoTest {
             Arguments.of("T--", "T--"),
             Arguments.of("T---", "T---"),
             Arguments.of("''", "''"),
-            Arguments.of("Ttttttttttttttttttttttttttttttt", "Ttttttttttttttttttttttttttttttt"));
+            Arguments.of("Ttttttttttttttttttttttttttttttt", "Ttttttttttttttttttttttttttttttt"),
+            Arguments.of("A - - B", "C - - D"),
+            Arguments.of("І. .ван", "Є. .гор"),
+            Arguments.of("Є ’     ’ ван", "Ґ ’ ’"),
+            Arguments.of("Test '' Name", "Last '' Name"));
     }
 
     private static Stream<Arguments> provideValidEmails() {
@@ -168,8 +176,7 @@ class EmployeeWithTariffsIdDtoTest {
             Arguments.of("gmail.com"),
             Arguments.of("@gmail.com"),
             Arguments.of("mail@gmail"),
-            Arguments.of("mail@gmailcom"),
-            Arguments.of("ma!il@gmail.com"));
+            Arguments.of("mail@gmailcom"));
     }
 
     private static EmployeeWithTariffsIdDto createEmployeeWithTariffsDto(

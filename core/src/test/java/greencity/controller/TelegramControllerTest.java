@@ -13,6 +13,7 @@ import greencity.dto.telegram.TelegramMessageDto;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
 import java.util.Collections;
+import greencity.ubstelegrambot.service.TelegramFeedbackServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,9 @@ class TelegramControllerTest {
 
     @InjectMocks
     private TelegramController telegramChatController;
+
+    @Mock
+    private TelegramFeedbackServiceImpl telegramFeedbackService;
 
     private PageableDto<TelegramMessageDto> messageDtoPage;
     private PageableDto<ChatDto> chatDtoPage;
@@ -98,7 +102,7 @@ class TelegramControllerTest {
 
     @Test
     void getAllFeedbacks_ShouldReturnOk() throws Exception {
-        Mockito.when(telegramService.getAllFeedbacks(any(Pageable.class)))
+        Mockito.when(telegramFeedbackService.getAllFeedbacks(any(Pageable.class)))
             .thenReturn(feedbackDtoPage);
 
         mockMvc.perform(get("/ubs/telegram/feedbacks"))
@@ -107,7 +111,7 @@ class TelegramControllerTest {
 
     @Test
     void getAllFeedbacksByChatId_ShouldReturnOk() throws Exception {
-        Mockito.when(telegramService.getAllFeedbacksByChatId(eq("123"), any(Pageable.class)))
+        Mockito.when(telegramFeedbackService.getAllFeedbacksByChatId(eq("123"), any(Pageable.class)))
             .thenReturn(feedbackDtoPage);
 
         mockMvc.perform(get("/ubs/telegram/feedbacks/123"))

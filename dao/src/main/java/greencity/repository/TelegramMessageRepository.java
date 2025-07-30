@@ -18,5 +18,7 @@ public interface TelegramMessageRepository extends JpaRepository<TelegramMessage
 
     Optional<TelegramMessage> findByMediaGroupId(String mediaGroupId);
 
+    boolean existsByMediaGroupId(String mediaGroupId);
+
     Optional<TelegramMessage> findFirstByChatOrderBySendAtDesc(TelegramChat chat);
 }
