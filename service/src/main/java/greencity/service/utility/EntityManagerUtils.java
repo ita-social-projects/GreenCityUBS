@@ -2,6 +2,7 @@ package greencity.service.utility;
 
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Parameter;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
@@ -14,6 +15,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,7 +52,7 @@ public class EntityManagerUtils {
 
     private static final String INVALID_ARGUMENT_EXCEPTION = "One or more specified attributes can't be applied";
 
-    protected <T> EntityGraph<T> createEntityGraph(Class<T> entityClass, List<String> attributes) {
+    public <T> EntityGraph<T> createEntityGraph(Class<T> entityClass, List<String> attributes) {
         EntityGraph<T> entityGraph = entityManager.createEntityGraph(entityClass);
         if (attributes != null) {
             for (String attribute : attributes) {
@@ -64,48 +66,63 @@ public class EntityManagerUtils {
         return entityGraph;
     }
 
-    protected <T> TypedQuery<T> createTypedQueryWithEntityGraph(
+    public <T> TypedQuery<T> createTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString, List<String> attributes) {
         return createTypedQueryWithEntityGraph(entityClass, jpqlQueryString, attributes, EntityGraphType.LOAD);
     }
 
-    protected <T> TypedQuery<T> createTypedQueryWithEntityGraph(
+    public <T> TypedQuery<T> createTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString,
         List<String> attributes, EntityGraphType entityGraphType) {
         TypedQuery<T> query = entityManager.createQuery(jpqlQueryString, entityClass);
 
         String hintKey = entityGraphType == EntityGraphType.FETCH
-            ? "jakarta.persistence.loadgraph"
-            : "jakarta.persistence.fetchgraph";
+            ? "jakarta.persistence.fetchgraph"
+            : "jakarta.persistence.loadgraph";
         query.setHint(hintKey, createEntityGraph(entityClass, attributes));
 
         return query;
     }
 
-    protected <T> Page<T> runPageableTypedQueryWithFetchGraph(
+    public <T> Page<T> createAndRunPageableTypedQueryWithEntityGraph(
+        Class<T> entityClass, String jpqlQueryString, List<String> attributes, Pageable pageable) {
+        TypedQuery<T> query = createPageableTypedQueryWithEntityGraph(entityClass, jpqlQueryString, attributes, pageable);
+        return runPageableTypedQueryWithEntityGraph(query, jpqlQueryString, pageable);
+    }
+
+    public <T> Page<T> runPageableTypedQueryWithEntityGraph(
+        TypedQuery<T> query, String jpqlQueryString, Pageable pageable) {
+        List<T> results = query.getResultList();
+        Long total = createAndRunCountQueryFor(query, jpqlQueryString);
+        return new PageImpl<>(results, pageable, total);
+    }
+
+    public <T> TypedQuery<T> createPageableTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString,
         List<String> attributes, Pageable pageable) {
         TypedQuery<T> query = createTypedQueryWithEntityGraph(entityClass, jpqlQueryString, attributes);
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
-        List<T> results = query.getResultList();
+        return query;
+    }
 
-        String countQueryString = createCountQueryFor(jpqlQueryString);
+    public <T> Long createAndRunCountQueryFor(TypedQuery<T> query, String jpqlQueryString) {
+        String countQueryString = createCountQueryStringFor(jpqlQueryString);
         TypedQuery<Long> countQuery = entityManager.createQuery(countQueryString, Long.class);
-        Long total = countQuery.getSingleResult();
-
-        return new PageImpl<>(results, pageable, total);
+        query.getParameters()
+            .forEach(parameter -> countQuery.setParameter(parameter.getName(), query.getParameterValue(parameter)));
+        return countQuery.getSingleResult();
     }
 
-    private static String createCountQueryFor(String jpqlQueryString) {
-        return createCountQueryFor(jpqlQueryString, null);
+    private static String createCountQueryStringFor(String jpqlQueryString) {
+        return createCountQueryStringFor(jpqlQueryString, null);
     }
 
-    private static String createCountQueryFor(String jpqlQueryString, @Nullable String countProjection) {
-        return createCountQueryFor(jpqlQueryString, countProjection, false);
+    private static String createCountQueryStringFor(String jpqlQueryString, @Nullable String countProjection) {
+        return createCountQueryStringFor(jpqlQueryString, countProjection, false);
     }
 
-    private static String createCountQueryFor(
+    private static String createCountQueryStringFor(
         String jpqlQueryString, @Nullable String countProjection, boolean nativeQuery) {
         Assert.hasText(jpqlQueryString, "OriginalQuery must not be null or empty");
         Matcher matcher = COUNT_MATCH.matcher(jpqlQueryString);
