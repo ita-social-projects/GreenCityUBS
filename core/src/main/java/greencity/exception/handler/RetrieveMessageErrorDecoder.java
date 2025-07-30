@@ -24,14 +24,8 @@ public class RetrieveMessageErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
         try (InputStream body = response.body().asInputStream()) {
-            ExceptionResponse exception;
             String bodyString = IOUtils.toString(body, StandardCharsets.UTF_8);
-
-            try {
-                exception = objectMapper.readValue(bodyString, ExceptionResponse.class);
-            } catch (Exception e) {
-                exception = ExceptionResponse.builder().message(bodyString).build();
-            }
+            ExceptionResponse exception = getExceptionResponse(bodyString);
 
             return switch (response.status()) {
                 case 400 -> new BadRequestException(exception.getMessage());
@@ -42,5 +36,15 @@ public class RetrieveMessageErrorDecoder implements ErrorDecoder {
         } catch (IOException e) {
             return new Exception(e.getMessage());
         }
+    }
+
+    private ExceptionResponse getExceptionResponse(String bodyString) {
+        ExceptionResponse exception;
+        try {
+            exception = objectMapper.readValue(bodyString, ExceptionResponse.class);
+        } catch (Exception e) {
+            exception = ExceptionResponse.builder().message(bodyString).build();
+        }
+        return exception;
     }
 }
