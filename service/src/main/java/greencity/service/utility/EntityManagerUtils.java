@@ -4,6 +4,7 @@ import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -63,24 +64,28 @@ public class EntityManagerUtils {
         return entityGraph;
     }
 
-    protected <T> TypedQuery<T> createTypedQueryWithFetchGraph(
+    protected <T> TypedQuery<T> createTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString, List<String> attributes) {
-        TypedQuery<T> query = entityManager.createQuery(jpqlQueryString, entityClass);
-        query.setHint("jakarta.persistence.fetchgraph", createEntityGraph(entityClass, attributes));
-        return query;
+        return createTypedQueryWithEntityGraph(entityClass, jpqlQueryString, attributes, EntityGraphType.LOAD);
     }
 
-    protected <T> TypedQuery<T> createTypedQueryWithLoadGraph(
-        Class<T> entityClass, String jpqlQueryString, List<String> attributes) {
+    protected <T> TypedQuery<T> createTypedQueryWithEntityGraph(
+        Class<T> entityClass, String jpqlQueryString,
+        List<String> attributes, EntityGraphType entityGraphType) {
         TypedQuery<T> query = entityManager.createQuery(jpqlQueryString, entityClass);
-        query.setHint("jakarta.persistence.loadgraph", createEntityGraph(entityClass, attributes));
+
+        String hintKey = entityGraphType == EntityGraphType.FETCH
+            ? "jakarta.persistence.loadgraph"
+            : "jakarta.persistence.fetchgraph";
+        query.setHint(hintKey, createEntityGraph(entityClass, attributes));
+
         return query;
     }
 
     protected <T> Page<T> runPageableTypedQueryWithFetchGraph(
         Class<T> entityClass, String jpqlQueryString,
         List<String> attributes, Pageable pageable) {
-        TypedQuery<T> query = createTypedQueryWithLoadGraph(entityClass, jpqlQueryString, attributes);
+        TypedQuery<T> query = createTypedQueryWithEntityGraph(entityClass, jpqlQueryString, attributes);
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
         List<T> results = query.getResultList();
