@@ -20,7 +20,6 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
@@ -31,6 +30,7 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
 import org.springframework.data.domain.Pageable;
@@ -88,16 +88,26 @@ public interface UBSClientService {
     CertificateDto checkCertificate(String code, String userUuid);
 
     /**
-     * Methods saves all entered by user data to database.
+     * Methods creates and adjusts new order and generates payment link for the
+     * order.
      *
-     * @param dto     {@link OrderResponseDto} user entered data;
-     * @param uuid    current {@link User}'s uuid;
-     * @param orderId {@link Long} order id;
-     * @return {@link PaymentWayForPayRequestDto} which contains data to pay order
-     *         out.
-     * @author Oleh Bilonizhka
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentSystemResponse} which contains data to pay order out.
+     * @author Oleksandr Ilnytskyi
      */
-    PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
+    PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid);
+
+    /**
+     * Methods adjusts existing order and generates payment link for the order if
+     * order is unpaid.
+     *
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentSystemResponse} which contains data to pay order out.
+     * @author Oleksandr Ilnytskyi
+     */
+    PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
      * Method that returns info about all orders for specified userID.
@@ -345,4 +355,6 @@ public interface UBSClientService {
      *                 details such as transaction ID, status, and amount.
      */
     void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
+
+    public OrdersDataForUserDto getOrdersData(Order order);
 }

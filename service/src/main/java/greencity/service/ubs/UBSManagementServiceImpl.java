@@ -10,6 +10,7 @@ import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.UserRemoteClient;
 import greencity.client.config.UserRemoteWebClient;
@@ -28,7 +29,6 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -98,7 +98,8 @@ import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.service.locations.LocationApiService;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
@@ -133,6 +134,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -159,7 +161,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
     private final OrdersAdminsPageService ordersAdminsPageService;
-    private final LocationApiService locationApiService;
     private final OrderLockService orderLockService;
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
@@ -178,6 +179,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
     private static final String PAY_BUTTON = "payButton";
+    private final CityRepository cityRepository;
+    private final DistrictRepository districtRepository;
 
     /**
      * {@inheritDoc}
@@ -376,12 +379,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .regionUk(address.getBaseAddress().getRegionUk())
             .regionEn(address.getBaseAddress().getRegionEn())
             .addressRegionDistrictList(
-                locationApiService
-                    .getAllDistrictsInCityByNames(address.getBaseAddress().getRegionUk(),
-                        address.getBaseAddress().getCityUk())
-                    .stream()
-                    .map(p -> modelMapper.map(p, DistrictDto.class))
-                    .collect(Collectors.toList()))
+                districtRepository.findAllByCityId(cityRepository.findIdByNameUkOrNameEn(
+                    address.getBaseAddress().getCityUk()))
+                    .stream().map(p -> modelMapper.map(p, DistrictDto.class))
+                    .collect(toList()))
             .build();
     }
 
@@ -1169,24 +1170,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             }
         }
         return DEFAULT_IMAGE_PATH;
-    }
-
-    /**
-     * This is service method which is save adminComment.
-     *
-     * @param adminCommentDto {@link AdminCommentDto}.
-     * @param email           {@link String}.
-     * @author Yuriy Bahlay.
-     */
-    @Override
-    public void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String email) {
-        Order order = orderRepository.findById(adminCommentDto.getOrderId()).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + adminCommentDto.getOrderId()));
-        checkAvailableOrderForEmployee(order, email);
-        order.setAdminComment(adminCommentDto.getAdminComment());
-        orderRepository.save(order);
-        eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, email
-            + "  " + email, order);
     }
 
     /**

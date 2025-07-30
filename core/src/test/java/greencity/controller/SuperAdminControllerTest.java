@@ -186,7 +186,7 @@ class SuperAdminControllerTest {
     @Test
     void deleteTariffService() throws Exception {
         mockMvc.perform(delete(ubsLink + "/deleteTariffService/" + 1L))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
         verify(superAdminService).deleteTariffService(1);
         verifyNoMoreInteractions(superAdminService);
     }
@@ -750,6 +750,38 @@ class SuperAdminControllerTest {
             .content(result)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void getTariffInfoByIdTariffFoundTest() throws Exception {
+        GetTariffsInfoDto getTariffsInfoDto = ModelUtils.getAllTariffsInfoDto();
+
+        Long id = 1L;
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = objectMapper.writeValueAsString(getTariffsInfoDto);
+
+        Mockito.when(superAdminService.getTariffInfoById(id))
+            .thenReturn(getTariffsInfoDto);
+
+        mockMvc.perform(get(ubsLink + "/tariff/" + id)
+            .content(result)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void getTariffInfoByIdTariffIsNotFoundTest() throws Exception {
+
+        Long id = 1L;
+
+        Mockito.doThrow(new NotFoundException("Tariff with id " + id + " not found"))
+            .when(superAdminService).getTariffInfoById(id);
+
+        mockMvc.perform(get(ubsLink + "/tariff/" + id)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
     }
 
     @Test
