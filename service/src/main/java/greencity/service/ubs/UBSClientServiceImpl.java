@@ -849,11 +849,18 @@ public class UBSClientServiceImpl implements UBSClientService {
     @Override
     public Order unlockSpecifiedPointsAndCertificatesFromOrder(
         Long orderId, int pointsToUse, Set<String> certificateCodes) {
-        unlockSpecifiedCertificatesFromOrder(orderId, certificateCodes);
+        if (!certificateCodes.isEmpty()) {
+            unlockSpecifiedCertificatesFromOrder(orderId, certificateCodes);
+        }
 
         Order order = orderRepository.findById(orderId).orElseThrow(
             () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        return unlockSpecifiedPointsFromOrder(order, pointsToUse);
+
+        if (pointsToUse > 0) {
+            return unlockSpecifiedPointsFromOrder(order, pointsToUse);
+        }
+
+        return order;
     }
 
     private void unlockSpecifiedCertificatesFromOrder(Long orderId, Set<String> certificateCodes) {
@@ -888,7 +895,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void scheduleOrderExpiryJob(
-        Long orderId, int pointsUsed, Set<String> certificateCodes, Long linkValiditySeconds) {
+        Long orderId, int pointsUsed, Set<String> certificateCodes, Long expirySeconds) {
         if (certificateCodes == null) {
             certificateCodes = new HashSet<>();
         }
@@ -908,7 +915,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Trigger trigger = TriggerBuilder.newTrigger()
             .withIdentity(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)
-            .startAt(Date.from(Instant.now().plus(linkValiditySeconds, ChronoUnit.SECONDS)))
+            .startAt(Date.from(Instant.now().plus(expirySeconds, ChronoUnit.SECONDS)))
             .build();
 
         try {
