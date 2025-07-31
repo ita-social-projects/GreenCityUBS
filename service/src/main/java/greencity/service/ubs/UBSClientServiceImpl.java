@@ -832,7 +832,8 @@ public class UBSClientServiceImpl implements UBSClientService {
                 Order.class, jpqlQueryString,
                 List.of(
                     "refund", "exportedQuantity", "confirmedQuantity", "amountOfBagsOrdered",
-                    "certificates", "payment", "ubsUser"), page);
+                    "certificates", "payment", "ubsUser", "additionalOrders",
+                    "orderStatus", "orderPaymentStatus", "ubsUser.orderAddress"), page);
         jpqlQuery.setParameter("uuid", uuid);
         jpqlQuery.setParameter("statuses", statuses);
         Page<Order> orderPages = entityManagerUtils
