@@ -28,8 +28,10 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
             CallbackQuery callBackQuery = update.getCallbackQuery();
             if (callBackQuery.getData().equals(TelegramBotConstants.LOGOUT_MANAGER_CALLBACK)) {
                 telegramLoginService.logoutManager(chatId);
+                return processMainMenuRequest(chatId);
+            } else {
+                return processManagerMessageRequest(chatId);
             }
-            return processMainMenuRequest(chatId);
         }
         return processManagerMessageRequest(update.getMessage().getChatId().toString());
     }
