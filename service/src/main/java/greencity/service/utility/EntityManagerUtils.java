@@ -2,8 +2,8 @@ package greencity.service.utility;
 
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Parameter;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Subgraph;
 import jakarta.persistence.TypedQuery;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.domain.Page;
@@ -14,10 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class EntityManagerUtils {
@@ -54,15 +57,37 @@ public class EntityManagerUtils {
 
     public <T> EntityGraph<T> createEntityGraph(Class<T> entityClass, List<String> attributes) {
         EntityGraph<T> entityGraph = entityManager.createEntityGraph(entityClass);
-        if (attributes != null) {
-            for (String attribute : attributes) {
+
+        Map<String, Subgraph<?>> subgraphsMap = new HashMap<>();
+
+        for (String attribute : attributes) {
+            if (!attribute.contains(".")) {
                 try {
                     entityGraph.addAttributeNodes(attribute);
                 } catch (Exception exception) {
                     throw new IllegalStateException(INVALID_ARGUMENT_EXCEPTION);
                 }
+            } else {
+                try {
+                    String[] subAttributes = attribute.split("\\.");
+                    int length = subAttributes.length;
+                    if (length == 2) {
+                        Subgraph<?> subgraph = entityGraph.addSubgraph(subAttributes[length - 2]);
+                        subgraph.addAttributeNodes(subAttributes[length - 1]);
+                        subgraphsMap.put(subAttributes[0], subgraph);
+                    } else {
+                        String rootSubgraphPath = String.join(".", Arrays.copyOfRange(subAttributes, 0, length-2));
+                        Subgraph<?> rootSubgraph = subgraphsMap.get(rootSubgraphPath);
+                        Subgraph<?> subgraph = rootSubgraph.addSubgraph(subAttributes[length - 2]);
+                        subgraph.addAttributeNodes(subAttributes[length - 1]);
+                        subgraphsMap.put(String.join(".", rootSubgraphPath, subAttributes[length - 2]), subgraph);
+                    }
+                } catch (Exception exception) {
+                    throw new IllegalStateException(INVALID_ARGUMENT_EXCEPTION);
+                }
             }
         }
+
         return entityGraph;
     }
 
