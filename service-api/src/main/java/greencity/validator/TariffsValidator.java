@@ -1,5 +1,11 @@
 package greencity.validator;
 
+import static greencity.constant.ErrorMessage.TARIFF_LIST_IS_NULL;
+import static greencity.constant.ErrorMessage.TARIFF_LIST_IS_EMPTY;
+import static greencity.constant.ErrorMessage.TARIFF_IS_NULL;
+import static greencity.constant.ErrorMessage.TARIFFID_IS_NULL;
+import static greencity.constant.ErrorMessage.TARIFFID_IS_NOT_POSITIVE;
+import static greencity.constant.ErrorMessage.TARIFF_LIST_CONTAINS_DUPLICATES;
 import greencity.annotations.ValidTariffs;
 import greencity.dto.tariff.TariffWithChatAccess;
 import jakarta.validation.ConstraintValidator;
@@ -14,12 +20,12 @@ public class TariffsValidator implements ConstraintValidator<ValidTariffs, List<
         context.disableDefaultConstraintViolation();
 
         if (tariffs == null) {
-            context.buildConstraintViolationWithTemplate("tariffs cannot be null")
+            context.buildConstraintViolationWithTemplate(TARIFF_LIST_IS_NULL)
                 .addConstraintViolation();
             return false;
         }
         if (tariffs.isEmpty()) {
-            context.buildConstraintViolationWithTemplate("tariffs cannot be empty")
+            context.buildConstraintViolationWithTemplate(TARIFF_LIST_IS_EMPTY)
                 .addConstraintViolation();
             return false;
         }
@@ -28,7 +34,7 @@ public class TariffsValidator implements ConstraintValidator<ValidTariffs, List<
 
         for (TariffWithChatAccess tariff : tariffs) {
             if (tariff == null) {
-                context.buildConstraintViolationWithTemplate("tariff cannot be null")
+                context.buildConstraintViolationWithTemplate(TARIFF_IS_NULL)
                     .addConstraintViolation();
                 return false;
             }
@@ -36,13 +42,19 @@ public class TariffsValidator implements ConstraintValidator<ValidTariffs, List<
             Long tariffId = tariff.getTariffId();
 
             if (tariffId == null) {
-                context.buildConstraintViolationWithTemplate("tariffId cannot be null")
+                context.buildConstraintViolationWithTemplate(TARIFFID_IS_NULL)
+                    .addConstraintViolation();
+                return false;
+            }
+
+            if (tariffId < 1L) {
+                context.buildConstraintViolationWithTemplate(TARIFFID_IS_NOT_POSITIVE)
                     .addConstraintViolation();
                 return false;
             }
 
             if (!uniqueIds.add(tariffId)) {
-                context.buildConstraintViolationWithTemplate("tariffs cannot contain duplicates")
+                context.buildConstraintViolationWithTemplate(TARIFF_LIST_CONTAINS_DUPLICATES)
                     .addConstraintViolation();
                 return false;
             }
