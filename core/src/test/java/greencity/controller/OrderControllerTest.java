@@ -94,10 +94,10 @@ class OrderControllerTest {
     @Test
     void getCurrentUserPointsByTariffAndLocationId() throws Exception {
         mockMvc.perform(get(ubsLink + "/order-details-for-tariff")
-                .principal(principal)
-                .param("tariffId", "1")
-                .param("locationId", "1")
-                .contentType(MediaType.APPLICATION_JSON))
+            .principal(principal)
+            .param("tariffId", "1")
+            .param("locationId", "1")
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         verify(ubsClientService).getFirstPageDataByTariffAndLocationId(1L, 1L);
@@ -175,16 +175,15 @@ class OrderControllerTest {
             .build();
         String resultJson = objectMapper.writeValueAsString(resultObject);
 
-
         when(userRepository.findUuidByRecipientEmail(anyString())).thenReturn(Optional.of(uuid));
         when(ubsClientService.processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong()))
             .thenReturn(resultObject);
 
         mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
-                .content(orderResponseDtoJSON)
-                .principal(principal)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+            .content(orderResponseDtoJSON)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().json(resultJson));
 
@@ -208,9 +207,9 @@ class OrderControllerTest {
         when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.empty());
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-                .principal(principal))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+            .principal(principal))
             .andExpect(status().isNotFound());
     }
 
@@ -222,9 +221,9 @@ class OrderControllerTest {
         when(userRepository.findUuidByRecipientEmail(anyString())).thenReturn(Optional.empty());
 
         mockMvc.perform(put(ubsLink + "/update-recipients-data")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
-                .principal(principal))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(ubsCustomersDtoUpdate))
+            .principal(principal))
             .andExpect(status().isNotFound());
     }
 
@@ -236,7 +235,7 @@ class OrderControllerTest {
         when(ubsClientService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
 
         mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L)
-                .principal(principal))
+            .principal(principal))
             .andExpect(status().isOk());
         verify(ubsClientService).getOrderCancellationReason(1L, "35467585763t4sfgchjfuyetf");
     }
@@ -244,7 +243,7 @@ class OrderControllerTest {
     @Test
     void testGetOrderHistoryByOrderId() throws Exception {
         mockMvc.perform(get(ubsLink + "/order_history" + "/{orderId}", 1L)
-                .principal(principal))
+            .principal(principal))
             .andExpect(status().isOk());
 
         verify(ubsClientService, times(1))
@@ -260,9 +259,9 @@ class OrderControllerTest {
         setRedirectionConfigProp();
 
         mockMvc.perform(post(ubsLink + "/receivePayment")
-                .content(paymentResponseJson)
-                .principal(principal)
-                .contentType(MediaType.APPLICATION_JSON))
+            .content(paymentResponseJson)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().is3xxRedirection());
     }
 
@@ -270,7 +269,7 @@ class OrderControllerTest {
     @SneakyThrows
     void getInfoAboutTariffTest() {
         mockMvc.perform(get(ubsLink + "/tariffinfo/{locationId}", 1L)
-                .param("courierId", "1"))
+            .param("courierId", "1"))
             .andExpect(status().isOk());
     }
 
@@ -294,8 +293,8 @@ class OrderControllerTest {
     @SneakyThrows
     void getTariffForOrder() {
         mockMvc.perform(get(ubsLink + "/orders/1/tariff")
-                .principal(principal)
-                .contentType(MediaType.APPLICATION_JSON))
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
@@ -305,7 +304,7 @@ class OrderControllerTest {
         when(ubsClientService.checkIfTariffExistsById(tariffId)).thenReturn(true);
 
         mockMvc.perform(get(ubsLink + "/check-if-tariff-exists/{id}", tariffId)
-                .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(""));
 
@@ -318,7 +317,7 @@ class OrderControllerTest {
         when(ubsClientService.checkIfTariffExistsById(tariffId)).thenReturn(false);
 
         mockMvc.perform(get(ubsLink + "/check-if-tariff-exists/{id}", tariffId)
-                .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
             .andExpect(content().string(""));
 
@@ -331,7 +330,7 @@ class OrderControllerTest {
         when(ubsClientService.getAllLocations()).thenReturn(locationsDtoList);
 
         mockMvc.perform(get(ubsLink + "/locations")
-                .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
@@ -345,7 +344,7 @@ class OrderControllerTest {
         when(ubsClientService.getTariffIdByLocationId(locationId)).thenReturn(tariffId);
 
         mockMvc.perform(get(ubsLink + "/tariffs/{locationId}", locationId)
-                .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(String.valueOf(tariffId)));
 
@@ -359,7 +358,7 @@ class OrderControllerTest {
         when(ubsClientService.getAllLocationsByCourierId(id)).thenReturn(locationsDtoList);
 
         mockMvc.perform(get(ubsLink + "/locationsByCourier/" + id)
-                .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 

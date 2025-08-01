@@ -44,7 +44,7 @@ class UserRemoteWebClientTest {
     }
 
     @BeforeEach
-    void init(){
+    void init() {
         String baseUrl = "http://localhost:%s".formatted(mockWebServer.getPort());
         userRemoteWebClient = new UserRemoteWebClient(WebClient.builder().baseUrl(baseUrl).build());
     }

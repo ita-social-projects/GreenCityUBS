@@ -77,7 +77,7 @@ class TelegramControllerTest {
             .thenReturn(chatDtoPage);
 
         mockMvc.perform(get("/ubs/telegram/chats")
-                .param("search", "test"))
+            .param("search", "test"))
             .andExpect(status().isOk());
     }
 
@@ -87,7 +87,7 @@ class TelegramControllerTest {
             .thenReturn(orderDto);
 
         mockMvc.perform(get("/ubs/telegram/last-order")
-                .param("chatId", "1"))
+            .param("chatId", "1"))
             .andExpect(status().isOk());
     }
 

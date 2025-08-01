@@ -224,7 +224,8 @@ public class OrderController {
      * @param response The payment response received from Way for Pay, in String
      *                 format.
      * @param servlet  The HttpServletResponse object to handle the redirection.
-     * @return A PaymentResponseWayForPay object representing the validated payment response.
+     * @return A PaymentResponseWayForPay object representing the validated payment
+     *         response.
      * @throws IOException If an input or output exception occurred during the
      *                     redirection.
      */
@@ -443,7 +444,8 @@ public class OrderController {
      * Check if a tariff exists by its ID.
      *
      * @param id The ID of the tariff to check.
-     * @return {@code ResponseEntity} with HTTP 200 OK if tariff exists, HTTP 404 NOT FOUND if it doesn't exist.
+     * @return {@code ResponseEntity} with HTTP 200 OK if tariff exists, HTTP 404
+     *         NOT FOUND if it doesn't exist.
      * @author Yurii Ososvskyi
      */
     @Operation(summary = "Check if tariff exists by Id")
