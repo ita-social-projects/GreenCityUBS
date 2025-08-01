@@ -83,7 +83,7 @@ class UserProfileControllerTest {
         String uuid = "uuid";
         when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
-        mockMvc.perform(put(AppConstant.ubsLink + "/user/update")
+        mockMvc.perform(put(AppConstant.UBS_LINK_USERPROFILE + "/user/update")
             .content(responseJSON)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -94,7 +94,7 @@ class UserProfileControllerTest {
     void getProfileData() throws Exception {
         String uuid = "uuid";
         when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
-        mockMvc.perform(get(AppConstant.ubsLink + "/user/getUserProfile")
+        mockMvc.perform(get(AppConstant.UBS_LINK_USERPROFILE + "/user/getUserProfile")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -106,7 +106,7 @@ class UserProfileControllerTest {
         DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
             .reason("test")
             .build();
-        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser)
+        mockMvc.perform(put(AppConstant.UBS_LINK_USERPROFILE + deactivateUser)
             .contentType(MediaType.APPLICATION_JSON)
             .content(mapper.writeValueAsString(request)))
             .andExpect(status().isOk());
@@ -116,7 +116,7 @@ class UserProfileControllerTest {
     void createUserProfile() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String content = objectMapper.writeValueAsString(getUserProfileCreateDto());
-        mockMvc.perform(post(AppConstant.ubsLink + "/user/create")
+        mockMvc.perform(post(AppConstant.UBS_LINK_USERPROFILE + "/user/create")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());

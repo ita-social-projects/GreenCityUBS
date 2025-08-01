@@ -1,8 +1,22 @@
 package greencity.ubstelegrambot;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.MessageAssetDto;
+import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -19,12 +33,17 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,20 +67,6 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
     @Mock
@@ -71,7 +76,7 @@ class TelegramServiceTest {
     private TelegramChatRepository telegramChatRepository;
 
     @Mock
-    private AzureCloudStorageService azureCloudStorageService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock
     private TelegramMessageRepository telegramMessageRepository;
@@ -119,7 +124,7 @@ class TelegramServiceTest {
             telegramManagerRepository,
             applicationContext,
             telegramChatRepository,
-            azureCloudStorageService,
+            userRemoteWebClient,
             ubsClientService,
             executor,
             employeeRepository,
@@ -161,11 +166,11 @@ class TelegramServiceTest {
         when(file.getOriginalFilename()).thenReturn("image.png");
         when(file.getSize()).thenReturn(1024L);
         when(file.getContentType()).thenReturn("image/png");
-        when(azureCloudStorageService.upload(file)).thenReturn("http://azure.com/image.png");
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://azure.com/image.png");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(azureCloudStorageService).upload(file);
+        verify(userRemoteWebClient).uploadFile(file);
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
     }
@@ -184,7 +189,7 @@ class TelegramServiceTest {
         when(file.getOriginalFilename()).thenReturn("image.png");
         when(file.getSize()).thenReturn(2048L);
         when(file.getContentType()).thenReturn("image/png");
-        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 

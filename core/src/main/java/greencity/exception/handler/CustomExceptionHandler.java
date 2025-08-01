@@ -1,6 +1,9 @@
 package greencity.exception.handler;
 
+import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
 import greencity.exceptions.BadRequestException;
+import greencity.exceptions.GreenCityUserServiceException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -31,6 +34,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
@@ -232,6 +237,28 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(ex.getMessage(), ex);
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    /**
+     * Method interceptor for server errors-related exceptions which can be thrown
+     * by WebClient during making and receiving requests to the User app such as
+     * {@link GreenCityUserServiceException}, {@link WebClientRequestException} ,
+     * {@link WebClientResponseException}.
+     *
+     * @param request Contains details about the occurred exception.
+     * @return ResponseEntity which contains the HTTP status and body with the
+     *         message of the exception.
+     */
+    @ExceptionHandler({GreenCityUserServiceException.class, WebClientRequestException.class,
+        WebClientResponseException.class})
+    public final ResponseEntity<Object> handleUserServiceException(Exception ex, WebRequest request) {
+        if (ex instanceof WebClientRequestException) {
+            Map<String, String> errorBody = Map.of(AppConstant.MESSAGE, ErrorMessage.USER_APP_UNAVAILABLE);
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorBody);
+        }
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        log.error(exceptionResponse.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
     }
 
     /**

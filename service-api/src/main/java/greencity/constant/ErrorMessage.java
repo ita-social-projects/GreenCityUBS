@@ -207,4 +207,6 @@ public class ErrorMessage {
     public static final String TARIFFID_IS_NULL = "Tariff id cannot be null";
     public static final String TARIFFID_IS_NOT_POSITIVE = "Tariff Id must be greater than 0";
     public static final String TARIFF_LIST_CONTAINS_DUPLICATES = "Tariffs cannot contain duplicates";
+    public static final String USER_APP_UNAVAILABLE = "the User service is unavailable";
+    public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
 }
