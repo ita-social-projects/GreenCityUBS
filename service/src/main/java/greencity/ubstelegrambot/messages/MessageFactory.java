@@ -59,8 +59,8 @@ public class MessageFactory {
      */
     public static SendMessage createForbiddenCommandsManagerMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId,
-                TelegramBotConstants.FORBIDDEN_COMMANDS_MANAGER + "\n" +TelegramBotConstants.SUPPORTED_COMMANDS,
-                KeyboardFactory.createHelpKeyboardForManager());
+            TelegramBotConstants.FORBIDDEN_COMMANDS_MANAGER + "\n" + TelegramBotConstants.SUPPORTED_COMMANDS,
+            KeyboardFactory.createHelpKeyboardForManager());
     }
 
     /**
