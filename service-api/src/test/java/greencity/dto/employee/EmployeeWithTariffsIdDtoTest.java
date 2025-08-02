@@ -3,15 +3,18 @@ package greencity.dto.employee;
 import greencity.ModelUtils;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.TariffWithChatAccess;
+import jakarta.validation.ConstraintViolation;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,97 +22,155 @@ class EmployeeWithTariffsIdDtoTest {
     private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private static final String validName = "Valid";
     private static final String validEmail = "mail@gmail.com";
-    private static final String validPhoneNumber = "+390990000000";
+    private static final String validPhoneNumber = "+380938754569";
     private static final List<PositionDto> validPositions = List.of(ModelUtils.getEmployeePosition());
     private static final long validId = 1L;
     private static final List<Long> validIds = List.of(1L);
 
-    @ParameterizedTest
-    @MethodSource("provideValidNamePairs")
-    void validNamesInEmployeeDtoTest(String firstName, String lastName) {
-        EmployeeWithTariffsIdDto dto =
-            createEmployeeWithTariffsDto(
-                firstName, lastName, validEmail,
-                validPhoneNumber, validPositions,
-                validId, validIds, true);
+    @Nested
+    @DisplayName("Name validation")
+    class NameValidation {
 
-        Set<ConstraintViolation<EmployeeWithTariffsIdDto>> constraintViolations =
-            validator.validate(dto);
+        @ParameterizedTest
+        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#provideValidNamePairs")
+        void shouldAcceptValidNames(String firstName, String lastName) {
+            EmployeeWithTariffsIdDto dto = createDto(firstName, lastName, validEmail, validPhoneNumber);
+            assertThat(validator.validate(dto)).isEmpty();
+        }
 
-        assertThat(constraintViolations).isEmpty();
+        @ParameterizedTest
+        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#provideInvalidNamePairs")
+        void shouldRejectInvalidNames(String firstName, String lastName) {
+            EmployeeWithTariffsIdDto dto = createDto(firstName, lastName, validEmail, validPhoneNumber);
+            assertThat(validator.validate(dto)).isNotEmpty();
+        }
     }
 
-    @ParameterizedTest
-    @MethodSource("provideInvalidNamePairs")
-    void invalidNamesInEmployeeDtoTest(String firstName, String lastName) {
-        EmployeeWithTariffsIdDto dto =
-            createEmployeeWithTariffsDto(
-                firstName, lastName, validEmail,
-                validPhoneNumber, validPositions,
-                validId, validIds, true);
+    @Nested
+    @DisplayName("Email validation")
+    class EmailValidation {
 
-        Set<ConstraintViolation<EmployeeWithTariffsIdDto>> constraintViolations =
-            validator.validate(dto);
+        @ParameterizedTest
+        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#provideValidEmails")
+        void shouldAcceptValidEmails(String email) {
+            EmployeeWithTariffsIdDto dto = createDto(validName, validName, email, validPhoneNumber);
+            assertThat(validator.validate(dto)).isEmpty();
+        }
 
-        assertThat(constraintViolations).hasSizeBetween(1, 2);
+        @ParameterizedTest
+        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#provideInvalidEmails")
+        void shouldRejectInvalidEmails(String email) {
+            EmployeeWithTariffsIdDto dto = createDto(validName, validName, email, validPhoneNumber);
+            assertThat(validator.validate(dto)).hasSize(1);
+        }
     }
 
-    @ParameterizedTest
-    @MethodSource("provideValidEmails")
-    void validEmailInEmployeeDtoTest(String email) {
-        EmployeeWithTariffsIdDto dto =
-            createEmployeeWithTariffsDto(
-                validName, validName, email,
-                validPhoneNumber, validPositions,
-                validId, validIds, true);
+    @Nested
+    @DisplayName("Phone number validation")
+    class PhoneNumberValidation {
 
-        Set<ConstraintViolation<EmployeeWithTariffsIdDto>> constraintViolations =
-            validator.validate(dto);
+        @ParameterizedTest
+        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#validPhoneNumbers")
+        void shouldAcceptValidPhoneNumbers(String phone) {
+            EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, phone);
+            assertThat(validator.validate(dto)).isEmpty();
+        }
 
-        assertThat(constraintViolations).isEmpty();
-    }
+        @ParameterizedTest
+        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#invalidPhoneNumbers")
+        void shouldRejectInvalidPhoneNumbers(String phone) {
+            EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, phone);
+            assertThat(validator.validate(dto)).isNotEmpty();
+        }
 
-    @ParameterizedTest
-    @MethodSource("provideInvalidEmails")
-    void invalidEmailInEmployeeDtoTest(String email) {
-        EmployeeWithTariffsIdDto dto =
-            createEmployeeWithTariffsDto(
-                validName, validName, email,
-                validPhoneNumber, validPositions,
-                validId, validIds, true);
+        @Test
+        void shouldRejectNullPhoneNumber() {
+            EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, null);
+            Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
 
-        Set<ConstraintViolation<EmployeeWithTariffsIdDto>> constraintViolations =
-            validator.validate(dto);
-
-        assertThat(constraintViolations).hasSize(1);
-    }
-
-    @Test
-    void validFieldsInEmployeeDtoTest() {
-        EmployeeWithTariffsIdDto dto =
-            createEmployeeWithTariffsDto(
-                validName, validName, validEmail,
-                validPhoneNumber, validPositions,
-                validId, validIds, true);
-
-        Set<ConstraintViolation<EmployeeWithTariffsIdDto>> constraintViolations =
-            validator.validate(dto);
-
-        assertThat(constraintViolations).isEmpty();
+            assertThat(violations)
+                .extracting(v -> v.getPropertyPath().toString())
+                .contains("employeeDto.phoneNumber");
+        }
     }
 
     @Test
-    void invalidFieldsInEmployeeDtoTest() {
-        EmployeeWithTariffsIdDto dto =
-            createEmployeeWithTariffsDto(
-                "", "", "",
-                "", null,
-                -1L, List.of(), true);
+    void shouldBeValidWithAllValidFields() {
+        EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, validPhoneNumber);
+        assertThat(validator.validate(dto)).isEmpty();
+    }
 
-        Set<ConstraintViolation<EmployeeWithTariffsIdDto>> constraintViolations =
-            validator.validate(dto);
+    @Test
+    void shouldBeInvalidWithEmptyOrMissingFields() {
+        EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
+        dto.setEmployeeDto(new EmployeeDto());
+        dto.setTariffs(null);
 
-        assertThat(constraintViolations).hasSize(5);
+        Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
+
+        assertThat(violations).hasSize(6);
+
+        Set<String> fieldsWithViolations = violations.stream()
+            .map(v -> v.getPropertyPath().toString())
+            .collect(Collectors.toSet());
+
+        assertThat(fieldsWithViolations).containsExactlyInAnyOrder(
+            "employeeDto.email",
+            "employeeDto.employeePositions",
+            "employeeDto.firstName",
+            "employeeDto.lastName",
+            "employeeDto.phoneNumber",
+            "tariffs");
+    }
+
+    private static EmployeeWithTariffsIdDto createDto(String firstName, String lastName, String email,
+        String phoneNumber) {
+        return createEmployeeWithTariffsDto(firstName, lastName, email, phoneNumber);
+    }
+
+    private static EmployeeWithTariffsIdDto createEmployeeWithTariffsDto(
+        String firstName, String lastName, String email, String phoneNumber) {
+
+        return EmployeeWithTariffsIdDto.builder()
+            .employeeDto(EmployeeDto.builder()
+                .id(validId)
+                .firstName(firstName)
+                .lastName(lastName)
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .employeePositions(validPositions)
+                .build())
+            .tariffs(createTariffsWithChatAccess())
+            .build();
+    }
+
+    private static List<TariffWithChatAccess> createTariffsWithChatAccess() {
+        return EmployeeWithTariffsIdDtoTest.validIds.stream()
+            .map(id -> TariffWithChatAccess.builder()
+                .tariffId(validId)
+                .hasChat(true)
+                .build())
+            .toList();
+    }
+
+    private static Stream<Arguments> validPhoneNumbers() {
+        return Stream.of(
+            Arguments.of("+380938754569"),
+            Arguments.of("+38(093)87-54-569"),
+            Arguments.of("380998754569"),
+            Arguments.of("0678754569"),
+            Arguments.of("938754569"));
+    }
+
+    private static Stream<Arguments> invalidPhoneNumbers() {
+        return Stream.of(
+            Arguments.of(""),
+            Arguments.of(" "),
+            Arguments.of("text"),
+            Arguments.of("067875Dhgjh4569"),
+            Arguments.of("0114860406"),
+            Arguments.of("4860406"),
+            Arguments.of("+"));
     }
 
     private static Stream<Arguments> provideValidNamePairs() {
@@ -177,32 +238,5 @@ class EmployeeWithTariffsIdDtoTest {
             Arguments.of("@gmail.com"),
             Arguments.of("mail@gmail"),
             Arguments.of("mail@gmailcom"));
-    }
-
-    private static EmployeeWithTariffsIdDto createEmployeeWithTariffsDto(
-        String firstName, String lastName, String email,
-        String phoneNumber, List<PositionDto> employeePositions, Long employeeId,
-        List<Long> tariffIds, boolean hasChat) {
-        return EmployeeWithTariffsIdDto.builder()
-            .employeeDto(EmployeeDto.builder()
-                .id(employeeId)
-                .firstName(firstName)
-                .lastName(lastName)
-                .phoneNumber(phoneNumber)
-                .email(email)
-                .employeePositions(employeePositions)
-                .build())
-            .tariffs(createTariffsWithChatAccess(tariffIds, hasChat))
-            .build();
-    }
-
-    private static List<TariffWithChatAccess> createTariffsWithChatAccess(
-        List<Long> tariffIds, boolean hasChat) {
-        return tariffIds.stream()
-            .map(id -> TariffWithChatAccess.builder()
-                .tariffId(id)
-                .hasChat(hasChat)
-                .build())
-            .toList();
     }
 }
