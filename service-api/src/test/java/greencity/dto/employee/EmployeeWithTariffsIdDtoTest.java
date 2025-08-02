@@ -32,17 +32,61 @@ class EmployeeWithTariffsIdDtoTest {
     class NameValidation {
 
         @ParameterizedTest
-        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#provideValidNamePairs")
+        @MethodSource("provideValidNamePairs")
         void shouldAcceptValidNames(String firstName, String lastName) {
             EmployeeWithTariffsIdDto dto = createDto(firstName, lastName, validEmail, validPhoneNumber);
             assertThat(validator.validate(dto)).isEmpty();
         }
 
         @ParameterizedTest
-        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#provideInvalidNamePairs")
+        @MethodSource("provideInvalidNamePairs")
         void shouldRejectInvalidNames(String firstName, String lastName) {
             EmployeeWithTariffsIdDto dto = createDto(firstName, lastName, validEmail, validPhoneNumber);
             assertThat(validator.validate(dto)).isNotEmpty();
+        }
+
+        private static Stream<Arguments> provideValidNamePairs() {
+            return Stream.of(
+                Arguments.of("F", "L"),
+                Arguments.of("FirstName", "LastName"),
+                Arguments.of("firstName", "lastName"),
+                Arguments.of("First-Name", "Last-Name"),
+                Arguments.of("Лук'ян", "Їгор"),
+                Arguments.of("Петро1", "ІЄгор1"),
+                Arguments.of("Лук'ян-", "Єгор-"),
+                Arguments.of("Лук'ян ", "Єгор "),
+                Arguments.of("Лук' ян", "Є гор"),
+                Arguments.of("Лук'ян.н", "Єгор.р"),
+                Arguments.of("Петро", "Ґгор"),
+                Arguments.of("лук'ян", "їєґгор"),
+                Arguments.of("Іван-Петро", "Кирило-Миколайович"),
+                Arguments.of("Dr.Ігор", "П.Іванович"),
+                Arguments.of("Тест-Test", "Прізвище-Family"),
+                Arguments.of("Євген’О’Браєн", "Ґудзик"));
+        }
+
+        private static Stream<Arguments> provideInvalidNamePairs() {
+            return Stream.of(
+                Arguments.of("", ""),
+                Arguments.of("Лук'ян+", "Єгор+"),
+                Arguments.of("+Лук'ян", "+Єгор"),
+                Arguments.of("-Лук'ян", "-Єгор"),
+                Arguments.of("1Лук'ян", "2Єгор"),
+                Arguments.of("Лук..ян", "Є..гор"),
+                Arguments.of(null, null),
+                Arguments.of(" ", " "),
+                Arguments.of(".", "."),
+                Arguments.of("T.", "T."),
+                Arguments.of("T..", "T.."),
+                Arguments.of("T...", "T..."),
+                Arguments.of("T--", "T--"),
+                Arguments.of("T---", "T---"),
+                Arguments.of("''", "''"),
+                Arguments.of("Ttttttttttttttttttttttttttttttt", "Ttttttttttttttttttttttttttttttt"),
+                Arguments.of("A - - B", "C - - D"),
+                Arguments.of("І. .ван", "Є. .гор"),
+                Arguments.of("Є ’     ’ ван", "Ґ ’ ’"),
+                Arguments.of("Test '' Name", "Last '' Name"));
         }
     }
 
@@ -51,17 +95,40 @@ class EmployeeWithTariffsIdDtoTest {
     class EmailValidation {
 
         @ParameterizedTest
-        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#provideValidEmails")
+        @MethodSource("provideValidEmails")
         void shouldAcceptValidEmails(String email) {
             EmployeeWithTariffsIdDto dto = createDto(validName, validName, email, validPhoneNumber);
             assertThat(validator.validate(dto)).isEmpty();
         }
 
         @ParameterizedTest
-        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#provideInvalidEmails")
+        @MethodSource("provideInvalidEmails")
         void shouldRejectInvalidEmails(String email) {
             EmployeeWithTariffsIdDto dto = createDto(validName, validName, email, validPhoneNumber);
             assertThat(validator.validate(dto)).hasSize(1);
+        }
+
+        private static Stream<Arguments> provideValidEmails() {
+            return Stream.of(
+                Arguments.of("mail@gmail.com"),
+                Arguments.of("mail@gmail.org"),
+                Arguments.of("Mail@gmail.com"),
+                Arguments.of("mail_@gmail.com"),
+                Arguments.of("Mail21_@gmail.com"),
+                Arguments.of("mail21@gmail.com"),
+                Arguments.of("mail@somemail.com"),
+                Arguments.of("1mail@somemail.com"),
+                Arguments.of("mail+1@gmail.com"));
+        }
+
+        private static Stream<Arguments> provideInvalidEmails() {
+            return Stream.of(
+                Arguments.of("mail.@gmail.com"),
+                Arguments.of(".mail@gmail.org"),
+                Arguments.of("gmail.com"),
+                Arguments.of("@gmail.com"),
+                Arguments.of("mail@gmail"),
+                Arguments.of("mail@gmailcom"));
         }
     }
 
@@ -70,14 +137,14 @@ class EmployeeWithTariffsIdDtoTest {
     class PhoneNumberValidation {
 
         @ParameterizedTest
-        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#validPhoneNumbers")
+        @MethodSource("validPhoneNumbers")
         void shouldAcceptValidPhoneNumbers(String phone) {
             EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, phone);
             assertThat(validator.validate(dto)).isEmpty();
         }
 
         @ParameterizedTest
-        @MethodSource("greencity.dto.employee.EmployeeWithTariffsIdDtoTest#invalidPhoneNumbers")
+        @MethodSource("invalidPhoneNumbers")
         void shouldRejectInvalidPhoneNumbers(String phone) {
             EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, phone);
             assertThat(validator.validate(dto)).isNotEmpty();
@@ -91,6 +158,26 @@ class EmployeeWithTariffsIdDtoTest {
             assertThat(violations)
                 .extracting(v -> v.getPropertyPath().toString())
                 .contains("employeeDto.phoneNumber");
+        }
+
+        private static Stream<Arguments> validPhoneNumbers() {
+            return Stream.of(
+                Arguments.of("+380938754569"),
+                Arguments.of("+38(093)87-54-569"),
+                Arguments.of("380998754569"),
+                Arguments.of("0678754569"),
+                Arguments.of("938754569"));
+        }
+
+        private static Stream<Arguments> invalidPhoneNumbers() {
+            return Stream.of(
+                Arguments.of(""),
+                Arguments.of(" "),
+                Arguments.of("text"),
+                Arguments.of("067875Dhgjh4569"),
+                Arguments.of("0114860406"),
+                Arguments.of("4860406"),
+                Arguments.of("+"));
         }
     }
 
@@ -151,92 +238,5 @@ class EmployeeWithTariffsIdDtoTest {
                 .hasChat(true)
                 .build())
             .toList();
-    }
-
-    private static Stream<Arguments> validPhoneNumbers() {
-        return Stream.of(
-            Arguments.of("+380938754569"),
-            Arguments.of("+38(093)87-54-569"),
-            Arguments.of("380998754569"),
-            Arguments.of("0678754569"),
-            Arguments.of("938754569"));
-    }
-
-    private static Stream<Arguments> invalidPhoneNumbers() {
-        return Stream.of(
-            Arguments.of(""),
-            Arguments.of(" "),
-            Arguments.of("text"),
-            Arguments.of("067875Dhgjh4569"),
-            Arguments.of("0114860406"),
-            Arguments.of("4860406"),
-            Arguments.of("+"));
-    }
-
-    private static Stream<Arguments> provideValidNamePairs() {
-        return Stream.of(
-            Arguments.of("F", "L"),
-            Arguments.of("FirstName", "LastName"),
-            Arguments.of("firstName", "lastName"),
-            Arguments.of("First-Name", "Last-Name"),
-            Arguments.of("Лук'ян", "Їгор"),
-            Arguments.of("Петро1", "ІЄгор1"),
-            Arguments.of("Лук'ян-", "Єгор-"),
-            Arguments.of("Лук'ян ", "Єгор "),
-            Arguments.of("Лук' ян", "Є гор"),
-            Arguments.of("Лук'ян.н", "Єгор.р"),
-            Arguments.of("Петро", "Ґгор"),
-            Arguments.of("лук'ян", "їєґгор"),
-            Arguments.of("Іван-Петро", "Кирило-Миколайович"),
-            Arguments.of("Dr.Ігор", "П.Іванович"),
-            Arguments.of("Тест-Test", "Прізвище-Family"),
-            Arguments.of("Євген’О’Браєн", "Ґудзик"));
-    }
-
-    private static Stream<Arguments> provideInvalidNamePairs() {
-        return Stream.of(
-            Arguments.of("", ""),
-            Arguments.of("Лук'ян+", "Єгор+"),
-            Arguments.of("+Лук'ян", "+Єгор"),
-            Arguments.of("-Лук'ян", "-Єгор"),
-            Arguments.of("1Лук'ян", "2Єгор"),
-            Arguments.of("Лук..ян", "Є..гор"),
-            Arguments.of(null, null),
-            Arguments.of(" ", " "),
-            Arguments.of(".", "."),
-            Arguments.of("T.", "T."),
-            Arguments.of("T..", "T.."),
-            Arguments.of("T...", "T..."),
-            Arguments.of("T--", "T--"),
-            Arguments.of("T---", "T---"),
-            Arguments.of("''", "''"),
-            Arguments.of("Ttttttttttttttttttttttttttttttt", "Ttttttttttttttttttttttttttttttt"),
-            Arguments.of("A - - B", "C - - D"),
-            Arguments.of("І. .ван", "Є. .гор"),
-            Arguments.of("Є ’     ’ ван", "Ґ ’ ’"),
-            Arguments.of("Test '' Name", "Last '' Name"));
-    }
-
-    private static Stream<Arguments> provideValidEmails() {
-        return Stream.of(
-            Arguments.of("mail@gmail.com"),
-            Arguments.of("mail@gmail.org"),
-            Arguments.of("Mail@gmail.com"),
-            Arguments.of("mail_@gmail.com"),
-            Arguments.of("Mail21_@gmail.com"),
-            Arguments.of("mail21@gmail.com"),
-            Arguments.of("mail@somemail.com"),
-            Arguments.of("1mail@somemail.com"),
-            Arguments.of("mail+1@gmail.com"));
-    }
-
-    private static Stream<Arguments> provideInvalidEmails() {
-        return Stream.of(
-            Arguments.of("mail.@gmail.com"),
-            Arguments.of(".mail@gmail.org"),
-            Arguments.of("gmail.com"),
-            Arguments.of("@gmail.com"),
-            Arguments.of("mail@gmail"),
-            Arguments.of("mail@gmailcom"));
     }
 }
