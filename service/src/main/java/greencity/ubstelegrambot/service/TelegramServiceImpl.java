@@ -111,9 +111,22 @@ public class TelegramServiceImpl implements TelegramService {
                     .build();
                 assets.add(asset);
 
-                if (assetType == AssetType.IMAGE) {
+                if (assetType == AssetType.FILE) {
+                    log.info("Sending document type: {} with filename: {} to chat ID: {}",
+                            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
                     try {
-                        var sendPhotoMessage = MessageFactory.createMultipartFileSender(chat.getChatId(), file);
+                        var sendFile = MessageFactory.createSendDocument(chat.getChatId(), file);
+                        executor.executeSendFile(bot, sendFile);
+
+                    } catch (IOException e) {
+                        log.error("Failed to send file to Telegram", e);
+                        throw new RuntimeException("Unable to send file to Telegram", e);
+                    }
+                } else if (assetType == AssetType.IMAGE) {
+                    log.info("Sending photo type: {} with filename: {} to chat ID: {}",
+                            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                    try {
+                        var sendPhotoMessage = MessageFactory.createSendPhoto(chat.getChatId(), file);
                         executor.executeSendPhoto(bot, sendPhotoMessage);
                     } catch (IOException e) {
                         log.error("Failed to send image to Telegram", e);
