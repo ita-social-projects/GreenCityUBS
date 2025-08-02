@@ -54,6 +54,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     /**
      * {@inheritDoc}
      */
+    @Override
     @Transactional
     public SendMessage processSupportMessage(Message message) {
         var bot = applicationContext.getBean(UBSTelegramBot.class);

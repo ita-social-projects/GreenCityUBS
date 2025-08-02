@@ -28,6 +28,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -525,6 +526,7 @@ class TelegramSupportServiceTest {
         TelegramMessage telegramMessage = TelegramMessage
             .builder()
             .mediaGroupId(mediaGroupId)
+            .assets(new ArrayList<>())
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
