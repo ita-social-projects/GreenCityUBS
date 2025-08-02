@@ -88,7 +88,7 @@ public class TelegramServiceImpl implements TelegramService {
 
         List<MessageAsset> assets = new ArrayList<>();
 
-        if (request.getText() != null) {
+        if (request.getText() != null && !request.getText().isBlank()) {
             var sendTextMessage = MessageFactory.buildMessage(chat.getChatId(), message.getText());
             executor.executeCommand(bot, sendTextMessage);
         }
