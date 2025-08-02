@@ -34,14 +34,16 @@ class EmployeeWithTariffsIdDtoTest {
         @ParameterizedTest
         @MethodSource("provideValidNamePairs")
         void shouldAcceptValidNames(String firstName, String lastName) {
-            EmployeeWithTariffsIdDto dto = createDto(firstName, lastName, validEmail, validPhoneNumber);
+            EmployeeWithTariffsIdDto dto =
+                createEmployeeWithTariffsDto(firstName, lastName, validEmail, validPhoneNumber);
             assertThat(validator.validate(dto)).isEmpty();
         }
 
         @ParameterizedTest
         @MethodSource("provideInvalidNamePairs")
         void shouldRejectInvalidNames(String firstName, String lastName) {
-            EmployeeWithTariffsIdDto dto = createDto(firstName, lastName, validEmail, validPhoneNumber);
+            EmployeeWithTariffsIdDto dto =
+                createEmployeeWithTariffsDto(firstName, lastName, validEmail, validPhoneNumber);
             assertThat(validator.validate(dto)).isNotEmpty();
         }
 
@@ -97,14 +99,14 @@ class EmployeeWithTariffsIdDtoTest {
         @ParameterizedTest
         @MethodSource("provideValidEmails")
         void shouldAcceptValidEmails(String email) {
-            EmployeeWithTariffsIdDto dto = createDto(validName, validName, email, validPhoneNumber);
+            EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, email, validPhoneNumber);
             assertThat(validator.validate(dto)).isEmpty();
         }
 
         @ParameterizedTest
         @MethodSource("provideInvalidEmails")
         void shouldRejectInvalidEmails(String email) {
-            EmployeeWithTariffsIdDto dto = createDto(validName, validName, email, validPhoneNumber);
+            EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, email, validPhoneNumber);
             assertThat(validator.validate(dto)).hasSize(1);
         }
 
@@ -139,20 +141,20 @@ class EmployeeWithTariffsIdDtoTest {
         @ParameterizedTest
         @MethodSource("validPhoneNumbers")
         void shouldAcceptValidPhoneNumbers(String phone) {
-            EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, phone);
+            EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, phone);
             assertThat(validator.validate(dto)).isEmpty();
         }
 
         @ParameterizedTest
         @MethodSource("invalidPhoneNumbers")
         void shouldRejectInvalidPhoneNumbers(String phone) {
-            EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, phone);
+            EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, phone);
             assertThat(validator.validate(dto)).isNotEmpty();
         }
 
         @Test
         void shouldRejectNullPhoneNumber() {
-            EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, null);
+            EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, null);
             Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
 
             assertThat(violations)
@@ -183,7 +185,7 @@ class EmployeeWithTariffsIdDtoTest {
 
     @Test
     void shouldBeValidWithAllValidFields() {
-        EmployeeWithTariffsIdDto dto = createDto(validName, validName, validEmail, validPhoneNumber);
+        EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, validPhoneNumber);
         assertThat(validator.validate(dto)).isEmpty();
     }
 
@@ -210,11 +212,6 @@ class EmployeeWithTariffsIdDtoTest {
             "tariffs");
     }
 
-    private static EmployeeWithTariffsIdDto createDto(String firstName, String lastName, String email,
-        String phoneNumber) {
-        return createEmployeeWithTariffsDto(firstName, lastName, email, phoneNumber);
-    }
-
     private static EmployeeWithTariffsIdDto createEmployeeWithTariffsDto(
         String firstName, String lastName, String email, String phoneNumber) {
 
@@ -234,7 +231,7 @@ class EmployeeWithTariffsIdDtoTest {
     private static List<TariffWithChatAccess> createTariffsWithChatAccess() {
         return EmployeeWithTariffsIdDtoTest.validIds.stream()
             .map(id -> TariffWithChatAccess.builder()
-                .tariffId(validId)
+                .tariffId(id)
                 .hasChat(true)
                 .build())
             .toList();
