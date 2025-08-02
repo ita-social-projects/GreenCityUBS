@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -81,5 +82,25 @@ class TelegramExecutorTest {
             MessageWasNotSent.class,
             () -> telegramExecutor.executeSendPhoto(ubsTelegramBot, sendPhoto));
         verify(ubsTelegramBot).execute(sendPhoto);
+    }
+
+    @Test
+    void executeSendFileTest() throws Exception {
+        SendDocument sendDocument = Mockito.mock(SendDocument.class);
+        telegramExecutor.executeSendFile(ubsTelegramBot, sendDocument);
+
+        verify(ubsTelegramBot).execute(sendDocument);
+    }
+
+    @Test
+    void executeSendFileTestCatchesException() throws Exception {
+        SendDocument sendDocument = Mockito.mock(SendDocument.class);
+        when(ubsTelegramBot.execute(sendDocument))
+                .thenThrow(new TelegramApiException());
+
+        assertThrows(
+                MessageWasNotSent.class,
+                () -> telegramExecutor.executeSendFile(ubsTelegramBot, sendDocument));
+        verify(ubsTelegramBot).execute(sendDocument);
     }
 }
