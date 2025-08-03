@@ -115,18 +115,28 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                     .max(Comparator.comparing(PhotoSize::getFileSize))
                     .orElse(null);
 
-            if (largestPhoto != null) {
-                fileId = largestPhoto.getFileId();
-                fileSize = largestPhoto.getFileSize().longValue();
+            if (largestPhoto == null) {
+                if(previouslySavedMessage.isEmpty()) {
+                    telegramMessageRepository.delete(telegramMessage);
+                }
+                return MessageFactory.buildMessage(message.getChatId().toString(),
+                        TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
             }
+            fileId = largestPhoto.getFileId();
+            fileSize = largestPhoto.getFileSize().longValue();
         } else if (message.hasDocument()) {
             Document document = message.getDocument();
-            if (document != null) {
-                fileId = document.getFileId();
-                fileSize = document.getFileSize();
-                contentType = document.getMimeType();
-                originalFileName = document.getFileName();
+            if (document == null) {
+                if(previouslySavedMessage.isEmpty()) {
+                    telegramMessageRepository.delete(telegramMessage);
+                }
+                return MessageFactory.buildMessage(message.getChatId().toString(),
+                        TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_FILE_PLEASE_TRY_AGAIN);
             }
+            fileId = document.getFileId();
+            fileSize = document.getFileSize();
+            contentType = document.getMimeType();
+            originalFileName = document.getFileName();
         }
 
         if (fileId != null) {
