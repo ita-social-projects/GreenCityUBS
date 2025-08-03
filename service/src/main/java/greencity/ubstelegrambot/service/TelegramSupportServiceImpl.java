@@ -243,11 +243,11 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         if (telegramMessage.getAssets() != null && !telegramMessage.getAssets().isEmpty()) {
             switch (telegramMessage.getAssets().getFirst().getType()) {
                 case IMAGE -> contentForNotification = "Image content ("
-                        + telegramMessage.getAssets().size() + " images)";
-                //case AUDIO -> contentForNotification = "Audio content ("
-                //         + telegramMessage.getAssets().size() + " audio)";
+                    + telegramMessage.getAssets().size() + " images)";
+                // case AUDIO -> contentForNotification = "Audio content ("
+                // + telegramMessage.getAssets().size() + " audio)";
                 default -> contentForNotification = "File content ("
-                        + telegramMessage.getAssets().size() + " files)";
+                    + telegramMessage.getAssets().size() + " files)";
             }
             if (telegramMessage.getText() != null && !telegramMessage.getText().isEmpty()) {
                 contentForNotification += " + text";
