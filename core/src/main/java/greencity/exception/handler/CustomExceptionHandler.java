@@ -17,6 +17,7 @@ import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.exceptions.validation.ValidationException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.MappingException;
@@ -33,9 +34,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import jakarta.validation.ConstraintViolationException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -56,7 +59,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler({
         BadRequestException.class,
-        ConstraintViolationException.class,
         MappingException.class,
         CourierAlreadyExists.class,
         ServiceAlreadyExistsException.class,
@@ -280,5 +282,40 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponse);
+    }
+
+    /**
+     * Handles exceptions of type {@link ConstraintViolationException} thrown during
+     * validation of method parameters or path variables. Extracts detailed
+     * violation messages from the exception and sets them into a custom
+     * {@link ExceptionResponse} object. The response is sent with HTTP status 400
+     * (Bad Request).
+     *
+     * @param ex      the {@link ConstraintViolationException} containing validation
+     *                errors
+     * @param request the current {@link WebRequest} context
+     * @return a {@link ResponseEntity} containing the {@link ExceptionResponse}
+     *         with aggregated violation messages and HTTP 400 status
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public final ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex,
+        WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        log.debug("Constraint violation occurred: {}", ex.getMessage());
+
+        Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
+
+        String detailedMessage;
+        if (violations == null || violations.isEmpty()) {
+            detailedMessage = "Validation failed with no specific details.";
+        } else {
+            detailedMessage = violations.stream()
+                .sorted(Comparator.comparing(v -> v.getPropertyPath().toString()))
+                .map(violation -> String.format("%s: %s", violation.getPropertyPath(), violation.getMessage()))
+                .collect(Collectors.joining(", ", "Validation failed: ", ""));
+        }
+
+        exceptionResponse.setMessage(detailedMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 }

@@ -17,7 +17,6 @@ import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
@@ -27,10 +26,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
 import greencity.service.ubs.UBSClientService;
-import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -72,7 +68,6 @@ import java.util.Optional;
 @Slf4j
 public class OrderController {
     private final UBSClientService ubsClientService;
-    private final UBSManagementService ubsManagementService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
