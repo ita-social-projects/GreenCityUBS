@@ -76,15 +76,15 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files) {
         TelegramChat chat = telegramChatRepository.findById(request.getChatId())
-                .orElseThrow(() -> new NotFoundException("Chat not found"));
+            .orElseThrow(() -> new NotFoundException("Chat not found"));
 
         TelegramMessage message = TelegramMessage.builder()
-                .chat(chat)
-                .text(request.getText())
-                .fromManager(true)
-                .status(MessageDeliveryStatus.SENT)
-                .sendAt(LocalDateTime.now())
-                .build();
+            .chat(chat)
+            .text(request.getText())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .sendAt(LocalDateTime.now())
+            .build();
 
         var bot = applicationContext.getBean(UBSTelegramBot.class);
 
@@ -100,7 +100,7 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private List<MessageAsset> handleFiles(UBSTelegramBot bot, TelegramChat chat,
-                                           TelegramMessage message, MultipartFile[] files) {
+        TelegramMessage message, MultipartFile[] files) {
         List<MessageAsset> assets = new ArrayList<>();
         if (files == null) {
             return assets;
@@ -113,13 +113,13 @@ public class TelegramServiceImpl implements TelegramService {
             AssetType assetType = TelegramUtils.detectAssetType(file);
 
             MessageAsset asset = MessageAsset.builder()
-                    .url(url)
-                    .fileName(file.getOriginalFilename())
-                    .size(file.getSize())
-                    .contentType(file.getContentType())
-                    .type(assetType)
-                    .message(message)
-                    .build();
+                .url(url)
+                .fileName(file.getOriginalFilename())
+                .size(file.getSize())
+                .contentType(file.getContentType())
+                .type(assetType)
+                .message(message)
+                .build();
             assets.add(asset);
 
             sendFileByType(bot, chat, file, assetType);
@@ -135,7 +135,7 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private void sendFileByType(UBSTelegramBot bot, TelegramChat chat,
-                                MultipartFile file, AssetType assetType) {
+        MultipartFile file, AssetType assetType) {
         try {
             if (assetType == AssetType.FILE) {
                 sendAsDocument(bot, chat, file);
@@ -150,7 +150,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     private void sendAsDocument(UBSTelegramBot bot, TelegramChat chat, MultipartFile file) throws IOException {
         log.info("Sending document: {} filename: {} to chat ID: {}",
-                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
         var sendFile = MessageFactory.createSendDocument(chat.getChatId(), file);
         executor.executeSendFile(bot, sendFile);
     }
@@ -160,12 +160,12 @@ public class TelegramServiceImpl implements TelegramService {
 
         if (canSendAsPhoto) {
             log.info("Sending image as photo: {} filename: {} to chat ID: {}",
-                    file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
             var sendPhotoMessage = MessageFactory.createSendPhoto(chat.getChatId(), file);
             executor.executeSendPhoto(bot, sendPhotoMessage);
         } else {
             log.info("Sending image as document: {} filename: {} to chat ID: {}",
-                    file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
             var sendDocumentMessage = MessageFactory.createSendDocument(chat.getChatId(), file);
             executor.executeSendFile(bot, sendDocumentMessage);
         }
@@ -187,7 +187,6 @@ public class TelegramServiceImpl implements TelegramService {
 
         return sizeOk && dimensionsOk && aspectOk;
     }
-
 
     /**
      *
