@@ -143,7 +143,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> addCertificate(
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
         certificateService.addCertificate(certificateDtoForAdding);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -166,7 +166,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> deleteCertificate(
         @PathVariable String responseCode) {
         certificateService.deleteCertificate(responseCode);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -248,7 +248,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> addPointsToUser(
         @Valid @RequestBody AddingPointsToUserDto addingPointsToUserDto) {
         ubsManagementService.addPointsToUser(addingPointsToUserDto);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -703,7 +703,7 @@ public class ManagementOrderController {
     public ResponseEntity<HttpStatus> deleteViolationFromOrder(@Positive @PathVariable Long orderId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         violationService.deleteViolation(orderId, uuid);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -753,7 +753,7 @@ public class ManagementOrderController {
     public ResponseEntity<ResponseStatus> deleteManualPayment(@Positive @PathVariable(name = "id") Long paymentId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         paymentService.deleteManualPayment(paymentId, uuid);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -816,20 +816,19 @@ public class ManagementOrderController {
      */
     @Operation(summary = "Update Violation to User")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @ApiLocale
-    @ResponseStatus(value = HttpStatus.CREATED)
     @PutMapping(value = "/updateViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart UpdateViolationToUserDto add,
         @Nullable @RequestPart(required = false) @ValidImage MultipartFile[] multipartFiles,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         violationService.updateUserViolation(add, multipartFiles, uuid);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**
@@ -840,19 +839,19 @@ public class ManagementOrderController {
      */
     @Operation(summary = "update eco-store id for order")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
-    @PutMapping("/update-eco-store{id}")
+    @PutMapping("/update-eco-store/{id}")
     public ResponseEntity<HttpStatus> updateEcoStoreIdToOrder(
         @RequestBody @Valid EcoNumberDto ecoNumberDto, @Positive @PathVariable(name = "id") Long orderId,
         Principal principal) {
         ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, orderId, principal.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**
@@ -870,7 +869,7 @@ public class ManagementOrderController {
 
     @Operation(summary = "update order admin page info and save reason if needed")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
@@ -889,7 +888,7 @@ public class ManagementOrderController {
             ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
                 principal.getName(), images);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(bigOrderTableDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(bigOrderTableDTO);
     }
 
     /**
@@ -901,7 +900,7 @@ public class ManagementOrderController {
      */
     @Operation(summary = "update all order admin page info")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
@@ -913,7 +912,7 @@ public class ManagementOrderController {
         @RequestBody @Valid UpdateAllOrderPageDto updateAllOrderPageDto, Principal principal,
         @RequestParam String lang) {
         ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, principal.getName(), lang);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**
