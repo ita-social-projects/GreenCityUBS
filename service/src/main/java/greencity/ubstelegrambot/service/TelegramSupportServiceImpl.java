@@ -114,18 +114,28 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .max(Comparator.comparing(PhotoSize::getFileSize))
                 .orElse(null);
 
-            if (largestPhoto != null) {
-                fileId = largestPhoto.getFileId();
-                fileSize = largestPhoto.getFileSize().longValue();
+            if (largestPhoto == null) {
+                if (previouslySavedMessage.isEmpty()) {
+                    telegramMessageRepository.delete(telegramMessage);
+                }
+                return MessageFactory.buildMessage(message.getChatId().toString(),
+                    TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
             }
+            fileId = largestPhoto.getFileId();
+            fileSize = largestPhoto.getFileSize().longValue();
         } else if (message.hasDocument()) {
             Document document = message.getDocument();
-            if (document != null) {
-                fileId = document.getFileId();
-                fileSize = document.getFileSize();
-                contentType = document.getMimeType();
-                originalFileName = document.getFileName();
+            if (document == null) {
+                if (previouslySavedMessage.isEmpty()) {
+                    telegramMessageRepository.delete(telegramMessage);
+                }
+                return MessageFactory.buildMessage(message.getChatId().toString(),
+                    TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_FILE_PLEASE_TRY_AGAIN);
             }
+            fileId = document.getFileId();
+            fileSize = document.getFileSize();
+            contentType = document.getMimeType();
+            originalFileName = document.getFileName();
         }
 
         if (fileId != null) {
@@ -229,26 +239,21 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     }
 
     private static String getString(TelegramMessage telegramMessage) {
-        String contentForNotification;
+        String contentForNotification = "Empty message";
         if (telegramMessage.getAssets() != null && !telegramMessage.getAssets().isEmpty()) {
             switch (telegramMessage.getAssets().getFirst().getType()) {
                 case IMAGE -> contentForNotification = "Image content ("
-                        +
-                    telegramMessage.getAssets().size() + " images)";
-                case AUDIO -> contentForNotification = "Audio content ("
-                        +
-                    telegramMessage.getAssets().size() + " audio)";
+                        + telegramMessage.getAssets().size() + " images)";
+                //case AUDIO -> contentForNotification = "Audio content ("
+                //         + telegramMessage.getAssets().size() + " audio)";
                 default -> contentForNotification = "File content ("
-                        +
-                    telegramMessage.getAssets().size() + " files)";
+                        + telegramMessage.getAssets().size() + " files)";
             }
             if (telegramMessage.getText() != null && !telegramMessage.getText().isEmpty()) {
                 contentForNotification += " + text";
             }
         } else if (telegramMessage.getText() != null && !telegramMessage.getText().isEmpty()) {
             contentForNotification = telegramMessage.getText();
-        } else {
-            contentForNotification = "Empty message";
         }
         return contentForNotification;
     }
