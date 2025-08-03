@@ -413,6 +413,14 @@ public class MessageFactory {
         return sendPhoto;
     }
 
+    /**
+     * Creates a {@link SendDocument} object to send a file from a {@link MultipartFile} to a Telegram chat.
+     *
+     * @param chatId {@link String} the ID of the target chat
+     * @param file   {@link MultipartFile} the file to be sent as a file
+     * @return a configured {@link SendDocument} object
+     * @throws IOException if reading the file input stream fails
+     */
     public static SendDocument createSendDocument(String chatId, MultipartFile file) throws IOException {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(chatId);
