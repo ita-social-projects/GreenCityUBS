@@ -42,6 +42,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -123,11 +125,33 @@ public class TelegramServiceImpl implements TelegramService {
                         throw new RuntimeException("Unable to send file to Telegram", e);
                     }
                 } else if (assetType == AssetType.IMAGE) {
-                    log.info("Sending photo type: {} with filename: {} to chat ID: {}",
-                            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                    boolean canSendAsPhoto = false;
                     try {
-                        var sendPhotoMessage = MessageFactory.createSendPhoto(chat.getChatId(), file);
-                        executor.executeSendPhoto(bot, sendPhotoMessage);
+                        BufferedImage image = ImageIO.read(file.getInputStream());
+
+                        if (image != null) {
+                            int width = image.getWidth();
+                            int height = image.getHeight();
+                            long fileSize = file.getSize();
+
+                            boolean sizeOk = fileSize <= 10 * 1024 * 1024;
+                            boolean dimensionsOk = (width + height <= 10000);
+                            boolean aspectOk = ((double) Math.max(width, height) / Math.min(width, height) <= 20.0);
+
+                            canSendAsPhoto = sizeOk && dimensionsOk && aspectOk;
+                        }
+
+                        if (canSendAsPhoto) {
+                            log.info("Sending image type as photo: {} with filename: {} to chat ID: {}",
+                                    file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                            var sendPhotoMessage = MessageFactory.createSendPhoto(chat.getChatId(), file);
+                            executor.executeSendPhoto(bot, sendPhotoMessage);
+                        } else {
+                            log.info("Sending image type as document: {} with filename: {} to chat ID: {}",
+                                    file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                            var sendDocumentMessage = MessageFactory.createSendDocument(chat.getChatId(), file);
+                            executor.executeSendFile(bot, sendDocumentMessage);
+                        }
                     } catch (IOException e) {
                         log.error("Failed to send image to Telegram", e);
                         throw new RuntimeException("Unable to send image to Telegram", e);
