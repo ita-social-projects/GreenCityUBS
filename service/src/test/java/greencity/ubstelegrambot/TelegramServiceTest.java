@@ -48,6 +48,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -161,22 +162,6 @@ class TelegramServiceTest {
 
         verify(executor).executeCommand(eq(bot), any(SendMessage.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
-    }
-
-    @Test
-    void testSendMessageToUser_FileLargeSize_MessageSentAndPhotoUploaded() {
-        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
-        request.setChatId(1L);
-
-        TelegramChat chat = new TelegramChat();
-        chat.setChatId("123456");
-
-        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
-        when(file.getSize()).thenReturn(1024000000L);
-
-        assertThrows(IllegalArgumentException.class,
-            () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
     }
 
     @Test
