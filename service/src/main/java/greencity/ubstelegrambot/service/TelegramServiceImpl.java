@@ -115,11 +115,10 @@ public class TelegramServiceImpl implements TelegramService {
 
                 if (assetType == AssetType.FILE) {
                     log.info("Sending document type: {} with filename: {} to chat ID: {}",
-                            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                        file.getContentType(), file.getOriginalFilename(), chat.getChatId());
                     try {
                         var sendFile = MessageFactory.createSendDocument(chat.getChatId(), file);
                         executor.executeSendFile(bot, sendFile);
-
                     } catch (IOException e) {
                         log.error("Failed to send file to Telegram", e);
                         throw new RuntimeException("Unable to send file to Telegram", e);
@@ -143,12 +142,12 @@ public class TelegramServiceImpl implements TelegramService {
 
                         if (canSendAsPhoto) {
                             log.info("Sending image type as photo: {} with filename: {} to chat ID: {}",
-                                    file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
                             var sendPhotoMessage = MessageFactory.createSendPhoto(chat.getChatId(), file);
                             executor.executeSendPhoto(bot, sendPhotoMessage);
                         } else {
                             log.info("Sending image type as document: {} with filename: {} to chat ID: {}",
-                                    file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+                                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
                             var sendDocumentMessage = MessageFactory.createSendDocument(chat.getChatId(), file);
                             executor.executeSendFile(bot, sendDocumentMessage);
                         }

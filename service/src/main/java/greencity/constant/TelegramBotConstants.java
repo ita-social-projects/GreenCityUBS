@@ -19,7 +19,7 @@ public class TelegramBotConstants {
     public static final String MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN =
         "Менеджер не зміг отримати ваше фото, спробуйте будь ласка, знову";
     public static final String MANAGER_DIDNT_RECEIVED_YOUR_FILE_PLEASE_TRY_AGAIN =
-            "Менеджер не зміг отримати ваш файл, спробуйте будь ласка, знову";
+        "Менеджер не зміг отримати ваш файл, спробуйте будь ласка, знову";
     public static final String GREETING_MESSAGE =
         """
             Привіт! Я бот і допомагаю своїм колегам-менеджеркам обробляти запити.

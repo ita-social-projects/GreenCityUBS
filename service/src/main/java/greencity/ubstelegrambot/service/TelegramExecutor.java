@@ -64,8 +64,9 @@ public class TelegramExecutor {
     /**
      * Sends a file to a Telegram user.
      *
-     * @param bot  {@link UBSTelegramBot} the Telegram bot instance
-     * @param message {@link SendDocument} the SendPhoto method containing the file and details
+     * @param bot     {@link UBSTelegramBot} the Telegram bot instance
+     * @param message {@link SendDocument} the SendPhoto method containing the file
+     *                and details
      * @throws MessageWasNotSent if the file cannot be sent
      */
     public void executeSendFile(UBSTelegramBot bot, SendDocument message) {

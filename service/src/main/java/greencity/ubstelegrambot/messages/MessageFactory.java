@@ -399,7 +399,8 @@ public class MessageFactory {
     }
 
     /**
-     * Creates a {@link SendPhoto} object to send a photo from a {@link MultipartFile} to a Telegram chat.
+     * Creates a {@link SendPhoto} object to send a photo from a
+     * {@link MultipartFile} to a Telegram chat.
      *
      * @param chatId {@link String} the ID of the target chat
      * @param file   {@link MultipartFile} the file to be sent as a photo
@@ -414,7 +415,8 @@ public class MessageFactory {
     }
 
     /**
-     * Creates a {@link SendDocument} object to send a file from a {@link MultipartFile} to a Telegram chat.
+     * Creates a {@link SendDocument} object to send a file from a
+     * {@link MultipartFile} to a Telegram chat.
      *
      * @param chatId {@link String} the ID of the target chat
      * @param file   {@link MultipartFile} the file to be sent as a file

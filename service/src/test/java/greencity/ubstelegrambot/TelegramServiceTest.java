@@ -801,9 +801,8 @@ class TelegramServiceTest {
         when(file.getSize()).thenReturn(51L * 1024 * 1024);
 
         IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> telegramService.sendMessageToUser(request, new MultipartFile[]{file})
-        );
+            IllegalArgumentException.class,
+            () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
 
         assertEquals("File size exceeds Telegram bot limit (50MB)", exception.getMessage());
 
@@ -826,7 +825,7 @@ class TelegramServiceTest {
         when(file.getSize()).thenReturn(1024L);
         when(file.getContentType()).thenReturn("application/pdf");
 
-        telegramService.sendMessageToUser(request, new MultipartFile[]{file});
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
         verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
         verify(telegramMessageRepository).save(any());
@@ -848,13 +847,12 @@ class TelegramServiceTest {
 
         try (MockedStatic<MessageFactory> messageFactoryMock = mockStatic(MessageFactory.class)) {
             messageFactoryMock
-                    .when(() -> MessageFactory.createSendDocument(anyString(), any(MultipartFile.class)))
-                    .thenThrow(new IOException("Simulated IO error"));
+                .when(() -> MessageFactory.createSendDocument(anyString(), any(MultipartFile.class)))
+                .thenThrow(new IOException("Simulated IO error"));
 
             RuntimeException exception = assertThrows(
-                    RuntimeException.class,
-                    () -> telegramService.sendMessageToUser(request, new MultipartFile[]{file})
-            );
+                RuntimeException.class,
+                () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
 
             assertTrue(exception.getMessage().contains("Unable to send file to Telegram"));
             verify(executor, never()).executeSendFile(any(), any());

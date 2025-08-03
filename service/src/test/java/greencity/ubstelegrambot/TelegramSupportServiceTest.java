@@ -349,9 +349,9 @@ class TelegramSupportServiceTest {
         when(message.getDocument()).thenReturn(null);
 
         TelegramChat chat = TelegramChat.builder()
-                .id(1L)
-                .chatId("1")
-                .build();
+            .id(1L)
+            .chatId("1")
+            .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
 
@@ -374,9 +374,9 @@ class TelegramSupportServiceTest {
         when(message.hasDocument()).thenReturn(false);
 
         TelegramChat chat = TelegramChat.builder()
-                .id(1L)
-                .chatId("1")
-                .build();
+            .id(1L)
+            .chatId("1")
+            .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
 
@@ -406,13 +406,13 @@ class TelegramSupportServiceTest {
 
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
         when(file.getFilePath()).thenReturn("/path/to/file.pdf");
-        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[]{1, 2, 3});
+        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any())).thenReturn("https://azure.com/file");
 
         TelegramChat chat = TelegramChat.builder()
-                .id(1L)
-                .chatId("1")
-                .build();
+            .id(1L)
+            .chatId("1")
+            .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
 
@@ -433,9 +433,9 @@ class TelegramSupportServiceTest {
         Message message = mock(Message.class);
         User user = mock(User.class);
         TelegramChat chat = TelegramChat.builder()
-                .chatId(chatId)
-                .id(1L)
-                .build();
+            .chatId(chatId)
+            .id(1L)
+            .build();
 
         when(user.getId()).thenReturn(userId);
         when(message.getFrom()).thenReturn(user);
@@ -481,13 +481,13 @@ class TelegramSupportServiceTest {
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
         when(file.getFilePath()).thenReturn("/path/to/file.pdf");
 
-        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[]{1, 2, 3});
+        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any())).thenReturn("https://azure.com/file");
 
         TelegramChat chat = TelegramChat.builder()
-                .id(1L)
-                .chatId("1")
-                .build();
+            .id(1L)
+            .chatId("1")
+            .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
 
@@ -503,10 +503,10 @@ class TelegramSupportServiceTest {
 
     @Test
     void testProcessSupportMessage_ImageWithCaption_ShouldCreateCorrectNotificationContent() throws Exception {
-        long chatDbId   = 1L;
-        String chatId   = "1";
+        long chatDbId = 1L;
+        String chatId = "1";
         String username = "tg_user";
-        String caption  = "Hello, manager!";
+        String caption = "Hello, manager!";
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -527,28 +527,26 @@ class TelegramSupportServiceTest {
         when(message.getCaption()).thenReturn(caption);
 
         TelegramChat chat = TelegramChat.builder()
-                .id(chatDbId)
-                .chatId(chatId)
-                .build();
+            .id(chatDbId)
+            .chatId(chatId)
+            .build();
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
 
         when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
         when(file.getFilePath()).thenReturn("/path/photo.jpeg");
-        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[]{1, 2, 3});
+        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any(MultipartFile.class))).thenReturn("https://azure.com/photo");
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
-
         assertTrue(result.getText()
-                .contains(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE));
+            .contains(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE));
 
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(
-                eq(username),
-                contentCaptor.capture(),
-                eq(chatDbId)
-        );
+            eq(username),
+            contentCaptor.capture(),
+            eq(chatDbId));
         assertEquals("Image content (1 images) + text", contentCaptor.getValue());
 
         verify(fileService).upload(any(MultipartFile.class));
