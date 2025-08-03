@@ -96,11 +96,11 @@ class TelegramExecutorTest {
     void executeSendFileTestCatchesException() throws Exception {
         SendDocument sendDocument = Mockito.mock(SendDocument.class);
         when(ubsTelegramBot.execute(sendDocument))
-                .thenThrow(new TelegramApiException());
+            .thenThrow(new TelegramApiException());
 
         assertThrows(
-                MessageWasNotSent.class,
-                () -> telegramExecutor.executeSendFile(ubsTelegramBot, sendDocument));
+            MessageWasNotSent.class,
+            () -> telegramExecutor.executeSendFile(ubsTelegramBot, sendDocument));
         verify(ubsTelegramBot).execute(sendDocument);
     }
 }

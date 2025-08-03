@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -48,6 +50,12 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -149,7 +157,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void testSendMessageToUser_OnlyFile_MessageSentAndPhotoUploaded() {
+    void testSendMessageToUser_FileLargeSize_MessageSentAndPhotoUploaded() {
         CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
         request.setChatId(1L);
 
@@ -158,20 +166,14 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
-        when(file.getOriginalFilename()).thenReturn("image.png");
-        when(file.getSize()).thenReturn(1024L);
-        when(file.getContentType()).thenReturn("image/png");
-        when(azureCloudStorageService.upload(file)).thenReturn("http://azure.com/image.png");
+        when(file.getSize()).thenReturn(1024000000L);
 
-        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
-
-        verify(azureCloudStorageService).upload(file);
-        verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
-        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        assertThrows(IllegalArgumentException.class,
+            () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
     }
 
     @Test
-    void testSendMessageToUser_TextAndFile_MessageSentAndPhotoUploaded() {
+    void testSendMessageToUser_FileUnknownContentType_MessageSentAndPhotoUploaded() {
         CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
         request.setChatId(1L);
         request.setText("Hi");
@@ -179,18 +181,71 @@ class TelegramServiceTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123456");
 
-        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
-        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("image.svg");
         when(file.getSize()).thenReturn(2048L);
-        when(file.getContentType()).thenReturn("image/png");
+        when(file.getContentType()).thenReturn(null);
         when(azureCloudStorageService.upload(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(executor).executeCommand(eq(bot), any(SendMessage.class));
+        verify(azureCloudStorageService).upload(file);
+        verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
+    }
+
+    @Test
+    void testSendMessageToUser_FileImageContentTypeLargeDimensions_MessageSentAndPhotoUploaded() throws IOException {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        BufferedImage img = new BufferedImage(10000, 10000, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(file.getSize()).thenReturn(2048L);
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getInputStream()).thenReturn(bais);
+        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(azureCloudStorageService).upload(file);
+        verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
+    }
+
+    @Test
+    void testSendMessageToUser_FileImageContentTypeNormalDimensions_MessageSentAndPhotoUploaded() throws IOException {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        BufferedImage img = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(file.getSize()).thenReturn(2048L);
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getInputStream()).thenReturn(bais);
+        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(azureCloudStorageService).upload(file);
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
-        verify(telegramMessageRepository).save(any(TelegramMessage.class));
     }
 
     @Test

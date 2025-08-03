@@ -30,7 +30,6 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,16 +88,16 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             telegramMessage = previouslySavedMessage.get();
         } else {
             String messageText = Optional.ofNullable(message.getText())
-                    .orElse(message.getCaption());
+                .orElse(message.getCaption());
 
             telegramMessage = TelegramMessage.builder()
-                    .chat(chat)
-                    .fromManager(false)
-                    .mediaGroupId(mediaGroupId)
-                    .status(MessageDeliveryStatus.SENT)
-                    .sendAt(LocalDateTime.now())
-                    .text(messageText)
-                    .build();
+                .chat(chat)
+                .fromManager(false)
+                .mediaGroupId(mediaGroupId)
+                .status(MessageDeliveryStatus.SENT)
+                .sendAt(LocalDateTime.now())
+                .text(messageText)
+                .build();
 
             telegramMessageRepository.save(telegramMessage);
         }
@@ -112,8 +111,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         if (message.hasPhoto()) {
             PhotoSize largestPhoto = message.getPhoto().stream()
-                    .max(Comparator.comparing(PhotoSize::getFileSize))
-                    .orElse(null);
+                .max(Comparator.comparing(PhotoSize::getFileSize))
+                .orElse(null);
 
             if (largestPhoto != null) {
                 fileId = largestPhoto.getFileId();
@@ -135,10 +134,10 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 if (telegramFile == null || telegramFile.getFilePath() == null) {
                     log.warn("Telegram file not found for fileId: {}", fileId);
                     return MessageFactory.buildMessage(message.getChatId().toString(),
-                            TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
+                        TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
                 }
 
-                if(message.hasPhoto()) {
+                if (message.hasPhoto()) {
                     contentType = TelegramUtils.getFileContentType(telegramFile.getFilePath());
                     originalFileName = TelegramUtils.getFileNameFromPath(telegramFile.getFilePath());
                 }
@@ -153,21 +152,21 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 byte[] content = telegramUtils.fileToByteArray(telegramFile);
 
                 MultipartFile multipartFile = new SimpleMultipartFile(content,
-                        originalFileName,
-                        originalFileName,
-                        contentType);
+                    originalFileName,
+                    originalFileName,
+                    contentType);
 
                 String azureFileUrl = fileService.upload(multipartFile);
                 assetType = TelegramUtils.detectAssetType(contentType);
 
                 MessageAsset asset = MessageAsset.builder()
-                        .url(azureFileUrl)
-                        .fileName(originalFileName)
-                        .size(fileSize)
-                        .contentType(contentType)
-                        .type(assetType)
-                        .message(telegramMessage)
-                        .build();
+                    .url(azureFileUrl)
+                    .fileName(originalFileName)
+                    .size(fileSize)
+                    .contentType(contentType)
+                    .type(assetType)
+                    .message(telegramMessage)
+                    .build();
 
                 if (previouslySavedMessage.isPresent()) {
                     List<MessageAsset> existingAssets = new ArrayList<>(telegramMessage.getAssets());
@@ -178,37 +177,38 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 }
                 messageAssetRepository.save(asset);
             } catch (Exception e) {
-                log.error("Error loading or saving file from Telegram (Filename: {}): {}", originalFileName, e.getMessage(), e);
+                log.error("Error loading or saving file from Telegram (Filename: {}): {}", originalFileName,
+                    e.getMessage(), e);
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                        TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
+                    TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
             }
         } else if (!message.hasText() && !message.hasPhoto() && !message.hasDocument()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                    TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
+                TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
         }
 
         List<MessageAssetDto> assetDtos = Optional.ofNullable(telegramMessage.getAssets())
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(asset -> MessageAssetDto.builder()
-                        .id(asset.getId())
-                        .url(asset.getUrl())
-                        .type(asset.getType())
-                        .fileName(asset.getFileName())
-                        .size(asset.getSize())
-                        .contentType(asset.getContentType())
-                        .build())
-                .toList();
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(asset -> MessageAssetDto.builder()
+                .id(asset.getId())
+                .url(asset.getUrl())
+                .type(asset.getType())
+                .fileName(asset.getFileName())
+                .size(asset.getSize())
+                .contentType(asset.getContentType())
+                .build())
+            .toList();
 
         TelegramMessageDto.TelegramMessageDtoBuilder telegramMessageDtoBuilder = TelegramMessageDto
-                .builder()
-                .id(telegramMessage.getId())
-                .sendAt(telegramMessage.getSendAt())
-                .text(telegramMessage.getText())
-                .fromManager(telegramMessage.getFromManager())
-                .deliveryStatus(telegramMessage.getStatus())
-                .assets(assetDtos);
+            .builder()
+            .id(telegramMessage.getId())
+            .sendAt(telegramMessage.getSendAt())
+            .text(telegramMessage.getText())
+            .fromManager(telegramMessage.getFromManager())
+            .deliveryStatus(telegramMessage.getStatus())
+            .assets(assetDtos);
 
         if (previouslySavedMessage.isEmpty()) {
             telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
@@ -216,11 +216,11 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             String contentForNotification = getString(telegramMessage);
 
             telegramNotificationService.notifyManagerAboutNewMessagesFromUser(
-                    Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
-                    contentForNotification,
-                    chat.getId());
+                Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
+                contentForNotification,
+                chat.getId());
             return MessageFactory.buildMessage(chat.getChatId(),
-                    TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
+                TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
         } else {
             telegramMessageRepository.save(telegramMessage);
             log.info("Added asset to existing media group message: {}", mediaGroupId);
@@ -232,12 +232,15 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         String contentForNotification;
         if (telegramMessage.getAssets() != null && !telegramMessage.getAssets().isEmpty()) {
             switch (telegramMessage.getAssets().getFirst().getType()) {
-                case IMAGE ->  contentForNotification = "Image content (" +
-                        telegramMessage.getAssets().size() + " images)";
-                case AUDIO -> contentForNotification = "Audio content (" +
-                        telegramMessage.getAssets().size() + " audio)";
-                default -> contentForNotification = "File content (" +
-                        telegramMessage.getAssets().size() + " files)";
+                case IMAGE -> contentForNotification = "Image content ("
+                        +
+                    telegramMessage.getAssets().size() + " images)";
+                case AUDIO -> contentForNotification = "Audio content ("
+                        +
+                    telegramMessage.getAssets().size() + " audio)";
+                default -> contentForNotification = "File content ("
+                        +
+                    telegramMessage.getAssets().size() + " files)";
             }
             if (telegramMessage.getText() != null && !telegramMessage.getText().isEmpty()) {
                 contentForNotification += " + text";
