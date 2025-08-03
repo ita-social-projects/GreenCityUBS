@@ -140,7 +140,7 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_CERTIFICATE', authentication)")
     @PostMapping("/addCertificate")
-    public ResponseEntity<HttpStatus> addCertificate(
+    public ResponseEntity<Void> addCertificate(
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
         certificateService.addCertificate(certificateDtoForAdding);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -163,7 +163,7 @@ public class ManagementOrderController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_CERTIFICATE', authentication)")
     @DeleteMapping("/deleteCertificate/{responseCode}")
-    public ResponseEntity<HttpStatus> deleteCertificate(
+    public ResponseEntity<Void> deleteCertificate(
         @PathVariable String responseCode) {
         certificateService.deleteCertificate(responseCode);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -245,7 +245,7 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
     @PatchMapping(value = "/addPointsToUser")
-    public ResponseEntity<HttpStatus> addPointsToUser(
+    public ResponseEntity<Void> addPointsToUser(
         @Valid @RequestBody AddingPointsToUserDto addingPointsToUserDto) {
         ubsManagementService.addPointsToUser(addingPointsToUserDto);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -301,7 +301,7 @@ public class ManagementOrderController {
     })
     @PostMapping(value = "/addViolationToUser",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
+    public ResponseEntity<Void> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
         @RequestPart(required = false) @Nullable @ValidImage MultipartFile[] files,
         Principal principal) {
         violationService.addUserViolation(add, files, principal.getName());
@@ -700,7 +700,7 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @DeleteMapping("/delete-violation-from-order/{orderId}")
-    public ResponseEntity<HttpStatus> deleteViolationFromOrder(@Positive @PathVariable Long orderId,
+    public ResponseEntity<Void> deleteViolationFromOrder(@Positive @PathVariable Long orderId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         violationService.deleteViolation(orderId, uuid);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -750,7 +750,7 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @DeleteMapping("/delete-manual-payment/{id}")
-    public ResponseEntity<ResponseStatus> deleteManualPayment(@Positive @PathVariable(name = "id") Long paymentId,
+    public ResponseEntity<Void> deleteManualPayment(@Positive @PathVariable(name = "id") Long paymentId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         paymentService.deleteManualPayment(paymentId, uuid);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -824,7 +824,7 @@ public class ManagementOrderController {
     })
     @ApiLocale
     @PutMapping(value = "/updateViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart UpdateViolationToUserDto add,
+    public ResponseEntity<Void> updateUsersViolation(@Valid @RequestPart UpdateViolationToUserDto add,
         @Nullable @RequestPart(required = false) @ValidImage MultipartFile[] multipartFiles,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         violationService.updateUserViolation(add, multipartFiles, uuid);
@@ -847,7 +847,7 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
     @PutMapping("/update-eco-store/{id}")
-    public ResponseEntity<HttpStatus> updateEcoStoreIdToOrder(
+    public ResponseEntity<Void> updateEcoStoreIdToOrder(
         @RequestBody @Valid EcoNumberDto ecoNumberDto, @Positive @PathVariable(name = "id") Long orderId,
         Principal principal) {
         ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, orderId, principal.getName());
@@ -908,7 +908,7 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
     @PutMapping("/all-order-page-admin-info")
-    public ResponseEntity<HttpStatus> updateAllOrderPageAdminInfo(
+    public ResponseEntity<Void> updateAllOrderPageAdminInfo(
         @RequestBody @Valid UpdateAllOrderPageDto updateAllOrderPageDto, Principal principal,
         @RequestParam String lang) {
         ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, principal.getName(), lang);
