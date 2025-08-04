@@ -252,11 +252,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({GreenCityUserServiceException.class, WebClientRequestException.class,
         WebClientResponseException.class})
     public final ResponseEntity<Object> handleUserServiceException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         if (ex instanceof WebClientRequestException) {
             Map<String, String> errorBody = Map.of(AppConstant.MESSAGE, ErrorMessage.USER_APP_UNAVAILABLE);
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorBody);
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
         }
-        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.error(exceptionResponse.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
     }

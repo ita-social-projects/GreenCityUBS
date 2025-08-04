@@ -45,7 +45,7 @@ class UserRemoteWebClientConfigTest {
     }
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         when(jwtTool.createAccessToken(anyString(), anyInt()))
             .thenReturn("mocked-jwt-token");
 
@@ -114,6 +114,26 @@ class UserRemoteWebClientConfigTest {
             Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
 
             Assertions.assertEquals("GreenCityUserServiceException", cause.getClass().getSimpleName());
+            Assertions.assertTrue(cause.getMessage().contains("Internal Server Error from API"));
+        }
+    }
+
+    @Test
+    void handleWebClientExceptionWithDefaultThrowsIllegalArgumentExceptionTest() {
+        mockWebServer.enqueue(new MockResponse()
+            .setResponseCode(503)
+            .setBody("{\"message\": \"Internal Server Error from API\"}")
+            .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+
+        Mono<String> result = webClient.get().uri("/").retrieve().bodyToMono(String.class);
+
+        try {
+            result.block();
+            Assertions.fail("Expected IllegalStateException to be thrown");
+        } catch (Exception ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+
+            Assertions.assertEquals("IllegalStateException", cause.getClass().getSimpleName());
             Assertions.assertTrue(cause.getMessage().contains("Internal Server Error from API"));
         }
     }

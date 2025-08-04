@@ -6,6 +6,7 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.GreenCityUserServiceException;
+import greencity.exceptions.JsonParsingException;
 import greencity.exceptions.NotFoundException;
 import greencity.security.JwtTool;
 import io.netty.channel.ChannelOption;
@@ -98,7 +99,7 @@ public class UserRemoteWebClientConfig {
         try {
             return new ObjectMapper().readValue(errorBody, JsonMessage.class).message();
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new JsonParsingException();
         }
     }
 }

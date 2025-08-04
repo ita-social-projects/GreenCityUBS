@@ -1,5 +1,6 @@
 package greencity.exception.handler;
 
+import greencity.exceptions.GreenCityUserServiceException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -7,9 +8,13 @@ import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.api.GoogleApiException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.exceptions.validation.ValidationException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +31,8 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -72,6 +79,15 @@ class CustomExceptionHandlerTest {
 
     @Mock
     NotFoundException notFoundException;
+
+    @Mock
+    private static GreenCityUserServiceException greenCityUserServiceException;
+
+    @Mock
+    private static WebClientRequestException webClientRequestException;
+
+    @Mock
+    private static WebClientResponseException webClientResponseException;
 
     @Mock
     HttpStatus status;
@@ -246,5 +262,34 @@ class CustomExceptionHandlerTest {
         assertEquals(customExceptionHandler.handleWrongSignatureException(wrongSignatureException, webRequest),
             ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleUserServiceExceptionWithWebClientRequestExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleUserServiceException(webClientRequestException, webRequest),
+            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideExceptionsForHandleUserServiceException")
+    void handleUserServiceExceptionTest(Exception exception, HttpStatus expectedStatus) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleUserServiceException(exception, webRequest),
+            ResponseEntity.status(expectedStatus).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    private static Stream<Arguments> provideExceptionsForHandleUserServiceException() {
+        return Stream.of(
+            Arguments.of(webClientRequestException, HttpStatus.SERVICE_UNAVAILABLE),
+            Arguments.of(greenCityUserServiceException, HttpStatus.INTERNAL_SERVER_ERROR),
+            Arguments.of(webClientResponseException, HttpStatus.INTERNAL_SERVER_ERROR)
+        );
     }
 }
