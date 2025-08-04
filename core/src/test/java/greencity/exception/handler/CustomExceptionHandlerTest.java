@@ -289,7 +289,6 @@ class CustomExceptionHandlerTest {
         return Stream.of(
             Arguments.of(webClientRequestException, HttpStatus.SERVICE_UNAVAILABLE),
             Arguments.of(greenCityUserServiceException, HttpStatus.INTERNAL_SERVER_ERROR),
-            Arguments.of(webClientResponseException, HttpStatus.INTERNAL_SERVER_ERROR)
-        );
+            Arguments.of(webClientResponseException, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 }
