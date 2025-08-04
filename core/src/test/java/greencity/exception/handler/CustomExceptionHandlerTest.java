@@ -1,5 +1,10 @@
 package greencity.exception.handler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 import greencity.exceptions.GreenCityUserServiceException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
@@ -8,6 +13,14 @@ import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.api.GoogleApiException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.exceptions.validation.ValidationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,17 +41,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CustomExceptionHandlerTest {
@@ -261,6 +265,88 @@ class CustomExceptionHandlerTest {
             .thenReturn(objectMap);
         assertEquals(customExceptionHandler.handleWrongSignatureException(wrongSignatureException, webRequest),
             ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleConstraintViolationExceptionSingleViolation() {
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        Path path = mock(Path.class);
+
+        when(path.toString()).thenReturn("fieldName");
+        when(violation.getPropertyPath()).thenReturn(path);
+        when(violation.getMessage()).thenReturn("must not be null");
+
+        ConstraintViolationException ex = new ConstraintViolationException(Set.of(violation));
+
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+
+        ExceptionResponse expectedResponse = new ExceptionResponse(objectMap);
+        expectedResponse.setMessage("Validation failed: fieldName: must not be null");
+
+        ResponseEntity<Object> response =
+            customExceptionHandler.handleConstraintViolationException(ex, webRequest);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleConstraintViolationExceptionMultipleViolations() {
+        ConstraintViolation<?> violation1 = mock(ConstraintViolation.class);
+        ConstraintViolation<?> violation2 = mock(ConstraintViolation.class);
+        Path path1 = mock(Path.class);
+        Path path2 = mock(Path.class);
+
+        when(path1.toString()).thenReturn("username");
+        when(path2.toString()).thenReturn("password");
+
+        when(violation1.getPropertyPath()).thenReturn(path1);
+        when(violation1.getMessage()).thenReturn("must not be null");
+
+        when(violation2.getPropertyPath()).thenReturn(path2);
+        when(violation2.getMessage()).thenReturn("size must be at least 3");
+
+        Set<ConstraintViolation<?>> orderedViolations = new LinkedHashSet<>();
+        orderedViolations.add(violation1);
+        orderedViolations.add(violation2);
+
+        ConstraintViolationException ex = new ConstraintViolationException(orderedViolations);
+
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+
+        ExceptionResponse expectedResponse = new ExceptionResponse(objectMap);
+        expectedResponse.setMessage("Validation failed: password: size must be at least 3, username: must not be null");
+
+        ResponseEntity<Object> response =
+            customExceptionHandler.handleConstraintViolationException(ex, webRequest);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleConstraintViolationExceptionWithNoViolations() {
+        ConstraintViolationException ex = new ConstraintViolationException(Collections.emptySet());
+
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+
+        ExceptionResponse expectedResponse = new ExceptionResponse(objectMap);
+        expectedResponse.setMessage("Validation failed with no specific details.");
+
+        ResponseEntity<Object> response =
+            customExceptionHandler.handleConstraintViolationException(ex, webRequest);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
 

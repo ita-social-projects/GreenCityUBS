@@ -166,7 +166,7 @@ public class AddressController {
      *
      * @param region Name of the region.
      * @param city   Name of the city.
-     * @return A List of LocationDtos containing a list of all districts for the
+     * @return A List of LocationDTOs containing a list of all districts for the
      *         specified region and city.
      */
     @Operation(summary = "Get all districts for a given region and city",
@@ -188,7 +188,7 @@ public class AddressController {
     /**
      * Returns a list of all districts for Kyiv.
      *
-     * @return A list of DistrictDtos containing all districts for Kyiv.
+     * @return A list of DistrictDTOs containing all districts for Kyiv.
      */
     @Operation(summary = "Get all districts for Kyiv")
     @ApiResponses(value = {

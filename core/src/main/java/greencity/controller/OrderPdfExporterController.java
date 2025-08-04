@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.core.io.Resource;
@@ -24,6 +25,7 @@ import java.util.Locale;
 @RestController
 @RequestMapping("ubs/order/pdf/export")
 @RequiredArgsConstructor
+@Validated
 public class OrderPdfExporterController {
     private final PdfExporterService pdfExporterService;
 
