@@ -13,6 +13,7 @@ import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.REFUND_CONFLICT_MONEY_AND_BONUSES;
 import static greencity.service.ubs.UBSManagementServiceImpl.FORMAT_DATE;
 import greencity.client.config.UserRemoteWebClient;
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.order.CounterOrderDetailsDto;
@@ -369,7 +370,7 @@ public class PaymentServiceImpl implements PaymentService {
                 try {
                     userRemoteWebClient.deleteFile(updatePayment.getImagePath());
                 } catch (WebClientRequestException | WebClientResponseException e) {
-                    log.warn("User service is unavailable: {}", e.getMessage());
+                    log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
                 }
             }
             updatePayment.setImagePath(null);
@@ -378,7 +379,7 @@ public class PaymentServiceImpl implements PaymentService {
             try {
                 updatePayment.setImagePath(userRemoteWebClient.uploadFile(image));
             } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}", e.getMessage());
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
         }
         return updatePayment;
@@ -414,7 +415,7 @@ public class PaymentServiceImpl implements PaymentService {
             try {
                 payment.setImagePath(userRemoteWebClient.uploadFile(image));
             } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}}", e.getMessage());
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
         }
         Employee employee = employeeRepository.findByEmail(email)

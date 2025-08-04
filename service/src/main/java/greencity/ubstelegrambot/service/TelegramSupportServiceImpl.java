@@ -155,12 +155,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 TelegramUtils.getFileNameFromPath(telegramFile.getFilePath()),
                 TelegramUtils.getFileNameFromPath(telegramFile.getFilePath()),
                 TelegramUtils.getFileContentType(telegramFile.getFilePath()));
-            String azureFileUrl = "";
-            try {
-                azureFileUrl = userRemoteWebClient.uploadFile(multipartFile);
-            } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}", e.getMessage());
-            }
+            String azureFileUrl = uploadFile(multipartFile);
             AssetType assetType =
                 TelegramUtils.detectAssetType(TelegramUtils.getFileContentType(telegramFile.getFilePath()));
 
@@ -213,5 +208,15 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         return MessageFactory.buildMessage(chat.getChatId(),
             TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
+    }
+
+    private String uploadFile(MultipartFile file) {
+        String url = "";
+        try {
+            url = userRemoteWebClient.uploadFile(file);
+        } catch (WebClientRequestException | WebClientResponseException e) {
+            log.warn("User service is unavailable: {}", e.getMessage());
+        }
+        return url;
     }
 }

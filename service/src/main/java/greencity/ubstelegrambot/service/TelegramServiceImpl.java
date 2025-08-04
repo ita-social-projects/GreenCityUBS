@@ -101,12 +101,7 @@ public class TelegramServiceImpl implements TelegramService {
                     log.warn("File \"{}\" size has over than 50MB", file.getName());
                     throw new IllegalArgumentException("File size exceeds Telegram bot limit (50MB)");
                 }
-                String url = "";
-                try {
-                    url = userRemoteWebClient.uploadFile(file);
-                } catch (WebClientRequestException | WebClientResponseException e) {
-                    log.warn("User service is unavailable: {}", e.getMessage());
-                }
+                String url = uploadFile(file);
                 AssetType assetType = TelegramUtils.detectAssetType(file);
                 MessageAsset asset = MessageAsset.builder()
                     .url(url)
@@ -395,5 +390,15 @@ public class TelegramServiceImpl implements TelegramService {
 
     private void notifyNewChat(ChatDto chatDto) {
         messagingTemplate.convertAndSend("/topic/chats", chatDto);
+    }
+
+    private String uploadFile(MultipartFile file) {
+        String url = "";
+        try {
+            url = userRemoteWebClient.uploadFile(file);
+        } catch (WebClientRequestException | WebClientResponseException e) {
+            log.warn("User service is unavailable: {}", e.getMessage());
+        }
+        return url;
     }
 }

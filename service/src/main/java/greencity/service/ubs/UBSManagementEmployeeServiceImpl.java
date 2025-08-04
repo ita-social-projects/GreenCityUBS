@@ -101,7 +101,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             try {
                 employee.setImagePath(userRemoteWebClient.uploadFile(image));
             } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}", e.getMessage());
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
         } else {
             employee.setImagePath(defaultImagePath);
@@ -288,13 +288,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             try {
                 updatedEmployee.setImagePath(userRemoteWebClient.uploadFile(image));
             } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}", e.getMessage());
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
             if (!imageUrlToDelete.equals(defaultImagePath)) {
                 try {
                     userRemoteWebClient.deleteFile(upEmployee.getImagePath());
                 } catch (WebClientRequestException | WebClientResponseException e) {
-                    log.warn("User service is unavailable: {}", e.getMessage());
+                    log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
                 }
             }
         } else {
@@ -375,7 +375,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             try {
                 userRemoteWebClient.deleteFile(employee.getImagePath());
             } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}", e.getMessage());
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
             employee.setImagePath(defaultImagePath);
             employeeRepository.save(employee);

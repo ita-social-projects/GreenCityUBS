@@ -256,7 +256,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleUserServiceException(Exception ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         if (ex instanceof WebClientRequestException) {
-            Map<String, String> errorBody = Map.of(AppConstant.MESSAGE, ErrorMessage.USER_APP_UNAVAILABLE);
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
         }
         log.error(exceptionResponse.getMessage());

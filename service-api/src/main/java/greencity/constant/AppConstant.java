@@ -41,4 +41,5 @@ public class AppConstant {
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String MESSAGE = "message";
     public static final String KYIV = "Kyiv";
+    public static final String USER_SERVICE_UNAVAILABLE_LOG = "User service is unavailable: {}";
 }
