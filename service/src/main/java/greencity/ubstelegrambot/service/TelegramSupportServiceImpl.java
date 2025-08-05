@@ -95,6 +95,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .build();
 
             telegramMessageRepository.save(telegramMessage);
+
+            chat.setLastMessage(telegramMessage);
+            telegramChatRepository.save(chat);
         }
 
         TelegramMessageDto.TelegramMessageDtoBuilder telegramMessageDtoBuilder = TelegramMessageDto

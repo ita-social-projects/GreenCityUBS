@@ -125,6 +125,9 @@ public class TelegramServiceImpl implements TelegramService {
 
         message.setAssets(assets);
         telegramMessageRepository.save(message);
+
+        chat.setLastMessage(message);
+        telegramChatRepository.save(chat);
     }
 
     /**
@@ -176,7 +179,7 @@ public class TelegramServiceImpl implements TelegramService {
     public PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable) {
         Specification<TelegramChat> spec = ChatSpecifications.hasNameLike(searchTerm);
 
-        Page<TelegramChat> chats = telegramChatRepository.findAllSortedByLastMessage(spec, pageable);
+        Page<TelegramChat> chats = telegramChatRepository.findAll(spec, pageable);
 
         List<ChatDto> chatDtos = chats
             .getContent()
@@ -201,7 +204,9 @@ public class TelegramServiceImpl implements TelegramService {
                         .user(chatUserDto);
                 }
 
-                telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat).ifPresent(message -> {
+                if (chat.getLastMessage() != null) {
+                    TelegramMessage message = chat.getLastMessage();
+
                     List<MessageAssetDto> assetDtos = Optional.ofNullable(message.getAssets())
                         .orElse(Collections.emptyList())
                         .stream()
@@ -224,7 +229,8 @@ public class TelegramServiceImpl implements TelegramService {
                         .build();
 
                     chatDtoBuilder.lastMessage(lastMessage);
-                });
+                }
+
                 return chatDtoBuilder.build();
             })
             .toList();
