@@ -28,8 +28,10 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
             CallbackQuery callBackQuery = update.getCallbackQuery();
             if (callBackQuery.getData().equals(TelegramBotConstants.LOGOUT_MANAGER_CALLBACK)) {
                 telegramLoginService.logoutManager(chatId);
+                return processMainMenuRequest(chatId);
+            } else {
+                return processManagerCallBackQueryRequest(chatId);
             }
-            return processMainMenuRequest(chatId);
         }
         return processManagerMessageRequest(update.getMessage().getChatId().toString());
     }
@@ -42,5 +44,10 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
     private SendMessage processManagerMessageRequest(String chatId) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory::createAvailableForManagerCommandsMessage);
+    }
+
+    private SendMessage processManagerCallBackQueryRequest(String chatId) {
+        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+            MessageFactory::createForbiddenCommandsManagerMessage);
     }
 }
