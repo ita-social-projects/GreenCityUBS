@@ -127,16 +127,16 @@ class TelegramControllerTest {
     @Test
     void markMessagesAsRead_ShouldReturnOk() throws Exception {
         MarkMessagesAsReadRequest request = MarkMessagesAsReadRequest
-                .builder()
-                .messagesIds(List.of(1L, 2L, 3L))
-                .build();
+            .builder()
+            .messagesIds(List.of(1L, 2L, 3L))
+            .build();
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(put("/ubs/telegram/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNoContent());
 
         verify(telegramService).markMessagesAsRead(request);
     }

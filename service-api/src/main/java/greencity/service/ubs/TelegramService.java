@@ -33,13 +33,13 @@ public interface TelegramService {
      * Reads multiple messages based on the specified request.
      * <p>
      * The method performs the reading of several messages according to the
-     * parameters provided in the {@link MarkMessagesAsReadRequest} object.
-     * Since this method returns {@code void}, all results are handled internally
-     * (e.g., updating the database or triggering events).
+     * parameters provided in the {@link MarkMessagesAsReadRequest} object. Since
+     * this method returns {@code void}, all results are handled internally (e.g.,
+     * updating the database or triggering events).
      * </p>
      *
-     * @param request the request containing the criteria for reading messages,
-     *                must not be {@code null}
+     * @param request the request containing the criteria for reading messages, must
+     *                not be {@code null}
      */
     void markMessagesAsRead(MarkMessagesAsReadRequest request);
 

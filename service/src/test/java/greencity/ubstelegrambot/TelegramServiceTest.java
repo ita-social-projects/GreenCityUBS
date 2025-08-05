@@ -842,33 +842,32 @@ class TelegramServiceTest {
         List<Long> messageIds = List.of(1L, 2L);
 
         TelegramChat chat1 = TelegramChat.builder()
-                .id(10L)
-                .unreadMessagesCount(1)
-                .build();
+            .id(10L)
+            .unreadMessagesCount(1)
+            .build();
 
         TelegramChat chat2 = TelegramChat.builder()
-                .id(20L)
-                .unreadMessagesCount(0)
-                .build();
+            .id(20L)
+            .unreadMessagesCount(0)
+            .build();
 
         TelegramMessage message1 = TelegramMessage.builder()
-                .id(1L)
-                .messageViewingStatus(MessageViewingStatus.UNREAD)
-                .chat(chat1)
-                .build();
+            .id(1L)
+            .messageViewingStatus(MessageViewingStatus.UNREAD)
+            .chat(chat1)
+            .build();
 
         TelegramMessage message2 = TelegramMessage.builder()
-                .id(2L)
-                .messageViewingStatus(MessageViewingStatus.READ)
-                .chat(chat2)
-                .build();
+            .id(2L)
+            .messageViewingStatus(MessageViewingStatus.READ)
+            .chat(chat2)
+            .build();
 
         when(telegramMessageRepository.findAllById(messageIds))
-                .thenReturn(List.of(message1, message2));
+            .thenReturn(List.of(message1, message2));
 
         telegramService.markMessagesAsRead(
-                MarkMessagesAsReadRequest.builder().messagesIds(messageIds).build()
-        );
+            MarkMessagesAsReadRequest.builder().messagesIds(messageIds).build());
 
         verify(telegramMessageRepository).findAllById(messageIds);
         verify(telegramMessageRepository).saveAll(List.of(message1, message2));
