@@ -835,7 +835,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         jpqlQuery.setParameter("uuid", uuid);
         jpqlQuery.setParameter("statuses", statuses);
         Page<Order> orderPages = entityManagerUtils
-            .runPageableTypedQueryWithEntityGraph(jpqlQuery, jpqlQueryString, page);
+            .runPageableTypedQueryWithEntityGraph(
+                Order.class, jpqlQuery, jpqlQueryString, List.of("payment", "certificates", "orderBags"), page);
         List<Order> orders = orderPages.getContent();
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
         orders.forEach(order -> dtos.add(getOrdersData(order)));
