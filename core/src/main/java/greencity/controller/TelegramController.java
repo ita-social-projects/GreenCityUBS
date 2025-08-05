@@ -3,23 +3,34 @@ package greencity.controller;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.FeedbackDto;
+import greencity.dto.telegram.TelegramMessageDto;
 import greencity.service.ubs.TelegramFeedbackService;
 import greencity.service.ubs.TelegramService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 /**
  * REST controller that handles Telegram-related endpoints. Provides
@@ -70,7 +81,7 @@ public class TelegramController {
     })
     @GetMapping("/chats")
     public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search,
-        Pageable pageable) {
+        @PageableDefault(sort = "lastMessage.sendAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getChats(search, pageable));
     }
 
