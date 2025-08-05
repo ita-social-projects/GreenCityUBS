@@ -1,6 +1,7 @@
 package greencity.entity.telegram;
 
 import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,6 +43,9 @@ public class TelegramMessage {
 
     @Enumerated(EnumType.STRING)
     private MessageDeliveryStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private MessageViewingStatus messageViewingStatus;
 
     @Column(name = "from_manager", nullable = false)
     private Boolean fromManager;
