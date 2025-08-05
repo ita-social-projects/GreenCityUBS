@@ -176,7 +176,8 @@ public class TelegramServiceImpl implements TelegramService {
     public PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable) {
         Specification<TelegramChat> spec = ChatSpecifications.hasNameLike(searchTerm);
 
-        Page<TelegramChat> chats = telegramChatRepository.findAll(spec, pageable);
+        Page<TelegramChat> chats = telegramChatRepository.findAllSortedByLastMessage(spec, pageable);
+
         List<ChatDto> chatDtos = chats
             .getContent()
             .stream()
