@@ -302,14 +302,14 @@ class TelegramServiceTest {
             .build();
 
         TelegramChat chat = TelegramChat.builder()
-                .id(1L)
-                .chatId("123456789")
-                .firstName("Test")
-                .lastName("User")
-                .username("testuser")
-                .user(user)
-                .lastMessage(message)
-                .build();
+            .id(1L)
+            .chatId("123456789")
+            .firstName("Test")
+            .lastName("User")
+            .username("testuser")
+            .user(user)
+            .lastMessage(message)
+            .build();
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
@@ -414,26 +414,26 @@ class TelegramServiceTest {
     void testGetChats_WithLastMessageAndNullAssets_ShouldReturnEmptyAssets() {
         Pageable pageable = PageRequest.of(0, 10);
         TelegramMessage message = TelegramMessage.builder()
-                .id(100L)
-                .text("Message with null assets")
-                .sendAt(LocalDateTime.now())
-                .fromManager(true)
-                .status(MessageDeliveryStatus.SENT)
-                .assets(null)
-                .build();
+            .id(100L)
+            .text("Message with null assets")
+            .sendAt(LocalDateTime.now())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .assets(null)
+            .build();
 
         TelegramChat chat = TelegramChat.builder()
-                .id(1L)
-                .chatId("123")
-                .firstName("Test")
-                .lastName("User")
-                .lastMessage(message)
-                .build();
+            .id(1L)
+            .chatId("123")
+            .firstName("Test")
+            .lastName("User")
+            .lastMessage(message)
+            .build();
 
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
         when(telegramChatRepository.findAll(ArgumentMatchers.<Specification<TelegramChat>>any(), eq(pageable)))
-                .thenReturn(chatPage);
+            .thenReturn(chatPage);
 
         PageableDto<ChatDto> result = telegramService.getChats("", pageable);
 
