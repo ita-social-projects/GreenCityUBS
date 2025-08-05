@@ -188,6 +188,7 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @PutMapping(value = "/messages", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void markMessagesAsRead(@RequestBody MarkMessagesAsReadRequest request) {
         telegramService.markMessagesAsRead(request);
     }
