@@ -216,7 +216,7 @@ class TelegramServiceTest {
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
         verify(azureCloudStorageService).upload(file);
-        verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
+        verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
     }
