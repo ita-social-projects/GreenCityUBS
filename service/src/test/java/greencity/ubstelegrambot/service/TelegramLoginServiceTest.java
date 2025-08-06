@@ -6,6 +6,8 @@ import greencity.dto.SuccessSignInDto;
 import greencity.dto.TestersSignInRequest;
 import greencity.entity.telegram.TelegramManager;
 import greencity.entity.user.employee.Employee;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
 import org.junit.jupiter.api.Test;
@@ -137,7 +139,7 @@ class TelegramLoginServiceTest {
     }
 
     @Test
-    void testProcessInputManagerCredentialsRequest_WithUnsuccessfulRemoteSignIn_ShouldReturnTryAgainMessage() {
+    void testProcessInputManagerCredentialsRequest_WithInvalidPassword_ShouldReturnWrongPasswordMessage() {
         Message message = mock(Message.class);
         when(message.getText()).thenReturn("manager@test.com:password");
         when(message.getChatId()).thenReturn(123L);
@@ -146,8 +148,46 @@ class TelegramLoginServiceTest {
         when(employeeRepository.findByEmailWithPositions("manager@test.com")).thenReturn(Optional.of(employee));
         when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(true);
 
-        ResponseEntity<SuccessSignInDto> responseEntity = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        when(userRemoteClient.signIn(any())).thenReturn(responseEntity);
+        when(userRemoteClient.signIn(any()))
+            .thenThrow(new BadRequestException("{\"name\":\"password\",\"message\":\"Bad password\"}"));
+
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+
+        assertEquals("123", result.getChatId());
+        assertTrue(result.getText().contains(TelegramBotConstants.INCORRECT_PASSWORD));
+    }
+
+    @Test
+    void testProcessInputManagerCredentialsRequest_WithBadRequestNonPassword_ShouldReturnTryAgainMessage() {
+        Message message = mock(Message.class);
+        when(message.getText()).thenReturn("manager@test.com:wrongpassword");
+        when(message.getChatId()).thenReturn(123L);
+
+        Employee employee = new Employee();
+        when(employeeRepository.findByEmailWithPositions("manager@test.com")).thenReturn(Optional.of(employee));
+        when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(true);
+
+        when(userRemoteClient.signIn(any()))
+            .thenThrow(new BadRequestException("Invalid login format"));
+
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+
+        assertEquals("123", result.getChatId());
+        assertTrue(result.getText().contains(TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN));
+    }
+
+    @Test
+    void testProcessInputManagerCredentialsRequest_WithGenericException_ShouldReturnTryAgainMessage() {
+        Message message = mock(Message.class);
+        when(message.getText()).thenReturn("manager@test.com:anypassword");
+        when(message.getChatId()).thenReturn(123L);
+
+        Employee employee = new Employee();
+        when(employeeRepository.findByEmailWithPositions("manager@test.com")).thenReturn(Optional.of(employee));
+        when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(true);
+
+        when(userRemoteClient.signIn(any()))
+            .thenThrow(new RemoteServerUnavailableException("Server is down"));
 
         SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
 
