@@ -5,6 +5,7 @@ import greencity.constant.TelegramBotConstants;
 import greencity.dto.TestersSignInRequest;
 import greencity.entity.telegram.TelegramManager;
 import greencity.entity.user.employee.Employee;
+import greencity.exceptions.BadRequestException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramLoginService;
@@ -65,25 +66,26 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
                 TelegramBotConstants.EMPLOYEE_IS_NOT_MANAGER);
         }
 
-        var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, secretToken));
+        try {
+            var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, secretToken));
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
+            var responseBody = response.getBody();
+            String name = (responseBody != null && responseBody.name() != null) ? responseBody.name() : USERNAME;
+
+            telegramManagerRepository.save(
+                TelegramManager
+                    .builder()
+                    .chatId(message.getChatId().toString())
+                    .employee(employee.get())
+                    .build());
+
+            return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name);
+        } catch (BadRequestException e) {
+            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
+                TelegramBotConstants.LOGIN_FAILED);
+        } catch (Exception e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
                 TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
         }
-
-        var responseBody = response.getBody();
-        String name = (responseBody != null && responseBody.name() != null) ? responseBody.name() : USERNAME;
-
-        telegramManagerRepository.save(
-            TelegramManager
-                .builder()
-                .chatId(message.getChatId().toString())
-                .employee(employee.get())
-                .build());
-
-        return MessageFactory.createSuccessLoginMessage(
-            message.getChatId().toString(),
-            name);
     }
 }
