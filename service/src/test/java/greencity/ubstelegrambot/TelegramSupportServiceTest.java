@@ -143,6 +143,7 @@ class TelegramSupportServiceTest {
             .builder()
             .id(id)
             .chatId(chatId)
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
@@ -175,6 +176,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat
             .builder()
             .id(id)
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
@@ -248,6 +250,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat
             .builder()
             .id(id)
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
@@ -365,6 +368,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat
             .builder()
             .id(id)
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
@@ -402,6 +406,7 @@ class TelegramSupportServiceTest {
             .builder()
             .id(id)
             .chatId(chatId)
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
@@ -485,6 +490,7 @@ class TelegramSupportServiceTest {
             .builder()
             .id(id)
             .chatId(chatId)
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));

@@ -1,10 +1,10 @@
 package greencity.ubstelegrambot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -16,6 +16,7 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequest;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.order.Order;
@@ -27,6 +28,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
@@ -34,6 +36,7 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
+import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.ubstelegrambot.service.TelegramExecutor;
@@ -60,7 +63,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
@@ -93,7 +95,7 @@ class TelegramServiceTest {
     @Mock
     private MultipartFile file;
     @Mock
-    private SimpMessagingTemplate messagingTemplate;
+    private TelegramNotificationService telegramNotificationService;
     @Mock
     private TelegramManagerRepository telegramManagerRepository;
     @Mock
@@ -128,7 +130,7 @@ class TelegramServiceTest {
             employeeRepository,
             orderRepository,
             userRepository,
-            messagingTemplate,
+            telegramNotificationService,
             telegramUtils,
             telegramUpdateProcessorMap);
     }
@@ -149,6 +151,7 @@ class TelegramServiceTest {
 
         verify(executor).executeCommand(eq(bot), any(SendMessage.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
     }
 
     @Test
@@ -171,6 +174,7 @@ class TelegramServiceTest {
         verify(userRemoteWebClient).uploadFile(file);
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
     }
 
     @Test
@@ -247,6 +251,7 @@ class TelegramServiceTest {
         verify(executor).executeCommand(eq(bot), any(SendMessage.class));
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
     }
 
     @Test
@@ -260,6 +265,7 @@ class TelegramServiceTest {
             () -> telegramService.sendMessageToUser(request, null));
 
         verify(telegramMessageRepository, never()).save(any());
+        verify(telegramChatRepository, never()).save(any());
     }
 
     @Test
@@ -333,15 +339,6 @@ class TelegramServiceTest {
             .recipientEmail("ivan@example.com")
             .build();
 
-        TelegramChat chat = TelegramChat.builder()
-            .id(1L)
-            .chatId("123456789")
-            .firstName("Test")
-            .lastName("User")
-            .username("testuser")
-            .user(user)
-            .build();
-
         MessageAsset asset = MessageAsset.builder()
             .id(10L)
             .url("http://image.png")
@@ -360,11 +357,20 @@ class TelegramServiceTest {
             .assets(List.of(asset))
             .build();
 
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("123456789")
+            .firstName("Test")
+            .lastName("User")
+            .username("testuser")
+            .user(user)
+            .lastMessage(message)
+            .build();
+
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
         when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
             .thenReturn(chatPage);
-        when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.of(message));
 
         PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
 
@@ -372,13 +378,12 @@ class TelegramServiceTest {
         assertEquals(1, result.getTotalElements());
 
         ChatDto chatDto = result.getPage().getFirst();
-        assertEquals("123456789", chatDto.getChatId());
         assertEquals("Test", chatDto.getFirstName());
-        Assertions.assertNotNull(chatDto.getUser());
+        assertNotNull(chatDto.getUser());
         assertEquals("ivan@example.com", chatDto.getUser().getEmail());
 
         TelegramMessageDto lastMessage = chatDto.getLastMessage();
-        Assertions.assertNotNull(lastMessage);
+        assertNotNull(lastMessage);
         assertEquals("Hello", lastMessage.getText());
         assertEquals(1, lastMessage.getAssets().size());
         assertEquals("http://image.png", lastMessage.getAssets().getFirst().getUrl());
@@ -402,7 +407,6 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
             .thenReturn(chatPage);
-        when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.empty());
 
         // when
         PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
@@ -457,8 +461,44 @@ class TelegramServiceTest {
 
         OrdersDataForUserDto result = telegramService.getLastOrderByChatId(chatId);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(Optional.of(100L).get(), result.getId());
+    }
+
+    @Test
+    void testGetChats_WithLastMessageAndNullAssets_ShouldReturnEmptyAssets() {
+        Pageable pageable = PageRequest.of(0, 10);
+        TelegramMessage message = TelegramMessage.builder()
+            .id(100L)
+            .text("Message with null assets")
+            .sendAt(LocalDateTime.now())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .assets(null)
+            .build();
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("123")
+            .firstName("Test")
+            .lastName("User")
+            .lastMessage(message)
+            .build();
+
+        Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
+
+        when(telegramChatRepository.findAll(ArgumentMatchers.<Specification<TelegramChat>>any(), eq(pageable)))
+            .thenReturn(chatPage);
+
+        PageableDto<ChatDto> result = telegramService.getChats("", pageable);
+
+        assertEquals(1, result.getTotalElements());
+        ChatDto dto = result.getPage().getFirst();
+
+        assertNotNull(dto.getLastMessage());
+        assertEquals("Message with null assets", dto.getLastMessage().getText());
+        assertNotNull(dto.getLastMessage().getAssets());
+        assertTrue(dto.getLastMessage().getAssets().isEmpty());
     }
 
     @Test
@@ -521,9 +561,8 @@ class TelegramServiceTest {
 
         ChatDto result = telegramService.getChatById(chatId);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(chatId, result.getId());
-        assertEquals("123456789", result.getChatId());
         assertEquals("Іван", result.getFirstName());
         assertEquals("Петренко", result.getLastName());
         assertEquals("ivan_pet", result.getUsername());
@@ -554,7 +593,7 @@ class TelegramServiceTest {
         Update update = new Update();
         update.setMessage(message);
 
-        doNothing().when(messagingTemplate).convertAndSend(anyString(), Optional.ofNullable(any()));
+        doNothing().when(telegramNotificationService).notifyNewChat(any(ChatDto.class));
 
         TelegramChat savedChat = TelegramChat.builder()
             .id(1L)
@@ -887,4 +926,47 @@ class TelegramServiceTest {
     void testProcessUpdate_ChatNotExistsUuidIsPresentIsUserUuid_UserUpdateProcessorReturned() {
 
     }
+
+    @Test
+    void testMarkMessagesAsRead() {
+        List<Long> messageIds = List.of(1L, 2L);
+
+        TelegramChat chat1 = TelegramChat.builder()
+            .id(10L)
+            .unreadMessagesCount(1)
+            .build();
+
+        TelegramChat chat2 = TelegramChat.builder()
+            .id(20L)
+            .unreadMessagesCount(0)
+            .build();
+
+        TelegramMessage message1 = TelegramMessage.builder()
+            .id(1L)
+            .messageViewingStatus(MessageViewingStatus.UNREAD)
+            .chat(chat1)
+            .build();
+
+        TelegramMessage message2 = TelegramMessage.builder()
+            .id(2L)
+            .messageViewingStatus(MessageViewingStatus.READ)
+            .chat(chat2)
+            .build();
+
+        when(telegramMessageRepository.findAllById(messageIds))
+            .thenReturn(List.of(message1, message2));
+
+        telegramService.markMessagesAsRead(
+            MarkMessagesAsReadRequest.builder().messagesIds(messageIds).build());
+
+        verify(telegramMessageRepository).findAllById(messageIds);
+        verify(telegramMessageRepository).saveAll(List.of(message1, message2));
+
+        assertEquals(MessageViewingStatus.READ, message1.getMessageViewingStatus());
+        assertEquals(MessageViewingStatus.READ, message2.getMessageViewingStatus());
+
+        assertEquals(0, chat1.getUnreadMessagesCount());
+        assertEquals(0, chat2.getUnreadMessagesCount());
+    }
+
 }

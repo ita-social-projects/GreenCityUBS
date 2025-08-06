@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.TelegramManager;
 import greencity.repository.TelegramManagerRepository;
@@ -24,6 +25,11 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
     @Override
     public void notifyNewMessage(TelegramMessageDto messageDto, Long chatId) {
         messagingTemplate.convertAndSend("/topic/messages/" + chatId, messageDto);
+    }
+
+    @Override
+    public void notifyNewChat(ChatDto chatDto) {
+        messagingTemplate.convertAndSend("/topic/chats", chatDto);
     }
 
     @Override

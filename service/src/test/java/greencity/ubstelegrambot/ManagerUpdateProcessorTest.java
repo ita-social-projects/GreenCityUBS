@@ -3,6 +3,7 @@ package greencity.ubstelegrambot;
 import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
 import greencity.service.ubs.TelegramLoginService;
+import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.ManagerUpdateProcessor;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class ManagerUpdateProcessorTest {
     private TelegramUtils telegramUtils;
 
     @Test
-    void testProcess_WithLogoutCallback_ShouldLogoutManagerAndReturnMainMenu() {
+    void testProcess_WithLogoutCallback_ShouldLogoutManagerAndReturnMainMenuMessage() {
         String chatId = "123";
         Update update = new Update();
 
@@ -48,42 +49,51 @@ class ManagerUpdateProcessorTest {
         callbackQuery.setMessage(message);
         update.setCallbackQuery(callbackQuery);
 
-        SendMessage expectedMessage = new SendMessage(chatId, "Some message");
+        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage(chatId);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
 
         SendMessage actualMessage = managerUpdateProcessor.process(update);
 
+        verify(telegramUtils).updateChatStateAndRespond(
+            eq(chatId),
+            eq(ChatState.NORMAL),
+            argThat(f -> f.apply(chatId).equals(expectedMessage)));
+
         verify(telegramLoginService).logoutManager(chatId);
-        verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any());
         assertEquals(expectedMessage, actualMessage);
     }
 
     @Test
-    void testProcess_WithTextMessage_ShouldReturnManagerCommandsMenuWithoutLogout() {
+    void testProcess_WithTextMessage_ShouldReturnAvailableManagerCommandsMessage() {
         String chatId = "123";
         Update update = new Update();
+
         Chat chat = new Chat();
         chat.setId(Long.parseLong(chatId));
         Message message = new Message();
         message.setChat(chat);
         update.setMessage(message);
 
-        SendMessage expectedMessage = new SendMessage(chatId, "Available manager commands");
+        SendMessage expectedMessage = MessageFactory.createAvailableForManagerCommandsMessage(chatId);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
 
         SendMessage actualMessage = managerUpdateProcessor.process(update);
 
-        verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any());
+        verify(telegramUtils).updateChatStateAndRespond(
+            eq(chatId),
+            eq(ChatState.NORMAL),
+            argThat(f -> f.apply(chatId).equals(expectedMessage)));
+
         verifyNoInteractions(telegramLoginService);
         assertEquals(expectedMessage, actualMessage);
     }
 
     @Test
-    void testProcess_WithOtherCallback_ShouldNotLogoutManagerAndReturnMainMenu() {
+    void testProcess_WithOtherCallback_ShouldReturnForbiddenCommandsMessage() {
         String chatId = "123";
         Update update = new Update();
 
@@ -97,16 +107,19 @@ class ManagerUpdateProcessorTest {
         callbackQuery.setMessage(message);
         update.setCallbackQuery(callbackQuery);
 
-        SendMessage expectedMessage = new SendMessage(chatId, "Main menu message");
+        SendMessage expectedMessage = MessageFactory.createForbiddenCommandsManagerMessage(chatId);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
 
         SendMessage actualMessage = managerUpdateProcessor.process(update);
 
-        verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any());
-        verifyNoInteractions(telegramLoginService);
+        verify(telegramUtils).updateChatStateAndRespond(
+            eq(chatId),
+            eq(ChatState.NORMAL),
+            argThat(f -> f.apply(chatId).equals(expectedMessage)));
 
+        verifyNoInteractions(telegramLoginService);
         assertEquals(expectedMessage, actualMessage);
     }
 
@@ -116,5 +129,16 @@ class ManagerUpdateProcessorTest {
 
         assertThrows(NullPointerException.class, () -> managerUpdateProcessor.process(update));
         verifyNoInteractions(telegramUtils, telegramLoginService);
+    }
+
+    @Test
+    void testProcess_WithCallbackButNoMessage_ShouldThrowException() {
+        Update update = new Update();
+        CallbackQuery callbackQuery = new CallbackQuery();
+        callbackQuery.setData("SOME_CALLBACK");
+
+        update.setCallbackQuery(callbackQuery);
+
+        assertThrows(NullPointerException.class, () -> managerUpdateProcessor.process(update));
     }
 }

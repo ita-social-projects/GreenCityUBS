@@ -4,11 +4,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.FeedbackDto;
+import greencity.dto.telegram.MarkMessagesAsReadRequest;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
@@ -23,8 +25,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import java.util.List;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramControllerTest {
@@ -116,5 +122,22 @@ class TelegramControllerTest {
 
         mockMvc.perform(get("/ubs/telegram/feedbacks/123"))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void markMessagesAsRead_ShouldReturnOk() throws Exception {
+        MarkMessagesAsReadRequest request = MarkMessagesAsReadRequest
+            .builder()
+            .messagesIds(List.of(1L, 2L, 3L))
+            .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mockMvc.perform(put("/ubs/telegram/messages")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNoContent());
+
+        verify(telegramService).markMessagesAsRead(request);
     }
 }
