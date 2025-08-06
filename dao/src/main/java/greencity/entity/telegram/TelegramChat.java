@@ -13,8 +13,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"messages", "feedbacks", "user"})
-@EqualsAndHashCode(exclude = {"messages", "feedbacks", "user"})
+@ToString(exclude = {"messages", "feedbacks", "user", "lastMessage"})
+@EqualsAndHashCode(exclude = {"messages", "feedbacks", "user", "lastMessage"})
 public class TelegramChat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,6 +50,10 @@ public class TelegramChat {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_message_id")
+    private TelegramMessage lastMessage;
 
     @Builder.Default
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)

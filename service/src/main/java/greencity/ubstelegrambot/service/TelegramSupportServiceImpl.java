@@ -97,6 +97,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .build();
 
             telegramMessageRepository.save(telegramMessage);
+            chat.setLastMessage(telegramMessage);
             chat.setUnreadMessagesCount(chat.getUnreadMessagesCount() + 1);
             telegramChatRepository.save(chat);
         }
