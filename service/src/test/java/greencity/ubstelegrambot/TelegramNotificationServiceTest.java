@@ -49,7 +49,7 @@ class TelegramNotificationServiceTest {
     }
 
     @Test
-    public void testNotifyNewChat_CorrectDestination_MessageSent() {
+    void testNotifyNewChat_CorrectDestination_MessageSent() {
         ChatDto chatDto = new ChatDto();
 
         telegramNotificationService.notifyNewChat(chatDto);
