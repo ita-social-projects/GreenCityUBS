@@ -208,7 +208,7 @@ class TelegramServiceTest {
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
 
-        MockMultipartFile file = new MockMultipartFile(
+        MockMultipartFile fileName = new MockMultipartFile(
             "fileName",
             "image.png",
             "image/png",
@@ -216,14 +216,14 @@ class TelegramServiceTest {
         );
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+            telegramService.sendMessageToUser(request, new MultipartFile[] {fileName});
         });
 
         assertTrue(exception.getMessage().contains("File size exceeds Telegram bot limit (50MB)"));
 
-        System.out.println(String.format("File \"%s\" size has over than 50MB", file.getName()));
+        System.out.println(String.format("File \"%s\" size has over than 50MB", fileName.getName()));
         List<String> warns = logCaptor.getWarnLogs();
-        assertTrue(warns.getFirst().contains(String.format("File \"%s\" size has over than 50MB", file.getName())));
+        assertTrue(warns.getFirst().contains(String.format("File \"%s\" size has over than 50MB", fileName.getName())));
     }
 
     @Test
