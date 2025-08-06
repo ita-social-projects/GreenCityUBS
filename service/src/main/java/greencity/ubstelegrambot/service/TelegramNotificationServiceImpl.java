@@ -17,8 +17,7 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
     private final ApplicationContext applicationContext;
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramExecutor executor;
-
-    @Override
+  
     public void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId) {
         var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
         List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
