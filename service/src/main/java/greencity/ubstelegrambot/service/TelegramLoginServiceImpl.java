@@ -83,7 +83,7 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
         } catch (BadRequestException e) {
             if (e.getMessage().contains("\"name\":\"password\"")) {
                 return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                    TelegramBotConstants.INCORRECT_PASSWORD);
+                    TelegramBotConstants.LOGIN_FAILED);
             }
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
                 TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
