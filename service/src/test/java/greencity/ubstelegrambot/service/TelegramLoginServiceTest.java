@@ -154,7 +154,7 @@ class TelegramLoginServiceTest {
         SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.INCORRECT_PASSWORD));
+        assertTrue(result.getText().contains(TelegramBotConstants.LOGIN_FAILED));
     }
 
     @Test
