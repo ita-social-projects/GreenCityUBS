@@ -17,22 +17,32 @@ import io.github.springwolf.core.asyncapi.annotations.AsyncPublisher;
 public class TelegramChatProducer {
     private final SimpMessagingTemplate messagingTemplate;
 
+    /**
+     * Sends a notification about a new message in a specific chat.
+     *
+     * @param messageDto the DTO of the new message, must not be {@code null}
+     * @param chatId     the ID of the chat where the message was received, must not
+     *                   be {@code null}
+     */
     @AsyncPublisher(
-            operation =
-            @AsyncOperation(
-                    channelName = "/topic/messages/{chatId}",
-                    description = "Subscription for new messages in chat by id"))
+        operation = @AsyncOperation(
+            channelName = "/topic/messages/{chatId}",
+            description = "Subscription for new messages in chat by id"))
     @StompAsyncOperationBinding
     public void notifyNewMessage(@Payload TelegramMessageDto messageDto, Long chatId) {
         log.debug("Publish to /topic/messages/{}", chatId);
         messagingTemplate.convertAndSend("/topic/messages/" + chatId, messageDto);
     }
 
+    /**
+     * Sends a notification about the creation of a new chat.
+     *
+     * @param chatDto the DTO of the new chat, must not be {@code null}
+     */
     @AsyncPublisher(
-            operation =
-            @AsyncOperation(
-                    channelName = "/topic/chats",
-                    description = "Subscription for new chat created"))
+        operation = @AsyncOperation(
+            channelName = "/topic/chats",
+            description = "Subscription for new chat created"))
     @StompAsyncOperationBinding
     public void notifyNewChat(ChatDto chatDto) {
         messagingTemplate.convertAndSend("/topic/chats", chatDto);
