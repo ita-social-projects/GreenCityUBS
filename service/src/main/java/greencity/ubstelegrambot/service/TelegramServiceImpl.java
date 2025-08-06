@@ -23,6 +23,7 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AzureCloudStorageService;
+import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;

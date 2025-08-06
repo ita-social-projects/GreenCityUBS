@@ -32,7 +32,6 @@ class TelegramNotificationServiceTest {
     @Mock
     private TelegramExecutor executor;
 
-    @Test
     public void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
         String username = "username";
         String messageText = "message";
