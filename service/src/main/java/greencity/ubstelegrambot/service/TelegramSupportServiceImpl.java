@@ -106,22 +106,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             telegramChatRepository.save(chat);
         }
 
-
         File telegramFile;
         String fileId = null;
         String originalFileName = null;
         String contentType = null;
         Long fileSize = null;
         AssetType assetType;
-
-        TelegramMessageDto.TelegramMessageDtoBuilder telegramMessageDtoBuilder = TelegramMessageDto
-            .builder()
-            .id(telegramMessage.getId())
-            .sendAt(telegramMessage.getSendAt())
-            .text(telegramMessage.getText())
-            .fromManager(telegramMessage.getFromManager())
-            .deliveryStatus(telegramMessage.getStatus())
-            .messageViewingStatus(telegramMessage.getMessageViewingStatus());
 
         if (message.hasPhoto()) {
             PhotoSize largestPhoto = message.getPhoto().stream()
@@ -232,6 +222,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .text(telegramMessage.getText())
             .fromManager(telegramMessage.getFromManager())
             .deliveryStatus(telegramMessage.getStatus())
+            .messageViewingStatus(telegramMessage.getMessageViewingStatus())
             .assets(assetDtos);
 
         if (previouslySavedMessage.isEmpty()) {
