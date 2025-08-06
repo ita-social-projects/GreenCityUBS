@@ -158,25 +158,6 @@ class TelegramLoginServiceTest {
     }
 
     @Test
-    void testProcessInputManagerCredentialsRequest_WithBadRequestNonPassword_ShouldReturnTryAgainMessage() {
-        Message message = mock(Message.class);
-        when(message.getText()).thenReturn("manager@test.com:wrongpassword");
-        when(message.getChatId()).thenReturn(123L);
-
-        Employee employee = new Employee();
-        when(employeeRepository.findByEmailWithPositions("manager@test.com")).thenReturn(Optional.of(employee));
-        when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(true);
-
-        when(userRemoteClient.signIn(any()))
-            .thenThrow(new BadRequestException("Invalid login format"));
-
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
-
-        assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN));
-    }
-
-    @Test
     void testProcessInputManagerCredentialsRequest_WithGenericException_ShouldReturnTryAgainMessage() {
         Message message = mock(Message.class);
         when(message.getText()).thenReturn("manager@test.com:anypassword");
