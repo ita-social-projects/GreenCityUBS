@@ -45,6 +45,7 @@ public class TelegramChatProducer {
             description = "Subscription for new chat created"))
     @StompAsyncOperationBinding
     public void notifyNewChat(ChatDto chatDto) {
+        log.debug("Publish to /topic/chats");
         messagingTemplate.convertAndSend("/topic/chats", chatDto);
     }
 }
