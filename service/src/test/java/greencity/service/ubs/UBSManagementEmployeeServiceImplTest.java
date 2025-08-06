@@ -1,5 +1,32 @@
 package greencity.service.ubs;
 
+import static greencity.ModelUtils.getAddEmployeeDto;
+import static greencity.ModelUtils.getEmployee;
+import static greencity.ModelUtils.getEmployeeDto;
+import static greencity.ModelUtils.getEmployeeDtoWithoutPositionsAndTariffsForGetAllMethod;
+import static greencity.ModelUtils.getEmployeeFilterViewListForOneEmployeeWithDifferentPositions;
+import static greencity.ModelUtils.getEmployeeForUpdateEmailCheck;
+import static greencity.ModelUtils.getEmployeeListForGetAllMethod;
+import static greencity.ModelUtils.getEmployeeWithTariffsIdDto;
+import static greencity.ModelUtils.getPosition;
+import static greencity.ModelUtils.getPositionDto;
+import static greencity.ModelUtils.getTariffInfo;
+import static greencity.ModelUtils.getTariffsInfo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
 import greencity.client.config.UserRemoteWebClient;
@@ -22,10 +49,15 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
+import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.TariffsInfoRepository;
-import greencity.repository.EmployeeCriteriaRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,36 +65,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import static greencity.ModelUtils.getAddEmployeeDto;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getEmployeeDto;
-import static greencity.ModelUtils.getEmployeeDtoWithoutPositionsAndTariffsForGetAllMethod;
-import static greencity.ModelUtils.getEmployeeFilterViewListForOneEmployeeWithDifferentPositions;
-import static greencity.ModelUtils.getEmployeeForUpdateEmailCheck;
-import static greencity.ModelUtils.getEmployeeListForGetAllMethod;
-import static greencity.ModelUtils.getEmployeeWithTariffsIdDto;
-import static greencity.ModelUtils.getPosition;
-import static greencity.ModelUtils.getPositionDto;
-import static greencity.ModelUtils.getTariffsInfo;
-import static greencity.ModelUtils.getTariffInfo;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.lenient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementEmployeeServiceImplTest {
@@ -82,6 +85,8 @@ class UBSManagementEmployeeServiceImplTest {
     private UBSManagementEmployeeServiceImpl employeeService;
     @Mock
     private EmployeeCriteriaRepository employeeCriteriaRepository;
+    @Mock
+    private WebClientRequestException webClientRequestException;
 
     @Test
     void saveEmployeeTest() {
@@ -100,6 +105,26 @@ class UBSManagementEmployeeServiceImplTest {
         verify(repository, times(1)).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1)).save(any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(any(), any());
+    }
+
+    @Test
+    void saveEmployeeShouldThrowWebClientRequestExceptionTest() {
+        LogCaptor logCaptor = LogCaptor.forClass(UBSManagementEmployeeServiceImpl.class);
+        Employee employee = getEmployee();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        dto.setTariffs(List.of(TariffWithChatAccess.builder().tariffId(1L).hasChat(false).build()));
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
+        when(repository.save(any())).thenReturn(employee);
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
+        when(positionRepository.existsPositionByIdAndNameUk(any(), any())).thenReturn(true);
+        when(userRemoteWebClient.uploadFile(file)).thenThrow(webClientRequestException);
+        employeeService.save(dto, file);
+
+        List<String> warns = logCaptor.getWarnLogs();
+        assertTrue(warns.getFirst().contains("User service is unavailable: null"));
     }
 
     @Test
@@ -279,6 +304,45 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(2)).map(any(), any());
         verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
         verify(repository, times(2)).findById(anyLong());
+    }
+
+    @Test
+    void updateEmployeeWithDefaultImagePathShouldThrowWebClientRequestExceptionTest() {
+        LogCaptor logCaptor = LogCaptor.forClass(UBSManagementEmployeeServiceImpl.class);
+        Employee employee = getEmployee();
+        employee.setImagePath("path");
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        Position position = getPosition();
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        doThrow(webClientRequestException).when(userRemoteWebClient).deleteFile(anyString());
+        employeeService.update(dto, file);
+
+        List<String> warns = logCaptor.getWarnLogs();
+        assertTrue(warns.getFirst().contains("User service is unavailable: null"));
+    }
+
+    @Test
+    void updateEmployeeWithUploadImagePathShouldThrowWebClientRequestExceptionTest() {
+        LogCaptor logCaptor = LogCaptor.forClass(UBSManagementEmployeeServiceImpl.class);
+        Employee employee = getEmployee();
+        EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        Position position = getPosition();
+        MockMultipartFile file = new MockMultipartFile("employeeDto",
+            "", "application/json", "random Bytes".getBytes());
+
+        when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        when(userRemoteWebClient.uploadFile(file)).thenThrow(webClientRequestException);
+
+        employeeService.update(dto, file);
+        List<String> warns = logCaptor.getWarnLogs();
+        assertTrue(warns.getFirst().contains("User service is unavailable: null"));
     }
 
     @Test
@@ -489,6 +553,20 @@ class UBSManagementEmployeeServiceImplTest {
         verify(repository, times(1)).findById(anyLong());
         verify(userRemoteWebClient, times(1)).deleteFile("path");
         verify(repository, times(1)).save(employee);
+    }
+
+    @Test
+    void deleteEmployeeImageShouldThrowWebClientExceptionTest() {
+        LogCaptor logCaptor = LogCaptor.forClass(UBSManagementEmployeeServiceImpl.class);
+        Employee employee = getEmployee();
+        employee.setImagePath("path");
+        when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
+        doThrow(webClientRequestException).when(userRemoteWebClient).deleteFile("path");
+
+        employeeService.deleteEmployeeImage(anyLong());
+
+        List<String> warns = logCaptor.getWarnLogs();
+        assertTrue(warns.getFirst().contains("User service is unavailable: null"));
     }
 
     @Test

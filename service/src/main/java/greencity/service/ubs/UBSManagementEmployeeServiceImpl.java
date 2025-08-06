@@ -292,7 +292,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             }
             if (!imageUrlToDelete.equals(defaultImagePath)) {
                 try {
-                    userRemoteWebClient.deleteFile(upEmployee.getImagePath());
+                    userRemoteWebClient.deleteFile(imageUrlToDelete);
                 } catch (WebClientRequestException | WebClientResponseException e) {
                     log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
                 }

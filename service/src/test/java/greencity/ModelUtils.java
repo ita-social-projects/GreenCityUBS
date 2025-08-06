@@ -2116,6 +2116,18 @@ public class ModelUtils {
             .build();
     }
 
+    public static Payment getManualPaymentWithoutImage() {
+        return Payment.builder()
+            .settlementDate("02-08-2021")
+            .amount(500L)
+            .paymentStatus(PaymentStatus.PAID)
+            .paymentId("1l")
+            .receiptLink("somelink.com")
+            .currency("UAH")
+            .order(getOrder())
+            .build();
+    }
+
     public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021")
@@ -2123,6 +2135,16 @@ public class ModelUtils {
             .receiptLink("link")
             .paymentId("1")
             .imagePath("fdhgh")
+            .build();
+    }
+
+    public static ManualPaymentRequestDto getManualPaymentRequestDtoWithoutImage() {
+        return ManualPaymentRequestDto.builder()
+            .settlementDate("02-08-2021")
+            .amount(500L)
+            .receiptLink("link")
+            .paymentId("1")
+            .imagePath("")
             .build();
     }
 

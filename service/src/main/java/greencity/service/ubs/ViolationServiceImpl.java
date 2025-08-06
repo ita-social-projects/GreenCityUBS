@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.client.config.UserRemoteWebClient;
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.pageble.PageableDto;
@@ -247,7 +248,7 @@ public class ViolationServiceImpl implements ViolationService {
                 try {
                     userRemoteWebClient.deleteFile(image);
                 } catch (WebClientRequestException | WebClientResponseException e) {
-                    log.warn("User service is unavailable: {}", e.getMessage());
+                    log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
                 }
                 violationImages.remove(image);
             }
@@ -269,7 +270,7 @@ public class ViolationServiceImpl implements ViolationService {
             try {
                 images.add(userRemoteWebClient.uploadFile(multipartFile));
             } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}", e.getMessage());
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
         }
     }

@@ -144,7 +144,7 @@ public class PaymentServiceImpl implements PaymentService {
             try {
                 userRemoteWebClient.deleteFile(payment.getImagePath());
             } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}", e.getMessage());
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
         }
         paymentRepository.deletePaymentById(paymentId);

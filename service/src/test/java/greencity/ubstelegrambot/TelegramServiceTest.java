@@ -2,6 +2,7 @@ package greencity.ubstelegrambot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +61,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -69,51 +73,45 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
+    public Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
     @Mock
     private ApplicationContext applicationContext;
-
     @Mock
     private TelegramChatRepository telegramChatRepository;
-
     @Mock
     private UserRemoteWebClient userRemoteWebClient;
-
     @Mock
     private TelegramMessageRepository telegramMessageRepository;
-
     @Mock
     private OrderRepository orderRepository;
-
     @Mock
     private UBSClientService ubsClientService;
-
     @Mock
     private TelegramExecutor executor;
-
     @Mock
     private UBSTelegramBot bot;
-
     @Mock
     private MultipartFile file;
-
     @Mock
     private SimpMessagingTemplate messagingTemplate;
-
     @Mock
     private TelegramManagerRepository telegramManagerRepository;
-
     @Mock
     private EmployeeRepository employeeRepository;
-
     @Mock
     private UserRepository userRepository;
-
+    @Mock
+    private WebClientRequestException webClientRequestException;
     @Mock
     private TelegramUtils telegramUtils;
-
     private TelegramServiceImpl telegramService;
 
-    public Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
+    private static org.telegram.telegrambots.meta.api.objects.User getTelegramAPIUser(Long chatId) {
+        org.telegram.telegrambots.meta.api.objects.User apiUser = new org.telegram.telegrambots.meta.api.objects.User();
+        apiUser.setId(chatId);
+        apiUser.setUserName("testUser");
+        return apiUser;
+    }
 
     @BeforeEach
     void setUp() {
@@ -173,6 +171,59 @@ class TelegramServiceTest {
         verify(userRemoteWebClient).uploadFile(file);
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
+    }
+
+    @Test
+    void testSendMessageToUser_OnlyFile_ShouldThrowWebClientRquestException() {
+        LogCaptor logCaptor = LogCaptor.forClass(TelegramServiceImpl.class);
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(file.getSize()).thenReturn(1024L);
+        when(file.getContentType()).thenReturn("image/png");
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://azure.com/image.png");
+        when(userRemoteWebClient.uploadFile(file)).thenThrow(webClientRequestException);
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        List<String> warns = logCaptor.getWarnLogs();
+        assertTrue(warns.getFirst().contains("User service is unavailable: null"));
+    }
+
+    @Test
+    void testSendMessageToUser_OnlyFile_ShouldThrowIllegalArgumentException() {
+        LogCaptor logCaptor = LogCaptor.forClass(TelegramServiceImpl.class);
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+
+        MockMultipartFile file = new MockMultipartFile(
+            "fileName",
+            "image.png",
+            "image/png",
+            new byte[60 * 1024 * 1024] // 60MB
+        );
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+        });
+
+        assertTrue(exception.getMessage().contains("File size exceeds Telegram bot limit (50MB)"));
+
+        System.out.println(String.format("File \"%s\" size has over than 50MB", file.getName()));
+        List<String> warns = logCaptor.getWarnLogs();
+        assertTrue(warns.getFirst().contains(String.format("File \"%s\" size has over than 50MB", file.getName())));
     }
 
     @Test
@@ -372,7 +423,7 @@ class TelegramServiceTest {
 
         PageableDto<ChatDto> result = telegramService.getChats("nothing", pageable);
 
-        Assertions.assertTrue(result.getPage().isEmpty());
+        assertTrue(result.getPage().isEmpty());
         assertEquals(0, result.getTotalElements());
         assertEquals(1, result.getTotalPages());
     }
@@ -815,13 +866,6 @@ class TelegramServiceTest {
 
         verify(userRepository, never()).findUserByUuid(any());
         verify(telegramChatRepository, never()).save(any());
-    }
-
-    private static org.telegram.telegrambots.meta.api.objects.User getTelegramAPIUser(Long chatId) {
-        org.telegram.telegrambots.meta.api.objects.User apiUser = new org.telegram.telegrambots.meta.api.objects.User();
-        apiUser.setId(chatId);
-        apiUser.setUserName("testUser");
-        return apiUser;
     }
 
     @Test
