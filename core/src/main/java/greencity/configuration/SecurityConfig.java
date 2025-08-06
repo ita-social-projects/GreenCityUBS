@@ -26,18 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.Arrays;
 import java.util.List;
-import static greencity.constant.AppConstant.ADMIN;
-import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
-import static greencity.constant.AppConstant.ADMIN_LINK;
-import static greencity.constant.AppConstant.COMMIT_INFO;
-import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
-import static greencity.constant.AppConstant.UBS_EMPLOYEE;
-import static greencity.constant.AppConstant.UBS_EXPORT;
-import static greencity.constant.AppConstant.UBS_LINK;
-import static greencity.constant.AppConstant.UBS_MANAG_LINK;
-import static greencity.constant.AppConstant.LOGS_LINKS;
-import static greencity.constant.AppConstant.USER;
-import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
+import static greencity.constant.AppConstant.*;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
@@ -277,11 +266,14 @@ public class SecurityConfig {
                     UBS_LINK + "/locations")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + "/telegram/**",
+                    UBS_LINK + TELEGRAM_LINKS,
                     SUPER_ADMIN_LINK + "/tariff/{id}")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
-                    UBS_LINK + "/telegram/**")
+                    UBS_LINK + TELEGRAM_LINKS)
+                .hasRole(UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.PUT,
+                    UBS_LINK + TELEGRAM_LINKS)
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(LOGS_LINKS)
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)

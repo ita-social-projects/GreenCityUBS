@@ -264,6 +264,7 @@ public class ModelUtils {
     public static final UserNotification TEST_USER_NOTIFICATION_7 = createUserNotificationForViolation7();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
+    public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE_2 = createCustomNotificationTemplate();
     public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = createNotificationTemplateDto();
 
     public static final NotificationTemplateWithPlatformsUpdateDto TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO =
@@ -294,8 +295,11 @@ public class ModelUtils {
         Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final List<NotificationFullDto> TEST_NOTIFICATION_DTO_LIST = List.of(createNotificationFullDto());
+    public static final List<NotificationFullDto> TEST_NOTIFICATION_DTO_LIST_2 = createCustomNotificationsFullDtoList();
     public static final PageableAdvancedDto<NotificationFullDto> TEST_NOTIFICATION_FULL_DTO_PAGEABLE =
         createPageableAdvancedDtoForNotificationFullDto();
+    public static final PageableAdvancedDto<NotificationFullDto> TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2 =
+        createPageableAdvancedDtoForCustomNotificationsFullDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
     public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(createBag(1), createBag(2), createBag(3));
@@ -1602,13 +1606,13 @@ public class ModelUtils {
 
     public static TelegramChat getTelegramBotNotifyTrue() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
-            "last_name", null, null,
+            "last_name", 0, null, null,
             new ArrayList<>(), new ArrayList<>());
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), false, "username", "first_name",
-            "last_name", null, null,
+            "last_name", 0, null, null,
             new ArrayList<>(), new ArrayList<>());
     }
 
@@ -5960,5 +5964,46 @@ public class ModelUtils {
             .authorName("Автор 3")
             .id(1L)
             .build();
+    }
+
+    private static NotificationTemplate createCustomNotificationTemplate() {
+        NotificationTemplate notificationTemplate = getCustomNotificationTemplate();
+        notificationTemplate.getNotificationPlatforms().add(createNotificationPlatform(SITE));
+        notificationTemplate.setTitleEn("Title");
+        notificationTemplate.setTitleUk("TitleUk");
+
+        return notificationTemplate;
+    }
+
+    private static List<NotificationFullDto> createCustomNotificationsFullDtoList() {
+        return List.of(
+            NotificationFullDto.builder()
+                .id(1L)
+                .read(false)
+                .title("Title")
+                .body("BodyEng")
+                .images(List.of())
+
+                .build(),
+            NotificationFullDto.builder()
+                .id(2L)
+                .read(false)
+                .title("Title")
+                .body("BodyEng")
+                .images(List.of())
+                .build());
+    }
+
+    private static PageableAdvancedDto<NotificationFullDto> createPageableAdvancedDtoForCustomNotificationsFullDto() {
+        return new PageableAdvancedDto<>(
+            TEST_NOTIFICATION_DTO_LIST_2,
+            2L,
+            0,
+            1,
+            0,
+            false,
+            false,
+            true,
+            true);
     }
 }

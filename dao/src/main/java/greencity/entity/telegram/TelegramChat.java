@@ -43,6 +43,10 @@ public class TelegramChat {
     @Column(name = "last_name")
     private String lastName;
 
+    @Builder.Default
+    @Column(name = "unread_messages_count", nullable = false)
+    private Integer unreadMessagesCount = 0;
+
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
