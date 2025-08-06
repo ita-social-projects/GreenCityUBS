@@ -9,6 +9,7 @@ import greencity.entity.telegram.TelegramMessage;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
@@ -92,9 +93,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .status(MessageDeliveryStatus.SENT)
                 .sendAt(LocalDateTime.now())
                 .text(messageText)
+                .messageViewingStatus(MessageViewingStatus.UNREAD)
                 .build();
 
             telegramMessageRepository.save(telegramMessage);
+            chat.setUnreadMessagesCount(chat.getUnreadMessagesCount() + 1);
+            telegramChatRepository.save(chat);
         }
 
         TelegramMessageDto.TelegramMessageDtoBuilder telegramMessageDtoBuilder = TelegramMessageDto
@@ -103,7 +107,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .sendAt(telegramMessage.getSendAt())
             .text(telegramMessage.getText())
             .fromManager(telegramMessage.getFromManager())
-            .deliveryStatus(telegramMessage.getStatus());
+            .deliveryStatus(telegramMessage.getStatus())
+            .messageViewingStatus(telegramMessage.getMessageViewingStatus());
 
         if (!message.hasPhoto()) {
             telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
