@@ -1,6 +1,7 @@
 package greencity.dto.telegram;
 
 import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,4 +25,6 @@ public class TelegramMessageDto {
     private MessageDeliveryStatus deliveryStatus;
 
     private List<MessageAssetDto> assets;
+
+    private MessageViewingStatus messageViewingStatus;
 }

@@ -3,11 +3,7 @@ package greencity.ubstelegrambot.service;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.ChatUserDto;
-import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.MessageAssetDto;
-import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.*;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -17,6 +13,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
@@ -25,19 +22,20 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AzureCloudStorageService;
+import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -67,7 +65,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final TelegramNotificationService telegramNotificationService;
     private final TelegramUtils telegramUtils;
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
 
@@ -158,7 +156,8 @@ public class TelegramServiceImpl implements TelegramService {
                     message.getText(),
                     message.getFromManager(),
                     message.getStatus(),
-                    assetDtos);
+                    assetDtos,
+                    message.getMessageViewingStatus());
             }).toList();
 
         return new PageableDto<>(
@@ -183,7 +182,7 @@ public class TelegramServiceImpl implements TelegramService {
             .map(chat -> {
                 ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
                     .id(chat.getId())
-                    .chatId(chat.getChatId())
+                    .unreadMessagesCount(chat.getUnreadMessagesCount())
                     .firstName(chat.getFirstName())
                     .lastName(chat.getLastName())
                     .username(chat.getUsername());
@@ -220,6 +219,7 @@ public class TelegramServiceImpl implements TelegramService {
                         .fromManager(message.getFromManager())
                         .deliveryStatus(message.getStatus())
                         .assets(assetDtos)
+                        .messageViewingStatus(message.getMessageViewingStatus())
                         .build();
 
                     chatDtoBuilder.lastMessage(lastMessage);
@@ -263,11 +263,35 @@ public class TelegramServiceImpl implements TelegramService {
             .orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
         return ChatDto.builder()
             .id(chat.getId())
-            .chatId(chat.getChatId())
+            .unreadMessagesCount(chat.getUnreadMessagesCount())
             .firstName(chat.getFirstName())
             .lastName(chat.getLastName())
             .username(chat.getUsername())
             .build();
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void markMessagesAsRead(MarkMessagesAsReadRequest request) {
+        List<TelegramMessage> messages = telegramMessageRepository.findAllById(request.getMessagesIds());
+
+        for (TelegramMessage message : messages) {
+            if (message.getMessageViewingStatus() == MessageViewingStatus.UNREAD) {
+                message.setMessageViewingStatus(MessageViewingStatus.READ);
+
+                TelegramChat chat = message.getChat();
+                int currentUnread = chat.getUnreadMessagesCount();
+                if (currentUnread > 0) {
+                    chat.setUnreadMessagesCount(currentUnread - 1);
+                }
+            }
+        }
+
+        telegramMessageRepository.saveAll(messages);
     }
 
     /**
@@ -327,12 +351,12 @@ public class TelegramServiceImpl implements TelegramService {
 
         ChatDto chatDto = ChatDto.builder()
             .id(createdChat.getId())
-            .chatId(createdChat.getChatId())
             .firstName(createdChat.getFirstName())
             .lastName(createdChat.getLastName())
+            .unreadMessagesCount(0)
             .username(createdChat.getUsername()).build();
 
-        notifyNewChat(chatDto);
+        telegramNotificationService.notifyNewChat(chatDto);
 
         return resolveProcessorByUuid(uuid, chatId);
     }
@@ -384,9 +408,5 @@ public class TelegramServiceImpl implements TelegramService {
         return telegramManagerRepository.findByChatId(chatId)
             .map(m -> telegramUpdateProcessorMap.get("managerUpdateProcessor"))
             .orElseGet(() -> telegramUpdateProcessorMap.get("userUpdateProcessor"));
-    }
-
-    private void notifyNewChat(ChatDto chatDto) {
-        messagingTemplate.convertAndSend("/topic/chats", chatDto);
     }
 }
