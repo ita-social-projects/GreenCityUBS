@@ -82,6 +82,7 @@ public class TelegramServiceImpl implements TelegramService {
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .sendAt(LocalDateTime.now())
+            .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
         var bot = applicationContext.getBean(UBSTelegramBot.class);
@@ -95,6 +96,9 @@ public class TelegramServiceImpl implements TelegramService {
 
         message.setAssets(assets);
         telegramMessageRepository.save(message);
+
+        chat.setLastMessage(message);
+        telegramChatRepository.save(chat);
     }
 
     private List<MessageAsset> handleFiles(UBSTelegramBot bot, TelegramChat chat,
@@ -237,6 +241,7 @@ public class TelegramServiceImpl implements TelegramService {
         Specification<TelegramChat> spec = ChatSpecifications.hasNameLike(searchTerm);
 
         Page<TelegramChat> chats = telegramChatRepository.findAll(spec, pageable);
+
         List<ChatDto> chatDtos = chats
             .getContent()
             .stream()
@@ -260,7 +265,9 @@ public class TelegramServiceImpl implements TelegramService {
                         .user(chatUserDto);
                 }
 
-                telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat).ifPresent(message -> {
+                if (chat.getLastMessage() != null) {
+                    TelegramMessage message = chat.getLastMessage();
+
                     List<MessageAssetDto> assetDtos = Optional.ofNullable(message.getAssets())
                         .orElse(Collections.emptyList())
                         .stream()
@@ -284,7 +291,8 @@ public class TelegramServiceImpl implements TelegramService {
                         .build();
 
                     chatDtoBuilder.lastMessage(lastMessage);
-                });
+                }
+
                 return chatDtoBuilder.build();
             })
             .toList();

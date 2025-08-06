@@ -55,17 +55,17 @@ import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
-import greencity.dto.notification.NotificationFullDto;
-import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
-import greencity.dto.notification.NotificationTemplateMainInfoDto;
-import greencity.dto.notification.NotificationShortDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
-import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.AddNotificationPlatformDto;
-import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
+import greencity.dto.notification.NotificationPlatformDto;
+import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
@@ -85,8 +85,8 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderDto;
 import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.OtherPackages;
@@ -170,9 +170,31 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.BaseAddress;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.BagStatus;
+import greencity.enums.CancellationReason;
+import greencity.enums.CertificateStatus;
+import greencity.enums.ChatState;
+import greencity.enums.CourierLimit;
+import greencity.enums.CourierStatus;
+import greencity.enums.EmployeeStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentSystem;
+import greencity.enums.TariffStatus;
+import greencity.enums.UserCategory;
 import greencity.util.Bot;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -180,13 +202,6 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1591,13 +1606,13 @@ public class ModelUtils {
 
     public static TelegramChat getTelegramBotNotifyTrue() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
-            "last_name", 0, null,
+            "last_name", 0, null, null,
             new ArrayList<>(), new ArrayList<>());
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), false, "username", "first_name",
-            "last_name", 0, null,
+            "last_name", 0, null, null,
             new ArrayList<>(), new ArrayList<>());
     }
 

@@ -69,6 +69,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -166,6 +167,7 @@ class TelegramServiceTest {
 
         verify(executor).executeCommand(eq(bot), any(SendMessage.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
     }
 
     @Test
@@ -214,7 +216,9 @@ class TelegramServiceTest {
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
         verify(azureCloudStorageService).upload(file);
-        verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
+        verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
     }
 
     @Test
@@ -242,6 +246,9 @@ class TelegramServiceTest {
 
         verify(azureCloudStorageService).upload(file);
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
+
     }
 
     @Test
@@ -255,6 +262,7 @@ class TelegramServiceTest {
             () -> telegramService.sendMessageToUser(request, null));
 
         verify(telegramMessageRepository, never()).save(any());
+        verify(telegramChatRepository, never()).save(any());
     }
 
     @Test
@@ -328,15 +336,6 @@ class TelegramServiceTest {
             .recipientEmail("ivan@example.com")
             .build();
 
-        TelegramChat chat = TelegramChat.builder()
-            .id(1L)
-            .chatId("123456789")
-            .firstName("Test")
-            .lastName("User")
-            .username("testuser")
-            .user(user)
-            .build();
-
         MessageAsset asset = MessageAsset.builder()
             .id(10L)
             .url("http://image.png")
@@ -355,11 +354,20 @@ class TelegramServiceTest {
             .assets(List.of(asset))
             .build();
 
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("123456789")
+            .firstName("Test")
+            .lastName("User")
+            .username("testuser")
+            .user(user)
+            .lastMessage(message)
+            .build();
+
         Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
 
         when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
             .thenReturn(chatPage);
-        when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.of(message));
 
         PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
 
@@ -368,11 +376,11 @@ class TelegramServiceTest {
 
         ChatDto chatDto = result.getPage().getFirst();
         assertEquals("Test", chatDto.getFirstName());
-        Assertions.assertNotNull(chatDto.getUser());
+        assertNotNull(chatDto.getUser());
         assertEquals("ivan@example.com", chatDto.getUser().getEmail());
 
         TelegramMessageDto lastMessage = chatDto.getLastMessage();
-        Assertions.assertNotNull(lastMessage);
+        assertNotNull(lastMessage);
         assertEquals("Hello", lastMessage.getText());
         assertEquals(1, lastMessage.getAssets().size());
         assertEquals("http://image.png", lastMessage.getAssets().getFirst().getUrl());
@@ -396,7 +404,6 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
             .thenReturn(chatPage);
-        when(telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)).thenReturn(Optional.empty());
 
         // when
         PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
@@ -451,8 +458,44 @@ class TelegramServiceTest {
 
         OrdersDataForUserDto result = telegramService.getLastOrderByChatId(chatId);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(Optional.of(100L).get(), result.getId());
+    }
+
+    @Test
+    void testGetChats_WithLastMessageAndNullAssets_ShouldReturnEmptyAssets() {
+        Pageable pageable = PageRequest.of(0, 10);
+        TelegramMessage message = TelegramMessage.builder()
+            .id(100L)
+            .text("Message with null assets")
+            .sendAt(LocalDateTime.now())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .assets(null)
+            .build();
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("123")
+            .firstName("Test")
+            .lastName("User")
+            .lastMessage(message)
+            .build();
+
+        Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
+
+        when(telegramChatRepository.findAll(ArgumentMatchers.<Specification<TelegramChat>>any(), eq(pageable)))
+            .thenReturn(chatPage);
+
+        PageableDto<ChatDto> result = telegramService.getChats("", pageable);
+
+        assertEquals(1, result.getTotalElements());
+        ChatDto dto = result.getPage().getFirst();
+
+        assertNotNull(dto.getLastMessage());
+        assertEquals("Message with null assets", dto.getLastMessage().getText());
+        assertNotNull(dto.getLastMessage().getAssets());
+        assertTrue(dto.getLastMessage().getAssets().isEmpty());
     }
 
     @Test
@@ -515,7 +558,7 @@ class TelegramServiceTest {
 
         ChatDto result = telegramService.getChatById(chatId);
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(chatId, result.getId());
         assertEquals("Іван", result.getFirstName());
         assertEquals("Петренко", result.getLastName());
