@@ -73,12 +73,14 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2;
 import static greencity.ModelUtils.TEST_UUID;
 import static greencity.ModelUtils.TEST_PAGEABLE_ADVANCED_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET2;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_2;
 import static greencity.ModelUtils.TEST_ORDER_2;
 import static greencity.ModelUtils.TEST_ORDER_3;
 import static greencity.ModelUtils.TEST_ORDER_4;
@@ -1630,5 +1632,42 @@ class NotificationServiceImplTest {
         notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME);
 
         verify(userRemoteClient, times(1)).sendGreenOfficeRequestNotification(notification);
+    }
+
+    @Test
+    void testGetAllNotificationsForUserForCustomNotifications() {
+        User user = TEST_USER;
+        String language = "en";
+        UserNotification customNotification1 = UserNotification.builder()
+            .id(1L)
+            .user(user)
+            .notificationType(NotificationType.CUSTOM)
+            .templateId(1L)
+            .build();
+        UserNotification customNotification2 = UserNotification.builder()
+            .id(2L)
+            .user(user)
+            .notificationType(NotificationType.CUSTOM)
+            .templateId(1L)
+            .build();
+
+        Page<UserNotification> page = new PageImpl<>(List.of(customNotification1, customNotification2),
+            Mockito.mock(Pageable.class),
+            2L);
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+
+        when(templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(1L, SITE))
+            .thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE_2));
+
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE)).thenReturn(page);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(customNotification1));
+        when(userNotificationRepository.findById(2L)).thenReturn(Optional.of(customNotification2));
+
+        PageableAdvancedDto<NotificationFullDto> actual =
+            notificationService.getAllNotificationsForUser(user.getUuid(), language, TEST_PAGEABLE);
+
+        assertEquals(TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2, actual);
     }
 }

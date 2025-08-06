@@ -242,7 +242,7 @@ public class ViolationServiceImpl implements ViolationService {
                 violationImages.remove(image);
             }
         }
-        if (multipartFiles.length > 0) {
+        if (multipartFiles != null && multipartFiles.length > 0) {
             List<String> images = new LinkedList<>();
             setImages(multipartFiles, images);
             if (violation.getImages().isEmpty()) {

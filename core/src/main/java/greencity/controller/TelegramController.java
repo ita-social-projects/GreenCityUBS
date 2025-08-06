@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RestController
 @RequestMapping("/ubs/telegram")
 @RequiredArgsConstructor
+@Validated
 public class TelegramController {
     private final TelegramService telegramService;
     private final TelegramFeedbackService telegramFeedbackService;
@@ -176,5 +178,18 @@ public class TelegramController {
         @PathVariable(name = "chatId") String chatId, Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable));
+    }
+
+    @Operation(summary = "Mark messages as read")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @PutMapping(value = "/messages", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void markMessagesAsRead(@RequestBody MarkMessagesAsReadRequest request) {
+        telegramService.markMessagesAsRead(request);
     }
 }

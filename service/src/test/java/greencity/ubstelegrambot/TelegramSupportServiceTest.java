@@ -151,6 +151,7 @@ class TelegramSupportServiceTest {
             .builder()
             .id(id)
             .chatId(chatId)
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
@@ -185,6 +186,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat
             .builder()
             .id(id)
+            .unreadMessagesCount(0)
             .build();
 
         TelegramMessage telegramMessage = TelegramMessage
@@ -268,6 +270,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat
             .builder()
             .id(id)
+            .unreadMessagesCount(0)
             .chatId(chatId)
             .build();
 
@@ -373,9 +376,11 @@ class TelegramSupportServiceTest {
         when(message.hasPhoto()).thenReturn(false);
         when(message.hasDocument()).thenReturn(false);
 
+
         TelegramChat chat = TelegramChat.builder()
             .id(1L)
             .chatId("1")
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
@@ -412,6 +417,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat.builder()
             .id(1L)
             .chatId("1")
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
@@ -472,6 +478,7 @@ class TelegramSupportServiceTest {
         when(message.hasPhoto()).thenReturn(false);
         when(message.hasText()).thenReturn(false);
         when(message.getMediaGroupId()).thenReturn(null);
+      
         when(message.getDocument()).thenReturn(document);
         when(document.getFileId()).thenReturn("fileId");
         when(document.getFileSize()).thenReturn(2048L);
@@ -487,6 +494,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat.builder()
             .id(1L)
             .chatId("1")
+            .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));

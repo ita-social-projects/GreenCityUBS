@@ -59,7 +59,9 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the forbidden manager messages.
      */
     public static SendMessage createForbiddenCommandsManagerMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.FORBIDDEN_COMMANDS_MANAGER);
+        return buildReplyMarkUpMessage(chatId,
+            TelegramBotConstants.FORBIDDEN_COMMANDS_MANAGER + "\n" + TelegramBotConstants.SUPPORTED_COMMANDS,
+            KeyboardFactory.createHelpKeyboardForManager());
     }
 
     /**

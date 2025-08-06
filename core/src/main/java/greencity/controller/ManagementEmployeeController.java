@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import greencity.annotations.ValidImage;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.employee.EmployeeWithTariffsDto;
@@ -29,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -37,6 +39,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/admin/ubs-employee")
 @RequiredArgsConstructor
+@Validated
 public class ManagementEmployeeController {
     private final UBSManagementEmployeeService employeeService;
     private final UBSClientService ubsClientService;
@@ -52,8 +55,8 @@ public class ManagementEmployeeController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
             content = @Content(schema = @Schema(implementation = EmployeeWithTariffsDto.class))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
@@ -62,7 +65,7 @@ public class ManagementEmployeeController {
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @RequestPart(value = "image", required = false) MultipartFile image) {
+        @RequestPart(value = "image", required = false) @ValidImage MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
@@ -108,7 +111,7 @@ public class ManagementEmployeeController {
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @Parameter(description = "Employee image") @RequestPart(required = false) MultipartFile image) {
+        @Parameter(description = "Employee image") @RequestPart(required = false) @ValidImage MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeWithTariffsIdDto, image));
     }
 

@@ -9,6 +9,7 @@ import greencity.entity.telegram.TelegramMessage;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
@@ -97,10 +98,14 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .status(MessageDeliveryStatus.SENT)
                 .sendAt(LocalDateTime.now())
                 .text(messageText)
+                .messageViewingStatus(MessageViewingStatus.UNREAD)
                 .build();
 
             telegramMessageRepository.save(telegramMessage);
+            chat.setUnreadMessagesCount(chat.getUnreadMessagesCount() + 1);
+            telegramChatRepository.save(chat);
         }
+
 
         File telegramFile;
         String fileId = null;
@@ -108,6 +113,15 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         String contentType = null;
         Long fileSize = null;
         AssetType assetType;
+
+        TelegramMessageDto.TelegramMessageDtoBuilder telegramMessageDtoBuilder = TelegramMessageDto
+            .builder()
+            .id(telegramMessage.getId())
+            .sendAt(telegramMessage.getSendAt())
+            .text(telegramMessage.getText())
+            .fromManager(telegramMessage.getFromManager())
+            .deliveryStatus(telegramMessage.getStatus())
+            .messageViewingStatus(telegramMessage.getMessageViewingStatus());
 
         if (message.hasPhoto()) {
             PhotoSize largestPhoto = message.getPhoto().stream()

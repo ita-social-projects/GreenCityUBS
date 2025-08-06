@@ -207,7 +207,7 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for delete service by Id.
+     * Controller for delete service by id.
      *
      * @param id {@link Long} - service id.
      * @author Vadym Makitra
