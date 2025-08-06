@@ -178,4 +178,6 @@ public class TelegramBotConstants {
 
     public static final String PHOTO_CONTENT =
         "Фото контент";
+
+    public static final String INCORRECT_PASSWORD = "Неправильний пароль. Спробуйте ще раз";
 }
