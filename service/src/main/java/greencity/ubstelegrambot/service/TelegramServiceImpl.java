@@ -3,7 +3,12 @@ package greencity.ubstelegrambot.service;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.ChatUserDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MessageAssetDto;
+import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -177,7 +182,7 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable) {
-        Specification<TelegramChat> spec = ChatSpecifications.hasNameLike(searchTerm);
+        Specification<TelegramChat> spec = ChatSpecifications.withSearchAndSort(searchTerm);
 
         Page<TelegramChat> chats = telegramChatRepository.findAll(spec, pageable);
 
