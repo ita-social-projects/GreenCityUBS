@@ -4,7 +4,6 @@ import greencity.service.ubs.TelegramService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -22,9 +21,9 @@ public class TelegramBotConfig {
     private String botToken;
 
     @Bean
-    public UBSTelegramBot ubsTelegramBot(TelegramService telegramService, ApplicationContext applicationContext,
+    public UBSTelegramBot ubsTelegramBot(TelegramService telegramService,
         TelegramExecutor executor) {
-        return new UBSTelegramBot(botToken, botName, telegramService, applicationContext, executor);
+        return new UBSTelegramBot(botToken, botName, telegramService, executor);
     }
 
     @Bean
