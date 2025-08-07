@@ -15,6 +15,7 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
@@ -22,7 +23,6 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AzureCloudStorageService;
-import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
@@ -67,7 +67,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final TelegramNotificationService telegramNotificationService;
+    private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
 
@@ -425,7 +425,7 @@ public class TelegramServiceImpl implements TelegramService {
             .unreadMessagesCount(0)
             .username(createdChat.getUsername()).build();
 
-        telegramNotificationService.notifyNewChat(chatDto);
+        telegramChatProducer.notifyNewChat(chatDto);
 
         return resolveProcessorByUuid(uuid, chatId);
     }

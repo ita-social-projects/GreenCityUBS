@@ -10,6 +10,7 @@ import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
@@ -49,6 +50,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramExecutor executor;
     private final TelegramNotificationService telegramNotificationService;
+    private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
 
     /**
@@ -106,7 +108,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             chat.setUnreadMessagesCount(chat.getUnreadMessagesCount() + 1);
             telegramChatRepository.save(chat);
         }
-
+      
         File telegramFile;
         String fileId = null;
         String originalFileName = null;
@@ -196,6 +198,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                     e.getMessage(), e);
                 return MessageFactory.buildMessage(message.getChatId().toString(),
                     TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
+
             }
         } else if (!message.hasText() && !message.hasPhoto() && !message.hasDocument()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
@@ -243,7 +246,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             return null;
         }
     }
-
+      
     private static String getString(TelegramMessage telegramMessage) {
         String contentForNotification = "Empty message";
         if (telegramMessage.getAssets() != null && !telegramMessage.getAssets().isEmpty()) {
