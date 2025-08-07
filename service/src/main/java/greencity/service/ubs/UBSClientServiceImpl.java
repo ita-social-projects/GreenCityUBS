@@ -1158,7 +1158,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(OrderBag::getAmount)
                 .filter(amount -> amount != 0)
                 .toList())
-                .returnUrl(greenCityClientUrl)
+            .returnUrl(greenCityClientUrl)
             .build();
 
         paymentWayForPayRequestDto.setSignature(encryptionUtil
