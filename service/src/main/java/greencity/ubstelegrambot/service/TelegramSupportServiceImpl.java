@@ -10,6 +10,7 @@ import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
@@ -46,6 +47,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramExecutor executor;
     private final TelegramNotificationService telegramNotificationService;
+    private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
 
     /**
@@ -112,7 +114,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .messageViewingStatus(telegramMessage.getMessageViewingStatus());
 
         if (!message.hasPhoto()) {
-            telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
+            telegramChatProducer.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
             telegramNotificationService.notifyManagerAboutNewMessagesFromUser(
                 Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
                 Optional.ofNullable(telegramMessage.getText()).orElse(TelegramBotConstants.PHOTO_CONTENT),
@@ -127,7 +129,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         if (largestPhoto == null) {
             if (previouslySavedMessage.isEmpty()) {
-                telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
+                telegramChatProducer.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
                 telegramNotificationService.notifyManagerAboutNewMessagesFromUser(
                     Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
                     Optional.ofNullable(telegramMessage.getText()).orElse(TelegramBotConstants.PHOTO_CONTENT),
@@ -142,7 +144,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             File telegramFile = executor.executeGetFile(bot, new GetFile(largestPhoto.getFileId()));
             if (telegramFile == null || telegramFile.getFilePath() == null) {
                 if (previouslySavedMessage.isEmpty()) {
-                    telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
+                    telegramChatProducer.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
                     telegramNotificationService.notifyManagerAboutNewMessagesFromUser(
                         Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
                         Optional.ofNullable(telegramMessage.getText()).orElse(TelegramBotConstants.PHOTO_CONTENT),
@@ -177,7 +179,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             messageAssetRepository.save(asset);
         } catch (Exception e) {
             if (previouslySavedMessage.isEmpty()) {
-                telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
+                telegramChatProducer.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
                 telegramNotificationService.notifyManagerAboutNewMessagesFromUser(
                     Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
                     Optional.ofNullable(telegramMessage.getText()).orElse(TelegramBotConstants.PHOTO_CONTENT),
@@ -206,7 +208,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             return null;
         }
 
-        telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
+        telegramChatProducer.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
         telegramNotificationService.notifyManagerAboutNewMessagesFromUser(
             Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
             Optional.ofNullable(telegramMessage.getText()).orElse(TelegramBotConstants.PHOTO_CONTENT), chat.getId());
