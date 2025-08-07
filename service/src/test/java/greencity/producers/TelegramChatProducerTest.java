@@ -19,7 +19,7 @@ public class TelegramChatProducerTest {
     private SimpMessagingTemplate messagingTemplate;
 
     @Test
-    public void testNotifyNewMessage_CorrectDestination_MessageSent() {
+    void testNotifyNewMessage_CorrectDestination_MessageSent() {
         Long chatId = 123L;
         TelegramMessageDto messageDto = new TelegramMessageDto();
 
