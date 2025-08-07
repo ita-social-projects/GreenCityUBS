@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import java.io.IOException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -160,18 +161,6 @@ public class MessageFactory {
         message.enableHtml(true);
         message.setParseMode(ParseMode.HTML);
         return message;
-    }
-
-    /**
-     * Method for creating end support mode message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     *
-     * @return {@link SendMessage} configured with the end support mode message.
-     */
-    public static SendMessage createEndSupportMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.CLIENT_STOP_SUPPORT_MODE,
-            KeyboardFactory.createChatFeedbackRatingKeyboard());
     }
 
     /**
@@ -430,5 +419,23 @@ public class MessageFactory {
         sendDocument.setChatId(chatId);
         sendDocument.setDocument(new InputFile(file.getInputStream(), file.getOriginalFilename()));
         return sendDocument;
+    }
+
+    /**
+     * Creates a Telegram {@link SendMessage} that removes the custom keyboard
+     * after the support mode ends.
+     *
+     * <p>This message includes a predefined text notifying the user that support mode
+     * has ended, and attaches a {@link ReplyKeyboardRemove} to hide the keyboard.</p>
+     *
+     * @param chatId the ID of the chat to send the message to
+     * @return a {@link SendMessage} object configured to remove the keyboard
+     */
+    public static SendMessage deleteEndSupportKeyboardMessage(String chatId) {
+        SendMessage removeKeyboardMsg = new SendMessage();
+        removeKeyboardMsg.setChatId(chatId);
+        removeKeyboardMsg.setText(TelegramBotConstants.CLIENT_STOP_SUPPORT_MODE);
+        removeKeyboardMsg.setReplyMarkup(new ReplyKeyboardRemove(true));
+        return removeKeyboardMsg;
     }
 }
