@@ -205,4 +205,6 @@ public class ErrorMessage {
     public static final String TARIFFID_IS_NULL = "Tariff id cannot be null";
     public static final String TARIFFID_IS_NOT_POSITIVE = "Tariff Id must be greater than 0";
     public static final String TARIFF_LIST_CONTAINS_DUPLICATES = "Tariffs cannot contain duplicates";
+    public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
+        "Template cannot be deleted while it is referenced by existing notifications";
 }
