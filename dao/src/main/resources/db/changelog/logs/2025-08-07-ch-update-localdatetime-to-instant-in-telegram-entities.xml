@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="2025-08-07-update-localdatetime-to-instant-in-telegram-entities" author="Anton Pampukha">
+        <comment>Convert LocalDateTime to Instant (timestamp to timestamptz)</comment>
+
+        <sql>
+            ALTER TABLE telegram_message
+                ALTER COLUMN send_at TYPE TIMESTAMP WITH TIME ZONE USING send_at AT TIME ZONE 'UTC',
+                ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE USING updated_at AT TIME ZONE 'UTC';
+        </sql>
+
+        <sql>
+            ALTER TABLE message_asset
+                ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE USING created_at AT TIME ZONE 'UTC',
+                ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE USING updated_at AT TIME ZONE 'UTC';
+        </sql>
+    </changeSet>
+</databaseChangeLog>
