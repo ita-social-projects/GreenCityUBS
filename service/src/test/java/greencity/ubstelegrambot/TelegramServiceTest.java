@@ -14,6 +14,7 @@ import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
@@ -21,7 +22,6 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AzureCloudStorageService;
-import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.ubstelegrambot.service.TelegramExecutor;
@@ -94,7 +94,7 @@ class TelegramServiceTest {
     private MultipartFile file;
 
     @Mock
-    private TelegramNotificationService telegramNotificationService;
+    private TelegramChatProducer telegramChatProducer;
 
     @Mock
     private TelegramManagerRepository telegramManagerRepository;
@@ -127,7 +127,7 @@ class TelegramServiceTest {
             employeeRepository,
             orderRepository,
             userRepository,
-            telegramNotificationService,
+            telegramChatProducer,
             telegramUtils,
             telegramUpdateProcessorMap);
     }
@@ -537,7 +537,7 @@ class TelegramServiceTest {
         Update update = new Update();
         update.setMessage(message);
 
-        doNothing().when(telegramNotificationService).notifyNewChat(any(ChatDto.class));
+        doNothing().when(telegramChatProducer).notifyNewChat(any(ChatDto.class));
 
         TelegramChat savedChat = TelegramChat.builder()
             .id(1L)
