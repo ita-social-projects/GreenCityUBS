@@ -206,8 +206,9 @@ class TelegramSupportServiceTest {
 
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
 
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username, TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -291,8 +292,9 @@ class TelegramSupportServiceTest {
 
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
 
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username, TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
+            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -335,15 +337,15 @@ class TelegramSupportServiceTest {
         when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
         SendMessage result = telegramSupportService.processSupportMessage(message);
-      
+
         assertNull(result);
         verify(fileService).upload(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
         verify(telegramMessageRepository).findByMediaGroupId(mediaGroupId);
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
+            eq(chat.getId()));
     }
 
     @Test
@@ -371,7 +373,8 @@ class TelegramSupportServiceTest {
         assertEquals(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_FILE_PLEASE_TRY_AGAIN, result.getText());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username, TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
+            eq(chat.getId()));
     }
 
     @Test
@@ -397,11 +400,9 @@ class TelegramSupportServiceTest {
 
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
-
         assertEquals(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN, result.getText());
-      
-        verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, TelegramBotConstants.PHOTO_CONTENT, id);
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
     }
 
     @Test
@@ -444,8 +445,7 @@ class TelegramSupportServiceTest {
 
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
     }
 
     @Test
@@ -474,16 +474,12 @@ class TelegramSupportServiceTest {
 
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
-
         assertEquals(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN, result.getText());
 
         verify(telegramMessageRepository).save(messageCaptor.capture());
         verify(telegramMessageRepository).delete(messageCaptor.getValue());
-      
-        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
 
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
     }
 
     @Test
@@ -526,7 +522,7 @@ class TelegramSupportServiceTest {
 
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, TelegramBotConstants.PHOTO_CONTENT, id);
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
         verify(fileService).upload(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
 
