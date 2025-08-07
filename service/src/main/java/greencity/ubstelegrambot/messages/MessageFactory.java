@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -408,10 +409,26 @@ public class MessageFactory {
      * @return a configured {@link SendPhoto} object
      * @throws IOException if reading the file input stream fails
      */
-    public static SendPhoto createMultipartFileSender(String chatId, MultipartFile file) throws IOException {
+    public static SendPhoto createSendPhoto(String chatId, MultipartFile file) throws IOException {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
         sendPhoto.setPhoto(new InputFile(file.getInputStream(), file.getOriginalFilename()));
         return sendPhoto;
+    }
+
+    /**
+     * Creates a {@link SendDocument} object to send a file from a
+     * {@link MultipartFile} to a Telegram chat.
+     *
+     * @param chatId {@link String} the ID of the target chat
+     * @param file   {@link MultipartFile} the file to be sent as a file
+     * @return a configured {@link SendDocument} object
+     * @throws IOException if reading the file input stream fails
+     */
+    public static SendDocument createSendDocument(String chatId, MultipartFile file) throws IOException {
+        SendDocument sendDocument = new SendDocument();
+        sendDocument.setChatId(chatId);
+        sendDocument.setDocument(new InputFile(file.getInputStream(), file.getOriginalFilename()));
+        return sendDocument;
     }
 }

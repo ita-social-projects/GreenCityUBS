@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -55,6 +56,22 @@ public class TelegramExecutor {
     public Message executeSendPhoto(UBSTelegramBot bot, SendPhoto message) {
         try {
             return bot.execute(message);
+        } catch (TelegramApiException e) {
+            throw new MessageWasNotSent(e.getMessage());
+        }
+    }
+
+    /**
+     * Sends a file to a Telegram user.
+     *
+     * @param bot     {@link UBSTelegramBot} the Telegram bot instance
+     * @param message {@link SendDocument} the SendPhoto method containing the file
+     *                and details
+     * @throws MessageWasNotSent if the file cannot be sent
+     */
+    public void executeSendFile(UBSTelegramBot bot, SendDocument message) {
+        try {
+            bot.execute(message);
         } catch (TelegramApiException e) {
             throw new MessageWasNotSent(e.getMessage());
         }

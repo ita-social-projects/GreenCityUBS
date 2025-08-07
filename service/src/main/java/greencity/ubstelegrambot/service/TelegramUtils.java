@@ -44,7 +44,7 @@ public class TelegramUtils {
             return AssetType.FILE;
         }
 
-        if (file.startsWith("image/")) {
+        if (file.startsWith("image/") && !file.contains("svg")) {
             return AssetType.IMAGE;
         }
         if (file.startsWith("video/")) {
