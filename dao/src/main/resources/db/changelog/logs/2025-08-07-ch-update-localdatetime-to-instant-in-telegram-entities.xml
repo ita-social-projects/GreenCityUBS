@@ -31,13 +31,15 @@
         </sql>
 
         <rollback>
-            ALTER TABLE telegram_message
-            ALTER COLUMN send_at TYPE TIMESTAMP WITHOUT TIME ZONE,
-            ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+            <sql>
+                ALTER TABLE telegram_message
+                ALTER COLUMN send_at TYPE TIMESTAMP WITHOUT TIME ZONE,
+                ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
 
-            ALTER TABLE message_asset
-            ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE,
-            ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+                ALTER TABLE message_asset
+                ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE,
+                ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+            </sql>
         </rollback>
     </changeSet>
 </databaseChangeLog>
