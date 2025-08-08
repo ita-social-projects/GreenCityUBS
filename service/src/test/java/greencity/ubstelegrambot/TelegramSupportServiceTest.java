@@ -89,7 +89,7 @@ class TelegramSupportServiceTest {
 
     @BeforeEach
     void setup() {
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        lenient().when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
     }
 
     @Test
