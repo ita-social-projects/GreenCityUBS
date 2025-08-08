@@ -32,6 +32,8 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,7 +100,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .fromManager(false)
                 .mediaGroupId(mediaGroupId)
                 .status(MessageDeliveryStatus.SENT)
-                .sendAt(LocalDateTime.now())
+                .sendAt(Instant.now())
                 .text(messageText)
                 .messageViewingStatus(MessageViewingStatus.UNREAD)
                 .build();

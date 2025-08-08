@@ -81,7 +81,7 @@ public class TelegramServiceImpl implements TelegramService {
             .text(request.getText())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
