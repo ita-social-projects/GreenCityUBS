@@ -50,7 +50,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -471,7 +470,7 @@ public class TelegramServiceImpl implements TelegramService {
             : update.getMessage().getChatId().toString();
 
         telegramChatRepository.findByChatId(chatId).ifPresent(chat -> {
-            Instant updatedAt = chat.getChatStateUpdatedAt().atZone(ZoneId.systemDefault()).toInstant();
+            Instant updatedAt = chat.getChatStateUpdatedAt();
             if (Duration.between(updatedAt, Instant.now()).toMinutes() > 10) {
                 chat.setChatState(ChatState.NORMAL);
                 telegramChatRepository.save(chat);

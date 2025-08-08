@@ -841,7 +841,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(Instant.now().minus(1, ChronoUnit.MINUTES))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString()))
