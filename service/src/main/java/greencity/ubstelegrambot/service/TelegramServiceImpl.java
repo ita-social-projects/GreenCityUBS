@@ -477,6 +477,13 @@ public class TelegramServiceImpl implements TelegramService {
             }
         });
 
+        if (update.hasCallbackQuery()) {
+            String callback = update.getCallbackQuery().getData();
+            if (callback.startsWith("SET_LANGUAGE_")) {
+                return telegramUpdateProcessorMap.get("languageSwitcherProcessor");
+            }
+        }
+
         return telegramManagerRepository.findByChatId(chatId)
             .map(m -> telegramUpdateProcessorMap.get("managerUpdateProcessor"))
             .orElseGet(() -> telegramUpdateProcessorMap.get("userUpdateProcessor"));
