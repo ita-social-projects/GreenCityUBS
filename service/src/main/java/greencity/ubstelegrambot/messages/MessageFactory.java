@@ -24,7 +24,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the welcome message.
      */
     public static SendMessage createWelcomeMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.GREETING_MESSAGE,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("greeting.message"),
             KeyboardFactory.createHelpKeyboard());
     }
 
@@ -36,7 +36,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the welcome manager message.
      */
     public static SendMessage createWelcomeManagerMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.GREETING_MANAGER_MESSAGE);
+        return buildMessage(chatId, MessageProvider.get("greeting.manager.message"));
     }
 
     /**
@@ -49,7 +49,7 @@ public class MessageFactory {
      *         message.
      */
     public static SendMessage createLogoutManagerMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.SUCCESSFUL_LOGOUT_MANAGER);
+        return buildMessage(chatId, MessageProvider.get("successful.logout.manager"));
     }
 
     /**
@@ -61,7 +61,7 @@ public class MessageFactory {
      */
     public static SendMessage createForbiddenCommandsManagerMessage(String chatId) {
         return buildReplyMarkUpMessage(chatId,
-            TelegramBotConstants.FORBIDDEN_COMMANDS_MANAGER + "\n" + TelegramBotConstants.SUPPORTED_COMMANDS,
+            MessageProvider.get("forbidden.commands.manager") + "\n" + MessageProvider.get("supported.commands"),
             KeyboardFactory.createHelpKeyboardForManager());
     }
 
@@ -74,7 +74,7 @@ public class MessageFactory {
      *         message.
      */
     public static SendMessage createAvailableCommandsMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("supported.commands"),
             KeyboardFactory.createHelpKeyboard());
     }
 
@@ -88,7 +88,7 @@ public class MessageFactory {
      *         commands message.
      */
     public static SendMessage createAvailableForManagerCommandsMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.SUPPORTED_COMMANDS,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("supported.commands"),
             KeyboardFactory.createHelpKeyboardForManager());
     }
 
@@ -100,7 +100,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the unknown command message.
      */
     public static SendMessage createUnknownCommandMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.UNKNOWN_COMMAND,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("unknown.command"),
             KeyboardFactory.createHelpKeyboard());
     }
 
@@ -112,7 +112,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the login message.
      */
     public static SendMessage createLoginMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.LOGIN_MESSAGE,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("login.message"),
             KeyboardFactory.createBackToMainMenuKeyboard());
     }
 
@@ -126,7 +126,7 @@ public class MessageFactory {
      *         message.
      */
     public static SendMessage createFailLoginMessage(String chatId, String errorMessage) {
-        return buildReplyMarkUpMessage(chatId, String.format(TelegramBotConstants.LOGIN_ERROR, errorMessage),
+        return buildReplyMarkUpMessage(chatId, String.format(MessageProvider.get("login.error"), errorMessage),
             KeyboardFactory.createBackToMainMenuKeyboard());
     }
 
@@ -140,7 +140,7 @@ public class MessageFactory {
      *         username.
      */
     public static SendMessage createSuccessLoginMessage(String chatId, String userName) {
-        return buildReplyMarkUpMessage(chatId, String.format(TelegramBotConstants.SUCCESS_LOGIN, userName),
+        return buildReplyMarkUpMessage(chatId, String.format(MessageProvider.get("login.success"), userName),
             KeyboardFactory.createHelpKeyboardForManager());
     }
 
@@ -157,7 +157,7 @@ public class MessageFactory {
     public static SendMessage createNotificationMessageForManager(String telegramChatId, String username,
         String messageText, Long innerChatId) {
         SendMessage message = buildMessage(telegramChatId,
-            String.format(TelegramBotConstants.CLIENT_WANT_TO_SPEAK, username, messageText, innerChatId));
+            String.format(MessageProvider.get("client.want.to.speak"), username, messageText, innerChatId));
         message.enableHtml(true);
         message.setParseMode(ParseMode.HTML);
         return message;
@@ -174,7 +174,7 @@ public class MessageFactory {
      */
     public static SendMessage createEndSupportModeNotification(String chatId, String username) {
         return buildMessage(chatId,
-            String.format(TelegramBotConstants.CLIENT_END_SUPPORT_MODE_NOTIFICATION, username));
+            String.format(MessageProvider.get("client.end.support.notification"), username));
     }
 
     /**
@@ -207,7 +207,7 @@ public class MessageFactory {
         return SendMessage
             .builder()
             .chatId(chatId)
-            .text(TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY)
+            .text(MessageProvider.get("client.support.message.callback.query"))
             .replyMarkup(KeyboardFactory.userSupportKeyboard())
             .build();
     }
@@ -219,7 +219,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the work schedule message.
      */
     public static SendMessage createWorkScheduleMessage(String chatId) {
-        var message = buildReplyMarkUpMessage(chatId, TelegramBotConstants.WORK_SCHEDULE_MESSAGE,
+        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get("work.schedule.message"),
             KeyboardFactory.createBackToMainMenuKeyboard());
         message.setParseMode(ParseMode.HTML);
         return message;
@@ -232,7 +232,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the sorting prices message.
      */
     public static SendMessage createSortingPricesMessage(String chatId) {
-        var message = buildReplyMarkUpMessage(chatId, TelegramBotConstants.SORTING_RULES_PRICING_MESSAGE,
+        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get("sorting.rules.pricing.message"),
             KeyboardFactory.createBackToMainMenuKeyboard());
         message.setParseMode(ParseMode.HTML);
         return message;
@@ -245,7 +245,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the admission rules message.
      */
     public static SendMessage createAdmissionRulesMessage(String chatId) {
-        var message = buildReplyMarkUpMessage(chatId, TelegramBotConstants.ADMISSION_RULES_TEXT,
+        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get("admission.rules.text"),
             KeyboardFactory.createBackToMainMenuKeyboard());
         message.setParseMode(ParseMode.HTML);
         return message;
@@ -258,7 +258,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the green office message.
      */
     public static SendMessage createGreenOfficeMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.GREEN_OFFICE_TEXT,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("green.office.text"),
             KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK));
     }
 
@@ -269,7 +269,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the entering email message.
      */
     public static SendMessage createEnteringEmailMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.ENTERING_EMAIL_MESSAGE,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("entering.email.message"),
             KeyboardFactory.createBackToMainMenuKeyboard());
     }
 
@@ -280,7 +280,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the invalid email message.
      */
     public static SendMessage createInvalidEmailMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.INVALID_EMAIL_MESSAGE,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("invalid.email.message"),
             KeyboardFactory.createBackToMainMenuKeyboard());
     }
 
@@ -291,7 +291,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the green office thanks message.
      */
     public static SendMessage createGreenOfficeThanksMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.GREEN_OFFICE_THANK_YOU_MESSAGE,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("green.office.thank.you.message"),
             KeyboardFactory.createHelpKeyboard());
     }
 
@@ -303,7 +303,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the feedback message.
      */
     public static SendMessage createFeedbackMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.FEEDBACK_MESSAGE,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("feedback.message"),
             KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard());
     }
 
@@ -315,7 +315,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the great feedback message.
      */
     public static SendMessage createGreatFeedbackMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.GREAT_FEEDBACK_MESSAGE);
+        return buildMessage(chatId, MessageProvider.get("great.feedback.message"));
     }
 
     /**
@@ -326,7 +326,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the bad feedback message.
      */
     public static SendMessage createBadFeedbackMessage(String chatId) {
-        return buildMessage(chatId, TelegramBotConstants.BAD_FEEDBACK_MESSAGE);
+        return buildMessage(chatId, MessageProvider.get("bad.feedback.message"));
     }
 
     /**
@@ -337,7 +337,7 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the thanks feedback message.
      */
     public static SendMessage createFeedbackThanksMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.FEEDBACK_THANK_YOU_MESSAGE,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("feedback.thank.you.message"),
             KeyboardFactory.createHelpKeyboard());
     }
 
@@ -350,7 +350,7 @@ public class MessageFactory {
      *         message.
      */
     public static SendMessage createUnknownErrorOccurredMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, TelegramBotConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN,
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get("unknown.error"),
             KeyboardFactory.createBackToMainMenuKeyboard());
     }
 

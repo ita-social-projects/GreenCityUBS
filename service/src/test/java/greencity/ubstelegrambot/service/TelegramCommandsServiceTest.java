@@ -1,8 +1,8 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +42,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message);
 
         assertEquals("123", result.getChatId());
-        assertEquals(TelegramBotConstants.UNKNOWN_COMMAND, result.getText());
+        assertEquals(MessageProvider.get("unknown.command"), result.getText());
     }
 
     @Test
@@ -61,7 +61,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message);
 
         assertEquals("123", result.getChatId());
-        assertEquals(TelegramBotConstants.SUPPORTED_COMMANDS, result.getText());
+        assertEquals(MessageProvider.get("supported.commands"), result.getText());
     }
 
     @Test
@@ -80,7 +80,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message);
 
         assertEquals("123", result.getChatId());
-        assertEquals(TelegramBotConstants.SUPPORTED_COMMANDS, result.getText());
+        assertEquals(MessageProvider.get("supported.commands"), result.getText());
     }
 
     @Test
@@ -99,7 +99,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message);
 
         assertEquals("123", result.getChatId());
-        assertEquals(TelegramBotConstants.CLIENT_SUPPORT_MESSAGE_CALL_BACK_QUERY, result.getText());
+        assertEquals(MessageProvider.get("client.support.message.callback.query"), result.getText());
     }
 
     @Test
@@ -118,7 +118,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message);
 
         assertEquals("123", result.getChatId());
-        assertEquals(TelegramBotConstants.LOGIN_MESSAGE, result.getText());
+        assertEquals(MessageProvider.get("login.message"), result.getText());
     }
 
     @Test
@@ -137,6 +137,6 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message);
 
         assertEquals("123", result.getChatId());
-        assertEquals(TelegramBotConstants.UNKNOWN_COMMAND, result.getText());
+        assertEquals(MessageProvider.get("unknown.command"), result.getText());
     }
 }

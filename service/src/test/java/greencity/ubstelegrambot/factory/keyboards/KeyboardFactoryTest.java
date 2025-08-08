@@ -2,6 +2,7 @@ package greencity.ubstelegrambot.factory.keyboards;
 
 import greencity.constant.TelegramBotConstants;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,7 +13,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 
 import java.util.List;
 
-import static greencity.constant.TelegramBotConstants.BACK_TO_MAIN_MENU;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -77,7 +77,7 @@ class KeyboardFactoryTest {
         List<KeyboardRow> rows = keyboard.getKeyboard();
         assertEquals(1, rows.size());
         assertEquals(1, rows.getFirst().size());
-        assertEquals(TelegramBotConstants.CLIENT_END_SUPPORT_MODE, rows.getFirst().getFirst().getText());
+        assertEquals(MessageProvider.get("client.end.support.mode"), rows.getFirst().getFirst().getText());
         assertTrue(keyboard.getResizeKeyboard());
     }
 
@@ -110,7 +110,7 @@ class KeyboardFactoryTest {
 
         assertEquals(6, rows.size());
         InlineKeyboardButton backBtn = rows.get(5).getFirst();
-        assertEquals(BACK_TO_MAIN_MENU, backBtn.getText());
+        assertEquals(MessageProvider.get("back.to.main.menu"), backBtn.getText());
         assertEquals(TelegramBotConstants.MAIN_MENU_CALLBACK, backBtn.getCallbackData());
     }
 }

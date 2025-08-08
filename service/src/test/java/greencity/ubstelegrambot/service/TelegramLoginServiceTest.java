@@ -1,7 +1,6 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
-import greencity.constant.TelegramBotConstants;
 import greencity.dto.SuccessSignInDto;
 import greencity.dto.TestersSignInRequest;
 import greencity.entity.telegram.TelegramManager;
@@ -10,6 +9,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -105,7 +105,7 @@ class TelegramLoginServiceTest {
         SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.INCORRECT_LOGIN_FORMAT));
+        assertTrue(result.getText().contains(MessageProvider.get("incorrect.login.format")));
     }
 
     @Test
@@ -119,7 +119,7 @@ class TelegramLoginServiceTest {
         SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.USER_IS_NOT_EMPLOYEE));
+        assertTrue(result.getText().contains(MessageProvider.get("user.not.employee")));
     }
 
     @Test
@@ -135,7 +135,7 @@ class TelegramLoginServiceTest {
         SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.EMPLOYEE_IS_NOT_MANAGER));
+        assertTrue(result.getText().contains(MessageProvider.get("employee.not.manager")));
     }
 
     @Test
@@ -154,7 +154,7 @@ class TelegramLoginServiceTest {
         SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.LOGIN_FAILED));
+        assertTrue(result.getText().contains(MessageProvider.get("login.failed")));
     }
 
     @Test
@@ -173,7 +173,7 @@ class TelegramLoginServiceTest {
         SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN));
+        assertTrue(result.getText().contains(MessageProvider.get("something.went.wrong")));
     }
 
     @Test

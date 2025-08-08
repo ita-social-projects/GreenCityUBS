@@ -4,7 +4,6 @@ import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
-import greencity.constant.TelegramBotConstants;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationFullDto;
@@ -40,6 +39,7 @@ import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.OrderBagService;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -955,7 +955,7 @@ public class NotificationServiceImpl implements NotificationService {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(username)
-            .subject(TelegramBotConstants.GREEN_OFFICE_SUBJECT)
+            .subject(MessageProvider.get("green.office.subject"))
             .body(userEmail)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
