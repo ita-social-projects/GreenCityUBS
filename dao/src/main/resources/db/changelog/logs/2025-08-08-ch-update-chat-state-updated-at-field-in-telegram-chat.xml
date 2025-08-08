@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
     <changeSet id="replace-chat-state-updated-at-in-telegram-chat" author="Anton Pampukha">
         <preConditions onFail="MARK_RAN">
@@ -12,10 +12,17 @@
 
         <comment>Change chat_state_updated_at from timestamp without time zone to with time zone</comment>
 
-        <modifyDataType
-                tableName="telegram_chat"
-                columnName="chat_state_updated_at"
-                newDataType="timestamp with time zone"/>
+        <sql>
+            ALTER TABLE telegram_chat
+            ALTER COLUMN chat_state_updated_at TYPE TIMESTAMP WITH TIME ZONE USING chat_state_updated_at AT TIME ZONE 'UTC';
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE telegram_chat
+                ALTER COLUMN chat_state_updated_at TYPE TIMESTAMP WITHOUT TIME ZONE USING chat_state_updated_at AT TIME ZONE 'UTC';
+            </sql>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
