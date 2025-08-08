@@ -1,7 +1,6 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
-import greencity.constant.TelegramBotConstants;
 import greencity.dto.TestersSignInRequest;
 import greencity.entity.telegram.TelegramManager;
 import greencity.entity.user.employee.Employee;
@@ -10,6 +9,7 @@ import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramLoginService;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
 
         if (parts.length < 2) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.INCORRECT_LOGIN_FORMAT);
+                MessageProvider.get("incorrect.login.format"));
         }
 
         String login = parts[0];
@@ -56,14 +56,14 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
 
         if (employee.isEmpty()) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.USER_IS_NOT_EMPLOYEE);
+                MessageProvider.get("user.not.employee"));
         }
 
         boolean isManager = telegramUtils.checkIsEmployeeManager(employee.get());
 
         if (!isManager) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.EMPLOYEE_IS_NOT_MANAGER);
+                MessageProvider.get("employee.not.manager"));
         }
 
         try {
@@ -82,10 +82,10 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
             return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name);
         } catch (BadRequestException e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.LOGIN_FAILED);
+                MessageProvider.get("login.failed"));
         } catch (Exception e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+                MessageProvider.get("something.went.wrong"));
         }
     }
 }

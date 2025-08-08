@@ -1,6 +1,5 @@
 package greencity.ubstelegrambot;
 
-import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
@@ -9,6 +8,7 @@ import greencity.enums.ChatState;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -231,6 +231,6 @@ class TelegramUtilsTest {
         );
 
         assertEquals("999", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN));
+        assertTrue(result.getText().contains(MessageProvider.get("unknown.error")));
     }
 }

@@ -6,7 +6,6 @@ import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.constant.TelegramBotConstants;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
@@ -38,6 +37,8 @@ import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.OrderBagService;
 import java.util.stream.Stream;
+
+import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -1622,7 +1623,7 @@ class NotificationServiceImplTest {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(USERNAME)
-            .subject(TelegramBotConstants.GREEN_OFFICE_SUBJECT)
+            .subject(MessageProvider.get("green.office.subject"))
             .body(USER_EMAIL)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)

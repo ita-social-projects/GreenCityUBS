@@ -2,6 +2,7 @@ package greencity.ubstelegrambot.keyboards;
 
 import com.vdurmont.emoji.EmojiParser;
 import greencity.constant.TelegramBotConstants;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -47,7 +48,7 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup createHelpKeyboardForManager() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
-        keyboard.add(createRow(LOGOUT_MANAGER, LOGOUT_MANAGER_CALLBACK));
+        keyboard.add(createRow(MessageProvider.get("logout.manager"), LOGOUT_MANAGER_CALLBACK));
 
         return InlineKeyboardMarkup
             .builder()
@@ -102,7 +103,7 @@ public class KeyboardFactory {
      */
     public static ReplyKeyboardMarkup userSupportKeyboard() {
         KeyboardRow firstRow = new KeyboardRow();
-        firstRow.add(TelegramBotConstants.CLIENT_END_SUPPORT_MODE);
+        firstRow.add(MessageProvider.get("client.end.support.mode"));
 
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         keyboardRows.add(firstRow);
@@ -122,7 +123,7 @@ public class KeyboardFactory {
      */
     public static InlineKeyboardMarkup createBackToMainMenuKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        keyboard.add(createRow(BACK_TO_MAIN_MENU, TelegramBotConstants.MAIN_MENU_CALLBACK));
+        keyboard.add(createRow(MessageProvider.get("back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
         return InlineKeyboardMarkup
             .builder()
             .keyboard(keyboard)
@@ -141,7 +142,7 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup createProcessOrBackToMainMenuKeyboard(String callBackData) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(createRow(YES, callBackData));
-        keyboard.add(createRow(BACK_TO_MAIN_MENU, TelegramBotConstants.MAIN_MENU_CALLBACK));
+        keyboard.add(createRow(MessageProvider.get("back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
 
         return InlineKeyboardMarkup
             .builder()
@@ -163,7 +164,7 @@ public class KeyboardFactory {
 
         keyboardRows.add(List.of(
             InlineKeyboardButton.builder()
-                .text(BACK_TO_MAIN_MENU)
+                .text(MessageProvider.get("back.to.main.menu"))
                 .callbackData(TelegramBotConstants.MAIN_MENU_CALLBACK)
                 .build()));
 

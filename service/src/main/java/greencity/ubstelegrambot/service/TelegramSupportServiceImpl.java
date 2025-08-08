@@ -1,6 +1,5 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
@@ -19,6 +18,7 @@ import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramSupportService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.util.SimpleMultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +69,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         TelegramChat chat = optionalChat.get();
 
-        if (message.hasText() && message.getText().contains(TelegramBotConstants.CLIENT_END_SUPPORT_MODE)) {
+        if (message.hasText() && message.getText().contains(MessageProvider.get("client.end.support.mode"))) {
             chat.setChatState(ChatState.NORMAL);
             chat.setChatStateUpdatedAt(Instant.now());
             telegramChatRepository.save(chat);
@@ -126,7 +126,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                     telegramMessageRepository.delete(telegramMessage);
                 }
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                    TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
+                    MessageProvider.get("manager.photo.failed"));
             }
             fileId = largestPhoto.getFileId();
             fileSize = largestPhoto.getFileSize().longValue();
@@ -137,7 +137,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                     telegramMessageRepository.delete(telegramMessage);
                 }
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                    TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_FILE_PLEASE_TRY_AGAIN);
+                    MessageProvider.get("manager.file.failed"));
             }
             fileId = document.getFileId();
             fileSize = document.getFileSize();
@@ -151,7 +151,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 if (telegramFile == null || telegramFile.getFilePath() == null) {
                     log.warn("Telegram file not found for fileId: {}", fileId);
                     return MessageFactory.buildMessage(message.getChatId().toString(),
-                        TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
+                        MessageProvider.get("manager.photo.failed"));
                 }
 
                 if (message.hasPhoto()) {
@@ -197,12 +197,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 log.error("Error loading or saving file from Telegram (Filename: {}): {}", originalFileName,
                     e.getMessage(), e);
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                    TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
+                    MessageProvider.get("manager.photo.failed"));
             }
         } else if (!message.hasText() && !message.hasPhoto() && !message.hasDocument()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN);
+                MessageProvider.get("manager.photo.failed"));
         }
 
         List<MessageAssetDto> assetDtos = Optional.ofNullable(telegramMessage.getAssets())
@@ -238,7 +238,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 contentForNotification,
                 chat.getId());
             return MessageFactory.buildMessage(chat.getChatId(),
-                TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
+                MessageProvider.get("message.sent.to.manager"));
         } else {
             telegramMessageRepository.save(telegramMessage);
             log.info("Added asset to existing media group message: {}", mediaGroupId);
