@@ -55,6 +55,9 @@ public class TelegramChat {
     @JoinColumn(name = "last_message_id")
     private TelegramMessage lastMessage;
 
+    @Column(nullable = false)
+    private String languageCode = "uk";
+
     @Builder.Default
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TelegramMessage> messages = new ArrayList<>();
