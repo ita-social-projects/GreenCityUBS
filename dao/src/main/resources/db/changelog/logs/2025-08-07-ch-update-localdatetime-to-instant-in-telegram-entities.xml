@@ -6,18 +6,38 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
     <changeSet id="2025-08-07-update-localdatetime-to-instant-in-telegram-entities" author="Anton Pampukha">
-        <comment>Convert LocalDateTime to Instant (timestamp to timestamptz)</comment>
+        <preConditions onFail="HALT" onError="HALT">
+            <dbms type="postgresql"/>
+            <tableExists tableName="telegram_message"/>
+            <columnExists tableName="telegram_message" columnName="send_at"/>
+            <columnExists tableName="telegram_message" columnName="updated_at"/>
+            <tableExists tableName="message_asset"/>
+            <columnExists tableName="message_asset" columnName="created_at"/>
+            <columnExists tableName="message_asset" columnName="updated_at"/>
+        </preConditions>
+
+        <comment>Convert LocalDateTime to Instant (timestamp → timestamptz)</comment>
 
         <sql>
             ALTER TABLE telegram_message
-                ALTER COLUMN send_at TYPE TIMESTAMP WITH TIME ZONE USING send_at AT TIME ZONE 'UTC',
-                ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE USING updated_at AT TIME ZONE 'UTC';
+            ALTER COLUMN send_at TYPE TIMESTAMP WITH TIME ZONE USING send_at AT TIME ZONE 'UTC',
+            ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE USING updated_at AT TIME ZONE 'UTC';
         </sql>
 
         <sql>
             ALTER TABLE message_asset
-                ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE USING created_at AT TIME ZONE 'UTC',
-                ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE USING updated_at AT TIME ZONE 'UTC';
+            ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE USING created_at AT TIME ZONE 'UTC',
+            ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE USING updated_at AT TIME ZONE 'UTC';
         </sql>
+
+        <rollback>
+            ALTER TABLE telegram_message
+            ALTER COLUMN send_at TYPE TIMESTAMP WITHOUT TIME ZONE,
+            ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+
+            ALTER TABLE message_asset
+            ALTER COLUMN created_at TYPE TIMESTAMP WITHOUT TIME ZONE,
+            ALTER COLUMN updated_at TYPE TIMESTAMP WITHOUT TIME ZONE;
+        </rollback>
     </changeSet>
 </databaseChangeLog>
