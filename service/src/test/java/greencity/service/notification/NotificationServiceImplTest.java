@@ -71,7 +71,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
-
 import static greencity.ModelUtils.*;
 import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
 import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
