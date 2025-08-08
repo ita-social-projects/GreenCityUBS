@@ -3,7 +3,12 @@ package greencity.ubstelegrambot.service;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.ChatUserDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MessageAssetDto;
+import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -40,12 +45,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -408,7 +413,7 @@ public class TelegramServiceImpl implements TelegramService {
             .lastName(message.getFrom().getLastName())
             .isNotify(true)
             .chatState(ChatState.NORMAL)
-            .chatStateUpdatedAt(LocalDateTime.now());
+            .chatStateUpdatedAt(Instant.now());
 
         if (!uuid.isEmpty()) {
             userRepository.findUserByUuid(uuid).ifPresent(newChatBuilder::user);

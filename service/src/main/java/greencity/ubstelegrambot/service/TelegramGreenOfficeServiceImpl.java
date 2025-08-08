@@ -10,7 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -43,7 +44,7 @@ public class TelegramGreenOfficeServiceImpl implements TelegramGreenOfficeServic
 
         notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email, username);
         chat.setChatState(ChatState.NORMAL);
-        chat.setChatStateUpdatedAt(LocalDateTime.now());
+        chat.setChatStateUpdatedAt(Instant.now());
         telegramChatRepository.save(chat);
         return MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString());
     }

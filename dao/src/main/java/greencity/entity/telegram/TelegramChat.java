@@ -2,9 +2,26 @@ package greencity.entity.telegram;
 
 import greencity.entity.user.User;
 import greencity.enums.ChatState;
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDateTime;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +46,7 @@ public class TelegramChat {
     private ChatState chatState = ChatState.NORMAL;
 
     @Column(name = "chat_state_updated_at", nullable = false)
-    private LocalDateTime chatStateUpdatedAt;
+    private Instant chatStateUpdatedAt;
 
     @Column(nullable = false, name = "notify")
     private Boolean isNotify;
