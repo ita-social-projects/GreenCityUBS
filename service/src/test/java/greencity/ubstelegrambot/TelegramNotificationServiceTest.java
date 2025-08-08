@@ -1,7 +1,5 @@
 package greencity.ubstelegrambot;
 
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.TelegramManager;
 import greencity.repository.TelegramManagerRepository;
 import greencity.ubstelegrambot.service.TelegramExecutor;
@@ -12,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,9 +19,6 @@ import static org.mockito.Mockito.*;
 class TelegramNotificationServiceTest {
     @InjectMocks
     private TelegramNotificationServiceImpl telegramNotificationService;
-
-    @Mock
-    private SimpMessagingTemplate messagingTemplate;
 
     @Mock
     private ApplicationContext applicationContext;
@@ -38,26 +32,6 @@ class TelegramNotificationServiceTest {
     @Mock
     private TelegramExecutor executor;
 
-    @Test
-    public void testNotifyNewMessage_CorrectDestination_MessageSent() {
-        Long chatId = 123L;
-        TelegramMessageDto messageDto = new TelegramMessageDto();
-
-        telegramNotificationService.notifyNewMessage(messageDto, chatId);
-
-        verify(messagingTemplate).convertAndSend("/topic/messages/" + chatId, messageDto);
-    }
-
-    @Test
-    void testNotifyNewChat_CorrectDestination_MessageSent() {
-        ChatDto chatDto = new ChatDto();
-
-        telegramNotificationService.notifyNewChat(chatDto);
-
-        verify(messagingTemplate).convertAndSend("/topic/chats", chatDto);
-    }
-
-    @Test
     public void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
         String username = "username";
         String messageText = "message";

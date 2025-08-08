@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -33,9 +32,6 @@ class UBSTelegramBotTest {
     @Mock
     private TelegramExecutor executor;
 
-    @Mock
-    private ApplicationContext applicationContext;
-
     @Test
     void onUpdateReceived_shouldCallExecutorWithCorrectMessage() {
         // given
@@ -57,7 +53,6 @@ class UBSTelegramBotTest {
         // mocks
         when(telegramService.processUpdate(update)).thenReturn(processor);
         when(processor.process(update)).thenReturn(expectedSendMessage);
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(ubsTelegramBot);
 
         // when
         ubsTelegramBot.onUpdateReceived(update);
@@ -70,7 +65,7 @@ class UBSTelegramBotTest {
     public void getBotUsername_shouldReturnBotName() {
         String botName = "testBotName";
         String botToken = "testBotToken";
-        ubsTelegramBot = new UBSTelegramBot(botToken, botName, telegramService, applicationContext, executor);
+        ubsTelegramBot = new UBSTelegramBot(botToken, botName, telegramService, executor);
         assertNotNull(ubsTelegramBot, "Instance UBSTelegramBot don't have to be null after creating.");
 
         String returnedBotName = ubsTelegramBot.getBotUsername();

@@ -103,6 +103,7 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/swagger-resources/**",
+                    "/springwolf/**",
                     "/webjars/**")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,

@@ -16,13 +16,13 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
@@ -38,8 +38,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -50,8 +54,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 @Slf4j
@@ -67,14 +69,12 @@ public class TelegramServiceImpl implements TelegramService {
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final TelegramNotificationService telegramNotificationService;
+    private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
 
     @Override
     public void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-
         TelegramChat chat = telegramChatRepository.findById(request.getChatId())
             .orElseThrow(() -> new NotFoundException("Chat not found"));
 
@@ -87,48 +87,109 @@ public class TelegramServiceImpl implements TelegramService {
             .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
-        List<MessageAsset> assets = new ArrayList<>();
+        var bot = applicationContext.getBean(UBSTelegramBot.class);
 
-        if (request.getText() != null) {
+        if (message.getText() != null && !message.getText().isBlank()) {
             var sendTextMessage = MessageFactory.buildMessage(chat.getChatId(), message.getText());
             executor.executeCommand(bot, sendTextMessage);
         }
 
-        if (files != null) {
-            for (MultipartFile file : files) {
-                if (file.getSize() > 50 * 1024 * 1024) {
-                    log.warn("File \"{}\" size has over than 50MB", file.getName());
-                    throw new IllegalArgumentException("File size exceeds Telegram bot limit (50MB)");
-                }
-                String url = uploadFile(file);
-                AssetType assetType = TelegramUtils.detectAssetType(file);
-                MessageAsset asset = MessageAsset.builder()
-                    .url(url)
-                    .fileName(file.getOriginalFilename())
-                    .size(file.getSize())
-                    .contentType(file.getContentType())
-                    .type(assetType)
-                    .message(message)
-                    .build();
-                assets.add(asset);
-
-                if (assetType == AssetType.IMAGE) {
-                    try {
-                        var sendPhotoMessage = MessageFactory.createMultipartFileSender(chat.getChatId(), file);
-                        executor.executeSendPhoto(bot, sendPhotoMessage);
-                    } catch (IOException e) {
-                        log.error("Failed to send image to Telegram", e);
-                        throw new RuntimeException("Unable to send image to Telegram", e);
-                    }
-                }
-            }
-        }
+        List<MessageAsset> assets = handleFiles(bot, chat, message, files);
 
         message.setAssets(assets);
         telegramMessageRepository.save(message);
 
         chat.setLastMessage(message);
         telegramChatRepository.save(chat);
+    }
+
+    private List<MessageAsset> handleFiles(UBSTelegramBot bot, TelegramChat chat,
+        TelegramMessage message, MultipartFile[] files) {
+        List<MessageAsset> assets = new ArrayList<>();
+        if (files == null) {
+            return assets;
+        }
+
+        for (MultipartFile file : files) {
+            validateFileSize(file);
+
+            String url = uploadFile(file);
+            AssetType assetType = TelegramUtils.detectAssetType(file);
+
+            MessageAsset asset = MessageAsset.builder()
+                .url(url)
+                .fileName(file.getOriginalFilename())
+                .size(file.getSize())
+                .contentType(file.getContentType())
+                .type(assetType)
+                .message(message)
+                .build();
+            assets.add(asset);
+
+            sendFileByType(bot, chat, file, assetType);
+        }
+        return assets;
+    }
+
+    private void validateFileSize(MultipartFile file) {
+        if (file.getSize() > 50 * 1024 * 1024) {
+            log.warn("File \"{}\" size exceeds 50MB", file.getName());
+            throw new IllegalArgumentException("File size exceeds Telegram bot limit (50MB)");
+        }
+    }
+
+    private void sendFileByType(UBSTelegramBot bot, TelegramChat chat,
+        MultipartFile file, AssetType assetType) {
+        try {
+            if (assetType == AssetType.FILE) {
+                sendAsDocument(bot, chat, file);
+            } else if (assetType == AssetType.IMAGE) {
+                sendImage(bot, chat, file);
+            }
+        } catch (IOException e) {
+            log.error("Failed to send file to Telegram", e);
+            throw new RuntimeException("Unable to send file to Telegram", e);
+        }
+    }
+
+    private void sendAsDocument(UBSTelegramBot bot, TelegramChat chat, MultipartFile file) throws IOException {
+        log.info("Sending document: {} filename: {} to chat ID: {}",
+            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+        var sendFile = MessageFactory.createSendDocument(chat.getChatId(), file);
+        executor.executeSendFile(bot, sendFile);
+    }
+
+    private void sendImage(UBSTelegramBot bot, TelegramChat chat, MultipartFile file) throws IOException {
+        boolean canSendAsPhoto = canSendAsPhoto(file);
+
+        if (canSendAsPhoto) {
+            log.info("Sending image as photo: {} filename: {} to chat ID: {}",
+                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+            var sendPhotoMessage = MessageFactory.createSendPhoto(chat.getChatId(), file);
+            executor.executeSendPhoto(bot, sendPhotoMessage);
+        } else {
+            log.info("Sending image as document: {} filename: {} to chat ID: {}",
+                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+            var sendDocumentMessage = MessageFactory.createSendDocument(chat.getChatId(), file);
+            executor.executeSendFile(bot, sendDocumentMessage);
+        }
+    }
+
+    private boolean canSendAsPhoto(MultipartFile file) throws IOException {
+        BufferedImage image = ImageIO.read(file.getInputStream());
+        if (image == null) {
+            return false;
+        }
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+        long fileSize = file.getSize();
+
+        boolean sizeOk = fileSize <= 10 * 1024 * 1024;
+        boolean dimensionsOk = (width + height <= 10000);
+        boolean aspectOk = ((double) Math.max(width, height) / Math.min(width, height) <= 20.0);
+
+        return sizeOk && dimensionsOk && aspectOk;
     }
 
     /**
@@ -366,7 +427,7 @@ public class TelegramServiceImpl implements TelegramService {
             .unreadMessagesCount(0)
             .username(createdChat.getUsername()).build();
 
-        telegramNotificationService.notifyNewChat(chatDto);
+        telegramChatProducer.notifyNewChat(chatDto);
 
         return resolveProcessorByUuid(uuid, chatId);
     }
