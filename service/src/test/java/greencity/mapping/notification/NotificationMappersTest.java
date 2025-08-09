@@ -14,7 +14,7 @@ class NotificationMappersTest {
         NotificationTemplate notification = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 
         NotificationTemplateMainInfoDto dto =
-            NotificationMappers.toNotificationTemplateMainInfoDto.apply(notification);
+            NotificationMappers.toNotificationTemplateMainInfoDto(notification);
 
         assertEquals(notification.getNotificationType(), dto.getType());
         assertEquals(notification.getTrigger(), dto.getTrigger());
@@ -37,7 +37,7 @@ class NotificationMappersTest {
             .getNotificationPlatforms().getFirst();
 
         NotificationPlatformDto dto =
-            NotificationMappers.toNotificationPlatformDto.apply(platform);
+            NotificationMappers.toNotificationPlatformDto(platform);
 
         assertEquals(platform.getId(), dto.getId());
         assertEquals(platform.getNotificationReceiverType(), dto.getReceiverType());

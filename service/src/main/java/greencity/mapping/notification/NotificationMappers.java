@@ -5,25 +5,24 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
- * Utility class providing reusable mapping functions for converting
- * notification-related entity objects into their corresponding DTO
- * representations.
+ * Utility class providing mapping methods for converting notification-related
+ * entities into their corresponding DTO representations.
  * <p>
- * This class is not meant to be instantiated; all mappings are exposed as
- * public static {@link Function} instances for direct usage in mappers,
- * services, or stream pipelines.
+ * This class is non-instantiable and exposes all mappers as public static
+ * methods, allowing them to be used directly in services, mappers, or stream
+ * operations.
  * </p>
  *
  * <h2>Available Mappers</h2>
  * <ul>
- * <li>{@link #toNotificationTemplateMainInfoDto} – Maps a
+ * <li>{@link #toNotificationTemplateMainInfoDto(NotificationTemplate)} – Maps a
  * {@link NotificationTemplate} entity to a
  * {@link NotificationTemplateMainInfoDto}.</li>
- * <li>{@link #toNotificationPlatformDto} – Maps a {@link NotificationPlatform}
- * entity to a {@link NotificationPlatformDto}.</li>
+ * <li>{@link #toNotificationPlatformDto(NotificationPlatform)} – Maps a
+ * {@link NotificationPlatform} entity to a
+ * {@link NotificationPlatformDto}.</li>
  * </ul>
  */
 public class NotificationMappers {
@@ -34,18 +33,20 @@ public class NotificationMappers {
     }
 
     /**
-     * Maps a {@link NotificationTemplate} entity to a
+     * Converts a {@link NotificationTemplate} entity to a
      * {@link NotificationTemplateMainInfoDto}.
      * <p>
-     * Copies type, trigger details, time details, schedule, title, status, schedule
-     * update restriction flag, and user category descriptions.
+     * Maps the notification type, trigger and its descriptions, time and its
+     * descriptions, schedule, titles, status, schedule update restriction flag, and
+     * user category descriptions (if available).
      * </p>
      *
-     * @see NotificationTemplate
-     * @see NotificationTemplateMainInfoDto
+     * @param notificationTemplate the entity to map
+     * @return a populated {@link NotificationTemplateMainInfoDto}
      */
-    public static final Function<NotificationTemplate, NotificationTemplateMainInfoDto> toNotificationTemplateMainInfoDto =
-        notificationTemplate -> NotificationTemplateMainInfoDto.builder()
+    public static NotificationTemplateMainInfoDto toNotificationTemplateMainInfoDto(
+        NotificationTemplate notificationTemplate) {
+        return NotificationTemplateMainInfoDto.builder()
             .type(notificationTemplate.getNotificationType())
             .trigger(notificationTemplate.getTrigger())
             .triggerDescriptionUk(notificationTemplate.getTrigger().getDescriptionUk())
@@ -65,25 +66,27 @@ public class NotificationMappers {
                 Objects.isNull(notificationTemplate.getUserCategory()) ? null
                     : notificationTemplate.getUserCategory().getDescriptionEn())
             .build();
+    }
 
     /**
-     * Maps a {@link NotificationPlatform} entity to a
+     * Converts a {@link NotificationPlatform} entity to a
      * {@link NotificationPlatformDto}.
      * <p>
-     * Copies platform ID, receiver type, English name, body texts in both
-     * languages, and notification status.
+     * Maps the platform ID, receiver type, receiver type name (English), message
+     * body in both languages, and notification status.
      * </p>
      *
-     * @see NotificationPlatform
-     * @see NotificationPlatformDto
+     * @param notificationPlatform the entity to map
+     * @return a populated {@link NotificationPlatformDto}
      */
-    public static final Function<NotificationPlatform, NotificationPlatformDto> toNotificationPlatformDto =
-        platform -> NotificationPlatformDto.builder()
-            .id(platform.getId())
-            .receiverType(platform.getNotificationReceiverType())
-            .nameEn(platform.getNotificationReceiverType().getName())
-            .bodyUk(platform.getBodyUk())
-            .bodyEn(platform.getBodyEn())
-            .status(platform.getNotificationStatus())
+    public static NotificationPlatformDto toNotificationPlatformDto(NotificationPlatform notificationPlatform) {
+        return NotificationPlatformDto.builder()
+            .id(notificationPlatform.getId())
+            .receiverType(notificationPlatform.getNotificationReceiverType())
+            .nameEn(notificationPlatform.getNotificationReceiverType().getName())
+            .bodyUk(notificationPlatform.getBodyUk())
+            .bodyEn(notificationPlatform.getBodyEn())
+            .status(notificationPlatform.getNotificationStatus())
             .build();
+    }
 }

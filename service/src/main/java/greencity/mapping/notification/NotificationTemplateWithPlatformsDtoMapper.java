@@ -12,9 +12,9 @@ class NotificationTemplateWithPlatformsDtoMapper
     protected NotificationTemplateWithPlatformsDto convert(NotificationTemplate notificationTemplate) {
         return NotificationTemplateWithPlatformsDto.builder()
             .notificationTemplateMainInfoDto(
-                NotificationMappers.toNotificationTemplateMainInfoDto.apply(notificationTemplate))
+                NotificationMappers.toNotificationTemplateMainInfoDto(notificationTemplate))
             .platforms(notificationTemplate.getNotificationPlatforms().stream()
-                .map(NotificationMappers.toNotificationPlatformDto)
+                .map(NotificationMappers::toNotificationPlatformDto)
                 .toList())
             .build();
     }

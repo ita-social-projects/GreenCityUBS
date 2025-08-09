@@ -22,7 +22,7 @@ public class NotificationTemplateWithPlatformsUpdateDtoMapper
                 .userCategory(notificationTemplate.getUserCategory())
                 .build())
             .platforms(notificationTemplate.getNotificationPlatforms().stream()
-                .map(NotificationMappers.toNotificationPlatformDto)
+                .map(NotificationMappers::toNotificationPlatformDto)
                 .toList())
             .build();
     }

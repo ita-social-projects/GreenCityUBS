@@ -13,7 +13,7 @@ public class NotificationTemplateDtoMapper
         return NotificationTemplateDto.builder()
             .id(notificationTemplate.getId())
             .notificationTemplateMainInfoDto(
-                NotificationMappers.toNotificationTemplateMainInfoDto.apply(notificationTemplate))
+                NotificationMappers.toNotificationTemplateMainInfoDto(notificationTemplate))
             .build();
     }
 }
