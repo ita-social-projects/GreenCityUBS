@@ -1,3 +1,12 @@
+menu:
+  client_support: "Chat with a human"
+  work_schedule: "Station work schedule"
+  admission_rules: "Raw material acceptance rules"
+  green_office: "Green office"
+  feedback: "Leave feedback"
+  sorting_prices: "Sorting prices"
+  login: "Log in as manager"
+yes: "Yes"
 incorrect.login.format: "Incorrect format. Please enter your credentials as login:password"
 logout.manager: "Exit manager role"
 successful.logout.manager: "Successfully exited manager role!"
@@ -109,7 +118,6 @@ back.to.main.menu: "⏪ Back to main menu"
 client.end.support.mode: "End conversation with manager"
 client.stop.support.mode: "You ended the conversation with the manager, please rate our support from 1 to 5"
 client.end.support.notification: "Client %s ended the conversation"
-messages.not.found.for.chat: "There are no messages in chat %s"
 
 client.support.message.callback.query: |
   Please ask your question — and I’ll call one of my human colleagues ✍️👇

@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
@@ -32,6 +33,7 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,23 +60,23 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
      */
     @Override
     @Transactional
-    public SendMessage processSupportMessage(Message message) {
+    public SendMessage processSupportMessage(Message message, String lang) {
         var bot = applicationContext.getBean(UBSTelegramBot.class);
 
         Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
             log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), TelegramBotConstants.UA);
         }
 
         TelegramChat chat = optionalChat.get();
 
-        if (message.hasText() && message.getText().contains(MessageProvider.get("client.end.support.mode"))) {
+        if (message.hasText() && message.getText().contains(MessageProvider.get(lang, "client.end.support.mode"))) {
             chat.setChatState(ChatState.NORMAL);
             chat.setChatStateUpdatedAt(LocalDateTime.now());
             telegramChatRepository.save(chat);
             telegramNotificationService.notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
-            return MessageFactory.createEndSupportMessage(chat.getChatId());
+            return MessageFactory.createEndSupportMessage(chat.getChatId(), lang);
         }
 
         TelegramMessage telegramMessage;
@@ -126,7 +128,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                     telegramMessageRepository.delete(telegramMessage);
                 }
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                    MessageProvider.get("manager.photo.failed"));
+                    MessageProvider.get(lang, "manager.photo.failed"));
             }
             fileId = largestPhoto.getFileId();
             fileSize = largestPhoto.getFileSize().longValue();
@@ -137,7 +139,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                     telegramMessageRepository.delete(telegramMessage);
                 }
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                    MessageProvider.get("manager.file.failed"));
+                    MessageProvider.get(lang, "manager.file.failed"));
             }
             fileId = document.getFileId();
             fileSize = document.getFileSize();
@@ -151,7 +153,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 if (telegramFile == null || telegramFile.getFilePath() == null) {
                     log.warn("Telegram file not found for fileId: {}", fileId);
                     return MessageFactory.buildMessage(message.getChatId().toString(),
-                        MessageProvider.get("manager.photo.failed"));
+                        MessageProvider.get(lang, "manager.photo.failed"));
                 }
 
                 if (message.hasPhoto()) {
@@ -197,12 +199,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 log.error("Error loading or saving file from Telegram (Filename: {}): {}", originalFileName,
                     e.getMessage(), e);
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                    MessageProvider.get("manager.photo.failed"));
+                    MessageProvider.get(lang, "manager.photo.failed"));
             }
         } else if (!message.hasText() && !message.hasPhoto() && !message.hasDocument()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get("manager.photo.failed"));
+                MessageProvider.get(lang, "manager.photo.failed"));
         }
 
         List<MessageAssetDto> assetDtos = Optional.ofNullable(telegramMessage.getAssets())
@@ -238,7 +240,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 contentForNotification,
                 chat.getId());
             return MessageFactory.buildMessage(chat.getChatId(),
-                MessageProvider.get("message.sent.to.manager"));
+                MessageProvider.get(lang, "message.sent.to.manager"));
         } else {
             telegramMessageRepository.save(telegramMessage);
             log.info("Added asset to existing media group message: {}", mediaGroupId);

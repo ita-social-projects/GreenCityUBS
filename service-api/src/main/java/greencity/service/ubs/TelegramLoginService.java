@@ -23,5 +23,5 @@ public interface TelegramLoginService {
      *                credentials in "email:password" format
      * @return a {@link SendMessage} with the result of the login attempt
      */
-    SendMessage processInputManagerCredentialsRequest(Message message);
+    SendMessage processInputManagerCredentialsRequest(Message message, String lang);
 }

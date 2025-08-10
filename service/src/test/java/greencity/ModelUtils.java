@@ -7,6 +7,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -1606,13 +1607,13 @@ public class ModelUtils {
 
     public static TelegramChat getTelegramBotNotifyTrue() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
-            "last_name", 0, null, null,
+            "last_name", 0, null, null, TelegramBotConstants.UA,
             new ArrayList<>(), new ArrayList<>());
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), false, "username", "first_name",
-            "last_name", 0, null, null,
+            "last_name", 0, null, null, TelegramBotConstants.UA,
             new ArrayList<>(), new ArrayList<>());
     }
 

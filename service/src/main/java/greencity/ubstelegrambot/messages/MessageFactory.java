@@ -22,9 +22,9 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the welcome message.
      */
-    public static SendMessage createWelcomeMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("greeting.message"),
-            KeyboardFactory.createHelpKeyboard());
+    public static SendMessage createWelcomeMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "greeting.message"),
+            KeyboardFactory.createHelpKeyboard(lang));
     }
 
     /**
@@ -34,8 +34,8 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the welcome manager message.
      */
-    public static SendMessage createWelcomeManagerMessage(String chatId) {
-        return buildMessage(chatId, MessageProvider.get("greeting.manager.message"));
+    public static SendMessage createWelcomeManagerMessage(String chatId, String lang) {
+        return buildMessage(chatId, MessageProvider.get(lang, "greeting.manager.message"));
     }
 
     /**
@@ -47,8 +47,8 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the successful logout manager
      *         message.
      */
-    public static SendMessage createLogoutManagerMessage(String chatId) {
-        return buildMessage(chatId, MessageProvider.get("successful.logout.manager"));
+    public static SendMessage createLogoutManagerMessage(String chatId, String lang) {
+        return buildMessage(chatId, MessageProvider.get(lang, "successful.logout.manager"));
     }
 
     /**
@@ -58,10 +58,10 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the forbidden manager messages.
      */
-    public static SendMessage createForbiddenCommandsManagerMessage(String chatId) {
+    public static SendMessage createForbiddenCommandsManagerMessage(String chatId, String lang) {
         return buildReplyMarkUpMessage(chatId,
-            MessageProvider.get("forbidden.commands.manager") + "\n" + MessageProvider.get("supported.commands"),
-            KeyboardFactory.createHelpKeyboardForManager());
+            MessageProvider.get(lang, "forbidden.commands.manager") + "\n" + MessageProvider.get(lang, "supported.commands"),
+            KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
     /**
@@ -72,9 +72,9 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the list of available commands
      *         message.
      */
-    public static SendMessage createAvailableCommandsMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("supported.commands"),
-            KeyboardFactory.createHelpKeyboard());
+    public static SendMessage createAvailableCommandsMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "supported.commands"),
+            KeyboardFactory.createHelpKeyboard(lang));
     }
 
     /**
@@ -86,9 +86,9 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the list of supported manager
      *         commands message.
      */
-    public static SendMessage createAvailableForManagerCommandsMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("supported.commands"),
-            KeyboardFactory.createHelpKeyboardForManager());
+    public static SendMessage createAvailableForManagerCommandsMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "supported.commands"),
+            KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
     /**
@@ -98,9 +98,9 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the unknown command message.
      */
-    public static SendMessage createUnknownCommandMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("unknown.command"),
-            KeyboardFactory.createHelpKeyboard());
+    public static SendMessage createUnknownCommandMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "unknown.command"),
+            KeyboardFactory.createHelpKeyboard(lang));
     }
 
     /**
@@ -110,9 +110,9 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the login message.
      */
-    public static SendMessage createLoginMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("login.message"),
-            KeyboardFactory.createBackToMainMenuKeyboard());
+    public static SendMessage createLoginMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "login.message"),
+            KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
     /**
@@ -124,9 +124,9 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the fail login message with error
      *         message.
      */
-    public static SendMessage createFailLoginMessage(String chatId, String errorMessage) {
-        return buildReplyMarkUpMessage(chatId, String.format(MessageProvider.get("login.error"), errorMessage),
-            KeyboardFactory.createBackToMainMenuKeyboard());
+    public static SendMessage createFailLoginMessage(String chatId, String errorMessage, String lang) {
+        return buildReplyMarkUpMessage(chatId, String.format(MessageProvider.get(lang, "login.error"), errorMessage),
+            KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
     /**
@@ -138,9 +138,9 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the success login message with
      *         username.
      */
-    public static SendMessage createSuccessLoginMessage(String chatId, String userName) {
-        return buildReplyMarkUpMessage(chatId, String.format(MessageProvider.get("login.success"), userName),
-            KeyboardFactory.createHelpKeyboardForManager());
+    public static SendMessage createSuccessLoginMessage(String chatId, String userName, String lang) {
+        return buildReplyMarkUpMessage(chatId, String.format(MessageProvider.get(lang, "login.success"), userName),
+            KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
     /**
@@ -154,9 +154,9 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the manager notification message.
      */
     public static SendMessage createNotificationMessageForManager(String telegramChatId, String username,
-        String messageText, Long innerChatId) {
+        String messageText, Long innerChatId, String lang) {
         SendMessage message = buildMessage(telegramChatId,
-            String.format(MessageProvider.get("client.want.to.speak"), username, messageText, innerChatId));
+            String.format(MessageProvider.get(lang, "client.want.to.speak"), username, messageText, innerChatId));
         message.enableHtml(true);
         message.setParseMode(ParseMode.HTML);
         return message;
@@ -169,8 +169,8 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the end support mode message.
      */
-    public static SendMessage createEndSupportMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("client.stop.support.mode"),
+    public static SendMessage createEndSupportMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "client.stop.support.mode"),
             KeyboardFactory.createChatFeedbackRatingKeyboard());
     }
 
@@ -183,9 +183,9 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the user notification end support
      *         mode message.
      */
-    public static SendMessage createEndSupportModeNotification(String chatId, String username) {
+    public static SendMessage createEndSupportModeNotification(String chatId, String username, String lang) {
         return buildMessage(chatId,
-            String.format(MessageProvider.get("client.end.support.notification"), username));
+            String.format(MessageProvider.get(lang, "client.end.support.notification"), username));
     }
 
     /**
@@ -214,12 +214,12 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the support message with call
      *         back query.
      */
-    public static SendMessage createSupportMessageCallBackQuery(String chatId) {
+    public static SendMessage createSupportMessageCallBackQuery(String chatId, String lang) {
         return SendMessage
             .builder()
             .chatId(chatId)
-            .text(MessageProvider.get("client.support.message.callback.query"))
-            .replyMarkup(KeyboardFactory.userSupportKeyboard())
+            .text(MessageProvider.get(lang, "client.support.message.callback.query"))
+            .replyMarkup(KeyboardFactory.userSupportKeyboard(lang))
             .build();
     }
 
@@ -229,9 +229,9 @@ public class MessageFactory {
      * @param chatId {@link String} is telegram chat id.
      * @return {@link SendMessage} configured with the work schedule message.
      */
-    public static SendMessage createWorkScheduleMessage(String chatId) {
-        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get("work.schedule.message"),
-            KeyboardFactory.createBackToMainMenuKeyboard());
+    public static SendMessage createWorkScheduleMessage(String chatId, String lang) {
+        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "work.schedule.message"),
+            KeyboardFactory.createBackToMainMenuKeyboard(lang));
         message.setParseMode(ParseMode.HTML);
         return message;
     }
@@ -242,9 +242,9 @@ public class MessageFactory {
      * @param chatId {@link String} is telegram chat id.
      * @return {@link SendMessage} configured with the sorting prices message.
      */
-    public static SendMessage createSortingPricesMessage(String chatId) {
-        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get("sorting.rules.pricing.message"),
-            KeyboardFactory.createBackToMainMenuKeyboard());
+    public static SendMessage createSortingPricesMessage(String chatId, String lang) {
+        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "sorting.rules.pricing.message"),
+            KeyboardFactory.createBackToMainMenuKeyboard(lang));
         message.setParseMode(ParseMode.HTML);
         return message;
     }
@@ -255,9 +255,9 @@ public class MessageFactory {
      * @param chatId {@link String} is telegram chat id.
      * @return {@link SendMessage} configured with the admission rules message.
      */
-    public static SendMessage createAdmissionRulesMessage(String chatId) {
-        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get("admission.rules.text"),
-            KeyboardFactory.createBackToMainMenuKeyboard());
+    public static SendMessage createAdmissionRulesMessage(String chatId, String lang) {
+        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "admission.rules.text"),
+            KeyboardFactory.createBackToMainMenuKeyboard(lang));
         message.setParseMode(ParseMode.HTML);
         return message;
     }
@@ -268,9 +268,9 @@ public class MessageFactory {
      * @param chatId {@link String} is telegram chat id.
      * @return {@link SendMessage} configured with the green office message.
      */
-    public static SendMessage createGreenOfficeMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("green.office.text"),
-            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK));
+    public static SendMessage createGreenOfficeMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "green.office.text"),
+            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK, lang));
     }
 
     /**
@@ -279,9 +279,9 @@ public class MessageFactory {
      * @param chatId {@link String} is telegram chat id.
      * @return {@link SendMessage} configured with the entering email message.
      */
-    public static SendMessage createEnteringEmailMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("entering.email.message"),
-            KeyboardFactory.createBackToMainMenuKeyboard());
+    public static SendMessage createEnteringEmailMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "entering.email.message"),
+            KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
     /**
@@ -290,9 +290,9 @@ public class MessageFactory {
      * @param chatId {@link String} is telegram chat id.
      * @return {@link SendMessage} configured with the invalid email message.
      */
-    public static SendMessage createInvalidEmailMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("invalid.email.message"),
-            KeyboardFactory.createBackToMainMenuKeyboard());
+    public static SendMessage createInvalidEmailMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "invalid.email.message"),
+            KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
     /**
@@ -301,9 +301,9 @@ public class MessageFactory {
      * @param chatId {@link String} is telegram chat id.
      * @return {@link SendMessage} configured with the green office thanks message.
      */
-    public static SendMessage createGreenOfficeThanksMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("green.office.thank.you.message"),
-            KeyboardFactory.createHelpKeyboard());
+    public static SendMessage createGreenOfficeThanksMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "green.office.thank.you.message"),
+            KeyboardFactory.createHelpKeyboard(lang));
     }
 
     /**
@@ -313,9 +313,9 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the feedback message.
      */
-    public static SendMessage createFeedbackMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("feedback.message"),
-            KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard());
+    public static SendMessage createFeedbackMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "feedback.message"),
+            KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard(lang));
     }
 
     /**
@@ -325,8 +325,8 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the great feedback message.
      */
-    public static SendMessage createGreatFeedbackMessage(String chatId) {
-        return buildMessage(chatId, MessageProvider.get("great.feedback.message"));
+    public static SendMessage createGreatFeedbackMessage(String chatId, String lang) {
+        return buildMessage(chatId, MessageProvider.get(lang, "great.feedback.message"));
     }
 
     /**
@@ -336,8 +336,8 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the bad feedback message.
      */
-    public static SendMessage createBadFeedbackMessage(String chatId) {
-        return buildMessage(chatId, MessageProvider.get("bad.feedback.message"));
+    public static SendMessage createBadFeedbackMessage(String chatId, String lang) {
+        return buildMessage(chatId, MessageProvider.get(lang, "bad.feedback.message"));
     }
 
     /**
@@ -347,9 +347,9 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the thanks feedback message.
      */
-    public static SendMessage createFeedbackThanksMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("feedback.thank.you.message"),
-            KeyboardFactory.createHelpKeyboard());
+    public static SendMessage createFeedbackThanksMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "feedback.thank.you.message"),
+            KeyboardFactory.createHelpKeyboard(lang));
     }
 
     /**
@@ -360,9 +360,9 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the unknown error occurred
      *         message.
      */
-    public static SendMessage createUnknownErrorOccurredMessage(String chatId) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get("unknown.error"),
-            KeyboardFactory.createBackToMainMenuKeyboard());
+    public static SendMessage createUnknownErrorOccurredMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "unknown.error"),
+            KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
     /**

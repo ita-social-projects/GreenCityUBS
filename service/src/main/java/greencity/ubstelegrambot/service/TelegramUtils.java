@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
@@ -16,13 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.File;
+
 import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND;
 import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 
@@ -106,15 +108,15 @@ public class TelegramUtils {
     public SendMessage updateChatStateAndRespond(
         String chatId,
         ChatState newState,
-        Function<String, SendMessage> messageSupplier) {
+        SendMessage message) {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
         if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId);
+            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UA);
         }
         chat.get().setChatState(newState);
         chat.get().setChatStateUpdatedAt(LocalDateTime.now());
         telegramChatRepository.save(chat.get());
-        return messageSupplier.apply(chatId);
+        return message;
     }
 
     public byte[] fileToByteArray(File file) throws IOException {
