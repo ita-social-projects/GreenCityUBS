@@ -292,6 +292,7 @@
     <include file="db/changelog/logs/ch-change-email-column-types-Popovych.xml"/>
     <include file="db/changelog/logs/2025-08-05-ch-add-unread-count-and-viewing-status-to-chat-and-message.xml"/>
     <include file="db/changelog/logs/2025-08-05-ch-add-last-message-in-telegram-chat.xml"/>
+    <include file="db/changelog/logs/2025-08-07-ch-update-localdatetime-to-instant-in-telegram-entities.xml"/>
+    <include file="db/changelog/logs/2025-08-08-ch-update-chat-state-updated-at-field-in-telegram-chat.xml"/>
     <include file="db/changelog/logs/2025-08-07-ch-add-created-at-to-telegram-chat.xml"/>
-
 </databaseChangeLog>

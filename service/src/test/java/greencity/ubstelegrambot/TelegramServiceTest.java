@@ -2,7 +2,11 @@ package greencity.ubstelegrambot;
 
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MessageAssetDto;
+import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -14,6 +18,7 @@ import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
@@ -21,9 +26,9 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AzureCloudStorageService;
-import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
+import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
@@ -34,6 +39,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
@@ -42,6 +48,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -49,7 +56,14 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -61,8 +75,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
@@ -94,7 +115,7 @@ class TelegramServiceTest {
     private MultipartFile file;
 
     @Mock
-    private TelegramNotificationService telegramNotificationService;
+    private TelegramChatProducer telegramChatProducer;
 
     @Mock
     private TelegramManagerRepository telegramManagerRepository;
@@ -127,7 +148,7 @@ class TelegramServiceTest {
             employeeRepository,
             orderRepository,
             userRepository,
-            telegramNotificationService,
+            telegramChatProducer,
             telegramUtils,
             telegramUpdateProcessorMap);
     }
@@ -152,30 +173,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void testSendMessageToUser_OnlyFile_MessageSentAndPhotoUploaded() {
-        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
-        request.setChatId(1L);
-
-        TelegramChat chat = new TelegramChat();
-        chat.setChatId("123456");
-
-        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
-        when(file.getOriginalFilename()).thenReturn("image.png");
-        when(file.getSize()).thenReturn(1024L);
-        when(file.getContentType()).thenReturn("image/png");
-        when(azureCloudStorageService.upload(file)).thenReturn("http://azure.com/image.png");
-
-        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
-
-        verify(azureCloudStorageService).upload(file);
-        verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
-        verify(telegramMessageRepository).save(any(TelegramMessage.class));
-        verify(telegramChatRepository).save(any(TelegramChat.class));
-    }
-
-    @Test
-    void testSendMessageToUser_TextAndFile_MessageSentAndPhotoUploaded() {
+    void testSendMessageToUser_FileUnknownContentType_MessageSentAndPhotoUploaded() {
         CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
         request.setChatId(1L);
         request.setText("Hi");
@@ -183,19 +181,76 @@ class TelegramServiceTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123456");
 
-        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
-        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("image.svg");
         when(file.getSize()).thenReturn(2048L);
-        when(file.getContentType()).thenReturn("image/png");
+        when(file.getContentType()).thenReturn(null);
         when(azureCloudStorageService.upload(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(executor).executeCommand(eq(bot), any(SendMessage.class));
+        verify(azureCloudStorageService).upload(file);
+        verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
+    }
+
+    @Test
+    void testSendMessageToUser_FileImageContentTypeLargeDimensions_MessageSentAndPhotoUploaded() throws IOException {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        BufferedImage img = new BufferedImage(10000, 10000, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(file.getSize()).thenReturn(2048L);
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getInputStream()).thenReturn(bais);
+        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(azureCloudStorageService).upload(file);
+        verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
+    }
+
+    @Test
+    void testSendMessageToUser_FileImageContentTypeNormalDimensions_MessageSentAndPhotoUploaded() throws IOException {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        BufferedImage img = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(file.getSize()).thenReturn(2048L);
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getInputStream()).thenReturn(bais);
+        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(azureCloudStorageService).upload(file);
         verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
+
     }
 
     @Test
@@ -221,7 +276,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Hello")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(false)
             .status(MessageDeliveryStatus.SENT)
             .assets(List.of(MessageAsset.builder()
@@ -295,7 +350,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Hello")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .assets(List.of(asset))
@@ -415,7 +470,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Message with null assets")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .assets(null)
@@ -537,7 +592,7 @@ class TelegramServiceTest {
         Update update = new Update();
         update.setMessage(message);
 
-        doNothing().when(telegramNotificationService).notifyNewChat(any(ChatDto.class));
+        doNothing().when(telegramChatProducer).notifyNewChat(any(ChatDto.class));
 
         TelegramChat savedChat = TelegramChat.builder()
             .id(1L)
@@ -623,7 +678,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(telegramChat));
@@ -786,7 +841,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString()))
@@ -856,6 +911,79 @@ class TelegramServiceTest {
         apiUser.setId(chatId);
         apiUser.setUserName("testUser");
         return apiUser;
+    }
+
+    @Test
+    void testSendMessageToUser_FileTooLarge_ShouldThrowException() {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(file.getName()).thenReturn("large_file.pdf");
+        when(file.getSize()).thenReturn(51L * 1024 * 1024);
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
+
+        assertEquals("File size exceeds Telegram bot limit (50MB)", exception.getMessage());
+
+        verifyNoInteractions(azureCloudStorageService);
+        verifyNoInteractions(executor);
+        verify(telegramMessageRepository, never()).save(any());
+    }
+
+    @Test
+    void testSendMessageToUser_FileAssetType_ShouldSendDocument() {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(file.getOriginalFilename()).thenReturn("doc.pdf");
+        when(file.getSize()).thenReturn(1024L);
+        when(file.getContentType()).thenReturn("application/pdf");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
+        verify(telegramMessageRepository).save(any());
+    }
+
+    @Test
+    void testSendMessageToUser_FileAssetType_WhenSendFails_ShouldThrowRuntimeException() {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(file.getOriginalFilename()).thenReturn("doc.pdf");
+        when(file.getSize()).thenReturn(1024L);
+        when(file.getContentType()).thenReturn("application/pdf");
+
+        try (MockedStatic<MessageFactory> messageFactoryMock = mockStatic(MessageFactory.class)) {
+            messageFactoryMock
+                .when(() -> MessageFactory.createSendDocument(anyString(), any(MultipartFile.class)))
+                .thenThrow(new IOException("Simulated IO error"));
+
+            RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
+
+            assertTrue(exception.getMessage().contains("Unable to send file to Telegram"));
+            verify(executor, never()).executeSendFile(any(), any());
+            verify(telegramMessageRepository, never()).save(any());
+        }
     }
 
     @Test

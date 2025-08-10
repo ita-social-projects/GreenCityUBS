@@ -22,7 +22,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +46,7 @@ public class TelegramChat {
     private ChatState chatState = ChatState.NORMAL;
 
     @Column(name = "chat_state_updated_at", nullable = false)
-    private LocalDateTime chatStateUpdatedAt;
+    private Instant chatStateUpdatedAt;
 
     @Column(nullable = false, name = "notify")
     private Boolean isNotify;
