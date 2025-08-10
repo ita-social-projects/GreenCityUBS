@@ -39,6 +39,8 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         if (telegramChat.isEmpty()) {
             return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
                 TelegramBotConstants.UA);
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
+                    TelegramBotConstants.UA);
         }
 
         Optional<ChatFeedback> chatFeedback = chatFeedbackRepository
