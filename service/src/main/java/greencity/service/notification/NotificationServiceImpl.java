@@ -951,11 +951,11 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username) {
+    public void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username, String lang) {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(username)
-            .subject(MessageProvider.get("green.office.subject"))
+            .subject(MessageProvider.get(lang, "green.office.subject"))
             .body(userEmail)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)

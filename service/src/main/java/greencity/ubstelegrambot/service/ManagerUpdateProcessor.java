@@ -2,13 +2,13 @@ package greencity.ubstelegrambot.service;
 
 import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
+import greencity.service.ubs.TelegramLanguageService;
 import greencity.service.ubs.TelegramLoginService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Service("managerUpdateProcessor")
@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
     private final TelegramLoginService telegramLoginService;
     private final TelegramUtils telegramUtils;
+    private final TelegramLanguageService telegramLanguageService;
 
     /**
      * Handles incoming updates related to manager interactions in Telegram.
@@ -23,31 +24,33 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
      */
     @Override
     public SendMessage process(Update update) {
+        String chatId = update.hasCallbackQuery() ?
+                update.getCallbackQuery().getMessage().getChatId().toString()
+                : update.getMessage().getChatId().toString();
+        String lang = telegramLanguageService.getChatLanguage(chatId);
         if (update.hasCallbackQuery()) {
-            String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
-            CallbackQuery callBackQuery = update.getCallbackQuery();
-            if (callBackQuery.getData().equals(TelegramBotConstants.LOGOUT_MANAGER_CALLBACK)) {
+            if (update.getCallbackQuery().getData().equals(TelegramBotConstants.LOGOUT_MANAGER_CALLBACK)) {
                 telegramLoginService.logoutManager(chatId);
-                return processMainMenuRequest(chatId);
+                return processMainMenuRequest(chatId, lang);
             } else {
-                return processManagerCallBackQueryRequest(chatId);
+                return processManagerCallBackQueryRequest(chatId, lang);
             }
         }
-        return processManagerMessageRequest(update.getMessage().getChatId().toString());
+        return processManagerMessageRequest(chatId, lang);
     }
 
-    private SendMessage processMainMenuRequest(String chatId) {
+    private SendMessage processMainMenuRequest(String chatId,  String lang) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createAvailableCommandsMessage);
+            MessageFactory.createAvailableCommandsMessage(chatId, lang));
     }
 
-    private SendMessage processManagerMessageRequest(String chatId) {
+    private SendMessage processManagerMessageRequest(String chatId,  String lang) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createAvailableForManagerCommandsMessage);
+            MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang));
     }
 
-    private SendMessage processManagerCallBackQueryRequest(String chatId) {
+    private SendMessage processManagerCallBackQueryRequest(String chatId, String lang) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createForbiddenCommandsManagerMessage);
+            MessageFactory.createForbiddenCommandsManagerMessage(chatId, lang));
     }
 }

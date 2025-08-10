@@ -34,7 +34,6 @@ import greencity.service.ubs.UBSClientService;
 import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
-import greencity.ubstelegrambot.messages.MessageProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -202,7 +202,7 @@ public class TelegramServiceImpl implements TelegramService {
     public PageableDto<TelegramMessageDto> findUserMessageByChatId(Long chatId, Pageable pageable) {
         Page<TelegramMessage> messages = telegramMessageRepository.findByChatId(chatId, pageable);
         if (messages.isEmpty()) {
-            throw new NotFoundException(String.format(MessageProvider.get("messages.not.found.for.chat"), chatId));
+            throw new NotFoundException(String.format("There are no messages in chat %s", chatId));
         }
 
         List<TelegramMessageDto> messageDtoList = messages.stream()
@@ -480,7 +480,7 @@ public class TelegramServiceImpl implements TelegramService {
 
         if (update.hasCallbackQuery()) {
             String callback = update.getCallbackQuery().getData();
-            if (callback.startsWith("SET_LANGUAGE_")) {
+            if (callback.startsWith("set_language_")) {
                 return telegramUpdateProcessorMap.get("languageSwitcherProcessor");
             }
         }
