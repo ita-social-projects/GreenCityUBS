@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -40,7 +40,7 @@ class TelegramNotificationServiceTest {
     private TelegramNotificationService telegramNotificationService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(
-            new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
+            new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
                 "last_name", 0, null, null,
                 new ArrayList<>(), new ArrayList<>()))
         .build();
@@ -94,7 +94,7 @@ class TelegramNotificationServiceTest {
         assertFalse(telegramNotificationService.isEnabled(userEntity));
 
         userEntity
-            .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username",
+            .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username",
                 "first_name", "last_name", 0,
                 userEntity, null, new ArrayList<>(), new ArrayList<>()));
 
