@@ -16,7 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +50,7 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         chatFeedback.get().setFeedbackState(FeedbackState.CLOSED);
         chatFeedbackRepository.save(chatFeedback.get());
         telegramChat.get().setChatState(ChatState.NORMAL);
-        telegramChat.get().setChatStateUpdatedAt(LocalDateTime.now());
+        telegramChat.get().setChatStateUpdatedAt(Instant.now());
         telegramChatRepository.save(telegramChat.get());
         return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString());
     }
@@ -67,7 +67,7 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         }
 
         chat.get().setChatState(ChatState.MAKING_FEEDBACK);
-        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
+        chat.get().setChatStateUpdatedAt(Instant.now());
         telegramChatRepository.save(chat.get());
 
         Optional<ChatFeedback> inProgressFeedback = chatFeedbackRepository
