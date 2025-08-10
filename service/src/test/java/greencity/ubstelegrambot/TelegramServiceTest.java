@@ -60,7 +60,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -272,7 +274,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Hello")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(false)
             .status(MessageDeliveryStatus.SENT)
             .assets(List.of(MessageAsset.builder()
@@ -346,7 +348,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Hello")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .assets(List.of(asset))
@@ -466,7 +468,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Message with null assets")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .assets(null)
@@ -674,7 +676,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(telegramChat));
@@ -837,7 +839,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString()))

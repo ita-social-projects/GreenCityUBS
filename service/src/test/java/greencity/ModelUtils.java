@@ -196,6 +196,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -1605,13 +1606,13 @@ public class ModelUtils {
     }
 
     public static TelegramChat getTelegramBotNotifyTrue() {
-        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
             "last_name", 0, null, null,
             new ArrayList<>(), new ArrayList<>());
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
-        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), false, "username", "first_name",
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), false, "username", "first_name",
             "last_name", 0, null, null,
             new ArrayList<>(), new ArrayList<>());
     }

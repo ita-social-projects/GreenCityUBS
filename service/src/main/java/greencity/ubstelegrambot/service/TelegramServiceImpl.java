@@ -4,7 +4,12 @@ import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.ChatUserDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MessageAssetDto;
+import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -47,8 +52,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -83,7 +86,7 @@ public class TelegramServiceImpl implements TelegramService {
             .text(request.getText())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
@@ -410,7 +413,7 @@ public class TelegramServiceImpl implements TelegramService {
             .lastName(message.getFrom().getLastName())
             .isNotify(true)
             .chatState(ChatState.NORMAL)
-            .chatStateUpdatedAt(LocalDateTime.now());
+            .chatStateUpdatedAt(Instant.now());
 
         if (!uuid.isEmpty()) {
             userRepository.findUserByUuid(uuid).ifPresent(newChatBuilder::user);
@@ -469,7 +472,7 @@ public class TelegramServiceImpl implements TelegramService {
             : update.getMessage().getChatId().toString();
 
         telegramChatRepository.findByChatId(chatId).ifPresent(chat -> {
-            Instant updatedAt = chat.getChatStateUpdatedAt().atZone(ZoneId.systemDefault()).toInstant();
+            Instant updatedAt = chat.getChatStateUpdatedAt();
             if (Duration.between(updatedAt, Instant.now()).toMinutes() > 10) {
                 chat.setChatState(ChatState.NORMAL);
                 telegramChatRepository.save(chat);

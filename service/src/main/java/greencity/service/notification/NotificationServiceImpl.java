@@ -472,6 +472,7 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Notifies the user about a canceled violation associated with a specific
      * order.
+     *
      * <p>
      *
      * Retrieves the canceled violation for the given order identifier. If the
