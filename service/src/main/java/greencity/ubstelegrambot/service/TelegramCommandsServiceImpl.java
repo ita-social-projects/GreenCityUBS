@@ -18,32 +18,31 @@ public class TelegramCommandsServiceImpl implements TelegramCommandsService {
      * {@inheritDoc}
      */
     @Override
-    public SendMessage processCommand(Message message) {
+    public SendMessage processCommand(Message message, String lang) {
         String chatId = message.getChatId().toString();
 
         if (message.getText() == null) {
             return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory::createUnknownCommandMessage);
+                MessageFactory.createUnknownCommandMessage(chatId,TelegramBotConstants.UA));
         }
-
         String text = message.getText().split(" ")[0];
 
         switch (text) {
             case TelegramBotConstants.START_COMMAND, TelegramBotConstants.HELP_COMMAND -> {
                 return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                    MessageFactory::createAvailableCommandsMessage);
+                    MessageFactory.createAvailableCommandsMessage(chatId, lang));
             }
             case TelegramBotConstants.SUPPORT_COMMAND -> {
                 return telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
-                    MessageFactory::createSupportMessageCallBackQuery);
+                    MessageFactory.createSupportMessageCallBackQuery(chatId, lang));
             }
             case TelegramBotConstants.LOGIN_COMMAND -> {
                 return telegramUtils.updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
-                    MessageFactory::createLoginMessage);
+                    MessageFactory.createLoginMessage(chatId, lang));
             }
             default -> {
                 return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                    MessageFactory::createUnknownCommandMessage);
+                    MessageFactory.createUnknownCommandMessage(chatId, lang));
             }
         }
     }

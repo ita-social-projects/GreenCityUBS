@@ -2,6 +2,7 @@ package greencity.ubstelegrambot.service;
 
 import greencity.entity.telegram.TelegramManager;
 import greencity.repository.TelegramManagerRepository;
+import greencity.service.ubs.TelegramLanguageService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -17,14 +18,16 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
     private final ApplicationContext applicationContext;
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramExecutor executor;
+    private final TelegramLanguageService telegramLanguageService;
 
     public void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId) {
         var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
         List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
         for (TelegramManager manager : telegramManagers) {
+            String lang = telegramLanguageService.getChatLanguage(manager.getChatId());
             SendMessage notification =
                 MessageFactory.createNotificationMessageForManager(manager.getChatId(), username, messageText,
-                    innerChatId);
+                    innerChatId, lang);
             executor.executeCommand(telegramBot, notification);
         }
     }
@@ -34,7 +37,8 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
         var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
         List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
         for (TelegramManager manager : telegramManagers) {
-            var notification = MessageFactory.createEndSupportModeNotification(manager.getChatId(), username);
+            String lang = telegramLanguageService.getChatLanguage(manager.getChatId());
+            var notification = MessageFactory.createEndSupportModeNotification(manager.getChatId(), username, lang);
             executor.executeCommand(telegramBot, notification);
         }
     }

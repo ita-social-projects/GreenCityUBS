@@ -7,6 +7,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -195,7 +196,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -1608,13 +1608,13 @@ public class ModelUtils {
 
     public static TelegramChat getTelegramBotNotifyTrue() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
-            "last_name", 0, null, null,
+            "last_name", 0, null, null, TelegramBotConstants.UA,
             new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), false, "username", "first_name",
-            "last_name", 0, null, null,
+            "last_name", 0, null, null, TelegramBotConstants.UA,
             new ArrayList<>(), new ArrayList<>(), null);
     }
 

@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
@@ -21,7 +22,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -214,7 +219,7 @@ class TelegramUtilsTest {
         SendMessage result = telegramUtils.updateChatStateAndRespond(
             "123",
             ChatState.MAKING_FEEDBACK,
-            id -> message);
+            message);
 
         assertEquals(message, result);
         assertEquals(ChatState.MAKING_FEEDBACK, chat.getChatState());
@@ -223,14 +228,14 @@ class TelegramUtilsTest {
     @Test
     void updateChatStateAndRespond_WhenChatNotFound_ShouldReturnErrorMessage() {
         when(telegramChatRepository.findByChatId("999")).thenReturn(Optional.empty());
-
+        String id = "1";
         SendMessage result = telegramUtils.updateChatStateAndRespond(
                 "999",
                 ChatState.NORMAL,
-                id -> new SendMessage(id, "Should not be called")
+                new SendMessage(id, "Should not be called")
         );
 
         assertEquals("999", result.getChatId());
-        assertTrue(result.getText().contains(MessageProvider.get("unknown.error")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA,"unknown.error")));
     }
 }

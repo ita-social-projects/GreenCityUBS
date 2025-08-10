@@ -1,3 +1,12 @@
+menu:
+  client_support: "Чат з людиною"
+  work_schedule: "Графік роботи станції"
+  admission_rules: "Правила прийому сировини"
+  green_office: "Зелений офіс"
+  feedback: "Залишити відгук"
+  sorting_prices: "Ціни на сортування"
+  login: "Увійти як менеджер"
+yes: "Так"
 incorrect.login.format: "Некоректний формат. Будь ласка, введіть дані в форматі login:password"
 logout.manager: "Вийти з ролі менеджера"
 successful.logout.manager: "Успішно вийшли з ролі менеджера!"
@@ -109,7 +118,6 @@ back.to.main.menu: "⏪ В головне меню"
 client.end.support.mode: "Закінчити розмову з менеджером"
 client.stop.support.mode: "Ви закінчили розмову з менеджером, оцініть будь ласка роботу нашої підтримки від 1 до 5"
 client.end.support.notification: "Клієнт %s закінчив розмову"
-messages.not.found.for.chat: "У чаті %s немає повідомлень"
 
 client.support.message.callback.query: |
   Поставте, будь ласка, своє запитання — і я покличу когось із моїх колег-людей ✍️👇

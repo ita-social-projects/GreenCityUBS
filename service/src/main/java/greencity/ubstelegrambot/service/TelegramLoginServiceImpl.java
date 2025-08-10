@@ -1,6 +1,7 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.TestersSignInRequest;
 import greencity.entity.telegram.TelegramManager;
 import greencity.entity.user.employee.Employee;
@@ -41,12 +42,12 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
      * {@inheritDoc}
      */
     @Override
-    public SendMessage processInputManagerCredentialsRequest(Message message) {
+    public SendMessage processInputManagerCredentialsRequest(Message message, String lang) {
         String[] parts = message.getText().split(":");
 
         if (parts.length < 2) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get("incorrect.login.format"));
+                MessageProvider.get(lang, "incorrect.login.format"), TelegramBotConstants.UA);
         }
 
         String login = parts[0];
@@ -56,14 +57,14 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
 
         if (employee.isEmpty()) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get("user.not.employee"));
+                MessageProvider.get(lang, "user.not.employee"), TelegramBotConstants.UA);
         }
 
         boolean isManager = telegramUtils.checkIsEmployeeManager(employee.get());
 
         if (!isManager) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get("employee.not.manager"));
+                MessageProvider.get(TelegramBotConstants.UA, "employee.not.manager"), TelegramBotConstants.UA);
         }
 
         try {
@@ -79,13 +80,13 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
                     .employee(employee.get())
                     .build());
 
-            return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name);
+            return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name, TelegramBotConstants.UA);
         } catch (BadRequestException e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get("login.failed"));
+                MessageProvider.get(TelegramBotConstants.UA, "login.failed"), TelegramBotConstants.UA);
         } catch (Exception e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get("something.went.wrong"));
+                MessageProvider.get(TelegramBotConstants.UA, "something.went.wrong"), TelegramBotConstants.UA);
         }
     }
 }

@@ -4,10 +4,14 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class TelegramBotConstants {
+    public static final String UA = "ua";
+    public static final String EN = "en";
     public static final String START_COMMAND = "/start";
     public static final String SUPPORT_COMMAND = "/support";
     public static final String LOGIN_COMMAND = "/login";
     public static final String HELP_COMMAND = "/help";
+    public static final String SET_LANGUAGE_UA_CALLBACK = "set_language_ua_command";
+    public static final String SET_LANGUAGE_EN_CALLBACK = "set_language_en_command";
     public static final String LOGOUT_MANAGER_CALLBACK = "logout_manager_command";
     public static final String CLIENT_SUPPORT_CALLBACK = "client_support_command";
     public static final String MAIN_MENU_CALLBACK = "main_menu_command";

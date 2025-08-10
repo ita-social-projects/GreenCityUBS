@@ -1,8 +1,11 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
+import greencity.enums.ChatState;
 import greencity.repository.TelegramChatRepository;
 import greencity.service.ubs.TelegramUpdateProcessor;
+import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import org.jvnet.hk2.annotations.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -11,9 +14,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Service
 @RequiredArgsConstructor
 public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
-
     private final TelegramChatRepository chatRepository;
-    //private final MessageLocalizer localizer;
+    private final TelegramUtils telegramUtils;
 
 
     @Override
@@ -24,15 +26,25 @@ public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
         TelegramChat chat = chatRepository.findByChatId(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
 
-        String newLang = callback.substring("SET_LANGUAGE_".length());
-        chat.setLanguageCode(newLang);
-        chatRepository.save(chat);
+        switch (callback) {
+            case TelegramBotConstants.SET_LANGUAGE_UA_CALLBACK -> {
+                if (chat.getLanguageCode().equals(TelegramBotConstants.UA)) break;
+                chat.setLanguageCode(TelegramBotConstants.UA);
+                chatRepository.save(chat);
+                return processLanguageSwitchRequest(chatId, chat.getLanguageCode());
+            }
+            case TelegramBotConstants.SET_LANGUAGE_EN_CALLBACK -> {
+                if (chat.getLanguageCode().equals(TelegramBotConstants.EN)) break;
+                chat.setLanguageCode(TelegramBotConstants.EN);
+                chatRepository.save(chat);
+                return processLanguageSwitchRequest(chatId, chat.getLanguageCode());
+            }
+        }
+        return null;
+    }
 
-  //      String messageText = localizer.get("menu.language_changed", newLang);
-
-        SendMessage response = new SendMessage(chatId, "");
-   //     response.setReplyMarkup(mainMenuWithLangButtons(newLang));
-
-        return response;
+    private SendMessage processLanguageSwitchRequest(String chatId, String lang) {
+        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                MessageFactory.createAvailableCommandsMessage(chatId, lang));
     }
 }
