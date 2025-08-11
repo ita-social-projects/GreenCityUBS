@@ -88,7 +88,6 @@ public class SecurityConfig {
                     UBS_LINK + "/getAllActiveCouriers",
                     UBS_LINK + "/locations/{courierId}",
                     UBS_LINK + "/tariffinfo/**",
-                    ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
                     UBS_LINK + "/locationsByCourier/{courierId}",
                     UBS_LINK + "/tariffs/{locationId}",
                     USER_AGREEMENT_LINK + "/latest",
