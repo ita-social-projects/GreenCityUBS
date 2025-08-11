@@ -24,12 +24,17 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup createHelpKeyboard(String lang) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
-        keyboard.add(createRow(MessageProvider.get(lang, "menu.client_support"), TelegramBotConstants.CLIENT_SUPPORT_CALLBACK));
-        keyboard.add(createRow(MessageProvider.get(lang, "menu.work_schedule"), TelegramBotConstants.WORK_SCHEDULE_CALLBACK));
-        keyboard.add(createRow(MessageProvider.get(lang, "menu.admission_rules"), TelegramBotConstants.ADMISSION_RULES_CALLBACK));
-        keyboard.add(createRow(MessageProvider.get(lang, "menu.green_office"), TelegramBotConstants.GREEN_OFFICE_CALLBACK));
+        keyboard.add(
+            createRow(MessageProvider.get(lang, "menu.client_support"), TelegramBotConstants.CLIENT_SUPPORT_CALLBACK));
+        keyboard.add(
+            createRow(MessageProvider.get(lang, "menu.work_schedule"), TelegramBotConstants.WORK_SCHEDULE_CALLBACK));
+        keyboard.add(createRow(MessageProvider.get(lang, "menu.admission_rules"),
+            TelegramBotConstants.ADMISSION_RULES_CALLBACK));
+        keyboard
+            .add(createRow(MessageProvider.get(lang, "menu.green_office"), TelegramBotConstants.GREEN_OFFICE_CALLBACK));
         keyboard.add(createRow(MessageProvider.get(lang, "menu.feedback"), TelegramBotConstants.FEEDBACK_CALLBACK));
-        keyboard.add(createRow(MessageProvider.get(lang, "menu.sorting_prices"), TelegramBotConstants.SORTING_PRICES_CALLBACK));
+        keyboard.add(
+            createRow(MessageProvider.get(lang, "menu.sorting_prices"), TelegramBotConstants.SORTING_PRICES_CALLBACK));
         keyboard.add(createRow(MessageProvider.get(lang, "menu.login"), TelegramBotConstants.LOGIN_CALLBACK));
         keyboard.add(createLanguagesButton());
         return InlineKeyboardMarkup
@@ -40,14 +45,14 @@ public class KeyboardFactory {
 
     private static List<InlineKeyboardButton> createLanguagesButton() {
         InlineKeyboardButton uaButton = InlineKeyboardButton.builder()
-                .text("🇺🇦 Українська")
-                .callbackData(SET_LANGUAGE_UA_CALLBACK)
-                .build();
+            .text("🇺🇦 Українська")
+            .callbackData(SET_LANGUAGE_UA_CALLBACK)
+            .build();
 
         InlineKeyboardButton enButton = InlineKeyboardButton.builder()
-                .text("🇬🇧 English")
-                .callbackData(SET_LANGUAGE_EN_CALLBACK)
-                .build();
+            .text("🇬🇧 English")
+            .callbackData(SET_LANGUAGE_EN_CALLBACK)
+            .build();
         return List.of(uaButton, enButton);
     }
 
@@ -56,7 +61,7 @@ public class KeyboardFactory {
      *
      * @return {@link InlineKeyboardMarkup} with one buttons: logout command.
      */
-    public static InlineKeyboardMarkup createHelpKeyboardForManager(String  lang) {
+    public static InlineKeyboardMarkup createHelpKeyboardForManager(String lang) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
 
         keyboard.add(createRow(MessageProvider.get(lang, "logout.manager"), LOGOUT_MANAGER_CALLBACK));
@@ -134,7 +139,8 @@ public class KeyboardFactory {
      */
     public static InlineKeyboardMarkup createBackToMainMenuKeyboard(String lang) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        keyboard.add(createRow(MessageProvider.get(lang, "back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
+        keyboard
+            .add(createRow(MessageProvider.get(lang, "back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
         return InlineKeyboardMarkup
             .builder()
             .keyboard(keyboard)
@@ -153,7 +159,8 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup createProcessOrBackToMainMenuKeyboard(String callBackData, String lang) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(createRow(MessageProvider.get(lang, "yes"), callBackData));
-        keyboard.add(createRow(MessageProvider.get(lang, "back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
+        keyboard
+            .add(createRow(MessageProvider.get(lang, "back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
 
         return InlineKeyboardMarkup
             .builder()

@@ -9,6 +9,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
+import greencity.ubstelegrambot.constant.TelegramConstants;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,7 +91,7 @@ class TelegramLoginServiceTest {
         when(telegramManagerRepository.save(any(TelegramManager.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message, TelegramConstants.UA);
 
         assertEquals("123", result.getChatId());
         assertTrue(result.getText().contains("Manager Name"));
@@ -102,10 +103,10 @@ class TelegramLoginServiceTest {
         when(message.getText()).thenReturn("wrongformat");
         when(message.getChatId()).thenReturn(123L);
 
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message, TelegramConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(MessageProvider.get("incorrect.login.format")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramConstants.UA, "incorrect.login.format")));
     }
 
     @Test
@@ -116,10 +117,10 @@ class TelegramLoginServiceTest {
 
         when(employeeRepository.findByEmailWithPositions("test@test.com")).thenReturn(Optional.empty());
 
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message, TelegramConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(MessageProvider.get("user.not.employee")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramConstants.UA, "user.not.employee")));
     }
 
     @Test
@@ -132,10 +133,10 @@ class TelegramLoginServiceTest {
         when(employeeRepository.findByEmailWithPositions("manager@test.com")).thenReturn(Optional.of(employee));
         when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(false);
 
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message, TelegramConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(MessageProvider.get("employee.not.manager")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramConstants.UA, "employee.not.manager")));
     }
 
     @Test
@@ -151,10 +152,10 @@ class TelegramLoginServiceTest {
         when(userRemoteClient.signIn(any()))
             .thenThrow(new BadRequestException("{\"name\":\"password\",\"message\":\"Bad password\"}"));
 
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message, TelegramConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(MessageProvider.get("login.failed")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramConstants.UA, "login.failed")));
     }
 
     @Test
@@ -170,10 +171,10 @@ class TelegramLoginServiceTest {
         when(userRemoteClient.signIn(any()))
             .thenThrow(new RemoteServerUnavailableException("Server is down"));
 
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message, TelegramConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertTrue(result.getText().contains(MessageProvider.get("something.went.wrong")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramConstants.UA, "something.went.wrong")));
     }
 
     @Test
@@ -193,7 +194,7 @@ class TelegramLoginServiceTest {
 
         when(userRemoteClient.signIn(any())).thenReturn(responseEntity);
 
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message, TelegramConstants.UA);
 
         assertEquals("123", result.getChatId());
         assertTrue(result.getText().contains("username"));
@@ -225,7 +226,7 @@ class TelegramLoginServiceTest {
 
         when(userRemoteClient.signIn(any())).thenReturn(responseEntity);
 
-        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message);
+        SendMessage result = telegramLoginService.processInputManagerCredentialsRequest(message, TelegramConstants.UA);
 
         assertEquals("123", result.getChatId());
         assertTrue(result.getText().contains("username"));

@@ -43,4 +43,6 @@ public class TelegramConstants {
         """
             Дякую! Упродовж доби вам прийде лист із описом послуги «Зелений Офіс» 👌
             """;
+    public static final String UA = "ua";
+    public static final String EN = "en";
 }

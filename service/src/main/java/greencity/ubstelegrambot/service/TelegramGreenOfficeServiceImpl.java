@@ -26,7 +26,7 @@ public class TelegramGreenOfficeServiceImpl implements TelegramGreenOfficeServic
     public SendMessage processGreenOfficeEmail(Message message, String lang) {
         String email = message.getText();
         if (!TelegramUtils.isValidEmail(email)) {
-            return MessageFactory.createInvalidEmailMessage(message.getChatId().toString(),  lang);
+            return MessageFactory.createInvalidEmailMessage(message.getChatId().toString(), lang);
         }
 
         Optional<TelegramChat> optChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());

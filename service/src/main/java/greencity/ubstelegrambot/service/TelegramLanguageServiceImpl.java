@@ -13,6 +13,7 @@ public class TelegramLanguageServiceImpl implements TelegramLanguageService {
 
     @Override
     public String getChatLanguage(String chatId) {
-        return telegramChatRepository.findByChatId(chatId).orElseThrow(()-> new NotFoundException("Chat not found by ID: " + chatId)).getLanguageCode();
+        return telegramChatRepository.findByChatId(chatId)
+            .orElseThrow(() -> new NotFoundException("Chat not found by ID: " + chatId)).getLanguageCode();
     }
 }

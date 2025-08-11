@@ -65,7 +65,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
             log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), TelegramBotConstants.UA);
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
+                TelegramBotConstants.UA);
         }
 
         TelegramChat chat = optionalChat.get();

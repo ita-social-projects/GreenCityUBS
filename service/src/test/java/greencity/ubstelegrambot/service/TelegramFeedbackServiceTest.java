@@ -84,7 +84,7 @@ class TelegramFeedbackServiceTest {
             .thenReturn(Optional.of(chatFeedback));
 
         // when
-        SendMessage result = telegramFeedbackService.processInputCommentRequest(message);
+        SendMessage result = telegramFeedbackService.processInputCommentRequest(message, TelegramConstants.UA);
 
         // then
         assertEquals(chatId.toString(), result.getChatId());
@@ -110,7 +110,7 @@ class TelegramFeedbackServiceTest {
         when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.empty());
 
         // when
-        SendMessage result = telegramFeedbackService.processInputCommentRequest(message);
+        SendMessage result = telegramFeedbackService.processInputCommentRequest(message, TelegramConstants.UA);
 
         // then
         assertEquals(chatId.toString(), result.getChatId());
@@ -139,7 +139,7 @@ class TelegramFeedbackServiceTest {
             .thenReturn(Optional.empty());
 
         // when
-        SendMessage result = telegramFeedbackService.processInputCommentRequest(message);
+        SendMessage result = telegramFeedbackService.processInputCommentRequest(message, TelegramConstants.UA);
 
         // then
         assertEquals(chatId.toString(), result.getChatId());
@@ -174,7 +174,7 @@ class TelegramFeedbackServiceTest {
             .thenReturn(Optional.of(chatFeedback));
 
         // when
-        SendMessage result = telegramFeedbackService.processInputCommentRequest(message);
+        SendMessage result = telegramFeedbackService.processInputCommentRequest(message, TelegramConstants.UA);
 
         // then
         assertEquals(FEEDBACK_THANK_YOU_MESSAGE, result.getText());
@@ -211,7 +211,7 @@ class TelegramFeedbackServiceTest {
 
         // when/then
         assertThrows(RuntimeException.class,
-            () -> telegramFeedbackService.processInputCommentRequest(message));
+            () -> telegramFeedbackService.processInputCommentRequest(message, TelegramConstants.UA));
     }
 
     @Test
