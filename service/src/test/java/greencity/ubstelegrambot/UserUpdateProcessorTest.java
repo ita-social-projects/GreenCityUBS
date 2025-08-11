@@ -10,13 +10,11 @@ import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import greencity.ubstelegrambot.service.UserUpdateProcessor;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
@@ -52,20 +50,15 @@ class UserUpdateProcessorTest {
     @Mock
     private TelegramLoginService telegramLoginService;
 
+    @Mock
+    private TelegramLanguageService telegramLanguageService;
+
     private static final String CHAT_ID = "123";
 
-    private static MockedStatic<MessageProvider> messageProviderMock;
-
-    @BeforeAll
-    static void mockMessageProvider() {
-        messageProviderMock = mockStatic(MessageProvider.class);
-        messageProviderMock.when(() -> MessageProvider.get(anyString(), anyString()))
-            .thenAnswer(inv -> inv.getArgument(1));
-    }
-
-    @AfterAll
-    static void closeMock() {
-        messageProviderMock.close();
+    @BeforeEach
+    void setUp() {
+        lenient().when(telegramLanguageService.getChatLanguage(anyString()))
+            .thenReturn(TelegramConstants.UA);
     }
 
     @Test
@@ -290,13 +283,13 @@ class UserUpdateProcessorTest {
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.IN_SUPPORT)));
 
-        when(telegramSupportService.processSupportMessage(any(), anyString()))
+        when(telegramSupportService.processSupportMessage(any(), nullable(String.class)))
             .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
         assertMessageEquals(expected, result);
-        verify(telegramSupportService).processSupportMessage(any(), anyString());
+        verify(telegramSupportService).processSupportMessage(any(), nullable(String.class));
     }
 
     @Test
@@ -309,13 +302,13 @@ class UserUpdateProcessorTest {
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.MAKING_FEEDBACK)));
 
-        when(telegramFeedbackService.processInputCommentRequest(any(), anyString()))
+        when(telegramFeedbackService.processInputCommentRequest(any(), nullable(String.class)))
             .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
         assertMessageEquals(expected, result);
-        verify(telegramFeedbackService).processInputCommentRequest(any(), anyString());
+        verify(telegramFeedbackService).processInputCommentRequest(any(), nullable(String.class));
     }
 
     @Test
@@ -328,13 +321,13 @@ class UserUpdateProcessorTest {
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.ENTERING_GREEN_OFFICE_EMAIL)));
 
-        when(telegramGreenOfficeService.processGreenOfficeEmail(any(), anyString()))
+        when(telegramGreenOfficeService.processGreenOfficeEmail(any(), nullable(String.class)))
             .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
         assertMessageEquals(expected, result);
-        verify(telegramGreenOfficeService).processGreenOfficeEmail(any(), anyString());
+        verify(telegramGreenOfficeService).processGreenOfficeEmail(any(), nullable(String.class));
     }
 
     @Test
@@ -346,13 +339,13 @@ class UserUpdateProcessorTest {
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.NORMAL)));
 
-        when(telegramCommandsService.processCommand(any(), anyString()))
+        when(telegramCommandsService.processCommand(any(), nullable(String.class)))
             .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
         assertMessageEquals(expected, result);
-        verify(telegramCommandsService).processCommand(any(), anyString());
+        verify(telegramCommandsService).processCommand(any(), nullable(String.class));
     }
 
     @Test
@@ -364,13 +357,13 @@ class UserUpdateProcessorTest {
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.LOGGING_AS_MANAGER)));
 
-        when(telegramLoginService.processInputManagerCredentialsRequest(any(), anyString()))
+        when(telegramLoginService.processInputManagerCredentialsRequest(any(), nullable(String.class)))
             .thenReturn(expected);
 
         SendMessage result = updateProcessor.process(update);
 
         assertMessageEquals(expected, result);
-        verify(telegramLoginService).processInputManagerCredentialsRequest(any(), anyString());
+        verify(telegramLoginService).processInputManagerCredentialsRequest(any(), nullable(String.class));
     }
 
     private Update createUpdateWithCallback(String callbackData) {

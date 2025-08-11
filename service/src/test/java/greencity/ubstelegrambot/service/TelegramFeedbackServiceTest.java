@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.entity.telegram.ChatFeedback;
@@ -8,8 +9,11 @@ import greencity.enums.ChatState;
 import greencity.enums.FeedbackState;
 import greencity.repository.ChatFeedbackRepository;
 import greencity.repository.TelegramChatRepository;
+import greencity.service.ubs.TelegramLanguageService;
 import greencity.ubstelegrambot.constant.TelegramConstants;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -53,6 +57,15 @@ class TelegramFeedbackServiceTest {
 
     @InjectMocks
     private TelegramFeedbackServiceImpl telegramFeedbackService;
+
+    @Mock
+    private TelegramLanguageService telegramLanguageService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(telegramLanguageService.getChatLanguage(anyString()))
+            .thenReturn(TelegramConstants.UA);
+    }
 
     @Test
     void processInputCommentRequest_shouldProcessFeedbackSuccessfully() {
@@ -289,7 +302,7 @@ class TelegramFeedbackServiceTest {
         SendMessage result = telegramFeedbackService.processRatingFeedbackRequest(chatId, rating);
 
         // then
-        assertEquals(GREAT_FEEDBACK_MESSAGE, result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "great.feedback.message"), result.getText());
 
         verify(chatFeedbackRepository).save(argThat(fb -> fb.getRating() == rating &&
             fb.getFeedbackState() == FeedbackState.IN_PROGRESS &&
