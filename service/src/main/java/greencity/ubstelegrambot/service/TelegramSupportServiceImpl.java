@@ -16,12 +16,10 @@ import greencity.repository.TelegramMessageRepository;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramSupportService;
-import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.util.SimpleMultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,12 +40,11 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class TelegramSupportServiceImpl implements TelegramSupportService {
-    private final ApplicationContext applicationContext;
     private final TelegramChatRepository telegramChatRepository;
     private final FileService fileService;
     private final TelegramMessageRepository telegramMessageRepository;
     private final MessageAssetRepository messageAssetRepository;
-    private final TelegramExecutor executor;
+    private final TelegramExecutor telegramExecutor;
     private final TelegramNotificationService telegramNotificationService;
     private final TelegramUtils telegramUtils;
 
@@ -57,8 +54,6 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     @Override
     @Transactional
     public SendMessage processSupportMessage(Message message) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-
         Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
             log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
@@ -145,7 +140,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         if (fileId != null) {
             try {
-                telegramFile = executor.executeGetFile(bot, new GetFile(fileId));
+                telegramFile = telegramExecutor.executeGetFile(new GetFile(fileId));
                 if (telegramFile == null || telegramFile.getFilePath() == null) {
                     log.warn("Telegram file not found for fileId: {}", fileId);
                     return MessageFactory.buildMessage(message.getChatId().toString(),
