@@ -75,13 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
@@ -322,7 +316,7 @@ class TelegramServiceTest {
             NotFoundException.class,
             () -> telegramService.findUserMessageByChatId(chatId, pageable));
 
-        assertEquals("There are no messages in the chat 1", exception.getMessage());
+        assertEquals("There are no messages in chat 1", exception.getMessage());
     }
 
     @Test
@@ -707,6 +701,7 @@ class TelegramServiceTest {
 
         CallbackQuery callbackQuery = new CallbackQuery();
         callbackQuery.setFrom(telegramUser);
+        callbackQuery.setData("manager_callback_example");
 
         Chat chat = new Chat();
         chat.setId(chatId);
