@@ -4,10 +4,15 @@ import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
 import greencity.repository.TelegramChatRepository;
 import greencity.service.ubs.NotificationService;
+import greencity.ubstelegrambot.constant.TelegramConstants;
+import greencity.ubstelegrambot.messages.MessageProvider;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -20,6 +25,8 @@ import static greencity.ubstelegrambot.constant.TelegramConstants.GREEN_OFFICE_T
 import static greencity.ubstelegrambot.constant.TelegramConstants.INVALID_EMAIL_MESSAGE;
 import static greencity.ubstelegrambot.constant.TelegramConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +41,20 @@ class TelegramGreenOfficeServiceTest {
     @InjectMocks
     private TelegramGreenOfficeServiceImpl telegramGreenOfficeService;
 
+    private static MockedStatic<MessageProvider> messageProviderMock;
+
+    @BeforeAll
+    static void mockMessageProvider() {
+        messageProviderMock = mockStatic(MessageProvider.class);
+        messageProviderMock.when(() -> MessageProvider.get(anyString(), anyString()))
+            .thenAnswer(inv -> inv.getArgument(1));
+    }
+
+    @AfterAll
+    static void closeMock() {
+        messageProviderMock.close();
+    }
+
     @Test
     void processGreenOfficeEmail_shouldReturnInvalidEmailMessage_whenEmailIsInvalid() {
         Chat chat = new Chat();
@@ -43,7 +64,7 @@ class TelegramGreenOfficeServiceTest {
         message.setChat(chat);
         message.setFrom(new User());
 
-        SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message);
+        SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message, TelegramConstants.UA);
 
         assertEquals(INVALID_EMAIL_MESSAGE, result.getText());
     }
@@ -61,7 +82,7 @@ class TelegramGreenOfficeServiceTest {
 
         when(telegramChatRepository.findByChatId("12345")).thenReturn(Optional.empty());
 
-        SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message);
+        SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message, TelegramConstants.UA);
 
         assertEquals(UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN, result.getText());
     }
@@ -87,9 +108,10 @@ class TelegramGreenOfficeServiceTest {
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
 
-        SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message);
+        SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message, TelegramConstants.UA);
 
-        verify(notificationService).notifyManagerWithNewGreenOfficeRequestFromTelegramBot("user@example.com",
+        verify(notificationService).notifyManagerWithNewGreenOfficeRequestFromTelegramBot(TelegramConstants.UA,
+            "user@example.com",
             "John Doe");
         verify(telegramChatRepository).save(chat);
         assertEquals(GREEN_OFFICE_THANK_YOU_MESSAGE, result.getText());
@@ -114,10 +136,10 @@ class TelegramGreenOfficeServiceTest {
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
 
-        SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message);
+        SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message, TelegramConstants.UA);
 
-        verify(notificationService).notifyManagerWithNewGreenOfficeRequestFromTelegramBot("user@example.com",
-            "tg_user");
+        verify(notificationService).notifyManagerWithNewGreenOfficeRequestFromTelegramBot(TelegramConstants.UA,
+            "user@example.com", "tg_user");
         verify(telegramChatRepository).save(chat);
         assertEquals(GREEN_OFFICE_THANK_YOU_MESSAGE, result.getText());
         assertEquals(ChatState.NORMAL, chat.getChatState());
