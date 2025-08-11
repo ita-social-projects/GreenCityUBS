@@ -24,9 +24,8 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
      */
     @Override
     public SendMessage process(Update update) {
-        String chatId = update.hasCallbackQuery() ?
-                update.getCallbackQuery().getMessage().getChatId().toString()
-                : update.getMessage().getChatId().toString();
+        String chatId = update.hasCallbackQuery() ? update.getCallbackQuery().getMessage().getChatId().toString()
+            : update.getMessage().getChatId().toString();
         String lang = telegramLanguageService.getChatLanguage(chatId);
         if (update.hasCallbackQuery()) {
             if (update.getCallbackQuery().getData().equals(TelegramBotConstants.LOGOUT_MANAGER_CALLBACK)) {
@@ -39,12 +38,12 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
         return processManagerMessageRequest(chatId, lang);
     }
 
-    private SendMessage processMainMenuRequest(String chatId,  String lang) {
+    private SendMessage processMainMenuRequest(String chatId, String lang) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory.createAvailableCommandsMessage(chatId, lang));
     }
 
-    private SendMessage processManagerMessageRequest(String chatId,  String lang) {
+    private SendMessage processManagerMessageRequest(String chatId, String lang) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang));
     }

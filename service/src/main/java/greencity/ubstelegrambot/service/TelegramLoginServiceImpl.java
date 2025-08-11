@@ -80,7 +80,8 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
                     .employee(employee.get())
                     .build());
 
-            return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name, TelegramBotConstants.UA);
+            return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name,
+                TelegramBotConstants.UA);
         } catch (BadRequestException e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
                 MessageProvider.get(TelegramBotConstants.UA, "login.failed"), TelegramBotConstants.UA);

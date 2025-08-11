@@ -33,7 +33,6 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +65,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
             log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), TelegramBotConstants.UA);
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
+                TelegramBotConstants.UA);
         }
 
         TelegramChat chat = optionalChat.get();

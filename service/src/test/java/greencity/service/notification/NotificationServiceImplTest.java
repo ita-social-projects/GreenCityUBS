@@ -12,19 +12,19 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
+import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
+import greencity.entity.user.User;
+import greencity.entity.user.Violation;
+import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.NotificationReceiverType;
-import greencity.entity.notifications.NotificationParameter;
-import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
-import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.enums.UserCategory;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
@@ -36,8 +36,7 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.OrderBagService;
-import java.util.stream.Stream;
-
+import greencity.ubstelegrambot.constant.TelegramConstants;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +46,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -72,58 +70,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
-import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE;
-import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2;
-import static greencity.ModelUtils.TEST_UUID;
-import static greencity.ModelUtils.TEST_PAGEABLE_ADVANCED_DTO;
-import static greencity.ModelUtils.TEST_NOTIFICATION_DTO;
-import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET;
-import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET2;
-import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
-import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_2;
-import static greencity.ModelUtils.TEST_ORDER_2;
-import static greencity.ModelUtils.TEST_ORDER_3;
-import static greencity.ModelUtils.TEST_ORDER_4;
-import static greencity.ModelUtils.TEST_ORDER_5;
-import static greencity.ModelUtils.TEST_PAGE;
-import static greencity.ModelUtils.TEST_PAGEABLE;
-import static greencity.ModelUtils.TEST_PAYMENT_LIST;
-import static greencity.ModelUtils.TEST_USER;
-import static greencity.ModelUtils.TEST_USER_NOTIFICATION;
-import static greencity.ModelUtils.TEST_USER_NOTIFICATION_2;
-import static greencity.ModelUtils.TEST_USER_NOTIFICATION_3;
-import static greencity.ModelUtils.TEST_USER_NOTIFICATION_4;
-import static greencity.ModelUtils.TEST_USER_NOTIFICATION_5;
-import static greencity.ModelUtils.TEST_USER_NOTIFICATION_6;
-import static greencity.ModelUtils.TEST_USER_NOTIFICATION_7;
-import static greencity.ModelUtils.TEST_VIOLATION;
-import static greencity.ModelUtils.getNotifyInternallyFormedOrder;
-import static greencity.ModelUtils.createUserNotificationForViolationWithParameters;
-import static greencity.ModelUtils.createViolationNotificationDto;
-import static greencity.ModelUtils.getBag1list;
-import static greencity.ModelUtils.getBag4list;
-import static greencity.ModelUtils.getActiveCertificateWith10Points;
-import static greencity.ModelUtils.getUser;
-import static greencity.ModelUtils.getViolation;
-import static greencity.enums.NotificationReceiverType.SITE;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.anyLong;
+import static greencity.ModelUtils.*;
 import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
 import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
 import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
@@ -132,7 +81,25 @@ import static greencity.constant.OrderHistory.ORDER_CONFIRMED_UK;
 import static greencity.constant.OrderHistory.ORDER_FORMED_UK;
 import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT_UK;
 import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE_UK;
+import static greencity.enums.NotificationReceiverType.SITE;
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
@@ -1623,14 +1590,15 @@ class NotificationServiceImplTest {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(USERNAME)
-            .subject(MessageProvider.get("green.office.subject"))
+            .subject(MessageProvider.get(TelegramConstants.UA, "green.office.subject"))
             .body(USER_EMAIL)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
             .build();
         doNothing().when(userRemoteClient).sendGreenOfficeRequestNotification(notification);
 
-        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME);
+        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME,
+            TelegramConstants.UA);
 
         verify(userRemoteClient, times(1)).sendGreenOfficeRequestNotification(notification);
     }

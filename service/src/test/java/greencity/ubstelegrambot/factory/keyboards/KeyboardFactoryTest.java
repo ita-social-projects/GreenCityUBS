@@ -77,7 +77,8 @@ class KeyboardFactoryTest {
         List<KeyboardRow> rows = keyboard.getKeyboard();
         assertEquals(1, rows.size());
         assertEquals(1, rows.getFirst().size());
-        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "client.end.support.mode"), rows.getFirst().getFirst().getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "client.end.support.mode"),
+            rows.getFirst().getFirst().getText());
         assertTrue(keyboard.getResizeKeyboard());
     }
 
@@ -95,7 +96,8 @@ class KeyboardFactoryTest {
     void createProcessOrBackToMainMenuKeyboard_shouldReturnTwoRows() {
         String callback = "confirm-action";
 
-        InlineKeyboardMarkup keyboard = KeyboardFactory.createProcessOrBackToMainMenuKeyboard(callback, TelegramBotConstants.UA);
+        InlineKeyboardMarkup keyboard =
+            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(callback, TelegramBotConstants.UA);
         List<List<InlineKeyboardButton>> rows = keyboard.getKeyboard();
 
         assertEquals(2, rows.size());

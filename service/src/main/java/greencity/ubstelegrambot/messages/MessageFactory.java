@@ -60,7 +60,8 @@ public class MessageFactory {
      */
     public static SendMessage createForbiddenCommandsManagerMessage(String chatId, String lang) {
         return buildReplyMarkUpMessage(chatId,
-            MessageProvider.get(lang, "forbidden.commands.manager") + "\n" + MessageProvider.get(lang, "supported.commands"),
+            MessageProvider.get(lang, "forbidden.commands.manager") + "\n"
+                + MessageProvider.get(lang, "supported.commands"),
             KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
@@ -270,7 +271,8 @@ public class MessageFactory {
      */
     public static SendMessage createGreenOfficeMessage(String chatId, String lang) {
         return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "green.office.text"),
-            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK, lang));
+            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK,
+                lang));
     }
 
     /**

@@ -23,7 +23,7 @@ public class TelegramCommandsServiceImpl implements TelegramCommandsService {
 
         if (message.getText() == null) {
             return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory.createUnknownCommandMessage(chatId,TelegramBotConstants.UA));
+                MessageFactory.createUnknownCommandMessage(chatId, TelegramBotConstants.UA));
         }
         String text = message.getText().split(" ")[0];
 

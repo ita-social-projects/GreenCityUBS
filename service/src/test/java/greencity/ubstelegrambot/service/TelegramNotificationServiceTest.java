@@ -12,6 +12,7 @@ import greencity.enums.ChatState;
 import greencity.enums.NotificationType;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.ubstelegrambot.UBSTelegramBot;
+import greencity.ubstelegrambot.constant.TelegramConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,7 +42,7 @@ class TelegramNotificationServiceTest {
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(
             new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
-                "last_name", 0, null, null,
+                "last_name", 0, null, null, TelegramConstants.UA,
                 new ArrayList<>(), new ArrayList<>()))
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
@@ -95,8 +96,8 @@ class TelegramNotificationServiceTest {
 
         userEntity
             .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username",
-                "first_name", "last_name", 0,
-                userEntity, null, new ArrayList<>(), new ArrayList<>()));
+                "first_name", "last_name", 0, userEntity, null,
+                TelegramConstants.UA, new ArrayList<>(), new ArrayList<>()));
 
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 
