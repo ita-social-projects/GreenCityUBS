@@ -10,6 +10,7 @@ import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
@@ -29,7 +30,7 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,6 +47,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramExecutor telegramExecutor;
     private final TelegramNotificationService telegramNotificationService;
+    private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
 
     /**
@@ -64,7 +66,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         if (message.hasText() && message.getText().contains(TelegramBotConstants.CLIENT_END_SUPPORT_MODE)) {
             chat.setChatState(ChatState.NORMAL);
-            chat.setChatStateUpdatedAt(LocalDateTime.now());
+            chat.setChatStateUpdatedAt(Instant.now());
             telegramChatRepository.save(chat);
             telegramNotificationService.notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
             return MessageFactory.createEndSupportMessage(chat.getChatId());
@@ -91,7 +93,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .fromManager(false)
                 .mediaGroupId(mediaGroupId)
                 .status(MessageDeliveryStatus.SENT)
-                .sendAt(LocalDateTime.now())
+                .sendAt(Instant.now())
                 .text(messageText)
                 .messageViewingStatus(MessageViewingStatus.UNREAD)
                 .build();
@@ -222,7 +224,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .assets(assetDtos);
 
         if (previouslySavedMessage.isEmpty()) {
-            telegramNotificationService.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
+            telegramChatProducer.notifyNewMessage(telegramMessageDtoBuilder.build(), chat.getId());
 
             String contentForNotification = getString(telegramMessage);
 

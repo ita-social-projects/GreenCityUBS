@@ -20,6 +20,7 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
+import greencity.producers.TelegramChatProducer;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
@@ -28,7 +29,6 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AzureCloudStorageService;
-import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
@@ -50,8 +50,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,7 +69,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final TelegramNotificationService telegramNotificationService;
+    private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
 
@@ -85,7 +83,7 @@ public class TelegramServiceImpl implements TelegramService {
             .text(request.getText())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
@@ -416,7 +414,7 @@ public class TelegramServiceImpl implements TelegramService {
             .lastName(message.getFrom().getLastName())
             .isNotify(true)
             .chatState(ChatState.NORMAL)
-            .chatStateUpdatedAt(LocalDateTime.now());
+            .chatStateUpdatedAt(Instant.now());
 
         if (!uuid.isEmpty()) {
             userRepository.findUserByUuid(uuid).ifPresent(newChatBuilder::user);
@@ -433,7 +431,7 @@ public class TelegramServiceImpl implements TelegramService {
             .unreadMessagesCount(0)
             .username(createdChat.getUsername()).build();
 
-        telegramNotificationService.notifyNewChat(chatDto);
+        telegramChatProducer.notifyNewChat(chatDto);
 
         return resolveProcessorByUuid(uuid, chatId);
     }
@@ -475,7 +473,7 @@ public class TelegramServiceImpl implements TelegramService {
             : update.getMessage().getChatId().toString();
 
         telegramChatRepository.findByChatId(chatId).ifPresent(chat -> {
-            Instant updatedAt = chat.getChatStateUpdatedAt().atZone(ZoneId.systemDefault()).toInstant();
+            Instant updatedAt = chat.getChatStateUpdatedAt();
             if (Duration.between(updatedAt, Instant.now()).toMinutes() > 10) {
                 chat.setChatState(ChatState.NORMAL);
                 telegramChatRepository.save(chat);

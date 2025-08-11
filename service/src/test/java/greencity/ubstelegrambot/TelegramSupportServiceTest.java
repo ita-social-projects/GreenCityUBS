@@ -5,6 +5,7 @@ import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
@@ -59,6 +60,9 @@ class TelegramSupportServiceTest {
 
     @Mock
     private TelegramNotificationService telegramNotificationService;
+
+    @Mock
+    private TelegramChatProducer telegramChatProducer;
 
     @Mock
     private TelegramMessageRepository telegramMessageRepository;
@@ -147,7 +151,7 @@ class TelegramSupportServiceTest {
 
         assertTrue(result.getText().contains(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
-        verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, messageText, id);
     }
 
@@ -188,7 +192,8 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
             TelegramBotConstants.PHOTO_CONTENT, id);
     }
@@ -229,7 +234,7 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
             TelegramBotConstants.PHOTO_CONTENT, id);
     }
@@ -273,7 +278,8 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
         assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
             TelegramBotConstants.PHOTO_CONTENT, id);
     }
@@ -323,6 +329,10 @@ class TelegramSupportServiceTest {
         verify(fileService).upload(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
         verify(telegramMessageRepository).findByMediaGroupId(mediaGroupId);
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
+            eq(chat.getId()));
     }
 
     @Test
@@ -374,6 +384,8 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
         assertEquals(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN, result.getText());
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
     }
 
     @Test
@@ -413,7 +425,9 @@ class TelegramSupportServiceTest {
         assertEquals(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE, result.getText());
         verify(fileService).upload(any());
         verify(messageAssetRepository).save(any());
-        verify(telegramNotificationService).notifyNewMessage(any(), anyLong());
+
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
     }
 
@@ -448,7 +462,7 @@ class TelegramSupportServiceTest {
         verify(telegramMessageRepository).save(messageCaptor.capture());
         verify(telegramMessageRepository).delete(messageCaptor.getValue());
 
-        verify(telegramNotificationService, never()).notifyNewMessage(any(), anyLong());
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
     }
 
     @Test
@@ -489,10 +503,12 @@ class TelegramSupportServiceTest {
 
         assertEquals(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE, result.getText());
 
-        verify(fileService).upload(any());
-        verify(telegramNotificationService).notifyNewMessage(any(), eq(chat.getId()));
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
-        verify(messageAssetRepository).save(any());
+        verify(fileService).upload(any(MultipartFile.class));
+        verify(messageAssetRepository).save(any(MessageAsset.class));
+
     }
 
     @Test

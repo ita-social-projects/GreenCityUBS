@@ -18,7 +18,7 @@ import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
@@ -26,7 +26,6 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AzureCloudStorageService;
-import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -61,7 +60,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +108,7 @@ class TelegramServiceTest {
     private MultipartFile file;
 
     @Mock
-    private TelegramNotificationService telegramNotificationService;
+    private TelegramChatProducer telegramChatProducer;
 
     @Mock
     private TelegramManagerRepository telegramManagerRepository;
@@ -139,7 +140,7 @@ class TelegramServiceTest {
             employeeRepository,
             orderRepository,
             userRepository,
-            telegramNotificationService,
+            telegramChatProducer,
             telegramUtils,
             telegramUpdateProcessorMap);
     }
@@ -263,7 +264,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Hello")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(false)
             .status(MessageDeliveryStatus.SENT)
             .assets(List.of(MessageAsset.builder()
@@ -337,7 +338,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Hello")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .assets(List.of(asset))
@@ -457,7 +458,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Message with null assets")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .assets(null)
@@ -579,7 +580,7 @@ class TelegramServiceTest {
         Update update = new Update();
         update.setMessage(message);
 
-        doNothing().when(telegramNotificationService).notifyNewChat(any(ChatDto.class));
+        doNothing().when(telegramChatProducer).notifyNewChat(any(ChatDto.class));
 
         TelegramChat savedChat = TelegramChat.builder()
             .id(1L)
@@ -673,7 +674,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(telegramChat));
@@ -851,7 +852,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString()))
@@ -973,7 +974,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void testSendMessageToUser_FileAssetType_WhenSendFails_ShouldThrowException() {
+    void testSendMessageToUser_FileAssetType_WhenSendFails_ShouldThrowRuntimeException() {
         CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
         request.setChatId(1L);
 
@@ -990,8 +991,8 @@ class TelegramServiceTest {
                 .when(() -> MessageFactory.createSendDocument(anyString(), any(MultipartFile.class)))
                 .thenThrow(new IOException("Simulated IO error"));
 
-            TelegramBotExecutionException exception = assertThrows(
-                TelegramBotExecutionException.class,
+            RuntimeException exception = assertThrows(
+                RuntimeException.class,
                 () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
 
             assertTrue(exception.getMessage().contains("Unable to send file to Telegram"));

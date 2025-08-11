@@ -1,13 +1,10 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.TelegramManager;
 import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.List;
@@ -15,21 +12,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TelegramNotificationServiceImpl implements TelegramNotificationService {
-    private final SimpMessagingTemplate messagingTemplate;
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramExecutor telegramExecutor;
 
-    @Override
-    public void notifyNewMessage(TelegramMessageDto messageDto, Long chatId) {
-        messagingTemplate.convertAndSend("/topic/messages/" + chatId, messageDto);
-    }
-
-    @Override
-    public void notifyNewChat(ChatDto chatDto) {
-        messagingTemplate.convertAndSend("/topic/chats", chatDto);
-    }
-
-    @Override
     public void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId) {
         List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
         for (TelegramManager manager : telegramManagers) {
