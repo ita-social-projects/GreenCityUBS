@@ -43,8 +43,9 @@ public class MessageProvider {
         } else if (obj instanceof List<?> list) {
             StringBuilder sb = new StringBuilder();
             for (Object item : list) {
-                if (sb.length() > 0)
+                if (sb.length() > 0) {
                     sb.append(", ");
+                }
                 sb.append(String.valueOf(item));
             }
             result.put(prefix, sb.toString());

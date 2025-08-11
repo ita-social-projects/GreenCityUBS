@@ -24,7 +24,7 @@ class KeyboardFactoryTest {
         InlineKeyboardMarkup keyboard = KeyboardFactory.createHelpKeyboard(TelegramBotConstants.UA);
 
         List<List<InlineKeyboardButton>> rows = keyboard.getKeyboard();
-        assertEquals(7, rows.size());
+        assertEquals(8, rows.size());
 
         List<String> expectedCallbacks = List.of(
             TelegramBotConstants.CLIENT_SUPPORT_CALLBACK,
