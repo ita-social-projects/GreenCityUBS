@@ -28,7 +28,7 @@ class TelegramNotificationServiceTest {
     private TelegramExecutor telegramExecutor;
 
     @Test
-    public void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
+    void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
         String username = "username";
         String messageText = "message";
         Long chatId = 123L;

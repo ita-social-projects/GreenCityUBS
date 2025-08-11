@@ -25,8 +25,8 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
      */
     @Autowired
     public TelegramNotificationService(UserRemoteClient userRemoteClient,
-                                       NotificationTemplateRepository templateRepository,
-                                       TelegramExecutor telegramExecutor) {
+        NotificationTemplateRepository templateRepository,
+        TelegramExecutor telegramExecutor) {
         super(userRemoteClient, templateRepository, notificationType);
         this.telegramExecutor = telegramExecutor;
     }

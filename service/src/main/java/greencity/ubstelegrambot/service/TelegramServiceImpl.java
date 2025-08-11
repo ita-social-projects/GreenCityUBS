@@ -60,6 +60,9 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class TelegramServiceImpl implements TelegramService {
+    private static final String USER_PROCESSOR_NAME = "userUpdateProcessor";
+    private static final String MANAGER_PROCESSOR_NAME = "managerUpdateProcessor";
+
     private final TelegramMessageRepository telegramMessageRepository;
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramChatRepository telegramChatRepository;
@@ -447,7 +450,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     private TelegramUpdateProcessor resolveProcessorByUuid(String uuid, Long chatId) {
         if (uuid.isEmpty()) {
-            return telegramUpdateProcessorMap.get("userUpdateProcessor");
+            return telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME);
         }
 
         Optional<Employee> employeeOpt = employeeRepository.findByUuid(uuid);
@@ -460,11 +463,11 @@ public class TelegramServiceImpl implements TelegramService {
                         .chatId(chatId.toString())
                         .employee(employee)
                         .build());
-                return telegramUpdateProcessorMap.get("managerUpdateProcessor");
+                return telegramUpdateProcessorMap.get(MANAGER_PROCESSOR_NAME);
             }
         }
 
-        return telegramUpdateProcessorMap.get("userUpdateProcessor");
+        return telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME);
     }
 
     private TelegramUpdateProcessor handleDefaultUpdate(Update update) {
@@ -481,7 +484,7 @@ public class TelegramServiceImpl implements TelegramService {
         });
 
         return telegramManagerRepository.findByChatId(chatId)
-            .map(m -> telegramUpdateProcessorMap.get("managerUpdateProcessor"))
-            .orElseGet(() -> telegramUpdateProcessorMap.get("userUpdateProcessor"));
+            .map(m -> telegramUpdateProcessorMap.get(MANAGER_PROCESSOR_NAME))
+            .orElseGet(() -> telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME));
     }
 }

@@ -93,9 +93,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     }
 
     private TelegramMessage getOrSaveTelegramMessage(TelegramChat chat,
-                                                     Message message,
-                                                     String mediaGroupId,
-                                                     Optional<TelegramMessage> telegramMessageOpt) {
+        Message message,
+        String mediaGroupId,
+        Optional<TelegramMessage> telegramMessageOpt) {
         if (telegramMessageOpt.isPresent()) {
             return telegramMessageOpt.get();
         }
@@ -122,9 +122,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     }
 
     private SendMessage processMessageFiles(TelegramChat chat,
-                                            Message message,
-                                            TelegramMessage telegramMessage,
-                                            Optional<TelegramMessage> telegramMessageOpt) {
+        Message message,
+        TelegramMessage telegramMessage,
+        Optional<TelegramMessage> telegramMessageOpt) {
         SendMessage resultMessage = null;
         FileInfo fileInfo = new FileInfo();
 
@@ -146,9 +146,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     }
 
     private SendMessage setPhotoInfo(Message message,
-                                     TelegramMessage telegramMessage,
-                                     Optional<TelegramMessage> telegramMessageOpt,
-                                     FileInfo fileInfo) {
+        TelegramMessage telegramMessage,
+        Optional<TelegramMessage> telegramMessageOpt,
+        FileInfo fileInfo) {
         PhotoSize largestPhoto = message.getPhoto().stream()
             .max(Comparator.comparing(PhotoSize::getFileSize))
             .orElse(null);
@@ -167,9 +167,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     }
 
     private SendMessage setDocumentInfo(Message message,
-                                        TelegramMessage telegramMessage,
-                                        Optional<TelegramMessage> telegramMessageOpt,
-                                        FileInfo fileInfo) {
+        TelegramMessage telegramMessage,
+        Optional<TelegramMessage> telegramMessageOpt,
+        FileInfo fileInfo) {
         Document document = message.getDocument();
         if (document == null) {
             if (telegramMessageOpt.isEmpty()) {
@@ -187,9 +187,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     }
 
     private SendMessage setFileAsMessageAsset(Message message,
-                                              TelegramMessage telegramMessage,
-                                              Optional<TelegramMessage> telegramMessageOpt,
-                                              FileInfo fileInfo) {
+        TelegramMessage telegramMessage,
+        Optional<TelegramMessage> telegramMessageOpt,
+        FileInfo fileInfo) {
         try {
             File telegramFile = telegramExecutor.executeGetFile(new GetFile(fileInfo.getFileId()));
             if (telegramFile == null || telegramFile.getFilePath() == null) {
@@ -249,10 +249,10 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     }
 
     private SendMessage notifyUserAboutMessage(TelegramChat chat,
-                                               Message message,
-                                               String mediaGroupId,
-                                               TelegramMessage telegramMessage,
-                                               Optional<TelegramMessage> telegramMessageOpt) {
+        Message message,
+        String mediaGroupId,
+        TelegramMessage telegramMessage,
+        Optional<TelegramMessage> telegramMessageOpt) {
         List<MessageAssetDto> assetDtos = Optional.ofNullable(telegramMessage.getAssets())
             .orElse(Collections.emptyList())
             .stream()
