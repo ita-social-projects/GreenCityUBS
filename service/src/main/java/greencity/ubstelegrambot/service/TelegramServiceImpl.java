@@ -45,7 +45,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -445,6 +444,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     private TelegramUpdateProcessor resolveProcessorByUuid(String uuid, Long chatId) {
         if (uuid.isEmpty()) {
+            log.info("No user found with uuid: {}", uuid);
             return telegramUpdateProcessorMap.get("userUpdateProcessor");
         }
 
