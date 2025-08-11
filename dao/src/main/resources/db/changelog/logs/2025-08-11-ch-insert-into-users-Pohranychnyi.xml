@@ -1,14 +1,15 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
     <changeSet id="add-pickup-user" author="Pohranychnyi Oleksandr">
         <preConditions onFail="MARK_RAN">
-            <not>
-                <sqlCheck expectedResult="1">
-                    SELECT COUNT(*) FROM users WHERE recipient_email = 'pickup@nowaste.org.ua';
-                </sqlCheck>
-            </not>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM users
+                WHERE recipient_email = 'pickup@nowaste.org.ua' OR uuid = 'd0840b34-3f17-4820-a375-305b855dff8b';
+            </sqlCheck>
         </preConditions>
 
         <insert tableName="users">
@@ -22,5 +23,10 @@
             <column name="date_of_registration" value="1970-01-01 00:00:00.000000"/>
         </insert>
 
+        <rollback>
+            <delete tableName="users">
+                <where>recipient_email = 'pickup@nowaste.org.ua' OR uuid = 'd0840b34-3f17-4820-a375-305b855dff8b'</where>
+            </delete>
+        </rollback>
     </changeSet>
 </databaseChangeLog>
