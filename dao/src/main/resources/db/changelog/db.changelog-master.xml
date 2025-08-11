@@ -292,5 +292,6 @@
     <include file="db/changelog/logs/ch-change-email-column-types-Popovych.xml"/>
     <include file="db/changelog/logs/2025-08-05-ch-add-unread-count-and-viewing-status-to-chat-and-message.xml"/>
     <include file="db/changelog/logs/2025-08-05-ch-add-last-message-in-telegram-chat.xml"/>
+    <include file="db/changelog/logs/2025-08-11-ch-add-column-language-code-in-telegram-chat.xml"/>
 
 </databaseChangeLog>
