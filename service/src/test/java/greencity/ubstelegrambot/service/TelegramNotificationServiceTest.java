@@ -27,7 +27,7 @@ class TelegramNotificationServiceTest {
         .telegramBot(
             new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
                 "last_name", 0, null, null,
-                new ArrayList<>(), new ArrayList<>()))
+                new ArrayList<>(), new ArrayList<>(), Instant.now()))
         .build();
     private final UserNotification notification = new UserNotification()
         .setNotificationType(NotificationType.LETS_STAY_CONNECTED)
@@ -88,7 +88,7 @@ class TelegramNotificationServiceTest {
         userEntity
             .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username",
                 "first_name", "last_name", 0,
-                userEntity, null, new ArrayList<>(), new ArrayList<>()));
+                userEntity, null, new ArrayList<>(), new ArrayList<>(), Instant.now()));
 
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 
