@@ -16,6 +16,8 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -74,7 +76,7 @@ class LanguageSwitcherProcessorTest {
     }
 
     @Test
-    void testLanguageSwitchToEN_NonNormalChat() {
+    void testLanguageSwitchToEN_InSupportChat() {
         Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_EN_CALLBACK);
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
@@ -85,9 +87,11 @@ class LanguageSwitcherProcessorTest {
 
         SendMessage result = processor.process(update);
 
-        assertNull(result);
-        verify(chatRepository).save(chat);
+        assertNotNull(result);
+        assertEquals("123", result.getChatId());
+        assertNotNull(result.getReplyMarkup());
         assertEquals(TelegramBotConstants.EN, chat.getLanguageCode());
+        verify(chatRepository).save(chat);
         verifyNoInteractions(telegramUtils);
     }
 
@@ -122,6 +126,24 @@ class LanguageSwitcherProcessorTest {
 
         assertNull(result);
         verify(chatRepository, never()).save(any());
+        verifyNoInteractions(telegramUtils);
+    }
+
+    @Test
+    void process_whenChatStateIsMakingFeedback_shouldReturnNull() {
+        Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_EN_CALLBACK);
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123");
+        chat.setLanguageCode(TelegramBotConstants.UA);
+        chat.setChatState(ChatState.ENTERING_GREEN_OFFICE_EMAIL);
+
+        when(chatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
+
+        SendMessage result = processor.process(update);
+
+        assertNull(result);
+        assertEquals(TelegramBotConstants.EN, chat.getLanguageCode());
+        verify(chatRepository).save(chat);
         verifyNoInteractions(telegramUtils);
     }
 
