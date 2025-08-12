@@ -4,7 +4,6 @@ import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
 import greencity.service.ubs.TelegramLanguageService;
 import greencity.service.ubs.TelegramLoginService;
-import greencity.ubstelegrambot.constant.TelegramConstants;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.ManagerUpdateProcessor;
 import greencity.ubstelegrambot.service.TelegramUtils;
@@ -43,7 +42,7 @@ class ManagerUpdateProcessorTest {
     @BeforeEach
     void setUp() {
         lenient().when(telegramLanguageService.getChatLanguage(anyString()))
-            .thenReturn(TelegramConstants.UA);
+            .thenReturn(TelegramBotConstants.UA);
     }
 
     @Test
@@ -61,7 +60,7 @@ class ManagerUpdateProcessorTest {
         callbackQuery.setMessage(message);
         update.setCallbackQuery(callbackQuery);
 
-        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage(chatId, TelegramConstants.UA);
+        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage(chatId, TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
@@ -71,7 +70,7 @@ class ManagerUpdateProcessorTest {
         verify(telegramUtils).updateChatStateAndRespond(
             eq(chatId),
             eq(ChatState.NORMAL),
-            eq(MessageFactory.createAvailableCommandsMessage(chatId, TelegramConstants.UA)));
+            eq(MessageFactory.createAvailableCommandsMessage(chatId, TelegramBotConstants.UA)));
 
         verify(telegramLoginService).logoutManager(chatId);
         assertEquals(expectedMessage, actualMessage);
@@ -89,7 +88,7 @@ class ManagerUpdateProcessorTest {
         update.setMessage(message);
 
         SendMessage expectedMessage =
-            MessageFactory.createAvailableForManagerCommandsMessage(chatId, TelegramConstants.UA);
+            MessageFactory.createAvailableForManagerCommandsMessage(chatId, TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
@@ -99,7 +98,7 @@ class ManagerUpdateProcessorTest {
         verify(telegramUtils).updateChatStateAndRespond(
             eq(chatId),
             eq(ChatState.NORMAL),
-            eq(MessageFactory.createAvailableForManagerCommandsMessage(chatId, TelegramConstants.UA)));
+            eq(MessageFactory.createAvailableForManagerCommandsMessage(chatId, TelegramBotConstants.UA)));
 
         verifyNoInteractions(telegramLoginService);
         assertEquals(expectedMessage, actualMessage);
@@ -121,7 +120,7 @@ class ManagerUpdateProcessorTest {
         update.setCallbackQuery(callbackQuery);
 
         SendMessage expectedMessage =
-            MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramConstants.UA);
+            MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
@@ -131,7 +130,7 @@ class ManagerUpdateProcessorTest {
         verify(telegramUtils).updateChatStateAndRespond(
             eq(chatId),
             eq(ChatState.NORMAL),
-            eq(MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramConstants.UA)));
+            eq(MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramBotConstants.UA)));
 
         verifyNoInteractions(telegramLoginService);
         assertEquals(expectedMessage, actualMessage);

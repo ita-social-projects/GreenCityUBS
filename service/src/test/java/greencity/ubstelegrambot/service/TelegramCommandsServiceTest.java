@@ -1,7 +1,7 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
-import greencity.ubstelegrambot.constant.TelegramConstants;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -53,12 +53,12 @@ class TelegramCommandsServiceTest {
         message.setChat(chat);
         message.setText(null);
 
-        SendMessage expectedMessage = MessageFactory.createUnknownCommandMessage("123", TelegramConstants.UA);
+        SendMessage expectedMessage = MessageFactory.createUnknownCommandMessage("123", TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
 
-        SendMessage result = telegramCommandsService.processCommand(message, TelegramConstants.UA);
+        SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UA);
 
         assertEquals("123", result.getChatId());
         assertEquals("unknown.command", result.getText());
@@ -72,15 +72,15 @@ class TelegramCommandsServiceTest {
         message.setChat(chat);
         message.setText("/start");
 
-        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage("123", TelegramConstants.UA);
+        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage("123", TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
 
-        SendMessage result = telegramCommandsService.processCommand(message, TelegramConstants.UA);
+        SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertEquals(MessageProvider.get(TelegramConstants.UA, "supported.commands"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "supported.commands"), result.getText());
     }
 
     @Test
@@ -91,15 +91,15 @@ class TelegramCommandsServiceTest {
         message.setChat(chat);
         message.setText("/help");
 
-        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage("123", TelegramConstants.UA);
+        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage("123", TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
 
-        SendMessage result = telegramCommandsService.processCommand(message, TelegramConstants.UA);
+        SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertEquals(MessageProvider.get(TelegramConstants.UA, "supported.commands"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "supported.commands"), result.getText());
     }
 
     @Test
@@ -110,15 +110,15 @@ class TelegramCommandsServiceTest {
         message.setChat(chat);
         message.setText("/support");
 
-        SendMessage expectedMessage = MessageFactory.createSupportMessageCallBackQuery("123", TelegramConstants.UA);
+        SendMessage expectedMessage = MessageFactory.createSupportMessageCallBackQuery("123", TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.IN_SUPPORT), any()))
             .thenReturn(expectedMessage);
 
-        SendMessage result = telegramCommandsService.processCommand(message, TelegramConstants.UA);
+        SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertEquals(MessageProvider.get(TelegramConstants.UA, "client.support.message.callback.query"),
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "client.support.message.callback.query"),
             result.getText());
     }
 
@@ -130,15 +130,15 @@ class TelegramCommandsServiceTest {
         message.setChat(chat);
         message.setText("/login");
 
-        SendMessage expectedMessage = MessageFactory.createLoginMessage("123", TelegramConstants.UA);
+        SendMessage expectedMessage = MessageFactory.createLoginMessage("123", TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.LOGGING_AS_MANAGER), any()))
             .thenReturn(expectedMessage);
 
-        SendMessage result = telegramCommandsService.processCommand(message, TelegramConstants.UA);
+        SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertEquals(MessageProvider.get(TelegramConstants.UA, "login.message"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "login.message"), result.getText());
     }
 
     @Test
@@ -149,14 +149,14 @@ class TelegramCommandsServiceTest {
         message.setChat(chat);
         message.setText("/unknown");
 
-        SendMessage expectedMessage = MessageFactory.createUnknownCommandMessage("123", TelegramConstants.UA);
+        SendMessage expectedMessage = MessageFactory.createUnknownCommandMessage("123", TelegramBotConstants.UA);
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
 
-        SendMessage result = telegramCommandsService.processCommand(message, TelegramConstants.UA);
+        SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UA);
 
         assertEquals("123", result.getChatId());
-        assertEquals(MessageProvider.get(TelegramConstants.UA, "unknown.command"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "unknown.command"), result.getText());
     }
 }
