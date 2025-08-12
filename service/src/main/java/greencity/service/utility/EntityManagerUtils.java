@@ -10,11 +10,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnitUtil;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.metamodel.Attribute;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.PluralAttribute;
-import org.hibernate.annotations.ManyToAny;
-import org.hibernate.jpa.HibernateHints;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -344,7 +341,7 @@ public class EntityManagerUtils {
         return alias;
     }
 
-    static String removeSubqueries(String query) {
+    private static String removeSubqueries(String query) {
         if (!StringUtils.hasText(query)) {
             return query;
         } else {
