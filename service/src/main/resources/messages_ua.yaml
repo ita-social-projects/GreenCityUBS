@@ -131,3 +131,4 @@ client.want.to.speak: "👨@%s хоче поговорити з людиною\n
 previous.session.expired: "Час попередньої сесії минув. Оберіть, будь ласка, команду зі списку щоб продовжити"
 photo.content: "Фото контент"
 login.failed: "Неправильний логін або пароль. Перевірте введені дані та спробуйте ще раз."
+client.support.message.change.language: "Мова змінена"

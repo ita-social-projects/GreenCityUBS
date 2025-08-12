@@ -37,9 +37,12 @@ public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
         chat.setLanguageCode(newLanguage);
         chatRepository.save(chat);
 
-        return chat.getChatState() == ChatState.NORMAL
-            ? processLanguageSwitchRequest(chatId, newLanguage)
-            : null;
+        if(chat.getChatState() == ChatState.NORMAL)
+            return processLanguageSwitchRequest(chatId, newLanguage);
+        else if (chat.getChatState() == ChatState.IN_SUPPORT) {
+            return MessageFactory.createSupportReplyMarkup(chatId, newLanguage);
+        }
+        else return null;
     }
 
     private SendMessage processLanguageSwitchRequest(String chatId, String lang) {
