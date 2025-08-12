@@ -1,9 +1,9 @@
 package greencity.ubstelegrambot;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramManager;
 import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramLanguageService;
-import greencity.ubstelegrambot.constant.TelegramConstants;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramNotificationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class TelegramNotificationServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(telegramLanguageService.getChatLanguage(anyString()))
-            .thenReturn(TelegramConstants.UA);
+            .thenReturn(TelegramBotConstants.UA);
     }
 
     @Test

@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
@@ -36,7 +37,6 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.OrderBagService;
-import greencity.ubstelegrambot.constant.TelegramConstants;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -1590,7 +1590,7 @@ class NotificationServiceImplTest {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(USERNAME)
-            .subject(MessageProvider.get(TelegramConstants.UA, "green.office.subject"))
+            .subject(MessageProvider.get(TelegramBotConstants.UA, "green.office.subject"))
             .body(USER_EMAIL)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
@@ -1598,7 +1598,7 @@ class NotificationServiceImplTest {
         doNothing().when(userRemoteClient).sendGreenOfficeRequestNotification(notification);
 
         notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME,
-            TelegramConstants.UA);
+            TelegramBotConstants.UA);
 
         verify(userRemoteClient, times(1)).sendGreenOfficeRequestNotification(notification);
     }

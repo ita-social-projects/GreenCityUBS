@@ -2,6 +2,7 @@ package greencity.ubstelegrambot.service;
 
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.language.LanguageVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.notifications.NotificationTemplate;
@@ -12,7 +13,6 @@ import greencity.enums.ChatState;
 import greencity.enums.NotificationType;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.ubstelegrambot.UBSTelegramBot;
-import greencity.ubstelegrambot.constant.TelegramConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +42,7 @@ class TelegramNotificationServiceTest {
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(
             new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
-                "last_name", 0, null, null, TelegramConstants.UA,
+                "last_name", 0, null, null, TelegramBotConstants.UA,
                 new ArrayList<>(), new ArrayList<>(), Instant.now()))
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
@@ -96,8 +96,8 @@ class TelegramNotificationServiceTest {
 
         userEntity
             .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username",
-                "first_name", "last_name", 0,
-                userEntity, null, TelegramConstants.UA, new ArrayList<>(), new ArrayList<>(), Instant.now()));
+                "first_name", "last_name", 0, userEntity, null,
+                TelegramBotConstants.UA, new ArrayList<>(), new ArrayList<>(), Instant.now()));
 
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 
