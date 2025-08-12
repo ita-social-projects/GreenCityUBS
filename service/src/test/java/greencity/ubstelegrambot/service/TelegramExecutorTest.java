@@ -71,7 +71,7 @@ class TelegramExecutorTest {
     }
 
     @Test
-    void executeSendDocumentTest() throws Exception {
+    void executeSendFileTest() throws Exception {
         SendDocument sendDocument = Mockito.mock(SendDocument.class);
         Message message = mock(Message.class);
 

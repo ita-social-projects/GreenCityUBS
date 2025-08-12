@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -21,7 +20,6 @@ class UBSTelegramBotTest {
     @Mock
     private TelegramService telegramService;
 
-    @Spy
     @InjectMocks
     private UBSTelegramBot ubsTelegramBot;
 

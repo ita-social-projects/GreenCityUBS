@@ -238,7 +238,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             }
 
             messageAssetRepository.save(asset);
-        } catch (TelegramBotExecutionException | IOException | NullPointerException e) {
+        } catch (TelegramBotExecutionException | IOException e) {
             log.error("Error loading or saving file from Telegram (Filename: {}): {}", fileInfo.getOriginalFileName(),
                 e.getMessage(), e);
             return MessageFactory.buildMessage(message.getChatId().toString(),

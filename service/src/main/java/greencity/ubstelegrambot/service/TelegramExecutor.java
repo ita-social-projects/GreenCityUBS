@@ -47,7 +47,7 @@ public class TelegramExecutor {
     /**
      * Sends a photo to a Telegram user.
      *
-     * @param message the SendPhoto method containing the photo and details
+     * @param message method containing the photo and details
      */
     public void executeSendPhoto(SendPhoto message) {
         executeSafely(message, TELEGRAM_SEND_EXCEPTION);
@@ -56,25 +56,27 @@ public class TelegramExecutor {
     /**
      * Sends a file to a Telegram user.
      *
-     * @param message {@link SendDocument} the SendPhoto method containing the file
-     *                and details
+     * @param message method containing the file and details
      */
     public void executeSendFile(SendDocument message) {
         executeSafely(message, TELEGRAM_SEND_EXCEPTION);
     }
 
     private <T extends Serializable> T executeSafely(PartialBotApiMethod<T> method, String errorMessage) {
+        if (method == null) {
+            throw new TelegramBotExecutionException(TELEGRAM_NULL_METHOD_EXCEPTION);
+        }
+
         try {
             return switch (method) {
                 case BotApiMethod<T> botApiMethod -> telegramBot.execute(botApiMethod);
                 case SendPhoto sendPhoto -> (T) telegramBot.execute(sendPhoto);
                 case SendDocument sendDocument -> (T) telegramBot.execute(sendDocument);
-                case null -> throw new TelegramBotExecutionException(TELEGRAM_NULL_METHOD_EXCEPTION);
                 default -> throw new TelegramBotExecutionException(TELEGRAM_INVALID_METHOD_EXCEPTION.formatted(
                     method.getClass().getSimpleName()));
             };
         } catch (TelegramApiException e) {
-            throw new TelegramBotExecutionException(errorMessage.formatted(e.getMessage()));
+            throw new TelegramBotExecutionException(errorMessage.formatted(e.getMessage()), e);
         }
     }
 }

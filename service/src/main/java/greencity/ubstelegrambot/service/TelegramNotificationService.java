@@ -3,6 +3,7 @@ package greencity.ubstelegrambot.service;
 import greencity.client.UserRemoteClient;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.repository.NotificationTemplateRepository;
@@ -39,9 +40,11 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
         if (Objects.isNull(user)) {
             return false;
         }
-        return Objects.nonNull(user.getTelegramBot())
-            && Objects.nonNull(user.getTelegramBot().getChatId())
-            && Objects.equals(user.getTelegramBot().getIsNotify(), true);
+
+        TelegramChat chatWithBot = user.getTelegramBot();
+        return Objects.nonNull(chatWithBot)
+            && Objects.nonNull(chatWithBot.getChatId())
+            && Objects.equals(chatWithBot.getIsNotify(), true);
     }
 
     /**

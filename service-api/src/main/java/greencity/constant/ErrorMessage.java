@@ -207,6 +207,6 @@ public class ErrorMessage {
     public static final String TARIFF_LIST_CONTAINS_DUPLICATES = "Tariffs cannot contain duplicates";
     public static final String TELEGRAM_SEND_EXCEPTION = "Exception occurred while sending to telegram: %s";
     public static final String TELEGRAM_RECEIVE_EXCEPTION = "Exception occurred while receiving from telegram: %s";
-    public static final String TELEGRAM_NULL_METHOD_EXCEPTION = "Execution type cannot be null";
+    public static final String TELEGRAM_NULL_METHOD_EXCEPTION = "Execution method cannot be null";
     public static final String TELEGRAM_INVALID_METHOD_EXCEPTION = "Invalid execution method type: %s";
 }
