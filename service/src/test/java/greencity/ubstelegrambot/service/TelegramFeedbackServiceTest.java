@@ -25,16 +25,10 @@ import org.springframework.data.domain.Pageable;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-
-import static greencity.ubstelegrambot.constant.TelegramConstants.BAD_FEEDBACK_MESSAGE;
-import static greencity.ubstelegrambot.constant.TelegramConstants.FEEDBACK_THANK_YOU_MESSAGE;
-import static greencity.ubstelegrambot.constant.TelegramConstants.GREAT_FEEDBACK_MESSAGE;
-import static greencity.ubstelegrambot.constant.TelegramConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
