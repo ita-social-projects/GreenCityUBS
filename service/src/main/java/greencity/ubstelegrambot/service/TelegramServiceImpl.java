@@ -411,7 +411,8 @@ public class TelegramServiceImpl implements TelegramService {
             .lastName(message.getFrom().getLastName())
             .isNotify(true)
             .chatState(ChatState.NORMAL)
-            .chatStateUpdatedAt(Instant.now());
+            .chatStateUpdatedAt(Instant.now())
+            .languageCode("ua");
 
         if (!uuid.isEmpty()) {
             userRepository.findUserByUuid(uuid).ifPresent(newChatBuilder::user);

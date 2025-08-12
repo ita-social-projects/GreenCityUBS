@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class TelegramLanguageServiceImpl implements TelegramLanguageService {
-    final TelegramChatRepository telegramChatRepository;
+    private final TelegramChatRepository telegramChatRepository;
 
     @Override
     public String getChatLanguage(String chatId) {
