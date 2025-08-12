@@ -32,7 +32,7 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -75,7 +75,6 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                     MessageFactory::createFeedbackMessage);
 
             executor.executeCommand(bot, MessageFactory.deleteEndSupportKeyboardMessage(chat.getChatId()));
-
             telegramNotificationService.notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
             return endSupportSendMessage;
         }
@@ -101,7 +100,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .fromManager(false)
                 .mediaGroupId(mediaGroupId)
                 .status(MessageDeliveryStatus.SENT)
-                .sendAt(LocalDateTime.now())
+                .sendAt(Instant.now())
                 .text(messageText)
                 .messageViewingStatus(MessageViewingStatus.UNREAD)
                 .build();

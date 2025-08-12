@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -84,9 +83,9 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     }
 
     private void updateNotificationTemplatePlatforms(List<NotificationPlatform> platforms,
-        List<NotificationPlatformDto> platformDtos) {
+        List<NotificationPlatformDto> platformDTOs) {
         for (NotificationPlatform platform : platforms) {
-            NotificationPlatformDto platformDto = platformDtos.stream()
+            NotificationPlatformDto platformDto = platformDTOs.stream()
                 .filter(dto -> dto.getId().equals(platform.getId()))
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_PLATFORM_NOT_FOUND));
@@ -110,7 +109,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         Page<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findAll(pageRequest);
         List<NotificationTemplateDto> templateDtoList = notificationTemplates.stream()
             .map(notificationTemplate -> modelMapper.map(notificationTemplate, NotificationTemplateDto.class))
-            .collect(Collectors.toList());
+            .toList();
         return new PageableDto<>(
             templateDtoList,
             notificationTemplates.getTotalElements(),
