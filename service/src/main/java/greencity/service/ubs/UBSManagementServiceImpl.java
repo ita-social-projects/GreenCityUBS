@@ -58,6 +58,7 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
+import greencity.enums.BonusReason;
 import greencity.enums.CancellationReason;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
@@ -803,6 +804,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
+    //todo main
     public OrderDetailStatusDto updateOrderDetailStatus(Order order, OrderDetailStatusRequestDto dto, String email) {
         List<Payment> payment = paymentRepository.findAllByOrderId(order.getId());
         if (payment.isEmpty()) {
@@ -818,9 +820,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
-                notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
+                notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_CONFIRMED_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED_UK, email, order);
@@ -921,6 +923,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .date(LocalDateTime.now())
             .user(user)
             .order(order)
+            .reason(BonusReason.REFUND_CANCELED_ORDER)
             .build();
         if (isNull(user.getChangeOfPointsList())) {
             user.setChangeOfPointsList(new ArrayList<>());

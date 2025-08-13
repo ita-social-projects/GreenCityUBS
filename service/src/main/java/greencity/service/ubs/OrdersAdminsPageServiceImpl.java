@@ -666,6 +666,10 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                         "Such desired status isn't applicable with current status!");
                 }
 
+                if (existedOrder.getOrderStatus() == OrderStatus.CONFIRMED) {
+                    notificationService.notifyCourierItineraryFormed(existedOrder);
+                }
+
                 if (existedOrder.getOrderStatus() == OrderStatus.CANCELED
                     && (existedOrder.getPointsToUse() != 0 || !existedOrder.getCertificates().isEmpty())) {
                     notificationService.notifyBonusesFromCanceledOrder(existedOrder);
