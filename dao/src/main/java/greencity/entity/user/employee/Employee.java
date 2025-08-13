@@ -52,7 +52,7 @@ public class Employee {
     @Column(name = "phone_number", length = 30, nullable = false, unique = true)
     private String phoneNumber;
 
-    @Column(length = 170, unique = true)
+    @Column(length = 72, unique = true)
     @EqualsAndHashCode.Include
     private String email;
 

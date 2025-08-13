@@ -1,5 +1,7 @@
 package greencity.controller;
 
+import greencity.annotations.ValidImage;
+import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
@@ -21,11 +23,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -34,6 +39,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/admin/ubs-employee")
 @RequiredArgsConstructor
+@Validated
 public class ManagementEmployeeController {
     private final UBSManagementEmployeeService employeeService;
     private final UBSClientService ubsClientService;
@@ -49,8 +55,8 @@ public class ManagementEmployeeController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
             content = @Content(schema = @Schema(implementation = EmployeeWithTariffsDto.class))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
@@ -59,7 +65,7 @@ public class ManagementEmployeeController {
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @RequestPart(value = "image", required = false) MultipartFile image) {
+        @RequestPart(value = "image", required = false) @ValidImage MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
@@ -105,7 +111,7 @@ public class ManagementEmployeeController {
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @Parameter(description = "Employee image") @RequestPart(required = false) MultipartFile image) {
+        @Parameter(description = "Employee image") @RequestPart(required = false) @ValidImage MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeWithTariffsIdDto, image));
     }
 
@@ -125,7 +131,7 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/deactivate-employee/{id}")
-    public ResponseEntity<HttpStatus> deleteEmployee(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteEmployee(@Positive @PathVariable Long id) {
         employeeService.deactivateEmployee(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -146,7 +152,7 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/activate-employee/{id}")
-    public ResponseEntity<HttpStatus> activateEmployee(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> activateEmployee(@Positive @PathVariable Long id) {
         employeeService.activateEmployee(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -186,7 +192,7 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEE', authentication)")
     @DeleteMapping("/delete-employee-image/{id}")
-    public ResponseEntity<HttpStatus> deleteEmployeeImage(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteEmployeeImage(@Positive @PathVariable Long id) {
         employeeService.deleteEmployeeImage(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -207,7 +213,8 @@ public class ManagementEmployeeController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/get-all-authorities")
-    public ResponseEntity<Object> getAllAuthorities(@RequestParam String email) {
+    public ResponseEntity<Object> getAllAuthorities(
+        @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
         Set<String> authorities = ubsClientService.getAllAuthorities(email);
         return ResponseEntity.status(HttpStatus.OK).body(authorities);
     }
@@ -231,7 +238,8 @@ public class ManagementEmployeeController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/get-positions-authorities")
-    public ResponseEntity<PositionAuthoritiesDto> getPositionsAndRelatedAuthorities(@RequestParam String email) {
+    public ResponseEntity<PositionAuthoritiesDto> getPositionsAndRelatedAuthorities(
+        @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getPositionsAndRelatedAuthorities(email));
     }
 
@@ -283,8 +291,15 @@ public class ManagementEmployeeController {
      *         representing the employees, with HttpStatus OK if successful.
      */
     @Operation(summary = "Get all employees with enabled chat by tariff id")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
     @GetMapping(value = "/get-employees/{tariffId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<EmployeeWithTariffsDto>> getEmployeesByTariffId(@PathVariable Long tariffId) {
+    public ResponseEntity<List<EmployeeWithTariffsDto>> getEmployeesByTariffId(@Positive @PathVariable Long tariffId) {
         return ResponseEntity.ok().body(employeeService.getEmployeesByTariffId(tariffId));
     }
 
@@ -297,8 +312,16 @@ public class ManagementEmployeeController {
      *         and the tariffs associated with them.
      */
     @Operation(summary = "Get employee with tariffs by email")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
     @GetMapping("/{email}")
-    public ResponseEntity<EmployeeWithTariffsDto> getEmployeesByUserId(@PathVariable String email) {
+    public ResponseEntity<EmployeeWithTariffsDto> getEmployeesByUserId(
+        @Email(regexp = ValidationConstant.EMAIL_REGEXP) @PathVariable String email) {
         return ResponseEntity.ok().body(employeeService.getEmployeeByEmail(email));
     }
 }

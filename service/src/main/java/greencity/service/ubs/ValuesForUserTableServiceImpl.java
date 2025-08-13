@@ -1,6 +1,6 @@
 package greencity.service.ubs;
 
-import greencity.dto.order.UserWithSomeOrderDetailDto;
+import greencity.dto.order.UserWithSomeOrderDetailAndChatIdDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.enums.SortingOrder;
 import greencity.entity.order.Order;
@@ -8,9 +8,9 @@ import greencity.entity.user.User;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.repository.EmployeeRepository;
+import greencity.repository.TelegramChatRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -27,10 +27,11 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
     UserRepository userRepository;
     UserTableRepo userTableRepo;
     private final EmployeeRepository employeeRepository;
+    private final TelegramChatRepository telegramChatRepository;
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Override
-    public PageableDto<UserWithSomeOrderDetailDto> getAllFields(CustomerPage page, String columnName,
+    public PageableDto<UserWithSomeOrderDetailAndChatIdDto> getAllFields(CustomerPage page, String columnName,
         SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria, String email) {
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
@@ -40,9 +41,9 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             usId.addAll(userRepository.getAllUsersByTariffsInfoId(id));
         }
         Page<User> users = userTableRepo.findAll(userFilterCriteria, columnName, sortingOrder, page, usId);
-        List<UserWithSomeOrderDetailDto> fields = new ArrayList<>();
+        List<UserWithSomeOrderDetailAndChatIdDto> fields = new ArrayList<>();
         for (User u : users) {
-            UserWithSomeOrderDetailDto allFieldsFromTableDto = mapToDto(u);
+            UserWithSomeOrderDetailAndChatIdDto allFieldsFromTableDto = mapToDtoV2(u);
             fields.add(allFieldsFromTableDto);
         }
 
@@ -50,8 +51,8 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
             users.getPageable().getPageNumber(), users.getTotalPages());
     }
 
-    private UserWithSomeOrderDetailDto mapToDto(User u) {
-        final UserWithSomeOrderDetailDto allFieldsFromTableDto = new UserWithSomeOrderDetailDto();
+    private UserWithSomeOrderDetailAndChatIdDto mapToDtoV2(User u) {
+        final UserWithSomeOrderDetailAndChatIdDto allFieldsFromTableDto = new UserWithSomeOrderDetailAndChatIdDto();
         StringBuilder name = new StringBuilder();
         allFieldsFromTableDto.setUserId(u.getId());
         if (u.getRecipientName() != null) {
@@ -90,9 +91,8 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
                 .setLastOrderDate(optional
                     .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
         }
-        if (Objects.nonNull(u.getChatLink())) {
-            allFieldsFromTableDto.setChatLink(u.getChatLink());
-        }
+        telegramChatRepository.findByUser(u)
+            .ifPresent(chat -> allFieldsFromTableDto.setChatId(chat.getId()));
         return allFieldsFromTableDto;
     }
 }

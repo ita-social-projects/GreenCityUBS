@@ -1,31 +1,67 @@
 package greencity.entity.telegram;
 
+import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.List;
 
-@MappedSuperclass
 @Data
+@Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public abstract class TelegramMessage {
+public class TelegramMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long messageId;
-    private String chatId;
-    @Column(updatable = false)
-    @CreatedDate
-    private LocalDateTime sendAt;
+    private Long id;
 
-    protected TelegramMessage(String chatId) {
-        this.chatId = chatId;
-    }
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
+    private Instant sendAt;
+
+    @LastModifiedDate
+    private Instant updatedAt;
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
+    private List<MessageAsset> assets;
+
+    @Column(length = 50, unique = true)
+    private String mediaGroupId;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_id", nullable = false)
+    private TelegramChat chat;
+
+    @Enumerated(EnumType.STRING)
+    private MessageDeliveryStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private MessageViewingStatus messageViewingStatus;
+
+    @Column(name = "from_manager", nullable = false)
+    private Boolean fromManager;
+
+    @Column(name = "text", length = 1000)
+    private String text;
 }

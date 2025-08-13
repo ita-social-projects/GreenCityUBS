@@ -279,4 +279,20 @@
     <include file="db/changelog/logs/2025-02-11-edit-order-address-table-Kizerov.xml"/>
     <include file="db/changelog/logs/ch-update-order-payment-status-translations-Feduniak.xml"/>
     <include file="db/changelog/logs/ch-update-column-names-Bulhakova.xml"/>
+    <include file="db/changelog/logs/2025-07-01-ch-update-telegram-message-changes-Pampukha.xml"/>
+    <include file="db/changelog/logs/2025-06-30-ch-entity-rename-add-columns-drop-tables.xml"/>
+    <include file="db/changelog/logs/2025-07-01-ch-telegram-chat-user-nullable.xml"/>
+    <include file="db/changelog/logs/2025-07-02-ch-update-text-message-and-image-table-Pampukha.xml"/>
+    <include file="db/changelog/logs/2025-07-04-ch-add-telegram-message-entity.xml"/>
+    <include file="/db/changelog/logs/2025-07-05-ch-add-column-media-group-id-to-telegram-message-Pampukha.xml"/>
+    <include file="db/changelog/logs/2025-07-06-ch-add-feedback-to-chat.xml"/>
+    <include file="db/changelog/logs/2025-07-07-ch-add-chat-state-updated-at-column.xml"/>
+    <include file="db/changelog/logs/2025-07-09-ch-drop-telegram-old-tables-and-columns.xml"/>
+    <include file="db/changelog/logs/ch-drop-viber-bot-table-Popovych.xml"/>
+    <include file="db/changelog/logs/ch-change-email-column-types-Popovych.xml"/>
+    <include file="db/changelog/logs/2025-08-05-ch-add-unread-count-and-viewing-status-to-chat-and-message.xml"/>
+    <include file="db/changelog/logs/2025-08-05-ch-add-last-message-in-telegram-chat.xml"/>
+    <include file="db/changelog/logs/2025-08-07-ch-update-localdatetime-to-instant-in-telegram-entities.xml"/>
+    <include file="db/changelog/logs/2025-08-08-ch-update-chat-state-updated-at-field-in-telegram-chat.xml"/>
+    <include file="db/changelog/logs/2025-08-07-ch-add-created-at-to-telegram-chat.xml"/>
 </databaseChangeLog>

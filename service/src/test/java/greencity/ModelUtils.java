@@ -55,19 +55,18 @@ import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
-import greencity.dto.notification.NotificationFullDto;
-import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
-import greencity.dto.notification.NotificationTemplateMainInfoDto;
-import greencity.dto.notification.NotificationShortDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
-import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.AddNotificationPlatformDto;
-import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
+import greencity.dto.notification.NotificationPlatformDto;
+import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -86,8 +85,8 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderDto;
 import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.OtherPackages;
@@ -154,7 +153,7 @@ import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.parameters.CustomTableView;
 import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
@@ -171,11 +170,11 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.BaseAddress;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.entity.viber.ViberBot;
 import greencity.enums.AddressStatus;
 import greencity.enums.BagStatus;
 import greencity.enums.CancellationReason;
 import greencity.enums.CertificateStatus;
+import greencity.enums.ChatState;
 import greencity.enums.CourierLimit;
 import greencity.enums.CourierStatus;
 import greencity.enums.EmployeeStatus;
@@ -191,21 +190,20 @@ import greencity.enums.PaymentSystem;
 import greencity.enums.TariffStatus;
 import greencity.enums.UserCategory;
 import greencity.util.Bot;
-
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -268,6 +266,7 @@ public class ModelUtils {
     public static final UserNotification TEST_USER_NOTIFICATION_7 = createUserNotificationForViolation7();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
+    public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE_2 = createCustomNotificationTemplate();
     public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = createNotificationTemplateDto();
 
     public static final NotificationTemplateWithPlatformsUpdateDto TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO =
@@ -298,8 +297,11 @@ public class ModelUtils {
         Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final List<NotificationFullDto> TEST_NOTIFICATION_DTO_LIST = List.of(createNotificationFullDto());
+    public static final List<NotificationFullDto> TEST_NOTIFICATION_DTO_LIST_2 = createCustomNotificationsFullDtoList();
     public static final PageableAdvancedDto<NotificationFullDto> TEST_NOTIFICATION_FULL_DTO_PAGEABLE =
         createPageableAdvancedDtoForNotificationFullDto();
+    public static final PageableAdvancedDto<NotificationFullDto> TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2 =
+        createPageableAdvancedDtoForCustomNotificationsFullDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
     public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(createBag(1), createBag(2), createBag(3));
@@ -592,6 +594,7 @@ public class ModelUtils {
     public static Order getOrder() {
         return Order.builder()
             .id(1L)
+            .counterOrderPaymentId(1L)
             .orderDate(LocalDateTime.of(2023, 10, 20, 14, 58))
             .payment(Lists.newArrayList(Payment.builder()
                 .id(1L)
@@ -1590,7 +1593,6 @@ public class ModelUtils {
             .recipientPhone("0666051373")
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -1604,28 +1606,16 @@ public class ModelUtils {
             .build();
     }
 
-    public static AuthorizedUser getTelegramBotNotifyTrue() {
-        return new AuthorizedUser("111111", false, true, null, false);
+    public static TelegramChat getTelegramBotNotifyTrue() {
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
+            "last_name", 0, null, null,
+            new ArrayList<>(), new ArrayList<>(), null);
     }
 
-    public static AuthorizedUser getTelegramBotNotifyFalse() {
-        return new AuthorizedUser("111111", false, false, null, false);
-    }
-
-    public static ViberBot getViberBotNotifyTrue() {
-        return ViberBot.builder()
-            .id(1L)
-            .chatId("111111L")
-            .isNotify(true)
-            .build();
-    }
-
-    public static ViberBot getViberBotNotifyFalse() {
-        return ViberBot.builder()
-            .id(1L)
-            .chatId("111111L")
-            .isNotify(false)
-            .build();
+    public static TelegramChat getTelegramBotNotifyFalse() {
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), false, "username", "first_name",
+            "last_name", 0, null, null,
+            new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public static UserProfileUpdateDto getUserProfileUpdateDto() {
@@ -1635,7 +1625,6 @@ public class ModelUtils {
             .recipientPhone(user.getRecipientPhone())
             .alternateEmail("test@email.com")
             .telegramIsNotify(true)
-            .viberIsNotify(true)
             .build();
     }
 
@@ -1646,7 +1635,6 @@ public class ModelUtils {
             .recipientPhone(user.getRecipientPhone())
             .alternateEmail("test@email.com")
             .telegramIsNotify(false)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -2551,6 +2539,25 @@ public class ModelUtils {
             .build();
     }
 
+    public static User getUserWithInitializedFields() {
+        return User.builder()
+            .id(1L)
+            .recipientEmail("someUser@gmail.com")
+            .recipientPhone("962473289")
+            .recipientSurname("Ivanov")
+            .alternateEmail("test@mail.com")
+            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
+            .recipientName("Taras")
+            .violations(0)
+            .currentPoints(0)
+            .dateOfRegistration(LocalDate.now())
+            .addresses(new ArrayList<>())
+            .ubsUsers(new HashSet<>())
+            .orders(new ArrayList<>())
+            .changeOfPointsList(new ArrayList<>())
+            .build();
+    }
+
     public static List<Location> getLocationList() {
         return List.of(Location.builder()
             .locationStatus(LocationStatus.ACTIVE)
@@ -3312,13 +3319,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static AdminCommentDto getAdminCommentDto() {
-        return AdminCommentDto.builder()
-            .orderId(1L)
-            .adminComment("Admin")
-            .build();
-    }
-
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
             .ecoNumber(new HashSet<>(Arrays.asList("1111111111", "3333333333")))
@@ -3797,7 +3797,6 @@ public class ModelUtils {
             .recipientPhone("962473289")
             .addressDto(addressDtoList())
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -4319,9 +4318,6 @@ public class ModelUtils {
         botList.add(new Bot()
             .setType("TELEGRAM")
             .setLink("https://telegram.me/ubs_test_bot?start=87df9ad5-6393-441f-8423-8b2e770b01a8"));
-        botList.add(new Bot()
-            .setType("VIBER")
-            .setLink("viber://pa?chatURI=ubstestbot1&context=87df9ad5-6393-441f-8423-8b2e770b01a8"));
         return botList;
     }
 
@@ -5970,5 +5966,46 @@ public class ModelUtils {
             .authorName("Автор 3")
             .id(1L)
             .build();
+    }
+
+    private static NotificationTemplate createCustomNotificationTemplate() {
+        NotificationTemplate notificationTemplate = getCustomNotificationTemplate();
+        notificationTemplate.getNotificationPlatforms().add(createNotificationPlatform(SITE));
+        notificationTemplate.setTitleEn("Title");
+        notificationTemplate.setTitleUk("TitleUk");
+
+        return notificationTemplate;
+    }
+
+    private static List<NotificationFullDto> createCustomNotificationsFullDtoList() {
+        return List.of(
+            NotificationFullDto.builder()
+                .id(1L)
+                .read(false)
+                .title("Title")
+                .body("BodyEng")
+                .images(List.of())
+
+                .build(),
+            NotificationFullDto.builder()
+                .id(2L)
+                .read(false)
+                .title("Title")
+                .body("BodyEng")
+                .images(List.of())
+                .build());
+    }
+
+    private static PageableAdvancedDto<NotificationFullDto> createPageableAdvancedDtoForCustomNotificationsFullDto() {
+        return new PageableAdvancedDto<>(
+            TEST_NOTIFICATION_DTO_LIST_2,
+            2L,
+            0,
+            1,
+            0,
+            false,
+            false,
+            true,
+            true);
     }
 }

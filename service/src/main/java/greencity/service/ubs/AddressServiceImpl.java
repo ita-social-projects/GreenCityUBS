@@ -1,12 +1,12 @@
 package greencity.service.ubs;
 
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
@@ -31,8 +31,8 @@ import greencity.repository.RegionRepository;
 import greencity.repository.CityRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.OrderRepository;
-import greencity.service.locations.LocationApiService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,11 +44,12 @@ import static greencity.constant.ErrorMessage.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
-    private static final Long CITY_ID_KIEV = 3L;
     private static final String KYIV_CITY = "Kyiv City";
+    private static final String KYIV = "Kyiv";
     private final OrderAddressRepository orderAddressRepository;
     private final DistrictRepository districtRepository;
     private final CityRepository cityRepository;
@@ -57,7 +58,6 @@ public class AddressServiceImpl implements AddressService {
     private final AddressRepository addressRepo;
     private final OrderRepository orderRepository;
     private final EventService eventService;
-    private final LocationApiService locationApiService;
     private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
     private final ModelMapper modelMapper;
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
@@ -89,10 +89,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public void addressUpdate(UpdateAddressDto addressDto, String email) {
+    public OrderAddressDtoResponse addressUpdate(UpdateAddressDto addressDto, String email) {
         Order order = orderRepository.findById(addressDto.getOrderId())
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
-        updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
+        return updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
     }
 
     /**
@@ -144,7 +144,7 @@ public class AddressServiceImpl implements AddressService {
      */
     @Override
     @Transactional
-    public Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
+    public OrderAddressDtoResponse updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email) {
         OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
             .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ADDRESS_BY_ID, dtoUpdate.getId())));
@@ -152,7 +152,7 @@ public class AddressServiceImpl implements AddressService {
         mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
         orderAddressRepository.save(updatedOrderAddress);
         eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_UK, email, order);
-        return Optional.of(modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class));
+        return modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class);
     }
 
     /**
@@ -188,8 +188,8 @@ public class AddressServiceImpl implements AddressService {
      */
     @Override
     public List<DistrictDto> getAllDistricts(String region, String city) {
-        List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
-        return locationDtos.stream().map(p -> modelMapper.map(p, DistrictDto.class))
+        List<District> districts = districtRepository.findAllByCityId(cityRepository.findIdByNameUkOrNameEn(city));
+        return districts.stream().map(p -> modelMapper.map(p, DistrictDto.class))
             .collect(toList());
     }
 
@@ -198,8 +198,11 @@ public class AddressServiceImpl implements AddressService {
      */
     @Override
     public List<DistrictDto> getAllDistrictsForKyiv() {
-        return districtRepository.findAllByCityId(CITY_ID_KIEV).stream()
-            .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn()))
+        Long cityId = cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.CITY_NOT_FOUND));
+        return districtRepository.findAllByCityId(cityId).stream()
+            .filter(district -> !KYIV_CITY.equalsIgnoreCase(district.getNameEn())
+                && !KYIV.equalsIgnoreCase(district.getNameEn()))
             .collect(toMap(
                 District::getNameUk,
                 district -> district,

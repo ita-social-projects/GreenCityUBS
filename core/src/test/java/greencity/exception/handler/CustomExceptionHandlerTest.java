@@ -3,7 +3,13 @@ package greencity.exception.handler;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
+import greencity.exceptions.WrongSignatureException;
+import greencity.exceptions.api.GoogleApiException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.exceptions.validation.ValidationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,8 +28,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
-
+import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -48,6 +55,15 @@ class CustomExceptionHandlerTest {
 
     @Mock
     UnprocessableEntityException unprocessableEntityException;
+
+    @Mock
+    WrongSignatureException wrongSignatureException;
+
+    @Mock
+    GoogleApiException googleApiException;
+
+    @Mock
+    UserNotFoundException userNotFoundException;
 
     @Mock
     HttpMessageNotReadableException notReadableException;
@@ -203,6 +219,118 @@ class CustomExceptionHandlerTest {
         assertEquals(
             customExceptionHandler.handleValidationException(validationException, webRequest),
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleGoogleApiExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleGoogleApiException(googleApiException, webRequest),
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleUserNotFoundExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleUserNotFoundException(userNotFoundException, webRequest),
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleWrongSignatureExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleWrongSignatureException(wrongSignatureException, webRequest),
+            ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleConstraintViolationExceptionSingleViolation() {
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        Path path = mock(Path.class);
+
+        when(path.toString()).thenReturn("fieldName");
+        when(violation.getPropertyPath()).thenReturn(path);
+        when(violation.getMessage()).thenReturn("must not be null");
+
+        ConstraintViolationException ex = new ConstraintViolationException(Set.of(violation));
+
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+
+        ExceptionResponse expectedResponse = new ExceptionResponse(objectMap);
+        expectedResponse.setMessage("Validation failed: fieldName: must not be null");
+
+        ResponseEntity<Object> response =
+            customExceptionHandler.handleConstraintViolationException(ex, webRequest);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleConstraintViolationExceptionMultipleViolations() {
+        ConstraintViolation<?> violation1 = mock(ConstraintViolation.class);
+        ConstraintViolation<?> violation2 = mock(ConstraintViolation.class);
+        Path path1 = mock(Path.class);
+        Path path2 = mock(Path.class);
+
+        when(path1.toString()).thenReturn("username");
+        when(path2.toString()).thenReturn("password");
+
+        when(violation1.getPropertyPath()).thenReturn(path1);
+        when(violation1.getMessage()).thenReturn("must not be null");
+
+        when(violation2.getPropertyPath()).thenReturn(path2);
+        when(violation2.getMessage()).thenReturn("size must be at least 3");
+
+        Set<ConstraintViolation<?>> orderedViolations = new LinkedHashSet<>();
+        orderedViolations.add(violation1);
+        orderedViolations.add(violation2);
+
+        ConstraintViolationException ex = new ConstraintViolationException(orderedViolations);
+
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+
+        ExceptionResponse expectedResponse = new ExceptionResponse(objectMap);
+        expectedResponse.setMessage("Validation failed: password: size must be at least 3, username: must not be null");
+
+        ResponseEntity<Object> response =
+            customExceptionHandler.handleConstraintViolationException(ex, webRequest);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleConstraintViolationExceptionWithNoViolations() {
+        ConstraintViolationException ex = new ConstraintViolationException(Collections.emptySet());
+
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+
+        ExceptionResponse expectedResponse = new ExceptionResponse(objectMap);
+        expectedResponse.setMessage("Validation failed with no specific details.");
+
+        ResponseEntity<Object> response =
+            customExceptionHandler.handleConstraintViolationException(ex, webRequest);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(expectedResponse, response.getBody());
+
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
 }

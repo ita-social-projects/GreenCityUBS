@@ -73,12 +73,14 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2;
 import static greencity.ModelUtils.TEST_UUID;
 import static greencity.ModelUtils.TEST_PAGEABLE_ADVANCED_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_DTO;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET2;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_2;
 import static greencity.ModelUtils.TEST_ORDER_2;
 import static greencity.ModelUtils.TEST_ORDER_3;
 import static greencity.ModelUtils.TEST_ORDER_4;
@@ -107,6 +109,8 @@ import static greencity.enums.NotificationReceiverType.SITE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -249,7 +253,7 @@ class NotificationServiceImplTest {
             created.setNotificationTime(LocalDateTime.now(fixedClock));
             created.setUser(getUser());
             created.setId(1L);
-            created.setOrder(orders.get(0));
+            created.setOrder(orders.getFirst());
 
             when(userNotificationRepository.save(any())).thenReturn(created);
 
@@ -964,7 +968,7 @@ class NotificationServiceImplTest {
             parameters.add(NotificationParameter.builder().key("amountToPay")
                 .value(String.format("%.2f", (double) amountToPay)).build());
             parameters.add(NotificationParameter.builder().key("orderNumber")
-                .value(orders.get(0).getId().toString()).build());
+                .value(orders.getFirst().getId().toString()).build());
 
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag1list());
             when(userNotificationRepository.save(any())).thenReturn(notification);
@@ -1126,8 +1130,8 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getUnreadenNotificationsTest() {
-        assertEquals(0, notificationService.getUnreadenNotifications("Test"));
+    void getUnreadNotificationsTest() {
+        assertEquals(0, notificationService.getUnreadNotifications("Test"));
     }
 
     @Test
@@ -1164,6 +1168,85 @@ class NotificationServiceImplTest {
         NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
 
         assertEquals(createViolationNotificationDto(), actual);
+    }
+
+    @Test
+    void getNotificationMarksAsReadWhenMarkAsReadTrueTest() {
+        UserNotification notification = createUserNotificationForViolationWithParameters();
+        notification.getUser().setUuid("abc");
+        notification.setRead(false);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES, SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
+            .thenReturn(Optional.of(getViolation()));
+        when(userNotificationRepository.save(notification)).thenReturn(notification);
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", true);
+
+        assertEquals(createViolationNotificationDto(), actual);
+        assertTrue(notification.isRead(), "Notification should be marked as read");
+        verify(userNotificationRepository).save(notification);
+    }
+
+    @Test
+    void getNotificationDoesNotMarkAsReadWhenMarkAsReadFalseTest() {
+        UserNotification notification = createUserNotificationForViolationWithParameters();
+        notification.getUser().setUuid("abc");
+        notification.setRead(false);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES, SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
+            .thenReturn(Optional.of(getViolation()));
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", false);
+
+        assertEquals(createViolationNotificationDto(), actual);
+        assertFalse(notification.isRead(), "Notification should not be marked as read");
+        verify(userNotificationRepository, never()).save(any());
+    }
+
+    @Test
+    void getNotificationMarksAsReadThroughEndpointTest() {
+        UserNotification notification = createUserNotificationForViolationWithParameters();
+        notification.getUser().setUuid("abc");
+        notification.setRead(false);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES, SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
+            .thenReturn(Optional.of(getViolation()));
+        when(userNotificationRepository.save(notification)).thenReturn(notification);
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
+
+        assertEquals(createViolationNotificationDto(), actual);
+        assertTrue(notification.isRead(),
+            "Notification should be marked as read when accessed through /notifications/{id}");
+        verify(userNotificationRepository).save(notification);
+    }
+
+    @Test
+    void getNotificationDoesNotSaveWhenAlreadyReadAndMarkAsReadTrueTest() {
+        UserNotification notification = createUserNotificationForViolationWithParameters();
+        notification.getUser().setUuid("abc");
+        notification.setRead(true);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
+        when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
+            NotificationType.VIOLATION_THE_RULES, SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
+        when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
+            .thenReturn(Optional.of(getViolation()));
+
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", true);
+
+        assertEquals(createViolationNotificationDto(), actual);
+        assertTrue(notification.isRead(), "Notification should remain read");
+        verify(userNotificationRepository, never()).save(any());
     }
 
     @Test
@@ -1549,5 +1632,42 @@ class NotificationServiceImplTest {
         notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME);
 
         verify(userRemoteClient, times(1)).sendGreenOfficeRequestNotification(notification);
+    }
+
+    @Test
+    void testGetAllNotificationsForUserForCustomNotifications() {
+        User user = TEST_USER;
+        String language = "en";
+        UserNotification customNotification1 = UserNotification.builder()
+            .id(1L)
+            .user(user)
+            .notificationType(NotificationType.CUSTOM)
+            .templateId(1L)
+            .build();
+        UserNotification customNotification2 = UserNotification.builder()
+            .id(2L)
+            .user(user)
+            .notificationType(NotificationType.CUSTOM)
+            .templateId(1L)
+            .build();
+
+        Page<UserNotification> page = new PageImpl<>(List.of(customNotification1, customNotification2),
+            Mockito.mock(Pageable.class),
+            2L);
+
+        when(userRepository.findByUuid(user.getUuid())).thenReturn(user);
+
+        when(templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(1L, SITE))
+            .thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE_2));
+
+        when(userNotificationRepository.findAllByUserAndIsDeletedFalse(user, TEST_PAGEABLE)).thenReturn(page);
+
+        when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(customNotification1));
+        when(userNotificationRepository.findById(2L)).thenReturn(Optional.of(customNotification2));
+
+        PageableAdvancedDto<NotificationFullDto> actual =
+            notificationService.getAllNotificationsForUser(user.getUuid(), language, TEST_PAGEABLE);
+
+        assertEquals(TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2, actual);
     }
 }

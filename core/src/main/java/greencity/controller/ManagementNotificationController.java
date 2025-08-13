@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/admin/notification")
 @RequiredArgsConstructor
+@Validated
 public class ManagementNotificationController {
     private final NotificationTemplateService notificationTemplateService;
 
@@ -71,7 +73,7 @@ public class ManagementNotificationController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_MESSAGE', authentication)")
     @PutMapping("/update-template/{id}")
     public ResponseEntity<HttpStatuses> updateNotificationTemplate(
-        @PathVariable(name = "id") Long id,
+        @Positive @PathVariable(name = "id") Long id,
         @RequestBody @Valid NotificationTemplateWithPlatformsUpdateDto notificationTemplateDto) {
         notificationTemplateService.update(id, notificationTemplateDto);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -91,7 +93,8 @@ public class ManagementNotificationController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/get-template/{id}")
-    public ResponseEntity<NotificationTemplateWithPlatformsDto> getNotificationTemplate(@PathVariable Long id) {
+    public ResponseEntity<NotificationTemplateWithPlatformsDto> getNotificationTemplate(
+        @Positive @PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(notificationTemplateService.findById(id));
     }
@@ -113,7 +116,7 @@ public class ManagementNotificationController {
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_MESSAGES_PAGE', authentication)")
     @PutMapping("/change-template-status/{id}")
     public ResponseEntity<HttpStatus> deactivateNotificationTemplate(
-        @PathVariable Long id, @RequestParam String status) {
+        @Positive @PathVariable Long id, @RequestParam String status) {
         notificationTemplateService.changeNotificationStatusById(id, status);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -132,7 +135,7 @@ public class ManagementNotificationController {
     })
     @PostMapping("/add-template")
     public ResponseEntity<HttpStatus> addNotificationTemplate(
-        @RequestBody @Validated AddNotificationTemplateWithPlatformsDto template) {
+        @RequestBody @Valid AddNotificationTemplateWithPlatformsDto template) {
         notificationTemplateService.createNotificationTemplate(template);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -151,7 +154,7 @@ public class ManagementNotificationController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
     })
     @DeleteMapping("/remove-custom-template/{id}")
-    public ResponseEntity<HttpStatus> removeNotificationTemplate(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> removeNotificationTemplate(@Positive @PathVariable Long id) {
         notificationTemplateService.removeNotificationTemplate(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

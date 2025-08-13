@@ -22,6 +22,7 @@ public class AppConstant {
     public static final String UBS_EXPORT = UBS_LINK + "/order/pdf/export";
     public static final String LOGS_LINKS = "/logs/**";
     public static final String EXPORT_SETTINGS_LINKS = "/export/settings/**";
+    public static final String TELEGRAM_LINKS = "/telegram/**";
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";
@@ -39,4 +40,5 @@ public class AppConstant {
     public static final String UNKNOWN_UK = "Невідомо";
     public static final String LOCALE_UK_NAME = "ua";
     public static final String LOCALE_EN_NAME = "en";
+    public static final String KYIV = "Kyiv";
 }

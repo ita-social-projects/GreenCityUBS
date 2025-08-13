@@ -6,30 +6,23 @@ import greencity.dto.language.LanguageVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
-import greencity.entity.telegram.AuthorizedUser;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
+import greencity.enums.ChatState;
 import greencity.enums.NotificationType;
-import greencity.exceptions.bots.MessageWasNotSent;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.ubstelegrambot.UBSTelegramBot;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Optional;
+import java.time.Instant;
+import java.util.ArrayList;
 
-import static greencity.enums.NotificationReceiverType.MOBILE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramNotificationServiceTest {
@@ -46,7 +39,10 @@ class TelegramNotificationServiceTest {
     @InjectMocks
     private TelegramNotificationService telegramNotificationService;
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
-        .telegramBot(new AuthorizedUser("12345", false, false, null, false))
+        .telegramBot(
+            new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
+                "last_name", 0, null, null,
+                new ArrayList<>(), new ArrayList<>(), Instant.now()))
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
     private final UserNotification notification = new UserNotification()
@@ -94,10 +90,14 @@ class TelegramNotificationServiceTest {
         User userEntity = new User();
         assertFalse(telegramNotificationService.isEnabled(userEntity));
 
-        userEntity.setTelegramBot(new AuthorizedUser());
+        userEntity.setTelegramBot(new TelegramChat());
         assertFalse(telegramNotificationService.isEnabled(userEntity));
 
-        userEntity.setTelegramBot(new AuthorizedUser("12345", false, true, userEntity, false));
+        userEntity
+            .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username",
+                "first_name", "last_name", 0,
+                userEntity, null, new ArrayList<>(), new ArrayList<>(), Instant.now()));
+
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 
     }
