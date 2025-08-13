@@ -58,7 +58,6 @@ import greencity.entity.user.employee.Position;
 import greencity.entity.user.employee.ReceivingStation;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.BonusReason;
 import greencity.enums.CancellationReason;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
@@ -74,7 +73,6 @@ import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.NotificationParameterRepository;
-import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -138,7 +136,6 @@ import static java.util.stream.Collectors.toList;
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final OrderRepository orderRepository;
-    private final OrderAddressRepository orderAddressRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final UserRemoteClient userRemoteClient;
@@ -804,7 +801,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * {@inheritDoc}
      */
     @Override
-    //todo main
     public OrderDetailStatusDto updateOrderDetailStatus(Order order, OrderDetailStatusRequestDto dto, String email) {
         List<Payment> payment = paymentRepository.findAllByOrderId(order.getId());
         if (payment.isEmpty()) {
@@ -875,7 +871,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
         if (order.getPointsToUse() != 0 || !order.getCertificates().isEmpty()) {
             notificationService.notifyBonusesFromCanceledOrder(order);
-            returnAllPointsFromOrder(order);
+            paymentService.processPointsRefundForOrder(order);
         }
         order.setCancellationComment(cancellationComment);
         order.setCancellationReason(CancellationReason.valueOf(cancellationReason));
@@ -906,30 +902,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .collect(Collectors.toList()));
 
         dto.setOrderId(order.getId());
-    }
-
-    private void returnAllPointsFromOrder(Order order) {
-        Integer pointsToReturn = order.getPointsToUse();
-        if (isNull(pointsToReturn) || pointsToReturn == 0) {
-            return;
-        }
-        User user = order.getUser();
-        if (isNull(user.getCurrentPoints())) {
-            user.setCurrentPoints(0);
-        }
-        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
-        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
-            .amount(pointsToReturn)
-            .date(LocalDateTime.now())
-            .user(user)
-            .order(order)
-            .reason(BonusReason.REFUND_CANCELED_ORDER)
-            .build();
-        if (isNull(user.getChangeOfPointsList())) {
-            user.setChangeOfPointsList(new ArrayList<>());
-        }
-        user.getChangeOfPointsList().add(changeOfPoints);
-        userRepository.save(user);
     }
 
     /**

@@ -61,6 +61,7 @@ import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXI
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.REFUND_CONFLICT_MONEY_AND_BONUSES;
 import static greencity.service.ubs.UBSManagementServiceImpl.FORMAT_DATE;
+import static java.util.Objects.isNull;
 
 @Service
 @AllArgsConstructor
@@ -180,6 +181,34 @@ public class PaymentServiceImpl implements PaymentService {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void processPointsRefundForOrder(Order order) {
+        Integer pointsToReturn = order.getPointsToUse();
+        if (isNull(pointsToReturn) || pointsToReturn == 0) {
+            return;
+        }
+        User user = order.getUser();
+        if (isNull(user.getCurrentPoints())) {
+            user.setCurrentPoints(0);
+        }
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
+        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
+            .amount(pointsToReturn)
+            .date(LocalDateTime.now())
+            .reason(BonusReason.REFUND_CANCELED_ORDER)
+            .user(user)
+            .order(order)
+            .build();
+        if (isNull(user.getChangeOfPointsList())) {
+            user.setChangeOfPointsList(new ArrayList<>());
+        }
+        user.getChangeOfPointsList().add(changeOfPoints);
+        userRepository.save(user);
+    }
+
     private void processRefundForBroughtItHimselfOrder(Order order, RefundDto refundDto, String employeeEmail) {
         if (isRefundDtoValid(refundDto)) {
             convertRefundAmountIntoCoins(refundDto);
@@ -200,7 +229,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new BadRequestException(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()));
         }
         if (refundDto.isReturnBonuses()) {
-            refundPaymentsInBonus(order, employeeEmail, BonusReason.REFUND_CANCELED_ORDER);
+            refundPaymentsInBonus(order, employeeEmail);
         } else if (refundDto.isReturnMoney()) {
             Long paidAmount = PaymentUtil.calculatePaidAmount(order);
             refundPaymentsInMoney(order, employeeEmail, paidAmount);
@@ -249,13 +278,13 @@ public class PaymentServiceImpl implements PaymentService {
         eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK, employeeEmail, order);
     }
 
-    private void refundPaymentsInBonus(Order order, String email, BonusReason reason) {
+    private void refundPaymentsInBonus(Order order, String email) {
         CounterOrderDetailsDto prices =
             PaymentUtil.getPriceDetails(order.getId(), orderRepository, orderBagService, certificateRepository);
         Long overpaymentInCoins =
             PaymentUtil.calculateOverpayment(order,
                 PaymentUtil.convertBillsIntoCoins(PaymentUtil.setTotalPrice(prices)));
-        refundPaymentsInBonus(order, email, overpaymentInCoins, reason);
+        refundPaymentsInBonus(order, email, overpaymentInCoins, BonusReason.REFUND_CANCELED_ORDER);
     }
 
     private void refundPaymentsInBonus(Order order, String email, Long amount, BonusReason reason) {
