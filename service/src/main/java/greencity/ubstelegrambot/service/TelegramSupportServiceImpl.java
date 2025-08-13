@@ -71,12 +71,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         TelegramChat chat = optionalChat.get();
 
-        if (message.hasText() && message.getText().contains(MessageProvider.get("client.end.support.mode"))) {
+        if (message.hasText() && message.getText().contains(MessageProvider.get(lang,"client.end.support.mode"))) {
             SendMessage endSupportSendMessage =
                 telegramUtils.updateChatStateAndRespond(chat.getChatId(), ChatState.NORMAL,
-                    MessageFactory::createFeedbackMessage);
+                    MessageFactory.createFeedbackMessage(chat.getChatId(),  lang));
 
-            executor.executeCommand(bot, MessageFactory.deleteEndSupportKeyboardMessage(chat.getChatId()));
+            executor.executeCommand(bot, MessageFactory.deleteEndSupportKeyboardMessage(chat.getChatId(), lang));
             telegramNotificationService.notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
             return endSupportSendMessage;
         }

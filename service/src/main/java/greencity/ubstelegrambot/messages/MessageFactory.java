@@ -457,10 +457,10 @@ public class MessageFactory {
      * @param chatId the ID of the chat to send the message to
      * @return a {@link SendMessage} object configured to remove the keyboard
      */
-    public static SendMessage deleteEndSupportKeyboardMessage(String chatId) {
+    public static SendMessage deleteEndSupportKeyboardMessage(String chatId, String lang) {
         SendMessage removeKeyboardMsg = new SendMessage();
         removeKeyboardMsg.setChatId(chatId);
-        removeKeyboardMsg.setText(TelegramBotConstants.CLIENT_STOP_SUPPORT_MODE);
+        removeKeyboardMsg.setText(MessageProvider.get(lang, "client.stop.support.mode"));
         removeKeyboardMsg.setReplyMarkup(new ReplyKeyboardRemove(true));
         return removeKeyboardMsg;
     }
