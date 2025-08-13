@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot;
 
+import greencity.client.UserRemoteClient;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
@@ -123,6 +124,9 @@ class TelegramServiceTest {
     @Mock
     private TelegramUtils telegramUtils;
 
+    @Mock
+    private UserRemoteClient userRemoteClient;
+
     private TelegramServiceImpl telegramService;
 
     public Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
@@ -144,7 +148,8 @@ class TelegramServiceTest {
             userRepository,
             telegramChatProducer,
             telegramUtils,
-            telegramUpdateProcessorMap);
+            telegramUpdateProcessorMap,
+            userRemoteClient);
     }
 
     @Test

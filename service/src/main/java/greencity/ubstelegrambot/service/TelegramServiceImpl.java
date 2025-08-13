@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.UserRemoteClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -73,6 +74,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
+    private final UserRemoteClient userRemoteClient;
 
     @Override
     public void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files) {
@@ -415,7 +417,17 @@ public class TelegramServiceImpl implements TelegramService {
             .languageCode("ua");
 
         if (!uuid.isEmpty()) {
-            userRepository.findUserByUuid(uuid).ifPresent(newChatBuilder::user);
+            userRepository.findUserByUuid(uuid).ifPresent(user -> {
+                newChatBuilder.user(user);
+
+                String langCode = "ua";
+                try {
+                    langCode = userRemoteClient.findUserLanguageByUuid(user.getUuid());
+                } catch (Exception e) {
+                    log.warn("Failed to get user language from UBS for uuid {}. Using default 'ua'", user.getUuid(), e);
+                }
+                newChatBuilder.languageCode(langCode);
+            });
         }
 
         TelegramChat createdChat = newChatBuilder.build();
@@ -436,7 +448,17 @@ public class TelegramServiceImpl implements TelegramService {
 
     private TelegramUpdateProcessor handleExistingChat(String uuid, TelegramChat chat, Long chatId) {
         if (!uuid.isEmpty()) {
-            userRepository.findUserByUuid(uuid).ifPresent(chat::setUser);
+            userRepository.findUserByUuid(uuid).ifPresent(user -> {
+                chat.setUser(user);
+
+                String langCode = "ua";
+                try {
+                    langCode = userRemoteClient.findUserLanguageByUuid(user.getUuid());
+                } catch (Exception e) {
+                    log.warn("Failed to get user language from UBS for uuid {}. Using default 'ua'", user.getUuid(), e);
+                }
+                chat.setLanguageCode(langCode);
+            });
             telegramChatRepository.save(chat);
         }
 

@@ -1,6 +1,5 @@
 package greencity.ubstelegrambot.service;
 
-
 import greencity.entity.telegram.TelegramChat;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.TelegramChatRepository;
@@ -24,14 +23,13 @@ public class TelegramLanguageServiceTest {
     @InjectMocks
     private TelegramLanguageServiceImpl service;
 
-
     @Test
     void getChatLanguage_ChatExists_ReturnsLanguageCode() {
         TelegramChat chat = new TelegramChat();
         chat.setLanguageCode("en");
 
         when(telegramChatRepository.findByChatId("123"))
-                .thenReturn(Optional.of(chat));
+            .thenReturn(Optional.of(chat));
 
         String result = service.getChatLanguage("123");
 
