@@ -266,6 +266,8 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String monoBankRedirectionUrl;
     @Value("${greencity.monobank.redirect.result-monobank-url}")
     private String monoBankPaymentRedirectUrl;
+    @Value("${greencity.redirect.green-city-client}")
+    private String greenCityClientUrl;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "Approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
@@ -1156,6 +1158,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(OrderBag::getAmount)
                 .filter(amount -> amount != 0)
                 .toList())
+            .returnUrl(greenCityClientUrl)
             .build();
 
         paymentWayForPayRequestDto.setSignature(encryptionUtil
