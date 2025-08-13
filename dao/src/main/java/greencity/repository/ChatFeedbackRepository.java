@@ -11,7 +11,8 @@ import java.util.Optional;
 @Repository
 public interface ChatFeedbackRepository extends JpaRepository<ChatFeedback, Long> {
     /**
-     * Finds all {@link ChatFeedback} entities for the specified chat ID with pagination support.
+     * Finds all {@link ChatFeedback} entities for the specified chat ID with
+     * pagination support.
      *
      * @param chatId   the ID of the chat whose feedback records should be retrieved
      * @param pageable pagination information (page number, size, sorting)
@@ -20,11 +21,13 @@ public interface ChatFeedbackRepository extends JpaRepository<ChatFeedback, Long
     Page<ChatFeedback> findByChatId(Long chatId, Pageable pageable);
 
     /**
-     * Finds a {@link ChatFeedback} entity for the specified chat ID and feedback state.
+     * Finds a {@link ChatFeedback} entity for the specified chat ID and feedback
+     * state.
      *
-     * @param chatId         the ID of the chat whose feedback should be retrieved
-     * @param feedbackState  the state of the feedback to search for
-     * @return an {@link Optional} containing the matching {@link ChatFeedback} if found, otherwise empty
+     * @param chatId        the ID of the chat whose feedback should be retrieved
+     * @param feedbackState the state of the feedback to search for
+     * @return an {@link Optional} containing the matching {@link ChatFeedback} if
+     *         found, otherwise empty
      */
     Optional<ChatFeedback> findByChatIdAndFeedbackState(Long chatId, FeedbackState feedbackState);
 }
