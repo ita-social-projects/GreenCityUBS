@@ -224,6 +224,15 @@ public class MessageFactory {
             .build();
     }
 
+    public static SendMessage createSupportReplyMarkup(String chatId, String lang) {
+        return SendMessage
+                .builder()
+                .chatId(chatId)
+                .text(MessageProvider.get(lang, "client.support.message.change.language"))
+                .replyMarkup(KeyboardFactory.userSupportKeyboard(lang))
+                .build();
+    }
+
     /**
      * Method for creating work schedule message.
      *

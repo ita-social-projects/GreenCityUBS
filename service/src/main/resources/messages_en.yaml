@@ -131,3 +131,4 @@ client.want.to.speak: "👨@%s wants to speak with a human\n\n👉 %s\n\n💬 ht
 previous.session.expired: "Previous session expired. Please choose a command from the list to continue"
 photo.content: "Photo content"
 login.failed: "Incorrect login or password. Please check your credentials and try again."
+client.support.message.change.language: "Language was switched"
