@@ -906,6 +906,172 @@ class TelegramServiceTest {
         verify(telegramChatRepository, never()).save(any());
     }
 
+    @Test
+    void processUpdate_shouldSetUserAndLanguage_whenUuidProvidedAndUserFound() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.empty());
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        String expectedLang = "en";
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenReturn(expectedLang);
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals(expectedLang, savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldSetDefaultLanguage_whenUserLanguageServiceFails() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.empty());
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenThrow(new RuntimeException("Service unavailable"));
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals("ua", savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldUpdateUserAndLanguage_whenExistingChatAndUserLanguageFound() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(existingChat));
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        String expectedLang = "en";
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenReturn(expectedLang);
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals(expectedLang, savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldUpdateUserAndDefaultLanguage_whenExistingChatAndLanguageServiceFails() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(existingChat));
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenThrow(new RuntimeException("Service unavailable"));
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals("ua", savedChat.getLanguageCode());
+    }
+
     private static org.telegram.telegrambots.meta.api.objects.User getTelegramAPIUser(Long chatId) {
         org.telegram.telegrambots.meta.api.objects.User apiUser = new org.telegram.telegrambots.meta.api.objects.User();
         apiUser.setId(chatId);
