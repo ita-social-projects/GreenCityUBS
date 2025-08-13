@@ -1,7 +1,10 @@
 package greencity.repository;
 
 import greencity.entity.order.OrderPaymentStatusTranslation;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.QueryHints;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +22,7 @@ public interface OrderPaymentStatusTranslationRepository
      * @return {@link List}.
      * @author Yuriy Bahlay.
      */
+    @QueryHints(@QueryHint(name = "org.hibernate.cacheable", value = "true"))
     List<OrderPaymentStatusTranslation> getAllBy();
 
     /**
@@ -28,6 +32,7 @@ public interface OrderPaymentStatusTranslationRepository
      * @return {@link OrderPaymentStatusTranslation}.
      * @author Olet Postolovskyi.
      */
+    @QueryHints(@QueryHint(name = "org.hibernate.cacheable", value = "true"))
     Optional<OrderPaymentStatusTranslation> getOrderPaymentStatusTranslationById(Long id);
 
     /**
