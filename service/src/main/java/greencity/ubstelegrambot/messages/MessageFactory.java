@@ -165,6 +165,18 @@ public class MessageFactory {
     }
 
     /**
+     * Method for creating end support mode message.
+     *
+     * @param chatId {@link String} is telegram chat id.
+     *
+     * @return {@link SendMessage} configured with the end support mode message.
+     */
+    public static SendMessage createEndSupportMessage(String chatId, String lang) {
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "client.stop.support.mode"),
+            KeyboardFactory.createChatFeedbackRatingKeyboard());
+    }
+
+    /**
      * Method for creating user notification end support mode message.
      *
      * @param chatId   {@link String} is telegram chat id.
@@ -217,10 +229,11 @@ public class MessageFactory {
         return SendMessage
             .builder()
             .chatId(chatId)
-            .text(MessageProvider.get(lang, "client.support.message.change.language"))
+            .text(MessageProvider.get(lang, "client.support.message.callback.query"))
             .replyMarkup(KeyboardFactory.userSupportKeyboard(lang))
             .build();
     }
+
 
     /**
      * Method for creating work schedule message.
