@@ -63,7 +63,7 @@ class LanguageSwitcherProcessorTest {
         when(chatRepository.findByChatId("123")).thenReturn(java.util.Optional.of(chat));
         SendMessage expectedMessage = new SendMessage("123", "Some commands");
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage result = processor.process(update);
 
@@ -134,5 +134,3 @@ class LanguageSwitcherProcessorTest {
         verifyNoInteractions(telegramUtils);
     }
 }
-
-
