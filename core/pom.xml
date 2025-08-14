@@ -21,7 +21,7 @@
         <tngtech.version>1.13.1</tngtech.version>
         <facebook.version>2.0.3.RELEASE</facebook.version>
         <socialcore.version>1.1.6.RELEASE</socialcore.version>
-        <apache.commons.version>3.13.0</apache.commons.version>
+        <apache.commons.version>3.18.0</apache.commons.version>
         <springdoc-openapi-starter-webmvc-ui.version>2.3.0</springdoc-openapi-starter-webmvc-ui.version>
         <thymeleaf-spring6.version>3.1.2.RELEASE</thymeleaf-spring6.version>
         <thymeleaf-extras-java8time.version>3.0.4.RELEASE</thymeleaf-extras-java8time.version>
