@@ -69,7 +69,7 @@ class ManagerUpdateProcessorTest {
         verify(telegramUtils).updateChatStateAndRespond(
             eq(chatId),
             eq(ChatState.NORMAL),
-            eq(argThat(msg -> chatId.equals(msg.getChatId()) && expectedMessage.getText().equals(msg.getText()))));
+            eq(MessageFactory.createAvailableCommandsMessage(chatId, TelegramBotConstants.UA)));
 
         verify(telegramLoginService).logoutManager(chatId);
         assertEquals(expectedMessage, actualMessage);
