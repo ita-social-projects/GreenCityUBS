@@ -122,7 +122,7 @@ client.end.support.notification: "Client %s ended the conversation"
 client.support.message.callback.query: |
   Please ask your question — and I’ll call one of my human colleagues ✍️👇
   If you want to return to my functions after talking to a human,
-  just click "End conversation with manager
+  just click "End conversation with manager"
 
 green.office.subject: "Interested in Green Office"
 unknown.error: "An unknown error occurred, please try again"
