@@ -5,6 +5,7 @@ import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
+import greencity.enums.ChatState;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
@@ -12,6 +13,7 @@ import greencity.repository.TelegramMessageRepository;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.ubstelegrambot.messages.MessageProvider;
+import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramSupportServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
@@ -34,13 +36,11 @@ import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -126,32 +126,35 @@ class TelegramSupportServiceTest {
             result.getText());
     }
 
-//    @Test
-//    void testProcessSupportMessage_EndSupportModeTextMessage_ShouldReturnStopSupportModeTextMessage() {
-//        Message message = mock(Message.class);
-//        User user = mock(User.class);
-//        String chatId = "1";
-//        String username = "tg_user";
-//
-//        when(user.getId()).thenReturn(1L);
-//        when(user.getUserName()).thenReturn(username);
-//        when(message.getFrom()).thenReturn(user);
-//        when(message.hasText()).thenReturn(true);
-//        when(message.getText())
-//            .thenReturn("Ви закінчили розмову з менеджером, оцініть будь ласка роботу нашої підтримки від 1 до 5");
-//
-//        TelegramChat chatEntity = TelegramChat.builder()
-//            .chatId(chatId)
-//            .build();
-//
-//        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chatEntity));
-//
-//        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
-//
-//        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "client.end.support.mode"), result.getText());
-//        verify(telegramChatRepository).save(chatEntity);
-//        verify(telegramNotificationService).notifyManagerAboutEndSupportModeFromUser(username);
-//    }
+    @Test
+    void testProcessSupportMessage_EndSupportModeTextMessage_ShouldReturnStopSupportModeTextMessage() {
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        String chatId = "1";
+        String username = "tg_user";
+
+        when(user.getId()).thenReturn(1L);
+        when(user.getUserName()).thenReturn(username);
+        when(message.getFrom()).thenReturn(user);
+        when(message.hasText()).thenReturn(true);
+        when(message.getText())
+            .thenReturn("Ви закінчили розмову з менеджером, оцініть будь ласка роботу нашої підтримки від 1 до 5");
+
+        TelegramChat chatEntity = TelegramChat.builder()
+            .chatId(chatId)
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chatEntity));
+        when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
+            .thenReturn(MessageFactory.createFeedbackMessage(chatId));
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "client.end.support.mode"), result.getText());
+        verify(telegramChatRepository).save(chatEntity);
+        verify(telegramNotificationService).notifyManagerAboutEndSupportModeFromUser(username);
+        verify(executor).executeCommand(eq(bot), eq(MessageFactory.deleteEndSupportKeyboardMessage(chatId)));
+    }
 
     @Test
     void testProcessSupportMessage_OnlyTextMessage_ShouldReturnSentToManagerMessage() {

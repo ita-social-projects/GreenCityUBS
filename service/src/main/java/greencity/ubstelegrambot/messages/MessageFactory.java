@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import java.io.IOException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -228,10 +229,11 @@ public class MessageFactory {
         return SendMessage
             .builder()
             .chatId(chatId)
-            .text(MessageProvider.get(lang, "client.support.message.change.language"))
+            .text(MessageProvider.get(lang, "client.support.message.callback.query"))
             .replyMarkup(KeyboardFactory.userSupportKeyboard(lang))
             .build();
     }
+
 
     /**
      * Method for creating work schedule message.
@@ -441,5 +443,25 @@ public class MessageFactory {
         sendDocument.setChatId(chatId);
         sendDocument.setDocument(new InputFile(file.getInputStream(), file.getOriginalFilename()));
         return sendDocument;
+    }
+
+    /**
+     * Creates a Telegram {@link SendMessage} that removes the custom keyboard after
+     * the support mode ends.
+     *
+     * <p>
+     * This message includes a predefined text notifying the user that support mode
+     * has ended, and attaches a {@link ReplyKeyboardRemove} to hide the keyboard.
+     * </p>
+     *
+     * @param chatId the ID of the chat to send the message to
+     * @return a {@link SendMessage} object configured to remove the keyboard
+     */
+    public static SendMessage deleteEndSupportKeyboardMessage(String chatId, String lang) {
+        SendMessage removeKeyboardMsg = new SendMessage();
+        removeKeyboardMsg.setChatId(chatId);
+        removeKeyboardMsg.setText(MessageProvider.get(lang, "client.stop.support.mode"));
+        removeKeyboardMsg.setReplyMarkup(new ReplyKeyboardRemove(true));
+        return removeKeyboardMsg;
     }
 }

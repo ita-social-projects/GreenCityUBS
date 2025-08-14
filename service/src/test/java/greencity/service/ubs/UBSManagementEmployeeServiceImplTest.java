@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.mock.web.MockMultipartFile;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -55,6 +56,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.anyLong;
@@ -329,7 +331,7 @@ class UBSManagementEmployeeServiceImplTest {
         assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
         Exception thrown = assertThrows(NotFoundException.class,
             () -> employeeService.deactivateEmployee(2L));
-        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
+        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND + 2L, thrown.getMessage());
     }
 
     @Test
@@ -343,7 +345,7 @@ class UBSManagementEmployeeServiceImplTest {
         assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
         Exception thrown = assertThrows(NotFoundException.class,
             () -> employeeService.deactivateEmployee(2L));
-        assertEquals(thrown.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
+        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND + 2L, thrown.getMessage());
     }
 
     @Test
@@ -498,7 +500,7 @@ class UBSManagementEmployeeServiceImplTest {
 
         Exception thrown1 = assertThrows(NotFoundException.class,
             () -> employeeService.deleteEmployeeImage(2L));
-        assertEquals(thrown1.getMessage(), ErrorMessage.EMPLOYEE_NOT_FOUND + 2L);
+        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND + 2L, thrown1.getMessage());
 
         when(repository.findById(1L)).thenReturn(Optional.of(employee));
 
@@ -538,6 +540,20 @@ class UBSManagementEmployeeServiceImplTest {
 
         verify(repository, times(1)).selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
         verify(modelMapper, times(1)).map(employee, EmployeeWithTariffsDto.class);
+    }
+
+    @Test
+    void getEmployeesByTariffIdShouldThrowNotFoundExceptionTest() {
+        Long tariffId = 1L;
+        when(repository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId)).thenReturn(Collections.emptyList());
+
+        NotFoundException thrown =
+            assertThrows(NotFoundException.class, () -> employeeService.getEmployeesByTariffId(tariffId));
+
+        assertEquals(ErrorMessage.EMPLOYEE_WITH_ENABLED_CHAT_NOT_FOUND_BY_TARIFF_ID + tariffId, thrown.getMessage());
+
+        verify(repository, times(1)).selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
+        verify(modelMapper, never()).map(any(Employee.class), eq(EmployeeWithTariffsDto.class));
     }
 
     @Test
