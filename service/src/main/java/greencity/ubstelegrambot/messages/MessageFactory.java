@@ -229,7 +229,7 @@ public class MessageFactory {
         return SendMessage
             .builder()
             .chatId(chatId)
-            .text(MessageProvider.get(lang, "client.support.message.callback.query"))
+            .text(MessageProvider.get(lang, "client.support.message.change.language"))
             .replyMarkup(KeyboardFactory.userSupportKeyboard(lang))
             .build();
     }

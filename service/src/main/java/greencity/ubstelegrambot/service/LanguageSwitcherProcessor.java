@@ -4,6 +4,7 @@ import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
 import greencity.repository.TelegramChatRepository;
+import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @RequiredArgsConstructor
 public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
     private final TelegramChatRepository chatRepository;
+    private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramUtils telegramUtils;
 
     @Override
@@ -37,16 +39,29 @@ public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
         chat.setLanguageCode(newLanguage);
         chatRepository.save(chat);
 
-        if (chat.getChatState() == ChatState.NORMAL)
-            return processLanguageSwitchRequest(chatId, newLanguage);
-        else if (chat.getChatState() == ChatState.IN_SUPPORT) {
-            return MessageFactory.createSupportReplyMarkup(chatId, newLanguage);
-        } else
-            return null;
+        switch (chat.getChatState()) {
+            case NORMAL -> {
+                if (telegramManagerRepository.existsByChatId(chatId)) {
+                    return processLanguageSwitchForManagerRequest(chatId,  newLanguage);
+                }
+                return processLanguageSwitchRequest(chatId, newLanguage);
+            }
+            case IN_SUPPORT -> {
+                return MessageFactory.createSupportReplyMarkup(chatId, newLanguage);
+            }
+            default -> {
+                return  null;
+            }
+        }
     }
 
     private SendMessage processLanguageSwitchRequest(String chatId, String lang) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory.createAvailableCommandsMessage(chatId, lang));
+    }
+
+    private SendMessage processLanguageSwitchForManagerRequest(String chatId, String lang) {
+        return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
+                MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang));
     }
 }

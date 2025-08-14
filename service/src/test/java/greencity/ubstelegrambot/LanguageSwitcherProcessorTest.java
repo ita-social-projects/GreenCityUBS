@@ -4,6 +4,7 @@ import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
 import greencity.repository.TelegramChatRepository;
+import greencity.repository.TelegramManagerRepository;
 import greencity.ubstelegrambot.service.LanguageSwitcherProcessor;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ class LanguageSwitcherProcessorTest {
 
     @Mock
     private TelegramUtils telegramUtils;
+
+    @Mock
+    private TelegramManagerRepository telegramManagerRepository;
 
     @InjectMocks
     private LanguageSwitcherProcessor processor;
@@ -83,7 +87,7 @@ class LanguageSwitcherProcessorTest {
         chat.setLanguageCode(TelegramBotConstants.UA);
         chat.setChatState(ChatState.IN_SUPPORT);
 
-        when(chatRepository.findByChatId("123")).thenReturn(java.util.Optional.of(chat));
+        when(chatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
 
         SendMessage result = processor.process(update);
 
@@ -135,7 +139,7 @@ class LanguageSwitcherProcessorTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
         chat.setLanguageCode(TelegramBotConstants.UA);
-        chat.setChatState(ChatState.ENTERING_GREEN_OFFICE_EMAIL);
+        chat.setChatState(ChatState.MAKING_FEEDBACK);
 
         when(chatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
 
@@ -145,6 +149,28 @@ class LanguageSwitcherProcessorTest {
         assertEquals(TelegramBotConstants.EN, chat.getLanguageCode());
         verify(chatRepository).save(chat);
         verifyNoInteractions(telegramUtils);
+    }
+
+    @Test
+    void testLanguageSwitchToUA_NormalChat_Manager() {
+        Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_UA_CALLBACK);
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123");
+        chat.setLanguageCode(TelegramBotConstants.EN);
+        chat.setChatState(ChatState.NORMAL);
+
+        when(chatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
+        when(telegramManagerRepository.existsByChatId("123")).thenReturn(true);
+        SendMessage expectedMessage = new SendMessage("123", "Manager commands");
+        when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
+                .thenReturn(expectedMessage);
+
+        SendMessage result = processor.process(update);
+
+        assertNotNull(result);
+        assertEquals(expectedMessage, result);
+        verify(chatRepository).save(chat);
+        assertEquals(TelegramBotConstants.UA, chat.getLanguageCode());
     }
 
     @Test
