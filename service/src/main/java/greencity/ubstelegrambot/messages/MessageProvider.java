@@ -10,6 +10,25 @@ import java.util.Map;
 public class MessageProvider {
     private static final Map<String, Map<String, String>> cache = new HashMap<>();
 
+    /**
+     * Retrieves a localized message for the specified language code and message key.
+     * <p>
+     * This method first checks the internal cache for messages corresponding to the provided
+     * {@code langCode}. If the messages for the given language are not already cached, they
+     * are loaded via {@link MessageProvider#loadMessages(String)} and stored in the cache.
+     * Then, it returns the message mapped to the given {@code key}.
+     * </p>
+     * <p>
+     * If the message key is not found in the loaded messages, a default string in the format
+     * {@code "Message not found: <key>"} is returned.
+     * </p>
+     *
+     * @param langCode the language code (e.g., {@code "en"}, {@code "ua"}) used to
+     *                 determine which language messages to retrieve.
+     * @param key      the message key to look up in the localized messages.
+     * @return the localized message if found; otherwise, a default "Message not found" string.
+     * @throws NullPointerException if {@code langCode} or {@code key} is {@code null}.
+     */
     public static String get(String langCode, String key) {
         Map<String, String> messages = cache.computeIfAbsent(langCode, MessageProvider::loadMessages);
         return messages.getOrDefault(key, "Message not found: " + key);

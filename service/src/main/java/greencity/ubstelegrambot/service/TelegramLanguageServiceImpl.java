@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 public class TelegramLanguageServiceImpl implements TelegramLanguageService {
     private final TelegramChatRepository telegramChatRepository;
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public String getChatLanguage(String chatId) {
         return telegramChatRepository.findByChatId(chatId)

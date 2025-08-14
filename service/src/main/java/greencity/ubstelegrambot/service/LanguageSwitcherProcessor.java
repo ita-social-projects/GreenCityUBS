@@ -19,6 +19,10 @@ public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramUtils telegramUtils;
 
+    /**
+     * Handles incoming updates related to switch language in Telegram.
+     * {@inheritDoc}
+     */
     @Override
     public SendMessage process(Update update) {
         String chatId = update.getCallbackQuery().getFrom().getId().toString();

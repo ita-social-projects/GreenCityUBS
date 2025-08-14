@@ -76,6 +76,10 @@ public class TelegramServiceImpl implements TelegramService {
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
     private final UserRemoteClient userRemoteClient;
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files) {
         TelegramChat chat = telegramChatRepository.findById(request.getChatId())

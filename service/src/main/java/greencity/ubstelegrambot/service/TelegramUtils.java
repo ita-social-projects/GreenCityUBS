@@ -34,11 +34,31 @@ public class TelegramUtils {
     private final PositionRepository positionRepository;
     private final TelegramChatRepository telegramChatRepository;
 
+    /**
+     * Detects the asset type based on the content type of the given multipart file.
+     *
+     * @param file {@link MultipartFile} the multipart file whose type needs to be detected
+     * @return the corresponding {@link AssetType} based on the file's content type
+     */
     public static AssetType detectAssetType(MultipartFile file) {
         String contentType = file.getContentType();
         return detectAssetType(contentType);
     }
 
+    /**
+     * Detects the asset type based on the given content type string.
+     *
+     * <ul>
+     *   <li>If {@code file} is {@code null}, returns {@link AssetType#FILE}.</li>
+     *   <li>If content type starts with {@code image/} (excluding SVG), returns {@link AssetType#IMAGE}.</li>
+     *   <li>If content type starts with {@code video/}, returns {@link AssetType#VIDEO}.</li>
+     *   <li>If content type starts with {@code audio/}, returns {@link AssetType#AUDIO}.</li>
+     *   <li>Otherwise, returns {@link AssetType#FILE}.</li>
+     * </ul>
+     *
+     * @param file the MIME type string
+     * @return the corresponding {@link AssetType}
+     */
     public static AssetType detectAssetType(String file) {
         if (file == null) {
             return AssetType.FILE;
@@ -57,6 +77,12 @@ public class TelegramUtils {
         return AssetType.FILE;
     }
 
+    /**
+     * Extracts the file name from the given file path.
+     *
+     * @param filePath {@link String} the full file path (may contain slashes)
+     * @return the file name without the path, or {@code null} if the input is {@code null} or empty
+     */
     public static String getFileNameFromPath(String filePath) {
         if (filePath == null || filePath.isEmpty()) {
             return null;
@@ -68,6 +94,12 @@ public class TelegramUtils {
         return filePath;
     }
 
+    /**
+     * Determines the MIME content type for a file based on its extension.
+     *
+     * @param filePath {@link String} the file path or file name
+     * @return a MIME type string (e.g., {@code image/jpeg}), or {@code application/octet-stream} if unknown
+     */
     public static String getFileContentType(String filePath) {
         if (filePath == null) {
             return "application/octet-stream";
@@ -82,6 +114,12 @@ public class TelegramUtils {
         return "application/octet-stream";
     }
 
+    /**
+     * Validates whether the given email address is in a correct format.
+     *
+     * @param email {@link String} the email string to validate
+     * @return {@code true} if the email matches the pattern, {@code false} otherwise
+     */
     public static boolean isValidEmail(String email) {
         if (email == null) {
             return false;
@@ -91,6 +129,15 @@ public class TelegramUtils {
         return matcher.matches();
     }
 
+    /**
+     * Checks if the specified employee has a manager-related position.
+     *
+     * Positions with IDs {@code 1} (Service Manager) and {@code 2} (Manager) are considered manager roles.
+     *
+     * @param employee {@link Employee} the employee entity to check
+     * @return {@code true} if the employee holds a manager or service manager position, {@code false} otherwise
+     * @throws NotFoundException if a required position is not found in the repository
+     */
     public boolean checkIsEmployeeManager(Employee employee) {
         var employeePositions = employee.getEmployeePosition();
 
@@ -103,6 +150,14 @@ public class TelegramUtils {
         return employeePositions.contains(manager) || employeePositions.contains(serviceManager);
     }
 
+    /**
+     * Updates the state of a Telegram chat and returns a response message.
+     *
+     * @param chatId   {@link String} the ID of the chat to update
+     * @param newState {@link ChatState} the new state to set for the chat
+     * @param message  {@link SendMessage} the message to return as a response
+     * @return the provided {@link SendMessage} if the chat exists, or an unknown error message otherwise
+     */
     public SendMessage updateChatStateAndRespond(
         String chatId,
         ChatState newState,
@@ -117,6 +172,13 @@ public class TelegramUtils {
         return message;
     }
 
+    /**
+     * Downloads a file from Telegram servers and returns its contents as a byte array.
+     *
+     * @param file {@link File} the file metadata containing the URL
+     * @return the file's contents as a byte array
+     * @throws IOException if an error occurs during download or reading the stream
+     */
     public byte[] fileToByteArray(File file) throws IOException {
         URI uri = URI.create(file.getFileUrl(telegramBotToken));
         return IOUtils.toByteArray(uri.toURL().openStream());
