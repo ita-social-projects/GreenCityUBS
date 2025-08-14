@@ -17,6 +17,7 @@ public class KeyboardFactory {
 
     /**
      * Method creates InlineKeyboardMarkup for help command for user.
+     *
      * @param lang {@link String} is a language code of the telegram chat.
      * @return InlineKeyboardMarkup with four buttons: start command, help command,
      *         login command and client support command.
@@ -43,9 +44,10 @@ public class KeyboardFactory {
             .build();
     }
 
-
     /**
-     * @return two button that can change a chat language.
+     * Return two button that can change a chat language.
+     *
+     * @return two {@link InlineKeyboardButton}.
      */
     private static List<InlineKeyboardButton> createLanguagesButton() {
         InlineKeyboardButton uaButton = InlineKeyboardButton.builder()
@@ -62,6 +64,7 @@ public class KeyboardFactory {
 
     /**
      * Method creates InlineKeyboardMarkup for help command for manager.
+     *
      * @param lang {@link String} is a language code of the telegram chat.
      * @return {@link InlineKeyboardMarkup} with one buttons: logout command.
      */
@@ -117,6 +120,7 @@ public class KeyboardFactory {
 
     /**
      * Creates ReplyKeyboardMarkup for user support keyboard.
+     *
      * @param lang {@link String} is a language code of the telegram chat.
      * @return ReplyKeyboardMarkup with one row containing button for stopping
      *         support mode and resize keyboard flag is set to true.
@@ -137,6 +141,7 @@ public class KeyboardFactory {
 
     /**
      * Creates InlineKeyboardMarkup for back to the main menu.
+     *
      * @param lang {@link String} is a language code of the telegram chat.
      * @return {@link InlineKeyboardMarkup} with one row containing button for
      *         returning to the main menu.
@@ -156,7 +161,7 @@ public class KeyboardFactory {
      * keyboard.
      *
      * @param callBackData {@link String} is callback data.
-     * @param lang {@link String} is a language code of the telegram chat.
+     * @param lang         {@link String} is a language code of the telegram chat.
      * @return {@link InlineKeyboardMarkup} with two rows containing buttons for say
      *         yes and for returning to the main menu keyboard.
      */
@@ -175,6 +180,7 @@ public class KeyboardFactory {
     /**
      * Creates an inline keyboard with feedback rating buttons and an additional
      * "Back to Main Menu" button.
+     *
      * @param lang {@link String} is a language code of the telegram chat.
      * @return an {@link InlineKeyboardMarkup} containing rating options and a back
      *         button

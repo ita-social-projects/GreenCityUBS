@@ -46,7 +46,7 @@ public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
         switch (chat.getChatState()) {
             case NORMAL -> {
                 if (telegramManagerRepository.existsByChatId(chatId)) {
-                    return processLanguageSwitchForManagerRequest(chatId,  newLanguage);
+                    return processLanguageSwitchForManagerRequest(chatId, newLanguage);
                 }
                 return processLanguageSwitchRequest(chatId, newLanguage);
             }
@@ -54,7 +54,7 @@ public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
                 return MessageFactory.createSupportReplyMarkup(chatId, newLanguage);
             }
             default -> {
-                return  null;
+                return null;
             }
         }
     }
@@ -66,6 +66,6 @@ public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
 
     private SendMessage processLanguageSwitchForManagerRequest(String chatId, String lang) {
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang));
+            MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang));
     }
 }

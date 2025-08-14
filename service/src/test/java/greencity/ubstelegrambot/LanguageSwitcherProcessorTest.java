@@ -163,7 +163,7 @@ class LanguageSwitcherProcessorTest {
         when(telegramManagerRepository.existsByChatId("123")).thenReturn(true);
         SendMessage expectedMessage = new SendMessage("123", "Manager commands");
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         SendMessage result = processor.process(update);
 

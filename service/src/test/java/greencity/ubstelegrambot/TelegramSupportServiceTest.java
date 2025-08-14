@@ -147,20 +147,20 @@ class TelegramSupportServiceTest {
             when(message.getText()).thenReturn(endSupportText);
 
             TelegramChat chatEntity = TelegramChat.builder()
-                    .chatId(chatId)
-                    .languageCode(lang)
-                    .build();
+                .chatId(chatId)
+                .languageCode(lang)
+                .build();
             when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chatEntity));
 
             SendMessage feedbackMessage = new SendMessage(chatId, "feedback");
             SendMessage deleteKeyboardMessage = new SendMessage(chatId, "delete_keyboard");
             mfMock.when(() -> MessageFactory.createFeedbackMessage(chatId, lang))
-                    .thenReturn(feedbackMessage);
+                .thenReturn(feedbackMessage);
             mfMock.when(() -> MessageFactory.deleteEndSupportKeyboardMessage(chatId, lang))
-                    .thenReturn(deleteKeyboardMessage);
+                .thenReturn(deleteKeyboardMessage);
 
             when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), eq(feedbackMessage)))
-                    .thenReturn(feedbackMessage);
+                .thenReturn(feedbackMessage);
 
             SendMessage result = telegramSupportService.processSupportMessage(message, lang);
 
