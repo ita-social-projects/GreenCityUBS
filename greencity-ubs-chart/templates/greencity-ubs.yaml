@@ -155,6 +155,12 @@ spec:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: GOOGLE-API-KEY
+
+        - name: LDM_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: LDM-SECRET-KEY
         
         - name: DOMAIN_NAME
           valueFrom:
