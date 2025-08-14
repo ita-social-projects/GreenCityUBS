@@ -1,14 +1,14 @@
 package greencity.ubstelegrambot.messages;
 
-import greencity.constant.TelegramBotConstants;
 import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MessageProvider {
-    private static final Map<String, Map<String, String>> cache = new HashMap<>();
+    private static final Map<String, Map<String, String>> cache = new ConcurrentHashMap<>();
 
     /**
      * Retrieves a localized message for the specified language code and message
@@ -40,7 +40,7 @@ public class MessageProvider {
 
     private static Map<String, String> loadMessages(String langCode) {
         String fileName = String.format("messages_%s.yaml", langCode);
-        try (InputStream inputStream = TelegramBotConstants.class.getClassLoader().getResourceAsStream(fileName)) {
+        try (InputStream inputStream = MessageProvider.class.getClassLoader().getResourceAsStream(fileName)) {
             if (inputStream != null) {
                 Yaml yaml = new Yaml();
                 Map<String, Object> loaded = yaml.load(inputStream);
