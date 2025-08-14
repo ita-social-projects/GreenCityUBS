@@ -188,7 +188,7 @@ public class TelegramController {
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(
-        @PathVariable(name = "chatId") String chatId, Pageable pageable) {
+        @PathVariable(name = "chatId") Long chatId, Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable));
     }
