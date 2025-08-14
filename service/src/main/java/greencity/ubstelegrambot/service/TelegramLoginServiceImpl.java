@@ -81,13 +81,13 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
                     .build());
 
             return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name,
-                TelegramBotConstants.UA);
+                lang);
         } catch (BadRequestException e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(TelegramBotConstants.UA, "login.failed"), TelegramBotConstants.UA);
+                MessageProvider.get(lang, "login.failed"), lang);
         } catch (Exception e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(TelegramBotConstants.UA, "something.went.wrong"), TelegramBotConstants.UA);
+                MessageProvider.get(lang, "something.went.wrong"), lang);
         }
     }
 }

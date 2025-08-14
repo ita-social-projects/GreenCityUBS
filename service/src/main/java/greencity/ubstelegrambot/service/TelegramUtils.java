@@ -137,9 +137,9 @@ public class TelegramUtils {
     }
 
     /**
-     * Checks if the specified employee has a manager-related position.
-     * Positions with IDs {@code 1} (Service Manager) and {@code 2} (Manager) are
-     * considered manager roles.
+     * Checks if the specified employee has a manager-related position. Positions
+     * with IDs {@code 1} (Service Manager) and {@code 2} (Manager) are considered
+     * manager roles.
      *
      * @param employee {@link Employee} the employee entity to check
      * @return {@code true} if the employee holds a manager or service manager
