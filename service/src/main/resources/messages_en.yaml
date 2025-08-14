@@ -6,7 +6,7 @@ menu:
   feedback: "Leave feedback"
   sorting_prices: "Sorting prices"
   login: "Log in as manager"
-yes: "Yes"
+yes.answer: "Yes"
 incorrect.login.format: "Incorrect format. Please enter your credentials as login:password"
 logout.manager: "Exit manager role"
 successful.logout.manager: "Successfully exited manager role!"

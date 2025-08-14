@@ -158,7 +158,7 @@ public class KeyboardFactory {
      */
     public static InlineKeyboardMarkup createProcessOrBackToMainMenuKeyboard(String callBackData, String lang) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        keyboard.add(createRow(MessageProvider.get(lang, "yes"), callBackData));
+        keyboard.add(createRow(MessageProvider.get(lang, "yes.answer"), callBackData));
         keyboard
             .add(createRow(MessageProvider.get(lang, "back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
 

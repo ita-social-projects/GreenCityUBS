@@ -6,7 +6,7 @@ menu:
   feedback: "Залишити відгук"
   sorting_prices: "Ціни на сортування"
   login: "Увійти як менеджер"
-yes: "Так"
+yes.answer: "Так"
 incorrect.login.format: "Некоректний формат. Будь ласка, введіть дані в форматі login:password"
 logout.manager: "Вийти з ролі менеджера"
 successful.logout.manager: "Успішно вийшли з ролі менеджера!"
