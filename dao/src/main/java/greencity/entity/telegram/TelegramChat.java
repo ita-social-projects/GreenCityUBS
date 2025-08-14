@@ -72,7 +72,8 @@ public class TelegramChat {
     @JoinColumn(name = "last_message_id")
     private TelegramMessage lastMessage;
 
-    @Column(nullable = false)
+    @Builder.Default
+    @Column(name = "language_code", nullable = false)
     private String languageCode = "ua";
 
     @Builder.Default
