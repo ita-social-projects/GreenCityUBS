@@ -36,8 +36,9 @@ public class TelegramMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
     @Column(name = "telegram_message_id")
-    private Integer telegramMessageId;
+    private Integer telegramMessageId = 0;
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
