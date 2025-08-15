@@ -17,9 +17,9 @@ public class ChatSpecifications {
             String pattern = "%" + searchTerm.toLowerCase() + "%";
 
             Expression<String> chatId = cb.lower(root.get("chatId"));
-            Expression<String> firstName = cb.lower(root.get("firstName"));
-            Expression<String> lastName = cb.lower(root.get("lastName"));
-            Expression<String> username = cb.lower(root.get("username"));
+            Expression<String> firstName = cb.lower(cb.coalesce(root.get("firstName"), ""));
+            Expression<String> lastName = cb.lower(cb.coalesce(root.get("lastName"), ""));
+            Expression<String> username = cb.lower(cb.coalesce(root.get("username"), ""));
             Expression<String> fullNameFirstAndLast = cb.concat(cb.concat(firstName, " "), lastName);
             Expression<String> fullNameLastAndFirst = cb.concat(cb.concat(lastName, " "), firstName);
 
