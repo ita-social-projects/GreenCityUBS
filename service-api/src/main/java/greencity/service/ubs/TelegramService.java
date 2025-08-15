@@ -76,4 +76,6 @@ public interface TelegramService {
      * @param update the Telegram update object to process
      */
     TelegramUpdateProcessor processUpdate(Update update);
+
+    void editManagerMessage(EditTelegramMessageRequest request);
 }

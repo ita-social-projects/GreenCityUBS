@@ -5,6 +5,7 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.MarkMessagesAsReadRequest;
 import greencity.dto.telegram.TelegramMessageDto;
@@ -204,5 +205,18 @@ public class TelegramController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void markMessagesAsRead(@RequestBody MarkMessagesAsReadRequest request) {
         telegramService.markMessagesAsRead(request);
+    }
+
+    @Operation(summary = "Edit telegram message")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @PutMapping(value = "/message/edit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void editMessage(@RequestBody @Valid EditTelegramMessageRequest request) {
+         telegramService.editManagerMessage(request);
     }
 }

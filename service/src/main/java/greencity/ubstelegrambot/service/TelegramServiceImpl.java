@@ -6,6 +6,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.ChatUserDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.MarkMessagesAsReadRequest;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
@@ -387,6 +388,14 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         return handleDefaultUpdate(update);
+    }
+
+    @Override
+    public void editManagerMessage(EditTelegramMessageRequest request) {
+        if(telegramChatRepository.existsByChatId((request.chatId())) &&
+                telegramMessageRepository.existsByTelegramMessageId(request.messageId())){
+            //todo implement logic
+        }
     }
 
     private boolean isStartCommand(Message message) {
