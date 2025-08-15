@@ -12,11 +12,13 @@ import greencity.enums.PaymentStatus;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
+import greencity.ubstelegrambot.UBSTelegramBot;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -36,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
+    @MockBean
+    private UBSTelegramBot telegramBot;
     @Autowired
     private BigOrderTableRepository bigOrderTableRepository;
     private static final String USER_LANGUAGE_ENG = "eng";
