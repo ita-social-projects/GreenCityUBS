@@ -122,7 +122,7 @@ class TelegramSupportServiceTest {
 
         assertEquals(TelegramBotConstants.FEEDBACK_MESSAGE, result.getText());
         verify(telegramNotificationService).notifyManagerAboutEndSupportModeFromUser(username);
-        verify(telegramExecutor).executeCommand(eq(MessageFactory.deleteEndSupportKeyboardMessage(chatId)));
+        verify(telegramExecutor).executeCommand(MessageFactory.deleteEndSupportKeyboardMessage(chatId));
     }
 
     @Test
