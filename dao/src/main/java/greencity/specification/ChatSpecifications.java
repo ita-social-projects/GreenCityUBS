@@ -24,13 +24,12 @@ public class ChatSpecifications {
             Expression<String> fullNameLastAndFirst = cb.concat(cb.concat(lastName, " "), firstName);
 
             return cb.or(
-                    cb.like(chatId, pattern),
-                    cb.like(firstName, pattern),
-                    cb.like(lastName, pattern),
-                    cb.like(username, pattern),
-                    cb.like(fullNameFirstAndLast, pattern),
-                    cb.like(fullNameLastAndFirst, pattern)
-            );
+                cb.like(chatId, pattern),
+                cb.like(firstName, pattern),
+                cb.like(lastName, pattern),
+                cb.like(username, pattern),
+                cb.like(fullNameFirstAndLast, pattern),
+                cb.like(fullNameLastAndFirst, pattern));
         };
     }
 
