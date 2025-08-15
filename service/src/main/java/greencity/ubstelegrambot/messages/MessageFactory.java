@@ -2,6 +2,8 @@ package greencity.ubstelegrambot.messages;
 
 import greencity.constant.TelegramBotConstants;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
@@ -439,5 +442,15 @@ public class MessageFactory {
         removeKeyboardMsg.setText(TelegramBotConstants.CLIENT_STOP_SUPPORT_MODE);
         removeKeyboardMsg.setReplyMarkup(new ReplyKeyboardRemove(true));
         return removeKeyboardMsg;
+    }
+
+    public static EditMessageText buildEditMessage(@NotBlank String chatId,
+                                                   Integer telegramMessageId,
+                                                   @NotBlank @Size(max = 1000) String text) {
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setChatId(chatId);
+        editMessage.setMessageId(telegramMessageId);
+        editMessage.setText(text);
+        return editMessage;
     }
 }

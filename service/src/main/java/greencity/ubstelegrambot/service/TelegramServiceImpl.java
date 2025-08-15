@@ -35,6 +35,7 @@ import greencity.service.ubs.UBSClientService;
 import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +45,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -392,9 +395,20 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public void editManagerMessage(EditTelegramMessageRequest request) {
-        if(telegramChatRepository.existsByChatId((request.chatId())) &&
-                telegramMessageRepository.existsByTelegramMessageId(request.messageId())){
-            //todo implement logic
+        if(telegramChatRepository.existsByChatId((request.chatId()))){
+            TelegramMessage message = telegramMessageRepository.findByTelegramMessageId(request.messageId())
+                    .orElseThrow(EntityNotFoundException::new);
+            if(message.getFromManager()) {
+                message.setUpdatedAt(Instant.now());
+                message.setText(request.newText());
+                telegramMessageRepository.save(message);
+
+                var bot = applicationContext.getBean(UBSTelegramBot.class);
+                EditMessageText editMessageText = MessageFactory
+                        .buildEditMessage(request.chatId(), message.getTelegramMessageId(), request.newText());
+                executor.executeCommand(bot, editMessageText);
+            }
+
         }
     }
 
