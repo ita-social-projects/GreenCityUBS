@@ -1,16 +1,7 @@
 package greencity.service.ubs.pdf.exporter;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Chunk;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
 import com.lowagie.text.pdf.draw.LineSeparator;
 import greencity.constant.pdf.PdfAddressConstants;
 import greencity.constant.pdf.PdfFileHeaders;
@@ -20,6 +11,7 @@ import greencity.dto.bag.BagForUserDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.service.ubs.file.export.FileExporter;
+import java.awt.image.BufferedImage;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.awt.Color;
@@ -59,8 +51,10 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             Document document = new Document(PageSize.A4)) {
             PdfWriter.getInstance(document, byteArrayOutputStream);
+            PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
             document.open();
             document.setDocumentLanguage(locale.getLanguage());
+            addQrCode(objectToWrite, document,writer);
             addHeader(PdfFileHeaders.getByLocale(ORDER_DETAILS, locale), document);
             addNewLine(document);
             addLineSeparator(document);
@@ -240,5 +234,29 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         Paragraph paragraph = new Paragraph(text, FontFactory.getFont(fontName, fontSize, bold ? Font.BOLD : 0));
         paragraph.setAlignment(alignment);
         document.add(paragraph);
+    }
+
+    private void addQrCode(OrdersDataForUserDto orderDetails, Document document, PdfWriter writer) {
+        try {
+            String url = "https://www.greencity.cx.ua/#/ubs/admin/order/" + orderDetails.getId();
+            BufferedImage qrImage = QrCodeGenerator.generateQrCodeImage(url, 150, 150);
+            Image pdfImage = PdfImageUtil.convertBufferedImageToImage(qrImage);
+            pdfImage.setAlignment(Image.ALIGN_LEFT);
+            pdfImage.scaleToFit(100, 100);
+            document.add(pdfImage);
+
+            float x = document.left();
+            float y = document.getPageSize().getHeight() - document.topMargin() - 100;
+
+            PdfAnnotation link = PdfAnnotation.createLink(
+                writer,
+                new com.lowagie.text.Rectangle(x, y, x + pdfImage.getScaledWidth(), y + pdfImage.getScaledHeight()),
+                PdfAnnotation.HIGHLIGHT_INVERT,
+                new com.lowagie.text.pdf.PdfAction(url)
+            );
+            writer.addAnnotation(link);
+        } catch (Exception e) {
+            System.err.println("Cannot add QR code to PDF: " + e.getMessage());
+        }
     }
 }
