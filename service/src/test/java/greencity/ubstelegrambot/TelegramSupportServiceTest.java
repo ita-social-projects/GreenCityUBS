@@ -6,12 +6,14 @@ import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
 import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.enums.ChatState;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.service.ubs.FileService;
 import greencity.service.ubs.TelegramNotificationService;
+import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramSupportServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
@@ -113,12 +115,14 @@ class TelegramSupportServiceTest {
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chatEntity));
+        when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
+            .thenReturn(MessageFactory.createFeedbackMessage(chatId));
 
         SendMessage result = telegramSupportService.processSupportMessage(message);
 
-        assertEquals(TelegramBotConstants.CLIENT_STOP_SUPPORT_MODE, result.getText());
-        verify(telegramChatRepository).save(chatEntity);
+        assertEquals(TelegramBotConstants.FEEDBACK_MESSAGE, result.getText());
         verify(telegramNotificationService).notifyManagerAboutEndSupportModeFromUser(username);
+        verify(telegramExecutor).executeCommand(eq(MessageFactory.deleteEndSupportKeyboardMessage(chatId)));
     }
 
     @Test

@@ -17,8 +17,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -85,7 +83,7 @@ public class TelegramController {
     })
     @GetMapping("/chats")
     public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search,
-        @PageableDefault(sort = "lastMessage.sendAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getChats(search, pageable));
     }
 
@@ -190,7 +188,7 @@ public class TelegramController {
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(
-        @PathVariable(name = "chatId") String chatId, Pageable pageable) {
+        @PathVariable(name = "chatId") Long chatId, Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable));
     }

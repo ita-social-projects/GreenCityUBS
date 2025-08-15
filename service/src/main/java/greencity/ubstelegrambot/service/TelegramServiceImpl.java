@@ -241,7 +241,7 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable) {
-        Specification<TelegramChat> spec = ChatSpecifications.hasNameLike(searchTerm);
+        Specification<TelegramChat> spec = ChatSpecifications.withSearchAndSort(searchTerm);
 
         Page<TelegramChat> chats = telegramChatRepository.findAll(spec, pageable);
 
