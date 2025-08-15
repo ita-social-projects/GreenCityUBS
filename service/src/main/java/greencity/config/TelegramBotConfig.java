@@ -2,10 +2,10 @@ package greencity.config;
 
 import greencity.service.ubs.TelegramService;
 import greencity.ubstelegrambot.UBSTelegramBot;
-import greencity.ubstelegrambot.service.TelegramExecutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -21,9 +21,8 @@ public class TelegramBotConfig {
     private String botToken;
 
     @Bean
-    public UBSTelegramBot ubsTelegramBot(TelegramService telegramService,
-        TelegramExecutor executor) {
-        return new UBSTelegramBot(botToken, botName, telegramService, executor);
+    public UBSTelegramBot ubsTelegramBot(@Lazy TelegramService telegramService) {
+        return new UBSTelegramBot(botToken, botName, telegramService);
     }
 
     @Bean
