@@ -9,13 +9,19 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageFactory {
@@ -452,5 +458,25 @@ public class MessageFactory {
         editMessage.setMessageId(telegramMessageId);
         editMessage.setText(text);
         return editMessage;
+    }
+
+    public static SendMediaGroup buildSendMediaGroup( String chatId, List<MultipartFile> images, String text){
+        List<InputMedia> media = new ArrayList<>();
+        try {
+            for (MultipartFile file : images) {
+                InputMediaPhoto photo = new InputMediaPhoto();
+                photo.setMedia(file.getInputStream(), file.getOriginalFilename());
+                media.add(photo);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (text != null && !text.isBlank()) {
+            media.getFirst().setCaption(text);
+        }
+        SendMediaGroup sendMediaGroup = new SendMediaGroup();
+        sendMediaGroup.setChatId(chatId);
+        sendMediaGroup.setMedias(media);
+        return sendMediaGroup;
     }
 }

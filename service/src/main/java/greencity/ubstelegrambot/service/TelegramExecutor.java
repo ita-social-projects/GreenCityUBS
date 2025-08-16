@@ -7,11 +7,14 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.List;
 
 @Component
 public class TelegramExecutor {
@@ -70,9 +73,9 @@ public class TelegramExecutor {
      *                and details
      * @throws MessageWasNotSent if the file cannot be sent
      */
-    public void executeSendFile(UBSTelegramBot bot, SendDocument message) {
+    public Message executeSendFile(UBSTelegramBot bot, SendDocument message) {
         try {
-            bot.execute(message);
+            return bot.execute(message);
         } catch (TelegramApiException e) {
             throw new MessageWasNotSent(e.getMessage());
         }
@@ -82,6 +85,14 @@ public class TelegramExecutor {
         try {
             return bot.execute(message);
         } catch (TelegramApiException e) {
+            throw new MessageWasNotSent(e.getMessage());
+        }
+    }
+
+    public List<Message> executeSendMediaGroup(UBSTelegramBot bot,  SendMediaGroup message) {
+        try {
+            return bot.execute(message);
+        } catch (Exception e) {
             throw new MessageWasNotSent(e.getMessage());
         }
     }
