@@ -21,7 +21,6 @@ import greencity.service.ubs.TelegramSupportService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.util.SimpleMultipartFile;
-import java.io.IOException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -35,6 +34,8 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,8 +63,6 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     @Transactional
 
     public SendMessage processSupportMessage(Message message, String lang) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-
         Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
             log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
@@ -78,7 +77,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 telegramUtils.updateChatStateAndRespond(chat.getChatId(), ChatState.NORMAL,
                     MessageFactory.createFeedbackMessage(chat.getChatId(), lang));
 
-            telegramExecutor.executeCommand(bot, MessageFactory.deleteEndSupportKeyboardMessage(chat.getChatId(), lang));
+            telegramExecutor.executeCommand(MessageFactory.deleteEndSupportKeyboardMessage(chat.getChatId(), lang));
 
             telegramNotificationService.notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
             return endSupportSendMessage;
@@ -93,7 +92,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             ? Optional.empty()
             : telegramMessageRepository.findByMediaGroupId(mediaGroupId);
         TelegramMessage telegramMessage = getOrSaveTelegramMessage(chat, message, mediaGroupId, previouslySavedMessage);
-        SendMessage filesFailMessage = processMessageFiles(chat, message, telegramMessage, previouslySavedMessage, lang);
+        SendMessage filesFailMessage =
+            processMessageFiles(chat, message, telegramMessage, previouslySavedMessage, chat.getLanguageCode());
 
         return filesFailMessage != null
             ? filesFailMessage
@@ -148,7 +148,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         } else if (!message.hasText() && !message.hasPhoto() && !message.hasDocument()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
             resultMessage = MessageFactory.buildMessage(message.getChatId().toString(),
-               MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, "manager.file.failed"));
         }
         return resultMessage;
     }
@@ -167,7 +167,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
-               MessageProvider.get(lang, "manager.photo.failed"));
+                MessageProvider.get(lang, "manager.photo.failed"));
         } else {
             fileInfo.setFileId(largestPhoto.getFileId());
             fileInfo.setFileSize(largestPhoto.getFileSize().longValue());
@@ -297,7 +297,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 contentForNotification,
                 chat.getId());
             return MessageFactory.buildMessage(chat.getChatId(),
-                MessageProvider.get(lang, "message.sent.to.manager"));
+                MessageProvider.get(chat.getLanguageCode(), "message.sent.to.manager"));
         } else {
             telegramMessageRepository.save(telegramMessage);
             log.info("Added asset to existing media group message: {}", mediaGroupId);

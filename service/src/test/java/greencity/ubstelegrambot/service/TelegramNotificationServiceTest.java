@@ -1,13 +1,11 @@
 package greencity.ubstelegrambot.service;
 
-
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.language.LanguageVO;
+import greencity.dto.notification.NotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.notifications.NotificationTemplate;
-import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
@@ -18,9 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 import java.time.Instant;
 import java.util.ArrayList;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -53,7 +53,7 @@ class TelegramNotificationServiceTest {
         User user = User.builder().id(32L).recipientEmail("user@email.com")
             .telegramBot(
                 new TelegramChat(1L, "123456", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
-                    "last_name", 0, null, null,
+                    "last_name", 0, null, null, TelegramBotConstants.UA,
                     new ArrayList<>(), new ArrayList<>(), Instant.now()))
             .build();
         UserNotification notification = new UserNotification()

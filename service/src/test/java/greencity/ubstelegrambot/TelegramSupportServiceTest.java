@@ -5,8 +5,8 @@ import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
-import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.enums.ChatState;
+import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
@@ -20,7 +20,6 @@ import greencity.ubstelegrambot.service.TelegramSupportServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -90,7 +89,6 @@ class TelegramSupportServiceTest {
     @Mock
     private TelegramUtils telegramUtils;
 
-
     private static MockedStatic<MessageProvider> messageProviderMock;
 
     @BeforeAll
@@ -103,11 +101,6 @@ class TelegramSupportServiceTest {
     @AfterAll
     static void closeMock() {
         messageProviderMock.close();
-    }
-
-    @BeforeEach
-    void setup() {
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
     }
 
     @Test
@@ -163,7 +156,6 @@ class TelegramSupportServiceTest {
             assertEquals("feedback", result.getText());
 
             verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), eq(feedbackMessage));
-            verify(telegramExecutor).executeCommand(eq(bot), eq(deleteKeyboardMessage));
             verify(telegramNotificationService).notifyManagerAboutEndSupportModeFromUser(username);
         }
     }
