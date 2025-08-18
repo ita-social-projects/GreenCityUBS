@@ -258,7 +258,6 @@ public class SecurityConfig {
                     "/notifications/**")
                 .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + "/**",
                     UBS_LINK + "/client/**",
                     UBS_LINK + "/order/{id}/cancellation",
                     UBS_LINK + "/certificate/{responseCode}",
@@ -271,14 +270,14 @@ public class SecurityConfig {
                     EXPORT_SETTINGS_LINKS)
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + TELEGRAM_LINKS,
+                    TELEGRAM_LINK + "/**",
                     SUPER_ADMIN_LINK + "/tariff/{id}")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
-                    UBS_LINK + TELEGRAM_LINKS)
+                    TELEGRAM_LINK + "/**")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
-                    UBS_LINK + TELEGRAM_LINKS)
+                    TELEGRAM_LINK + "/**")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",

@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import static greencity.constant.AppConstant.TELEGRAM_LINK;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -40,7 +41,7 @@ import org.springframework.web.multipart.MultipartFile;
  * Telegram bot users.
  */
 @RestController
-@RequestMapping("/ubs/telegram")
+@RequestMapping(TELEGRAM_LINK)
 @RequiredArgsConstructor
 @Validated
 public class TelegramController {
