@@ -207,7 +207,7 @@ public class TelegramController {
         telegramService.markMessagesAsRead(request);
     }
 
-    @Operation(summary = "Edit telegram message")
+    @Operation(summary = "Edit telegram manager message")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),

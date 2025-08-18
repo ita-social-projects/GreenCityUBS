@@ -47,6 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -93,7 +94,7 @@ public class TelegramServiceImpl implements TelegramService {
         if (files != null) {
             for (MultipartFile file : files) {
                 AssetType type = TelegramUtils.detectAssetType(file);
-                if (type == AssetType.IMAGE) images.add(file);
+                if (type == AssetType.IMAGE && canSendAsPhoto(file)) images.add(file);
                 else others.add(file);
             }
         }
@@ -132,7 +133,7 @@ public class TelegramServiceImpl implements TelegramService {
             } else {
                 SendPhoto sendPhoto;
                 try {
-                    sendPhoto = MessageFactory.createSendPhoto(chat.getChatId(), images.getFirst());
+                    sendPhoto = MessageFactory.createSendPhoto(chat.getChatId(), images.getFirst(), request.getText());
                 } catch (IOException e) {
                     throw new RuntimeException("Unable to send file to Telegram", e);
                 }
@@ -169,7 +170,7 @@ public class TelegramServiceImpl implements TelegramService {
                     .build();
             fileMessage.setAssets(List.of(asset));
 
-            Message sentMessage = sendFileByType(bot, chat, file, type);
+            Message sentMessage = sendAsDocument(bot, chat, file);
             fileMessage.setTelegramMessageId(sentMessage.getMessageId());
 
             telegramMessageRepository.save(fileMessage);
@@ -179,34 +180,6 @@ public class TelegramServiceImpl implements TelegramService {
         telegramChatRepository.save(chat);
     }
 
-//    private List<MessageAsset> handleFiles(UBSTelegramBot bot, TelegramChat chat,
-//        TelegramMessage message, MultipartFile[] files) {
-//        List<MessageAsset> assets = new ArrayList<>();
-//        if (files == null) {
-//            return assets;
-//        }
-//
-//        for (MultipartFile file : files) {
-//            validateFileSize(file);
-//
-//            String url = azureCloudStorageService.upload(file);
-//            AssetType assetType = TelegramUtils.detectAssetType(file);
-//
-//            MessageAsset asset = MessageAsset.builder()
-//                .url(url)
-//                .fileName(file.getOriginalFilename())
-//                .size(file.getSize())
-//                .contentType(file.getContentType())
-//                .type(assetType)
-//                .message(message)
-//                .build();
-//            assets.add(asset);
-//
-//            sendFileByType(bot, chat, file, assetType);
-//        }
-//        return assets;
-//    }
-
     private void validateFileSize(MultipartFile file) {
         if (file.getSize() > 50 * 1024 * 1024) {
             log.warn("File \"{}\" size exceeds 50MB", file.getName());
@@ -214,47 +187,25 @@ public class TelegramServiceImpl implements TelegramService {
         }
     }
 
-    private Message sendFileByType(UBSTelegramBot bot, TelegramChat chat,
-        MultipartFile file, AssetType assetType) {
+    private Message sendAsDocument(UBSTelegramBot bot, TelegramChat chat, MultipartFile file) {
+        log.info("Sending document: {} filename: {} to chat ID: {}",
+            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
         try {
-            if (assetType == AssetType.IMAGE) {
-                return sendImage(bot, chat, file);
-            } else if (assetType == AssetType.FILE) {
-                return sendAsDocument(bot, chat, file);
-            } else {
-                return sendAsDocument(bot, chat, file);
-            }
+            var sendFile = MessageFactory.createSendDocument(chat.getChatId(), file);
+            return executor.executeSendFile(bot, sendFile);
         } catch (IOException e) {
             log.error("Failed to send file to Telegram", e);
             throw new RuntimeException("Unable to send file to Telegram", e);
         }
     }
 
-    private Message sendAsDocument(UBSTelegramBot bot, TelegramChat chat, MultipartFile file) throws IOException {
-        log.info("Sending document: {} filename: {} to chat ID: {}",
-            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
-        var sendFile = MessageFactory.createSendDocument(chat.getChatId(), file);
-        return executor.executeSendFile(bot, sendFile);
-    }
-
-    private Message sendImage(UBSTelegramBot bot, TelegramChat chat, MultipartFile file) throws IOException {
-        boolean canSendAsPhoto = canSendAsPhoto(file);
-
-        if (canSendAsPhoto) {
-            log.info("Sending image as photo: {} filename: {} to chat ID: {}",
-                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
-            var sendPhotoMessage = MessageFactory.createSendPhoto(chat.getChatId(), file);
-            return executor.executeSendPhoto(bot, sendPhotoMessage);
-        } else {
-            log.info("Sending image as document: {} filename: {} to chat ID: {}",
-                file.getContentType(), file.getOriginalFilename(), chat.getChatId());
-            var sendDocumentMessage = MessageFactory.createSendDocument(chat.getChatId(), file);
-            return executor.executeSendFile(bot, sendDocumentMessage);
+    private boolean canSendAsPhoto(MultipartFile file) {
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(file.getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    private boolean canSendAsPhoto(MultipartFile file) throws IOException {
-        BufferedImage image = ImageIO.read(file.getInputStream());
         if (image == null) {
             return false;
         }
@@ -468,20 +419,28 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     public void editManagerMessage(EditTelegramMessageRequest request) {
-        if(telegramChatRepository.existsByChatId((request.chatId()))){
+        if (request.newText() == null || request.newText().isBlank()) {
+            throw new IllegalArgumentException("Text to edit cannot be null or empty");
+        }
+        if(telegramChatRepository.existsByChatId((request.chatId()))) {
             TelegramMessage message = telegramMessageRepository.findByTelegramMessageId(request.messageId())
                     .orElseThrow(EntityNotFoundException::new);
             if(message.getFromManager()) {
+                var bot = applicationContext.getBean(UBSTelegramBot.class);
                 message.setUpdatedAt(Instant.now());
                 message.setText(request.newText());
+                if (!message.getAssets().isEmpty()){
+                    EditMessageCaption editMessageCaption = MessageFactory
+                            .buildEditMessageCaption(request.chatId(), message.getTelegramMessageId(), request.newText());
+                    executor.executeCommand(bot,  editMessageCaption);
+                } else {
+                    EditMessageText editMessageText = MessageFactory
+                            .buildEditMessageText(request.chatId(), message.getTelegramMessageId(), request.newText());
+                    executor.executeCommand(bot, editMessageText);
+                }
+
                 telegramMessageRepository.save(message);
-
-                var bot = applicationContext.getBean(UBSTelegramBot.class);
-                EditMessageText editMessageText = MessageFactory
-                        .buildEditMessage(request.chatId(), message.getTelegramMessageId(), request.newText());
-                executor.executeCommand(bot, editMessageText);
             }
-
         }
     }
 
