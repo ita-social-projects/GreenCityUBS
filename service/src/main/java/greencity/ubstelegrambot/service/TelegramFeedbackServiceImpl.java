@@ -124,8 +124,8 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
      * {@inheritDoc}
      */
     @Override
-    public PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable) {
-        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatIdPageable(chatId, pageable);
+    public PageableDto<FeedbackDto> getAllFeedbacksByChatId(Long chatId, Pageable pageable) {
+        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatId(chatId, pageable);
         List<FeedbackDto> feedbackDtos = chatFeedbacks
             .getContent()
             .stream()

@@ -39,9 +39,9 @@ public interface TelegramFeedbackService {
     /**
      * Retrieves a pageable list of feedback entries filtered by chat ID.
      *
-     * @param chatId   {@link String} the unique identifier of the chat as a String
+     * @param chatId   {@link Long} the unique identifier of the chat as a String
      * @param pageable {@link Pageable} the pagination information
      * @return a pageable DTO containing feedback data for the specified chat
      */
-    PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable);
+    PageableDto<FeedbackDto> getAllFeedbacksByChatId(Long chatId, Pageable pageable);
 }

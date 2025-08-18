@@ -5,6 +5,7 @@ import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
+import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.enums.ChatState;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
@@ -28,7 +29,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -82,19 +82,14 @@ class TelegramSupportServiceTest {
     private FileService fileService;
 
     @Mock
-    private UBSTelegramBot bot;
-
-    @Mock
-    private ApplicationContext applicationContext;
-
-    @Mock
-    private TelegramExecutor executor;
+    private TelegramExecutor telegramExecutor;
 
     @Mock
     private MessageAssetRepository messageAssetRepository;
 
     @Mock
     private TelegramUtils telegramUtils;
+
 
     private static MockedStatic<MessageProvider> messageProviderMock;
 
@@ -168,7 +163,7 @@ class TelegramSupportServiceTest {
             assertEquals("feedback", result.getText());
 
             verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), eq(feedbackMessage));
-            verify(executor).executeCommand(eq(bot), eq(deleteKeyboardMessage));
+            verify(telegramExecutor).executeCommand(eq(bot), eq(deleteKeyboardMessage));
             verify(telegramNotificationService).notifyManagerAboutEndSupportModeFromUser(username);
         }
     }
@@ -240,7 +235,7 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(null);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(null);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
 
@@ -282,7 +277,7 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenThrow(new RuntimeException());
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenThrow(new TelegramBotExecutionException());
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
 
@@ -326,7 +321,7 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
 
@@ -372,7 +367,7 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
@@ -464,7 +459,7 @@ class TelegramSupportServiceTest {
         when(document.getMimeType()).thenReturn("application/pdf");
         when(document.getFileName()).thenReturn("file.pdf");
 
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
         when(file.getFilePath()).thenReturn("/path/to/file.pdf");
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any())).thenReturn("https://azure.com/file");
@@ -542,7 +537,7 @@ class TelegramSupportServiceTest {
         when(document.getMimeType()).thenReturn(null);
         when(document.getFileName()).thenReturn(null);
 
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
         when(file.getFilePath()).thenReturn("/path/to/file.pdf");
 
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
@@ -599,7 +594,7 @@ class TelegramSupportServiceTest {
             .build();
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
 
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
         when(file.getFilePath()).thenReturn("/path/photo.jpeg");
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any(MultipartFile.class))).thenReturn("https://azure.com/photo");

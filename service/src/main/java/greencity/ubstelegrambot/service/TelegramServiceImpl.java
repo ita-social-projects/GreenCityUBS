@@ -22,6 +22,7 @@ import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.producers.TelegramChatProducer;
+import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
@@ -33,17 +34,16 @@ import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.specification.ChatSpecifications;
-import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import javax.imageio.ImageIO;
@@ -61,13 +61,15 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class TelegramServiceImpl implements TelegramService {
+    private static final String USER_PROCESSOR_NAME = "userUpdateProcessor";
+    private static final String MANAGER_PROCESSOR_NAME = "managerUpdateProcessor";
+
     private final TelegramMessageRepository telegramMessageRepository;
     private final TelegramManagerRepository telegramManagerRepository;
-    private final ApplicationContext applicationContext;
     private final TelegramChatRepository telegramChatRepository;
     private final AzureCloudStorageService azureCloudStorageService;
     private final UBSClientService ubsClientService;
-    private final TelegramExecutor executor;
+    private final TelegramExecutor telegramExecutor;
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
@@ -94,14 +96,12 @@ public class TelegramServiceImpl implements TelegramService {
             .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-
         if (message.getText() != null && !message.getText().isBlank()) {
             var sendTextMessage = MessageFactory.buildMessage(chat.getChatId(), message.getText());
-            executor.executeCommand(bot, sendTextMessage);
+            telegramExecutor.executeCommand(sendTextMessage);
         }
 
-        List<MessageAsset> assets = handleFiles(bot, chat, message, files);
+        List<MessageAsset> assets = handleFiles(chat, message, files);
 
         message.setAssets(assets);
         telegramMessageRepository.save(message);
@@ -110,7 +110,7 @@ public class TelegramServiceImpl implements TelegramService {
         telegramChatRepository.save(chat);
     }
 
-    private List<MessageAsset> handleFiles(UBSTelegramBot bot, TelegramChat chat,
+    private List<MessageAsset> handleFiles(TelegramChat chat,
         TelegramMessage message, MultipartFile[] files) {
         List<MessageAsset> assets = new ArrayList<>();
         if (files == null) {
@@ -133,7 +133,7 @@ public class TelegramServiceImpl implements TelegramService {
                 .build();
             assets.add(asset);
 
-            sendFileByType(bot, chat, file, assetType);
+            sendFileByType(chat, file, assetType);
         }
         return assets;
     }
@@ -145,40 +145,40 @@ public class TelegramServiceImpl implements TelegramService {
         }
     }
 
-    private void sendFileByType(UBSTelegramBot bot, TelegramChat chat,
+    private void sendFileByType(TelegramChat chat,
         MultipartFile file, AssetType assetType) {
         try {
             if (assetType == AssetType.FILE) {
-                sendAsDocument(bot, chat, file);
+                sendAsDocument(chat, file);
             } else if (assetType == AssetType.IMAGE) {
-                sendImage(bot, chat, file);
+                sendImage(chat, file);
             }
         } catch (IOException e) {
             log.error("Failed to send file to Telegram", e);
-            throw new RuntimeException("Unable to send file to Telegram", e);
+            throw new TelegramBotExecutionException("Unable to send file to Telegram", e);
         }
     }
 
-    private void sendAsDocument(UBSTelegramBot bot, TelegramChat chat, MultipartFile file) throws IOException {
+    private void sendAsDocument(TelegramChat chat, MultipartFile file) throws IOException {
         log.info("Sending document: {} filename: {} to chat ID: {}",
             file.getContentType(), file.getOriginalFilename(), chat.getChatId());
         var sendFile = MessageFactory.createSendDocument(chat.getChatId(), file);
-        executor.executeSendFile(bot, sendFile);
+        telegramExecutor.executeSendFile(sendFile);
     }
 
-    private void sendImage(UBSTelegramBot bot, TelegramChat chat, MultipartFile file) throws IOException {
+    private void sendImage(TelegramChat chat, MultipartFile file) throws IOException {
         boolean canSendAsPhoto = canSendAsPhoto(file);
 
         if (canSendAsPhoto) {
             log.info("Sending image as photo: {} filename: {} to chat ID: {}",
                 file.getContentType(), file.getOriginalFilename(), chat.getChatId());
             var sendPhotoMessage = MessageFactory.createSendPhoto(chat.getChatId(), file);
-            executor.executeSendPhoto(bot, sendPhotoMessage);
+            telegramExecutor.executeSendPhoto(sendPhotoMessage);
         } else {
             log.info("Sending image as document: {} filename: {} to chat ID: {}",
                 file.getContentType(), file.getOriginalFilename(), chat.getChatId());
             var sendDocumentMessage = MessageFactory.createSendDocument(chat.getChatId(), file);
-            executor.executeSendFile(bot, sendDocumentMessage);
+            telegramExecutor.executeSendFile(sendDocumentMessage);
         }
     }
 
@@ -377,8 +377,9 @@ public class TelegramServiceImpl implements TelegramService {
      * {@inheritDoc}
      */
     @Override
-    public TelegramUpdateProcessor processUpdate(Update update) {
+    public void processUpdate(Update update) {
         Message message = update.getMessage();
+        TelegramUpdateProcessor updateProcessor;
 
         if (isStartCommand(message)) {
             String uuid = extractUuid(message);
@@ -386,13 +387,18 @@ public class TelegramServiceImpl implements TelegramService {
             Optional<TelegramChat> chatOpt = telegramChatRepository.findByChatId(chatId.toString());
 
             if (chatOpt.isEmpty()) {
-                return handleNewChat(uuid, message, chatId);
+                updateProcessor = handleNewChat(uuid, message, chatId);
             } else {
-                return handleExistingChat(uuid, chatOpt.get(), chatId);
+                updateProcessor = handleExistingChat(uuid, chatOpt.get(), chatId);
             }
+        } else {
+            updateProcessor = handleDefaultUpdate(update);
         }
 
-        return handleDefaultUpdate(update);
+        SendMessage sendMessage = updateProcessor.process(update);
+        if (sendMessage != null) {
+            telegramExecutor.executeCommand(sendMessage);
+        }
     }
 
     private boolean isStartCommand(Message message) {
@@ -472,7 +478,7 @@ public class TelegramServiceImpl implements TelegramService {
     private TelegramUpdateProcessor resolveProcessorByUuid(String uuid, Long chatId) {
         if (uuid.isEmpty()) {
             log.info("No user found with uuid: {}", uuid);
-            return telegramUpdateProcessorMap.get("userUpdateProcessor");
+            return telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME);
         }
 
         Optional<Employee> employeeOpt = employeeRepository.findByUuid(uuid);
@@ -485,11 +491,11 @@ public class TelegramServiceImpl implements TelegramService {
                         .chatId(chatId.toString())
                         .employee(employee)
                         .build());
-                return telegramUpdateProcessorMap.get("managerUpdateProcessor");
+                return telegramUpdateProcessorMap.get(MANAGER_PROCESSOR_NAME);
             }
         }
 
-        return telegramUpdateProcessorMap.get("userUpdateProcessor");
+        return telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME);
     }
 
     private TelegramUpdateProcessor handleDefaultUpdate(Update update) {
@@ -513,7 +519,7 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         return telegramManagerRepository.findByChatId(chatId)
-            .map(m -> telegramUpdateProcessorMap.get("managerUpdateProcessor"))
-            .orElseGet(() -> telegramUpdateProcessorMap.get("userUpdateProcessor"));
+            .map(m -> telegramUpdateProcessorMap.get(MANAGER_PROCESSOR_NAME))
+            .orElseGet(() -> telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME));
     }
 }
