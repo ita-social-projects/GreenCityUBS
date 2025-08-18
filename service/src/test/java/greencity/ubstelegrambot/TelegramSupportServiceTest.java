@@ -231,7 +231,7 @@ class TelegramSupportServiceTest {
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.photo.failed")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed")));
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
@@ -273,7 +273,7 @@ class TelegramSupportServiceTest {
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.photo.failed")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed")));
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
             MessageProvider.get(TelegramBotConstants.UA, "photo.content"), id);
@@ -317,7 +317,7 @@ class TelegramSupportServiceTest {
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.photo.failed")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed")));
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
@@ -427,7 +427,7 @@ class TelegramSupportServiceTest {
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "manager.photo.failed"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed"), result.getText());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
     }
