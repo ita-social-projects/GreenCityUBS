@@ -869,6 +869,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
+        notificationService.notifyCanceledOrder(order);
         if (order.getPointsToUse() != 0 || !order.getCertificates().isEmpty()) {
             notificationService.notifyBonusesFromCanceledOrder(order);
             paymentService.processPointsRefundForOrder(order);

@@ -841,7 +841,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyCreatedOrder(Order order) {
         fillAndSendNotification(
-            getNotificationParametersForNewOrder(order),
+            getNotificationParametersWithCustomerInfo(order),
             order,
             NotificationType.CREATE_NEW_ORDER);
     }
@@ -894,7 +894,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {
+    private Set<NotificationParameter> getNotificationParametersWithCustomerInfo(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
@@ -963,8 +963,16 @@ public class NotificationServiceImpl implements NotificationService {
         userRemoteClient.sendGreenOfficeRequestNotification(notification);
     }
 
+    @Override
+    public void notifyCanceledOrder(Order order) {
+        fillAndSendNotification(
+            getNotificationParametersWithCustomerInfo(order),
+            order,
+            NotificationType.CANCELED_ORDER);
+    }
+
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language,
-        Long monthsOfAccountInactivity) {
+                                                            Long monthsOfAccountInactivity) {
         NotificationTemplate template = getNotificationTemplate(notification, SITE, templateRepository);
 
         String templateBody = resolveTemplateBody(language, SITE, template);

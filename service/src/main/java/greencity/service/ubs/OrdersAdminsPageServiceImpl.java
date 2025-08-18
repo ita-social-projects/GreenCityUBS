@@ -674,16 +674,19 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             notificationService.notifyCourierItineraryFormed(updatedOrder);
         }
 
-        if (updatedOrder.getOrderStatus() == OrderStatus.CANCELED
-            && (updatedOrder.getPointsToUse() != 0 || !updatedOrder.getCertificates().isEmpty())) {
-            notificationService.notifyBonusesFromCanceledOrder(updatedOrder);
-            paymentService.processPointsRefundForOrder(updatedOrder);
+        if (updatedOrder.getOrderStatus() == OrderStatus.CANCELED) {
+            notificationService.notifyCanceledOrder(updatedOrder);
 
-            if (!updatedOrder.getCertificates().isEmpty()) {
-                Set<Certificate> certificates = updatedOrder.getCertificates();
-                for (Certificate certificate : certificates) {
-                    certificate.setPoints(0);
-                    certificateRepository.save(certificate);
+            if (updatedOrder.getPointsToUse() != 0 || !updatedOrder.getCertificates().isEmpty()) {
+                notificationService.notifyBonusesFromCanceledOrder(updatedOrder);
+                paymentService.processPointsRefundForOrder(updatedOrder);
+
+                if (!updatedOrder.getCertificates().isEmpty()) {
+                    Set<Certificate> certificates = updatedOrder.getCertificates();
+                    for (Certificate certificate : certificates) {
+                        certificate.setPoints(0);
+                        certificateRepository.save(certificate);
+                    }
                 }
             }
         }

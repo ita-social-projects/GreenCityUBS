@@ -282,4 +282,14 @@ public interface NotificationService {
      * @author Chernenko Vitaliy
      */
     void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username);
+
+    /**
+     * Notify user that order has been canceled.
+     * This method is used when order status changed to CANCELED.
+     *
+     * @param order the order to send notification for
+     *
+     * @author Rostyslav Zadyraichuk
+     */
+    void notifyCanceledOrder(Order order);
 }
