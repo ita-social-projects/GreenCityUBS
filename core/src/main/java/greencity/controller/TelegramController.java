@@ -220,7 +220,7 @@ public class TelegramController {
     @PutMapping(value = "/message/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> editMessage(@RequestBody @Valid EditTelegramMessageRequest request) {
-         telegramService.editManagerMessage(request);
+        telegramService.editManagerMessage(request);
         return ResponseEntity.noContent().build();
     }
 

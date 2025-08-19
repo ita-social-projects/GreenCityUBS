@@ -296,4 +296,5 @@
     <include file="db/changelog/logs/2025-08-08-ch-update-chat-state-updated-at-field-in-telegram-chat.xml"/>
     <include file="db/changelog/logs/2025-08-07-ch-add-created-at-to-telegram-chat.xml"/>
     <include file="db/changelog/logs/2025-08-18-ch-add-column-telegrammessage-id-to-telegram-message-entity.xml"/>
+    <include file="db/changelog/logs/2025-08-19-ch-add-telegram-message-id-column-to-message-asset.xml"/>
 </databaseChangeLog>
