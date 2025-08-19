@@ -298,4 +298,6 @@
     <include file="db/changelog/logs/ch-insert-into-users-Pohranychnyi.xml"/>
     <include file="db/changelog/logs/2025-08-11-ch-insert-into-users-Pohranychnyi.xml"/>
     <include file="db/changelog/logs/ch-insert-into-user-Lys.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-cities-Kyiv-Lys.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-districts-for-Kyiv-Lys.xml"/>
 </databaseChangeLog>
