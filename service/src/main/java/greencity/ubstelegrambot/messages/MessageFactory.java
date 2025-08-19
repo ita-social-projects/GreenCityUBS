@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -489,6 +490,13 @@ public class MessageFactory {
                 .chatId(chatId)
                 .messageId(telegramMessageId)
                 .caption(text)
+                .build();
+    }
+
+    public static DeleteMessage buildDeleteMessage(@NotBlank String chatId, Integer telegramMessageId) {
+        return DeleteMessage .builder()
+                .chatId(chatId)
+                .messageId(telegramMessageId)
                 .build();
     }
 }

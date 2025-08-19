@@ -5,6 +5,7 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.MarkMessagesAsReadRequest;
@@ -23,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -210,13 +212,30 @@ public class TelegramController {
     @Operation(summary = "Edit telegram manager message")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @PutMapping(value = "/message/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void editMessage(@RequestBody @Valid EditTelegramMessageRequest request) {
+    public ResponseEntity<Void> editMessage(@RequestBody @Valid EditTelegramMessageRequest request) {
          telegramService.editManagerMessage(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Delete telegram manager message")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @DeleteMapping(value = "/message/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> deleteMessage(@RequestBody @Valid DeleteTelegramMessageRequest request) {
+        telegramService.deleteManagerMessage(request);
+        return ResponseEntity.noContent().build();
     }
 }

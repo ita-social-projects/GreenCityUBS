@@ -4,6 +4,7 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.MarkMessagesAsReadRequest;
 import greencity.dto.telegram.TelegramMessageDto;
@@ -82,4 +83,6 @@ public interface TelegramService {
     TelegramUpdateProcessor processUpdate(Update update);
 
     void editManagerMessage(EditTelegramMessageRequest request);
+
+    void deleteManagerMessage(DeleteTelegramMessageRequest request);
 }
