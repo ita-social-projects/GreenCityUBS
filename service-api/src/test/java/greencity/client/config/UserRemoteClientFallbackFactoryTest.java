@@ -22,7 +22,7 @@ class UserRemoteClientFallbackFactoryTest {
     private static final String USER_UUID = "849446d9-186f-4386-b76e-32aed1c3b1aa";
     private static final String USER_NAME = "John Doe";
     private static final String SUBJECT = "some subject";
-    private static final String LANGUAGE_UA = "ua";
+    private static final String LANGUAGE_UA = "uk";
     @InjectMocks
     private UserRemoteClientFallbackFactory fallbackFactory;
 

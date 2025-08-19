@@ -38,7 +38,7 @@ public class AppConstant {
     public static final String NOTIFICATOR_RESTART_LOG_MESSAGE = "Restarting scheduled notificator {}";
     public static final String UNKNOWN_EN = "Unknown";
     public static final String UNKNOWN_UK = "Невідомо";
-    public static final String LOCALE_UK_NAME = "ua";
+    public static final String LOCALE_UK_NAME = "uk";
     public static final String LOCALE_EN_NAME = "en";
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String MESSAGE = "message";

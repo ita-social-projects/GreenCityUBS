@@ -3796,7 +3796,7 @@ public class ModelUtils {
             .builder()
             .statusId(1L)
             .id(1L)
-            .nameUk("ua")
+            .nameUk("uk")
             .build();
     }
 
@@ -3833,7 +3833,7 @@ public class ModelUtils {
 
     public static List<RegionTranslationDto> getRegionTranslationsDto() {
         return List.of(
-            RegionTranslationDto.builder().languageCode("ua").regionName("Київська область").build(),
+            RegionTranslationDto.builder().languageCode("uk").regionName("Київська область").build(),
             RegionTranslationDto.builder().regionName("Kyiv region").languageCode("en").build());
     }
 
@@ -3848,7 +3848,7 @@ public class ModelUtils {
 
     public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
         return List.of(
-            AddLocationTranslationDto.builder().locationName("Київ").languageCode("ua").build(),
+            AddLocationTranslationDto.builder().locationName("Київ").languageCode("uk").build(),
             AddLocationTranslationDto.builder().locationName("Kyiv").languageCode("en").build());
     }
 
@@ -3897,7 +3897,7 @@ public class ModelUtils {
     public static List<LocationTranslationDto> getLocationTranslationDto() {
         return List.of(LocationTranslationDto.builder()
             .locationName("Київ")
-            .languageCode("ua")
+            .languageCode("uk")
             .build(),
             LocationTranslationDto.builder()
                 .locationName("Kyiv")
@@ -5449,7 +5449,7 @@ public class ModelUtils {
 
     public static PositionWithTranslateDto getPositionWithTranslateDto(Long id) {
         Map<String, String> nameTranslations = new HashMap<>();
-        nameTranslations.put("ua", "Водій");
+        nameTranslations.put("uk", "Водій");
         nameTranslations.put("en", "Driver");
 
         return PositionWithTranslateDto.builder()
@@ -5696,7 +5696,7 @@ public class ModelUtils {
 
     public static EventDto getDtoWithLanguage(String language, Event event) {
         return switch (language) {
-            case "ua" -> EventDto.builder()
+            case "uk" -> EventDto.builder()
                 .eventDate(event.getEventDate())
                 .eventName(event.getEventNameUk())
                 .authorName(event.getAuthorNameUk())
