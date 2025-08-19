@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.OrderHistory;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
@@ -189,7 +190,7 @@ class UBSManagementServiceImplTest {
     OrderAddressRepository orderAddressRepository;
 
     @Mock
-    private FileService fileService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock(strictness = Mock.Strictness.LENIENT)
     OrderRepository orderRepository;
@@ -616,7 +617,7 @@ class UBSManagementServiceImplTest {
         when(modelMapper.map(any(), eq(new TypeToken<List<OrderDetailInfoDto>>() {
         }.getType()))).thenReturn(TEST_ORDER_DETAILS_INFO_DTO_LIST);
 
-        List<OrderDetailInfoDto> actual = ubsManagementService.getOrderDetails(1L, "ua");
+        List<OrderDetailInfoDto> actual = ubsManagementService.getOrderDetails(1L, "uk");
 
         assertEquals(TEST_ORDER_DETAILS_INFO_DTO_LIST, actual);
 
@@ -661,7 +662,7 @@ class UBSManagementServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-                () -> ubsManagementService.getOrderDetails(1L, "ua"));
+                () -> ubsManagementService.getOrderDetails(1L, "uk"));
     }
 
     @Test
@@ -1705,7 +1706,7 @@ class UBSManagementServiceImplTest {
         UpdateAllOrderPageDto updateAllOrderPageDto = updateAllOrderPageDto();
         when(orderRepository.findById(4L)).thenReturn(Optional.ofNullable(order));
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua"));
+            () -> ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "uk"));
     }
 
     @Test
@@ -1713,7 +1714,7 @@ class UBSManagementServiceImplTest {
         UpdateAllOrderPageDto updateAllOrderPageDto = updateAllOrderPageDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(Order.builder().build()));
         assertThrows(BadRequestException.class,
-            () -> ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "ua"));
+            () -> ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "uuid", "uk"));
     }
 
     @Test
@@ -1730,49 +1731,49 @@ class UBSManagementServiceImplTest {
         assertEquals(expectedObject.getExportDetailsDto().getDateExport(),
             actual.getExportDetailsDto().getDateExport());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "uk");
 
         expectedObject = updateAllOrderPageDto();
         actual = updateAllOrderPageDto();
         assertEquals(expectedObject.getExportDetailsDto().getDateExport(),
             actual.getExportDetailsDto().getDateExport());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "uk");
 
         expectedObject = updateAllOrderPageDto();
         actual = updateAllOrderPageDto();
         assertEquals(expectedObject.getExportDetailsDto().getDateExport(),
             actual.getExportDetailsDto().getDateExport());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "uk");
 
         expectedObject = updateAllOrderPageDto();
         actual = updateAllOrderPageDto();
         assertEquals(expectedObject.getExportDetailsDto().getDateExport(),
             actual.getExportDetailsDto().getDateExport());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "uk");
 
         expectedObject = updateAllOrderPageDto();
         actual = updateAllOrderPageDto();
         assertEquals(expectedObject.getExportDetailsDto().getDateExport(),
             actual.getExportDetailsDto().getDateExport());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "uk");
 
         expectedObject = updateAllOrderPageDto();
         actual = updateAllOrderPageDto();
         assertEquals(expectedObject.getExportDetailsDto().getDateExport(),
             actual.getExportDetailsDto().getDateExport());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "uk");
 
         expectedObject = updateAllOrderPageDto();
         actual = updateAllOrderPageDto();
         assertEquals(expectedObject.getExportDetailsDto().getDateExport(),
             actual.getExportDetailsDto().getDateExport());
 
-        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(expectedObject, "uuid", "uk");
     }
 
     @Test
@@ -1784,7 +1785,7 @@ class UBSManagementServiceImplTest {
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(getReceivingStation()));
         when(receivingStationRepository.findAll()).thenReturn(List.of(getReceivingStation()));
 
-        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "test@gmail.com", "ua");
+        ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, "test@gmail.com", "uk");
 
         verify(orderRepository, times(2)).findById(1L);
     }

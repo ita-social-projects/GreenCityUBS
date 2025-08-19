@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="insert-into-cities-Kyiv" author="BohdanLys">
+        <insert tableName="cities">
+            <column name="id">1</column>
+            <column name="name_uk">Київ</column>
+            <column name="name_en">Kyiv</column>
+            <column name="region_id">16</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

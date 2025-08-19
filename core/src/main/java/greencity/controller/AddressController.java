@@ -12,7 +12,6 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.dto.user.UserVO;
 import greencity.service.ubs.AddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,7 +50,7 @@ public class AddressController {
     /**
      * Controller for getting all addresses for current order.
      *
-     * @param userUuid {@link UserVO} id.
+     * @param userUuid - user's uuid.
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Get all addresses for order")
@@ -70,7 +69,7 @@ public class AddressController {
      * Controller save address for current order.
      *
      * @param dtoRequest {@link CreateAddressRequestDto}.
-     * @param uuid       {@link UserVO} id.
+     * @param uuid       - user's uuid.
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Save order address")
@@ -94,7 +93,7 @@ public class AddressController {
      * Controller update address for current order.
      *
      * @param dtoRequest {@link OrderAddressDtoRequest}.
-     * @param uuid       {@link UserVO} id.
+     * @param uuid       - user's uuid.
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Update order address(if placeId is null updates only addressComment)")
@@ -118,7 +117,7 @@ public class AddressController {
      * Controller delete order address.
      *
      * @param id   {@link Long}.
-     * @param uuid {@link UserVO} id.
+     * @param uuid - user's uuid.
      * @return {@link HttpStatus} - http status.
      */
     @Operation(summary = "Delete order address")
@@ -142,7 +141,7 @@ public class AddressController {
      * Controller make address actual (default).
      *
      * @param addressId {@link Long}.
-     * @param uuid      {@link UserVO} id.
+     * @param uuid      - user's uuid.
      * @return {@link ResponseEntity}.
      */
     @Operation(summary = "Make address actual (default)")

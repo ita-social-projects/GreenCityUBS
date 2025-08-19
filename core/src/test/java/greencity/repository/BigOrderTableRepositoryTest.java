@@ -43,7 +43,7 @@ class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @Autowired
     private BigOrderTableRepository bigOrderTableRepository;
     private static final String USER_LANGUAGE_ENG = "eng";
-    private static final String USER_LANGUAGE_UA = "ua";
+    private static final String USER_LANGUAGE_UA = "uk";
     private static final List<Long> TARIFFS_ID_LIST = Collections.singletonList(1L);
     private static final OrderSearchCriteria DEFAULT_ORDER_SEARCH_CRITERIA = new OrderSearchCriteria();
     private static final LocalDateTime ORDER_DATE_START = LocalDateTime.of(2022, 1, 31, 23, 59, 59);
