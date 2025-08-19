@@ -21,7 +21,7 @@ class EmployeeWithTariffsIdDtoTest {
     private static final String validName = "Valid";
     private static final String validEmail = "mail@gmail.com";
     private static final String validPhoneNumber = "+380938754569";
-    private static final List<Long> validPositionIds = List.of(1L, 2L, 3L);
+    private static final Set<Long> validPositionIds = Set.of(1L, 2L, 3L);
     private static final long validId = 1L;
     private static final List<Long> validIds = List.of(1L);
 
@@ -203,7 +203,7 @@ class EmployeeWithTariffsIdDtoTest {
 
         assertThat(fieldsWithViolations).containsExactlyInAnyOrder(
             "employeeDto.email",
-            "employeeDto.employeePositions",
+            "employeeDto.employeePositionIds",
             "employeeDto.firstName",
             "employeeDto.lastName",
             "employeeDto.phoneNumber",

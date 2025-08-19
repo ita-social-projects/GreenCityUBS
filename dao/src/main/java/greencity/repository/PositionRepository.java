@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface PositionRepository extends JpaRepository<Position, Long> {
@@ -34,4 +36,12 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
      */
     @Query("SELECT p.id FROM Position p WHERE p.nameEn IN :names")
     List<Long> findAllIdsFromNames(@Param("names") List<String> names);
+
+    /**
+     * Finds all position that match the given list of position ids.
+     *
+     * @param ids the list of position ids to search for
+     * @return a set of positions that matches the given ids
+     */
+    Set<Position> findByIdIn(Collection<Long> ids);
 }

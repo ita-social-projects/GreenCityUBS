@@ -6,6 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.ErrorMessage;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.employee.CreateUpdateEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
@@ -96,7 +97,7 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void saveEmployeeTest() throws Exception {
-        EmployeeDto employeeDto = new EmployeeDto();
+        CreateUpdateEmployeeDto employeeDto = new CreateUpdateEmployeeDto();
         List<TariffWithChatAccess> tariffs = new ArrayList<>();
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         dto.setEmployeeDto(employeeDto);
@@ -140,7 +141,7 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void updateEmployeeTest() throws Exception {
-        EmployeeDto employeeDto = new EmployeeDto();
+        CreateUpdateEmployeeDto employeeDto = new CreateUpdateEmployeeDto();
         List<TariffWithChatAccess> tariffs = new ArrayList<>();
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         dto.setEmployeeDto(employeeDto);

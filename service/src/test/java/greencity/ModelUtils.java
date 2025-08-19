@@ -37,6 +37,7 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.CreateUpdateEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
@@ -1440,18 +1441,14 @@ public class ModelUtils {
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
         return EmployeeWithTariffsIdDto
             .builder()
-            .employeeDto(EmployeeDto.builder()
+            .employeeDto(CreateUpdateEmployeeDto.builder()
                 .id(1L)
                 .firstName("Петро")
                 .lastName("Петренко")
                 .phoneNumber("+380935577455")
                 .email("test@gmail.com")
                 .image("path")
-                .employeePositions(List.of(PositionDto.builder()
-                    .id(1L)
-                    .nameUk("Водій")
-                    .nameEn("Driver")
-                    .build()))
+                .employeePositionIds(Set.of(1L))
                 .build())
             .tariffs(null)
             .build();

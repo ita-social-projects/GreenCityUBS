@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -34,5 +34,5 @@ public class CreateUpdateEmployeeDto {
     private EmployeeStatus employeeStatus;
     private String image;
     @NotEmpty
-    private List<Long> employeePositionIds;
+    private Set<Long> employeePositionIds;
 }

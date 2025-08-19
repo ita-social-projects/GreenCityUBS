@@ -95,12 +95,14 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(repository.save(any())).thenReturn(employee);
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
-        when(positionRepository.existsPositionByIdAndNameUk(any(), any())).thenReturn(true);
+        when(positionRepository.findByIdIn(any())).thenReturn(Set.of(getPosition()));
+        when(positionRepository.existsById(any())).thenReturn(true);
         employeeService.save(dto, file);
 
         verify(repository, times(1)).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1)).save(any());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(any(), any());
+        verify(positionRepository, times(1)).existsById(any());
+        verify(positionRepository, atLeastOnce()).existsById(any());
     }
 
     @Test
@@ -136,17 +138,20 @@ class UBSManagementEmployeeServiceImplTest {
             .thenReturn(new ArrayList<>());
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
+        when(modelMapper.map(getPosition(), PositionDto.class)).thenReturn(getPositionDto(1L));
         when(repository.save(any())).thenReturn(employee);
-        when(positionRepository.existsPositionByIdAndNameUk(any(), any())).thenReturn(true);
+        when(positionRepository.findByIdIn(any())).thenReturn(Set.of(getPosition()));
+        when(positionRepository.existsById(any())).thenReturn(true);
         employeeService.save(dto, file);
 
         verify(repository, times(1))
             .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1))
             .existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(2)).map(any(), any());
+        verify(modelMapper, times(3)).map(any(), any());
         verify(repository, times(2)).save(any());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(any(), any());
+        verify(positionRepository, times(1)).findByIdIn(any());
+        verify(positionRepository, atLeastOnce()).existsById(any());
     }
 
     @Test
@@ -168,13 +173,15 @@ class UBSManagementEmployeeServiceImplTest {
 
         when(repository.existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail())).thenReturn(false);
         when(repository.save(any())).thenReturn(employee);
-        when(positionRepository.existsPositionByIdAndNameUk(any(), any())).thenReturn(true);
+        when(positionRepository.findByIdIn(any())).thenReturn(Set.of(getPosition()));
+        when(positionRepository.existsById(any())).thenReturn(true);
         employeeService.save(dto, null);
 
         verify(repository, times(1))
             .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1)).save(any());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(any(), any());
+        verify(positionRepository, times(1)).findByIdIn(any());
+        verify(positionRepository, atLeastOnce()).existsById(any());
     }
 
     @Test
@@ -236,7 +243,7 @@ class UBSManagementEmployeeServiceImplTest {
             "", "application/json", "random Bytes".getBytes());
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
-        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
+        when(positionRepository.existsById(position.getId())).thenReturn(true);
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(repository.save(any())).thenReturn(employee);
         doNothing().when(fileService).delete(retrievedEmployee.getImagePath());
@@ -246,7 +253,7 @@ class UBSManagementEmployeeServiceImplTest {
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository).save(any());
         verify(fileService).delete(retrievedEmployee.getImagePath());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
+        verify(positionRepository, atLeastOnce()).existsById(position.getId());
         verify(repository, times(2)).findById(anyLong());
     }
 
@@ -259,10 +266,10 @@ class UBSManagementEmployeeServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
-        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(false);
+        when(positionRepository.existsById(position.getId())).thenReturn(false);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         assertThrows(NotFoundException.class, () -> employeeService.update(dto, file));
-        verify(positionRepository).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
+        verify(positionRepository).existsById(position.getId());
         verify(repository).findById(anyLong());
     }
 
@@ -273,12 +280,12 @@ class UBSManagementEmployeeServiceImplTest {
         Position position = getPosition();
 
         when(modelMapper.map(dto, Employee.class)).thenReturn(employee);
-        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
+        when(positionRepository.existsById(position.getId())).thenReturn(true);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         employeeService.update(dto, null);
 
         verify(modelMapper, times(2)).map(any(), any());
-        verify(positionRepository, atLeastOnce()).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
+        verify(positionRepository, atLeastOnce()).existsById(position.getId());
         verify(repository, times(2)).findById(anyLong());
     }
 
@@ -310,13 +317,13 @@ class UBSManagementEmployeeServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
-        when(positionRepository.existsPositionByIdAndNameUk(position.getId(), position.getNameUk())).thenReturn(true);
+        when(positionRepository.existsById(position.getId())).thenReturn(true);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
         doThrow(HystrixRuntimeException.class).when(userRemoteClient)
             .updateEmployeeEmail(dto.getEmployeeDto().getEmail(), null);
 
         assertThrows(BadRequestException.class, () -> employeeService.update(dto, file));
-        verify(positionRepository).existsPositionByIdAndNameUk(position.getId(), position.getNameUk());
+        verify(positionRepository).existsById(position.getId());
         verify(repository, times(2)).findById(anyLong());
         verify(userRemoteClient).updateEmployeeEmail(dto.getEmployeeDto().getEmail(), null);
     }
