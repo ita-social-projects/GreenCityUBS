@@ -1,7 +1,5 @@
 package greencity.dto.employee;
 
-import greencity.ModelUtils;
-import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.TariffWithChatAccess;
 import jakarta.validation.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +21,7 @@ class EmployeeWithTariffsIdDtoTest {
     private static final String validName = "Valid";
     private static final String validEmail = "mail@gmail.com";
     private static final String validPhoneNumber = "+380938754569";
-    private static final List<PositionDto> validPositions = List.of(ModelUtils.getEmployeePosition());
+    private static final List<Long> validPositionIds = List.of(1L, 2L, 3L);
     private static final long validId = 1L;
     private static final List<Long> validIds = List.of(1L);
 
@@ -192,7 +190,7 @@ class EmployeeWithTariffsIdDtoTest {
     @Test
     void shouldBeInvalidWithEmptyOrMissingFields() {
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
-        dto.setEmployeeDto(new EmployeeDto());
+        dto.setEmployeeDto(new CreateUpdateEmployeeDto());
         dto.setTariffs(null);
 
         Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
@@ -216,13 +214,13 @@ class EmployeeWithTariffsIdDtoTest {
         String firstName, String lastName, String email, String phoneNumber) {
 
         return EmployeeWithTariffsIdDto.builder()
-            .employeeDto(EmployeeDto.builder()
+            .employeeDto(CreateUpdateEmployeeDto.builder()
                 .id(validId)
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber(phoneNumber)
                 .email(email)
-                .employeePositions(validPositions)
+                .employeePositionIds(validPositionIds)
                 .build())
             .tariffs(createTariffsWithChatAccess())
             .build();
