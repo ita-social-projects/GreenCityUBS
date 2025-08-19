@@ -56,11 +56,20 @@ class EmployeeWithTariffsIdDtoTest {
         when(positionRepository.findAllById(validPositionIds))
                 .thenReturn(validPositionIds.stream()
                         .map(id -> {
-                            var pos = new Position();
+                            Position pos = new Position();
                             pos.setId(id);
                             return pos;
                         })
                         .toList());
+
+        when(positionRepository.findByIdIn(validPositionIds))
+                .thenReturn(validPositionIds.stream()
+                        .map(id -> {
+                            Position pos = new Position();
+                            pos.setId(id);
+                            return pos;
+                        })
+                        .collect(Collectors.toSet()));
     }
 
     @Nested
@@ -232,7 +241,7 @@ class EmployeeWithTariffsIdDtoTest {
 
         Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
 
-        assertThat(violations).hasSize(7);
+        assertThat(violations).hasSize(6);
 
         Set<String> fieldsWithViolations = violations.stream()
             .map(v -> v.getPropertyPath().toString())

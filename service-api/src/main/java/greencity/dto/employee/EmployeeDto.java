@@ -1,6 +1,7 @@
 package greencity.dto.employee;
 
 import greencity.dto.position.PositionDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,5 +17,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class EmployeeDto extends BaseEmployeeDto {
     @NotEmpty
+    @Valid
     private List<PositionDto> employeePositions;
 }
