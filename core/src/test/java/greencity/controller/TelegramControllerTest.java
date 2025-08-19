@@ -117,7 +117,7 @@ class TelegramControllerTest {
 
     @Test
     void getAllFeedbacksByChatId_ShouldReturnOk() throws Exception {
-        Mockito.when(telegramFeedbackService.getAllFeedbacksByChatId(eq("123"), any(Pageable.class)))
+        Mockito.when(telegramFeedbackService.getAllFeedbacksByChatId(eq(123L), any(Pageable.class)))
             .thenReturn(feedbackDtoPage);
 
         mockMvc.perform(get("/ubs/telegram/feedbacks/123"))

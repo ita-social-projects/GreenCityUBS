@@ -3,15 +3,14 @@ package greencity.ubstelegrambot.service;
 import greencity.client.UserRemoteClient;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.repository.NotificationTemplateRepository;
 import greencity.repository.UserRepository;
 import greencity.service.notification.AbstractNotificationProvider;
-import greencity.ubstelegrambot.UBSTelegramBot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.Objects;
@@ -20,8 +19,7 @@ import static greencity.enums.NotificationReceiverType.MOBILE;
 @Service
 @Slf4j
 public class TelegramNotificationService extends AbstractNotificationProvider {
-    private final TelegramExecutor executor;
-    private final ApplicationContext applicationContext;
+    private final TelegramExecutor telegramExecutor;
     private static final NotificationReceiverType notificationType = MOBILE;
 
     /**
@@ -30,10 +28,9 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
     @Autowired
     public TelegramNotificationService(UserRemoteClient userRemoteClient,
         NotificationTemplateRepository templateRepository, UserRepository userRepository,
-        TelegramExecutor executor, ApplicationContext applicationContext) {
+        TelegramExecutor telegramExecutor) {
         super(userRemoteClient, templateRepository, notificationType, userRepository);
-        this.executor = executor;
-        this.applicationContext = applicationContext;
+        this.telegramExecutor = telegramExecutor;
     }
 
     /**
@@ -44,14 +41,11 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
         if (Objects.isNull(user)) {
             return false;
         }
-        return Objects.nonNull(user.getTelegramBot())
-            && Objects.nonNull(user.getTelegramBot().getChatId())
-            && Objects.equals(user.getTelegramBot().getIsNotify(), true);
-    }
 
-    private void sendMessageToUser(SendMessage sendMessage) {
-        var ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
-        executor.executeCommand(ubsTelegramBot, sendMessage);
+        TelegramChat chatWithBot = user.getTelegramBot();
+        return Objects.nonNull(chatWithBot)
+            && Objects.nonNull(chatWithBot.getChatId())
+            && Objects.equals(chatWithBot.getIsNotify(), true);
     }
 
     /**
@@ -64,6 +58,6 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
             notificationDto.getTitle() + "\n\n" + notificationDto.getBody());
         log.info("Sending message for user {}, with type {}", notification.getUser().getUuid(),
             notification.getNotificationType());
-        sendMessageToUser(sendMessage);
+        telegramExecutor.executeCommand(sendMessage);
     }
 }

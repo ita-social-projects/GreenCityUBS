@@ -41,6 +41,8 @@ public class ErrorMessage {
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String EMPLOYEE_WITH_UUID_NOT_FOUND = "Employee with current uuid doesn't exist: ";
+    public static final String EMPLOYEE_WITH_ENABLED_CHAT_NOT_FOUND_BY_TARIFF_ID =
+        "No employees with enabled chat found for tariff id: ";
     public static final String ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS =
         "Active employee with this email already exists: ";
     public static final String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
@@ -209,4 +211,8 @@ public class ErrorMessage {
     public static final String TARIFF_LIST_CONTAINS_DUPLICATES = "Tariffs cannot contain duplicates";
     public static final String USER_APP_UNAVAILABLE = "the User service is unavailable";
     public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
+    public static final String TELEGRAM_SEND_EXCEPTION = "Exception occurred while sending to telegram: %s";
+    public static final String TELEGRAM_RECEIVE_EXCEPTION = "Exception occurred while receiving from telegram: %s";
+    public static final String TELEGRAM_NULL_METHOD_EXCEPTION = "Execution method cannot be null";
+    public static final String TELEGRAM_INVALID_METHOD_EXCEPTION = "Invalid execution method type: %s";
 }

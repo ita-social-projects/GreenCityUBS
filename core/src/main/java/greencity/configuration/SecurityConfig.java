@@ -90,7 +90,6 @@ public class SecurityConfig {
                     UBS_LINK + "/getAllActiveCouriers",
                     UBS_LINK + "/locations/{courierId}",
                     UBS_LINK + "/tariffinfo/**",
-                    ADMIN_EMPL_LINK + "/get-employees/{tariffId}",
                     UBS_LINK + "/locationsByCourier/{courierId}",
                     UBS_LINK + "/tariffs/{locationId}",
                     USER_AGREEMENT_LINK + "/latest",
@@ -157,6 +156,9 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/**",
                     USER_AGREEMENT_LINK + "/**")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.POST,
+                    LOGS_LINKS)
+                .hasAnyRole(ADMIN, UBS_EMPLOYEE, USER)
                 .requestMatchers(HttpMethod.PUT,
                     UBS_MANAG_LINK + "/changeOrdersTableView",
                     UBS_MANAG_LINK + "/updateViolationToUser",
@@ -266,7 +268,9 @@ public class SecurityConfig {
                     "/notifications/**",
                     "/notifications/quantityUnreadNotifications",
                     UBS_LINK + "/check-if-tariff-exists/{id}",
-                    UBS_LINK + "/locations")
+                    UBS_LINK + "/locations",
+                    LOGS_LINKS,
+                    EXPORT_SETTINGS_LINKS)
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK + TELEGRAM_LINKS,
@@ -278,8 +282,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT,
                     UBS_LINK + TELEGRAM_LINKS)
                 .hasRole(UBS_EMPLOYEE)
-                .requestMatchers(LOGS_LINKS)
-                .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",
                     "/notifications/{notificationId}/unreadNotification")
