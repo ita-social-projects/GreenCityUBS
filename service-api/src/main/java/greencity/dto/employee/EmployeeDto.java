@@ -1,39 +1,20 @@
 package greencity.dto.employee;
 
-import greencity.annotations.ValidPhoneNumber;
-import greencity.constant.ValidationConstant;
 import greencity.dto.position.PositionDto;
-import greencity.enums.EmployeeStatus;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import java.util.List;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmployeeDto {
-    private Long id;
-    @NotNull
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
-    private String firstName;
-    @NotNull
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
-    private String lastName;
-    @NotNull
-    @ValidPhoneNumber
-    private String phoneNumber;
-    @NotNull
-    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
-    private String email;
-    private EmployeeStatus employeeStatus;
-    private String image;
+@EqualsAndHashCode(callSuper = true)
+public class EmployeeDto extends BaseEmployeeDto {
     @NotEmpty
     private List<PositionDto> employeePositions;
 }

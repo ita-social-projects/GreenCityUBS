@@ -4,6 +4,7 @@ import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.entity.user.employee.Position;
 import greencity.repository.PositionRepository;
 import jakarta.validation.ConstraintViolation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,8 @@ class EmployeeWithTariffsIdDtoTest {
         }
     }
 
-    private void mockPositionRepositoryForValidIds() {
+    @BeforeEach
+    void setUp() {
         when(positionRepository.findAllById(validPositionIds))
                 .thenReturn(validPositionIds.stream()
                         .map(id -> {
@@ -70,7 +72,6 @@ class EmployeeWithTariffsIdDtoTest {
         void shouldAcceptValidNames(String firstName, String lastName) {
             EmployeeWithTariffsIdDto dto =
                 createEmployeeWithTariffsDto(firstName, lastName, validEmail, validPhoneNumber);
-            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isEmpty();
         }
 
@@ -79,7 +80,6 @@ class EmployeeWithTariffsIdDtoTest {
         void shouldRejectInvalidNames(String firstName, String lastName) {
             EmployeeWithTariffsIdDto dto =
                 createEmployeeWithTariffsDto(firstName, lastName, validEmail, validPhoneNumber);
-            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isNotEmpty();
         }
 
@@ -136,7 +136,6 @@ class EmployeeWithTariffsIdDtoTest {
         @MethodSource("provideValidEmails")
         void shouldAcceptValidEmails(String email) {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, email, validPhoneNumber);
-            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isEmpty();
         }
 
@@ -144,7 +143,6 @@ class EmployeeWithTariffsIdDtoTest {
         @MethodSource("provideInvalidEmails")
         void shouldRejectInvalidEmails(String email) {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, email, validPhoneNumber);
-            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).hasSize(1);
         }
 
@@ -180,7 +178,6 @@ class EmployeeWithTariffsIdDtoTest {
         @MethodSource("validPhoneNumbers")
         void shouldAcceptValidPhoneNumbers(String phone) {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, phone);
-            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isEmpty();
         }
 
@@ -188,7 +185,6 @@ class EmployeeWithTariffsIdDtoTest {
         @MethodSource("invalidPhoneNumbers")
         void shouldRejectInvalidPhoneNumbers(String phone) {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, phone);
-            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isNotEmpty();
         }
 
@@ -196,7 +192,6 @@ class EmployeeWithTariffsIdDtoTest {
         void shouldRejectNullPhoneNumber() {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, null);
             Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
-            mockPositionRepositoryForValidIds();
             assertThat(violations)
                 .extracting(v -> v.getPropertyPath().toString())
                 .contains("employeeDto.phoneNumber");
@@ -226,7 +221,6 @@ class EmployeeWithTariffsIdDtoTest {
     @Test
     void shouldBeValidWithAllValidFields() {
         EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, validPhoneNumber);
-        mockPositionRepositoryForValidIds();
         assertThat(validator.validate(dto)).isEmpty();
     }
 
