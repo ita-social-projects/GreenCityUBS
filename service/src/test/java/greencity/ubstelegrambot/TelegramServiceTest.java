@@ -120,6 +120,9 @@ class TelegramServiceTest {
     @Mock
     private UserRemoteClient userRemoteClient;
 
+    @Mock
+    private TelegramUpdateProcessor updateProcessor;
+
     private TelegramServiceImpl telegramService;
 
     public Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
@@ -127,6 +130,7 @@ class TelegramServiceTest {
     @BeforeEach
     void setUp() {
         telegramUpdateProcessorMap = new HashMap<>();
+        telegramUpdateProcessorMap.put("userUpdateProcessor", updateProcessor);
 
         telegramService = new TelegramServiceImpl(
             telegramMessageRepository,
