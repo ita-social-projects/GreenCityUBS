@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import java.util.List;
 
@@ -18,5 +19,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class EmployeeDto extends BaseEmployeeDto {
     @NotEmpty
+    @Singular
     private List<@NotNull @Valid PositionDto> employeePositions;
 }
