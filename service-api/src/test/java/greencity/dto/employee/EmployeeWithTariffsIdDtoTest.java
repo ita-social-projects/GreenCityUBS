@@ -1,29 +1,65 @@
 package greencity.dto.employee;
 
 import greencity.dto.tariff.TariffWithChatAccess;
+import greencity.entity.user.employee.Position;
+import greencity.repository.PositionRepository;
 import jakarta.validation.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = EmployeeWithTariffsIdDtoTest.TestConfig.class)
 class EmployeeWithTariffsIdDtoTest {
-    private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    @Autowired
+    Validator validator;
+
+    @MockBean
+    private PositionRepository positionRepository;
+
     private static final String validName = "Valid";
     private static final String validEmail = "mail@gmail.com";
     private static final String validPhoneNumber = "+380938754569";
     private static final Set<Long> validPositionIds = Set.of(1L, 2L, 3L);
     private static final long validId = 1L;
     private static final List<Long> validIds = List.of(1L);
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public Validator validatorFactory() {
+            return new LocalValidatorFactoryBean();
+        }
+    }
+
+    private void mockPositionRepositoryForValidIds() {
+        when(positionRepository.findAllById(validPositionIds))
+                .thenReturn(validPositionIds.stream()
+                        .map(id -> {
+                            var pos = new Position();
+                            pos.setId(id);
+                            return pos;
+                        })
+                        .toList());
+    }
 
     @Nested
     @DisplayName("Name validation")
@@ -34,6 +70,7 @@ class EmployeeWithTariffsIdDtoTest {
         void shouldAcceptValidNames(String firstName, String lastName) {
             EmployeeWithTariffsIdDto dto =
                 createEmployeeWithTariffsDto(firstName, lastName, validEmail, validPhoneNumber);
+            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isEmpty();
         }
 
@@ -42,6 +79,7 @@ class EmployeeWithTariffsIdDtoTest {
         void shouldRejectInvalidNames(String firstName, String lastName) {
             EmployeeWithTariffsIdDto dto =
                 createEmployeeWithTariffsDto(firstName, lastName, validEmail, validPhoneNumber);
+            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isNotEmpty();
         }
 
@@ -98,6 +136,7 @@ class EmployeeWithTariffsIdDtoTest {
         @MethodSource("provideValidEmails")
         void shouldAcceptValidEmails(String email) {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, email, validPhoneNumber);
+            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isEmpty();
         }
 
@@ -105,6 +144,7 @@ class EmployeeWithTariffsIdDtoTest {
         @MethodSource("provideInvalidEmails")
         void shouldRejectInvalidEmails(String email) {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, email, validPhoneNumber);
+            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).hasSize(1);
         }
 
@@ -140,6 +180,7 @@ class EmployeeWithTariffsIdDtoTest {
         @MethodSource("validPhoneNumbers")
         void shouldAcceptValidPhoneNumbers(String phone) {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, phone);
+            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isEmpty();
         }
 
@@ -147,6 +188,7 @@ class EmployeeWithTariffsIdDtoTest {
         @MethodSource("invalidPhoneNumbers")
         void shouldRejectInvalidPhoneNumbers(String phone) {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, phone);
+            mockPositionRepositoryForValidIds();
             assertThat(validator.validate(dto)).isNotEmpty();
         }
 
@@ -154,7 +196,7 @@ class EmployeeWithTariffsIdDtoTest {
         void shouldRejectNullPhoneNumber() {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, null);
             Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
-
+            mockPositionRepositoryForValidIds();
             assertThat(violations)
                 .extracting(v -> v.getPropertyPath().toString())
                 .contains("employeeDto.phoneNumber");
@@ -184,6 +226,7 @@ class EmployeeWithTariffsIdDtoTest {
     @Test
     void shouldBeValidWithAllValidFields() {
         EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, validPhoneNumber);
+        mockPositionRepositoryForValidIds();
         assertThat(validator.validate(dto)).isEmpty();
     }
 
@@ -195,7 +238,7 @@ class EmployeeWithTariffsIdDtoTest {
 
         Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
 
-        assertThat(violations).hasSize(6);
+        assertThat(violations).hasSize(7);
 
         Set<String> fieldsWithViolations = violations.stream()
             .map(v -> v.getPropertyPath().toString())

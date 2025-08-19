@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import static greencity.constant.ErrorMessage.INVALID_POSITION_IDS;
 
 /**
@@ -38,13 +39,12 @@ public class PositionsValidator implements ConstraintValidator<ValidPositions, S
             return true;
         }
 
-        Set<Long> existingIds = new HashSet<>(positionRepository.findAllById(positionIds))
-            .stream()
+        Set<Long> existingIds = positionRepository.findAllById(positionIds).stream()
             .map(Position::getId)
             .collect(HashSet::new, HashSet::add, HashSet::addAll);
 
         if (existingIds.size() != positionIds.size()) {
-            Set<Long> missingIds = new HashSet<>(positionIds);
+            Set<Long> missingIds = new TreeSet<>(positionIds);
             missingIds.removeAll(existingIds);
 
             ctx.disableDefaultConstraintViolation();
