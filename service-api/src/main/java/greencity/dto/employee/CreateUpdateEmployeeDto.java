@@ -1,6 +1,7 @@
 package greencity.dto.employee;
 
 import greencity.annotations.ValidPhoneNumber;
+import greencity.annotations.ValidPositions;
 import greencity.constant.ValidationConstant;
 import greencity.enums.EmployeeStatus;
 import jakarta.validation.constraints.Email;
@@ -33,6 +34,8 @@ public class CreateUpdateEmployeeDto {
     private String email;
     private EmployeeStatus employeeStatus;
     private String image;
+    @NotNull
     @NotEmpty
+    @ValidPositions
     private Set<Long> employeePositionIds;
 }

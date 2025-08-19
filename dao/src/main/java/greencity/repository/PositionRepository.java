@@ -20,15 +20,6 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
     boolean existsPositionByNameUk(String name);
 
     /**
-     * Method checks if position already exists.
-     *
-     * @param name {@link String} position's name.
-     * @param id   {@link Long} position's id.
-     * @return {@link Boolean}
-     */
-    boolean existsPositionByIdAndNameUk(Long id, String name);
-
-    /**
      * Finds all position IDs that match the given list of English names.
      *
      * @param names the list of English names to search for
@@ -44,4 +35,6 @@ public interface PositionRepository extends JpaRepository<Position, Long> {
      * @return a set of positions that matches the given ids
      */
     Set<Position> findByIdIn(Collection<Long> ids);
+
+    long countByIdIn(Collection<Long> ids);
 }
