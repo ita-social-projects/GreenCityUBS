@@ -7,6 +7,7 @@ import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.repository.NotificationTemplateRepository;
+import greencity.repository.UserRepository;
 import greencity.service.notification.AbstractNotificationProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,9 @@ public class TelegramNotificationService extends AbstractNotificationProvider {
      */
     @Autowired
     public TelegramNotificationService(UserRemoteClient userRemoteClient,
-        NotificationTemplateRepository templateRepository,
+        NotificationTemplateRepository templateRepository, UserRepository userRepository,
         TelegramExecutor telegramExecutor) {
-        super(userRemoteClient, templateRepository, notificationType);
+        super(userRemoteClient, templateRepository, notificationType, userRepository);
         this.telegramExecutor = telegramExecutor;
     }
 

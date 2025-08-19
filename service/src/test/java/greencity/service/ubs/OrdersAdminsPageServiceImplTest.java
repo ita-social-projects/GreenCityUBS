@@ -1121,26 +1121,43 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void requestToBlockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
+        String email = user.getRecipientEmail();
         List<Long> orders = new ArrayList<>();
         orders.add(1L);
 
-        when(userRemoteClient.findByUuid(user.getUuid()))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(userRepository.findByUuid(user.getUuid()))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         assertNotNull(ordersAdminsPageService.requestToBlockOrder(user.getUuid(), orders));
     }
 
     @Test
+    void requestToBlockOrderWhenUserNotFoundTest() {
+        String uuid = "uuid";
+        List<Long> orders = List.of(1L, 2L);
+        String expectedExceptionMessage = ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid;
+
+        when(userRepository.findByUuid(uuid))
+            .thenReturn(null);
+
+        var notFoundException = assertThrows(
+            NotFoundException.class,
+            () -> ordersAdminsPageService.requestToBlockOrder(uuid, orders));
+        assertEquals(expectedExceptionMessage, notFoundException.getMessage());
+    }
+
+    @Test
     void unblockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
+        String email = user.getRecipientEmail();
         List<Long> orders = new ArrayList<>();
         orders.add(1L);
 
-        when(userRemoteClient.findByUuid(user.getUuid()))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(userRepository.findByUuid(user.getUuid()))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         assertNotNull(ordersAdminsPageService.unblockOrder(user.getUuid(), orders));
