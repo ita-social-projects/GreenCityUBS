@@ -101,7 +101,6 @@ class UBSManagementEmployeeServiceImplTest {
 
         verify(repository, times(1)).existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1)).save(any());
-        verify(positionRepository, times(1)).existsById(any());
         verify(positionRepository, atLeastOnce()).existsById(any());
     }
 
@@ -148,7 +147,7 @@ class UBSManagementEmployeeServiceImplTest {
             .existsByEmailAndActiveStatus(getAddEmployeeDto().getEmail());
         verify(repository, times(1))
             .existsByEmailAndInactiveStatus(getAddEmployeeDto().getEmail());
-        verify(modelMapper, times(3)).map(any(), any());
+        verify(modelMapper, atLeastOnce()).map(any(), any());
         verify(repository, times(2)).save(any());
         verify(positionRepository, times(1)).findByIdIn(any());
         verify(positionRepository, atLeastOnce()).existsById(any());

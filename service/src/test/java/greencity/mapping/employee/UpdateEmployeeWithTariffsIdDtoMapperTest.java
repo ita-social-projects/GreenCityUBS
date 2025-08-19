@@ -9,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Set;
+import static greencity.ModelUtils.getPosition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -26,7 +28,7 @@ class UpdateEmployeeWithTariffsIdDtoMapperTest {
     void convertEmployeeDtoToEmployeeTest() {
         Employee employee = ModelUtils.getFullEmployee();
         EmployeeWithTariffsIdDto dto = ModelUtils.getEmployeeWithTariffsIdDto();
-        when(positionRepository.findByIdIn(any())).thenReturn(any());
+        when(positionRepository.findByIdIn(any())).thenReturn(Set.of(getPosition()));
         assertEquals(mapper.convert(dto).getFirstName(), employee.getFirstName());
     }
 }
