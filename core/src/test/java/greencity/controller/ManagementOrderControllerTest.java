@@ -134,7 +134,7 @@ class ManagementOrderControllerTest {
     @Test
     void getOrderDetail() throws Exception {
         this.mockMvc.perform(get(ubsManagementLink + "/read-order-info" + "/{id}", 1L)
-            .param("language", "ua"))
+            .param("language", "uk"))
             .andExpect(status().isOk());
     }
 
@@ -404,7 +404,7 @@ class ManagementOrderControllerTest {
         mockMvc.perform(put(ubsManagementLink + "/all-order-page-admin-info")
             .content(jsonDto)
             .principal(principal)
-            .param("lang", "ua")
+            .param("lang", "uk")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
     }

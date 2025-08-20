@@ -2137,6 +2137,18 @@ public class ModelUtils {
             .build();
     }
 
+    public static Payment getManualPaymentWithoutImage() {
+        return Payment.builder()
+            .settlementDate("02-08-2021")
+            .amount(500L)
+            .paymentStatus(PaymentStatus.PAID)
+            .paymentId("1l")
+            .receiptLink("somelink.com")
+            .currency("UAH")
+            .order(getOrder())
+            .build();
+    }
+
     public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021")
@@ -2144,6 +2156,16 @@ public class ModelUtils {
             .receiptLink("link")
             .paymentId("1")
             .imagePath("fdhgh")
+            .build();
+    }
+
+    public static ManualPaymentRequestDto getManualPaymentRequestDtoWithoutImage() {
+        return ManualPaymentRequestDto.builder()
+            .settlementDate("02-08-2021")
+            .amount(500L)
+            .receiptLink("link")
+            .paymentId("1")
+            .imagePath("")
             .build();
     }
 
@@ -3774,7 +3796,7 @@ public class ModelUtils {
             .builder()
             .statusId(1L)
             .id(1L)
-            .nameUk("ua")
+            .nameUk("uk")
             .build();
     }
 
@@ -3811,7 +3833,7 @@ public class ModelUtils {
 
     public static List<RegionTranslationDto> getRegionTranslationsDto() {
         return List.of(
-            RegionTranslationDto.builder().languageCode("ua").regionName("Київська область").build(),
+            RegionTranslationDto.builder().languageCode("uk").regionName("Київська область").build(),
             RegionTranslationDto.builder().regionName("Kyiv region").languageCode("en").build());
     }
 
@@ -3826,7 +3848,7 @@ public class ModelUtils {
 
     public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
         return List.of(
-            AddLocationTranslationDto.builder().locationName("Київ").languageCode("ua").build(),
+            AddLocationTranslationDto.builder().locationName("Київ").languageCode("uk").build(),
             AddLocationTranslationDto.builder().locationName("Kyiv").languageCode("en").build());
     }
 
@@ -3875,7 +3897,7 @@ public class ModelUtils {
     public static List<LocationTranslationDto> getLocationTranslationDto() {
         return List.of(LocationTranslationDto.builder()
             .locationName("Київ")
-            .languageCode("ua")
+            .languageCode("uk")
             .build(),
             LocationTranslationDto.builder()
                 .locationName("Kyiv")
@@ -5427,7 +5449,7 @@ public class ModelUtils {
 
     public static PositionWithTranslateDto getPositionWithTranslateDto(Long id) {
         Map<String, String> nameTranslations = new HashMap<>();
-        nameTranslations.put("ua", "Водій");
+        nameTranslations.put("uk", "Водій");
         nameTranslations.put("en", "Driver");
 
         return PositionWithTranslateDto.builder()
@@ -5674,7 +5696,7 @@ public class ModelUtils {
 
     public static EventDto getDtoWithLanguage(String language, Event event) {
         return switch (language) {
-            case "ua" -> EventDto.builder()
+            case "uk" -> EventDto.builder()
                 .eventDate(event.getEventDate())
                 .eventName(event.getEventNameUk())
                 .authorName(event.getAuthorNameUk())

@@ -5,7 +5,6 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.SuccessSignInDto;
 import greencity.dto.TestersSignInRequest;
-import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -13,10 +12,8 @@ import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.UserVO;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -31,18 +28,6 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             @Override
             public String findUuidByEmail(String email) {
                 throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_USER_DATA, throwable);
-            }
-
-            @Override
-            public Optional<UserVO> findNotDeactivatedByEmail(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + "{}", email, throwable);
-                return Optional.empty();
-            }
-
-            @Override
-            public Optional<UbsCustomersDto> findByUuid(String uuid) {
-                log.error(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, throwable);
-                return Optional.empty();
             }
 
             @Override
