@@ -2067,6 +2067,7 @@ public class ModelUtils {
             .violations(10)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
+            .changeOfPointsList(new ArrayList<>())
             .build();
     }
 

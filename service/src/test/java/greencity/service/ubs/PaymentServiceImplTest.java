@@ -1,47 +1,46 @@
 package greencity.service.ubs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
+import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.refund.RefundDto;
+import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
+import greencity.enums.BonusReason;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
-import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderBagRepository;
-import greencity.repository.OrderDetailRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.PaymentRepository;
-import greencity.repository.PositionRepository;
-import greencity.repository.ReceivingStationRepository;
 import greencity.repository.RefundRepository;
-import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -89,6 +88,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -98,90 +98,31 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceImplTest {
     @Mock
-    OrderAddressRepository orderAddressRepository;
-    @Mock
     private FileService fileService;
-
     @Mock
     OrderRepository orderRepository;
-
     @Mock
     UserRepository userRepository;
-
     @Mock
     CertificateRepository certificateRepository;
-
     @Mock
     private ModelMapper modelMapper;
-
-    @Mock
-    private ReceivingStationRepository receivingStationRepository;
-
     @Mock
     private PaymentRepository paymentRepository;
-
-    @Mock
-    private EmployeeOrderPositionRepository employeeOrderPositionRepository;
-
-    @Mock
-    private PositionRepository positionRepository;
-
     @Mock
     private EmployeeRepository employeeRepository;
-
-    @Mock
-    private BagRepository bagRepository;
-
-    @Mock
-    private UserRemoteClient userRemoteClient;
-
     @Mock
     private NotificationServiceImpl notificationService;
     @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private OrderDetailRepository orderDetailRepository;
-
-    @InjectMocks
-    private UBSManagementServiceImpl ubsManagementService;
-
-    @Mock
     private EventService eventService;
-
-    @Mock
-    private OrderStatusTranslationRepository orderStatusTranslationRepository;
-
-    @Mock
-    private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
-
-    @Mock
-    private UBSClientServiceImpl ubsClientService;
-
-    @Mock
-    private UBSManagementServiceImpl ubsManagementServiceMock;
-
-    @Mock
-    private ServiceRepository serviceRepository;
-
-    @Mock
-    OrdersAdminsPageService ordersAdminsPageService;
-
     @Mock
     TariffsInfoRepository tariffsInfoRepository;
-
     @Mock
     RefundRepository refundRepository;
     @Mock
     private OrderBagService orderBagService;
     @InjectMocks
     private PaymentServiceImpl paymentServiceImpl;
-    @Mock
-    private PaymentUtil paymentUtil;
-    @Mock
-    private OrderBagRepository orderBagRepository;
-    @Mock
-    private OrderLockService orderLockService;
 
     @Test
     void checkGetPaymentInfo() {
@@ -447,7 +388,7 @@ class PaymentServiceImplTest {
             .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
             Arguments.of(ManualPaymentRequestDto.builder()
                 .settlementDate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
-                Mockito.mock(MultipartFile.class)));
+                mock(MultipartFile.class)));
     }
 
     @Test
@@ -697,7 +638,7 @@ class PaymentServiceImplTest {
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
             order);
-        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, Mockito.mock(MultipartFile.class),
+        paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, mock(MultipartFile.class),
             TEST_EMAIL);
 
         verify(eventService, times(1))
@@ -880,5 +821,162 @@ class PaymentServiceImplTest {
             any(Order.class));
         verify(userRepository, never()).save(any());
         verify(refundRepository, never()).save(any());
+    }
+
+    @Test
+    void processRefundForOrderWhenOrderStatusNotHandled() {
+        // 181
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.FORMED);
+        RefundDto refundDto = getRefundDto_ReturnMoney();
+
+        boolean result = paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL);
+
+        assertFalse(result);
+        verify(refundRepository, never()).save(any());
+        verify(orderRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
+        verify(eventService, never()).saveEvent(anyString(), anyString(), any());
+    }
+
+    @Test
+    void processPointsRefundForOrder_ShouldRefundPoints_WhenPointsToUseExists() {
+        int pointsToUse = 100;
+        int currentUserPoints = 200;
+
+        User user = mock(User.class);
+        List<ChangeOfPoints> changeOfPointsList = mock(ArrayList.class);
+        ArgumentCaptor<ChangeOfPoints> argumentCaptor = ArgumentCaptor.forClass(ChangeOfPoints.class);
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setPointsToUse(pointsToUse);
+        order.setUser(user);
+
+        when(user.getCurrentPoints()).thenReturn(currentUserPoints);
+        when(user.getChangeOfPointsList()).thenReturn(changeOfPointsList);
+
+        paymentServiceImpl.processPointsRefundForOrder(order);
+
+        verify(user).setCurrentPoints(currentUserPoints + pointsToUse);
+        verify(changeOfPointsList).add(argumentCaptor.capture());
+        verify(userRepository).save(user);
+
+        ChangeOfPoints changeOfPoints = argumentCaptor.getValue();
+        assertEquals(pointsToUse, changeOfPoints.getAmount());
+        assertEquals(LocalDateTime.now().toLocalDate(), changeOfPoints.getDate().toLocalDate());
+        assertEquals(BonusReason.REFUND_CANCELED_ORDER, changeOfPoints.getReason());
+        assertEquals(user, changeOfPoints.getUser());
+        assertEquals(order, changeOfPoints.getOrder());
+    }
+
+    @Test
+    void processPointsRefundForOrderWhenCurrentPointsIsNull() {
+        int pointsToUse = 100;
+
+        User user = Mockito.spy(User.class);
+        List<ChangeOfPoints> changeOfPointsList = mock(ArrayList.class);
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setPointsToUse(pointsToUse);
+        order.setUser(user);
+
+        when(user.getChangeOfPointsList()).thenReturn(changeOfPointsList);
+
+        paymentServiceImpl.processPointsRefundForOrder(order);
+
+        verify(user).setCurrentPoints(0);
+        verify(user).setCurrentPoints(pointsToUse);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void processPointsRefundForOrderWhenListIsNull() {
+        int pointsToUse = 100;
+        int currentUserPoints = 200;
+
+        User user = Mockito.spy(User.class);
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setPointsToUse(pointsToUse);
+        order.setUser(user);
+
+        when(user.getCurrentPoints()).thenReturn(currentUserPoints);
+
+        paymentServiceImpl.processPointsRefundForOrder(order);
+
+        verify(user).setChangeOfPointsList(any(ArrayList.class));
+        verify(userRepository).save(user);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(ints = {0})
+    void processPointsRefundForOrderWhenPointsToUseIsInvalid(Integer pointsToUse) {
+        Order orderWithNullPoints = getOrderForGetOrderStatusData2Test();
+        orderWithNullPoints.setPointsToUse(pointsToUse);
+
+        paymentServiceImpl.processPointsRefundForOrder(orderWithNullPoints);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void processRefundForDoneOrderWhenNeitherMoneyNorBonusesSelected() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.DONE);
+        RefundDto refundDto = getRefundDto_NothingToRefund();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+
+        assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()), exception.getMessage());
+        verify(refundRepository, never()).save(any());
+        verify(orderRepository, never()).save(any());
+        verify(userRepository, never()).save(any());
+        verify(eventService, never()).saveEvent(anyString(), anyString(), any());
+    }
+
+    @Test
+    void processRefundForBroughtItHimselfOrderWhenRefundingBonuses() {
+        Order order = getOrderForGetOrderStatusData2Test();
+        order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        order.setPointsToUse(50);
+
+        Payment payment = getPayment();
+        payment.setAmount(100L);
+        payment.setPaymentStatus(PaymentStatus.PAID);
+        order.setPayment(Collections.singletonList(payment));
+
+        RefundDto refundDto = getRefundDto_ReturnBonuses();
+        refundDto.setAmount(12000L);
+
+        User user = getTestUser();
+        order.setUser(user);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+
+        assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
+        verify(userRepository, never()).save(any());
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void saveNewManualPaymentWhenEmployeeCannotAccessOrder() {
+        Order order = getFormedOrder();
+        TariffsInfo tariffsInfo = getTariffsInfo();
+        order.setTariffsInfo(tariffsInfo);
+
+        Employee employee = getEmployee();
+        ManualPaymentRequestDto paymentRequestDto = getManualPaymentRequestDto();
+        MockMultipartFile image = new MockMultipartFile("image", "test.jpg", "image/jpeg", "test image".getBytes());
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(employee));
+        when(tariffsInfoRepository.findTariffsInfoByIdForEmployee(tariffsInfo.getId(), employee.getId()))
+            .thenReturn(Optional.empty());
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> paymentServiceImpl.saveNewManualPayment(1L, paymentRequestDto, image, TEST_EMAIL));
+
+        assertEquals(ErrorMessage.CANNOT_ACCESS_ORDER_FOR_EMPLOYEE + order.getId(), exception.getMessage());
+        verify(paymentRepository, never()).save(any());
+        verify(eventService, never()).save(anyString(), anyString(), any());
     }
 }
