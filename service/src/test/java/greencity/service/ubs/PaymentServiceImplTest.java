@@ -1100,9 +1100,9 @@ class PaymentServiceImplTest {
 
     private static Stream<Arguments> provideManualPaymentRequestDto() {
         return Stream.of(Arguments.of(ManualPaymentRequestDto.builder()
-                .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
+            .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build(), null),
             Arguments.of(ManualPaymentRequestDto.builder()
-                    .settlementDate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
+                .settlementDate("02-08-2021").amount(500L).imagePath("path").paymentId("1").build(),
                 mock(MultipartFile.class)));
     }
 }
