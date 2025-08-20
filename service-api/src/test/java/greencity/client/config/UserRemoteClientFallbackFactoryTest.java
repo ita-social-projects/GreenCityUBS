@@ -12,10 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(MockitoExtension.class)
 class UserRemoteClientFallbackFactoryTest {
@@ -23,7 +22,7 @@ class UserRemoteClientFallbackFactoryTest {
     private static final String USER_UUID = "849446d9-186f-4386-b76e-32aed1c3b1aa";
     private static final String USER_NAME = "John Doe";
     private static final String SUBJECT = "some subject";
-    private static final String LANGUAGE_UA = "ua";
+    private static final String LANGUAGE_UA = "uk";
     @InjectMocks
     private UserRemoteClientFallbackFactory fallbackFactory;
 
@@ -38,16 +37,6 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void findUuidByEmail() {
         assertThrows(RemoteServerUnavailableException.class, () -> client.findUuidByEmail(USER_EMAIL));
-    }
-
-    @Test
-    void findNotDeactivatedByEmail() {
-        assertEquals(Optional.empty(), client.findNotDeactivatedByEmail(USER_EMAIL));
-    }
-
-    @Test
-    void findByUuid() {
-        assertEquals(Optional.empty(), client.findByUuid(USER_EMAIL));
     }
 
     @Test
@@ -76,7 +65,7 @@ class UserRemoteClientFallbackFactoryTest {
 
     @Test
     void sendScheduledEmailNotification() {
-        ScheduledEmailMessage dto = ScheduledEmailMessage.builder().email(USER_EMAIL).build();
+        ScheduledEmailMessage dto = ScheduledEmailMessage.builder().userUuid(USER_UUID).build();
         assertDoesNotThrow(() -> client.sendScheduledEmailNotification(dto));
     }
 

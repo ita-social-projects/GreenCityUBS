@@ -1,5 +1,19 @@
 package greencity.service.ubs;
 
+import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
+import static greencity.constant.AppConstant.PAYMENT_REFUND_EN;
+import static greencity.constant.ErrorMessage.CANNOT_REFUND_MONEY;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND;
+import static greencity.constant.ErrorMessage.INVALID_REQUESTED_REFUND_AMOUNT;
+import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
+import static greencity.constant.ErrorMessage.ORDER_HAS_NO_OVERPAYMENT;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.REFUND_CONFLICT_MONEY_AND_BONUSES;
+import static greencity.service.ubs.UBSManagementServiceImpl.FORMAT_DATE;
+import greencity.client.config.UserRemoteWebClient;
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.order.CounterOrderDetailsDto;
@@ -15,11 +29,11 @@ import greencity.entity.order.Refund;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
+import greencity.enums.BonusReason;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentType;
-import greencity.enums.BonusReason;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.CertificateRepository;
@@ -30,16 +44,6 @@ import greencity.repository.RefundRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang.StringUtils;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -49,18 +53,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
-import static greencity.constant.AppConstant.PAYMENT_REFUND_EN;
-import static greencity.constant.ErrorMessage.CANNOT_REFUND_MONEY;
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND;
-import static greencity.constant.ErrorMessage.INVALID_REQUESTED_REFUND_AMOUNT;
-import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
-import static greencity.constant.ErrorMessage.ORDER_HAS_NO_OVERPAYMENT;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.REFUND_CONFLICT_MONEY_AND_BONUSES;
-import static greencity.service.ubs.UBSManagementServiceImpl.FORMAT_DATE;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @AllArgsConstructor
@@ -70,7 +74,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
     private final EventService eventService;
-    private final FileService fileService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
     private final OrderBagService orderBagService;
@@ -137,7 +141,11 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found"));
         if (payment.getImagePath() != null) {
-            fileService.delete(payment.getImagePath());
+            try {
+                userRemoteWebClient.deleteFile(payment.getImagePath());
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
+            }
         }
         paymentRepository.deletePaymentById(paymentId);
         eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
@@ -359,12 +367,20 @@ public class PaymentServiceImpl implements PaymentService {
         updatePayment.setReceiptLink(requestDto.getReceiptLink());
         if (requestDto.getImagePath().isEmpty()) {
             if (updatePayment.getImagePath() != null) {
-                fileService.delete(updatePayment.getImagePath());
+                try {
+                    userRemoteWebClient.deleteFile(updatePayment.getImagePath());
+                } catch (WebClientRequestException | WebClientResponseException e) {
+                    log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
+                }
             }
             updatePayment.setImagePath(null);
         }
         if (image != null) {
-            updatePayment.setImagePath(fileService.upload(image));
+            try {
+                updatePayment.setImagePath(userRemoteWebClient.uploadFile(image));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
+            }
         }
         return updatePayment;
     }
@@ -396,7 +412,11 @@ public class PaymentServiceImpl implements PaymentService {
             .orderStatus(order.getOrderStatus())
             .build();
         if (image != null) {
-            payment.setImagePath(fileService.upload(image));
+            try {
+                payment.setImagePath(userRemoteWebClient.uploadFile(image));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
+            }
         }
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));

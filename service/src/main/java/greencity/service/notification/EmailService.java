@@ -8,6 +8,7 @@ import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.repository.NotificationTemplateRepository;
 import java.util.Objects;
+import greencity.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import static greencity.enums.NotificationReceiverType.EMAIL;
@@ -22,8 +23,9 @@ public class EmailService extends AbstractNotificationProvider {
      * Constructor with super() call.
      */
     @Autowired
-    public EmailService(UserRemoteClient userRemoteClient, NotificationTemplateRepository templateRepository) {
-        super(userRemoteClient, templateRepository, notificationType);
+    public EmailService(UserRemoteClient userRemoteClient, NotificationTemplateRepository templateRepository,
+        UserRepository userRepository) {
+        super(userRemoteClient, templateRepository, notificationType, userRepository);
         this.userRemoteClient = userRemoteClient;
     }
 
@@ -46,7 +48,7 @@ public class EmailService extends AbstractNotificationProvider {
         String userLanguage = userRemoteClient.findUserLanguageByUuid(notification.getUser().getUuid());
         ScheduledEmailMessage emailNotification = ScheduledEmailMessage.builder()
             .username(notification.getUser().getRecipientName())
-            .email(notification.getUser().getRecipientEmail())
+            .userUuid(notification.getUser().getUuid())
             .subject(notificationDto.getTitle())
             .body(notificationDto.getBody())
             .language(userLanguage)

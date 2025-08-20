@@ -15,16 +15,15 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,9 +36,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import jakarta.validation.constraints.Positive;
+import java.security.Principal;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -55,11 +59,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.io.IOException;
-import java.security.Principal;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/ubs")
@@ -72,10 +71,10 @@ public class OrderController {
 
     /**
      * Controller returns all available bags and bonus points of current user by
-     * tariff and location ids. {@link UserVO}.
+     * tariff and location ids.
      *
-     * @param tariffId   {@link UserVO} id of tariff.
-     * @param locationId {@link UserVO} id of location.
+     * @param tariffId   - id of tariff.
+     * @param locationId - id of location.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
@@ -96,10 +95,10 @@ public class OrderController {
 
     /**
      * Controller returns all available bags and bonus points of current user by
-     * order id. {@link UserVO}.
+     * order id.
      *
-     * @param userUuid {@link UserVO} id.
-     * @param orderId  {@link UserVO} id of order.
+     * @param userUuid - user's uuid.
+     * @param orderId  - id of the order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
@@ -145,9 +144,9 @@ public class OrderController {
     }
 
     /**
-     * Controller returns list of saved {@link UserVO} data.
+     * Controller returns list of saved user's data.
      *
-     * @param userUuid {@link UserVO} id.
+     * @param userUuid - user's id.
      * @return list of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */
@@ -169,7 +168,7 @@ public class OrderController {
      * Controller adjusts and creates new order and generates payment link for the
      * order.
      *
-     * @param userUuid current {@link User}'s uuid.
+     * @param userUuid - user's id.
      * @param dto      {@link OrderResponseDto} order data.
      * @return {@link PaymentSystemResponse}.
      * @author Oleh Bilonizhka
@@ -386,7 +385,6 @@ public class OrderController {
      * Controller for getting all active couriers.
      *
      * @return list of {@link CourierDto}
-     *
      * @author Anton Bondar
      */
     @Operation(summary = "Get all active couriers")

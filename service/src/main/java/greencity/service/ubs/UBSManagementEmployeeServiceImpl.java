@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
@@ -26,7 +27,6 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.mapping.employee.PositionDtoMapper;
 import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
@@ -36,6 +36,7 @@ import greencity.repository.TariffsInfoRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -51,9 +52,12 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 @Data
+@Slf4j
 public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeService {
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
@@ -61,11 +65,10 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final ReceivingStationRepository stationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final UserRemoteClient userRemoteClient;
-    private final FileService fileService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final ModelMapper modelMapper;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
-    private final PositionDtoMapper positionDtoMapper;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
 
     /**
@@ -98,7 +101,16 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = buildEmployeeFromEmployeeWithTariffsIdDto(dto);
         employee.setUuid(UUID.randomUUID().toString());
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-        employee.setImagePath(image != null ? fileService.upload(image) : defaultImagePath);
+        if (image != null) {
+            try {
+                employee.setImagePath(userRemoteWebClient.uploadFile(image));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
+            }
+        } else {
+            employee.setImagePath(defaultImagePath);
+        }
+
         if (employee.getTariffsInfoReceivingEmployees() == null) {
             employee.setTariffsInfoReceivingEmployees(new ArrayList<>());
         }
@@ -272,9 +284,17 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
         if (image != null) {
             String imageUrlToDelete = upEmployee.getImagePath();
-            updatedEmployee.setImagePath(fileService.upload(image));
+            try {
+                updatedEmployee.setImagePath(userRemoteWebClient.uploadFile(image));
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
+            }
             if (!imageUrlToDelete.equals(defaultImagePath)) {
-                fileService.delete(upEmployee.getImagePath());
+                try {
+                    userRemoteWebClient.deleteFile(imageUrlToDelete);
+                } catch (WebClientRequestException | WebClientResponseException e) {
+                    log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
+                }
             }
         } else {
             updatedEmployee.setImagePath(dto.getEmployeeDto().getImage());
@@ -353,7 +373,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         if (!employee.getImagePath().equals(defaultImagePath)) {
-            fileService.delete(employee.getImagePath());
+            try {
+                userRemoteWebClient.deleteFile(employee.getImagePath());
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
+            }
             employee.setImagePath(defaultImagePath);
             employeeRepository.save(employee);
         } else {

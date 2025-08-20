@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -28,7 +29,6 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
@@ -42,6 +42,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -66,7 +68,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramMessageRepository telegramMessageRepository;
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramChatRepository telegramChatRepository;
-    private final AzureCloudStorageService azureCloudStorageService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final UBSClientService ubsClientService;
     private final TelegramExecutor telegramExecutor;
     private final EmployeeRepository employeeRepository;
@@ -114,7 +116,7 @@ public class TelegramServiceImpl implements TelegramService {
         for (MultipartFile file : files) {
             validateFileSize(file);
 
-            String url = azureCloudStorageService.upload(file);
+            String url = uploadFile(file);
             AssetType assetType = TelegramUtils.detectAssetType(file);
 
             MessageAsset asset = MessageAsset.builder()
@@ -486,5 +488,15 @@ public class TelegramServiceImpl implements TelegramService {
         return telegramManagerRepository.findByChatId(chatId)
             .map(m -> telegramUpdateProcessorMap.get(MANAGER_PROCESSOR_NAME))
             .orElseGet(() -> telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME));
+    }
+
+    private String uploadFile(MultipartFile file) {
+        String url = "";
+        try {
+            url = userRemoteWebClient.uploadFile(file);
+        } catch (WebClientRequestException | WebClientResponseException e) {
+            log.warn("User service is unavailable: {}", e.getMessage());
+        }
+        return url;
     }
 }

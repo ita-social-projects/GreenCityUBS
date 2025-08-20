@@ -273,7 +273,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final String LANGUAGE_EN = "en";
-    private static final String LANGUAGE_UK = "ua";
+    private static final String LANGUAGE_UK = "uk";
     private static final Double KYIV_LATITUDE = 50.4546600;
     private static final Double KYIV_LONGITUDE = 30.5238000;
     private static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
