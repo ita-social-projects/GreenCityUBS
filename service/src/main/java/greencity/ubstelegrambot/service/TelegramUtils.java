@@ -174,7 +174,7 @@ public class TelegramUtils {
         SendMessage message) {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
         if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UA);
+            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK);
         }
         chat.get().setChatState(newState);
         chat.get().setChatStateUpdatedAt(Instant.now());

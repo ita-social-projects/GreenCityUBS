@@ -1004,7 +1004,7 @@ class TelegramServiceTest {
 
         TelegramChat savedChat = chatCaptor.getValue();
         assertEquals(mockUser, savedChat.getUser());
-        assertEquals("ua", savedChat.getLanguageCode());
+        assertEquals("uk", savedChat.getLanguageCode());
     }
 
     @Test
@@ -1091,7 +1091,7 @@ class TelegramServiceTest {
 
         TelegramChat savedChat = chatCaptor.getValue();
         assertEquals(mockUser, savedChat.getUser());
-        assertEquals("ua", savedChat.getLanguageCode());
+        assertEquals("uk", savedChat.getLanguageCode());
     }
 
     private static org.telegram.telegrambots.meta.api.objects.User getTelegramAPIUser(Long chatId) {

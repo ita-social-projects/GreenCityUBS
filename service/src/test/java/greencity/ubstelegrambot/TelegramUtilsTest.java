@@ -236,6 +236,6 @@ class TelegramUtilsTest {
         );
 
         assertEquals("999", result.getChatId());
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA,"unknown.error")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK,"unknown.error")));
     }
 }

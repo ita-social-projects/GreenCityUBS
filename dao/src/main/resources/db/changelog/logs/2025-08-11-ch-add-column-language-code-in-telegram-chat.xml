@@ -7,7 +7,7 @@
 
     <changeSet id="add-language-code-to-telegram-chat" author="Anton Pampukha">
         <addColumn tableName="telegram_chat">
-            <column name="language_code" type="varchar(10)" defaultValue="ua">
+            <column name="language_code" type="varchar(10)" defaultValue="uk">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

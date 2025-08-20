@@ -424,17 +424,17 @@ public class TelegramServiceImpl implements TelegramService {
             .isNotify(true)
             .chatState(ChatState.NORMAL)
             .chatStateUpdatedAt(Instant.now())
-            .languageCode("ua");
+            .languageCode("uk");
 
         if (!uuid.isEmpty()) {
             userRepository.findUserByUuid(uuid).ifPresent(user -> {
                 newChatBuilder.user(user);
 
-                String langCode = "ua";
+                String langCode = "uk";
                 try {
                     langCode = userRemoteClient.findUserLanguageByUuid(user.getUuid());
                 } catch (Exception e) {
-                    log.warn("Failed to get user language from UBS for uuid {}. Using default 'ua'", user.getUuid(), e);
+                    log.warn("Failed to get user language from UBS for uuid {}. Using default 'uk'", user.getUuid(), e);
                 }
                 newChatBuilder.languageCode(langCode);
             });
@@ -461,11 +461,11 @@ public class TelegramServiceImpl implements TelegramService {
             userRepository.findUserByUuid(uuid).ifPresent(user -> {
                 chat.setUser(user);
 
-                String langCode = "ua";
+                String langCode = "uk";
                 try {
                     langCode = userRemoteClient.findUserLanguageByUuid(user.getUuid());
                 } catch (Exception e) {
-                    log.warn("Failed to get user language from UBS for uuid {}. Using default 'ua'", user.getUuid(), e);
+                    log.warn("Failed to get user language from UBS for uuid {}. Using default 'uk'", user.getUuid(), e);
                 }
                 chat.setLanguageCode(langCode);
             });

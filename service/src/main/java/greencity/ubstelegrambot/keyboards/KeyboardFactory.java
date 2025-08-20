@@ -52,7 +52,7 @@ public class KeyboardFactory {
     private static List<InlineKeyboardButton> createLanguagesButton() {
         InlineKeyboardButton uaButton = InlineKeyboardButton.builder()
             .text("🇺🇦 Українська")
-            .callbackData(SET_LANGUAGE_UA_CALLBACK)
+            .callbackData(SET_LANGUAGE_UK_CALLBACK)
             .build();
 
         InlineKeyboardButton enButton = InlineKeyboardButton.builder()

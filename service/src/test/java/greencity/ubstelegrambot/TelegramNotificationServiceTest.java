@@ -38,7 +38,7 @@ class TelegramNotificationServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(telegramLanguageService.getChatLanguage(anyString()))
-            .thenReturn(TelegramBotConstants.UA);
+            .thenReturn(TelegramBotConstants.UK);
     }
 
     @Test

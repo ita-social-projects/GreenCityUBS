@@ -38,7 +38,7 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
 
         if (telegramChat.isEmpty()) {
             return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
-                TelegramBotConstants.UA);
+                TelegramBotConstants.UK);
         }
 
         Optional<ChatFeedback> chatFeedback = chatFeedbackRepository
@@ -67,7 +67,7 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
 
         if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UA);
+            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK);
         }
 
         chat.get().setChatState(ChatState.MAKING_FEEDBACK);

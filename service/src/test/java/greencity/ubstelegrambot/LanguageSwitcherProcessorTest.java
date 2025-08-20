@@ -60,7 +60,7 @@ class LanguageSwitcherProcessorTest {
 
     @Test
     void testLanguageSwitchToUA_NormalChat() {
-        Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_UA_CALLBACK);
+        Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_UK_CALLBACK);
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
         chat.setLanguageCode(TelegramBotConstants.EN);
@@ -76,7 +76,7 @@ class LanguageSwitcherProcessorTest {
         assertNotNull(result);
         assertEquals(expectedMessage, result);
         verify(chatRepository).save(chat);
-        assertEquals(TelegramBotConstants.UA, chat.getLanguageCode());
+        assertEquals(TelegramBotConstants.UK, chat.getLanguageCode());
     }
 
     @Test
@@ -84,7 +84,7 @@ class LanguageSwitcherProcessorTest {
         Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_EN_CALLBACK);
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
-        chat.setLanguageCode(TelegramBotConstants.UA);
+        chat.setLanguageCode(TelegramBotConstants.UK);
         chat.setChatState(ChatState.IN_SUPPORT);
 
         when(chatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
@@ -138,7 +138,7 @@ class LanguageSwitcherProcessorTest {
         Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_EN_CALLBACK);
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
-        chat.setLanguageCode(TelegramBotConstants.UA);
+        chat.setLanguageCode(TelegramBotConstants.UK);
         chat.setChatState(ChatState.MAKING_FEEDBACK);
 
         when(chatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
@@ -153,7 +153,7 @@ class LanguageSwitcherProcessorTest {
 
     @Test
     void testLanguageSwitchToUA_NormalChat_Manager() {
-        Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_UA_CALLBACK);
+        Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_UK_CALLBACK);
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
         chat.setLanguageCode(TelegramBotConstants.EN);
@@ -170,12 +170,12 @@ class LanguageSwitcherProcessorTest {
         assertNotNull(result);
         assertEquals(expectedMessage, result);
         verify(chatRepository).save(chat);
-        assertEquals(TelegramBotConstants.UA, chat.getLanguageCode());
+        assertEquals(TelegramBotConstants.UK, chat.getLanguageCode());
     }
 
     @Test
     void testChatNotFound_ThrowsException() {
-        Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_UA_CALLBACK);
+        Update update = createUpdate("123", TelegramBotConstants.SET_LANGUAGE_UK_CALLBACK);
         when(chatRepository.findByChatId("123")).thenReturn(java.util.Optional.empty());
 
         assertThrows(RuntimeException.class, () -> processor.process(update));

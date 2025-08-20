@@ -31,7 +31,7 @@ public class LanguageSwitcherProcessor implements TelegramUpdateProcessor {
         TelegramChat chat = chatRepository.findByChatId(chatId)
             .orElseThrow(() -> new RuntimeException("Chat not found"));
         String newLanguage = switch (callback) {
-            case TelegramBotConstants.SET_LANGUAGE_UA_CALLBACK -> TelegramBotConstants.UA;
+            case TelegramBotConstants.SET_LANGUAGE_UK_CALLBACK -> TelegramBotConstants.UK;
             case TelegramBotConstants.SET_LANGUAGE_EN_CALLBACK -> TelegramBotConstants.EN;
             default -> null;
         };

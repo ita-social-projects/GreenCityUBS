@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
@@ -58,13 +57,13 @@ class UserUpdateProcessorTest {
     @BeforeEach
     void setUp() {
         lenient().when(telegramLanguageService.getChatLanguage(anyString()))
-            .thenReturn(TelegramBotConstants.UA);
+            .thenReturn(TelegramBotConstants.UK);
     }
 
     @Test
     void testProcess_HasSupportCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.CLIENT_SUPPORT_CALLBACK);
-        SendMessage expected = MessageFactory.createSupportMessageCallBackQuery(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createSupportMessageCallBackQuery(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.IN_SUPPORT), any()))
             .thenReturn(expected);
@@ -78,7 +77,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasSortingProcessCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.SORTING_PRICES_CALLBACK);
-        SendMessage expected = MessageFactory.createSortingPricesMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createSortingPricesMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);
@@ -92,7 +91,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasWorkScheduleCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.WORK_SCHEDULE_CALLBACK);
-        SendMessage expected = MessageFactory.createWorkScheduleMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createWorkScheduleMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);
@@ -106,7 +105,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasAdmissionRulesCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.ADMISSION_RULES_CALLBACK);
-        SendMessage expected = MessageFactory.createAdmissionRulesMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createAdmissionRulesMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);
@@ -120,7 +119,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasGreenOfficeCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.GREEN_OFFICE_CALLBACK);
-        SendMessage expected = MessageFactory.createGreenOfficeMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createGreenOfficeMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);
@@ -134,7 +133,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasGreenOfficeProcessCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK);
-        SendMessage expected = MessageFactory.createEnteringEmailMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createEnteringEmailMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.ENTERING_GREEN_OFFICE_EMAIL), any()))
             .thenReturn(expected);
@@ -148,7 +147,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasFeedbackCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.FEEDBACK_CALLBACK);
-        SendMessage expected = MessageFactory.createFeedbackMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);
@@ -162,7 +161,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingTerriblyCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_TERRIBLY_CALLBACK);
-        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 1))
             .thenReturn(expected);
@@ -176,7 +175,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingBadlyCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_BADLY_CALLBACK);
-        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 2))
             .thenReturn(expected);
@@ -190,7 +189,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingSatisfactorilyCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_SATISFACTORILY_CALLBACK);
-        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 3))
             .thenReturn(expected);
@@ -204,7 +203,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingGoodCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_GOOD_CALLBACK);
-        SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 4))
             .thenReturn(expected);
@@ -218,7 +217,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingPerfectlyCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_PERFECTLY_CALLBACK);
-        SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 5))
             .thenReturn(expected);
@@ -232,7 +231,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasLoginCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.LOGIN_CALLBACK);
-        SendMessage expected = MessageFactory.createLoginMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createLoginMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.LOGGING_AS_MANAGER), any()))
             .thenReturn(expected);
@@ -246,7 +245,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasUnknownCallback_MessageReturned() {
         Update update = createUpdateWithCallback("UNKNOWN_CALLBACK");
-        SendMessage expected = MessageFactory.createAvailableCommandsMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createAvailableCommandsMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);
@@ -261,9 +260,9 @@ class UserUpdateProcessorTest {
     void testProcess_HasSupportMessageChatNotFound_MessageReturned() {
         Update update =
             createUpdateWithMessage(
-                MessageProvider.get(TelegramBotConstants.UA, "client.support.message.callback.query"),
+                MessageProvider.get(TelegramBotConstants.UK, "client.support.message.callback.query"),
                 ChatState.IN_SUPPORT);
-        SendMessage expected = MessageFactory.createUnknownErrorOccurredMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createUnknownErrorOccurredMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.empty());
@@ -278,9 +277,9 @@ class UserUpdateProcessorTest {
     void testProcess_HasSupportMessage_MessageReturned() {
         Update update =
             createUpdateWithMessage(
-                MessageProvider.get(TelegramBotConstants.UA, "client.support.message.callback.query"),
+                MessageProvider.get(TelegramBotConstants.UK, "client.support.message.callback.query"),
                 ChatState.IN_SUPPORT);
-        SendMessage expected = MessageFactory.createSupportMessageCallBackQuery(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createSupportMessageCallBackQuery(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.IN_SUPPORT)));
@@ -297,9 +296,9 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasFeedback_MessageReturned() {
         Update update =
-            createUpdateWithMessage(MessageProvider.get(TelegramBotConstants.UA, "feedback.thank.you.message"),
+            createUpdateWithMessage(MessageProvider.get(TelegramBotConstants.UK, "feedback.thank.you.message"),
                 ChatState.MAKING_FEEDBACK);
-        SendMessage expected = MessageFactory.createFeedbackThanksMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createFeedbackThanksMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.MAKING_FEEDBACK)));
@@ -316,9 +315,9 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasGreenOfficeEmail_MessageReturned() {
         Update update =
-            createUpdateWithMessage(MessageProvider.get(TelegramBotConstants.UA, "green.office.thank.you.message"),
+            createUpdateWithMessage(MessageProvider.get(TelegramBotConstants.UK, "green.office.thank.you.message"),
                 ChatState.ENTERING_GREEN_OFFICE_EMAIL);
-        SendMessage expected = MessageFactory.createGreenOfficeThanksMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createGreenOfficeThanksMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.ENTERING_GREEN_OFFICE_EMAIL)));
@@ -335,9 +334,9 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasCommand_MessageReturned() {
         Update update =
-            createUpdateWithMessage(MessageProvider.get(TelegramBotConstants.UA, "supported.commands"),
+            createUpdateWithMessage(MessageProvider.get(TelegramBotConstants.UK, "supported.commands"),
                 ChatState.NORMAL);
-        SendMessage expected = MessageFactory.createAvailableCommandsMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createAvailableCommandsMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.NORMAL)));
@@ -353,9 +352,9 @@ class UserUpdateProcessorTest {
 
     @Test
     void testProcess_HasManagerCredentials_MessageReturned() {
-        Update update = createUpdateWithMessage(MessageProvider.get(TelegramBotConstants.UA, "login.message"),
+        Update update = createUpdateWithMessage(MessageProvider.get(TelegramBotConstants.UK, "login.message"),
             ChatState.LOGGING_AS_MANAGER);
-        SendMessage expected = MessageFactory.createFeedbackThanksMessage(CHAT_ID, TelegramBotConstants.UA);
+        SendMessage expected = MessageFactory.createFeedbackThanksMessage(CHAT_ID, TelegramBotConstants.UK);
 
         when(telegramChatRepository.findByChatId(CHAT_ID))
             .thenReturn(Optional.of(createTelegramChat(ChatState.LOGGING_AS_MANAGER)));

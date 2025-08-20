@@ -112,9 +112,9 @@ class TelegramSupportServiceTest {
         when(user.getId()).thenReturn(1L);
         when(telegramChatRepository.findByChatId(anyString())).thenReturn(Optional.empty());
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "unknown.error"),
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "unknown.error"),
             result.getText());
     }
 
@@ -122,7 +122,7 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_EndSupportModeTextMessage_ShouldReturnStopSupportModeTextMessage() {
         try (MockedStatic<MessageFactory> mfMock = Mockito.mockStatic(MessageFactory.class)) {
             String chatId = "1";
-            String lang = TelegramBotConstants.UA;
+            String lang = TelegramBotConstants.UK;
             String username = "tg_user";
             String endSupportText = MessageProvider.get(lang, "client.end.support.mode");
 
@@ -187,9 +187,9 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "message.sent.to.manager")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager")));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, messageText, id);
@@ -229,13 +229,13 @@ class TelegramSupportServiceTest {
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(null);
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            MessageProvider.get(TelegramBotConstants.UA, "photo.content"), id);
+            MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
 
     @Test
@@ -271,12 +271,12 @@ class TelegramSupportServiceTest {
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenThrow(new TelegramBotExecutionException());
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            MessageProvider.get(TelegramBotConstants.UA, "photo.content"), id);
+            MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
 
     @Test
@@ -315,13 +315,13 @@ class TelegramSupportServiceTest {
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed")));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            MessageProvider.get(TelegramBotConstants.UA, "photo.content"), id);
+            MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
 
     @Test
@@ -363,7 +363,7 @@ class TelegramSupportServiceTest {
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
         assertNull(result);
         verify(fileService).upload(any(MultipartFile.class));
@@ -395,9 +395,9 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed"), result.getText());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
@@ -425,9 +425,9 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "manager.file.failed"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed"), result.getText());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
     }
@@ -464,9 +464,9 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "message.sent.to.manager"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager"), result.getText());
         verify(fileService).upload(any());
         verify(messageAssetRepository).save(any());
 
@@ -499,9 +499,9 @@ class TelegramSupportServiceTest {
         ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
         doNothing().when(telegramMessageRepository).delete(any());
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "manager.photo.failed"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.photo.failed"), result.getText());
 
         verify(telegramMessageRepository).save(messageCaptor.capture());
         verify(telegramMessageRepository).delete(messageCaptor.getValue());
@@ -543,9 +543,9 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UA, "message.sent.to.manager"), result.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager"), result.getText());
 
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
@@ -592,10 +592,10 @@ class TelegramSupportServiceTest {
         when(fileService.upload(any(MultipartFile.class))).thenReturn("https://azure.com/photo");
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UA);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
         assertTrue(result.getText()
-            .contains(MessageProvider.get(TelegramBotConstants.UA, "message.sent.to.manager")));
+            .contains(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager")));
 
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(
             eq(username),

@@ -1590,7 +1590,7 @@ class NotificationServiceImplTest {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(USERNAME)
-            .subject(MessageProvider.get(TelegramBotConstants.UA, "green.office.subject"))
+            .subject(MessageProvider.get(TelegramBotConstants.UK, "green.office.subject"))
             .body(USER_EMAIL)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
@@ -1598,7 +1598,7 @@ class NotificationServiceImplTest {
         doNothing().when(userRemoteClient).sendGreenOfficeRequestNotification(notification);
 
         notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME,
-            TelegramBotConstants.UA);
+            TelegramBotConstants.UK);
 
         verify(userRemoteClient, times(1)).sendGreenOfficeRequestNotification(notification);
     }

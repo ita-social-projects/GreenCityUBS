@@ -38,7 +38,7 @@ class TelegramNotificationServiceTest {
     private final User user = User.builder().id(32L).recipientEmail("user@email.com")
         .telegramBot(
             new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
-                "last_name", 0, null, null, TelegramBotConstants.UA,
+                "last_name", 0, null, null, TelegramBotConstants.UK,
                 new ArrayList<>(), new ArrayList<>(), Instant.now()))
         .build();
     private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
@@ -53,7 +53,7 @@ class TelegramNotificationServiceTest {
         User user = User.builder().id(32L).recipientEmail("user@email.com")
             .telegramBot(
                 new TelegramChat(1L, "123456", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
-                    "last_name", 0, null, null, TelegramBotConstants.UA,
+                    "last_name", 0, null, null, TelegramBotConstants.UK,
                     new ArrayList<>(), new ArrayList<>(), Instant.now()))
             .build();
         UserNotification notification = new UserNotification()
@@ -85,7 +85,7 @@ class TelegramNotificationServiceTest {
         userEntity
             .setTelegramBot(new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username",
                 "first_name", "last_name", 0, userEntity, null,
-                TelegramBotConstants.UA, new ArrayList<>(), new ArrayList<>(), Instant.now()));
+                TelegramBotConstants.UK, new ArrayList<>(), new ArrayList<>(), Instant.now()));
 
         assertTrue(telegramNotificationService.isEnabled(userEntity));
 
