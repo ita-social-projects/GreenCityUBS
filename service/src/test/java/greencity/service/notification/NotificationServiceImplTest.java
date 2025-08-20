@@ -198,7 +198,7 @@ class NotificationServiceImplTest {
     @Nested
     class ClockNotification {
         @BeforeEach
-        public void setUp() {
+        void setUp() {
             fixedClock = Clock.fixed(LOCAL_DATE_TIME.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
             lenient().doReturn(fixedClock.instant()).when(clock).instant();
             lenient().doReturn(fixedClock.getZone()).when(clock).getZone();
