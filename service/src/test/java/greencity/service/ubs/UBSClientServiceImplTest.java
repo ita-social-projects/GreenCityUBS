@@ -3720,7 +3720,7 @@ class UBSClientServiceImplTest {
         User user = getUser();
         ubsUser.setUser(user);
 
-        when(SecurityContextHolder.getContext()).thenReturn(securityContext);
+        mockedContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         doReturn(List.of(new SimpleGrantedAuthority("ROLE_UBS_EMPLOYEE")))
             .when(authentication).getAuthorities();

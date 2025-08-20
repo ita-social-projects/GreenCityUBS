@@ -121,6 +121,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -2316,8 +2317,9 @@ class UBSManagementServiceImplTest {
             Mockito.eq(order));
         verify(eventService).saveEvent(anyString(), Mockito.eq("test@mail.com"), Mockito.eq(order));
 
+        Mockito.clearInvocations(eventService);
         ubsManagementService.setOrderDetail(order, null, null, "test@mail.com");
-        verify(eventService, atMost(1)).saveEvent(anyString(), anyString(), any());
+        verify(eventService, never()).saveEvent(anyString(), anyString(), any());
     }
 
     @ParameterizedTest
@@ -2348,8 +2350,9 @@ class UBSManagementServiceImplTest {
             Mockito.eq(order));
         verify(eventService, atLeastOnce()).saveEvent(anyString(), Mockito.eq("test@mail.com"), Mockito.eq(order));
 
+        Mockito.clearInvocations(eventService);
         ubsManagementService.setOrderDetail(order, null, null, "test@mail.com");
-        verify(eventService, atMost(1)).saveEvent(anyString(), anyString(), any());
+        verify(eventService, never()).saveEvent(anyString(), anyString(), any());
     }
 
     @Test

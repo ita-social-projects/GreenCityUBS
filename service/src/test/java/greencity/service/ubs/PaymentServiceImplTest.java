@@ -825,7 +825,6 @@ class PaymentServiceImplTest {
 
     @Test
     void processRefundForOrderWhenOrderStatusNotHandled() {
-        // 181
         Order order = getOrderForGetOrderStatusData2Test();
         order.setOrderStatus(OrderStatus.FORMED);
         RefundDto refundDto = getRefundDto_ReturnMoney();
@@ -840,32 +839,32 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    void processPointsRefundForOrder_ShouldRefundPoints_WhenPointsToUseExists() {
+    void processPointsRefundForOrderWhenPointsToUseExists() {
         int pointsToUse = 100;
         int currentUserPoints = 200;
 
-        User user = mock(User.class);
-        List<ChangeOfPoints> changeOfPointsList = mock(ArrayList.class);
+        List<ChangeOfPoints> changeOfPointsList = new ArrayList<>();
+        User user = getTestUser();
+        user.setCurrentPoints(currentUserPoints);
+        user.setChangeOfPointsList(changeOfPointsList);
         ArgumentCaptor<ChangeOfPoints> argumentCaptor = ArgumentCaptor.forClass(ChangeOfPoints.class);
         Order order = getOrderForGetOrderStatusData2Test();
         order.setPointsToUse(pointsToUse);
         order.setUser(user);
 
-        when(user.getCurrentPoints()).thenReturn(currentUserPoints);
-        when(user.getChangeOfPointsList()).thenReturn(changeOfPointsList);
-
         paymentServiceImpl.processPointsRefundForOrder(order);
 
-        verify(user).setCurrentPoints(currentUserPoints + pointsToUse);
-        verify(changeOfPointsList).add(argumentCaptor.capture());
-        verify(userRepository).save(user);
-
-        ChangeOfPoints changeOfPoints = argumentCaptor.getValue();
+        verify(userRepository, times(1)).save(user);
+        ChangeOfPoints changeOfPoints = user.getChangeOfPointsList().getFirst();
         assertEquals(pointsToUse, changeOfPoints.getAmount());
         assertEquals(LocalDateTime.now().toLocalDate(), changeOfPoints.getDate().toLocalDate());
         assertEquals(BonusReason.REFUND_CANCELED_ORDER, changeOfPoints.getReason());
         assertEquals(user, changeOfPoints.getUser());
         assertEquals(order, changeOfPoints.getOrder());
+
+        paymentServiceImpl.processPointsRefundForOrder(order);
+
+        verify(userRepository, times(1)).save(user);
     }
 
     @Test

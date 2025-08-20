@@ -750,7 +750,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             notificationService.notifyPaidOrder(currentOrder);
 
-            if (currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+            if (currentOrder.getOrderStatus() == OrderStatus.CONFIRMED) {
                 notificationService.notifyCourierItineraryFormed(currentOrder);
             }
         } else if (halfPaidCondition) {

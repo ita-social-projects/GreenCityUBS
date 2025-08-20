@@ -205,6 +205,9 @@ public class PaymentServiceImpl implements PaymentService {
         if (isNull(user.getChangeOfPointsList())) {
             user.setChangeOfPointsList(new ArrayList<>());
         }
+        if (user.getChangeOfPointsList().contains(changeOfPoints)) {
+            return;
+        }
         user.getChangeOfPointsList().add(changeOfPoints);
         userRepository.save(user);
     }
@@ -284,7 +287,10 @@ public class PaymentServiceImpl implements PaymentService {
         Long overpaymentInCoins =
             PaymentUtil.calculateOverpayment(order,
                 PaymentUtil.convertBillsIntoCoins(PaymentUtil.setTotalPrice(prices)));
-        refundPaymentsInBonus(order, email, overpaymentInCoins, BonusReason.REFUND_CANCELED_ORDER);
+        BonusReason reason = order.getOrderStatus() == OrderStatus.CANCELED
+            ? BonusReason.REFUND_CANCELED_ORDER
+            : BonusReason.RETURN_OVERPAY;
+        refundPaymentsInBonus(order, email, overpaymentInCoins, reason);
     }
 
     private void refundPaymentsInBonus(Order order, String email, Long amount, BonusReason reason) {
