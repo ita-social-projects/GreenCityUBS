@@ -5,8 +5,10 @@ import greencity.entity.telegram.TelegramMessage;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 
+@UtilityClass
 public class ChatSpecifications {
     public static Specification<TelegramChat> hasNameLike(String searchTerm) {
         return (root, query, criteriaBuilder) -> {

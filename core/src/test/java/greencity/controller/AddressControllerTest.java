@@ -62,7 +62,7 @@ class AddressControllerTest {
     private final Principal principal = getPrincipal();
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(addressController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
                 new UserArgumentResolver(userRepository))
