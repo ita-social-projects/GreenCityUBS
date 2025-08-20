@@ -347,11 +347,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto.getSumAmount();
     }
 
-    private Boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
+    private boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
         return dto.getSumConfirmed() != 0;
     }
 
-    private Boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
+    private boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
         return dto.getSumExported() != 0;
     }
 
