@@ -449,10 +449,6 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private boolean existPositions(Set<Long> positionIds) {
-        if (positionIds == null) {
-            return false;
-        }
-
         return positionIds.stream()
             .allMatch(positionRepository::existsById);
     }
