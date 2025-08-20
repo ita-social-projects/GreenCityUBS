@@ -1144,12 +1144,13 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void requestToBlockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
+        String email = user.getRecipientEmail();
         List<Long> orders = new ArrayList<>();
         orders.add(1L);
 
-        when(userRemoteClient.findByUuid(user.getUuid()))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(userRepository.findByUuid(user.getUuid()))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         assertNotNull(ordersAdminsPageService.requestToBlockOrder(user.getUuid(), orders));
@@ -1157,14 +1158,14 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void requestToBlockOrderWithEmptyOrderListTest() {
-        // 1035
-        String userUuid = "test-uuid";
-        String email = "test@gmail.com";
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        String email = user.getRecipientEmail();
         Employee employee = ModelUtils.getEmployee();
         employee.setEmail(email);
 
-        when(userRemoteClient.findByUuid(userUuid))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail(email)));
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
         when(employeeRepository.findByEmail(email))
             .thenReturn(Optional.of(employee));
         doNothing().when(orderRepository)
@@ -1173,7 +1174,7 @@ class OrdersAdminsPageServiceImplTest {
         List<BlockedOrderDto> result = ordersAdminsPageService.requestToBlockOrder(
             userUuid, Collections.emptyList());
 
-        verify(userRemoteClient).findByUuid(userUuid);
+        verify(userRepository).findByUuid(userUuid);
         verify(employeeRepository).findByEmail(email);
         verify(orderRepository).setBlockedEmployeeForAllOrders(eq(employee.getId()), any(LocalDateTime.class));
         assertTrue(result.isEmpty());
@@ -1181,9 +1182,9 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void requestToBlockOrderWhenBlockedByAnotherEmployeeTest() {
-        // 1041
-        String userUuid = "test-uuid";
-        String email = "test@gmail.com";
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        String email = user.getRecipientEmail();
         Long orderId = 1L;
         Employee employee = ModelUtils.getEmployee();
         employee.setId(1L);
@@ -1200,8 +1201,8 @@ class OrdersAdminsPageServiceImplTest {
         blockedOrder.setBlockedByEmployee(anotherEmployee);
         List<Long> orders = List.of(orderId);
 
-        when(userRemoteClient.findByUuid(userUuid))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail(email)));
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
         when(employeeRepository.findByEmail(email))
             .thenReturn(Optional.of(employee));
         when(orderRepository.findById(orderId))
@@ -1209,23 +1210,39 @@ class OrdersAdminsPageServiceImplTest {
 
         List<BlockedOrderDto> result = ordersAdminsPageService.requestToBlockOrder(userUuid, orders);
 
-        verify(userRemoteClient).findByUuid(userUuid);
+        verify(userRepository).findByUuid(userUuid);
         verify(employeeRepository).findByEmail(email);
         verify(orderRepository).findById(orderId);
         assertEquals(1, result.size());
-        assertEquals(orderId, result.get(0).getOrderId());
-        assertEquals("Jane Doe", result.get(0).getUserName());
+        assertEquals(orderId, result.getFirst().getOrderId());
+        assertEquals("Jane Doe", result.getFirst().getUserName());
+    }
+
+    @Test
+    void requestToBlockOrderWhenUserNotFoundTest() {
+        String uuid = "uuid";
+        List<Long> orders = List.of(1L, 2L);
+        String expectedExceptionMessage = ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid;
+
+        when(userRepository.findByUuid(uuid))
+            .thenReturn(null);
+
+        var notFoundException = assertThrows(
+            NotFoundException.class,
+            () -> ordersAdminsPageService.requestToBlockOrder(uuid, orders));
+        assertEquals(expectedExceptionMessage, notFoundException.getMessage());
     }
 
     @Test
     void unblockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
+        String email = user.getRecipientEmail();
         List<Long> orders = new ArrayList<>();
         orders.add(1L);
 
-        when(userRemoteClient.findByUuid(user.getUuid()))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(userRepository.findByUuid(user.getUuid()))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         assertNotNull(ordersAdminsPageService.unblockOrder(user.getUuid(), orders));
@@ -1233,20 +1250,20 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void unblockOrderWithEmptyOrderListTest() {
-        // 1059
-        String userUuid = "test-uuid";
-        String email = "test@gmail.com";
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        String email = user.getRecipientEmail();
         Employee employee = ModelUtils.getEmployee();
         employee.setEmail(email);
 
-        when(userRemoteClient.findByUuid(userUuid))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail(email)));
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         doNothing().when(orderRepository).unblockAllOrders(employee.getId());
 
         List<Long> result = ordersAdminsPageService.unblockOrder(userUuid, Collections.emptyList());
 
-        verify(userRemoteClient).findByUuid(userUuid);
+        verify(userRepository).findByUuid(userUuid);
         verify(employeeRepository).findByEmail(email);
         verify(orderRepository).unblockAllOrders(employee.getId());
         assertTrue(result.isEmpty());
@@ -1254,9 +1271,9 @@ class OrdersAdminsPageServiceImplTest {
 
     @Test
     void unblockOrderWhenBlockedByCurrentEmployeeTest() {
-        // 1066
-        String userUuid = "test-uuid";
-        String email = "test@gmail.com";
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        String email = user.getRecipientEmail();
         Long orderId = 1L;
         Employee employee = ModelUtils.getEmployee();
         employee.setId(1L);
@@ -1267,20 +1284,20 @@ class OrdersAdminsPageServiceImplTest {
         blockedOrder.setBlockedByEmployee(employee);
         List<Long> orders = List.of(orderId);
 
-        when(userRemoteClient.findByUuid(userUuid))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail(email)));
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(blockedOrder));
         doNothing().when(orderLockService).unlockOrder(blockedOrder);
 
         List<Long> result = ordersAdminsPageService.unblockOrder(userUuid, orders);
 
-        verify(userRemoteClient).findByUuid(userUuid);
+        verify(userRepository).findByUuid(userUuid);
         verify(employeeRepository).findByEmail(email);
         verify(orderRepository).findById(orderId);
         verify(orderLockService).unlockOrder(blockedOrder);
         assertEquals(1, result.size());
-        assertEquals(orderId, result.get(0));
+        assertEquals(orderId, result.getFirst());
     }
 
     @Test
@@ -1642,7 +1659,7 @@ class OrdersAdminsPageServiceImplTest {
         List<Long> result = ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, futureDate, employeeId);
 
         assertEquals(1, result.size());
-        assertEquals(orderId, result.get(0));
+        assertEquals(orderId, result.getFirst());
         verify(orderRepository, times(1)).findById(orderId);
     }
 

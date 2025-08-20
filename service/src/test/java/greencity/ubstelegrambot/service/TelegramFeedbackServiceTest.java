@@ -325,6 +325,7 @@ class TelegramFeedbackServiceTest {
 
     @Test
     void testGetAllFeedbacksByChatId_FeedbacksFound_FeedbackDtoReturned() {
+        Long id = 1L;
         String chatId = "123456789";
         Pageable pageable = PageRequest.of(0, 5);
 
@@ -341,9 +342,9 @@ class TelegramFeedbackServiceTest {
 
         Page<ChatFeedback> feedbackPage = new PageImpl<>(List.of(feedback), pageable, 1);
 
-        when(chatFeedbackRepository.findByChatIdPageable(chatId, pageable)).thenReturn(feedbackPage);
+        when(chatFeedbackRepository.findByChatId(id, pageable)).thenReturn(feedbackPage);
 
-        PageableDto<FeedbackDto> result = telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable);
+        PageableDto<FeedbackDto> result = telegramFeedbackService.getAllFeedbacksByChatId(id, pageable);
 
         assertEquals(1, result.getTotalElements());
         assertEquals(1, result.getPage().size());
@@ -357,11 +358,11 @@ class TelegramFeedbackServiceTest {
 
     @Test
     void testGetAllFeedbacksByChatId_ChatNotFound_EmptyPageableDtoReturned() {
-        String chatId = "999999999";
+        Long id = 1L;
         Pageable pageable = PageRequest.of(0, 5);
-        when(chatFeedbackRepository.findByChatIdPageable(chatId, pageable)).thenReturn(Page.empty());
+        when(chatFeedbackRepository.findByChatId(id, pageable)).thenReturn(Page.empty());
 
-        PageableDto<FeedbackDto> result = telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable);
+        PageableDto<FeedbackDto> result = telegramFeedbackService.getAllFeedbacksByChatId(id, pageable);
 
         Assertions.assertTrue(result.getPage().isEmpty());
         assertEquals(0, result.getTotalElements());

@@ -200,7 +200,7 @@ class NotificationServiceImplTest {
     private OrderBagService orderBagService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         fixedClock = Clock.fixed(LOCAL_DATE_TIME.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
         lenient().doReturn(fixedClock.instant()).when(clock).instant();
         lenient().doReturn(fixedClock.getZone()).when(clock).getZone();
@@ -500,7 +500,6 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyBonusesFromCanceledOrderWhenPointsToReturnZero() {
-            // Covers line 436: when pointsToReturn is null or 0
             Order order = Order.builder()
                 .id(1L)
                 .pointsToUse(0)
@@ -1092,7 +1091,7 @@ class NotificationServiceImplTest {
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
         PageableAdvancedDto<NotificationShortDto> actual = notificationService
-            .getAllShortNotificationsForUser(email, "ua", TEST_PAGEABLE);
+            .getAllShortNotificationsForUser(email, "uk", TEST_PAGEABLE);
 
         assertEquals(TEST_PAGEABLE_ADVANCED_DTO, actual);
     }
@@ -1100,7 +1099,7 @@ class NotificationServiceImplTest {
     @Test
     void testGetAllNotificationsForUser() {
         String userUuid = "user uuid";
-        String language = "ua";
+        String language = "uk";
         Long orderId = 5L;
         Long notificationId = 0L;
         NotificationType notificationType = NotificationType.VIOLATION_THE_RULES;
@@ -1155,7 +1154,7 @@ class NotificationServiceImplTest {
     void testGetAllNotificationForUserWhenNotificationDoesNotBelongToUser() {
         String userUuid = "user uuid";
         String anotherUserUuid = "another uuid";
-        String language = "ua";
+        String language = "uk";
         Long notificationId = 0L;
         NotificationType notificationType = NotificationType.VIOLATION_THE_RULES;
         UserNotification userNotification = Mockito.mock(UserNotification.class);
@@ -1193,7 +1192,7 @@ class NotificationServiceImplTest {
     @Test
     void testGetAllNotificationForUserWhenNotificationIsNotFound() {
         String userUuid = "user uuid";
-        String language = "ua";
+        String language = "uk";
         Long notificationId = 1L;
         UserNotification userNotification = Mockito.mock(UserNotification.class);
         NotificationType notificationType = NotificationType.UNPAID_ORDER;
@@ -1238,7 +1237,7 @@ class NotificationServiceImplTest {
             NotificationType.UNPAID_ORDER,
             SITE)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));
 
-        NotificationDto actual = notificationService.getNotification("test", 1L, "ua");
+        NotificationDto actual = notificationService.getNotification("test", 1L, "uk");
 
         assertEquals(TEST_NOTIFICATION_DTO, actual);
     }
@@ -1248,7 +1247,7 @@ class NotificationServiceImplTest {
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(TEST_USER_NOTIFICATION_4));
 
         assertThrows(AccessDeniedException.class,
-            () -> notificationService.getNotification("testtest", 1L, "ua"));
+            () -> notificationService.getNotification("testtest", 1L, "uk"));
     }
 
     @Test
@@ -1262,7 +1261,7 @@ class NotificationServiceImplTest {
         when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
             .thenReturn(Optional.of(getViolation()));
 
-        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "uk");
 
         assertEquals(createViolationNotificationDto(), actual);
     }
@@ -1280,7 +1279,7 @@ class NotificationServiceImplTest {
             .thenReturn(Optional.of(getViolation()));
         when(userNotificationRepository.save(notification)).thenReturn(notification);
 
-        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", true);
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "uk", true);
 
         assertEquals(createViolationNotificationDto(), actual);
         assertTrue(notification.isRead(), "Notification should be marked as read");
@@ -1299,7 +1298,7 @@ class NotificationServiceImplTest {
         when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
             .thenReturn(Optional.of(getViolation()));
 
-        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", false);
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "uk", false);
 
         assertEquals(createViolationNotificationDto(), actual);
         assertFalse(notification.isRead(), "Notification should not be marked as read");
@@ -1319,7 +1318,7 @@ class NotificationServiceImplTest {
             .thenReturn(Optional.of(getViolation()));
         when(userNotificationRepository.save(notification)).thenReturn(notification);
 
-        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua");
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "uk");
 
         assertEquals(createViolationNotificationDto(), actual);
         assertTrue(notification.isRead(),
@@ -1339,7 +1338,7 @@ class NotificationServiceImplTest {
         when(violationRepository.findByOrderIdAndDescription(notification.getOrder().getId(), "Description"))
             .thenReturn(Optional.of(getViolation()));
 
-        NotificationDto actual = notificationService.getNotification("abc", 1L, "ua", true);
+        NotificationDto actual = notificationService.getNotification("abc", 1L, "uk", true);
 
         assertEquals(createViolationNotificationDto(), actual);
         assertTrue(notification.isRead(), "Notification should remain read");
@@ -1358,7 +1357,7 @@ class NotificationServiceImplTest {
             .thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> notificationService.getNotification("abc", 1L, "ua"));
+            () -> notificationService.getNotification("abc", 1L, "uk"));
     }
 
     @Test
@@ -1605,7 +1604,7 @@ class NotificationServiceImplTest {
 
     @Test
     void testCreateNotificationDtoTitleUaLanguage() {
-        String language = "ua";
+        String language = "uk";
 
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(any(), any()))
             .thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE));

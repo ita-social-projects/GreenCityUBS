@@ -295,5 +295,11 @@
     <include file="db/changelog/logs/2025-08-07-ch-update-localdatetime-to-instant-in-telegram-entities.xml"/>
     <include file="db/changelog/logs/2025-08-08-ch-update-chat-state-updated-at-field-in-telegram-chat.xml"/>
     <include file="db/changelog/logs/2025-08-07-ch-add-created-at-to-telegram-chat.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-users-Pohranychnyi.xml"/>
+    <include file="db/changelog/logs/2025-08-11-ch-insert-into-users-Pohranychnyi.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-user-Lys.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-cities-Kyiv-Lys.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-districts-for-Kyiv-Lys.xml"/>
     <include file="db/changelog/logs/ch-add-canceled-notification-Zadyraichuk.xml"/>
+    <include file="db/changelog/logs/ch-update-notification_platforms-Zadyraichuk.xml"/>
 </databaseChangeLog>

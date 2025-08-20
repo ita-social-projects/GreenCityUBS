@@ -472,6 +472,7 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Notifies the user about a canceled violation associated with a specific
      * order.
+     *
      * <p>
      *
      * Retrieves the canceled violation for the given order identifier. If the
@@ -989,7 +990,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationShortDto.builder()
             .id(notification.getId())
-            .title(language.equals("ua")
+            .title(language.equals("uk")
                 ? template.getTitleUk()
                 : template.getTitleEn())
             .notificationTime(notification.getNotificationTime())
@@ -1039,7 +1040,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         StringSubstitutor sub = new StringSubstitutor(valuesMap);
         String resultBody = sub.replace(String.format(templateBody, monthsOfAccountInactivity));
-        String title = language.equals("ua") ? template.getTitleUk() : template.getTitleEn();
+        String title = language.equals("uk") ? template.getTitleUk() : template.getTitleEn();
 
         return NotificationDto.builder()
             .title(title)
@@ -1063,7 +1064,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private static String resolveTemplateBody(String language, NotificationReceiverType receiverType,
         NotificationTemplate notification) {
-        return language.equals("ua")
+        return language.equals("uk")
             ? getNotificationPlatformByReceiverType(notification, receiverType).getBodyUk()
             : getNotificationPlatformByReceiverType(notification, receiverType).getBodyEn();
     }

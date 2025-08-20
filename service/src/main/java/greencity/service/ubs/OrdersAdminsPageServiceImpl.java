@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.client.UserRemoteClient;
+import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.TitleDto;
@@ -1027,8 +1028,12 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<BlockedOrderDto> requestToBlockOrder(String userUuid, List<Long> orders) {
-        String email = userRemoteClient.findByUuid(userUuid)
-            .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
+        User user = userRepository.findByUuid(userUuid);
+        if (user == null) {
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID + userUuid);
+        }
+        String email = user.getRecipientEmail();
+
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         List<BlockedOrderDto> blockedOrderDTOS = new ArrayList<>();
@@ -1052,8 +1057,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     @Override
     public synchronized List<Long> unblockOrder(String userUuid, List<Long> orders) {
-        String email = userRemoteClient.findByUuid(userUuid)
-            .orElseThrow(() -> new EntityNotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getEmail();
+        User user = userRepository.findByUuid(userUuid);
+        String email = user.getRecipientEmail();
+
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         if (orders.isEmpty()) {
