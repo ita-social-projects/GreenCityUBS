@@ -3,6 +3,17 @@
         xmlns="http://www.ehcache.org/v3"
         xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core.xsd">
 
+    <default-copiers>
+        <copier type="java.lang.Object">org.ehcache.impl.copy.IdentityCopier</copier>
+    </default-copiers>
+
+    <cache alias="default-update-timestamps-region">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <heap>100</heap>
+    </cache>
+
     <cache-template name="translation-entities">
         <resources>
             <heap>1000</heap>
