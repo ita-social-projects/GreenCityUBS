@@ -1320,7 +1320,7 @@ class UBSManagementServiceImplTest {
     @Test
     void getOrderSumDetailsForAdjustmentPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
-        Order order = ModelUtils.getAdjustmentPaidOrder();
+        Order order = ModelUtils.getConfirmedPaidOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 

@@ -966,7 +966,6 @@ class PaymentServiceImplTest {
         User user = getTestUser();
         user.setCurrentPoints(currentUserPoints);
         user.setChangeOfPointsList(changeOfPointsList);
-        ArgumentCaptor<ChangeOfPoints> argumentCaptor = ArgumentCaptor.forClass(ChangeOfPoints.class);
         Order order = getOrderForGetOrderStatusData2Test();
         order.setPointsToUse(pointsToUse);
         order.setUser(user);

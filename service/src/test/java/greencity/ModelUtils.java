@@ -2258,12 +2258,12 @@ public class ModelUtils {
             .build();
     }
 
-    public static Order getAdjustmentPaidOrder() {
+    public static Order getConfirmedPaidOrder() {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
                 "Roman", "Roman", "Roman", "Roman", new Order())))
-            .orderStatus(OrderStatus.ADJUSTMENT)
+            .orderStatus(OrderStatus.CONFIRMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
                 .amount(300000L)
