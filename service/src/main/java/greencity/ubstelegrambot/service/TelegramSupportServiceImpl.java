@@ -302,14 +302,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private String buildContentForNotification(TelegramMessage telegramMessage) {
         String contentForNotification = "Empty message";
         if (telegramMessage.getAssets() != null && !telegramMessage.getAssets().isEmpty()) {
-            switch (telegramMessage.getAssets().getFirst().getType()) {
-                case IMAGE -> contentForNotification = "Image content ("
-                    + telegramMessage.getAssets().size() + " images)";
-                // case AUDIO -> contentForNotification = "Audio content ("
-                // + telegramMessage.getAssets().size() + " audio)";
-                default -> contentForNotification = "File content ("
+            contentForNotification = telegramMessage.getAssets().getFirst().getType().equals(AssetType.IMAGE)
+                ? "Image content ("
+                    + telegramMessage.getAssets().size() + " images)"
+                : "File content ("
                     + telegramMessage.getAssets().size() + " files)";
-            }
+
             if (telegramMessage.getText() != null && !telegramMessage.getText().isEmpty()) {
                 contentForNotification += " + text";
             }
