@@ -972,7 +972,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language,
-                                                            Long monthsOfAccountInactivity) {
+        Long monthsOfAccountInactivity) {
         NotificationTemplate template = getNotificationTemplate(notification, SITE, templateRepository);
 
         String templateBody = resolveTemplateBody(language, SITE, template);

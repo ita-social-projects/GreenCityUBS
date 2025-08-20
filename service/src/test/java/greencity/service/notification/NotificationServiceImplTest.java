@@ -893,7 +893,7 @@ class NotificationServiceImplTest {
         }
 
         private void mockFillAndSendNotification(Set<NotificationParameter> parameters, Order order,
-                                                 NotificationType notificationType) {
+            NotificationType notificationType) {
             UserNotification userNotification = new UserNotification();
             userNotification.setNotificationType(notificationType);
             userNotification.setUser(order.getUser());
@@ -983,22 +983,22 @@ class NotificationServiceImplTest {
         void testNotifyAllHalfPaidPackages() {
             User user = getUser();
             List<Order> orders = List.of(Order.builder().id(47L).user(user)
-                    .orderDate(LocalDateTime.now(fixedClock))
-                    .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
-                    .payment(Collections.emptyList())
-                    .certificates(Collections.emptySet())
-                    .amountOfBagsOrdered(Collections.singletonMap(1, 3))
-                    .exportedQuantity(Collections.emptyMap())
-                    .confirmedQuantity(Collections.singletonMap(1, 3))
-                    .pointsToUse(50)
-                    .payment(List.of(
-                        Payment.builder()
-                            .paymentStatus(PaymentStatus.PAID).amount(5000L)
-                            .build(),
-                        Payment.builder()
-                            .paymentStatus(PaymentStatus.UNPAID).amount(0L)
-                            .build()))
-                    .build(),
+                .orderDate(LocalDateTime.now(fixedClock))
+                .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
+                .payment(Collections.emptyList())
+                .certificates(Collections.emptySet())
+                .amountOfBagsOrdered(Collections.singletonMap(1, 3))
+                .exportedQuantity(Collections.emptyMap())
+                .confirmedQuantity(Collections.singletonMap(1, 3))
+                .pointsToUse(50)
+                .payment(List.of(
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.PAID).amount(5000L)
+                        .build(),
+                    Payment.builder()
+                        .paymentStatus(PaymentStatus.UNPAID).amount(0L)
+                        .build()))
+                .build(),
                 Order.builder().id(53L).user(user)
                     .orderDate(LocalDateTime.now(fixedClock))
                     .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
@@ -1711,9 +1711,9 @@ class NotificationServiceImplTest {
         notification.setUser(user);
         notification.setOrder(newOrder);
         Set<NotificationParameter> parameters = Set.of(NotificationParameter.builder()
-                .key(ORDER_NUMBER_KEY)
-                .value(newOrder.getId().toString())
-                .build(),
+            .key(ORDER_NUMBER_KEY)
+            .value(newOrder.getId().toString())
+            .build(),
             NotificationParameter.builder()
                 .key(AMOUNT_TO_PAY_KEY)
                 .value(String.valueOf(newOrder.getSumTotalAmountWithoutDiscounts() / 100))

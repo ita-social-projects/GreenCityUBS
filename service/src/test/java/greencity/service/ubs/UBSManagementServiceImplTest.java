@@ -2312,7 +2312,8 @@ class UBSManagementServiceImplTest {
         doNothing().when(eventService).saveEvent(anyString(), anyString(), any());
 
         ubsManagementService.setOrderDetail(order, confirmed, null, "test@mail.com");
-        verify(eventService).saveEvent(Mockito.contains(bag.getNameUk()), Mockito.eq("test@mail.com"), Mockito.eq(order));
+        verify(eventService).saveEvent(Mockito.contains(bag.getNameUk()), Mockito.eq("test@mail.com"),
+            Mockito.eq(order));
         verify(eventService).saveEvent(anyString(), Mockito.eq("test@mail.com"), Mockito.eq(order));
 
         ubsManagementService.setOrderDetail(order, null, null, "test@mail.com");
@@ -2343,7 +2344,8 @@ class UBSManagementServiceImplTest {
         doNothing().when(eventService).saveEvent(anyString(), anyString(), any());
 
         ubsManagementService.setOrderDetail(order, null, exported, "test@mail.com");
-        verify(eventService).saveEvent(Mockito.contains(bag.getNameUk()), Mockito.eq("test@mail.com"), Mockito.eq(order));
+        verify(eventService).saveEvent(Mockito.contains(bag.getNameUk()), Mockito.eq("test@mail.com"),
+            Mockito.eq(order));
         verify(eventService, atLeastOnce()).saveEvent(anyString(), Mockito.eq("test@mail.com"), Mockito.eq(order));
 
         ubsManagementService.setOrderDetail(order, null, null, "test@mail.com");
