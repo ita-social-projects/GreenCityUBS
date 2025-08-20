@@ -1816,6 +1816,7 @@ class UBSClientServiceImplTest {
         UBSuser ubsUser = ubsUserOptional.get();
         User user = getUser();
         ubsUser.setUser(user);
+        String userUuid = user.getUuid() + "test";
 
         MockedStatic<SecurityContextHolder> mockedContextHolder = mockStatic(SecurityContextHolder.class);
         mockedContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
@@ -1826,7 +1827,7 @@ class UBSClientServiceImplTest {
         when(ubsUserRepository.findById(1L)).thenReturn(ubsUserOptional);
 
         assertThrows(AccessDeniedException.class,
-            () -> ubsService.updateUbsUserInfoInOrder(request, user.getUuid() + "test"));
+            () -> ubsService.updateUbsUserInfoInOrder(request, userUuid));
 
         verify(ubsUserRepository).findById(1L);
 
