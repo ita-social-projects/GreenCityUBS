@@ -744,10 +744,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void setOrderPaymentStatusForConfirmedBags(Order currentOrder, long paymentsForCurrentOrder,
         long totalSumAmount, long totalConfirmed) {
-        boolean paidCondition = paymentsForCurrentOrder > 0 && paymentsForCurrentOrder >= totalSumAmount
+        boolean paidCondition = paymentsForCurrentOrder > 0
+            && paymentsForCurrentOrder >= totalSumAmount
             && paymentsForCurrentOrder >= totalConfirmed;
-        boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalSumAmount > paymentsForCurrentOrder
-            || totalConfirmed > paymentsForCurrentOrder;
+        boolean halfPaidCondition = paymentsForCurrentOrder > 0
+            && (totalSumAmount > paymentsForCurrentOrder || totalConfirmed > paymentsForCurrentOrder);
 
         if (paidCondition) {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);

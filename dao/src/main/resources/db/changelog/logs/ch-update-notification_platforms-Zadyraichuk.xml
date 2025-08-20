@@ -5,13 +5,13 @@
     <changeSet id="addCanceledNotificationPlatformsZadyraichuk" author="Rostyslav Zadyraichuk">
         <sql>
             UPDATE notification_platforms
-            SET body_uk = 'Ви нещодавно залишили заявку №${orderNumber} для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay}. грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
+            SET body_uk = 'Ви нещодавно залишили заявку №${orderNumber} для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
                 body_en = 'Recently you have requested our “UBS Courier” service, however, we have not received the payment confirmation. Did you happen to encounter any issues? The sum is ${amountToPay} UAH. ${payButton} We will gladly answer any questions you might still have! You can chat with a manager here selecting “Chat with manager” option in menu or email us at hello@nowaste.org.ua'
             WHERE notification_id IN (
                     SELECT id
                     FROM notification_templates
                     WHERE notification_type = 'UNPAID_ORDER')
-                AND notification_receiver_type = 'EMAIL'
+                AND notification_receiver_type = 'EMAIL';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітання! Ви нещодавно залишили заявку №${orderNumber} для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -20,7 +20,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'UNPAID_ORDER')
-              AND notification_receiver_type = 'SITE'
+              AND notification_receiver_type = 'SITE';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітання! Ви нещодавно залишили заявку №${orderNumber} для замовлення нашої послуги «УБС Кур’єр», але ми не отримали підтвердження оплати. Можливо, у вас виникли якісь труднощі? Сума до сплати ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -29,7 +29,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'UNPAID_ORDER')
-              AND notification_receiver_type = 'MOBILE'
+              AND notification_receiver_type = 'MOBILE';
 
             UPDATE notification_platforms
             SET body_uk = 'Ви успішно замовили й оплатили послугу «УБС Кур’єр», замовлення №${orderNumber}. УБС Кур’єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв’яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -38,7 +38,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'ORDER_IS_PAID')
-              AND notification_receiver_type = 'EMAIL'
+              AND notification_receiver_type = 'EMAIL';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітаємо! Ви успішно замовили й оплатили послугу «УБС Кур’єр», замовлення №${orderNumber}. УБС Кур’єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв’яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -47,7 +47,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'ORDER_IS_PAID')
-              AND notification_receiver_type = 'SITE'
+              AND notification_receiver_type = 'SITE';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітаємо! Ви успішно замовили й оплатили послугу «УБС Кур’єр», замовлення №${orderNumber}. УБС Кур’єр приїде по ваші пакети впродовж 2–9 днів від дати оплати послуги. Коли маршрут буде сформовано, ми обов’язково зв’яжемося з вами для узгодження деталей. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -56,7 +56,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'ORDER_IS_PAID')
-              AND notification_receiver_type = 'MOBILE'
+              AND notification_receiver_type = 'MOBILE';
 
             UPDATE notification_platforms
             SET body_uk = 'Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур’єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур’єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов’язково попередьте про це Кур’єра або менеджерів! Номер Кур’єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповім! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -65,7 +65,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'COURIER_ITINERARY_FORMED')
-              AND notification_receiver_type = 'EMAIL'
+              AND notification_receiver_type = 'EMAIL';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітання! Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур’єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур’єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов’язково попередьте про це Кур’єра або менеджерів! Номер Кур’єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -74,7 +74,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'COURIER_ITINERARY_FORMED')
-              AND notification_receiver_type = 'SITE'
+              AND notification_receiver_type = 'SITE';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітання! Ми сформували маршрут УБС Кур’єра, замовлення №${orderNumber}. Наш Кур’єр буде у вас ${date}.  Робочий час Кур’єра: з ${startTime} до ${endTime}. Будь ласка, залишайтеся в цей час на зв’язку й увімкніть телефон на гучний режим. Кур’єр зателефонує вам заздалегідь та коли приїде. Якщо вам не вдасться бути на місці в домовлений час, ви можете залишити ваші пакети в консьєржа, але обов’язково попередьте про це Кур’єра або менеджерів! Номер Кур’єра — +380638175035 або +380931038987. Якщо у вас залишилися будь-які питання - з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -83,7 +83,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'COURIER_ITINERARY_FORMED')
-              AND notification_receiver_type = 'MOBILE'
+              AND notification_receiver_type = 'MOBILE';
 
             UPDATE notification_platforms
             SET body_uk = 'Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -92,7 +92,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'UNPAID_PACKAGE')
-              AND notification_receiver_type = 'EMAIL'
+              AND notification_receiver_type = 'EMAIL';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -101,7 +101,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'UNPAID_PACKAGE')
-              AND notification_receiver_type = 'SITE'
+              AND notification_receiver_type = 'SITE';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітання! Ви внесли зміни у замовлення №${orderNumber}. Просимо вас, будь ласка, доплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -110,7 +110,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'UNPAID_PACKAGE')
-              AND notification_receiver_type = 'MOBILE'
+              AND notification_receiver_type = 'MOBILE';
 
             UPDATE notification_platforms
             SET body_uk = 'Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -119,7 +119,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'TARIFF_PRICE_WAS_CHANGED')
-              AND notification_receiver_type = 'EMAIL'
+              AND notification_receiver_type = 'EMAIL';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітання! Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -128,7 +128,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'TARIFF_PRICE_WAS_CHANGED')
-              AND notification_receiver_type = 'SITE'
+              AND notification_receiver_type = 'SITE';
 
             UPDATE notification_platforms
             SET body_uk = 'Вітання! Адміністратор вніс зміни у тариф замовлення №${orderNumber}. Просимо вас, будь ласка, оплатити ${amountToPay} грн. Оплатити: ${payButton} Якщо у вас залишилися будь-які питання — з радістю відповім! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -137,7 +137,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'TARIFF_PRICE_WAS_CHANGED')
-              AND notification_receiver_type = 'MOBILE'
+              AND notification_receiver_type = 'MOBILE';
 
             UPDATE notification_platforms
             SET body_uk = 'Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -146,7 +146,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'CREATE_NEW_ORDER')
-              AND notification_receiver_type = 'EMAIL'
+              AND notification_receiver_type = 'EMAIL';
 
             UPDATE notification_platforms
             SET body_uk = 'Шановний(-а) ${customerName}, Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -155,7 +155,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'CREATE_NEW_ORDER')
-              AND notification_receiver_type = 'SITE'
+              AND notification_receiver_type = 'SITE';
 
             UPDATE notification_platforms
             SET body_uk = 'Шановний(-а) ${customerName}, Дякуємо за Ваше замовлення на нашому сайті! Ми раді повідомити, що Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було успішно розміщене та обробляється. Якщо у вас залишилися будь-які питання — з радістю відповімо! Чат з менеджером доступний при виборі у меню опції «Чат з людиною» чи за e-mail hello@nowaste.org.ua',
@@ -164,7 +164,7 @@
                 SELECT id
                 FROM notification_templates
                 WHERE notification_type = 'CREATE_NEW_ORDER')
-              AND notification_receiver_type = 'MOBILE'
+              AND notification_receiver_type = 'MOBILE';
         </sql>
     </changeSet>
 </databaseChangeLog>

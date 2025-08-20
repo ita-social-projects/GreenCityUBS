@@ -117,7 +117,6 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -794,7 +793,7 @@ class UBSManagementServiceImplTest {
 
     @Test
     void testSetOrderDetailConfirmed() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrdersStatusConfirmedDto()));
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
                 .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));

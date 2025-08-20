@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.courier.ReceivingStationDto;
@@ -11,7 +10,6 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.user.ChatLinkDto;
-
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
@@ -57,7 +55,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -115,8 +112,6 @@ class OrdersAdminsPageServiceImplTest {
     NotificationServiceImpl notificationService;
     @Mock
     private SuperAdminService superAdminService;
-    @Mock
-    private UserRemoteClient userRemoteClient;
     @Mock
     private TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     @Mock
