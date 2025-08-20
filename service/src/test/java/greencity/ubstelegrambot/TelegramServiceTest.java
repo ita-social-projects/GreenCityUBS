@@ -20,6 +20,7 @@ import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
+import greencity.repository.MessageAssetRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
@@ -121,6 +122,9 @@ class TelegramServiceTest {
     private TelegramManagerRepository telegramManagerRepository;
 
     @Mock
+    private MessageAssetRepository messageAssetRepository;
+
+    @Mock
     private EmployeeRepository employeeRepository;
 
     @Mock
@@ -150,6 +154,7 @@ class TelegramServiceTest {
             userRepository,
             telegramChatProducer,
             telegramUtils,
+            messageAssetRepository,
             telegramUpdateProcessorMap);
     }
 
