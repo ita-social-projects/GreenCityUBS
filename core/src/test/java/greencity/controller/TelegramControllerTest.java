@@ -1,7 +1,10 @@
 package greencity.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import greencity.client.UserRemoteClient;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -9,7 +12,9 @@ import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.MarkMessagesAsReadRequest;
 import greencity.dto.telegram.TelegramMessageDto;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
+import java.util.Collections;
 import greencity.ubstelegrambot.service.TelegramFeedbackServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,20 +28,15 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.util.Collections;
 import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramControllerTest {
 
     @Mock
-    private UserRemoteClient userRemoteClient;
+    private UserRepository userRepository;
 
     @Mock
     private TelegramService telegramService;
@@ -59,7 +59,7 @@ class TelegramControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(telegramChatController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .build();
 
         messageDtoPage = new PageableDto<>(Collections.emptyList(), 0, 0, 0);

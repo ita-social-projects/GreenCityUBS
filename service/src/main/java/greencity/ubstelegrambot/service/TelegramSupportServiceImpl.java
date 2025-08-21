@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
@@ -15,7 +16,6 @@ import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
-import greencity.service.ubs.FileService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramSupportService;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -28,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
@@ -47,7 +49,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final TelegramChatRepository telegramChatRepository;
-    private final FileService fileService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final TelegramMessageRepository telegramMessageRepository;
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramExecutor telegramExecutor;
@@ -227,7 +229,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 fileInfo.getOriginalFileName(),
                 fileInfo.getContentType());
 
-            String azureFileUrl = fileService.upload(multipartFile);
+            String azureFileUrl = uploadFile(multipartFile);
             AssetType assetType = TelegramUtils.detectAssetType(fileInfo.getContentType());
 
             MessageAsset asset = MessageAsset.builder()
@@ -308,14 +310,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private String buildContentForNotification(TelegramMessage telegramMessage) {
         String contentForNotification = "Empty message";
         if (telegramMessage.getAssets() != null && !telegramMessage.getAssets().isEmpty()) {
-            switch (telegramMessage.getAssets().getFirst().getType()) {
-                case IMAGE -> contentForNotification = "Image content ("
-                    + telegramMessage.getAssets().size() + " images)";
-                // case AUDIO -> contentForNotification = "Audio content ("
-                // + telegramMessage.getAssets().size() + " audio)";
-                default -> contentForNotification = "File content ("
+            contentForNotification = telegramMessage.getAssets().getFirst().getType().equals(AssetType.IMAGE)
+                ? "Image content ("
+                    + telegramMessage.getAssets().size() + " images)"
+                : "File content ("
                     + telegramMessage.getAssets().size() + " files)";
-            }
+
             if (telegramMessage.getText() != null && !telegramMessage.getText().isEmpty()) {
                 contentForNotification += " + text";
             }
@@ -332,5 +332,15 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         private String originalFileName;
         private String contentType;
         private Long fileSize;
+    }
+
+    private String uploadFile(MultipartFile file) {
+        String url = "";
+        try {
+            url = userRemoteWebClient.uploadFile(file);
+        } catch (WebClientRequestException | WebClientResponseException e) {
+            log.warn("User service is unavailable: {}", e.getMessage());
+        }
+        return url;
     }
 }

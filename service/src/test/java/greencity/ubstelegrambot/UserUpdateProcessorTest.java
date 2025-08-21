@@ -382,7 +382,7 @@ class UserUpdateProcessorTest {
         return update;
     }
 
-    private Update createUpdateWithMessage(String text, ChatState chatState) {
+    private Update createUpdateWithMessage(String text) {
         Update update = new Update();
         Message message = new Message();
         Chat chat = new Chat();

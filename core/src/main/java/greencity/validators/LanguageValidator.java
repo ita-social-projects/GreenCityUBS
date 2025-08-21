@@ -11,7 +11,7 @@ public class LanguageValidator implements ConstraintValidator<ValidLanguage, Loc
 
     @Override
     public void initialize(ValidLanguage constraintAnnotation) {
-        codes = List.of("en", "ua");
+        codes = List.of("en", "uk");
     }
 
     @Override

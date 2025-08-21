@@ -364,7 +364,7 @@ public class ModelUtils {
 
     public static List<RegionTranslationDto> getRegionTranslationsDto() {
         return List.of(RegionTranslationDto.builder()
-            .languageCode("ua")
+            .languageCode("uk")
             .regionName("Київська область")
             .build());
     }
@@ -381,7 +381,7 @@ public class ModelUtils {
     public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
         return List.of(AddLocationTranslationDto.builder()
             .locationName("Київ")
-            .languageCode("ua")
+            .languageCode("uk")
             .build());
     }
 

@@ -367,7 +367,6 @@ class TelegramFeedbackServiceTest {
     @Test
     void testGetAllFeedbacksByChatId_ChatNotFound_EmptyPageableDtoReturned() {
         Long id = 1L;
-        String chatId = "999999999";
         Pageable pageable = PageRequest.of(0, 5);
         when(chatFeedbackRepository.findByChatId(id, pageable)).thenReturn(Page.empty());
 

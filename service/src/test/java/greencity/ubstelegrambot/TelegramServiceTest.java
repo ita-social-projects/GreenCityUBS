@@ -1,6 +1,6 @@
 package greencity.ubstelegrambot;
 
-import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
@@ -26,7 +26,6 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.AzureCloudStorageService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -55,7 +54,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -69,7 +67,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -85,7 +82,7 @@ class TelegramServiceTest {
     private TelegramChatRepository telegramChatRepository;
 
     @Mock
-    private AzureCloudStorageService azureCloudStorageService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock
     private TelegramMessageRepository telegramMessageRepository;
@@ -136,7 +133,7 @@ class TelegramServiceTest {
             telegramMessageRepository,
             telegramManagerRepository,
             telegramChatRepository,
-            azureCloudStorageService,
+            userRemoteWebClient,
             ubsClientService,
             telegramExecutor,
             employeeRepository,
@@ -179,11 +176,11 @@ class TelegramServiceTest {
         when(file.getOriginalFilename()).thenReturn("image.svg");
         when(file.getSize()).thenReturn(2048L);
         when(file.getContentType()).thenReturn(null);
-        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(azureCloudStorageService).upload(file);
+        verify(userRemoteWebClient).uploadFile(file);
         verify(telegramExecutor).executeSendFile(any(SendDocument.class));
     }
 
@@ -205,11 +202,11 @@ class TelegramServiceTest {
         when(file.getSize()).thenReturn(2048L);
         when(file.getContentType()).thenReturn("image/png");
         when(file.getInputStream()).thenReturn(bais);
-        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(azureCloudStorageService).upload(file);
+        verify(userRemoteWebClient).uploadFile(file);
         verify(telegramExecutor).executeSendFile(any(SendDocument.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
@@ -233,11 +230,11 @@ class TelegramServiceTest {
         when(file.getSize()).thenReturn(2048L);
         when(file.getContentType()).thenReturn("image/png");
         when(file.getInputStream()).thenReturn(bais);
-        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(azureCloudStorageService).upload(file);
+        verify(userRemoteWebClient).uploadFile(file);
         verify(telegramExecutor).executeSendPhoto(any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
@@ -1119,7 +1116,7 @@ class TelegramServiceTest {
 
         assertEquals("File size exceeds Telegram bot limit (50MB)", exception.getMessage());
 
-        verifyNoInteractions(azureCloudStorageService);
+        verifyNoInteractions(userRemoteWebClient);
         verifyNoInteractions(telegramExecutor);
         verify(telegramMessageRepository, never()).save(any());
     }
