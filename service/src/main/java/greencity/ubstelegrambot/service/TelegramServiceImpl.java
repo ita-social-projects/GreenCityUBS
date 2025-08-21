@@ -512,7 +512,7 @@ public class TelegramServiceImpl implements TelegramService {
             DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(parent.getChat().getChatId(),
                     asset.getTelegramMessageId());
             executor.executeCommand(bot, deleteMessage);
-
+            //TODO if i delete one photo from album -> remove caption
             parent.getAssets().remove(asset);
             messageAssetRepository.delete(asset);
 
