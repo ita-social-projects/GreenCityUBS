@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot;
 
+import greencity.client.UserRemoteClient;
 import greencity.client.config.UserRemoteWebClient;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -54,6 +55,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -67,6 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -74,7 +77,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
@@ -134,6 +143,7 @@ class TelegramServiceTest {
             telegramManagerRepository,
             telegramChatRepository,
             userRemoteWebClient,
+            userRemoteClient,
             ubsClientService,
             telegramExecutor,
             employeeRepository,
@@ -141,8 +151,7 @@ class TelegramServiceTest {
             userRepository,
             telegramChatProducer,
             telegramUtils,
-            telegramUpdateProcessorMap,
-            userRemoteClient);
+            telegramUpdateProcessorMap);
     }
 
     @Test

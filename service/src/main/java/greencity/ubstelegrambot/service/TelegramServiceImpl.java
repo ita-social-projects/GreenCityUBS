@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.UserRemoteClient;
 import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
@@ -69,6 +70,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramChatRepository telegramChatRepository;
     private final UserRemoteWebClient userRemoteWebClient;
+    private final UserRemoteClient userRemoteClient;
     private final UBSClientService ubsClientService;
     private final TelegramExecutor telegramExecutor;
     private final EmployeeRepository employeeRepository;
@@ -77,7 +79,6 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
-    private final UserRemoteClient userRemoteClient;
 
     /**
      *
