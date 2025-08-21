@@ -1,24 +1,23 @@
 package greencity.dto.employee;
 
-import greencity.dto.position.PositionDto;
-import jakarta.validation.Valid;
+import greencity.annotations.ValidPositions;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class EmployeeDto extends BaseEmployeeDto {
+public class CreateUpdateEmployeeDto extends BaseEmployeeDto {
     @NotEmpty
+    @ValidPositions
     @Singular
-    private List<@NotNull @Valid PositionDto> employeePositions;
+    private Set<Long> employeePositionIds;
 }
