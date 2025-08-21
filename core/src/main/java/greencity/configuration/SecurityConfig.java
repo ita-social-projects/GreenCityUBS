@@ -109,6 +109,7 @@ public class SecurityConfig {
                     UBS_LINK + "/tariffs/{locationId}",
                     USER_AGREEMENT_LINK + "/latest",
                     UBS_LINK + "/districts-for-kyiv",
+                    UBS_LINK + "/order-details-for-tariff",
                     COMMIT_INFO)
                 .permitAll()
                 .requestMatchers("/v2/api-docs/**",
