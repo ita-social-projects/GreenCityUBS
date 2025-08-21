@@ -141,16 +141,16 @@ class TelegramControllerTest {
     @Test
     void toggleNotifications_ShouldReturnOk() throws Exception {
         ToggleNotificationsRequestDto request = ToggleNotificationsRequestDto
-                .builder()
-                .isNotify(true)
-                .build();
+            .builder()
+            .isNotify(true)
+            .build();
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(put("/ubs/telegram/notifications")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNoContent());
 
         verify(telegramService).toggleNotifications(any(), eq(request));
     }
@@ -158,8 +158,8 @@ class TelegramControllerTest {
     @Test
     void getIsNotificationsEnabled_ShouldReturnOk() throws Exception {
         mockMvc.perform(get("/ubs/telegram/notifications")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(telegramService).getIsNotificationsEnabled(any());
     }

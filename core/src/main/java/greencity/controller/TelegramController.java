@@ -206,27 +206,27 @@ public class TelegramController {
 
     @Operation(summary = "Toggle notifications in Telegram bot")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PutMapping(value = "/notifications", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void toggleNotifications(
-            @Parameter(hidden = true) @CurrentUserUuid String userUuid,
-            @RequestBody ToggleNotificationsRequestDto request) {
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @RequestBody ToggleNotificationsRequestDto request) {
         telegramService.toggleNotifications(userUuid, request);
     }
 
     @Operation(summary = "Get the value of whether notifications are enabled in the Telegram bot")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @GetMapping(value = "/notifications", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Boolean> getIsNotificationsEnabled(
-            @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.ok(telegramService.getIsNotificationsEnabled(userUuid));
     }
 }

@@ -1041,14 +1041,14 @@ class TelegramServiceTest {
     void testToggleNotifications_UserNotFoundByUuid_ShouldThrowException() {
         String uuid = "some-uuid";
         ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
-                .builder()
-                .isNotify(true)
-                .build();
+            .builder()
+            .isNotify(true)
+            .build();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-                () -> telegramService.toggleNotifications(uuid, requestDto));
+            () -> telegramService.toggleNotifications(uuid, requestDto));
 
         verify(userRepository).findUserByUuid(uuid);
         verifyNoInteractions(telegramChatRepository);
@@ -1058,19 +1058,18 @@ class TelegramServiceTest {
     void testToggleNotifications_UserWithoutChat_ShouldThrowException() {
         String uuid = "some-uuid";
         ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
-                .builder()
-                .isNotify(true)
-                .build();
+            .builder()
+            .isNotify(true)
+            .build();
 
         User user = User.builder()
-                .uuid(uuid)
-                .build();
+            .uuid(uuid)
+            .build();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
 
-
         assertThrows(NotFoundException.class,
-                () -> telegramService.toggleNotifications(uuid, requestDto));
+            () -> telegramService.toggleNotifications(uuid, requestDto));
 
         verify(userRepository).findUserByUuid(uuid);
         verifyNoInteractions(telegramChatRepository);
@@ -1080,19 +1079,19 @@ class TelegramServiceTest {
     void testToggleNotifications_UserWithChat_NotificationsToggled() {
         String uuid = "some-uuid";
         ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
-                .builder()
-                .isNotify(true)
-                .build();
+            .builder()
+            .isNotify(true)
+            .build();
 
         TelegramChat telegramChat = TelegramChat
-                .builder()
-                .id(1L)
-                .build();
+            .builder()
+            .id(1L)
+            .build();
 
         User user = User.builder()
-                .uuid(uuid)
-                .telegramBot(telegramChat)
-                .build();
+            .uuid(uuid)
+            .telegramBot(telegramChat)
+            .build();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
 
@@ -1109,7 +1108,7 @@ class TelegramServiceTest {
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-                () -> telegramService.getIsNotificationsEnabled(uuid));
+            () -> telegramService.getIsNotificationsEnabled(uuid));
 
         verify(userRepository).findUserByUuid(uuid);
         verifyNoInteractions(telegramChatRepository);
@@ -1120,14 +1119,13 @@ class TelegramServiceTest {
         String uuid = "some-uuid";
 
         User user = User.builder()
-                .uuid(uuid)
-                .build();
+            .uuid(uuid)
+            .build();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
 
-
         assertThrows(NotFoundException.class,
-                () -> telegramService.getIsNotificationsEnabled(uuid));
+            () -> telegramService.getIsNotificationsEnabled(uuid));
 
         verify(userRepository).findUserByUuid(uuid);
         verifyNoInteractions(telegramChatRepository);
@@ -1137,20 +1135,20 @@ class TelegramServiceTest {
     void testGetIsNotificationsEnabled_UserWithChat_NotificationsToggled() {
         String uuid = "some-uuid";
         ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
-                .builder()
-                .isNotify(true)
-                .build();
+            .builder()
+            .isNotify(true)
+            .build();
 
         TelegramChat telegramChat = TelegramChat
-                .builder()
-                .id(1L)
-                .isNotify(true)
-                .build();
+            .builder()
+            .id(1L)
+            .isNotify(true)
+            .build();
 
         User user = User.builder()
-                .uuid(uuid)
-                .telegramBot(telegramChat)
-                .build();
+            .uuid(uuid)
+            .telegramBot(telegramChat)
+            .build();
 
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
 

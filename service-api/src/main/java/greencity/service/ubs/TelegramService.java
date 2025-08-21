@@ -31,12 +31,10 @@ public interface TelegramService {
 
     /**
      * Reads multiple messages based on the specified request.
-     * <p>
      * The method performs the reading of several messages according to the
      * parameters provided in the {@link MarkMessagesAsReadRequestDto} object. Since
      * this method returns {@code void}, all results are handled internally (e.g.,
      * updating the database or triggering events).
-     * </p>
      *
      * @param request the request containing the criteria for reading messages, must
      *                not be {@code null}
@@ -79,12 +77,14 @@ public interface TelegramService {
 
     /**
      * Toggles the notification setting for a user in the Telegram bot.
-     * <p>
      * Depending on the provided {@link ToggleNotificationsRequestDto}, this method
-     * enables or disables whether the user with the specified UUID will receive notifications.
+     * enables or disables whether the user with the specified UUID will receive
+     * notifications.
      *
-     * @param uuid    the unique identifier of the user whose notification setting should be changed
-     * @param request the DTO containing the desired notification state (enabled/disabled)
+     * @param uuid    the unique identifier of the user whose notification setting
+     *                should be changed
+     * @param request the DTO containing the desired notification state
+     *                (enabled/disabled)
      */
     void toggleNotifications(String uuid, ToggleNotificationsRequestDto request);
 
@@ -92,7 +92,8 @@ public interface TelegramService {
      * Checks whether notifications are enabled for a user in the Telegram bot.
      *
      * @param uuid the unique identifier of the user
-     * @return {@code true} if the user has notifications enabled, {@code false} otherwise
+     * @return {@code true} if the user has notifications enabled, {@code false}
+     *         otherwise
      */
     boolean getIsNotificationsEnabled(String uuid);
 }

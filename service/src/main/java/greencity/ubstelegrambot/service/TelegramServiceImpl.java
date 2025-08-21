@@ -371,7 +371,8 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public void toggleNotifications(String uuid, ToggleNotificationsRequestDto request) {
-        User user = userRepository.findUserByUuid(uuid).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
+        User user = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
 
         if (user.getTelegramBot() == null) {
             throw new NotFoundException(ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT);
@@ -388,7 +389,8 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public boolean getIsNotificationsEnabled(String uuid) {
-        User user = userRepository.findUserByUuid(uuid).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
+        User user = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
 
         if (user.getTelegramBot() == null) {
             throw new NotFoundException(ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT);
