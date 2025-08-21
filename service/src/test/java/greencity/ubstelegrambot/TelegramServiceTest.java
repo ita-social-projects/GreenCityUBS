@@ -1134,10 +1134,6 @@ class TelegramServiceTest {
     @Test
     void testGetIsNotificationsEnabled_UserWithChat_NotificationsToggled() {
         String uuid = "some-uuid";
-        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
-            .builder()
-            .isNotify(true)
-            .build();
 
         TelegramChat telegramChat = TelegramChat
             .builder()
