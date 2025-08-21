@@ -453,8 +453,8 @@ public class TelegramServiceImpl implements TelegramService {
     @Transactional
     public void editManagerMessage(EditTelegramMessageRequest request) {
         TelegramChat chat = telegramChatRepository.findById(request.chatId()).orElseThrow(NotFoundException::new);
-        if(chat != null && request.messageId() != 0) {
-            TelegramMessage message = telegramMessageRepository.findByTelegramMessageId(request.messageId())
+        if(chat != null) {
+            TelegramMessage message = telegramMessageRepository.findById(request.messageId())
                     .orElseThrow(EntityNotFoundException::new);
             if(message.getFromManager()) {
                 var bot = applicationContext.getBean(UBSTelegramBot.class);
@@ -491,15 +491,16 @@ public class TelegramServiceImpl implements TelegramService {
             throw new NotFoundException("Message with id 0 not found");
         }
         telegramChatRepository.findById(request.chatId()).ifPresent(chat -> {
-            TelegramMessage message = telegramMessageRepository.findByTelegramMessageId(request.messageId())
+            TelegramMessage message = telegramMessageRepository.findById(request.messageId())
                     .orElseThrow(EntityNotFoundException::new);
             if(message.getFromManager()) {
                 var bot = applicationContext.getBean(UBSTelegramBot.class);
-                DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(chat.getChatId(), request.messageId());
+                DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(chat.getChatId(), message.getTelegramMessageId());
                 executor.executeCommand(bot, deleteMessage);
-                telegramMessageRepository.findByTelegramMessageId(request.messageId())
+                telegramMessageRepository.findById(request.messageId())
                         .ifPresent(telegramMessageRepository::delete);
 
+                updateLastMessage(chat);
             }
         });
     }
@@ -507,21 +508,40 @@ public class TelegramServiceImpl implements TelegramService {
     private void deleteAsset(DeleteTelegramMessageRequest request) {
         messageAssetRepository.findById(request.assetId()).ifPresent(asset -> {
             TelegramMessage parent = asset.getMessage();
-            if(parent.getFromManager()){
-            var bot = applicationContext.getBean(UBSTelegramBot.class);
-            DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(parent.getChat().getChatId(),
-                    asset.getTelegramMessageId());
-            executor.executeCommand(bot, deleteMessage);
-            //TODO if i delete one photo from album -> remove caption
-            parent.getAssets().remove(asset);
-            messageAssetRepository.delete(asset);
+            if (parent.getFromManager()) {
+                var bot = applicationContext.getBean(UBSTelegramBot.class);
+                DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(parent.getChat().getChatId(),
+                        asset.getTelegramMessageId());
+                executor.executeCommand(bot, deleteMessage);
 
-            if (parent.getAssets().isEmpty()) {
-                telegramMessageRepository.delete(parent);
-            }
+                parent.getAssets().remove(asset);
+                messageAssetRepository.delete(asset);
+
+                if (parent.getAssets().isEmpty()) {
+                    telegramMessageRepository.delete(parent);
+                    updateLastMessage(parent.getChat());
+                } else {
+                    if (parent.getText() != null && !parent.getText().isBlank()) {
+                        MessageAsset nextAsset = parent.getAssets().getFirst();
+
+                        EditMessageCaption editCaption = MessageFactory.buildEditMessageCaption(
+                                parent.getChat().getChatId(),
+                                nextAsset.getTelegramMessageId(),
+                                parent.getText());
+                        executor.executeCommand(bot, editCaption);
+                    }
+                }
             }
         });
     }
+
+    private void updateLastMessage(TelegramChat chat) {
+        telegramMessageRepository.findTopByChatOrderBySendAtDesc(chat)
+                .ifPresentOrElse(chat::setLastMessage,
+                        () -> chat.setLastMessage(null));
+        telegramChatRepository.save(chat);
+    }
+
     private boolean isStartCommand(Message message) {
         return message != null
             &&

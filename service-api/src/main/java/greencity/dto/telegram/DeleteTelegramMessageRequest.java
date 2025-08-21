@@ -6,5 +6,5 @@ import lombok.Builder;
 @Builder
 public record DeleteTelegramMessageRequest(
         @NotNull Long chatId,
-        Integer messageId,
+        Long messageId,
         Long assetId) { }

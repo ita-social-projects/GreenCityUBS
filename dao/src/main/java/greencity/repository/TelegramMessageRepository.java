@@ -25,4 +25,6 @@ public interface TelegramMessageRepository extends JpaRepository<TelegramMessage
     boolean existsByTelegramMessageId(Integer telegramMessageId);
 
     Optional<TelegramMessage> findByTelegramMessageId(Integer telegramMessageId);
+
+    Optional<TelegramMessage> findTopByChatOrderBySendAtDesc(TelegramChat chat);
 }
