@@ -3,11 +3,7 @@ package greencity.ubstelegrambot;
 import greencity.client.config.UserRemoteWebClient;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
-import greencity.dto.telegram.MessageAssetDto;
-import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.*;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -1000,7 +996,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void testMarkMessagesAsRead() {
+    void testMarkMessagesAsRead_IdsSpecified_MessagesMarkedAsRead() {
         List<Long> messageIds = List.of(1L, 2L);
 
         TelegramChat chat1 = TelegramChat.builder()
@@ -1029,7 +1025,7 @@ class TelegramServiceTest {
             .thenReturn(List.of(message1, message2));
 
         telegramService.markMessagesAsRead(
-            MarkMessagesAsReadRequest.builder().messagesIds(messageIds).build());
+            MarkMessagesAsReadRequestDto.builder().messagesIds(messageIds).build());
 
         verify(telegramMessageRepository).findAllById(messageIds);
         verify(telegramMessageRepository).saveAll(List.of(message1, message2));
@@ -1041,4 +1037,126 @@ class TelegramServiceTest {
         assertEquals(0, chat2.getUnreadMessagesCount());
     }
 
+    @Test
+    void testToggleNotifications_UserNotFoundByUuid_ShouldThrowException() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+                .builder()
+                .isNotify(true)
+                .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> telegramService.toggleNotifications(uuid, requestDto));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testToggleNotifications_UserWithoutChat_ShouldThrowException() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+                .builder()
+                .isNotify(true)
+                .build();
+
+        User user = User.builder()
+                .uuid(uuid)
+                .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+
+        assertThrows(NotFoundException.class,
+                () -> telegramService.toggleNotifications(uuid, requestDto));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testToggleNotifications_UserWithChat_NotificationsToggled() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+                .builder()
+                .isNotify(true)
+                .build();
+
+        TelegramChat telegramChat = TelegramChat
+                .builder()
+                .id(1L)
+                .build();
+
+        User user = User.builder()
+                .uuid(uuid)
+                .telegramBot(telegramChat)
+                .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        telegramService.toggleNotifications(uuid, requestDto);
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(telegramChatRepository).save(telegramChat);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserNotFoundByUuid_ShouldThrowException() {
+        String uuid = "some-uuid";
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> telegramService.getIsNotificationsEnabled(uuid));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserWithoutChat_ShouldThrowException() {
+        String uuid = "some-uuid";
+
+        User user = User.builder()
+                .uuid(uuid)
+                .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+
+        assertThrows(NotFoundException.class,
+                () -> telegramService.getIsNotificationsEnabled(uuid));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserWithChat_NotificationsToggled() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+                .builder()
+                .isNotify(true)
+                .build();
+
+        TelegramChat telegramChat = TelegramChat
+                .builder()
+                .id(1L)
+                .isNotify(true)
+                .build();
+
+        User user = User.builder()
+                .uuid(uuid)
+                .telegramBot(telegramChat)
+                .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        boolean result = telegramService.getIsNotificationsEnabled(uuid);
+
+        verify(userRepository).findUserByUuid(uuid);
+        assertEquals(user.getTelegramBot().getIsNotify(), result);
+    }
 }

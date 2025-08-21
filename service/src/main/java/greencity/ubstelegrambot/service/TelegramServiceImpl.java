@@ -1,20 +1,17 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.config.UserRemoteWebClient;
+import greencity.constant.ErrorMessage;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.ChatUserDto;
-import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
-import greencity.dto.telegram.MessageAssetDto;
-import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.*;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramManager;
 import greencity.entity.telegram.TelegramMessage;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
@@ -350,7 +347,7 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     @Transactional
-    public void markMessagesAsRead(MarkMessagesAsReadRequest request) {
+    public void markMessagesAsRead(MarkMessagesAsReadRequestDto request) {
         List<TelegramMessage> messages = telegramMessageRepository.findAllById(request.getMessagesIds());
 
         for (TelegramMessage message : messages) {
@@ -366,6 +363,38 @@ public class TelegramServiceImpl implements TelegramService {
         }
 
         telegramMessageRepository.saveAll(messages);
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public void toggleNotifications(String uuid, ToggleNotificationsRequestDto request) {
+        User user = userRepository.findUserByUuid(uuid).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
+
+        if (user.getTelegramBot() == null) {
+            throw new NotFoundException(ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT);
+        }
+
+        TelegramChat telegramChat = user.getTelegramBot();
+        telegramChat.setIsNotify(request.isNotify());
+        telegramChatRepository.save(telegramChat);
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean getIsNotificationsEnabled(String uuid) {
+        User user = userRepository.findUserByUuid(uuid).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
+
+        if (user.getTelegramBot() == null) {
+            throw new NotFoundException(ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT);
+        }
+
+        return user.getTelegramBot().getIsNotify();
     }
 
     /**
