@@ -70,8 +70,7 @@ public class OrderController {
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
-     * Controller returns all available bags and bonus points of current user by
-     * tariff and location ids.
+     * Controller returns all available bags by tariff and location ids.
      *
      * @param tariffId   - id of tariff.
      * @param locationId - id of location.
