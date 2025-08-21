@@ -30,11 +30,11 @@ public interface TelegramService {
     ChatDto getChatById(Long chatId);
 
     /**
-     * Reads multiple messages based on the specified request.
-     * The method performs the reading of several messages according to the
-     * parameters provided in the {@link MarkMessagesAsReadRequestDto} object. Since
-     * this method returns {@code void}, all results are handled internally (e.g.,
-     * updating the database or triggering events).
+     * Reads multiple messages based on the specified request. The method performs
+     * the reading of several messages according to the parameters provided in the
+     * {@link MarkMessagesAsReadRequestDto} object. Since this method returns
+     * {@code void}, all results are handled internally (e.g., updating the database
+     * or triggering events).
      *
      * @param request the request containing the criteria for reading messages, must
      *                not be {@code null}
@@ -76,10 +76,9 @@ public interface TelegramService {
     void processUpdate(Update update);
 
     /**
-     * Toggles the notification setting for a user in the Telegram bot.
-     * Depending on the provided {@link ToggleNotificationsRequestDto}, this method
-     * enables or disables whether the user with the specified UUID will receive
-     * notifications.
+     * Toggles the notification setting for a user in the Telegram bot. Depending on
+     * the provided {@link ToggleNotificationsRequestDto}, this method enables or
+     * disables whether the user with the specified UUID will receive notifications.
      *
      * @param uuid    the unique identifier of the user whose notification setting
      *                should be changed
