@@ -22,5 +22,5 @@ public interface TelegramCommandsService {
      * @return a {@link SendMessage} response appropriate to the command or fallback
      *         message
      */
-    SendMessage processCommand(Message message);
+    SendMessage processCommand(Message message, String lang);
 }

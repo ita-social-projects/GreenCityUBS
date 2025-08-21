@@ -13,5 +13,5 @@ public interface TelegramSupportService {
      *         Telegram, confirming that the message was received or an error
      *         occurred.
      */
-    SendMessage processSupportMessage(Message message);
+    SendMessage processSupportMessage(Message message, String lang);
 }

@@ -281,5 +281,5 @@ public interface NotificationService {
      *
      * @author Chernenko Vitaliy
      */
-    void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username);
+    void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username, String lang);
 }

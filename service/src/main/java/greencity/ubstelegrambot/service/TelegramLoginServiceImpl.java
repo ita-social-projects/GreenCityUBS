@@ -10,6 +10,7 @@ import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramLoginService;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -41,12 +42,12 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
      * {@inheritDoc}
      */
     @Override
-    public SendMessage processInputManagerCredentialsRequest(Message message) {
+    public SendMessage processInputManagerCredentialsRequest(Message message, String lang) {
         String[] parts = message.getText().split(":");
 
         if (parts.length < 2) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.INCORRECT_LOGIN_FORMAT);
+                MessageProvider.get(lang, "incorrect.login.format"), TelegramBotConstants.UK);
         }
 
         String login = parts[0];
@@ -56,14 +57,14 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
 
         if (employee.isEmpty()) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.USER_IS_NOT_EMPLOYEE);
+                MessageProvider.get(lang, "user.not.employee"), TelegramBotConstants.UK);
         }
 
         boolean isManager = telegramUtils.checkIsEmployeeManager(employee.get());
 
         if (!isManager) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.EMPLOYEE_IS_NOT_MANAGER);
+                MessageProvider.get(TelegramBotConstants.UK, "employee.not.manager"), TelegramBotConstants.UK);
         }
 
         try {
@@ -79,13 +80,14 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
                     .employee(employee.get())
                     .build());
 
-            return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name);
+            return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name,
+                lang);
         } catch (BadRequestException e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.LOGIN_FAILED);
+                MessageProvider.get(lang, "login.failed"), lang);
         } catch (Exception e) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
+                MessageProvider.get(lang, "something.went.wrong"), lang);
         }
     }
 }
