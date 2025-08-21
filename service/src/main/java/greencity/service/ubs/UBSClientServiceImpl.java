@@ -864,16 +864,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private void unlockSpecifiedCertificatesFromOrder(Long orderId, Set<String> certificateCodes) {
-        certificateCodes.stream().map(certificateRepository::findById)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .filter(certificate -> orderId.equals(certificate.getOrder().getId()))
-            .peek(certificate -> certificate
-                .setOrder(null)
-                .setDateOfUse(null)
-                .setCertificateStatus(CertificateStatus.ACTIVE)
-                .setPoints(certificate.getInitialPointsValue()))
-            .forEach(certificateRepository::save);
+        Set<Certificate> certificates = certificateRepository.findAllByCodesAndOrderId(
+            certificateCodes.stream().toList(), orderId);
+        certificates.forEach((certificate -> certificate
+            .setOrder(null)
+            .setDateOfUse(null)
+            .setCertificateStatus(CertificateStatus.ACTIVE)
+            .setPoints(certificate.getInitialPointsValue())));
+        certificateRepository.saveAll(certificates);
     }
 
     private Order unlockSpecifiedPointsFromOrder(Order order, int pointsToUse) {
