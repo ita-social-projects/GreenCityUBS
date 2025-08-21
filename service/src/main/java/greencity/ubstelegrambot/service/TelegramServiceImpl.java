@@ -22,8 +22,8 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
-import greencity.producers.TelegramChatProducer;
 import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
@@ -51,6 +51,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -185,20 +186,22 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private boolean canSendAsPhoto(MultipartFile file) throws IOException {
-        BufferedImage image = ImageIO.read(file.getInputStream());
-        if (image == null) {
-            return false;
+        try (InputStream is = file.getInputStream()) {
+            BufferedImage image = ImageIO.read(is);
+            if (image == null) {
+                return false;
+            }
+
+            int width = image.getWidth();
+            int height = image.getHeight();
+            long fileSize = file.getSize();
+
+            boolean sizeOk = fileSize <= 10 * 1024 * 1024;
+            boolean dimensionsOk = (width + height <= 10000);
+            boolean aspectOk = ((double) Math.max(width, height) / Math.min(width, height) <= 20.0);
+
+            return sizeOk && dimensionsOk && aspectOk;
         }
-
-        int width = image.getWidth();
-        int height = image.getHeight();
-        long fileSize = file.getSize();
-
-        boolean sizeOk = fileSize <= 10 * 1024 * 1024;
-        boolean dimensionsOk = (width + height <= 10000);
-        boolean aspectOk = ((double) Math.max(width, height) / Math.min(width, height) <= 20.0);
-
-        return sizeOk && dimensionsOk && aspectOk;
     }
 
     /**
