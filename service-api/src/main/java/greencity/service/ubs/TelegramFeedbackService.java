@@ -15,7 +15,7 @@ public interface TelegramFeedbackService {
      * @return a {@link SendMessage} response indicating the result: a thank-you
      *         message
      */
-    SendMessage processInputCommentRequest(Message message);
+    SendMessage processInputCommentRequest(Message message, String lang);
 
     /**
      * Processes the user's rating for a feedback session in a Telegram chat.
