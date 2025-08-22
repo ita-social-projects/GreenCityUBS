@@ -1,10 +1,16 @@
 package greencity.controller;
 
+import static greencity.constant.AppConstant.TELEGRAM_LINK;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.FeedbackDto;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
+import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import greencity.service.ubs.TelegramFeedbackService;
 import greencity.service.ubs.TelegramService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
  * Telegram bot users.
  */
 @RestController
-@RequestMapping("/ubs/telegram")
+@RequestMapping(TELEGRAM_LINK)
 @RequiredArgsConstructor
 @Validated
 public class TelegramController {
