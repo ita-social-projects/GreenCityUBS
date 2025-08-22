@@ -606,4 +606,33 @@ class TelegramSupportServiceTest {
         verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
+
+    @Test
+    void testProcessSupportMessage_StartCommandWhileInSupport_ShouldReturnAlreadyOpenMessage() {
+        String chatId = "123";
+        String lang = TelegramBotConstants.UK;
+
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        when(message.getFrom()).thenReturn(user);
+        when(user.getId()).thenReturn(123L);
+        when(message.hasText()).thenReturn(true);
+        when(message.getText()).thenReturn("/start");
+
+        TelegramChat chatEntity = TelegramChat.builder()
+            .chatId(chatId)
+            .chatState(ChatState.IN_SUPPORT)
+            .build();
+        when(telegramChatRepository.findByChatId(chatId))
+            .thenReturn(Optional.of(chatEntity));
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, lang);
+
+        assertNotNull(result);
+        assertEquals(chatId, result.getChatId());
+        assertTrue(result.getText()
+            .contains(MessageProvider.get(lang, "manager.chat.already.open.message")));
+
+        verify(telegramChatRepository).findByChatId(chatId);
+    }
 }

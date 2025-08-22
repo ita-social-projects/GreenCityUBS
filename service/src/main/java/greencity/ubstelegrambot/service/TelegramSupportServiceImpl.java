@@ -73,6 +73,13 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         TelegramChat chat = optionalChat.get();
 
+        if (message.hasText()
+            && message.getText().startsWith("/start")
+            && chat.getChatState() == ChatState.IN_SUPPORT) {
+            log.info("User is already in support chat {}. Filtering system /start message", chat.getChatId());
+            return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), lang);
+        }
+
         if (message.hasText() && message.getText().contains(MessageProvider.get(lang, "client.end.support.mode"))) {
             SendMessage endSupportSendMessage =
                 telegramUtils.updateChatStateAndRespond(chat.getChatId(), ChatState.NORMAL,
