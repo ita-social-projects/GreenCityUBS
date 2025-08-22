@@ -53,6 +53,15 @@ public interface UserRemoteClient {
     boolean checkIfUserExistsByUuid(@RequestParam(UUID) String uuid);
 
     /**
+     * Method checks the existence of an active user by uuid.
+     *
+     * @param uuid {@link User}'s UUID.
+     * @return {@link Boolean}
+     */
+    @GetMapping("user/checkActiveUserByUuid")
+    boolean checkIfActiveUserExistsByUuid(@RequestParam(UUID) String uuid);
+
+    /**
      * Gets user's positions and all possible related authorities to these positions
      * by user's email.
      *
