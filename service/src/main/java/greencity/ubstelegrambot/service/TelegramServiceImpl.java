@@ -17,10 +17,7 @@ import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramManager;
 import greencity.entity.telegram.TelegramMessage;
 import greencity.entity.user.employee.Employee;
-import greencity.enums.AssetType;
-import greencity.enums.ChatState;
-import greencity.enums.MessageDeliveryStatus;
-import greencity.enums.MessageViewingStatus;
+import greencity.enums.*;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.producers.TelegramChatProducer;
@@ -333,7 +330,13 @@ public class TelegramServiceImpl implements TelegramService {
 
         Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId())
             .orElseThrow(() -> new NotFoundException("Order not found"));
-        return ubsClientService.getOrdersData(order);
+        OrdersDataForUserDto dto = ubsClientService.getOrdersData(order);
+        Long completedCount = orderRepository.countByUserIdAndOrderStatus(
+            telegramChat.getUser().getId(),
+            OrderStatus.DONE);
+        dto.setCompletedOrdersCount(completedCount);
+
+        return dto;
     }
 
     /**
