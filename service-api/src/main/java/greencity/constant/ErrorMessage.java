@@ -217,4 +217,5 @@ public class ErrorMessage {
     public static final String TELEGRAM_RECEIVE_EXCEPTION = "Exception occurred while receiving from telegram: %s";
     public static final String TELEGRAM_NULL_METHOD_EXCEPTION = "Execution method cannot be null";
     public static final String TELEGRAM_INVALID_METHOD_EXCEPTION = "Invalid execution method type: %s";
+    public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
 }
