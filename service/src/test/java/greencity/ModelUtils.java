@@ -2058,12 +2058,12 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .violations(10)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
+            .changeOfPointsList(new ArrayList<>())
             .build();
     }
 
@@ -2074,9 +2074,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyTrue())
@@ -2090,9 +2089,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyTrue())
@@ -2106,9 +2104,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyFalse())
@@ -2258,12 +2255,12 @@ public class ModelUtils {
             .build();
     }
 
-    public static Order getAdjustmentPaidOrder() {
+    public static Order getConfirmedPaidOrder() {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
                 "Roman", "Roman", "Roman", "Roman", new Order())))
-            .orderStatus(OrderStatus.ADJUSTMENT)
+            .orderStatus(OrderStatus.CONFIRMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
                 .amount(300000L)

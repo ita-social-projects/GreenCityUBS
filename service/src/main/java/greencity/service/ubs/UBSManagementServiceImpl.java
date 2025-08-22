@@ -85,7 +85,6 @@ import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.NotificationParameterRepository;
-import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -140,7 +139,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final OrderRepository orderRepository;
-    private final OrderAddressRepository orderAddressRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final UserRemoteClient userRemoteClient;
@@ -746,16 +744,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void setOrderPaymentStatusForConfirmedBags(Order currentOrder, long paymentsForCurrentOrder,
         long totalSumAmount, long totalConfirmed) {
-        boolean paidCondition = paymentsForCurrentOrder > 0 && paymentsForCurrentOrder >= totalSumAmount
+        boolean paidCondition = paymentsForCurrentOrder > 0
+            && paymentsForCurrentOrder >= totalSumAmount
             && paymentsForCurrentOrder >= totalConfirmed;
-        boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalSumAmount > paymentsForCurrentOrder
-            || totalConfirmed > paymentsForCurrentOrder;
+        boolean halfPaidCondition = paymentsForCurrentOrder > 0
+            && (totalSumAmount > paymentsForCurrentOrder || totalConfirmed > paymentsForCurrentOrder);
 
         if (paidCondition) {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             notificationService.notifyPaidOrder(currentOrder);
 
-            if (currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+            if (currentOrder.getOrderStatus() == OrderStatus.CONFIRMED) {
                 notificationService.notifyCourierItineraryFormed(currentOrder);
             }
         } else if (halfPaidCondition) {
@@ -821,9 +820,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
-                notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
+                notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_CONFIRMED_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED_UK, email, order);
@@ -874,9 +873,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
+        notificationService.notifyCanceledOrder(order);
         if (order.getPointsToUse() != 0 || !order.getCertificates().isEmpty()) {
             notificationService.notifyBonusesFromCanceledOrder(order);
-            returnAllPointsFromOrder(order);
+            paymentService.processPointsRefundForOrder(order);
         }
         order.setCancellationComment(cancellationComment);
         order.setCancellationReason(CancellationReason.valueOf(cancellationReason));
@@ -907,29 +907,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .collect(Collectors.toList()));
 
         dto.setOrderId(order.getId());
-    }
-
-    private void returnAllPointsFromOrder(Order order) {
-        Integer pointsToReturn = order.getPointsToUse();
-        if (isNull(pointsToReturn) || pointsToReturn == 0) {
-            return;
-        }
-        User user = order.getUser();
-        if (isNull(user.getCurrentPoints())) {
-            user.setCurrentPoints(0);
-        }
-        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
-        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
-            .amount(pointsToReturn)
-            .date(LocalDateTime.now())
-            .user(user)
-            .order(order)
-            .build();
-        if (isNull(user.getChangeOfPointsList())) {
-            user.setChangeOfPointsList(new ArrayList<>());
-        }
-        user.getChangeOfPointsList().add(changeOfPoints);
-        userRepository.save(user);
     }
 
     /**
