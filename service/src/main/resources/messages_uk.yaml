@@ -132,3 +132,4 @@ previous.session.expired: "Час попередньої сесії минув. 
 photo.content: "Фото контент"
 login.failed: "Неправильний логін або пароль. Перевірте введені дані та спробуйте ще раз."
 client.support.message.change.language: "Мова змінена"
+manager.chat.already.open.message: "Чат із менеджером уже відкрито. Ви можете залишити своє повідомлення, коли будете готові."
