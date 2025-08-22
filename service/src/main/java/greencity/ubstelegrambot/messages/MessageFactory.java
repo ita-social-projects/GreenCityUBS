@@ -402,6 +402,18 @@ public class MessageFactory {
     }
 
     /**
+     * Method for creating a message for the user when the chat with the manager is
+     * already open.
+     *
+     * @param chatId {@link String} is the Telegram chat ID.
+     * @param lang   {@link String} is the language code of the Telegram chat.
+     * @return {@link SendMessage} configured with the chat already open message.
+     */
+    public static SendMessage createChatAlreadyOpenMessage(String chatId, String lang) {
+        return buildMessage(chatId, MessageProvider.get(lang, "manager.chat.already.open.message"));
+    }
+
+    /**
      * Builds a SendMessage object with the specified chat ID and text.
      *
      * @param chatId the telegram chat ID

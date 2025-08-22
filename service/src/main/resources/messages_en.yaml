@@ -132,3 +132,4 @@ previous.session.expired: "Previous session expired. Please choose a command fro
 photo.content: "Photo content"
 login.failed: "Incorrect login or password. Please check your credentials and try again."
 client.support.message.change.language: "Language was switched"
+manager.chat.already.open.message: "Chat with manager is already open. You can send a message whenever you're ready."
