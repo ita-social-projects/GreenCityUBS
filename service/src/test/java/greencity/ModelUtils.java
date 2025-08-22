@@ -7,6 +7,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -37,6 +38,7 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.CreateUpdateEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
@@ -195,7 +197,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -1440,18 +1441,14 @@ public class ModelUtils {
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
         return EmployeeWithTariffsIdDto
             .builder()
-            .employeeDto(EmployeeDto.builder()
+            .employeeDto(CreateUpdateEmployeeDto.builder()
                 .id(1L)
                 .firstName("Петро")
                 .lastName("Петренко")
                 .phoneNumber("+380935577455")
                 .email("test@gmail.com")
                 .image("path")
-                .employeePositions(List.of(PositionDto.builder()
-                    .id(1L)
-                    .nameUk("Водій")
-                    .nameEn("Driver")
-                    .build()))
+                .employeePositionIds(Set.of(1L))
                 .build())
             .tariffs(null)
             .build();
@@ -1608,13 +1605,13 @@ public class ModelUtils {
 
     public static TelegramChat getTelegramBotNotifyTrue() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
-            "last_name", 0, null, null,
+            "last_name", 0, null, null, TelegramBotConstants.UK,
             new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
         return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), false, "username", "first_name",
-            "last_name", 0, null, null,
+            "last_name", 0, null, null, TelegramBotConstants.UK,
             new ArrayList<>(), new ArrayList<>(), null);
     }
 
