@@ -14,19 +14,19 @@ import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
 import greencity.entity.order.Bag;
+import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
+import greencity.entity.user.User;
+import greencity.entity.user.Violation;
+import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.NotificationReceiverType;
-import greencity.entity.notifications.NotificationParameter;
-import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
-import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.enums.UserCategory;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -50,7 +51,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -59,7 +59,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -75,7 +74,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-
+import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
+import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT_UK;
+import static greencity.constant.OrderHistory.ORDER_CONFIRMED_UK;
+import static greencity.constant.OrderHistory.ORDER_FORMED_UK;
+import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT_UK;
+import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE_UK;
 import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE;
 import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2;
 import static greencity.ModelUtils.TEST_UUID;
@@ -109,33 +115,25 @@ import static greencity.ModelUtils.getActiveCertificateWith10Points;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getViolation;
 import static greencity.enums.NotificationReceiverType.SITE;
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.anyLong;
-import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
-import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
-import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
-import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT_UK;
-import static greencity.constant.OrderHistory.ORDER_CONFIRMED_UK;
-import static greencity.constant.OrderHistory.ORDER_FORMED_UK;
-import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT_UK;
-import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE_UK;
-import static java.util.Arrays.asList;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
@@ -1736,14 +1734,15 @@ class NotificationServiceImplTest {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(USERNAME)
-            .subject(TelegramBotConstants.GREEN_OFFICE_SUBJECT)
+            .subject(MessageProvider.get(TelegramBotConstants.UK, "green.office.subject"))
             .body(USER_EMAIL)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
             .build();
         doNothing().when(userRemoteClient).sendGreenOfficeRequestNotification(notification);
 
-        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME);
+        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME,
+            TelegramBotConstants.UK);
 
         verify(userRemoteClient, times(1)).sendGreenOfficeRequestNotification(notification);
     }

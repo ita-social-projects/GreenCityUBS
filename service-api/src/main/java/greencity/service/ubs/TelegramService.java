@@ -2,10 +2,7 @@ package greencity.service.ubs;
 
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
-import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -33,18 +30,16 @@ public interface TelegramService {
     ChatDto getChatById(Long chatId);
 
     /**
-     * Reads multiple messages based on the specified request.
-     * <p>
-     * The method performs the reading of several messages according to the
-     * parameters provided in the {@link MarkMessagesAsReadRequest} object. Since
-     * this method returns {@code void}, all results are handled internally (e.g.,
-     * updating the database or triggering events).
-     * </p>
+     * Reads multiple messages based on the specified request. The method performs
+     * the reading of several messages according to the parameters provided in the
+     * {@link MarkMessagesAsReadRequestDto} object. Since this method returns
+     * {@code void}, all results are handled internally (e.g., updating the database
+     * or triggering events).
      *
      * @param request the request containing the criteria for reading messages, must
      *                not be {@code null}
      */
-    void markMessagesAsRead(MarkMessagesAsReadRequest request);
+    void markMessagesAsRead(MarkMessagesAsReadRequestDto request);
 
     /**
      * Retrieves a pageable list of user messages associated with a specific chat
@@ -79,4 +74,25 @@ public interface TelegramService {
      * @param update the Telegram update object to process
      */
     void processUpdate(Update update);
+
+    /**
+     * Toggles the notification setting for a user in the Telegram bot. Depending on
+     * the provided {@link ToggleNotificationsRequestDto}, this method enables or
+     * disables whether the user with the specified UUID will receive notifications.
+     *
+     * @param uuid    the unique identifier of the user whose notification setting
+     *                should be changed
+     * @param request the DTO containing the desired notification state
+     *                (enabled/disabled)
+     */
+    void toggleNotifications(String uuid, ToggleNotificationsRequestDto request);
+
+    /**
+     * Checks whether notifications are enabled for a user in the Telegram bot.
+     *
+     * @param uuid the unique identifier of the user
+     * @return {@code true} if the user has notifications enabled, {@code false}
+     *         otherwise
+     */
+    boolean getIsNotificationsEnabled(String uuid);
 }

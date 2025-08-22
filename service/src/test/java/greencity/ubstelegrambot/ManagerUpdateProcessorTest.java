@@ -2,10 +2,12 @@ package greencity.ubstelegrambot;
 
 import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
+import greencity.service.ubs.TelegramLanguageService;
 import greencity.service.ubs.TelegramLoginService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.ManagerUpdateProcessor;
 import greencity.ubstelegrambot.service.TelegramUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +18,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +35,15 @@ class ManagerUpdateProcessorTest {
     @Mock
     private TelegramUtils telegramUtils;
 
+    @Mock
+    private TelegramLanguageService telegramLanguageService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(telegramLanguageService.getChatLanguage(anyString()))
+            .thenReturn(TelegramBotConstants.UK);
+    }
+
     @Test
     void testProcess_WithLogoutCallback_ShouldLogoutManagerAndReturnMainMenuMessage() {
         String chatId = "123";
@@ -49,7 +59,7 @@ class ManagerUpdateProcessorTest {
         callbackQuery.setMessage(message);
         update.setCallbackQuery(callbackQuery);
 
-        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage(chatId);
+        SendMessage expectedMessage = MessageFactory.createAvailableCommandsMessage(chatId, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
@@ -59,7 +69,7 @@ class ManagerUpdateProcessorTest {
         verify(telegramUtils).updateChatStateAndRespond(
             eq(chatId),
             eq(ChatState.NORMAL),
-            argThat(f -> f.apply(chatId).equals(expectedMessage)));
+            eq(MessageFactory.createAvailableCommandsMessage(chatId, TelegramBotConstants.UK)));
 
         verify(telegramLoginService).logoutManager(chatId);
         assertEquals(expectedMessage, actualMessage);
@@ -76,7 +86,8 @@ class ManagerUpdateProcessorTest {
         message.setChat(chat);
         update.setMessage(message);
 
-        SendMessage expectedMessage = MessageFactory.createAvailableForManagerCommandsMessage(chatId);
+        SendMessage expectedMessage =
+            MessageFactory.createAvailableForManagerCommandsMessage(chatId, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
@@ -86,7 +97,7 @@ class ManagerUpdateProcessorTest {
         verify(telegramUtils).updateChatStateAndRespond(
             eq(chatId),
             eq(ChatState.NORMAL),
-            argThat(f -> f.apply(chatId).equals(expectedMessage)));
+            eq(MessageFactory.createAvailableForManagerCommandsMessage(chatId, TelegramBotConstants.UK)));
 
         verifyNoInteractions(telegramLoginService);
         assertEquals(expectedMessage, actualMessage);
@@ -107,7 +118,8 @@ class ManagerUpdateProcessorTest {
         callbackQuery.setMessage(message);
         update.setCallbackQuery(callbackQuery);
 
-        SendMessage expectedMessage = MessageFactory.createForbiddenCommandsManagerMessage(chatId);
+        SendMessage expectedMessage =
+            MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramBotConstants.UK);
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
@@ -117,7 +129,7 @@ class ManagerUpdateProcessorTest {
         verify(telegramUtils).updateChatStateAndRespond(
             eq(chatId),
             eq(ChatState.NORMAL),
-            argThat(f -> f.apply(chatId).equals(expectedMessage)));
+            eq(MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramBotConstants.UK)));
 
         verifyNoInteractions(telegramLoginService);
         assertEquals(expectedMessage, actualMessage);

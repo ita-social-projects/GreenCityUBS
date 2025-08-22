@@ -1,31 +1,76 @@
 package greencity.dto.employee;
 
-import greencity.ModelUtils;
-import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.TariffWithChatAccess;
+import greencity.entity.user.employee.Position;
+import greencity.repository.PositionRepository;
 import jakarta.validation.ConstraintViolation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = EmployeeWithTariffsIdDtoTest.TestConfig.class)
 class EmployeeWithTariffsIdDtoTest {
-    private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    @Autowired
+    Validator validator;
+
+    @MockBean
+    private PositionRepository positionRepository;
+
     private static final String validName = "Valid";
     private static final String validEmail = "mail@gmail.com";
     private static final String validPhoneNumber = "+380938754569";
-    private static final List<PositionDto> validPositions = List.of(ModelUtils.getEmployeePosition());
+    private static final Set<Long> validPositionIds = Set.of(1L, 2L, 3L);
     private static final long validId = 1L;
     private static final List<Long> validIds = List.of(1L);
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public Validator validatorFactory() {
+            return new LocalValidatorFactoryBean();
+        }
+    }
+
+    @BeforeEach
+    void setUp() {
+        when(positionRepository.findAllById(validPositionIds))
+                .thenReturn(validPositionIds.stream()
+                        .map(id -> {
+                            Position pos = new Position();
+                            pos.setId(id);
+                            return pos;
+                        })
+                        .toList());
+
+        when(positionRepository.findByIdIn(validPositionIds))
+                .thenReturn(validPositionIds.stream()
+                        .map(id -> {
+                            Position pos = new Position();
+                            pos.setId(id);
+                            return pos;
+                        })
+                        .collect(Collectors.toSet()));
+    }
 
     @Nested
     @DisplayName("Name validation")
@@ -156,7 +201,6 @@ class EmployeeWithTariffsIdDtoTest {
         void shouldRejectNullPhoneNumber() {
             EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, null);
             Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
-
             assertThat(violations)
                 .extracting(v -> v.getPropertyPath().toString())
                 .contains("employeeDto.phoneNumber");
@@ -192,7 +236,7 @@ class EmployeeWithTariffsIdDtoTest {
     @Test
     void shouldBeInvalidWithEmptyOrMissingFields() {
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
-        dto.setEmployeeDto(new EmployeeDto());
+        dto.setEmployeeDto(new CreateUpdateEmployeeDto());
         dto.setTariffs(null);
 
         Set<ConstraintViolation<EmployeeWithTariffsIdDto>> violations = validator.validate(dto);
@@ -205,7 +249,7 @@ class EmployeeWithTariffsIdDtoTest {
 
         assertThat(fieldsWithViolations).containsExactlyInAnyOrder(
             "employeeDto.email",
-            "employeeDto.employeePositions",
+            "employeeDto.employeePositionIds",
             "employeeDto.firstName",
             "employeeDto.lastName",
             "employeeDto.phoneNumber",
@@ -216,13 +260,13 @@ class EmployeeWithTariffsIdDtoTest {
         String firstName, String lastName, String email, String phoneNumber) {
 
         return EmployeeWithTariffsIdDto.builder()
-            .employeeDto(EmployeeDto.builder()
+            .employeeDto(CreateUpdateEmployeeDto.builder()
                 .id(validId)
                 .firstName(firstName)
                 .lastName(lastName)
                 .phoneNumber(phoneNumber)
                 .email(email)
-                .employeePositions(validPositions)
+                .employeePositionIds(validPositionIds)
                 .build())
             .tariffs(createTariffsWithChatAccess())
             .build();

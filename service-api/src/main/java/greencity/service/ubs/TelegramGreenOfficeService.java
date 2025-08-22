@@ -13,5 +13,5 @@ public interface TelegramGreenOfficeService {
      * @return a {@link SendMessage} containing either an error or a thank-you
      *         response
      */
-    SendMessage processGreenOfficeEmail(Message message);
+    SendMessage processGreenOfficeEmail(Message message, String lang);
 }

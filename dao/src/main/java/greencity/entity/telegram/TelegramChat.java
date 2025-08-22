@@ -73,6 +73,10 @@ public class TelegramChat {
     private TelegramMessage lastMessage;
 
     @Builder.Default
+    @Column(name = "language_code", nullable = false)
+    private String languageCode = "uk";
+
+    @Builder.Default
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TelegramMessage> messages = new ArrayList<>();
 

@@ -1,9 +1,12 @@
 package greencity.ubstelegrambot;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramManager;
 import greencity.repository.TelegramManagerRepository;
+import greencity.service.ubs.TelegramLanguageService;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramNotificationServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +31,15 @@ class TelegramNotificationServiceTest {
 
     @Mock
     private TelegramExecutor telegramExecutor;
+
+    @Mock
+    private TelegramLanguageService telegramLanguageService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(telegramLanguageService.getChatLanguage(anyString()))
+            .thenReturn(TelegramBotConstants.UK);
+    }
 
     @Test
     void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
