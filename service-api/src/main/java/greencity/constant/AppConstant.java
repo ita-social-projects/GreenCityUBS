@@ -23,7 +23,7 @@ public class AppConstant {
     public static final String UBS_EXPORT = UBS_LINK + "/order/pdf/export";
     public static final String LOGS_LINKS = "/logs/**";
     public static final String EXPORT_SETTINGS_LINKS = "/export/settings/**";
-    public static final String TELEGRAM_LINKS = "/telegram/**";
+    public static final String TELEGRAM_LINK = "/ubs/telegram";
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";
