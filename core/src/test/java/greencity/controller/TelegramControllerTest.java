@@ -6,6 +6,9 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.DeleteTelegramMessageRequest;
+import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.MarkMessagesAsReadRequest;
 import greencity.dto.telegram.TelegramMessageDto;
@@ -21,15 +24,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -140,4 +149,53 @@ class TelegramControllerTest {
 
         verify(telegramService).markMessagesAsRead(request);
     }
+    @Test
+    void editMessage_ShouldReturnNoContent() throws Exception {
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 2L,"new text");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mockMvc.perform(put("/ubs/telegram/message/edit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        verify(telegramService).editManagerMessage(request);
+    }
+
+    @Test
+    void deleteMessage_ShouldReturnNoContent() throws Exception {
+        DeleteTelegramMessageRequest request = new DeleteTelegramMessageRequest(1L, 123L, null);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mockMvc.perform(delete("/ubs/telegram/message/delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+
+        verify(telegramService).deleteManagerMessage(request);
+    }
+
+    @Test
+    void sendMessage_ShouldReturnOk() throws Exception {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest(123L, "hello");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        MockMultipartFile jsonPart = new MockMultipartFile(
+                "data", "", "application/json", objectMapper.writeValueAsBytes(request));
+
+        MockMultipartFile filePart = new MockMultipartFile(
+                "files", "test.png", "image/png", "fake image".getBytes());
+
+        mockMvc.perform(multipart("/ubs/telegram/messages")
+                        .file(jsonPart)
+                        .file(filePart)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk());
+
+        verify(telegramService).sendMessageToUser(eq(request), any(MultipartFile[].class));
+    }
+
 }

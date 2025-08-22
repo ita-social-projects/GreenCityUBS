@@ -471,6 +471,11 @@ public class TelegramServiceImpl implements TelegramService {
                 }
 
                 telegramMessageRepository.save(message);
+
+                if (chat.getLastMessage() != null && chat.getLastMessage().getId().equals(message.getId())) {
+                    chat.setLastMessage(message);
+                    telegramChatRepository.save(chat);
+                }
             }
         }
     }
@@ -478,9 +483,9 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     @Transactional
     public void deleteManagerMessage(DeleteTelegramMessageRequest request) {
-        if(request.messageId() != null){
+        if (request.messageId() != null) {
             deleteMessage(request);
-        } else if (request.assetId() != null){
+        } else if (request.assetId() != null) {
             deleteAsset(request);
         }
     }
