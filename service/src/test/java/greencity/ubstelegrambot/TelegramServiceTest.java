@@ -4,6 +4,8 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.DeleteTelegramMessageRequest;
+import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.MarkMessagesAsReadRequest;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
@@ -33,6 +35,7 @@ import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +55,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -84,6 +90,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -172,7 +179,7 @@ class TelegramServiceTest {
 
         telegramService.sendMessageToUser(request, null);
 
-        verify(executor).executeCommand(eq(bot), any(SendMessage.class));
+        verify(executor).executeSendMessage(eq(bot), any(SendMessage.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
     }
@@ -187,6 +194,7 @@ class TelegramServiceTest {
         chat.setChatId("123456");
 
         when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(executor.executeSendFile(any(), any())).thenReturn(mockTelegramResponse(1));
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(file.getOriginalFilename()).thenReturn("image.svg");
         when(file.getSize()).thenReturn(2048L);
@@ -213,6 +221,7 @@ class TelegramServiceTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
         when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+        when(executor.executeSendFile(any(), any())).thenReturn(mockTelegramResponse(1));
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(file.getOriginalFilename()).thenReturn("image.png");
         when(file.getSize()).thenReturn(2048L);
@@ -951,6 +960,7 @@ class TelegramServiceTest {
         chat.setChatId("123456");
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(executor.executeSendFile(any(), any())).thenReturn(mockTelegramResponse(1));
         when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
         when(file.getOriginalFilename()).thenReturn("doc.pdf");
         when(file.getSize()).thenReturn(1024L);
@@ -958,7 +968,7 @@ class TelegramServiceTest {
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(executor).executeSendFile(eq(bot), any(SendDocument.class));
+        verify(executor).executeSendFile(any(), any(SendDocument.class));
         verify(telegramMessageRepository).save(any());
     }
 
@@ -1053,4 +1063,246 @@ class TelegramServiceTest {
         assertEquals(0, chat2.getUnreadMessagesCount());
     }
 
+    @Test
+    void deleteMessage_shouldDeleteAndUpdateLastMessage() {
+        var chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("123456");
+
+        var message = new TelegramMessage();
+        message.setId(100L);
+        message.setTelegramMessageId(42);
+        message.setFromManager(true);
+        message.setChat(chat);
+
+        chat.setLastMessage(message);
+
+        var request = new DeleteTelegramMessageRequest(chat.getId(), message.getId(), null);
+
+        when(telegramChatRepository.findById(chat.getId())).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(message.getId()))
+                .thenReturn(Optional.of(message));
+
+        telegramService.deleteManagerMessage(request);
+
+        verify(executor).executeCommand(any(), any(DeleteMessage.class));
+        verify(telegramMessageRepository).delete(message);
+        verify(telegramChatRepository).save(chat);
+    }
+
+    @Test
+    void deleteAsset_shouldDeleteParentIfNoAssetsLeft() {
+        var chat = new TelegramChat();
+        chat.setId(2L);
+        chat.setChatId("123456");
+
+        var parent = new TelegramMessage();
+        parent.setId(200L);
+        parent.setTelegramMessageId(55);
+        parent.setFromManager(true);
+        parent.setChat(chat);
+
+        var asset = new MessageAsset();
+        asset.setId(300L);
+        asset.setTelegramMessageId(56);
+        asset.setMessage(parent);
+
+        parent.getAssets().add(asset);
+        chat.setLastMessage(parent);
+
+        var request = new DeleteTelegramMessageRequest(chat.getId(), null, asset.getId());
+
+        when(messageAssetRepository.findById(asset.getId())).thenReturn(Optional.of(asset));
+
+        telegramService.deleteManagerMessage(request);
+
+        verify(executor).executeCommand(any(), any(DeleteMessage.class));
+        verify(telegramMessageRepository).delete(parent);
+        verify(messageAssetRepository).delete(asset);
+    }
+
+    @Test
+    void deleteAsset_shouldEditCaptionIfTextPresentAndAssetsRemain() {
+        var chat = new TelegramChat();
+        chat.setId(3L);
+        chat.setChatId("123456");
+
+        var parent = new TelegramMessage();
+        parent.setId(201L);
+        parent.setTelegramMessageId(66);
+        parent.setFromManager(true);
+        parent.setChat(chat);
+        parent.setText("hello");
+
+        var asset1 = new MessageAsset();
+        asset1.setId(301L);
+        asset1.setTelegramMessageId(67);
+        asset1.setMessage(parent);
+
+        var asset2 = new MessageAsset();
+        asset2.setId(302L);
+        asset2.setTelegramMessageId(68);
+        asset2.setMessage(parent);
+
+        parent.getAssets().add(asset1);
+        parent.getAssets().add(asset2);
+
+        var request = new DeleteTelegramMessageRequest(chat.getId(), null, asset1.getId());
+
+        when(messageAssetRepository.findById(asset1.getId())).thenReturn(Optional.of(asset1));
+
+        telegramService.deleteManagerMessage(request);
+
+        verify(messageAssetRepository).delete(asset1);
+        verify(executor).executeCommand(any(), any(EditMessageCaption.class));
+        verifyNoMoreInteractions(telegramMessageRepository);
+    }
+
+    @Test
+    void sendMessageToUser_shouldThrowNotFoundException_whenMessageIdIsZero() {
+        var request = new DeleteTelegramMessageRequest(1L, 0L, null);
+
+        assertThrows(NotFoundException.class, () -> telegramService.deleteManagerMessage(request));
+    }
+
+    @Test
+    void editManagerMessage_shouldThrowNotFoundException_whenChatNotFound() {
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 100L, "new text");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> telegramService.editManagerMessage(request));
+    }
+
+    @Test
+    void editManagerMessage_shouldThrowEntityNotFound_whenMessageNotFound() {
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 100L, "new text");
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(100L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> telegramService.editManagerMessage(request));
+    }
+
+    @Test
+    void editManagerMessage_shouldDoNothing_whenMessageNotFromManager() {
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 100L, "new text");
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+
+        TelegramMessage message = new TelegramMessage();
+        message.setFromManager(false);
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(100L)).thenReturn(Optional.of(message));
+
+        telegramService.editManagerMessage(request);
+
+        verifyNoInteractions(applicationContext, executor);
+        verify(telegramMessageRepository, never()).save(any());
+    }
+
+    @Test
+    void editManagerMessage_shouldUpdateCaption_whenMessageHasAssets() {
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 100L, "new text");
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("12345");
+
+        TelegramMessage message = new TelegramMessage();
+        message.setId(100L);
+        message.setFromManager(true);
+        message.setTelegramMessageId(777);
+        message.setAssets(List.of(new MessageAsset()));
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(100L)).thenReturn(Optional.of(message));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+
+        telegramService.editManagerMessage(request);
+
+        verify(executor).executeCommand(any(), any(EditMessageCaption.class));
+        verify(telegramMessageRepository).save(message);
+    }
+
+    @Test
+    void editManagerMessage_shouldUpdateText_whenMessageWithoutAssets() {
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 100L, "new text");
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("12345");
+
+        TelegramMessage message = new TelegramMessage();
+        message.setId(100L);
+        message.setFromManager(true);
+        message.setTelegramMessageId(888);
+        message.setAssets(Collections.emptyList());
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(100L)).thenReturn(Optional.of(message));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+
+        telegramService.editManagerMessage(request);
+
+        verify(executor).executeCommand(any(), any(EditMessageText.class));
+        verify(telegramMessageRepository).save(message);
+    }
+
+    @Test
+    void editManagerMessage_shouldUpdateChatLastMessage_whenEditedMessageIsLastMessage() {
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 100L, "new text");
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("12345");
+
+        TelegramMessage message = new TelegramMessage();
+        message.setId(100L);
+        message.setFromManager(true);
+        message.setTelegramMessageId(999);
+        message.setAssets(Collections.emptyList());
+
+        chat.setLastMessage(message);
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(100L)).thenReturn(Optional.of(message));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+
+        telegramService.editManagerMessage(request);
+
+        verify(telegramChatRepository).save(chat);
+    }
+
+    @Test
+    void editManagerMessage_shouldNotUpdateChat_whenEditedMessageIsNotLastMessage() {
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 200L, "new text");
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("12345");
+
+        TelegramMessage lastMessage = new TelegramMessage();
+        lastMessage.setId(999L);
+        chat.setLastMessage(lastMessage);
+
+        TelegramMessage message = new TelegramMessage();
+        message.setId(200L);
+        message.setFromManager(true);
+        message.setTelegramMessageId(777);
+        message.setAssets(Collections.emptyList());
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(200L)).thenReturn(Optional.of(message));
+        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+
+        telegramService.editManagerMessage(request);
+
+        verify(telegramChatRepository, never()).save(chat);
+    }
+
+    private Message mockTelegramResponse(int id) {
+        Message m = new Message();
+        m.setMessageId(id);
+        return m;
+    }
 }

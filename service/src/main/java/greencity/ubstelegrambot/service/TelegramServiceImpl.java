@@ -451,34 +451,34 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     @Transactional
-    public void editManagerMessage(EditTelegramMessageRequest request) {
-        TelegramChat chat = telegramChatRepository.findById(request.chatId()).orElseThrow(NotFoundException::new);
-        if(chat != null) {
-            TelegramMessage message = telegramMessageRepository.findById(request.messageId())
-                    .orElseThrow(EntityNotFoundException::new);
-            if(message.getFromManager()) {
-                var bot = applicationContext.getBean(UBSTelegramBot.class);
-                message.setUpdatedAt(Instant.now());
-                message.setText(request.newText());
-                if (!message.getAssets().isEmpty()){
-                    EditMessageCaption editMessageCaption = MessageFactory
-                            .buildEditMessageCaption(chat.getChatId(), message.getTelegramMessageId(), request.newText());
-                    executor.executeCommand(bot,  editMessageCaption);
-                } else {
-                    EditMessageText editMessageText = MessageFactory
-                            .buildEditMessageText(chat.getChatId(), message.getTelegramMessageId(), request.newText());
-                    executor.executeCommand(bot, editMessageText);
-                }
+        public void editManagerMessage(EditTelegramMessageRequest request) {
+            TelegramChat chat = telegramChatRepository.findById(request.chatId()).orElseThrow(NotFoundException::new);
+            if(chat != null) {
+                TelegramMessage message = telegramMessageRepository.findById(request.messageId())
+                        .orElseThrow(EntityNotFoundException::new);
+                if(message.getFromManager()) {
+                    var bot = applicationContext.getBean(UBSTelegramBot.class);
+                    message.setUpdatedAt(Instant.now());
+                    message.setText(request.newText());
+                    if (!message.getAssets().isEmpty()){
+                        EditMessageCaption editMessageCaption = MessageFactory
+                                .buildEditMessageCaption(chat.getChatId(), message.getTelegramMessageId(), request.newText());
+                        executor.executeCommand(bot,  editMessageCaption);
+                    } else {
+                        EditMessageText editMessageText = MessageFactory
+                                .buildEditMessageText(chat.getChatId(), message.getTelegramMessageId(), request.newText());
+                        executor.executeCommand(bot, editMessageText);
+                    }
 
-                telegramMessageRepository.save(message);
+                    telegramMessageRepository.save(message);
 
-                if (chat.getLastMessage() != null && chat.getLastMessage().getId().equals(message.getId())) {
-                    chat.setLastMessage(message);
-                    telegramChatRepository.save(chat);
+                    if (chat.getLastMessage() != null && chat.getLastMessage().getId().equals(message.getId())) {
+                        chat.setLastMessage(message);
+                        telegramChatRepository.save(chat);
+                    }
                 }
             }
         }
-    }
 
     @Override
     @Transactional
