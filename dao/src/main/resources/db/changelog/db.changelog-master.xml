@@ -301,4 +301,6 @@
     <include file="db/changelog/logs/ch-insert-into-cities-Kyiv-Lys.xml"/>
     <include file="db/changelog/logs/ch-insert-into-districts-for-Kyiv-Lys.xml"/>
     <include file="db/changelog/logs/2025-08-11-ch-add-column-language-code-in-telegram-chat.xml"/>
+    <include file="db/changelog/logs/ch-add-canceled-notification-Zadyraichuk.xml"/>
+    <include file="db/changelog/logs/ch-update-notification_platforms-Zadyraichuk.xml"/>
 </databaseChangeLog>
