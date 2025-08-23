@@ -70,15 +70,14 @@ public class OrderController {
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
-     * Controller returns all available bags and bonus points of current user by
-     * tariff and location ids.
+     * Controller returns all available bags by tariff and location ids.
      *
      * @param tariffId   - id of tariff.
      * @param locationId - id of location.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
-    @Operation(summary = "Get order points by details")
+    @Operation(summary = "Get details for the given tariff and location")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = UserPointsAndAllBagsDto.class))),
