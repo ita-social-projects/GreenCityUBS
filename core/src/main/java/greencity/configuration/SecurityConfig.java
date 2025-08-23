@@ -284,7 +284,10 @@ public class SecurityConfig {
                     UBS_LINK + "/check-if-tariff-exists/{id}",
                     UBS_LINK + "/locations",
                     LOGS_LINKS,
-                    EXPORT_SETTINGS_LINKS)
+                    EXPORT_SETTINGS_LINKS,
+                    UBS_LINK + "/findAll-order-address",
+                    UBS_LINK + "/order-details-for-tariff",
+                    UBS_LINK + "/personal-data")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     TELEGRAM_LINK + "/**",
