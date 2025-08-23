@@ -50,7 +50,7 @@ public interface UBSClientService {
     PaymentResponseWayForPay validatePayment(PaymentResponseDto response);
 
     /**
-     * Methods returns all available for order bags and current user's bonus points.
+     * Method returns all bags available for order.
      *
      * @param tariffId   {@link Long} tariff id.
      * @param locationId {@link Long} location id.
