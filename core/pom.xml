@@ -21,20 +21,20 @@
         <tngtech.version>1.13.1</tngtech.version>
         <facebook.version>2.0.3.RELEASE</facebook.version>
         <socialcore.version>1.1.6.RELEASE</socialcore.version>
-        <apache.commons.version>3.13.0</apache.commons.version>
+        <apache.commons.version>3.18.0</apache.commons.version>
         <springdoc-openapi-starter-webmvc-ui.version>2.3.0</springdoc-openapi-starter-webmvc-ui.version>
         <thymeleaf-spring6.version>3.1.2.RELEASE</thymeleaf-spring6.version>
         <thymeleaf-extras-java8time.version>3.0.4.RELEASE</thymeleaf-extras-java8time.version>
         <google-guava.version>33.0.0-jre</google-guava.version>
         <json-path.version>2.9.0</json-path.version>
-        <ldm.version>0.21.8-SNAPSHOT</ldm.version>
+        <ldm.version>0.0.5</ldm.version>
     </properties>
 
     <repositories>
         <repository>
             <id>github</id>
             <name>GitHub Repository</name>
-            <url>https://maven.pkg.github.com/Warded120/LDM-spring-boot-starter</url>
+            <url>https://maven.pkg.github.com/ita-social-projects/LDM-spring-boot-starter</url>
         </repository>
     </repositories>
 
@@ -144,6 +144,10 @@
             <artifactId>hibernate-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-jcache</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
@@ -229,9 +233,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.ivan.softserve</groupId>
+            <groupId>com.softserve.ldm</groupId>
             <artifactId>ldm-spring-boot-starter</artifactId>
             <version>${ldm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>3.10.8</version>
+            <classifier>jakarta</classifier>
         </dependency>
     </dependencies>
 

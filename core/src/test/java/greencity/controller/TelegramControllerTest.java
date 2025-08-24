@@ -1,15 +1,17 @@
 package greencity.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import greencity.client.UserRemoteClient;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
-import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.*;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
+import java.util.Collections;
 import greencity.ubstelegrambot.service.TelegramFeedbackServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,20 +25,15 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.util.Collections;
 import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramControllerTest {
 
     @Mock
-    private UserRemoteClient userRemoteClient;
+    private UserRepository userRepository;
 
     @Mock
     private TelegramService telegramService;
@@ -59,7 +56,7 @@ class TelegramControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(telegramChatController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .build();
 
         messageDtoPage = new PageableDto<>(Collections.emptyList(), 0, 0, 0);
@@ -117,7 +114,7 @@ class TelegramControllerTest {
 
     @Test
     void getAllFeedbacksByChatId_ShouldReturnOk() throws Exception {
-        Mockito.when(telegramFeedbackService.getAllFeedbacksByChatId(eq("123"), any(Pageable.class)))
+        Mockito.when(telegramFeedbackService.getAllFeedbacksByChatId(eq(123L), any(Pageable.class)))
             .thenReturn(feedbackDtoPage);
 
         mockMvc.perform(get("/ubs/telegram/feedbacks/123"))
@@ -126,7 +123,7 @@ class TelegramControllerTest {
 
     @Test
     void markMessagesAsRead_ShouldReturnOk() throws Exception {
-        MarkMessagesAsReadRequest request = MarkMessagesAsReadRequest
+        MarkMessagesAsReadRequestDto request = MarkMessagesAsReadRequestDto
             .builder()
             .messagesIds(List.of(1L, 2L, 3L))
             .build();
@@ -139,5 +136,31 @@ class TelegramControllerTest {
             .andExpect(status().isNoContent());
 
         verify(telegramService).markMessagesAsRead(request);
+    }
+
+    @Test
+    void toggleNotifications_ShouldReturnOk() throws Exception {
+        ToggleNotificationsRequestDto request = ToggleNotificationsRequestDto
+            .builder()
+            .isNotify(true)
+            .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mockMvc.perform(put("/ubs/telegram/notifications")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNoContent());
+
+        verify(telegramService).toggleNotifications(any(), eq(request));
+    }
+
+    @Test
+    void getIsNotificationsEnabled_ShouldReturnOk() throws Exception {
+        mockMvc.perform(get("/ubs/telegram/notifications")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(telegramService).getIsNotificationsEnabled(any());
     }
 }

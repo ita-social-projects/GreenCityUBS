@@ -73,4 +73,11 @@ public interface PaymentService {
      */
     boolean processRefundForOrder(Order order, RefundDto refundDto,
         String employeeEmail);
+
+    /**
+     * Processes a refund of bonus points for an order.
+     *
+     * @param order {@link Order} the order for which points are refunded.
+     */
+    void processPointsRefundForOrder(Order order);
 }

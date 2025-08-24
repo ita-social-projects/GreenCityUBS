@@ -1,38 +1,63 @@
 package greencity.ubstelegrambot;
 
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
+import greencity.enums.ChatState;
+import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
-import greencity.service.ubs.FileService;
 import greencity.service.ubs.TelegramNotificationService;
+import greencity.ubstelegrambot.messages.MessageFactory;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramSupportServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramSupportServiceTest {
@@ -47,19 +72,16 @@ class TelegramSupportServiceTest {
     private TelegramNotificationService telegramNotificationService;
 
     @Mock
+    private TelegramChatProducer telegramChatProducer;
+
+    @Mock
     private TelegramMessageRepository telegramMessageRepository;
 
     @Mock
-    private FileService fileService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock
-    private UBSTelegramBot bot;
-
-    @Mock
-    private ApplicationContext applicationContext;
-
-    @Mock
-    private TelegramExecutor executor;;
+    private TelegramExecutor telegramExecutor;
 
     @Mock
     private MessageAssetRepository messageAssetRepository;
@@ -67,9 +89,18 @@ class TelegramSupportServiceTest {
     @Mock
     private TelegramUtils telegramUtils;
 
-    @BeforeEach
-    void setup() {
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
+    private static MockedStatic<MessageProvider> messageProviderMock;
+
+    @BeforeAll
+    static void mockMessageProvider() {
+        messageProviderMock = mockStatic(MessageProvider.class);
+        messageProviderMock.when(() -> MessageProvider.get(anyString(), anyString()))
+            .thenAnswer(inv -> inv.getArgument(1));
+    }
+
+    @AfterAll
+    static void closeMock() {
+        messageProviderMock.close();
     }
 
     @Test
@@ -81,36 +112,52 @@ class TelegramSupportServiceTest {
         when(user.getId()).thenReturn(1L);
         when(telegramChatRepository.findByChatId(anyString())).thenReturn(Optional.empty());
 
-        SendMessage result = telegramSupportService.processSupportMessage(message);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(TelegramBotConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN,
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "unknown.error"),
             result.getText());
     }
 
     @Test
     void testProcessSupportMessage_EndSupportModeTextMessage_ShouldReturnStopSupportModeTextMessage() {
-        Message message = mock(Message.class);
-        User user = mock(User.class);
-        String chatId = "1";
-        String username = "tg_user";
+        try (MockedStatic<MessageFactory> mfMock = Mockito.mockStatic(MessageFactory.class)) {
+            String chatId = "1";
+            String lang = TelegramBotConstants.UK;
+            String username = "tg_user";
+            String endSupportText = MessageProvider.get(lang, "client.end.support.mode");
 
-        when(user.getId()).thenReturn(1L);
-        when(user.getUserName()).thenReturn(username);
-        when(message.getFrom()).thenReturn(user);
-        when(message.hasText()).thenReturn(true);
-        when(message.getText()).thenReturn(TelegramBotConstants.CLIENT_END_SUPPORT_MODE);
+            Message message = mock(Message.class);
+            User user = mock(User.class);
+            when(user.getId()).thenReturn(1L);
+            when(user.getUserName()).thenReturn(username);
+            when(message.getFrom()).thenReturn(user);
+            when(message.hasText()).thenReturn(true);
+            when(message.getText()).thenReturn(endSupportText);
 
-        TelegramChat chatEntity = TelegramChat.builder()
-            .chatId(chatId)
-            .build();
+            TelegramChat chatEntity = TelegramChat.builder()
+                .chatId(chatId)
+                .languageCode(lang)
+                .build();
+            when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chatEntity));
 
-        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chatEntity));
+            SendMessage feedbackMessage = new SendMessage(chatId, "feedback");
+            SendMessage deleteKeyboardMessage = new SendMessage(chatId, "delete_keyboard");
+            mfMock.when(() -> MessageFactory.createFeedbackMessage(chatId, lang))
+                .thenReturn(feedbackMessage);
+            mfMock.when(() -> MessageFactory.deleteEndSupportKeyboardMessage(chatId, lang))
+                .thenReturn(deleteKeyboardMessage);
 
-        SendMessage result = telegramSupportService.processSupportMessage(message);
+            when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), eq(feedbackMessage)))
+                .thenReturn(feedbackMessage);
 
-        assertEquals(TelegramBotConstants.CLIENT_STOP_SUPPORT_MODE, result.getText());
-        verify(telegramChatRepository).save(chatEntity);
-        verify(telegramNotificationService).notifyManagerAboutEndSupportModeFromUser(username);
+            SendMessage result = telegramSupportService.processSupportMessage(message, lang);
+
+            assertNotNull(result);
+            assertEquals("feedback", result.getText());
+
+            verify(telegramUtils).updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), eq(feedbackMessage));
+            verify(telegramNotificationService).notifyManagerAboutEndSupportModeFromUser(username);
+        }
     }
 
     @Test
@@ -140,120 +187,12 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
 
-        SendMessage result = telegramSupportService.processSupportMessage(message);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager")));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
-        verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, messageText, id);
-    }
-
-    @Test
-    void testProcessSupportMessage_HasPhotoMessageNoLargestPhotoNoMediaGroup_ShouldReturnSomethingWentWrongMessage() {
-        long id = 1L;
-        String chatId = "1";
-        String username = "tg_user";
-
-        Message message = mock(Message.class);
-        User user = mock(User.class);
-
-        when(user.getId()).thenReturn(1L);
-        when(user.getUserName()).thenReturn(username);
-        when(message.getFrom()).thenReturn(user);
-        when(message.getChatId()).thenReturn(1L);
-        when(message.getMediaGroupId()).thenReturn(null);
-        when(message.hasPhoto()).thenReturn(true);
-        when(message.getPhoto()).thenReturn(List.of());
-
-        TelegramChat chat = TelegramChat
-            .builder()
-            .id(id)
-            .unreadMessagesCount(0)
-            .build();
-
-        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
-
-        SendMessage result = telegramSupportService.processSupportMessage(message);
-
-        assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramMessageRepository).save(any(TelegramMessage.class));
-        verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
-    }
-
-    @Test
-    void testProcessSupportMessage_HasPhotoMessageNoLargestPhotoWithMediaGroup_ShouldReturnSomethingWentWrongMessage() {
-        long id = 1L;
-        String chatId = "1";
-        String username = "tg_user";
-        String mediaGroupId = "12345";
-
-        Message message = mock(Message.class);
-        User user = mock(User.class);
-
-        when(user.getId()).thenReturn(1L);
-        when(message.getFrom()).thenReturn(user);
-        when(message.getChatId()).thenReturn(1L);
-        when(message.getMediaGroupId()).thenReturn(mediaGroupId);
-        when(message.hasPhoto()).thenReturn(true);
-        when(message.getPhoto()).thenReturn(List.of());
-
-        TelegramChat chat = TelegramChat
-            .builder()
-            .id(id)
-            .build();
-
-        TelegramMessage telegramMessage = TelegramMessage
-            .builder()
-            .mediaGroupId(mediaGroupId)
-            .build();
-
-        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
-        when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-
-        SendMessage result = telegramSupportService.processSupportMessage(message);
-
-        assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
-    }
-
-    @Test
-    void testProcessSupportMessage_HasPhotoMessageNoMediaGroupExecuteGetFileError_ShouldReturnSomethingWentWrongMessage() {
-        long id = 1L;
-        String chatId = "1";
-        String username = "tg_user";
-
-        Message message = mock(Message.class);
-        User user = mock(User.class);
-        PhotoSize photoSize = mock(PhotoSize.class);
-
-        when(user.getId()).thenReturn(1L);
-        when(message.getFrom()).thenReturn(user);
-        when(user.getUserName()).thenReturn(username);
-        when(message.getChatId()).thenReturn(1L);
-        when(message.getMediaGroupId()).thenReturn(null);
-        when(message.hasPhoto()).thenReturn(true);
-        when(message.getPhoto()).thenReturn(List.of(photoSize));
-        when(photoSize.getFileId()).thenReturn("123456789");
-
-        TelegramChat chat = TelegramChat
-            .builder()
-            .id(id)
-            .unreadMessagesCount(0)
-            .build();
-
-        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(null);
-
-        SendMessage result = telegramSupportService.processSupportMessage(message);
-
-        assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
     }
 
     @Test
@@ -278,6 +217,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat
             .builder()
             .id(id)
+            .unreadMessagesCount(0)
             .build();
 
         TelegramMessage telegramMessage = TelegramMessage
@@ -287,14 +227,15 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(null);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(null);
 
-        SendMessage result = telegramSupportService.processSupportMessage(message);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
+            MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
 
     @Test
@@ -328,89 +269,14 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenThrow(new RuntimeException());
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenThrow(new TelegramBotExecutionException());
 
-        SendMessage result = telegramSupportService.processSupportMessage(message);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
-    }
-
-    @Test
-    void testProcessSupportMessage_HasPhotoMessageNoMediaGroupExecuteGetFileException_ShouldReturnSomethingWentWrongMessage() {
-        long id = 1L;
-        String chatId = "1";
-        String username = "tg_user";
-
-        Message message = mock(Message.class);
-        User user = mock(User.class);
-        PhotoSize photoSize = mock(PhotoSize.class);
-
-        when(user.getId()).thenReturn(1L);
-        when(user.getUserName()).thenReturn(username);
-        when(message.getFrom()).thenReturn(user);
-        when(message.getChatId()).thenReturn(1L);
-        when(message.getMediaGroupId()).thenReturn(null);
-        when(message.hasPhoto()).thenReturn(true);
-        when(message.getPhoto()).thenReturn(List.of(photoSize));
-        when(photoSize.getFileId()).thenReturn("123456789");
-
-        TelegramChat chat = TelegramChat
-            .builder()
-            .id(id)
-            .unreadMessagesCount(0)
-            .build();
-
-        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenThrow(new RuntimeException());
-
-        SendMessage result = telegramSupportService.processSupportMessage(message);
-
-        assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
-    }
-
-    @Test
-    void testProcessSupportMessage_HasPhotoMessageNoMediaGroupNoTelegramFilePath_ShouldReturnSomethingWentWrongMessage() {
-        long id = 1L;
-        String chatId = "1";
-        String username = "tg_user";
-
-        Message message = mock(Message.class);
-        User user = mock(User.class);
-        PhotoSize photoSize = mock(PhotoSize.class);
-        File file = mock(File.class);
-
-        when(user.getId()).thenReturn(1L);
-        when(user.getUserName()).thenReturn(username);
-        when(message.getFrom()).thenReturn(user);
-        when(message.getMediaGroupId()).thenReturn(null);
-        when(message.hasPhoto()).thenReturn(true);
-        when(message.getPhoto()).thenReturn(List.of(photoSize));
-        when(photoSize.getFileId()).thenReturn("123456789");
-        when(file.getFilePath()).thenReturn(null);
-
-        TelegramChat chat = TelegramChat
-            .builder()
-            .id(id)
-            .chatId(chatId)
-            .unreadMessagesCount(0)
-            .build();
-
-        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
-
-        SendMessage result = telegramSupportService.processSupportMessage(message);
-
-        assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramMessageRepository).save(any(TelegramMessage.class));
-        verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
+            MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
 
     @Test
@@ -436,6 +302,7 @@ class TelegramSupportServiceTest {
         TelegramChat chat = TelegramChat
             .builder()
             .id(id)
+            .unreadMessagesCount(0)
             .chatId(chatId)
             .build();
 
@@ -446,59 +313,15 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
 
-        SendMessage result = telegramSupportService.processSupportMessage(message);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(TelegramBotConstants.MANAGER_DIDNT_RECEIVED_YOUR_PHOTO_PLEASE_TRY_AGAIN));
-        verify(telegramNotificationService, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
-    }
-
-    @Test
-    void testProcessSupportMessage_HasOnePhotoMessageUploadingSuccess_ShouldReturnMessageSentToManagerMessage()
-        throws IOException {
-        long id = 1L;
-        String chatId = "1";
-        String username = "tg_user";
-
-        Message message = mock(Message.class);
-        User user = mock(User.class);
-        PhotoSize photoSize = mock(PhotoSize.class);
-        File file = mock(File.class);
-
-        when(user.getId()).thenReturn(1L);
-        when(user.getUserName()).thenReturn(username);
-        when(message.getFrom()).thenReturn(user);
-        when(message.getMediaGroupId()).thenReturn(null);
-        when(message.hasPhoto()).thenReturn(true);
-        when(message.getPhoto()).thenReturn(List.of(photoSize));
-        when(photoSize.getFileSize()).thenReturn(10000);
-        when(photoSize.getFileId()).thenReturn("123456789");
-        when(file.getFilePath()).thenReturn("/path/to/file");
-
-        TelegramChat chat = TelegramChat
-            .builder()
-            .id(id)
-            .chatId(chatId)
-            .unreadMessagesCount(0)
-            .build();
-
-        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
-        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
-        when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
-
-        SendMessage result = telegramSupportService.processSupportMessage(message);
-
-        assertTrue(result.getText().contains(TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE));
-        verify(telegramMessageRepository).save(any(TelegramMessage.class));
-        verify(telegramNotificationService).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username,
-            TelegramBotConstants.PHOTO_CONTENT, id);
-        verify(fileService).upload(any(MultipartFile.class));
-        verify(messageAssetRepository).save(any(MessageAsset.class));
+            MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
 
     @Test
@@ -531,19 +354,285 @@ class TelegramSupportServiceTest {
         TelegramMessage telegramMessage = TelegramMessage
             .builder()
             .mediaGroupId(mediaGroupId)
+            .assets(new ArrayList<>())
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
-        when(executor.executeGetFile(eq(bot), any(GetFile.class))).thenReturn(file);
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
-        when(fileService.upload(any(MultipartFile.class))).thenReturn("azureFileUrl");
+        when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
-        SendMessage result = telegramSupportService.processSupportMessage(message);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
         assertNull(result);
-        verify(fileService).upload(any(MultipartFile.class));
+        verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
         verify(telegramMessageRepository).findByMediaGroupId(mediaGroupId);
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
+            eq(chat.getId()));
+    }
+
+    @Test
+    void testProcessSupportMessage_HasDocumentButNullDocument_ShouldReturnRetryMessage() {
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+
+        when(user.getId()).thenReturn(1L);
+        when(message.getFrom()).thenReturn(user);
+        when(message.getChatId()).thenReturn(1L);
+        when(message.hasText()).thenReturn(false);
+        when(message.hasPhoto()).thenReturn(false);
+        when(message.hasDocument()).thenReturn(true);
+        when(message.getDocument()).thenReturn(null);
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("1")
+            .build();
+
+        when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
+
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed"), result.getText());
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
+            eq(chat.getId()));
+    }
+
+    @Test
+    void testProcessSupportMessage_EmptyMessage_ShouldReturnRetryMessage() {
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        String chatId = "1";
+
+        when(user.getId()).thenReturn(1L);
+        when(message.getFrom()).thenReturn(user);
+        when(message.getChatId()).thenReturn(1L);
+        when(message.hasText()).thenReturn(false);
+        when(message.hasPhoto()).thenReturn(false);
+        when(message.hasDocument()).thenReturn(false);
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("1")
+            .unreadMessagesCount(0)
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
+
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed"), result.getText());
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+    }
+
+    @Test
+    void testProcessSupportMessage_HasDocumentMessage_ShouldUploadAndNotify() throws IOException {
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        Document document = mock(Document.class);
+        File file = mock(File.class);
+
+        when(user.getId()).thenReturn(1L);
+        when(message.getFrom()).thenReturn(user);
+        when(message.hasDocument()).thenReturn(true);
+        when(message.hasPhoto()).thenReturn(false);
+        when(message.hasText()).thenReturn(false);
+        when(message.getMediaGroupId()).thenReturn(null);
+        when(message.getDocument()).thenReturn(document);
+        when(document.getFileId()).thenReturn("fileId");
+        when(document.getFileSize()).thenReturn(2048L);
+        when(document.getMimeType()).thenReturn("application/pdf");
+        when(document.getFileName()).thenReturn("file.pdf");
+
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
+        when(file.getFilePath()).thenReturn("/path/to/file.pdf");
+        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
+        when(userRemoteWebClient.uploadFile(any())).thenReturn("https://azure.com/file");
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("1")
+            .unreadMessagesCount(0)
+            .build();
+
+        when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
+
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager"), result.getText());
+        verify(userRemoteWebClient).uploadFile(any());
+        verify(messageAssetRepository).save(any());
+
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
+    }
+
+    @Test
+    void testProcessSupportMessage_HasPhotoButNoLargestPhoto_ShouldDeleteMessageAndReturnRetryMessage() {
+        String chatId = "1";
+        long userId = 1L;
+
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        TelegramChat chat = TelegramChat.builder()
+            .chatId(chatId)
+            .id(1L)
+            .build();
+
+        when(user.getId()).thenReturn(userId);
+        when(message.getFrom()).thenReturn(user);
+        when(message.hasText()).thenReturn(false);
+        when(message.hasPhoto()).thenReturn(true);
+        when(message.getMediaGroupId()).thenReturn(null);
+        lenient().when(message.getPhoto()).thenReturn(Collections.emptyList());
+
+        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
+
+        ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
+        doNothing().when(telegramMessageRepository).delete(any());
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
+
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.photo.failed"), result.getText());
+
+        verify(telegramMessageRepository).save(messageCaptor.capture());
+        verify(telegramMessageRepository).delete(messageCaptor.getValue());
+
+        verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+    }
+
+    @Test
+    void testProcessSupportMessage_HasDocumentWithNullMimeTypeAndFilename_ShouldUseUtilsToResolve() throws IOException {
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        Document document = mock(Document.class);
+        File file = mock(File.class);
+
+        when(user.getId()).thenReturn(1L);
+        when(message.getFrom()).thenReturn(user);
+        when(message.hasDocument()).thenReturn(true);
+        when(message.hasPhoto()).thenReturn(false);
+        when(message.hasText()).thenReturn(false);
+        when(message.getMediaGroupId()).thenReturn(null);
+
+        when(message.getDocument()).thenReturn(document);
+        when(document.getFileId()).thenReturn("fileId");
+        when(document.getFileSize()).thenReturn(2048L);
+        when(document.getMimeType()).thenReturn(null);
+        when(document.getFileName()).thenReturn(null);
+
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
+        when(file.getFilePath()).thenReturn("/path/to/file.pdf");
+
+        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
+        when(userRemoteWebClient.uploadFile(any())).thenReturn("https://azure.com/file");
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("1")
+            .unreadMessagesCount(0)
+            .build();
+
+        when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
+
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager"), result.getText());
+
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
+        verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
+        verify(messageAssetRepository).save(any(MessageAsset.class));
+
+    }
+
+    @Test
+    void testProcessSupportMessage_ImageWithCaption_ShouldCreateCorrectNotificationContent() throws Exception {
+        long chatDbId = 1L;
+        String chatId = "1";
+        String username = "tg_user";
+        String caption = "Hello, manager!";
+
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        PhotoSize photoSize = mock(PhotoSize.class);
+        File file = mock(File.class);
+
+        when(user.getId()).thenReturn(1L);
+        when(user.getUserName()).thenReturn(username);
+        when(message.getFrom()).thenReturn(user);
+
+        when(message.getMediaGroupId()).thenReturn(null);
+
+        when(message.hasPhoto()).thenReturn(true);
+        when(message.getPhoto()).thenReturn(List.of(photoSize));
+        when(photoSize.getFileId()).thenReturn("file123");
+        when(photoSize.getFileSize()).thenReturn(1_024);
+        when(message.getText()).thenReturn(null);
+        when(message.getCaption()).thenReturn(caption);
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(chatDbId)
+            .chatId(chatId)
+            .build();
+        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
+
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
+        when(file.getFilePath()).thenReturn("/path/photo.jpeg");
+        when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
+        when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("https://azure.com/photo");
+
+        ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
+        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
+
+        assertTrue(result.getText()
+            .contains(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager")));
+
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(
+            eq(username),
+            contentCaptor.capture(),
+            eq(chatDbId));
+        assertEquals("Image content (1 images) + text", contentCaptor.getValue());
+
+        verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
+        verify(messageAssetRepository).save(any(MessageAsset.class));
+    }
+
+    @Test
+    void testProcessSupportMessage_StartCommandWhileInSupport_ShouldReturnAlreadyOpenMessage() {
+        String chatId = "123";
+        String lang = TelegramBotConstants.UK;
+
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        when(message.getFrom()).thenReturn(user);
+        when(user.getId()).thenReturn(123L);
+        when(message.hasText()).thenReturn(true);
+        when(message.getText()).thenReturn("/start");
+
+        TelegramChat chatEntity = TelegramChat.builder()
+            .chatId(chatId)
+            .chatState(ChatState.IN_SUPPORT)
+            .build();
+        when(telegramChatRepository.findByChatId(chatId))
+            .thenReturn(Optional.of(chatEntity));
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, lang);
+
+        assertNotNull(result);
+        assertEquals(chatId, result.getChatId());
+        assertTrue(result.getText()
+            .contains(MessageProvider.get(lang, "manager.chat.already.open.message")));
+
+        verify(telegramChatRepository).findByChatId(chatId);
     }
 }

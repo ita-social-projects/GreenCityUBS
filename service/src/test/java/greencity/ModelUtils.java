@@ -7,6 +7,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -37,6 +38,7 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.CreateUpdateEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
@@ -196,6 +198,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -1439,18 +1442,14 @@ public class ModelUtils {
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
         return EmployeeWithTariffsIdDto
             .builder()
-            .employeeDto(EmployeeDto.builder()
+            .employeeDto(CreateUpdateEmployeeDto.builder()
                 .id(1L)
                 .firstName("Петро")
                 .lastName("Петренко")
                 .phoneNumber("+380935577455")
                 .email("test@gmail.com")
                 .image("path")
-                .employeePositions(List.of(PositionDto.builder()
-                    .id(1L)
-                    .nameUk("Водій")
-                    .nameEn("Driver")
-                    .build()))
+                .employeePositionIds(Set.of(1L))
                 .build())
             .tariffs(null)
             .build();
@@ -1606,15 +1605,15 @@ public class ModelUtils {
     }
 
     public static TelegramChat getTelegramBotNotifyTrue() {
-        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
-            "last_name", 0, null, null,
-            new ArrayList<>(), new ArrayList<>());
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
+            "last_name", 0, null, null, TelegramBotConstants.UK,
+            new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
-        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), false, "username", "first_name",
-            "last_name", 0, null, null,
-            new ArrayList<>(), new ArrayList<>());
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), false, "username", "first_name",
+            "last_name", 0, null, null, TelegramBotConstants.UK,
+            new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public static UserProfileUpdateDto getUserProfileUpdateDto() {
@@ -2060,12 +2059,12 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .violations(10)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
+            .changeOfPointsList(new ArrayList<>())
             .build();
     }
 
@@ -2076,9 +2075,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyTrue())
@@ -2092,9 +2090,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyTrue())
@@ -2108,9 +2105,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyFalse())
@@ -2136,6 +2132,18 @@ public class ModelUtils {
             .build();
     }
 
+    public static Payment getManualPaymentWithoutImage() {
+        return Payment.builder()
+            .settlementDate("02-08-2021")
+            .amount(500L)
+            .paymentStatus(PaymentStatus.PAID)
+            .paymentId("1l")
+            .receiptLink("somelink.com")
+            .currency("UAH")
+            .order(getOrder())
+            .build();
+    }
+
     public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021")
@@ -2143,6 +2151,16 @@ public class ModelUtils {
             .receiptLink("link")
             .paymentId("1")
             .imagePath("fdhgh")
+            .build();
+    }
+
+    public static ManualPaymentRequestDto getManualPaymentRequestDtoWithoutImage() {
+        return ManualPaymentRequestDto.builder()
+            .settlementDate("02-08-2021")
+            .amount(500L)
+            .receiptLink("link")
+            .paymentId("1")
+            .imagePath("")
             .build();
     }
 
@@ -2238,12 +2256,12 @@ public class ModelUtils {
             .build();
     }
 
-    public static Order getAdjustmentPaidOrder() {
+    public static Order getConfirmedPaidOrder() {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
                 "Roman", "Roman", "Roman", "Roman", new Order())))
-            .orderStatus(OrderStatus.ADJUSTMENT)
+            .orderStatus(OrderStatus.CONFIRMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
                 .amount(300000L)
@@ -3773,7 +3791,7 @@ public class ModelUtils {
             .builder()
             .statusId(1L)
             .id(1L)
-            .nameUk("ua")
+            .nameUk("uk")
             .build();
     }
 
@@ -3810,7 +3828,7 @@ public class ModelUtils {
 
     public static List<RegionTranslationDto> getRegionTranslationsDto() {
         return List.of(
-            RegionTranslationDto.builder().languageCode("ua").regionName("Київська область").build(),
+            RegionTranslationDto.builder().languageCode("uk").regionName("Київська область").build(),
             RegionTranslationDto.builder().regionName("Kyiv region").languageCode("en").build());
     }
 
@@ -3825,7 +3843,7 @@ public class ModelUtils {
 
     public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
         return List.of(
-            AddLocationTranslationDto.builder().locationName("Київ").languageCode("ua").build(),
+            AddLocationTranslationDto.builder().locationName("Київ").languageCode("uk").build(),
             AddLocationTranslationDto.builder().locationName("Kyiv").languageCode("en").build());
     }
 
@@ -3874,7 +3892,7 @@ public class ModelUtils {
     public static List<LocationTranslationDto> getLocationTranslationDto() {
         return List.of(LocationTranslationDto.builder()
             .locationName("Київ")
-            .languageCode("ua")
+            .languageCode("uk")
             .build(),
             LocationTranslationDto.builder()
                 .locationName("Kyiv")
@@ -5426,7 +5444,7 @@ public class ModelUtils {
 
     public static PositionWithTranslateDto getPositionWithTranslateDto(Long id) {
         Map<String, String> nameTranslations = new HashMap<>();
-        nameTranslations.put("ua", "Водій");
+        nameTranslations.put("uk", "Водій");
         nameTranslations.put("en", "Driver");
 
         return PositionWithTranslateDto.builder()
@@ -5674,7 +5692,7 @@ public class ModelUtils {
 
     public static EventDto getDtoWithLanguage(String language, Event event) {
         return switch (language) {
-            case "ua" -> EventDto.builder()
+            case "uk" -> EventDto.builder()
                 .eventDate(event.getEventDate())
                 .eventName(event.getEventNameUk())
                 .authorName(event.getAuthorNameUk())

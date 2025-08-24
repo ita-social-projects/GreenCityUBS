@@ -1,24 +1,26 @@
 package greencity.controller;
 
+import static greencity.constant.AppConstant.TELEGRAM_LINK;
+import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
 import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
 import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import greencity.service.ubs.TelegramFeedbackService;
 import greencity.service.ubs.TelegramService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
  * Telegram bot users.
  */
 @RestController
-@RequestMapping("/ubs/telegram")
+@RequestMapping(TELEGRAM_LINK)
 @RequiredArgsConstructor
 @Validated
 public class TelegramController {
@@ -85,7 +87,7 @@ public class TelegramController {
     })
     @GetMapping("/chats")
     public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search,
-        @PageableDefault(sort = "lastMessage.sendAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getChats(search, pageable));
     }
 
@@ -190,7 +192,7 @@ public class TelegramController {
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(
-        @PathVariable(name = "chatId") String chatId, Pageable pageable) {
+        @PathVariable(name = "chatId") Long chatId, Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable));
     }
@@ -204,7 +206,33 @@ public class TelegramController {
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @PutMapping(value = "/messages", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void markMessagesAsRead(@RequestBody MarkMessagesAsReadRequest request) {
+    public void markMessagesAsRead(@RequestBody MarkMessagesAsReadRequestDto request) {
         telegramService.markMessagesAsRead(request);
+    }
+
+    @Operation(summary = "Toggle notifications in Telegram bot")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PutMapping(value = "/notifications", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void toggleNotifications(
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @RequestBody ToggleNotificationsRequestDto request) {
+        telegramService.toggleNotifications(userUuid, request);
+    }
+
+    @Operation(summary = "Get the value of whether notifications are enabled in the Telegram bot")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @GetMapping(value = "/notifications", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> getIsNotificationsEnabled(
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
+        return ResponseEntity.ok(telegramService.getIsNotificationsEnabled(userUuid));
     }
 }

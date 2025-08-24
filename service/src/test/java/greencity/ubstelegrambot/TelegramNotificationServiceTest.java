@@ -1,22 +1,25 @@
 package greencity.ubstelegrambot;
 
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.TelegramMessageDto;
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramManager;
 import greencity.repository.TelegramManagerRepository;
+import greencity.service.ubs.TelegramLanguageService;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramNotificationServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramNotificationServiceTest {
@@ -24,46 +27,25 @@ class TelegramNotificationServiceTest {
     private TelegramNotificationServiceImpl telegramNotificationService;
 
     @Mock
-    private SimpMessagingTemplate messagingTemplate;
-
-    @Mock
-    private ApplicationContext applicationContext;
-
-    @Mock
-    private UBSTelegramBot bot;
-
-    @Mock
     private TelegramManagerRepository telegramManagerRepository;
 
     @Mock
-    private TelegramExecutor executor;
+    private TelegramExecutor telegramExecutor;
 
-    @Test
-    public void testNotifyNewMessage_CorrectDestination_MessageSent() {
-        Long chatId = 123L;
-        TelegramMessageDto messageDto = new TelegramMessageDto();
+    @Mock
+    private TelegramLanguageService telegramLanguageService;
 
-        telegramNotificationService.notifyNewMessage(messageDto, chatId);
-
-        verify(messagingTemplate).convertAndSend("/topic/messages/" + chatId, messageDto);
+    @BeforeEach
+    void setUp() {
+        lenient().when(telegramLanguageService.getChatLanguage(anyString()))
+            .thenReturn(TelegramBotConstants.UK);
     }
 
     @Test
-    void testNotifyNewChat_CorrectDestination_MessageSent() {
-        ChatDto chatDto = new ChatDto();
-
-        telegramNotificationService.notifyNewChat(chatDto);
-
-        verify(messagingTemplate).convertAndSend("/topic/chats", chatDto);
-    }
-
-    @Test
-    public void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
+    void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
         String username = "username";
         String messageText = "message";
         Long chatId = 123L;
-
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
 
         TelegramManager telegramManager1 = TelegramManager
             .builder()
@@ -78,26 +60,24 @@ class TelegramNotificationServiceTest {
 
         telegramNotificationService.notifyManagerAboutNewMessagesFromUser(username, messageText, chatId);
 
-        verify(executor, times(2)).executeCommand(eq(bot), any(SendMessage.class));
+        verify(telegramExecutor, times(2)).executeCommand(any(SendMessage.class));
     }
 
     @Test
-    public void testNotifyManagerAboutEndSupportModeFromUser_ManagersFound_MessageSent() {
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
-
+    void testNotifyManagerAboutEndSupportModeFromUser_ManagersFound_MessageSent() {
         TelegramManager telegramManager1 = TelegramManager
-                .builder()
-                .chatId("123456789")
-                .build();
+            .builder()
+            .chatId("123456789")
+            .build();
         TelegramManager telegramManager2 = TelegramManager
-                .builder()
-                .chatId("123456711")
-                .build();
+            .builder()
+            .chatId("123456711")
+            .build();
 
         when(telegramManagerRepository.findAll()).thenReturn(List.of(telegramManager1, telegramManager2));
 
         telegramNotificationService.notifyManagerAboutEndSupportModeFromUser("username");
 
-        verify(executor, times(2)).executeCommand(eq(bot), any(SendMessage.class));
+        verify(telegramExecutor, times(2)).executeCommand(any(SendMessage.class));
     }
 }

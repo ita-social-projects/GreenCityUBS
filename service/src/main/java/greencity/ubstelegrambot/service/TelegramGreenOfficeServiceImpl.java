@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -23,16 +23,16 @@ public class TelegramGreenOfficeServiceImpl implements TelegramGreenOfficeServic
      * {@inheritDoc}
      */
     @Override
-    public SendMessage processGreenOfficeEmail(Message message) {
+    public SendMessage processGreenOfficeEmail(Message message, String lang) {
         String email = message.getText();
         if (!TelegramUtils.isValidEmail(email)) {
-            return MessageFactory.createInvalidEmailMessage(message.getChatId().toString());
+            return MessageFactory.createInvalidEmailMessage(message.getChatId().toString(), lang);
         }
 
         Optional<TelegramChat> optChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
 
         if (optChat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), lang);
         }
 
         TelegramChat chat = optChat.get();
@@ -41,10 +41,10 @@ public class TelegramGreenOfficeServiceImpl implements TelegramGreenOfficeServic
             chat.getUser() != null ? chat.getUser().getRecipientName() + " " + chat.getUser().getRecipientSurname()
                 : message.getFrom().getUserName();
 
-        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email, username);
+        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email, username, lang);
         chat.setChatState(ChatState.NORMAL);
-        chat.setChatStateUpdatedAt(LocalDateTime.now());
+        chat.setChatStateUpdatedAt(Instant.now());
         telegramChatRepository.save(chat);
-        return MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString());
+        return MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString(), lang);
     }
 }

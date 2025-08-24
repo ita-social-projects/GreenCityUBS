@@ -1,5 +1,6 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.entity.telegram.ChatFeedback;
@@ -9,6 +10,7 @@ import greencity.enums.FeedbackState;
 import greencity.repository.ChatFeedbackRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.service.ubs.TelegramFeedbackService;
+import greencity.service.ubs.TelegramLanguageService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,16 +27,18 @@ import java.util.Optional;
 public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
     private final TelegramChatRepository telegramChatRepository;
     private final ChatFeedbackRepository chatFeedbackRepository;
+    private final TelegramLanguageService telegramLanguageService;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SendMessage processInputCommentRequest(Message message) {
+    public SendMessage processInputCommentRequest(Message message, String lang) {
         Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(message.getChatId().toString());
 
         if (telegramChat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
+                TelegramBotConstants.UK);
         }
 
         Optional<ChatFeedback> chatFeedback = chatFeedbackRepository
@@ -43,16 +47,16 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
                 FeedbackState.IN_PROGRESS);
 
         if (chatFeedback.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), lang);
         }
 
         chatFeedback.get().setComment(message.getText());
         chatFeedback.get().setFeedbackState(FeedbackState.CLOSED);
         chatFeedbackRepository.save(chatFeedback.get());
         telegramChat.get().setChatState(ChatState.NORMAL);
-        telegramChat.get().setChatStateUpdatedAt(LocalDateTime.now());
+        telegramChat.get().setChatStateUpdatedAt(Instant.now());
         telegramChatRepository.save(telegramChat.get());
-        return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString());
+        return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString(), lang);
     }
 
     /**
@@ -63,11 +67,11 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
 
         if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId);
+            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK);
         }
 
         chat.get().setChatState(ChatState.MAKING_FEEDBACK);
-        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
+        chat.get().setChatStateUpdatedAt(Instant.now());
         telegramChatRepository.save(chat.get());
 
         Optional<ChatFeedback> inProgressFeedback = chatFeedbackRepository
@@ -85,12 +89,12 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
             .build();
 
         chatFeedbackRepository.save(chatFeedback);
-
+        String lang = telegramLanguageService.getChatLanguage(chat.get().getChatId());
         if (rating >= 4) {
-            return MessageFactory.createGreatFeedbackMessage(chatId);
+            return MessageFactory.createGreatFeedbackMessage(chatId, lang);
         }
 
-        return MessageFactory.createBadFeedbackMessage(chatId);
+        return MessageFactory.createBadFeedbackMessage(chatId, lang);
     }
 
     /**
@@ -120,8 +124,8 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
      * {@inheritDoc}
      */
     @Override
-    public PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable) {
-        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatIdPageable(chatId, pageable);
+    public PageableDto<FeedbackDto> getAllFeedbacksByChatId(Long chatId, Pageable pageable) {
+        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatId(chatId, pageable);
         List<FeedbackDto> feedbackDtos = chatFeedbacks
             .getContent()
             .stream()

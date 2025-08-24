@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class EmployeeWithTariffsIdDto {
     @Valid
-    private EmployeeDto employeeDto;
+    private CreateUpdateEmployeeDto employeeDto;
     @ValidTariffs
     private List<TariffWithChatAccess> tariffs;
 }

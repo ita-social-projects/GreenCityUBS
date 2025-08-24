@@ -1,5 +1,7 @@
 package greencity.ubstelegrambot;
 
+import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.*;
@@ -14,16 +16,16 @@ import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
+import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.AzureCloudStorageService;
-import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
+import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
@@ -34,14 +36,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -49,7 +52,14 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -61,19 +71,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
     @Mock
-    private ApplicationContext applicationContext;
-
-    @Mock
     private TelegramChatRepository telegramChatRepository;
 
     @Mock
-    private AzureCloudStorageService azureCloudStorageService;
+    private UserRemoteWebClient userRemoteWebClient;
 
     @Mock
     private TelegramMessageRepository telegramMessageRepository;
@@ -85,16 +99,13 @@ class TelegramServiceTest {
     private UBSClientService ubsClientService;
 
     @Mock
-    private TelegramExecutor executor;
-
-    @Mock
-    private UBSTelegramBot bot;
+    private TelegramExecutor telegramExecutor;
 
     @Mock
     private MultipartFile file;
 
     @Mock
-    private TelegramNotificationService telegramNotificationService;
+    private TelegramChatProducer telegramChatProducer;
 
     @Mock
     private TelegramManagerRepository telegramManagerRepository;
@@ -108,6 +119,12 @@ class TelegramServiceTest {
     @Mock
     private TelegramUtils telegramUtils;
 
+    @Mock
+    private UserRemoteClient userRemoteClient;
+
+    @Mock
+    private TelegramUpdateProcessor updateProcessor;
+
     private TelegramServiceImpl telegramService;
 
     public Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
@@ -115,19 +132,20 @@ class TelegramServiceTest {
     @BeforeEach
     void setUp() {
         telegramUpdateProcessorMap = new HashMap<>();
+        telegramUpdateProcessorMap.put("userUpdateProcessor", updateProcessor);
 
         telegramService = new TelegramServiceImpl(
             telegramMessageRepository,
             telegramManagerRepository,
-            applicationContext,
             telegramChatRepository,
-            azureCloudStorageService,
+            userRemoteWebClient,
+            userRemoteClient,
             ubsClientService,
-            executor,
+            telegramExecutor,
             employeeRepository,
             orderRepository,
             userRepository,
-            telegramNotificationService,
+            telegramChatProducer,
             telegramUtils,
             telegramUpdateProcessorMap);
     }
@@ -142,40 +160,16 @@ class TelegramServiceTest {
         chat.setChatId("123456");
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
 
         telegramService.sendMessageToUser(request, null);
 
-        verify(executor).executeCommand(eq(bot), any(SendMessage.class));
+        verify(telegramExecutor).executeCommand(any(SendMessage.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
     }
 
     @Test
-    void testSendMessageToUser_OnlyFile_MessageSentAndPhotoUploaded() {
-        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
-        request.setChatId(1L);
-
-        TelegramChat chat = new TelegramChat();
-        chat.setChatId("123456");
-
-        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
-        when(file.getOriginalFilename()).thenReturn("image.png");
-        when(file.getSize()).thenReturn(1024L);
-        when(file.getContentType()).thenReturn("image/png");
-        when(azureCloudStorageService.upload(file)).thenReturn("http://azure.com/image.png");
-
-        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
-
-        verify(azureCloudStorageService).upload(file);
-        verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
-        verify(telegramMessageRepository).save(any(TelegramMessage.class));
-        verify(telegramChatRepository).save(any(TelegramChat.class));
-    }
-
-    @Test
-    void testSendMessageToUser_TextAndFile_MessageSentAndPhotoUploaded() {
+    void testSendMessageToUser_FileUnknownContentType_MessageSentAndPhotoUploaded() {
         CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
         request.setChatId(1L);
         request.setText("Hi");
@@ -184,18 +178,72 @@ class TelegramServiceTest {
         chat.setChatId("123456");
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
-        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(file.getOriginalFilename()).thenReturn("image.svg");
         when(file.getSize()).thenReturn(2048L);
-        when(file.getContentType()).thenReturn("image/png");
-        when(azureCloudStorageService.upload(file)).thenReturn("http://image");
+        when(file.getContentType()).thenReturn(null);
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(executor).executeCommand(eq(bot), any(SendMessage.class));
-        verify(executor).executeSendPhoto(eq(bot), any(SendPhoto.class));
+        verify(userRemoteWebClient).uploadFile(file);
+        verify(telegramExecutor).executeSendFile(any(SendDocument.class));
+    }
+
+    @Test
+    void testSendMessageToUser_FileImageContentTypeLargeDimensions_MessageSentAndPhotoUploaded() throws IOException {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        BufferedImage img = new BufferedImage(10000, 10000, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(file.getSize()).thenReturn(2048L);
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getInputStream()).thenReturn(bais);
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(userRemoteWebClient).uploadFile(file);
+        verify(telegramExecutor).executeSendFile(any(SendDocument.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
+    }
+
+    @Test
+    void testSendMessageToUser_FileImageContentTypeNormalDimensions_MessageSentAndPhotoUploaded() throws IOException {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        BufferedImage img = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("image.png");
+        when(file.getSize()).thenReturn(2048L);
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getInputStream()).thenReturn(bais);
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(userRemoteWebClient).uploadFile(file);
+        verify(telegramExecutor).executeSendPhoto(any(SendPhoto.class));
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
+
     }
 
     @Test
@@ -221,7 +269,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Hello")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(false)
             .status(MessageDeliveryStatus.SENT)
             .assets(List.of(MessageAsset.builder()
@@ -269,7 +317,7 @@ class TelegramServiceTest {
             NotFoundException.class,
             () -> telegramService.findUserMessageByChatId(chatId, pageable));
 
-        assertEquals("There are no messages in the chat 1", exception.getMessage());
+        assertEquals("There are no messages in chat 1", exception.getMessage());
     }
 
     @Test
@@ -295,7 +343,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Hello")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .assets(List.of(asset))
@@ -415,7 +463,7 @@ class TelegramServiceTest {
         TelegramMessage message = TelegramMessage.builder()
             .id(100L)
             .text("Message with null assets")
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .assets(null)
@@ -524,7 +572,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void processUpdate_shouldReturnUserProcessor_whenStartWithoutUuid() {
+    void processUpdate_whenStartWithoutUuid() {
         Long chatId = 12345L;
         String startCommand = "/start";
 
@@ -537,7 +585,7 @@ class TelegramServiceTest {
         Update update = new Update();
         update.setMessage(message);
 
-        doNothing().when(telegramNotificationService).notifyNewChat(any(ChatDto.class));
+        doNothing().when(telegramChatProducer).notifyNewChat(any(ChatDto.class));
 
         TelegramChat savedChat = TelegramChat.builder()
             .id(1L)
@@ -554,15 +602,19 @@ class TelegramServiceTest {
         when(userProcessor.process(update)).thenReturn(expected);
 
         // act
-        SendMessage result = telegramService.processUpdate(update).process(update);
+        telegramService.processUpdate(update);
 
         // assert
+        ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramExecutor).executeCommand(captor.capture());
+
+        SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
         assertEquals(expected.getChatId(), result.getChatId());
     }
 
     @Test
-    void processUpdate_shouldReturnManagerProcessor_whenStartWithManagerUuidAndChatExists() {
+    void processUpdate_whenStartWithManagerUuidAndChatExists() {
         // arrange
         Long chatId = 12345L;
         String uuid = "some-uuid";
@@ -595,15 +647,19 @@ class TelegramServiceTest {
         when(managerProcessor.process(update)).thenReturn(expected);
 
         // act
-        SendMessage result = telegramService.processUpdate(update).process(update);
+        telegramService.processUpdate(update);
 
         // assert
+        ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramExecutor).executeCommand(captor.capture());
+
+        SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
         assertEquals(expected.getChatId(), result.getChatId());
     }
 
     @Test
-    void processUpdate_shouldReturnUserProcessor_whenNoStartCommand() {
+    void processUpdate_whenNoStartCommand() {
         // arrange
         Long chatId = 12345L;
         String text = "Some regular text";
@@ -623,7 +679,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(telegramChat));
@@ -636,17 +692,20 @@ class TelegramServiceTest {
         when(userProcessor.process(update)).thenReturn(expected);
 
         // act
-        SendMessage result = telegramService.processUpdate(update).process(update);
+        telegramService.processUpdate(update);
 
         // assert
+        ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(telegramChatRepository).save(telegramChat);
+
+        SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
         assertEquals(expected.getChatId(), result.getChatId());
-
-        verify(telegramChatRepository).save(telegramChat);
     }
 
     @Test
-    void processUpdate_shouldReturnManagerProcessor_whenCallbackFromManager() {
+    void processUpdate_whenCallbackFromManager() {
         // arrange
         Long chatId = 12345L;
 
@@ -654,6 +713,7 @@ class TelegramServiceTest {
 
         CallbackQuery callbackQuery = new CallbackQuery();
         callbackQuery.setFrom(telegramUser);
+        callbackQuery.setData("manager_callback_example");
 
         Chat chat = new Chat();
         chat.setId(chatId);
@@ -676,15 +736,19 @@ class TelegramServiceTest {
         when(managerProcessor.process(update)).thenReturn(expected);
 
         // act
-        SendMessage result = telegramService.processUpdate(update).process(update);
+        telegramService.processUpdate(update);
 
         // assert
+        ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramExecutor).executeCommand(captor.capture());
+
+        SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
         assertEquals(expected.getChatId(), result.getChatId());
     }
 
     @Test
-    void processUpdate_shouldReturnUserProcessor_whenStartWithUserUuidAndChatExists() {
+    void processUpdate_whenStartWithUserUuidAndChatExists() {
         Long chatId = 12345L;
         String uuid = "user-uuid";
         String startCommand = "/start " + uuid;
@@ -716,8 +780,12 @@ class TelegramServiceTest {
         SendMessage expected = new SendMessage(chatId.toString(), "Hello user!");
         when(userProcessor.process(update)).thenReturn(expected);
 
-        SendMessage result = telegramService.processUpdate(update).process(update);
+        telegramService.processUpdate(update);
 
+        ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramExecutor).executeCommand(captor.capture());
+
+        SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
         assertEquals(expected.getChatId(), result.getChatId());
     }
@@ -755,8 +823,12 @@ class TelegramServiceTest {
         SendMessage expected = new SendMessage(chatId.toString(), "response after creating chat without user");
         when(userProcessor.process(update)).thenReturn(expected);
 
-        SendMessage result = telegramService.processUpdate(update).process(update);
+        telegramService.processUpdate(update);
 
+        ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramExecutor).executeCommand(captor.capture());
+
+        SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
         assertEquals(expected.getChatId(), result.getChatId());
 
@@ -768,7 +840,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void processUpdate_shouldReturnUserProcessor_whenMessageTextIsNull() {
+    void processUpdate_whenMessageTextIsNull() {
         Long chatId = 12345L;
 
         var apiUser = getTelegramAPIUser(chatId);
@@ -786,7 +858,7 @@ class TelegramServiceTest {
 
         TelegramChat telegramChat = TelegramChat.builder()
             .chatId(chatId.toString())
-            .chatStateUpdatedAt(LocalDateTime.now().minusMinutes(15))
+            .chatStateUpdatedAt(Instant.now().minus(15, ChronoUnit.MINUTES))
             .build();
 
         when(telegramChatRepository.findByChatId(chatId.toString()))
@@ -801,12 +873,16 @@ class TelegramServiceTest {
         SendMessage expected = new SendMessage(chatId.toString(), "default user reply");
         when(userProcessor.process(update)).thenReturn(expected);
 
-        SendMessage result = telegramService.processUpdate(update).process(update);
+        telegramService.processUpdate(update);
 
+        ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(telegramChatRepository).save(telegramChat);
+
+        SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
         assertEquals(expected.getChatId(), result.getChatId());
 
-        verify(telegramChatRepository).save(telegramChat);
     }
 
     @Test
@@ -842,13 +918,182 @@ class TelegramServiceTest {
         SendMessage expected = new SendMessage(chatId.toString(), "Hello user!");
         when(userProcessor.process(update)).thenReturn(expected);
 
-        SendMessage result = telegramService.processUpdate(update).process(update);
+        telegramService.processUpdate(update);
 
-        assertEquals(expected.getText(), result.getText());
-        assertEquals(expected.getChatId(), result.getChatId());
-
+        ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramExecutor).executeCommand(captor.capture());
         verify(userRepository, never()).findUserByUuid(any());
         verify(telegramChatRepository, never()).save(any());
+
+        SendMessage result = captor.getValue();
+        assertEquals(expected.getText(), result.getText());
+        assertEquals(expected.getChatId(), result.getChatId());
+    }
+
+    @Test
+    void processUpdate_shouldSetUserAndLanguage_whenUuidProvidedAndUserFound() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.empty());
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        String expectedLang = "en";
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenReturn(expectedLang);
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals(expectedLang, savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldSetDefaultLanguage_whenUserLanguageServiceFails() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.empty());
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenThrow(new RuntimeException("Service unavailable"));
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals("uk", savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldUpdateUserAndLanguage_whenExistingChatAndUserLanguageFound() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(existingChat));
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        String expectedLang = "en";
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenReturn(expectedLang);
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals(expectedLang, savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldUpdateUserAndDefaultLanguage_whenExistingChatAndLanguageServiceFails() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(existingChat));
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenThrow(new RuntimeException("Service unavailable"));
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals("uk", savedChat.getLanguageCode());
     }
 
     private static org.telegram.telegrambots.meta.api.objects.User getTelegramAPIUser(Long chatId) {
@@ -859,27 +1104,77 @@ class TelegramServiceTest {
     }
 
     @Test
-    void testProcessUpdate_ChatNotExistsUuidIsEmpty_ChatCreatedUserUpdateProcessorReturned() {
+    void testSendMessageToUser_FileTooLarge_ShouldThrowException() {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
 
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getName()).thenReturn("large_file.pdf");
+        when(file.getSize()).thenReturn(51L * 1024 * 1024);
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
+
+        assertEquals("File size exceeds Telegram bot limit (50MB)", exception.getMessage());
+
+        verifyNoInteractions(userRemoteWebClient);
+        verifyNoInteractions(telegramExecutor);
+        verify(telegramMessageRepository, never()).save(any());
     }
 
     @Test
-    void testProcessUpdate_ChatExistsUuidIsEmpty_UserUpdateProcessorReturned() {
+    void testSendMessageToUser_FileAssetType_ShouldSendDocument() {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
 
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("doc.pdf");
+        when(file.getSize()).thenReturn(1024L);
+        when(file.getContentType()).thenReturn("application/pdf");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(telegramExecutor).executeSendFile(any(SendDocument.class));
+        verify(telegramMessageRepository).save(any());
     }
 
     @Test
-    void testProcessUpdate_ChatNotExistsUuidIsPresentIsManagerUuid_ManagerUpdateProcessorReturned() {
+    void testSendMessageToUser_FileAssetType_WhenSendFails_ShouldThrowRuntimeException() {
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
 
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123456");
+
+        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getOriginalFilename()).thenReturn("doc.pdf");
+        when(file.getSize()).thenReturn(1024L);
+        when(file.getContentType()).thenReturn("application/pdf");
+
+        try (MockedStatic<MessageFactory> messageFactoryMock = mockStatic(MessageFactory.class)) {
+            messageFactoryMock
+                .when(() -> MessageFactory.createSendDocument(anyString(), any(MultipartFile.class)))
+                .thenThrow(new IOException("Simulated IO error"));
+
+            RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
+
+            assertTrue(exception.getMessage().contains("Unable to send file to Telegram"));
+            verify(telegramExecutor, never()).executeSendFile(any());
+            verify(telegramMessageRepository, never()).save(any());
+        }
     }
 
     @Test
-    void testProcessUpdate_ChatNotExistsUuidIsPresentIsUserUuid_UserUpdateProcessorReturned() {
-
-    }
-
-    @Test
-    void testMarkMessagesAsRead() {
+    void testMarkMessagesAsRead_IdsSpecified_MessagesMarkedAsRead() {
         List<Long> messageIds = List.of(1L, 2L);
 
         TelegramChat chat1 = TelegramChat.builder()
@@ -908,7 +1203,7 @@ class TelegramServiceTest {
             .thenReturn(List.of(message1, message2));
 
         telegramService.markMessagesAsRead(
-            MarkMessagesAsReadRequest.builder().messagesIds(messageIds).build());
+            MarkMessagesAsReadRequestDto.builder().messagesIds(messageIds).build());
 
         verify(telegramMessageRepository).findAllById(messageIds);
         verify(telegramMessageRepository).saveAll(List.of(message1, message2));
@@ -920,4 +1215,120 @@ class TelegramServiceTest {
         assertEquals(0, chat2.getUnreadMessagesCount());
     }
 
+    @Test
+    void testToggleNotifications_UserNotFoundByUuid_ShouldThrowException() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+            .builder()
+            .isNotify(true)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> telegramService.toggleNotifications(uuid, requestDto));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testToggleNotifications_UserWithoutChat_ShouldThrowException() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+            .builder()
+            .isNotify(true)
+            .build();
+
+        User user = User.builder()
+            .uuid(uuid)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        assertThrows(NotFoundException.class,
+            () -> telegramService.toggleNotifications(uuid, requestDto));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testToggleNotifications_UserWithChat_NotificationsToggled() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+            .builder()
+            .isNotify(true)
+            .build();
+
+        TelegramChat telegramChat = TelegramChat
+            .builder()
+            .id(1L)
+            .build();
+
+        User user = User.builder()
+            .uuid(uuid)
+            .telegramBot(telegramChat)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        telegramService.toggleNotifications(uuid, requestDto);
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(telegramChatRepository).save(telegramChat);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserNotFoundByUuid_ShouldThrowException() {
+        String uuid = "some-uuid";
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> telegramService.getIsNotificationsEnabled(uuid));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserWithoutChat_ShouldThrowException() {
+        String uuid = "some-uuid";
+
+        User user = User.builder()
+            .uuid(uuid)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        assertThrows(NotFoundException.class,
+            () -> telegramService.getIsNotificationsEnabled(uuid));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserWithChat_NotificationsToggled() {
+        String uuid = "some-uuid";
+
+        TelegramChat telegramChat = TelegramChat
+            .builder()
+            .id(1L)
+            .isNotify(true)
+            .build();
+
+        User user = User.builder()
+            .uuid(uuid)
+            .telegramBot(telegramChat)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        boolean result = telegramService.getIsNotificationsEnabled(uuid);
+
+        verify(userRepository).findUserByUuid(uuid);
+        assertEquals(user.getTelegramBot().getIsNotify(), result);
+    }
 }

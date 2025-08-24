@@ -1,5 +1,11 @@
 package greencity.exception.handler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+import greencity.exceptions.GreenCityUserServiceException;
 import greencity.exceptions.ForbiddenException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
@@ -11,9 +17,18 @@ import greencity.exceptions.validation.ValidationException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,16 +42,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @ExtendWith(MockitoExtension.class)
 class CustomExceptionHandlerTest {
@@ -80,6 +87,15 @@ class CustomExceptionHandlerTest {
 
     @Mock
     ForbiddenException forbiddenException;
+
+    @Mock
+    private static GreenCityUserServiceException greenCityUserServiceException;
+
+    @Mock
+    private static WebClientRequestException webClientRequestException;
+
+    @Mock
+    private static WebClientResponseException webClientResponseException;
 
     @Mock
     HttpStatus status;
@@ -336,6 +352,34 @@ class CustomExceptionHandlerTest {
         assertEquals(expectedResponse, response.getBody());
 
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleUserServiceExceptionWithWebClientRequestExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleUserServiceException(webClientRequestException, webRequest),
+            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideExceptionsForHandleUserServiceException")
+    void handleUserServiceExceptionTest(Exception exception, HttpStatus expectedStatus) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleUserServiceException(exception, webRequest),
+            ResponseEntity.status(expectedStatus).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    private static Stream<Arguments> provideExceptionsForHandleUserServiceException() {
+        return Stream.of(
+            Arguments.of(webClientRequestException, HttpStatus.SERVICE_UNAVAILABLE),
+            Arguments.of(greenCityUserServiceException, HttpStatus.INTERNAL_SERVER_ERROR),
+            Arguments.of(webClientResponseException, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     @Test

@@ -266,12 +266,14 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String monoBankRedirectionUrl;
     @Value("${greencity.monobank.redirect.result-monobank-url}")
     private String monoBankPaymentRedirectUrl;
+    @Value("${greencity.redirect.green-city-client}")
+    private String greenCityClientUrl;
     private static final String FAILED_STATUS = "failure";
     private static final String APPROVED_STATUS = "Approved";
     private static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
     private static final String TELEGRAM_PART_3_OF_LINK = "?start=";
     private static final String LANGUAGE_EN = "en";
-    private static final String LANGUAGE_UK = "ua";
+    private static final String LANGUAGE_UK = "uk";
     private static final Double KYIV_LATITUDE = 50.4546600;
     private static final Double KYIV_LONGITUDE = 30.5238000;
     private static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
@@ -555,9 +557,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
 
         notificationService.notifyCreatedOrder(order);
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
-        }
 
         return paymentSystemResponse;
     }
@@ -1156,6 +1155,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .map(OrderBag::getAmount)
                 .filter(amount -> amount != 0)
                 .toList())
+            .returnUrl(greenCityClientUrl)
             .build();
 
         paymentWayForPayRequestDto.setSignature(encryptionUtil

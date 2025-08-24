@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="insert-into-districts-for-Kyiv" author="BohdanLys">
+        <insert tableName="districts">
+            <column name="name_uk" value="Голосіївський район"/>
+            <column name="name_en" value="Holosiivs'kyi District"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Дарницький район"/>
+            <column name="name_en" value="Darnyts'kyi District"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Деснянський район"/>
+            <column name="name_en" value="Desnyans'kyi District"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Дніпровський район"/>
+            <column name="name_en" value="Dniprovs'kyi District"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Оболонський район"/>
+            <column name="name_en" value="Obolonskyi District"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Печерський район"/>
+            <column name="name_en" value="Pechers'kyi district"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Подільський район"/>
+            <column name="name_en" value="Podil's'kyi district"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Святошинський район"/>
+            <column name="name_en" value="Svyatoshyns'kyi District"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Солом’янський район"/>
+            <column name="name_en" value="Solom'yans'kyi district"/>
+            <column name="city_id" value="1"/>
+        </insert>
+        <insert tableName="districts">
+            <column name="name_uk" value="Шевченківський район"/>
+            <column name="name_en" value="Shevchenkivs'kyi district"/>
+            <column name="city_id" value="1"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
