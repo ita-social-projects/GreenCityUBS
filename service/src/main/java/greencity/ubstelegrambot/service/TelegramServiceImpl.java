@@ -535,7 +535,9 @@ public class TelegramServiceImpl implements TelegramService {
                     telegramChatRepository.save(ch);
                 }
             }
-        }, () -> { throw new NotFoundException(); });
+        }, () -> {
+            throw new NotFoundException();
+        });
     }
 
     @Override

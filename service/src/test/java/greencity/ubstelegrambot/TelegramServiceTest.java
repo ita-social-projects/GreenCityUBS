@@ -52,6 +52,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -192,6 +193,7 @@ class TelegramServiceTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123456");
 
+        when(executor.executeSendFile(any(SendDocument.class))).thenReturn(mockTelegramResponse(10));
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(file.getOriginalFilename()).thenReturn("image.svg");
         when(file.getSize()).thenReturn(2048L);
@@ -217,6 +219,7 @@ class TelegramServiceTest {
         ImageIO.write(img, "png", baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
+        when(executor.executeSendFile(any(SendDocument.class))).thenReturn(mockTelegramResponse(10));
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(file.getOriginalFilename()).thenReturn("image.png");
         when(file.getSize()).thenReturn(2048L);
@@ -1149,6 +1152,7 @@ class TelegramServiceTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123456");
 
+        when(executor.executeSendFile(any(SendDocument.class))).thenReturn(mockTelegramResponse(10));
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(file.getOriginalFilename()).thenReturn("doc.pdf");
         when(file.getSize()).thenReturn(1024L);
