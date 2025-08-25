@@ -55,7 +55,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCa
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -99,8 +98,11 @@ public class TelegramServiceImpl implements TelegramService {
         if (files != null) {
             for (MultipartFile file : files) {
                 AssetType type = TelegramUtils.detectAssetType(file);
-                if (type == AssetType.IMAGE && canSendAsPhoto(file)) images.add(file);
-                else others.add(file);
+                if (type == AssetType.IMAGE && canSendAsPhoto(file)) {
+                    images.add(file);
+                } else {
+                    others.add(file);
+                }
             }
         }
 
@@ -109,14 +111,14 @@ public class TelegramServiceImpl implements TelegramService {
             Message sentMessage = executor.executeSendMessage(bot, sendMessage);
 
             TelegramMessage textMessage = TelegramMessage.builder()
-                    .chat(chat)
-                    .text(request.getText())
-                    .fromManager(true)
-                    .status(MessageDeliveryStatus.SENT)
-                    .sendAt(Instant.now())
-                    .messageViewingStatus(MessageViewingStatus.READ)
-                    .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
-                    .build();
+                .chat(chat)
+                .text(request.getText())
+                .fromManager(true)
+                .status(MessageDeliveryStatus.SENT)
+                .sendAt(Instant.now())
+                .messageViewingStatus(MessageViewingStatus.READ)
+                .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
+                .build();
 
             telegramMessageRepository.save(textMessage);
             chat.setLastMessage(textMessage);
@@ -126,30 +128,31 @@ public class TelegramServiceImpl implements TelegramService {
 
         if (!images.isEmpty()) {
             TelegramMessage imageMessage = TelegramMessage.builder()
-                    .chat(chat)
-                    .text(request.getText())
-                    .fromManager(true)
-                    .status(MessageDeliveryStatus.SENT)
-                    .sendAt(Instant.now())
-                    .messageViewingStatus(MessageViewingStatus.READ)
-                    .build();
+                .chat(chat)
+                .text(request.getText())
+                .fromManager(true)
+                .status(MessageDeliveryStatus.SENT)
+                .sendAt(Instant.now())
+                .messageViewingStatus(MessageViewingStatus.READ)
+                .build();
 
             List<MessageAsset> imageAssets = new ArrayList<>();
             for (MultipartFile img : images) {
                 validateFileSize(img);
                 String url = azureCloudStorageService.upload(img);
                 imageAssets.add(MessageAsset.builder()
-                        .url(url)
-                        .fileName(img.getOriginalFilename())
-                        .size(img.getSize())
-                        .contentType(img.getContentType())
-                        .type(AssetType.IMAGE)
-                        .message(imageMessage)
-                        .build());
+                    .url(url)
+                    .fileName(img.getOriginalFilename())
+                    .size(img.getSize())
+                    .contentType(img.getContentType())
+                    .type(AssetType.IMAGE)
+                    .message(imageMessage)
+                    .build());
             }
             imageMessage.setAssets(imageAssets);
-            if(imageAssets.size() > 1) {
-                SendMediaGroup sendMediaGroup = MessageFactory.buildSendMediaGroup(chat.getChatId(), images, request.getText());
+            if (imageAssets.size() > 1) {
+                SendMediaGroup sendMediaGroup =
+                    MessageFactory.buildSendMediaGroup(chat.getChatId(), images, request.getText());
                 List<Message> sentMessages = executor.executeSendMediaGroup(bot, sendMediaGroup);
                 if (!sentMessages.isEmpty()) {
                     imageMessage.setTelegramMessageId(sentMessages.getFirst().getMessageId());
@@ -166,7 +169,7 @@ public class TelegramServiceImpl implements TelegramService {
                     throw new RuntimeException("Unable to send file to Telegram", e);
                 }
                 Message sentMessage = executor.executeSendPhoto(bot, sendPhoto);
-                if(sentMessage != null) {
+                if (sentMessage != null) {
                     imageMessage.setTelegramMessageId(sentMessage.getMessageId());
                     imageMessage.setMediaGroupId(null);
                     imageAssets.getFirst().setTelegramMessageId(sentMessage.getMessageId());
@@ -181,23 +184,23 @@ public class TelegramServiceImpl implements TelegramService {
         for (MultipartFile file : others) {
             validateFileSize(file);
             TelegramMessage fileMessage = TelegramMessage.builder()
-                    .chat(chat)
-                    .fromManager(true)
-                    .status(MessageDeliveryStatus.SENT)
-                    .sendAt(Instant.now())
-                    .messageViewingStatus(MessageViewingStatus.READ)
-                    .build();
+                .chat(chat)
+                .fromManager(true)
+                .status(MessageDeliveryStatus.SENT)
+                .sendAt(Instant.now())
+                .messageViewingStatus(MessageViewingStatus.READ)
+                .build();
 
             String url = azureCloudStorageService.upload(file);
             AssetType type = TelegramUtils.detectAssetType(file);
             MessageAsset asset = MessageAsset.builder()
-                    .url(url)
-                    .fileName(file.getOriginalFilename())
-                    .size(file.getSize())
-                    .contentType(file.getContentType())
-                    .type(type)
-                    .message(fileMessage)
-                    .build();
+                .url(url)
+                .fileName(file.getOriginalFilename())
+                .size(file.getSize())
+                .contentType(file.getContentType())
+                .type(type)
+                .message(fileMessage)
+                .build();
             fileMessage.setAssets(List.of(asset));
 
             Message sentMessage = sendAsDocument(bot, chat, file);
@@ -451,34 +454,34 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     @Transactional
-        public void editManagerMessage(EditTelegramMessageRequest request) {
-            TelegramChat chat = telegramChatRepository.findById(request.chatId()).orElseThrow(NotFoundException::new);
-            if(chat != null) {
-                TelegramMessage message = telegramMessageRepository.findById(request.messageId())
-                        .orElseThrow(EntityNotFoundException::new);
-                if(message.getFromManager()) {
-                    var bot = applicationContext.getBean(UBSTelegramBot.class);
-                    message.setUpdatedAt(Instant.now());
-                    message.setText(request.newText());
-                    if (!message.getAssets().isEmpty()){
-                        EditMessageCaption editMessageCaption = MessageFactory
-                                .buildEditMessageCaption(chat.getChatId(), message.getTelegramMessageId(), request.newText());
-                        executor.executeCommand(bot,  editMessageCaption);
-                    } else {
-                        EditMessageText editMessageText = MessageFactory
-                                .buildEditMessageText(chat.getChatId(), message.getTelegramMessageId(), request.newText());
-                        executor.executeCommand(bot, editMessageText);
-                    }
+    public void editManagerMessage(EditTelegramMessageRequest request) {
+        TelegramChat chat = telegramChatRepository.findById(request.chatId()).orElseThrow(NotFoundException::new);
+        if (chat != null) {
+            TelegramMessage message = telegramMessageRepository.findById(request.messageId())
+                .orElseThrow(EntityNotFoundException::new);
+            if (message.getFromManager()) {
+                var bot = applicationContext.getBean(UBSTelegramBot.class);
+                message.setUpdatedAt(Instant.now());
+                message.setText(request.newText());
+                if (!message.getAssets().isEmpty()) {
+                    EditMessageCaption editMessageCaption = MessageFactory
+                        .buildEditMessageCaption(chat.getChatId(), message.getTelegramMessageId(), request.newText());
+                    executor.executeCommand(bot, editMessageCaption);
+                } else {
+                    EditMessageText editMessageText = MessageFactory
+                        .buildEditMessageText(chat.getChatId(), message.getTelegramMessageId(), request.newText());
+                    executor.executeCommand(bot, editMessageText);
+                }
 
-                    telegramMessageRepository.save(message);
+                telegramMessageRepository.save(message);
 
-                    if (chat.getLastMessage() != null && chat.getLastMessage().getId().equals(message.getId())) {
-                        chat.setLastMessage(message);
-                        telegramChatRepository.save(chat);
-                    }
+                if (chat.getLastMessage() != null && chat.getLastMessage().getId().equals(message.getId())) {
+                    chat.setLastMessage(message);
+                    telegramChatRepository.save(chat);
                 }
             }
         }
+    }
 
     @Override
     @Transactional
@@ -490,20 +493,20 @@ public class TelegramServiceImpl implements TelegramService {
         }
     }
 
-
     private void deleteMessage(DeleteTelegramMessageRequest request) {
-        if(request.messageId() == 0) {
+        if (request.messageId() == 0) {
             throw new NotFoundException("Message with id 0 not found");
         }
         telegramChatRepository.findById(request.chatId()).ifPresent(chat -> {
             TelegramMessage message = telegramMessageRepository.findById(request.messageId())
-                    .orElseThrow(EntityNotFoundException::new);
-            if(message.getFromManager()) {
+                .orElseThrow(EntityNotFoundException::new);
+            if (message.getFromManager()) {
                 var bot = applicationContext.getBean(UBSTelegramBot.class);
-                DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(chat.getChatId(), message.getTelegramMessageId());
+                DeleteMessage deleteMessage =
+                    MessageFactory.buildDeleteMessage(chat.getChatId(), message.getTelegramMessageId());
                 executor.executeCommand(bot, deleteMessage);
                 telegramMessageRepository.findById(request.messageId())
-                        .ifPresent(telegramMessageRepository::delete);
+                    .ifPresent(telegramMessageRepository::delete);
 
                 updateLastMessage(chat);
             }
@@ -516,7 +519,7 @@ public class TelegramServiceImpl implements TelegramService {
             if (parent.getFromManager()) {
                 var bot = applicationContext.getBean(UBSTelegramBot.class);
                 DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(parent.getChat().getChatId(),
-                        asset.getTelegramMessageId());
+                    asset.getTelegramMessageId());
                 executor.executeCommand(bot, deleteMessage);
 
                 parent.getAssets().remove(asset);
@@ -530,9 +533,9 @@ public class TelegramServiceImpl implements TelegramService {
                         MessageAsset nextAsset = parent.getAssets().getFirst();
 
                         EditMessageCaption editCaption = MessageFactory.buildEditMessageCaption(
-                                parent.getChat().getChatId(),
-                                nextAsset.getTelegramMessageId(),
-                                parent.getText());
+                            parent.getChat().getChatId(),
+                            nextAsset.getTelegramMessageId(),
+                            parent.getText());
                         executor.executeCommand(bot, editCaption);
                     }
                 }
@@ -542,8 +545,8 @@ public class TelegramServiceImpl implements TelegramService {
 
     private void updateLastMessage(TelegramChat chat) {
         telegramMessageRepository.findTopByChatOrderBySendAtDesc(chat)
-                .ifPresentOrElse(chat::setLastMessage,
-                        () -> chat.setLastMessage(null));
+            .ifPresentOrElse(chat::setLastMessage,
+                () -> chat.setLastMessage(null));
         telegramChatRepository.save(chat);
     }
 

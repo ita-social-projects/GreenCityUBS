@@ -20,7 +20,6 @@ import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -453,9 +452,19 @@ public class MessageFactory {
         return removeKeyboardMsg;
     }
 
+    /**
+     * Builds a EditMessageText object with the specified chat ID and text to edit
+     * message.
+     *
+     * @param chatId            {@link String} the telegram chat ID
+     * @param telegramMessageId {@link Integer} the ID from telegram API
+     * @param text              {@link String} the message text to edit
+     * @return a EditMessageText object configured with the specified chat ID, text
+     *         and telegram message ID
+     */
     public static EditMessageText buildEditMessageText(@NotBlank String chatId,
-                                                       Integer telegramMessageId,
-                                                       @NotBlank @Size(max = 1000) String text) {
+        Integer telegramMessageId,
+        @NotBlank @Size(max = 1000) String text) {
         EditMessageText editMessage = new EditMessageText();
         editMessage.setChatId(chatId);
         editMessage.setMessageId(telegramMessageId);
@@ -463,7 +472,16 @@ public class MessageFactory {
         return editMessage;
     }
 
-    public static SendMediaGroup buildSendMediaGroup( String chatId, List<MultipartFile> images, String text){
+    /**
+     * Builds a SendMediaGroup object with the specified chat ID and images.
+     *
+     * @param chatId {@link String} the telegram chat ID
+     * @param images {@link List} the ID from telegram API
+     * @param text   {@link String} the message text to edit
+     * @return a SendMediaGroup object configured with the specified chat ID, images
+     *         and text
+     */
+    public static SendMediaGroup buildSendMediaGroup(String chatId, List<MultipartFile> images, String text) {
         List<InputMedia> media = new ArrayList<>();
         try {
             for (MultipartFile file : images) {
@@ -483,20 +501,39 @@ public class MessageFactory {
         return sendMediaGroup;
     }
 
+    /**
+     * Builds a EditMessageText object with the specified chat ID and caption to
+     * edit message with photo.
+     *
+     * @param chatId            {@link String} the telegram chat ID
+     * @param telegramMessageId {@link Integer} the ID from telegram API
+     * @param text              {@link String} the message text to edit
+     * @return a EditMessageText object configured with the specified chat ID,
+     *         caption and telegram message ID
+     */
     public static EditMessageCaption buildEditMessageCaption(@NotBlank String chatId,
-                                                      Integer telegramMessageId,
-                                                      @NotBlank @Size(max = 1000) String text) {
+        Integer telegramMessageId,
+        @NotBlank @Size(max = 1000) String text) {
         return EditMessageCaption.builder()
-                .chatId(chatId)
-                .messageId(telegramMessageId)
-                .caption(text)
-                .build();
+            .chatId(chatId)
+            .messageId(telegramMessageId)
+            .caption(text)
+            .build();
     }
 
+    /**
+     * Builds a DeleteMessage object with the specified chat ID and text to delete
+     * message.
+     *
+     * @param chatId            {@link String} the telegram chat ID
+     * @param telegramMessageId {@link Integer} the ID from telegram API
+     * @return a DeleteMessage object configured with the specified chat ID and
+     *         telegram message ID
+     */
     public static DeleteMessage buildDeleteMessage(@NotBlank String chatId, Integer telegramMessageId) {
-        return DeleteMessage .builder()
-                .chatId(chatId)
-                .messageId(telegramMessageId)
-                .build();
+        return DeleteMessage.builder()
+            .chatId(chatId)
+            .messageId(telegramMessageId)
+            .build();
     }
 }

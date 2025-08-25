@@ -211,10 +211,10 @@ public class TelegramController {
 
     @Operation(summary = "Edit telegram manager message")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @PutMapping(value = "/message/edit", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -226,10 +226,10 @@ public class TelegramController {
 
     @Operation(summary = "Delete telegram manager message")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
-            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @DeleteMapping(value = "/message/delete", produces = MediaType.APPLICATION_JSON_VALUE)

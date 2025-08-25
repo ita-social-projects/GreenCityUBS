@@ -13,7 +13,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import java.util.List;
 
 @Component
@@ -89,7 +88,7 @@ public class TelegramExecutor {
         }
     }
 
-    public List<Message> executeSendMediaGroup(UBSTelegramBot bot,  SendMediaGroup message) {
+    public List<Message> executeSendMediaGroup(UBSTelegramBot bot, SendMediaGroup message) {
         try {
             return bot.execute(message);
         } catch (Exception e) {

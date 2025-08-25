@@ -1081,7 +1081,7 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findById(chat.getId())).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findById(message.getId()))
-                .thenReturn(Optional.of(message));
+            .thenReturn(Optional.of(message));
 
         telegramService.deleteManagerMessage(request);
 
@@ -1298,6 +1298,27 @@ class TelegramServiceTest {
         telegramService.editManagerMessage(request);
 
         verify(telegramChatRepository, never()).save(chat);
+    }
+
+    @Test
+    void sendMessageToUser_shouldThrowIOException(){
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123");
+        when(telegramChatRepository.findById(any())).thenReturn(Optional.of(chat));
+
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getSize()).thenReturn(1024L);
+
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+
+        try (MockedStatic<MessageFactory> mf = mockStatic(MessageFactory.class)) {
+            mf.when(() -> MessageFactory.createSendPhoto(anyString(), any(), any())).thenThrow(IOException.class);
+
+            assertThrows(RuntimeException.class, () ->
+                    telegramService.sendMessageToUser(request, new MultipartFile[]{file})
+            );
+        }
     }
 
     private Message mockTelegramResponse(int id) {

@@ -7,7 +7,7 @@ import lombok.Builder;
 
 @Builder
 public record EditTelegramMessageRequest(
-        @NotNull Long chatId,
-        @NotNull Long messageId,
-        @NotBlank @Size(max = 1000) String newText
-) { }
+    @NotNull Long chatId,
+    @NotNull Long messageId,
+    @NotBlank @Size(max = 1000) String newText) {
+}

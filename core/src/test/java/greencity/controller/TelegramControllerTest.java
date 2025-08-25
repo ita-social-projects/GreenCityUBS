@@ -149,16 +149,17 @@ class TelegramControllerTest {
 
         verify(telegramService).markMessagesAsRead(request);
     }
+
     @Test
     void editMessage_ShouldReturnNoContent() throws Exception {
-        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 2L,"new text");
+        EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 2L, "new text");
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(put("/ubs/telegram/message/edit")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNoContent());
 
         verify(telegramService).editManagerMessage(request);
     }
@@ -170,9 +171,9 @@ class TelegramControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
 
         mockMvc.perform(delete("/ubs/telegram/message/delete")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNoContent());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNoContent());
 
         verify(telegramService).deleteManagerMessage(request);
     }
@@ -184,16 +185,16 @@ class TelegramControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MockMultipartFile jsonPart = new MockMultipartFile(
-                "data", "", "application/json", objectMapper.writeValueAsBytes(request));
+            "data", "", "application/json", objectMapper.writeValueAsBytes(request));
 
         MockMultipartFile filePart = new MockMultipartFile(
-                "files", "test.png", "image/png", "fake image".getBytes());
+            "files", "test.png", "image/png", "fake image".getBytes());
 
         mockMvc.perform(multipart("/ubs/telegram/messages")
-                        .file(jsonPart)
-                        .file(filePart)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andExpect(status().isOk());
+            .file(jsonPart)
+            .file(filePart)
+            .contentType(MediaType.MULTIPART_FORM_DATA))
+            .andExpect(status().isOk());
 
         verify(telegramService).sendMessageToUser(eq(request), any(MultipartFile[].class));
     }
