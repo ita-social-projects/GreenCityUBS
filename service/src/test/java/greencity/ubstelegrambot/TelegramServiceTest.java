@@ -8,9 +8,10 @@ import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
 import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -62,6 +63,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -75,6 +77,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -109,7 +112,7 @@ class TelegramServiceTest {
     private UBSClientService ubsClientService;
 
     @Mock
-    private TelegramExecutor telegramExecutor;
+    private TelegramExecutor executor;
 
     @Mock
     private MultipartFile file;
@@ -154,7 +157,7 @@ class TelegramServiceTest {
             userRemoteWebClient,
             userRemoteClient,
             ubsClientService,
-            telegramExecutor,
+            executor,
             employeeRepository,
             orderRepository,
             userRepository,
@@ -177,7 +180,7 @@ class TelegramServiceTest {
 
         telegramService.sendMessageToUser(request, null);
 
-        verify(telegramExecutor).executeCommand(any(SendMessage.class));
+        verify(executor).executeCommand(any(SendMessage.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
     }
@@ -200,7 +203,7 @@ class TelegramServiceTest {
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
         verify(userRemoteWebClient).uploadFile(file);
-        verify(telegramExecutor).executeSendFile(any(SendDocument.class));
+        verify(executor).executeSendFile(any(SendDocument.class));
     }
 
     @Test
@@ -226,7 +229,7 @@ class TelegramServiceTest {
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
         verify(userRemoteWebClient).uploadFile(file);
-        verify(telegramExecutor).executeSendFile(any(SendDocument.class));
+        verify(executor).executeSendFile(any(SendDocument.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
     }
@@ -254,7 +257,7 @@ class TelegramServiceTest {
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
         verify(userRemoteWebClient).uploadFile(file);
-        verify(telegramExecutor).executeSendPhoto(any(SendPhoto.class));
+        verify(executor).executeSendPhoto(any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
 
@@ -620,7 +623,7 @@ class TelegramServiceTest {
 
         // assert
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(executor).executeCommand(captor.capture());
 
         SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
@@ -665,7 +668,7 @@ class TelegramServiceTest {
 
         // assert
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(executor).executeCommand(captor.capture());
 
         SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
@@ -710,7 +713,7 @@ class TelegramServiceTest {
 
         // assert
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(executor).executeCommand(captor.capture());
         verify(telegramChatRepository).save(telegramChat);
 
         SendMessage result = captor.getValue();
@@ -754,7 +757,7 @@ class TelegramServiceTest {
 
         // assert
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(executor).executeCommand(captor.capture());
 
         SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
@@ -797,7 +800,7 @@ class TelegramServiceTest {
         telegramService.processUpdate(update);
 
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(executor).executeCommand(captor.capture());
 
         SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
@@ -840,7 +843,7 @@ class TelegramServiceTest {
         telegramService.processUpdate(update);
 
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(executor).executeCommand(captor.capture());
 
         SendMessage result = captor.getValue();
         assertEquals(expected.getText(), result.getText());
@@ -890,7 +893,7 @@ class TelegramServiceTest {
         telegramService.processUpdate(update);
 
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(executor).executeCommand(captor.capture());
         verify(telegramChatRepository).save(telegramChat);
 
         SendMessage result = captor.getValue();
@@ -935,7 +938,7 @@ class TelegramServiceTest {
         telegramService.processUpdate(update);
 
         ArgumentCaptor<SendMessage> captor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramExecutor).executeCommand(captor.capture());
+        verify(executor).executeCommand(captor.capture());
         verify(userRepository, never()).findUserByUuid(any());
         verify(telegramChatRepository, never()).save(any());
 
@@ -1136,7 +1139,7 @@ class TelegramServiceTest {
         assertEquals("File size exceeds Telegram bot limit (50MB)", exception.getMessage());
 
         verifyNoInteractions(userRemoteWebClient);
-        verifyNoInteractions(telegramExecutor);
+        verifyNoInteractions(executor);
         verify(telegramMessageRepository, never()).save(any());
     }
 
@@ -1155,7 +1158,7 @@ class TelegramServiceTest {
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(telegramExecutor).executeSendFile(any(SendDocument.class));
+        verify(executor).executeSendFile(any(SendDocument.class));
         verify(telegramMessageRepository).save(any());
     }
 
@@ -1182,7 +1185,7 @@ class TelegramServiceTest {
                 () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
 
             assertTrue(exception.getMessage().contains("Unable to send file to Telegram"));
-            verify(telegramExecutor, never()).executeSendFile(any());
+            verify(executor, never()).executeSendFile(any());
             verify(telegramMessageRepository, never()).save(any());
         }
     }
@@ -1251,7 +1254,7 @@ class TelegramServiceTest {
 
         telegramService.deleteManagerMessage(request);
 
-        verify(executor).executeCommand(any(), any(DeleteMessage.class));
+        verify(executor).executeCommand(any(DeleteMessage.class));
         verify(telegramMessageRepository).delete(message);
         verify(telegramChatRepository).save(chat);
     }
@@ -1282,7 +1285,7 @@ class TelegramServiceTest {
 
         telegramService.deleteManagerMessage(request);
 
-        verify(executor).executeCommand(any(), any(DeleteMessage.class));
+        verify(executor).executeCommand(any(DeleteMessage.class));
         verify(telegramMessageRepository).delete(parent);
         verify(messageAssetRepository).delete(asset);
     }
@@ -1320,12 +1323,12 @@ class TelegramServiceTest {
         telegramService.deleteManagerMessage(request);
 
         verify(messageAssetRepository).delete(asset1);
-        verify(executor).executeCommand(any(), any(EditMessageCaption.class));
+        verify(executor).executeCommand(any(EditMessageCaption.class));
         verifyNoMoreInteractions(telegramMessageRepository);
     }
 
     @Test
-    void sendMessageToUser_shouldThrowNotFoundException_whenMessageIdIsZero() {
+    void deleteManagerMessage_shouldThrowNotFoundException_whenMessageIdIsZero() {
         var request = new DeleteTelegramMessageRequest(1L, 0L, null);
 
         assertThrows(NotFoundException.class, () -> telegramService.deleteManagerMessage(request));
@@ -1366,7 +1369,6 @@ class TelegramServiceTest {
 
         telegramService.editManagerMessage(request);
 
-        verifyNoInteractions(applicationContext, executor);
         verify(telegramMessageRepository, never()).save(any());
     }
 
@@ -1385,11 +1387,10 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findById(100L)).thenReturn(Optional.of(message));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
 
         telegramService.editManagerMessage(request);
 
-        verify(executor).executeCommand(any(), any(EditMessageCaption.class));
+        verify(executor).executeCommand(any(EditMessageCaption.class));
         verify(telegramMessageRepository).save(message);
     }
 
@@ -1408,11 +1409,10 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findById(100L)).thenReturn(Optional.of(message));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
 
         telegramService.editManagerMessage(request);
 
-        verify(executor).executeCommand(any(), any(EditMessageText.class));
+        verify(executor).executeCommand(any(EditMessageText.class));
         verify(telegramMessageRepository).save(message);
     }
 
@@ -1433,7 +1433,6 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findById(100L)).thenReturn(Optional.of(message));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
 
         telegramService.editManagerMessage(request);
 
@@ -1459,7 +1458,6 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findById(200L)).thenReturn(Optional.of(message));
-        when(applicationContext.getBean(UBSTelegramBot.class)).thenReturn(bot);
 
         telegramService.editManagerMessage(request);
 
@@ -1467,7 +1465,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void sendMessageToUser_shouldThrowIOException(){
+    void sendMessageToUser_shouldThrowIOException() {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
         when(telegramChatRepository.findById(any())).thenReturn(Optional.of(chat));
@@ -1481,13 +1479,11 @@ class TelegramServiceTest {
         try (MockedStatic<MessageFactory> mf = mockStatic(MessageFactory.class)) {
             mf.when(() -> MessageFactory.createSendPhoto(anyString(), any(), any())).thenThrow(IOException.class);
 
-            assertThrows(RuntimeException.class, () ->
-                    telegramService.sendMessageToUser(request, new MultipartFile[]{file})
-            );
+            assertThrows(RuntimeException.class,
+                () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
         }
     }
 
-   
     @Test
     void testToggleNotifications_UserNotFoundByUuid_ShouldThrowException() {
         String uuid = "some-uuid";
@@ -1604,8 +1600,8 @@ class TelegramServiceTest {
         verify(userRepository).findUserByUuid(uuid);
         assertEquals(user.getTelegramBot().getIsNotify(), result);
     }
-  
- private Message mockTelegramResponse(int id) {
+
+    private Message mockTelegramResponse(int id) {
         Message m = new Message();
         m.setMessageId(id);
         return m;

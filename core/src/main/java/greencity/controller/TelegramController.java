@@ -242,7 +242,7 @@ public class TelegramController {
         telegramService.deleteManagerMessage(request);
         return ResponseEntity.noContent().build();
     }
-  
+
     @Operation(summary = "Toggle notifications in Telegram bot")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),

@@ -6,8 +6,9 @@ import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
 import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
 import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -100,7 +101,7 @@ public interface TelegramService {
      *         otherwise
      */
     boolean getIsNotificationsEnabled(String uuid);
-  
+
     void editManagerMessage(EditTelegramMessageRequest request);
 
     void deleteManagerMessage(DeleteTelegramMessageRequest request);

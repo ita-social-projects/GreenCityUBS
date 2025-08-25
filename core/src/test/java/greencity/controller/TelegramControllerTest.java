@@ -1,9 +1,5 @@
 package greencity.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrdersDataForUserDto;
@@ -13,11 +9,11 @@ import greencity.dto.telegram.CreateTelegramMessageRequest;
 import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
 import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
-import java.util.Collections;
 import greencity.ubstelegrambot.service.TelegramFeedbackServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,15 +29,18 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Collections;
 import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 @ExtendWith(MockitoExtension.class)
 class TelegramControllerTest {
@@ -164,8 +163,8 @@ class TelegramControllerTest {
             .andExpect(status().isNoContent());
         verify(telegramService).editManagerMessage(request);
     }
-  
-  @Test
+
+    @Test
     void toggleNotifications_ShouldReturnOk() throws Exception {
         ToggleNotificationsRequestDto request = ToggleNotificationsRequestDto
             .builder()
@@ -179,7 +178,7 @@ class TelegramControllerTest {
             .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isNoContent());
 
-           verify(telegramService).toggleNotifications(any(), eq(request));
+        verify(telegramService).toggleNotifications(any(), eq(request));
     }
 
     @Test
@@ -216,7 +215,7 @@ class TelegramControllerTest {
 
         verify(telegramService).sendMessageToUser(eq(request), any(MultipartFile[].class));
     }
-  
+
     @Test
     void getIsNotificationsEnabled_ShouldReturnOk() throws Exception {
         mockMvc.perform(get("/ubs/telegram/notifications")

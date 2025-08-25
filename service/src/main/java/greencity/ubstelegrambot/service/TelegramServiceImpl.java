@@ -11,9 +11,10 @@ import greencity.dto.telegram.ChatUserDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
 import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -21,7 +22,11 @@ import greencity.entity.telegram.TelegramManager;
 import greencity.entity.telegram.TelegramMessage;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
-import greencity.enums.*;
+import greencity.enums.AssetType;
+import greencity.enums.ChatState;
+import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.producers.TelegramChatProducer;
@@ -46,21 +51,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -82,7 +85,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final UserRemoteWebClient userRemoteWebClient;
     private final UserRemoteClient userRemoteClient;
     private final UBSClientService ubsClientService;
-    private final TelegramExecutor telegramExecutor;
+    private final TelegramExecutor executor;
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
@@ -147,7 +150,7 @@ public class TelegramServiceImpl implements TelegramService {
             List<MessageAsset> imageAssets = new ArrayList<>();
             for (MultipartFile img : images) {
                 validateFileSize(img);
-                String url = azureCloudStorageService.upload(img);
+                String url = userRemoteWebClient.uploadFile(img);
                 imageAssets.add(MessageAsset.builder()
                     .url(url)
                     .fileName(img.getOriginalFilename())
@@ -219,7 +222,6 @@ public class TelegramServiceImpl implements TelegramService {
             telegramMessageRepository.save(fileMessage);
             messageAssetRepository.save(asset);
             chat.setLastMessage(fileMessage);
-
         }
 
         telegramChatRepository.save(chat);
@@ -231,7 +233,7 @@ public class TelegramServiceImpl implements TelegramService {
             throw new IllegalArgumentException("File size exceeds Telegram bot limit (50MB)");
         }
     }
-  
+
     private Message sendAsDocument(TelegramChat chat, MultipartFile file) {
         log.info("Sending document: {} filename: {} to chat ID: {}",
             file.getContentType(), file.getOriginalFilename(), chat.getChatId());
@@ -243,7 +245,7 @@ public class TelegramServiceImpl implements TelegramService {
             throw new TelegramBotExecutionException("Unable to send file to Telegram", e);
         }
     }
-  
+
     private boolean canSendAsPhoto(MultipartFile file) {
         BufferedImage image = null;
         try {
@@ -504,39 +506,37 @@ public class TelegramServiceImpl implements TelegramService {
 
         SendMessage sendMessage = updateProcessor.process(update);
         if (sendMessage != null) {
-            telegramExecutor.executeCommand(sendMessage);
+            executor.executeCommand(sendMessage);
         }
     }
 
     @Override
     @Transactional
     public void editManagerMessage(EditTelegramMessageRequest request) {
-        TelegramChat chat = telegramChatRepository.findById(request.chatId()).orElseThrow(NotFoundException::new);
-        if (chat != null) {
+        telegramChatRepository.findById(request.chatId()).ifPresentOrElse(ch -> {
             TelegramMessage message = telegramMessageRepository.findById(request.messageId())
                 .orElseThrow(EntityNotFoundException::new);
             if (message.getFromManager()) {
-                var bot = applicationContext.getBean(UBSTelegramBot.class);
                 message.setUpdatedAt(Instant.now());
                 message.setText(request.newText());
                 if (!message.getAssets().isEmpty()) {
                     EditMessageCaption editMessageCaption = MessageFactory
-                        .buildEditMessageCaption(chat.getChatId(), message.getTelegramMessageId(), request.newText());
-                    executor.executeCommand(bot, editMessageCaption);
+                        .buildEditMessageCaption(ch.getChatId(), message.getTelegramMessageId(), request.newText());
+                    executor.executeCommand(editMessageCaption);
                 } else {
                     EditMessageText editMessageText = MessageFactory
-                        .buildEditMessageText(chat.getChatId(), message.getTelegramMessageId(), request.newText());
-                    executor.executeCommand(bot, editMessageText);
+                        .buildEditMessageText(ch.getChatId(), message.getTelegramMessageId(), request.newText());
+                    executor.executeCommand(editMessageText);
                 }
 
                 telegramMessageRepository.save(message);
 
-                if (chat.getLastMessage() != null && chat.getLastMessage().getId().equals(message.getId())) {
-                    chat.setLastMessage(message);
-                    telegramChatRepository.save(chat);
+                if (ch.getLastMessage() != null && ch.getLastMessage().getId().equals(message.getId())) {
+                    ch.setLastMessage(message);
+                    telegramChatRepository.save(ch);
                 }
             }
-        }
+        }, EntityNotFoundException::new);
     }
 
     @Override
@@ -557,10 +557,9 @@ public class TelegramServiceImpl implements TelegramService {
             TelegramMessage message = telegramMessageRepository.findById(request.messageId())
                 .orElseThrow(EntityNotFoundException::new);
             if (message.getFromManager()) {
-                var bot = applicationContext.getBean(UBSTelegramBot.class);
                 DeleteMessage deleteMessage =
                     MessageFactory.buildDeleteMessage(chat.getChatId(), message.getTelegramMessageId());
-                executor.executeCommand(bot, deleteMessage);
+                executor.executeCommand(deleteMessage);
                 telegramMessageRepository.findById(request.messageId())
                     .ifPresent(telegramMessageRepository::delete);
 
@@ -573,10 +572,9 @@ public class TelegramServiceImpl implements TelegramService {
         messageAssetRepository.findById(request.assetId()).ifPresent(asset -> {
             TelegramMessage parent = asset.getMessage();
             if (parent.getFromManager()) {
-                var bot = applicationContext.getBean(UBSTelegramBot.class);
                 DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(parent.getChat().getChatId(),
                     asset.getTelegramMessageId());
-                executor.executeCommand(bot, deleteMessage);
+                executor.executeCommand(deleteMessage);
 
                 parent.getAssets().remove(asset);
                 messageAssetRepository.delete(asset);
@@ -592,7 +590,7 @@ public class TelegramServiceImpl implements TelegramService {
                             parent.getChat().getChatId(),
                             nextAsset.getTelegramMessageId(),
                             parent.getText());
-                        executor.executeCommand(bot, editCaption);
+                        executor.executeCommand(editCaption);
                     }
                 }
             }
