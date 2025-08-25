@@ -176,6 +176,7 @@ public class ErrorMessage {
         "Predefined notification template cannot be deleted.";
     public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
     public static final String USER_AGREEMENT_NOT_FOUND_BY_ID = "User Agreement with ID %d not found";
+    public static final String USER_NOT_FOUND_BY_UUID = "User not found by uuid: ";
     public static final String REFUND_CONFLICT_MONEY_AND_BONUSES =
         "A refund cannot be processed with both money and bonuses at the same time";
     public static final String TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST =
@@ -199,12 +200,22 @@ public class ErrorMessage {
     public static final String ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED =
         "Cannot update order: status must be FORMED and payment must be UNPAID";
     public static final String ORDER_NOT_FOUND_BY_ID = "Order not found with id: ";
+    public static final String UUID_NOT_FOUND_BY_EMAIL = "UUID not found by email: ";
     public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
     public static final String TARIFF_VALIDATION_ERROR_MESSAGE = "Invalid tariff list.";
+    public static final String POSITION_VALIDATION_ERROR_MESSAGE = "Invalid position IDs.";
+    public static final String INVALID_POSITION_IDS = "Invalid position IDs: %s";
     public static final String TARIFF_LIST_IS_NULL = "Tariffs cannot be null";
     public static final String TARIFF_LIST_IS_EMPTY = "Tariffs cannot be empty";
     public static final String TARIFF_IS_NULL = "Tariff cannot be null";
     public static final String TARIFFID_IS_NULL = "Tariff id cannot be null";
     public static final String TARIFFID_IS_NOT_POSITIVE = "Tariff Id must be greater than 0";
     public static final String TARIFF_LIST_CONTAINS_DUPLICATES = "Tariffs cannot contain duplicates";
+    public static final String USER_APP_UNAVAILABLE = "the User service is unavailable";
+    public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
+    public static final String TELEGRAM_SEND_EXCEPTION = "Exception occurred while sending to telegram: %s";
+    public static final String TELEGRAM_RECEIVE_EXCEPTION = "Exception occurred while receiving from telegram: %s";
+    public static final String TELEGRAM_NULL_METHOD_EXCEPTION = "Execution method cannot be null";
+    public static final String TELEGRAM_INVALID_METHOD_EXCEPTION = "Invalid execution method type: %s";
+    public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
 }

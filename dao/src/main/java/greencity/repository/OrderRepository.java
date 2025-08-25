@@ -266,4 +266,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @return an Optional containing the latest order, or empty if no orders exist
      */
     Optional<Order> findFirstByUserIdOrderByOrderDateDesc(Long userId);
+
+    /**
+     * Counts the number of orders with status DONE for a specific user.
+     *
+     * @param userId the ID of the user
+     * @param status the completed status (OrderStatus.DONE)
+     * @return the number of completed orders
+     */
+    Long countByUserIdAndOrderStatus(Long userId, OrderStatus status);
 }

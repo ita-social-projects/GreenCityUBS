@@ -2,6 +2,7 @@ package greencity.ubstelegrambot.factory.keyboards;
 
 import greencity.constant.TelegramBotConstants;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,7 +13,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 
 import java.util.List;
 
-import static greencity.constant.TelegramBotConstants.BACK_TO_MAIN_MENU;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,10 +21,10 @@ class KeyboardFactoryTest {
 
     @Test
     void createHelpKeyboard_shouldReturn7RowsWithCorrectCallbacks() {
-        InlineKeyboardMarkup keyboard = KeyboardFactory.createHelpKeyboard();
+        InlineKeyboardMarkup keyboard = KeyboardFactory.createHelpKeyboard(TelegramBotConstants.UK);
 
         List<List<InlineKeyboardButton>> rows = keyboard.getKeyboard();
-        assertEquals(7, rows.size());
+        assertEquals(8, rows.size());
 
         List<String> expectedCallbacks = List.of(
             TelegramBotConstants.CLIENT_SUPPORT_CALLBACK,
@@ -43,7 +43,7 @@ class KeyboardFactoryTest {
 
     @Test
     void createHelpKeyboardForManager_shouldReturnOneLogoutButton() {
-        InlineKeyboardMarkup keyboard = KeyboardFactory.createHelpKeyboardForManager();
+        InlineKeyboardMarkup keyboard = KeyboardFactory.createHelpKeyboardForManager(TelegramBotConstants.UK);
 
         List<List<InlineKeyboardButton>> rows = keyboard.getKeyboard();
         assertEquals(1, rows.size());
@@ -72,18 +72,19 @@ class KeyboardFactoryTest {
 
     @Test
     void userSupportKeyboard_shouldReturnOneRowWithResizeTrue() {
-        ReplyKeyboardMarkup keyboard = KeyboardFactory.userSupportKeyboard();
+        ReplyKeyboardMarkup keyboard = KeyboardFactory.userSupportKeyboard(TelegramBotConstants.UK);
 
         List<KeyboardRow> rows = keyboard.getKeyboard();
         assertEquals(1, rows.size());
         assertEquals(1, rows.getFirst().size());
-        assertEquals(TelegramBotConstants.CLIENT_END_SUPPORT_MODE, rows.getFirst().getFirst().getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "client.end.support.mode"),
+            rows.getFirst().getFirst().getText());
         assertTrue(keyboard.getResizeKeyboard());
     }
 
     @Test
     void createBackToMainMenuKeyboard_shouldReturnOneButton() {
-        InlineKeyboardMarkup keyboard = KeyboardFactory.createBackToMainMenuKeyboard();
+        InlineKeyboardMarkup keyboard = KeyboardFactory.createBackToMainMenuKeyboard(TelegramBotConstants.UK);
 
         List<List<InlineKeyboardButton>> rows = keyboard.getKeyboard();
         assertEquals(1, rows.size());
@@ -95,7 +96,8 @@ class KeyboardFactoryTest {
     void createProcessOrBackToMainMenuKeyboard_shouldReturnTwoRows() {
         String callback = "confirm-action";
 
-        InlineKeyboardMarkup keyboard = KeyboardFactory.createProcessOrBackToMainMenuKeyboard(callback);
+        InlineKeyboardMarkup keyboard =
+            KeyboardFactory.createProcessOrBackToMainMenuKeyboard(callback, TelegramBotConstants.UK);
         List<List<InlineKeyboardButton>> rows = keyboard.getKeyboard();
 
         assertEquals(2, rows.size());
@@ -105,12 +107,12 @@ class KeyboardFactoryTest {
 
     @Test
     void createFeedbackOrBackToMainMenuKeyboard_shouldAppendBackButton() {
-        InlineKeyboardMarkup keyboard = KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard();
+        InlineKeyboardMarkup keyboard = KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard(TelegramBotConstants.UK);
         List<List<InlineKeyboardButton>> rows = keyboard.getKeyboard();
 
         assertEquals(6, rows.size());
         InlineKeyboardButton backBtn = rows.get(5).getFirst();
-        assertEquals(BACK_TO_MAIN_MENU, backBtn.getText());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "back.to.main.menu"), backBtn.getText());
         assertEquals(TelegramBotConstants.MAIN_MENU_CALLBACK, backBtn.getCallbackData());
     }
 }

@@ -10,7 +10,6 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
-import greencity.dto.user.UserVO;
 import greencity.enums.OrderStatus;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -145,7 +144,7 @@ public class ClientController {
     }
 
     /**
-     * Controller returns bonus points of current user. {@link UserVO}.
+     * Controller returns bonus points of current user.
      *
      * @param userUuid {@link String} uuid.
      * @return {@link UserPointDto}.

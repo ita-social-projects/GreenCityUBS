@@ -2,10 +2,10 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.ErrorMessage;
 import greencity.converters.UserArgumentResolver;
+import greencity.dto.employee.CreateUpdateEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
@@ -15,6 +15,7 @@ import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +76,7 @@ class ManagementEmployeeControllerTest {
     @Mock
     private UBSClientService ubsClientService;
     @Mock
-    private UserRemoteClient userRemoteClient;
+    UserRepository userRepository;
     @Mock
     private Validator mockValidator;
 
@@ -89,14 +90,14 @@ class ManagementEmployeeControllerTest {
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(new CustomExceptionHandler(new DefaultErrorAttributes()))
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .setValidator(mockValidator)
             .build();
     }
 
     @Test
     void saveEmployeeTest() throws Exception {
-        EmployeeDto employeeDto = new EmployeeDto();
+        CreateUpdateEmployeeDto employeeDto = new CreateUpdateEmployeeDto();
         List<TariffWithChatAccess> tariffs = new ArrayList<>();
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         dto.setEmployeeDto(employeeDto);
@@ -140,7 +141,7 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void updateEmployeeTest() throws Exception {
-        EmployeeDto employeeDto = new EmployeeDto();
+        CreateUpdateEmployeeDto employeeDto = new CreateUpdateEmployeeDto();
         List<TariffWithChatAccess> tariffs = new ArrayList<>();
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         dto.setEmployeeDto(employeeDto);

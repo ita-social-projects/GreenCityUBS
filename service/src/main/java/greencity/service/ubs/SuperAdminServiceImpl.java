@@ -395,7 +395,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .nameEn(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("en")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName())
-            .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("ua")).findFirst()
+            .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("uk")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName())
             .region(region)
@@ -404,7 +404,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto, Long regionId) {
         Optional<Location> location = locationRepository.findLocationByNameAndRegionId(
-            dto.stream().filter(translation -> translation.getLanguageCode().equals("ua")).findFirst()
+            dto.stream().filter(translation -> translation.getLanguageCode().equals("uk")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName(),
             dto.stream().filter(translation -> translation.getLanguageCode().equals("en")).findFirst()
@@ -424,7 +424,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
         String ukName = dto.getRegionTranslationDtos().stream()
-            .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("ua")).findAny()
+            .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("uk")).findAny()
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
 
@@ -521,7 +521,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
         String enName = getRegionTranslation(dto, "en");
-        String uaName = getRegionTranslation(dto, "ua");
+        String uaName = getRegionTranslation(dto, "uk");
         return Region.builder()
             .nameEn(enName)
             .nameUk(uaName)

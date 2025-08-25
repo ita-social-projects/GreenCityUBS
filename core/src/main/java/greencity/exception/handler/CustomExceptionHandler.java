@@ -1,10 +1,14 @@
 package greencity.exception.handler;
 
+import greencity.constant.AppConstant;
+import greencity.constant.ErrorMessage;
 import greencity.exceptions.BadRequestException;
+import greencity.exceptions.GreenCityUserServiceException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.WrongSignatureException;
+import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
@@ -32,6 +36,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Comparator;
@@ -82,7 +88,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-        HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        HttpHeaders headers, HttpStatusCode status,
+        WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         log.trace(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
@@ -90,7 +97,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-        HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        HttpHeaders headers, HttpStatusCode status,
+        WebRequest request) {
         List<ValidationExceptionDto> collect =
             ex.getBindingResult().getFieldErrors().stream()
                 .map(ValidationExceptionDto::new)
@@ -237,6 +245,27 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Method interceptor for server errors-related exceptions which can be thrown
+     * by WebClient during making and receiving requests to the User app such as
+     * {@link GreenCityUserServiceException}, {@link WebClientRequestException} ,
+     * {@link WebClientResponseException}.
+     *
+     * @param request Contains details about the occurred exception.
+     * @return ResponseEntity which contains the HTTP status and body with the
+     *         message of the exception.
+     */
+    @ExceptionHandler({GreenCityUserServiceException.class, WebClientRequestException.class,
+        WebClientResponseException.class})
+    public final ResponseEntity<Object> handleUserServiceException(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        if (ex instanceof WebClientRequestException) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
+        }
+        log.error(exceptionResponse.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exceptionResponse);
+    }
+
+    /**
      * Exception handler for {@link GoogleApiException}.
      *
      * @param ex         Exception which should be intercepted.
@@ -317,5 +346,21 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
         exceptionResponse.setMessage(detailedMessage);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
+    }
+
+    /**
+     * Exception handler for {@link TelegramBotExecutionException}.
+     *
+     * @param ex         Exception which should be intercepted.
+     * @param webRequest contain detail about occur exception.
+     * @return ResponseEntity which contain http status and body with message of
+     *         exception.
+     */
+    @ExceptionHandler(TelegramBotExecutionException.class)
+    public final ResponseEntity<Object> handleTelegramBotExecutionException(TelegramBotExecutionException ex,
+        WebRequest webRequest) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(webRequest));
+        log.trace(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(exceptionResponse);
     }
 }
