@@ -37,7 +37,6 @@ import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +52,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -180,7 +178,7 @@ class TelegramServiceTest {
 
         telegramService.sendMessageToUser(request, null);
 
-        verify(executor).executeCommand(any(SendMessage.class));
+        verify(executor).executeSendMessage(any(SendMessage.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
     }
@@ -1352,7 +1350,7 @@ class TelegramServiceTest {
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findById(100L)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> telegramService.editManagerMessage(request));
+        assertThrows(NotFoundException.class, () -> telegramService.editManagerMessage(request));
     }
 
     @Test

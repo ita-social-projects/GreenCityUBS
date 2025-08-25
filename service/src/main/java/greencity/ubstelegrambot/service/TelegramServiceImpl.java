@@ -42,7 +42,6 @@ import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.messages.MessageFactory;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -515,7 +514,7 @@ public class TelegramServiceImpl implements TelegramService {
     public void editManagerMessage(EditTelegramMessageRequest request) {
         telegramChatRepository.findById(request.chatId()).ifPresentOrElse(ch -> {
             TelegramMessage message = telegramMessageRepository.findById(request.messageId())
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(NotFoundException::new);
             if (message.getFromManager()) {
                 message.setUpdatedAt(Instant.now());
                 message.setText(request.newText());
@@ -536,7 +535,7 @@ public class TelegramServiceImpl implements TelegramService {
                     telegramChatRepository.save(ch);
                 }
             }
-        }, EntityNotFoundException::new);
+        }, () -> { throw new NotFoundException(); });
     }
 
     @Override
@@ -555,7 +554,7 @@ public class TelegramServiceImpl implements TelegramService {
         }
         telegramChatRepository.findById(request.chatId()).ifPresent(chat -> {
             TelegramMessage message = telegramMessageRepository.findById(request.messageId())
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(NotFoundException::new);
             if (message.getFromManager()) {
                 DeleteMessage deleteMessage =
                     MessageFactory.buildDeleteMessage(chat.getChatId(), message.getTelegramMessageId());
