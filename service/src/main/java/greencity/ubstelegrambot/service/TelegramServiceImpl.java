@@ -549,14 +549,14 @@ public class TelegramServiceImpl implements TelegramService {
             TelegramMessage message = telegramMessageRepository.findById(messageId)
                 .orElseThrow(NotFoundException::new);
             if (Boolean.TRUE.equals(message.getFromManager())) {
-                if(message.getAssets() != null && !message.getAssets().isEmpty()) {
+                if (message.getAssets() != null && !message.getAssets().isEmpty()) {
                     executor.executeCommand(MessageFactory.buildDeleteMessages(chat.getChatId(),
-                            message.getAssets().stream()
-                                    .map(MessageAsset::getTelegramMessageId)
-                                    .toList()));
+                        message.getAssets().stream()
+                            .map(MessageAsset::getTelegramMessageId)
+                            .toList()));
                 } else {
                     executor.executeCommand(MessageFactory.buildDeleteMessage(chat.getChatId(),
-                            message.getTelegramMessageId()));
+                        message.getTelegramMessageId()));
                 }
                 telegramMessageRepository.findById(messageId)
                     .ifPresent(telegramMessageRepository::delete);

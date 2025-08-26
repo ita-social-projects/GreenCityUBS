@@ -485,7 +485,8 @@ public class MessageFactory {
      * @return a configured {@link SendDocument} object
      * @throws IOException if reading the file input stream fails
      */
-    public static SendDocument createSendDocument(String chatId, String caption, MultipartFile file) throws IOException {
+    public static SendDocument createSendDocument(String chatId, String caption, MultipartFile file)
+        throws IOException {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(chatId);
         sendDocument.setCaption(caption);
@@ -603,15 +604,15 @@ public class MessageFactory {
      * Builds a DeleteMessages object with the specified chat ID and text to delete
      * message.
      *
-     * @param chatId            {@link String} the telegram chat ID
+     * @param chatId             {@link String} the telegram chat ID
      * @param telegramMessagesId {@link List} the List of IDs from telegram API
      * @return a DeleteMessages object configured with the specified chat ID and
      *         telegram message IDs
      */
     public static DeleteMessages buildDeleteMessages(@NotBlank String chatId, List<Integer> telegramMessagesId) {
         return DeleteMessages.builder()
-                .chatId(chatId)
-                .messageIds(telegramMessagesId)
-                .build();
+            .chatId(chatId)
+            .messageIds(telegramMessagesId)
+            .build();
     }
 }
