@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessages;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -484,9 +485,10 @@ public class MessageFactory {
      * @return a configured {@link SendDocument} object
      * @throws IOException if reading the file input stream fails
      */
-    public static SendDocument createSendDocument(String chatId, MultipartFile file) throws IOException {
+    public static SendDocument createSendDocument(String chatId, String caption, MultipartFile file) throws IOException {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(chatId);
+        sendDocument.setCaption(caption);
         sendDocument.setDocument(new InputFile(file.getInputStream(), file.getOriginalFilename()));
         return sendDocument;
     }
@@ -595,5 +597,21 @@ public class MessageFactory {
             .chatId(chatId)
             .messageId(telegramMessageId)
             .build();
+    }
+
+    /**
+     * Builds a DeleteMessages object with the specified chat ID and text to delete
+     * message.
+     *
+     * @param chatId            {@link String} the telegram chat ID
+     * @param telegramMessagesId {@link List} the List of IDs from telegram API
+     * @return a DeleteMessages object configured with the specified chat ID and
+     *         telegram message IDs
+     */
+    public static DeleteMessages buildDeleteMessages(@NotBlank String chatId, List<Integer> telegramMessagesId) {
+        return DeleteMessages.builder()
+                .chatId(chatId)
+                .messageIds(telegramMessagesId)
+                .build();
     }
 }

@@ -76,6 +76,7 @@ public class TelegramExecutor {
                 case BotApiMethod<T> botApiMethod -> telegramBot.execute(botApiMethod);
                 case SendPhoto sendPhoto -> (T) telegramBot.execute(sendPhoto);
                 case SendDocument sendDocument -> (T) telegramBot.execute(sendDocument);
+                case SendMediaGroup sendMediaGroup -> (T) telegramBot.execute(sendMediaGroup);
                 default -> throw new TelegramBotExecutionException(TELEGRAM_INVALID_METHOD_EXCEPTION.formatted(
                     method.getClass().getSimpleName()));
             };

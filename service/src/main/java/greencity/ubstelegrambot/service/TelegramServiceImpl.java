@@ -192,9 +192,12 @@ public class TelegramServiceImpl implements TelegramService {
 
         for (MultipartFile file : others) {
             validateFileSize(file);
+
+            String caption = images.isEmpty() ? request.getText() : null;
             TelegramMessage fileMessage = TelegramMessage.builder()
                 .chat(chat)
                 .fromManager(true)
+                .text(caption)
                 .status(MessageDeliveryStatus.SENT)
                 .sendAt(Instant.now())
                 .messageViewingStatus(MessageViewingStatus.READ)
@@ -213,7 +216,7 @@ public class TelegramServiceImpl implements TelegramService {
                 .build();
             fileMessage.setAssets(List.of(asset));
 
-            Message sentMessage = sendAsDocument(chat, file);
+            Message sentMessage = sendAsDocument(chat, caption, file);
             fileMessage.setTelegramMessageId(sentMessage.getMessageId());
             asset.setTelegramMessageId(sentMessage.getMessageId());
 
@@ -232,11 +235,11 @@ public class TelegramServiceImpl implements TelegramService {
         }
     }
 
-    private Message sendAsDocument(TelegramChat chat, MultipartFile file) {
+    private Message sendAsDocument(TelegramChat chat, String caption, MultipartFile file) {
         log.info("Sending document: {} filename: {} to chat ID: {}",
             file.getContentType(), file.getOriginalFilename(), chat.getChatId());
         try {
-            var sendFile = MessageFactory.createSendDocument(chat.getChatId(), file);
+            var sendFile = MessageFactory.createSendDocument(chat.getChatId(), caption, file);
             return executor.executeSendFile(sendFile);
         } catch (IOException e) {
             log.error("Failed to send file to Telegram", e);
@@ -514,7 +517,7 @@ public class TelegramServiceImpl implements TelegramService {
         telegramChatRepository.findById(request.chatId()).ifPresentOrElse(ch -> {
             TelegramMessage message = telegramMessageRepository.findById(request.messageId())
                 .orElseThrow(NotFoundException::new);
-            if (message.getFromManager()) {
+            if (Boolean.TRUE.equals(message.getFromManager())) {
                 message.setUpdatedAt(Instant.now());
                 message.setText(request.newText());
                 if (!message.getAssets().isEmpty()) {
@@ -542,16 +545,19 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     @Transactional
     public void deleteManagerMessage(Long messageId, Long chatId) {
-        if (messageId == 0) {
-            throw new NotFoundException("Message with id 0 not found");
-        }
         telegramChatRepository.findById(chatId).ifPresent(chat -> {
             TelegramMessage message = telegramMessageRepository.findById(messageId)
                 .orElseThrow(NotFoundException::new);
-            if (message.getFromManager()) {
-                DeleteMessage deleteMessage =
-                    MessageFactory.buildDeleteMessage(chat.getChatId(), message.getTelegramMessageId());
-                executor.executeCommand(deleteMessage);
+            if (Boolean.TRUE.equals(message.getFromManager())) {
+                if(message.getAssets() != null && !message.getAssets().isEmpty()) {
+                    executor.executeCommand(MessageFactory.buildDeleteMessages(chat.getChatId(),
+                            message.getAssets().stream()
+                                    .map(MessageAsset::getTelegramMessageId)
+                                    .toList()));
+                } else {
+                    executor.executeCommand(MessageFactory.buildDeleteMessage(chat.getChatId(),
+                            message.getTelegramMessageId()));
+                }
                 telegramMessageRepository.findById(messageId)
                     .ifPresent(telegramMessageRepository::delete);
 

@@ -1179,7 +1179,7 @@ class TelegramServiceTest {
 
         try (MockedStatic<MessageFactory> messageFactoryMock = mockStatic(MessageFactory.class)) {
             messageFactoryMock
-                .when(() -> MessageFactory.createSendDocument(anyString(), any(MultipartFile.class)))
+                .when(() -> MessageFactory.createSendDocument(anyString(), anyString(), any(MultipartFile.class)))
                 .thenThrow(new IOException("Simulated IO error"));
 
             RuntimeException exception = assertThrows(
