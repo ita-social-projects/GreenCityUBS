@@ -1,13 +1,11 @@
 package greencity.controller;
 
-import static greencity.constant.AppConstant.TELEGRAM_LINK;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
@@ -20,6 +18,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import static greencity.constant.AppConstant.TELEGRAM_LINK;
 
 /**
  * REST controller that handles Telegram-related endpoints. Provides
@@ -228,18 +228,35 @@ public class TelegramController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Delete telegram manager message")
+    @Operation(summary = "Delete full telegram manager message (with all assets)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
-    @DeleteMapping(value = "/message/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> deleteMessage(@RequestBody @Valid DeleteTelegramMessageRequest request) {
-        telegramService.deleteManagerMessage(request);
+    @DeleteMapping(value = "/message/{messageId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> deleteMessage(@PathVariable @NotNull @Positive Long messageId,
+        @RequestParam @NotNull @Positive Long chatId) {
+        telegramService.deleteManagerMessage(messageId, chatId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Delete only telegram manager asset")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @DeleteMapping(value = "/asset/{assetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> deleteAsset(@PathVariable @NotNull @Positive Long assetId,
+        @RequestParam @NotNull @Positive Long chatId) {
+        telegramService.deleteManagerAsset(assetId, chatId);
         return ResponseEntity.noContent().build();
     }
 

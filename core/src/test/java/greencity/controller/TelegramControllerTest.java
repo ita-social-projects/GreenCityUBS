@@ -6,7 +6,6 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
@@ -183,16 +182,28 @@ class TelegramControllerTest {
 
     @Test
     void deleteMessage_ShouldReturnNoContent() throws Exception {
-        DeleteTelegramMessageRequest request = new DeleteTelegramMessageRequest(1L, 123L, null);
+        Long chatId = 1L;
+        Long messageId = 123L;
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        mockMvc.perform(delete("/ubs/telegram/message/delete")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(delete("/ubs/telegram/message/{messageId}", messageId)
+            .param("chatId", chatId.toString())
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
-        verify(telegramService).deleteManagerMessage(request);
+        verify(telegramService).deleteManagerMessage(messageId, chatId);
+    }
+
+    @Test
+    void deleteAsset_ShouldReturnNoContent() throws Exception {
+        Long chatId = 1L;
+        Long assetId = 123L;
+
+        mockMvc.perform(delete("/ubs/telegram/asset/{assetId}", assetId)
+            .param("chatId", chatId.toString())
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        verify(telegramService).deleteManagerAsset(assetId, chatId);
     }
 
     @Test

@@ -6,7 +6,6 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
 import greencity.dto.telegram.MessageAssetDto;
@@ -82,6 +81,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -1238,7 +1238,7 @@ class TelegramServiceTest {
     void deleteMessage_shouldDeleteAndUpdateLastMessage() {
         var chat = new TelegramChat();
         chat.setId(1L);
-        chat.setChatId("123456");
+        chat.setChatId("12345");
 
         var message = new TelegramMessage();
         message.setId(100L);
@@ -1248,13 +1248,11 @@ class TelegramServiceTest {
 
         chat.setLastMessage(message);
 
-        var request = new DeleteTelegramMessageRequest(chat.getId(), message.getId(), null);
-
-        when(telegramChatRepository.findById(chat.getId())).thenReturn(Optional.of(chat));
-        when(telegramMessageRepository.findById(message.getId()))
+        when(telegramChatRepository.findById(anyLong())).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(anyLong()))
             .thenReturn(Optional.of(message));
 
-        telegramService.deleteManagerMessage(request);
+        telegramService.deleteManagerMessage(message.getId(), chat.getId());
 
         verify(executor).executeCommand(any(DeleteMessage.class));
         verify(telegramMessageRepository).delete(message);
@@ -1281,11 +1279,9 @@ class TelegramServiceTest {
         parent.getAssets().add(asset);
         chat.setLastMessage(parent);
 
-        var request = new DeleteTelegramMessageRequest(chat.getId(), null, asset.getId());
-
         when(messageAssetRepository.findById(asset.getId())).thenReturn(Optional.of(asset));
 
-        telegramService.deleteManagerMessage(request);
+        telegramService.deleteManagerAsset(asset.getId(), chat.getId());
 
         verify(executor).executeCommand(any(DeleteMessage.class));
         verify(telegramMessageRepository).delete(parent);
@@ -1318,11 +1314,9 @@ class TelegramServiceTest {
         parent.getAssets().add(asset1);
         parent.getAssets().add(asset2);
 
-        var request = new DeleteTelegramMessageRequest(chat.getId(), null, asset1.getId());
-
         when(messageAssetRepository.findById(asset1.getId())).thenReturn(Optional.of(asset1));
 
-        telegramService.deleteManagerMessage(request);
+        telegramService.deleteManagerAsset(asset1.getId(), chat.getId());
 
         verify(messageAssetRepository).delete(asset1);
         verify(executor).executeCommand(any(EditMessageCaption.class));
@@ -1331,9 +1325,7 @@ class TelegramServiceTest {
 
     @Test
     void deleteManagerMessage_shouldThrowNotFoundException_whenMessageIdIsZero() {
-        var request = new DeleteTelegramMessageRequest(1L, 0L, null);
-
-        assertThrows(NotFoundException.class, () -> telegramService.deleteManagerMessage(request));
+        assertThrows(NotFoundException.class, () -> telegramService.deleteManagerMessage(0L, 1L));
     }
 
     @Test

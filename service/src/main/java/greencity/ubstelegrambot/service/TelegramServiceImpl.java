@@ -9,7 +9,6 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.ChatUserDto;
 import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.DeleteTelegramMessageRequest;
 import greencity.dto.telegram.EditTelegramMessageRequest;
 import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
 import greencity.dto.telegram.MessageAssetDto;
@@ -542,26 +541,18 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Override
     @Transactional
-    public void deleteManagerMessage(DeleteTelegramMessageRequest request) {
-        if (request.messageId() != null) {
-            deleteMessage(request);
-        } else if (request.assetId() != null) {
-            deleteAsset(request);
-        }
-    }
-
-    private void deleteMessage(DeleteTelegramMessageRequest request) {
-        if (request.messageId() == 0) {
+    public void deleteManagerMessage(Long messageId, Long chatId) {
+        if (messageId == 0) {
             throw new NotFoundException("Message with id 0 not found");
         }
-        telegramChatRepository.findById(request.chatId()).ifPresent(chat -> {
-            TelegramMessage message = telegramMessageRepository.findById(request.messageId())
+        telegramChatRepository.findById(chatId).ifPresent(chat -> {
+            TelegramMessage message = telegramMessageRepository.findById(messageId)
                 .orElseThrow(NotFoundException::new);
             if (message.getFromManager()) {
                 DeleteMessage deleteMessage =
                     MessageFactory.buildDeleteMessage(chat.getChatId(), message.getTelegramMessageId());
                 executor.executeCommand(deleteMessage);
-                telegramMessageRepository.findById(request.messageId())
+                telegramMessageRepository.findById(messageId)
                     .ifPresent(telegramMessageRepository::delete);
 
                 updateLastMessage(chat);
@@ -569,8 +560,10 @@ public class TelegramServiceImpl implements TelegramService {
         });
     }
 
-    private void deleteAsset(DeleteTelegramMessageRequest request) {
-        messageAssetRepository.findById(request.assetId()).ifPresent(asset -> {
+    @Override
+    @Transactional
+    public void deleteManagerAsset(Long assetId, Long chatId) {
+        messageAssetRepository.findById(assetId).ifPresent(asset -> {
             TelegramMessage parent = asset.getMessage();
             if (parent.getFromManager()) {
                 DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(parent.getChat().getChatId(),
