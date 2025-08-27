@@ -1,9 +1,10 @@
-package greencity.service.ubs.exporter.pdf;
+package greencity.service.ubs.pdf.exporter;
 
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import greencity.ModelUtils;
 import greencity.constant.AppConstant;
+import greencity.constant.pdf.PdfQrCodeText;
 import greencity.dto.order.OrdersDataForUserDto;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,9 +15,7 @@ import static org.mockito.Mockito.*;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.UBSClientServiceImpl;
-import greencity.service.ubs.pdf.exporter.OrdersDataPdfFileExporterImpl;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -40,7 +39,7 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportValidEnPdf() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDto();
-        when(orderRepository.findById(orderData.getId()))
+        when(orderRepository.findById(anyLong()))
             .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
         byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.ENGLISH);
         PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
@@ -64,6 +63,8 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportValidUaPdf() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDto();
+        when(orderRepository.findById(anyLong()))
+            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
         byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UK_NAME));
         PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
         String pdfText = pdfTextExtractor.getTextFromPage(1, true);
@@ -86,6 +87,8 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportPdfWithEmptyComment() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDtoWithNullComment();
+        when(orderRepository.findById(anyLong()))
+            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
         byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UK_NAME));
         PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
         String pdfText = pdfTextExtractor.getTextFromPage(1, true);
@@ -101,5 +104,46 @@ class OrdersDataPdfFileExporterImplTest {
             .when(spyExporter)
             .export(mockDto, mockLocale);
         assertThrows(PdfFileExportingException.class, () -> spyExporter.export(mockDto, mockLocale));
+    }
+
+    @Test
+    void exportWhenAmountIsZerShowsAlreadyPaidNoLinks() throws Exception {
+        OrdersDataForUserDto dto = ModelUtils.getOrdersDataForUserDto();
+        dto.setAmountBeforePayment(0.0);
+        when(orderRepository.findById(anyLong()))
+            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
+        byte[] pdf = pdfFileExporter.export(dto, Locale.of("uk"));
+        var text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
+        assertTrue(text.contains(PdfQrCodeText.getByLocale(PdfQrCodeText.ALREADY_PAID, Locale.of("uk"))));
+    }
+
+    @Test
+    void exportWhenLinkBlankShowsLinkNotGenerated() throws Exception {
+        var dto = ModelUtils.getOrdersDataForUserDto();
+        dto.setAmountBeforePayment(10.0);
+        when(orderRepository.findById(anyLong()))
+            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
+        when(ubsClientService.formedLink(any(), anyLong())).thenReturn("   ");
+
+        byte[] pdf = pdfFileExporter.export(dto, Locale.ENGLISH);
+        var text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
+
+        assertTrue(text.contains(PdfQrCodeText.getByLocale(PdfQrCodeText.LINK_NOT_GENERATED, Locale.ENGLISH)));
+    }
+
+    @Test
+    void export_whenLinkPresent_addsQrHint_andCallsFormedLink() throws Exception {
+        OrdersDataForUserDto dto = ModelUtils.getOrdersDataForUserDto();
+        dto.setAmountBeforePayment(10.00);
+        when(orderRepository.findById(anyLong()))
+            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
+        String url = "https://pay.example.com/invoice/TEST123";
+        when(ubsClientService.formedLink(any(), anyLong())).thenReturn(url);
+        Locale locale = Locale.ENGLISH;
+        byte[] pdf = pdfFileExporter.export(dto, locale);
+        String pageText = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
+        String expectedHint = PdfQrCodeText.getByLocale(PdfQrCodeText.QR_CODE_HINT, locale);
+        assertTrue(pageText.contains(expectedHint));
+        verify(ubsClientService).formedLink(any(), anyLong());
     }
 }

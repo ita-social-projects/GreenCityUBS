@@ -1,4 +1,4 @@
-package greencity.service.ubs.exporter.pdf;
+package greencity.service.ubs.pdf.exporter;
 
 import greencity.ModelUtils;
 import greencity.dto.order.OrdersDataForUserDto;
