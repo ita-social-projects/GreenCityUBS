@@ -298,8 +298,6 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         return table;
     }
 
-
-
     private void addQrCodeMessage(Document document, PdfQrCodeText messageKey, Locale locale) {
         Paragraph message = new Paragraph(
             PdfQrCodeText.getByLocale(messageKey, locale),
