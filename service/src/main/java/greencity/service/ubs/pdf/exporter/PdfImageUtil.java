@@ -7,6 +7,10 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class PdfImageUtil {
+    private PdfImageUtil() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static Image convertBufferedImageToImage(BufferedImage bufferedImage) throws IOException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             boolean written = ImageIO.write(bufferedImage, "png", out);

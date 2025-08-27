@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import static com.lowagie.text.Element.ALIGN_LEFT;
 import static greencity.constant.AppConstant.LOCALE_EN_NAME;
 import static greencity.constant.AppConstant.LOCALE_UK_NAME;
 import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
@@ -175,7 +176,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
             && !orderDetails.getOrderComment().isBlank()) {
             addHeader(PdfFileHeaders.getByLocale(ORDER_COMMENT, locale), document);
             addParagraph(document, orderDetails.getOrderComment(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         }
     }
 
@@ -183,46 +184,46 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         addHeader(PdfFileHeaders.getByLocale(SENDER_INFO, locale), document);
         addParagraph(document, String.join(" ", orderDetails.getSender().getSenderName(),
             orderDetails.getSender().getSenderSurname()),
-            DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+            DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         addParagraph(document, orderDetails.getSender().getSenderPhone(), DEFAULT_FONT_NAME,
-            DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+            DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         addParagraph(document, orderDetails.getSender().getSenderEmail(), DEFAULT_FONT_NAME,
-            DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+            DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
     }
 
     private void addSenderAddress(OrdersDataForUserDto orderDetails, Locale locale, Document document) {
         addHeader(PdfFileHeaders.getByLocale(ADDRESS_INFO, locale), document);
         if (Objects.equals(LOCALE_EN_NAME, locale.getLanguage())) {
             addParagraph(document, orderDetails.getAddress().getAddressCityEn(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressRegionEn(), DEFAULT_FONT_NAME,
-                DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             addParagraph(document, String.join(", ", orderDetails.getAddress().getAddressStreetEn(),
                 orderDetails.getAddress().getHouseNumber()), DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE,
-                false, Element.ALIGN_LEFT);
+                false, ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressDistinctEn(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         } else {
             addParagraph(document, orderDetails.getAddress().getAddressCityUk(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressRegionUk(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             addParagraph(document, String.join(", ", orderDetails.getAddress().getAddressStreetUk(),
                 orderDetails.getAddress().getHouseNumber()), DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE,
-                false, Element.ALIGN_LEFT);
+                false, ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressDistinctUk(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         }
         if (Objects.nonNull(orderDetails.getAddress().getHouseCorpus())) {
             addParagraph(document, String.join(" ",
                 PdfAddressConstants.getByLocale(PdfAddressConstants.HOUSE_CORPUS_NUMBER, locale),
                 orderDetails.getAddress().getHouseCorpus()), DEFAULT_FONT_NAME,
-                DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             if (Objects.nonNull(orderDetails.getAddress().getEntranceNumber())) {
                 addParagraph(document, String.join(" ",
                     PdfAddressConstants.getByLocale(PdfAddressConstants.ENTRANCE_NUMBER, locale),
                     orderDetails.getAddress().getEntranceNumber()), DEFAULT_FONT_NAME,
-                    DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                    DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             }
         }
     }
@@ -275,7 +276,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private Image buildQrImage(String paymentLink) throws Exception {
         BufferedImage qrImage = QrCodeGenerator.generateQrCodeImage(paymentLink, 150, 150);
         Image pdfImage = PdfImageUtil.convertBufferedImageToImage(qrImage);
-        pdfImage.setAlignment(Image.ALIGN_LEFT);
+        pdfImage.setAlignment(ALIGN_LEFT);
         pdfImage.setAnnotation(new Annotation(0, 0, 0, 0, paymentLink));
         return pdfImage;
     }
@@ -289,7 +290,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
 
         PdfPCell imageCell = new PdfPCell(pdfImage, true);
         imageCell.setBorder(Rectangle.NO_BORDER);
-        imageCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        imageCell.setHorizontalAlignment(ALIGN_LEFT);
         imageCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         imageCell.setFixedHeight(150);
 
@@ -310,7 +311,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         Paragraph message = new Paragraph(
             PdfQrCodeText.getByLocale(messageKey, locale),
             FontFactory.getFont(DEFAULT_FONT_NAME, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD));
-        message.setAlignment(Element.ALIGN_LEFT);
+        message.setAlignment(ALIGN_LEFT);
         message.setSpacingBefore(10);
         message.setSpacingAfter(10);
         document.add(message);
