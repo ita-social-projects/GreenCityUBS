@@ -45,6 +45,11 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
+    void checkIfActiveUserExistsByUuid() {
+        assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfActiveUserExistsByUuid(USER_UUID));
+    }
+
+    @Test
     void markUserDeactivated() {
         DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
             .reason("test")
