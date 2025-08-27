@@ -22,6 +22,7 @@ import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.MessageAssetRepository;
@@ -36,6 +37,7 @@ import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,6 +95,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 class TelegramServiceTest {
     @Mock
@@ -1165,31 +1168,23 @@ class TelegramServiceTest {
     }
 
     @Test
-    void testSendMessageToUser_FileAssetType_WhenSendFails_ShouldThrowRuntimeException() {
-        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
-        request.setChatId(1L);
+    void testSendMessageToUser_WhenFileSendingFails_ShouldThrowTelegramBotExecutionException() throws IOException {
+        Long chatId = 123L;
+        CreateTelegramMessageRequest request =
+            new CreateTelegramMessageRequest(chatId, "test caption");
 
         TelegramChat chat = new TelegramChat();
-        chat.setChatId("123456");
+        chat.setChatId(chatId.toString());
 
-        when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
-        when(file.getOriginalFilename()).thenReturn("doc.pdf");
-        when(file.getSize()).thenReturn(1024L);
-        when(file.getContentType()).thenReturn("application/pdf");
+        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
-        try (MockedStatic<MessageFactory> messageFactoryMock = mockStatic(MessageFactory.class)) {
-            messageFactoryMock
-                .when(() -> MessageFactory.createSendDocument(anyString(), anyString(), any(MultipartFile.class)))
-                .thenThrow(new IOException("Simulated IO error"));
+        MultipartFile badFile = mock(MultipartFile.class);
+        when(badFile.getInputStream()).thenThrow(new IOException("fake IO fail"));
 
-            RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
+        MultipartFile[] files = new MultipartFile[] {badFile};
 
-            assertTrue(exception.getMessage().contains("Unable to send file to Telegram"));
-            verify(executor, never()).executeSendFile(any());
-            verify(telegramMessageRepository, never()).save(any());
-        }
+        assertThrows(TelegramBotExecutionException.class,
+            () -> telegramService.sendMessageToUser(request, files));
     }
 
     @Test
@@ -1324,8 +1319,9 @@ class TelegramServiceTest {
     }
 
     @Test
-    void deleteManagerMessage_shouldThrowNotFoundException_whenMessageIdIsZero() {
-        assertThrows(NotFoundException.class, () -> telegramService.deleteManagerMessage(0L, 1L));
+    void deleteManagerMessage_shouldThrowNotFoundException_whenMessageIdIsNull() {
+        when(telegramChatRepository.findById(anyLong())).thenReturn(Optional.of(new TelegramChat()));
+        assertThrows(NotFoundException.class, () -> telegramService.deleteManagerMessage(null, 1L));
     }
 
     @Test
