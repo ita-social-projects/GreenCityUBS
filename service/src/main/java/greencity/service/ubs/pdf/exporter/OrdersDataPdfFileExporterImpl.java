@@ -3,13 +3,14 @@ package greencity.service.ubs.pdf.exporter;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import com.lowagie.text.pdf.draw.LineSeparator;
-import greencity.constant.pdf.PdfAddressConstants;
-import greencity.constant.pdf.PdfFileHeaders;
-import greencity.constant.pdf.PdfOrderDetailsHeaders;
-import greencity.constant.pdf.PdfOrderContentDetailsHeaders;
+import greencity.constant.pdf.*;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.order.OrdersDataForUserDto;
+import greencity.entity.order.Order;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
+import greencity.repository.OrderRepository;
+import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.file.export.FileExporter;
 import java.awt.image.BufferedImage;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.Objects;
 import static greencity.constant.AppConstant.LOCALE_EN_NAME;
 import static greencity.constant.AppConstant.LOCALE_UK_NAME;
 import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.pdf.PdfFileHeaders.ADDRESS_INFO;
 import static greencity.constant.pdf.PdfFileHeaders.ORDER_COMMENT;
 import static greencity.constant.pdf.PdfFileHeaders.SENDER_INFO;
@@ -42,6 +44,8 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private static final int DEFAULT_SPACING_VALUE = 10;
     private static final float[] ORDER_DETAILS_TABLE_COLUMN_WIDTH = new float[] {50, 95, 100, 100, 80, 100, 80};
     private static final float[] ORDER_CONTENT_TABLE_COLUMN_WIDTH = new float[] {125, 120, 120, 120, 120};
+    private final UBSClientServiceImpl ubsClientService;
+    private final OrderRepository orderRepository;
 
     /**
      * {@inheritDoc}
@@ -50,12 +54,12 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     public byte[] export(OrdersDataForUserDto objectToWrite, Locale locale) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             Document document = new Document(PageSize.A4)) {
-            PdfWriter.getInstance(document, byteArrayOutputStream);
             PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
             document.open();
             document.setDocumentLanguage(locale.getLanguage());
-            addQrCode(objectToWrite, document,writer);
-            addHeader(PdfFileHeaders.getByLocale(ORDER_DETAILS, locale), document);
+            addQrCode(objectToWrite, document, writer, locale);
+            String title = PdfFileHeaders.getByLocale(ORDER_DETAILS, locale) + objectToWrite.getId();
+            addHeader(title, document);
             addNewLine(document);
             addLineSeparator(document);
             PdfPTable tableOrderDetails = createTable(PdfOrderDetailsHeaders.getAllByLocale(locale),
@@ -236,27 +240,80 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         document.add(paragraph);
     }
 
-    private void addQrCode(OrdersDataForUserDto orderDetails, Document document, PdfWriter writer) {
+    private void addQrCode(OrdersDataForUserDto orderDetails, Document document, PdfWriter writer, Locale locale) {
         try {
-            String url = "https://www.greencity.cx.ua/#/ubs/admin/order/" + orderDetails.getId();
-            BufferedImage qrImage = QrCodeGenerator.generateQrCodeImage(url, 150, 150);
-            Image pdfImage = PdfImageUtil.convertBufferedImageToImage(qrImage);
-            pdfImage.setAlignment(Image.ALIGN_LEFT);
-            pdfImage.scaleToFit(100, 100);
-            document.add(pdfImage);
+            Order order = orderRepository.findById(orderDetails.getId())
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderDetails.getId()));
 
-            float x = document.left();
-            float y = document.getPageSize().getHeight() - document.topMargin() - 100;
+            long sumInCoins = (long) (orderDetails.getAmountBeforePayment() * 100);
 
-            PdfAnnotation link = PdfAnnotation.createLink(
-                writer,
-                new com.lowagie.text.Rectangle(x, y, x + pdfImage.getScaledWidth(), y + pdfImage.getScaledHeight()),
-                PdfAnnotation.HIGHLIGHT_INVERT,
-                new com.lowagie.text.pdf.PdfAction(url)
-            );
-            writer.addAnnotation(link);
+            if (sumInCoins <= 0) {
+                addQrCodeMessage(document, PdfQrCodeText.ALREADY_PAID, locale);
+                return;
+            }
+
+            String paymentLink = ubsClientService.formedLink(order, sumInCoins);
+            if (paymentLink == null || paymentLink.isBlank()) {
+                addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);
+                return;
+            }
+
+            addQrCodeWithText(document, writer, paymentLink, locale);
         } catch (Exception e) {
             System.err.println("Cannot add QR code to PDF: " + e.getMessage());
         }
+    }
+
+    private Image buildQrImage(String paymentLink) throws Exception {
+        BufferedImage qrImage = QrCodeGenerator.generateQrCodeImage(paymentLink, 150, 150);
+        Image pdfImage = PdfImageUtil.convertBufferedImageToImage(qrImage);
+        pdfImage.setAlignment(Image.ALIGN_LEFT);
+        pdfImage.setAnnotation(new Annotation(0, 0, 0, 0, paymentLink));
+        return pdfImage;
+    }
+
+    private PdfPTable buildQrCodeTable(Image pdfImage, Locale locale) throws DocumentException {
+        PdfPTable table = new PdfPTable(2);
+        table.setWidths(new float[] {1, 2});
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(10);
+        table.setSpacingAfter(5);
+
+        PdfPCell imageCell = new PdfPCell(pdfImage, true);
+        imageCell.setBorder(Rectangle.NO_BORDER);
+        imageCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        imageCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        imageCell.setFixedHeight(100);
+
+        Paragraph label = new Paragraph(
+            PdfQrCodeText.getByLocale(PdfQrCodeText.QR_CODE_HINT, locale),
+            FontFactory.getFont("Comic Sans MS", 12, Font.BOLD));
+        PdfPCell textCell = new PdfPCell(label);
+        textCell.setBorder(Rectangle.NO_BORDER);
+        textCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        textCell.setPaddingLeft(10);
+
+        table.addCell(imageCell);
+        table.addCell(textCell);
+        return table;
+    }
+
+
+
+    private void addQrCodeMessage(Document document, PdfQrCodeText messageKey, Locale locale) {
+        Paragraph message = new Paragraph(
+            PdfQrCodeText.getByLocale(messageKey, locale),
+            FontFactory.getFont(DEFAULT_FONT_NAME, 12, Font.BOLD));
+        message.setAlignment(Element.ALIGN_LEFT);
+        message.setSpacingBefore(10);
+        message.setSpacingAfter(10);
+        document.add(message);
+    }
+
+    private void addQrCodeWithText(Document document, PdfWriter writer, String paymentLink, Locale locale)
+        throws Exception {
+        Image qrPdfImage = buildQrImage(paymentLink);
+        PdfPTable qrTable = buildQrCodeTable(qrPdfImage, locale);
+        document.add(qrTable);
     }
 }

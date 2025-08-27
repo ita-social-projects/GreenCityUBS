@@ -14,20 +14,29 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
+import greencity.repository.OrderRepository;
+import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.pdf.exporter.OrdersDataPdfFileExporterImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Locale;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class OrdersDataPdfFileExporterImplTest {
-    private OrdersDataPdfFileExporterImpl pdfFileExporter;
+    @Mock
+    private UBSClientServiceImpl ubsClientService;
 
-    @BeforeEach
-    void setUp() {
-        pdfFileExporter = new OrdersDataPdfFileExporterImpl();
-    }
+    @Mock
+    private OrderRepository orderRepository;
+
+    @InjectMocks
+    private OrdersDataPdfFileExporterImpl pdfFileExporter;
 
     @Test
     void exportValidEnPdf() throws IOException {
