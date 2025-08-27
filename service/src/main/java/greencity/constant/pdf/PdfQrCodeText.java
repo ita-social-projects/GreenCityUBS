@@ -20,8 +20,7 @@ public enum PdfQrCodeText {
     private final String textEn;
 
     public static String getByLocale(PdfQrCodeText label, Locale locale) {
-        return Objects.equals(locale.getLanguage(), AppConstant.LOCALE_EN_NAME)
-            ? label.textEn
-            : label.textUk;
+        String lang = locale != null ? locale.getLanguage() : AppConstant.LOCALE_UK_NAME;
+        return Objects.equals(lang, AppConstant.LOCALE_EN_NAME) ? label.textEn : label.textUk;
     }
 }

@@ -6,17 +6,16 @@ import greencity.ModelUtils;
 import greencity.constant.AppConstant;
 import greencity.dto.order.OrdersDataForUserDto;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.pdf.exporter.OrdersDataPdfFileExporterImpl;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +40,8 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportValidEnPdf() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDto();
+        when(orderRepository.findById(orderData.getId()))
+            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
         byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.ENGLISH);
         PdfTextExtractor pdfTextExtractor = new PdfTextExtractor(new PdfReader(pdfBytes));
         String pdfText = pdfTextExtractor.getTextFromPage(1, true);

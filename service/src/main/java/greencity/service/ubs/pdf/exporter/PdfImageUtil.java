@@ -8,8 +8,12 @@ import javax.imageio.ImageIO;
 
 public class PdfImageUtil {
     public static Image convertBufferedImageToImage(BufferedImage bufferedImage) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
-        return Image.getInstance(byteArrayOutputStream.toByteArray());
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            boolean written = ImageIO.write(bufferedImage, "png", out);
+            if (!written) {
+                throw new IOException("No ImageIO writer found for format: png");
+            }
+            return Image.getInstance(out.toByteArray());
+        }
     }
 }

@@ -1713,6 +1713,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
+    @Override
     public String formedLink(Order order, long sumToPayInCoins) {
         Order increment = incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =

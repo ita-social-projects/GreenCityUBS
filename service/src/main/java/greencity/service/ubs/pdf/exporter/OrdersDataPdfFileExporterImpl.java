@@ -10,10 +10,13 @@ import greencity.entity.order.Order;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.repository.OrderRepository;
-import greencity.service.ubs.UBSClientServiceImpl;
+import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.file.export.FileExporter;
 import java.awt.image.BufferedImage;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
@@ -31,6 +34,7 @@ import static greencity.constant.pdf.PdfFileHeaders.ORDER_COMMENT;
 import static greencity.constant.pdf.PdfFileHeaders.SENDER_INFO;
 import static greencity.constant.pdf.PdfFileHeaders.ORDER_DETAILS;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataForUserDto> {
@@ -44,7 +48,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private static final int DEFAULT_SPACING_VALUE = 10;
     private static final float[] ORDER_DETAILS_TABLE_COLUMN_WIDTH = new float[] {50, 95, 100, 100, 80, 100, 80};
     private static final float[] ORDER_CONTENT_TABLE_COLUMN_WIDTH = new float[] {125, 120, 120, 120, 120};
-    private final UBSClientServiceImpl ubsClientService;
+    private final UBSClientService ubsClientService;
     private final OrderRepository orderRepository;
 
     /**
@@ -54,10 +58,10 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     public byte[] export(OrdersDataForUserDto objectToWrite, Locale locale) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             Document document = new Document(PageSize.A4)) {
-            PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
+            PdfWriter.getInstance(document, byteArrayOutputStream);
             document.open();
             document.setDocumentLanguage(locale.getLanguage());
-            addQrCode(objectToWrite, document, writer, locale);
+            addQrCode(objectToWrite, document, locale);
             String title = PdfFileHeaders.getByLocale(ORDER_DETAILS, locale) + objectToWrite.getId();
             addHeader(title, document);
             addNewLine(document);
@@ -155,7 +159,6 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         cell.setVerticalAlignment(Element.ALIGN_CENTER);
         cell.setPadding(DEFAULT_SPACING_VALUE);
         cell.setMinimumHeight(DEFAULT_SPACING_VALUE * 2f);
-        cell.setPadding(DEFAULT_SPACING_VALUE);
         cell.setUseBorderPadding(true);
         return cell;
     }
@@ -240,12 +243,16 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         document.add(paragraph);
     }
 
-    private void addQrCode(OrdersDataForUserDto orderDetails, Document document, PdfWriter writer, Locale locale) {
+    private void addQrCode(OrdersDataForUserDto orderDetails, Document document, Locale locale) {
         try {
             Order order = orderRepository.findById(orderDetails.getId())
                 .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderDetails.getId()));
 
-            long sumInCoins = (long) (orderDetails.getAmountBeforePayment() * 100);
+            double amount = orderDetails.getAmountBeforePayment();
+            long sumInCoins = BigDecimal.valueOf(amount)
+                .movePointRight(2)
+                .setScale(0, RoundingMode.HALF_UP)
+                .longValueExact();
 
             if (sumInCoins <= 0) {
                 addQrCodeMessage(document, PdfQrCodeText.ALREADY_PAID, locale);
@@ -258,9 +265,10 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
                 return;
             }
 
-            addQrCodeWithText(document, writer, paymentLink, locale);
+            addQrCodeWithText(document, paymentLink, locale);
         } catch (Exception e) {
-            System.err.println("Cannot add QR code to PDF: " + e.getMessage());
+            log.warn("Cannot add QR code to PDF for order {}: {}", orderDetails.getId(), e.getMessage(), e);
+            addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);
         }
     }
 
@@ -283,11 +291,11 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         imageCell.setBorder(Rectangle.NO_BORDER);
         imageCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         imageCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        imageCell.setFixedHeight(100);
+        imageCell.setFixedHeight(150);
 
         Paragraph label = new Paragraph(
             PdfQrCodeText.getByLocale(PdfQrCodeText.QR_CODE_HINT, locale),
-            FontFactory.getFont("Comic Sans MS", 12, Font.BOLD));
+            FontFactory.getFont(DEFAULT_FONT_NAME, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD));
         PdfPCell textCell = new PdfPCell(label);
         textCell.setBorder(Rectangle.NO_BORDER);
         textCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -301,14 +309,14 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private void addQrCodeMessage(Document document, PdfQrCodeText messageKey, Locale locale) {
         Paragraph message = new Paragraph(
             PdfQrCodeText.getByLocale(messageKey, locale),
-            FontFactory.getFont(DEFAULT_FONT_NAME, 12, Font.BOLD));
+            FontFactory.getFont(DEFAULT_FONT_NAME, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD));
         message.setAlignment(Element.ALIGN_LEFT);
         message.setSpacingBefore(10);
         message.setSpacingAfter(10);
         document.add(message);
     }
 
-    private void addQrCodeWithText(Document document, PdfWriter writer, String paymentLink, Locale locale)
+    private void addQrCodeWithText(Document document, String paymentLink, Locale locale)
         throws Exception {
         Image qrPdfImage = buildQrImage(paymentLink);
         PdfPTable qrTable = buildQrCodeTable(qrPdfImage, locale);
