@@ -697,8 +697,6 @@ class NotificationServiceImplTest {
             Order order = TEST_ORDER_4;
             List<Order> orders = Collections.singletonList(order);
             setEventsToOrder(order, DELETE_VIOLATION_UK);
-            Set<NotificationParameter> parameters = getViolationParameter(order);
-
             mockUserNeedNotificationCheck(order, NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
             when(orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION_UK)).thenReturn(orders);
             when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(false);
