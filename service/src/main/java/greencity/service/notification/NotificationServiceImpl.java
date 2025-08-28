@@ -1082,8 +1082,8 @@ public class NotificationServiceImpl implements NotificationService {
     private void fillAndSendNotification(Set<NotificationParameter> parameters, Order order,
         NotificationType notificationType) {
         User user = order.getUser();
-        UserNotification userNotification = new UserNotification();
         if (isUserActive(user)) {
+            UserNotification userNotification = new UserNotification();
             userNotification.setNotificationType(notificationType);
             userNotification.setUser(user);
             userNotification.setOrder(order);

@@ -692,6 +692,22 @@ class NotificationServiceImplTest {
             verifyFillAndSendNotification();
         }
 
+        @Test
+        void testNotifyAllCanceledViolationsForInactiveUser() {
+            Order order = TEST_ORDER_4;
+            List<Order> orders = Collections.singletonList(order);
+            setEventsToOrder(order, DELETE_VIOLATION_UK);
+            Set<NotificationParameter> parameters = getViolationParameter(order);
+
+            mockUserNeedNotificationCheck(order, NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
+            when(orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION_UK)).thenReturn(orders);
+            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(false);
+
+            notificationService.notifyAllCanceledViolations();
+
+            verify(userNotificationRepository, never()).save(any());
+        }
+
         private Set<NotificationParameter> getViolationParameter(Order order) {
             Set<NotificationParameter> parameters = new HashSet<>();
             parameters.add(NotificationParameter.builder()
@@ -948,6 +964,20 @@ class NotificationServiceImplTest {
 
             verify(userNotificationRepository).save(any());
             verify(userRepository).findAll(any(UserSpecification.class));
+        }
+
+        @Test
+        void testNotifyCustomForInactiveUser() {
+            User user = TEST_USER;
+            List<User> userList = List.of(user);
+
+            when(userRepository.findAll(any(UserSpecification.class))).thenReturn(userList);
+            when(userRemoteClient.checkIfActiveUserExistsByUuid(user.getUuid())).thenReturn(false);
+
+            notificationService.notifyCustom(1L, UserCategory.USERS_WITH_ORDERS_MADE_LESS_THAN_3_MONTHS);
+
+            verify(userNotificationRepository, never()).save(any());
+
         }
 
         @Test
