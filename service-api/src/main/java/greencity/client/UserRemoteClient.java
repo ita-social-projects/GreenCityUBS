@@ -58,7 +58,7 @@ public interface UserRemoteClient {
      * @param uuid {@link User}'s UUID.
      * @return {@link Boolean}
      */
-    @GetMapping("user/checkActiveUserByUuid")
+    @GetMapping("/user/checkActiveUserByUuid")
     boolean checkIfActiveUserExistsByUuid(@RequestParam(UUID) String uuid);
 
     /**
