@@ -1,6 +1,7 @@
 package greencity.ubstelegrambot.messages;
 
 import greencity.constant.TelegramBotConstants;
+import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -553,7 +554,7 @@ public class MessageFactory {
                 media.add(photo);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new TelegramBotExecutionException("Failed to read image file for media group", e);
         }
         if (text != null && !text.isBlank()) {
             media.getFirst().setCaption(text);
