@@ -1636,7 +1636,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void sendMessageToUser_FilesNotImagesOrOthers_ShouldSendTextOnly() throws IOException {
+    void sendMessageToUser_FilesNotImagesOrOthers_ShouldSendTextOnly() {
         Long chatId = 1L;
 
         TelegramChat chat = new TelegramChat();
@@ -1702,7 +1702,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void sendMessageToUser_WhenSendDocumentReturnsNull_ShouldNotThrowNPE() throws IOException {
+    void sendMessageToUser_WhenSendDocumentReturnsNull_ShouldNotThrowNPE() {
         Long chatId = 1L;
 
         TelegramChat chat = new TelegramChat();
@@ -1713,7 +1713,6 @@ class TelegramServiceTest {
         request.setChatId(chatId);
         request.setText("Text");
 
-        MultipartFile file = mock(MultipartFile.class);
         when(file.getOriginalFilename()).thenReturn("file.bin");
         when(file.getSize()).thenReturn(1024L);
         when(file.getContentType()).thenReturn("application/octet-stream");
