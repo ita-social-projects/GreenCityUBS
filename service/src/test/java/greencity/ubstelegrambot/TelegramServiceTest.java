@@ -57,6 +57,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessages;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -85,6 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -1319,9 +1321,81 @@ class TelegramServiceTest {
     }
 
     @Test
+    void deleteAsset_whenFromManagerIsFalse_shouldReturnNoting() {
+        TelegramMessage mess = TelegramMessage.builder()
+                .fromManager(false)
+                .chat(TelegramChat.builder().chatId("123").build())
+                .build();
+
+        MessageAsset asset = MessageAsset.builder()
+                .message(mess)
+                .telegramMessageId(1)
+                .build();
+        when(messageAssetRepository.findById(1L)).thenReturn(Optional.of(asset));
+
+        telegramService.deleteManagerAsset(1L, 1L);
+
+        verify(messageAssetRepository, never()).delete(any());
+        verify(executor, never()).executeCommand(any(DeleteMessage.class));
+    }
+
+    @Test
     void deleteManagerMessage_shouldThrowNotFoundException_whenMessageIdIsNull() {
         when(telegramChatRepository.findById(anyLong())).thenReturn(Optional.of(new TelegramChat()));
         assertThrows(NotFoundException.class, () -> telegramService.deleteManagerMessage(null, 1L));
+    }
+
+    @Test
+    void deleteManagerMessage_WhenHasAssets_ShouldDeleteAllAssets() {
+        Long chatId = 1L;
+        Long messageId = 10L;
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123");
+
+        MessageAsset asset1 = new MessageAsset();
+        asset1.setTelegramMessageId(111);
+        MessageAsset asset2 = new MessageAsset();
+        asset2.setTelegramMessageId(222);
+
+        TelegramMessage message = new TelegramMessage();
+        message.setFromManager(true);
+        message.setAssets(List.of(asset1, asset2));
+
+        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(messageId)).thenReturn(Optional.of(message));
+
+        telegramService.deleteManagerMessage(messageId, chatId);
+
+        verify(executor).executeCommand(
+                argThat(cmd -> cmd instanceof DeleteMessages &&
+                        ((DeleteMessages) cmd).getMessageIds().containsAll(List.of(111, 222)))
+        );
+        verify(telegramMessageRepository).delete(message);
+    }
+
+    @Test
+    void deleteManagerMessage_WhenNoAssets_ShouldDeleteSingleMessage() {
+        Long chatId = 1L;
+        Long messageId = 20L;
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("456");
+
+        TelegramMessage message = new TelegramMessage();
+        message.setFromManager(true);
+        message.setTelegramMessageId(999);
+
+        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findById(messageId)).thenReturn(Optional.of(message));
+
+        telegramService.deleteManagerMessage(messageId, chatId);
+
+        verify(executor).executeCommand(
+                argThat(cmd -> cmd instanceof DeleteMessage &&
+                        ((DeleteMessage) cmd).getMessageId() == 999)
+        );
+        verify(telegramMessageRepository).delete(message);
     }
 
     @Test
