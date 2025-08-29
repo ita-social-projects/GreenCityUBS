@@ -1,8 +1,10 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.UserRemoteClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.FeedbackDto;
+import greencity.dto.telegram.UserTelegramFeedbackDto;
 import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
@@ -28,6 +30,7 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
     private final TelegramChatRepository telegramChatRepository;
     private final ChatFeedbackRepository chatFeedbackRepository;
     private final TelegramLanguageService telegramLanguageService;
+    private final UserRemoteClient userRemoteClient;
 
     /**
      * {@inheritDoc}
@@ -50,12 +53,25 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
             return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), lang);
         }
 
-        chatFeedback.get().setComment(message.getText());
-        chatFeedback.get().setFeedbackState(FeedbackState.CLOSED);
-        chatFeedbackRepository.save(chatFeedback.get());
-        telegramChat.get().setChatState(ChatState.NORMAL);
-        telegramChat.get().setChatStateUpdatedAt(Instant.now());
-        telegramChatRepository.save(telegramChat.get());
+        ChatFeedback feedback = chatFeedback.get();
+        feedback.setComment(message.getText());
+        feedback.setFeedbackState(FeedbackState.CLOSED);
+        chatFeedbackRepository.save(feedback);
+
+        TelegramChat chat = telegramChat.get();
+        chat.setChatState(ChatState.NORMAL);
+        chat.setChatStateUpdatedAt(Instant.now());
+        telegramChatRepository.save(chat);
+
+        UserTelegramFeedbackDto feedbackDto = UserTelegramFeedbackDto.builder()
+            .chatId(chat.getChatId())
+            .rating(feedback.getRating())
+            .comment(feedback.getComment())
+            .name(chat.getUsername())
+            .subject("New Telegram Feedback")
+            .build();
+
+        userRemoteClient.sendTelegramFeedback(feedbackDto);
         return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString(), lang);
     }
 
