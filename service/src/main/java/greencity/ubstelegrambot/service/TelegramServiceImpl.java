@@ -98,98 +98,148 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files) {
-        TelegramChat chat = telegramChatRepository.findById(request.getChatId())
-            .orElseThrow(() -> new NotFoundException("Chat not found"));
+        TelegramChat chat = findChatOrThrow(request.getChatId());
 
         List<MultipartFile> images = new ArrayList<>();
         List<MultipartFile> others = new ArrayList<>();
+        splitFiles(files, images, others);
 
-        if (files != null) {
-            for (MultipartFile file : files) {
-                AssetType type = TelegramUtils.detectAssetType(file);
-                if (type == AssetType.IMAGE && canSendAsPhoto(file)) {
-                    images.add(file);
-                } else {
-                    others.add(file);
-                }
-            }
-        }
-
-        if ((files == null || (images.isEmpty() && others.isEmpty())) && request.getText() != null) {
-            SendMessage sendMessage = MessageFactory.buildMessage(chat.getChatId(), request.getText());
-            Message sentMessage = executor.executeSendMessage(sendMessage);
-
-            TelegramMessage textMessage = TelegramMessage.builder()
-                .chat(chat)
-                .text(request.getText())
-                .fromManager(true)
-                .status(MessageDeliveryStatus.SENT)
-                .sendAt(Instant.now())
-                .messageViewingStatus(MessageViewingStatus.READ)
-                .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
-                .build();
-
-            telegramMessageRepository.save(textMessage);
-            chat.setLastMessage(textMessage);
-            telegramChatRepository.save(chat);
+        if (shouldSendTextOnly(request, files, images, others)) {
+            handleTextMessageOnly(chat, request);
             return;
         }
 
         if (!images.isEmpty()) {
-            TelegramMessage imageMessage = TelegramMessage.builder()
-                .chat(chat)
-                .text(request.getText())
-                .fromManager(true)
-                .status(MessageDeliveryStatus.SENT)
-                .sendAt(Instant.now())
-                .messageViewingStatus(MessageViewingStatus.READ)
-                .build();
-
-            List<MessageAsset> imageAssets = new ArrayList<>();
-            for (MultipartFile img : images) {
-                validateFileSize(img);
-                String url = userRemoteWebClient.uploadFile(img);
-                imageAssets.add(MessageAsset.builder()
-                    .url(url)
-                    .fileName(img.getOriginalFilename())
-                    .size(img.getSize())
-                    .contentType(img.getContentType())
-                    .type(AssetType.IMAGE)
-                    .message(imageMessage)
-                    .build());
-            }
-            imageMessage.setAssets(imageAssets);
-            if (imageAssets.size() > 1) {
-                SendMediaGroup sendMediaGroup =
-                    MessageFactory.buildSendMediaGroup(chat.getChatId(), images, request.getText());
-                List<Message> sentMessages = executor.executeSendMediaGroup(sendMediaGroup);
-                if (!sentMessages.isEmpty()) {
-                    imageMessage.setTelegramMessageId(sentMessages.getFirst().getMessageId());
-                    imageMessage.setMediaGroupId(sentMessages.getFirst().getMediaGroupId());
-                    for (int i = 0; i < imageAssets.size() && i < sentMessages.size(); i++) {
-                        imageAssets.get(i).setTelegramMessageId(sentMessages.get(i).getMessageId());
-                    }
-                }
-            } else {
-                SendPhoto sendPhoto;
-                try {
-                    sendPhoto = MessageFactory.createSendPhoto(chat.getChatId(), images.getFirst(), request.getText());
-                } catch (IOException e) {
-                    throw new TelegramBotExecutionException("Unable to send file to Telegram", e);
-                }
-                Message sentMessage = executor.executeSendPhoto(sendPhoto);
-                if (sentMessage != null) {
-                    imageMessage.setTelegramMessageId(sentMessage.getMessageId());
-                    imageMessage.setMediaGroupId(null);
-                    imageAssets.getFirst().setTelegramMessageId(sentMessage.getMessageId());
-                }
-            }
-
-            telegramMessageRepository.save(imageMessage);
-            messageAssetRepository.saveAll(imageAssets);
-            chat.setLastMessage(imageMessage);
+            handleImageMessages(chat, request, images);
         }
 
+        if (!others.isEmpty()) {
+            handleOtherFiles(chat, request, images, others);
+        }
+
+        telegramChatRepository.save(chat);
+    }
+
+    private TelegramChat findChatOrThrow(Long chatId) {
+        return telegramChatRepository.findById(chatId)
+            .orElseThrow(() -> new NotFoundException("Chat not found"));
+    }
+
+    private void splitFiles(MultipartFile[] files, List<MultipartFile> images, List<MultipartFile> others) {
+        if (files == null) {
+            return;
+        }
+
+        for (MultipartFile file : files) {
+            AssetType type = TelegramUtils.detectAssetType(file);
+            if (type == AssetType.IMAGE && canSendAsPhoto(file)) {
+                images.add(file);
+            } else {
+                others.add(file);
+            }
+        }
+    }
+
+    private boolean shouldSendTextOnly(CreateTelegramMessageRequest request, MultipartFile[] files,
+        List<MultipartFile> images, List<MultipartFile> others) {
+        return (files == null || (images.isEmpty() && others.isEmpty())) && request.getText() != null;
+    }
+
+    private void handleTextMessageOnly(TelegramChat chat, CreateTelegramMessageRequest request) {
+        SendMessage sendMessage = MessageFactory.buildMessage(chat.getChatId(), request.getText());
+        Message sentMessage = executor.executeSendMessage(sendMessage);
+
+        TelegramMessage textMessage = TelegramMessage.builder()
+            .chat(chat)
+            .text(request.getText())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .sendAt(Instant.now())
+            .messageViewingStatus(MessageViewingStatus.READ)
+            .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
+            .build();
+
+        telegramMessageRepository.save(textMessage);
+        chat.setLastMessage(textMessage);
+        telegramChatRepository.save(chat);
+    }
+
+    private void handleImageMessages(TelegramChat chat, CreateTelegramMessageRequest request,
+        List<MultipartFile> images) {
+        TelegramMessage imageMessage = TelegramMessage.builder()
+            .chat(chat)
+            .text(request.getText())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .sendAt(Instant.now())
+            .messageViewingStatus(MessageViewingStatus.READ)
+            .build();
+
+        List<MessageAsset> imageAssets = createImageAssets(images, imageMessage);
+
+        if (imageAssets.size() > 1) {
+            sendAsMediaGroup(chat, request, images, imageMessage, imageAssets);
+        } else {
+            sendAsSinglePhoto(chat, request, images, imageMessage, imageAssets);
+        }
+
+        telegramMessageRepository.save(imageMessage);
+        messageAssetRepository.saveAll(imageAssets);
+        chat.setLastMessage(imageMessage);
+    }
+
+    private List<MessageAsset> createImageAssets(List<MultipartFile> images, TelegramMessage imageMessage) {
+        List<MessageAsset> assets = new ArrayList<>();
+        for (MultipartFile img : images) {
+            validateFileSize(img);
+            String url = userRemoteWebClient.uploadFile(img);
+            assets.add(MessageAsset.builder()
+                .url(url)
+                .fileName(img.getOriginalFilename())
+                .size(img.getSize())
+                .contentType(img.getContentType())
+                .type(AssetType.IMAGE)
+                .message(imageMessage)
+                .build());
+        }
+        imageMessage.setAssets(assets);
+        return assets;
+    }
+
+    private void sendAsMediaGroup(TelegramChat chat, CreateTelegramMessageRequest request,
+        List<MultipartFile> images, TelegramMessage imageMessage,
+        List<MessageAsset> imageAssets) {
+        SendMediaGroup sendMediaGroup = MessageFactory.buildSendMediaGroup(chat.getChatId(), images, request.getText());
+        List<Message> sentMessages = executor.executeSendMediaGroup(sendMediaGroup);
+
+        if (!sentMessages.isEmpty()) {
+            imageMessage.setTelegramMessageId(sentMessages.getFirst().getMessageId());
+            imageMessage.setMediaGroupId(sentMessages.getFirst().getMediaGroupId());
+            for (int i = 0; i < imageAssets.size() && i < sentMessages.size(); i++) {
+                imageAssets.get(i).setTelegramMessageId(sentMessages.get(i).getMessageId());
+            }
+        }
+    }
+
+    private void sendAsSinglePhoto(TelegramChat chat, CreateTelegramMessageRequest request,
+        List<MultipartFile> images, TelegramMessage imageMessage,
+        List<MessageAsset> imageAssets) {
+        try {
+            SendPhoto sendPhoto =
+                MessageFactory.createSendPhoto(chat.getChatId(), images.getFirst(), request.getText());
+            Message sentMessage = executor.executeSendPhoto(sendPhoto);
+            if (sentMessage != null) {
+                imageMessage.setTelegramMessageId(sentMessage.getMessageId());
+                imageMessage.setMediaGroupId(null);
+                imageAssets.getFirst().setTelegramMessageId(sentMessage.getMessageId());
+            }
+        } catch (IOException e) {
+            throw new TelegramBotExecutionException("Unable to send file to Telegram", e);
+        }
+    }
+
+    private void handleOtherFiles(TelegramChat chat, CreateTelegramMessageRequest request,
+        List<MultipartFile> images, List<MultipartFile> others) {
         for (MultipartFile file : others) {
             validateFileSize(file);
 
@@ -214,6 +264,7 @@ public class TelegramServiceImpl implements TelegramService {
                 .type(type)
                 .message(fileMessage)
                 .build();
+
             fileMessage.setAssets(List.of(asset));
 
             Message sentMessage = sendAsDocument(chat, caption, file);
@@ -224,8 +275,6 @@ public class TelegramServiceImpl implements TelegramService {
             messageAssetRepository.save(asset);
             chat.setLastMessage(fileMessage);
         }
-
-        telegramChatRepository.save(chat);
     }
 
     private void validateFileSize(MultipartFile file) {

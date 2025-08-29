@@ -54,6 +54,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -79,15 +80,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -253,6 +257,7 @@ class TelegramServiceTest {
         ImageIO.write(img, "png", baos);
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 
+        when(executor.executeSendPhoto(any(SendPhoto.class))).thenReturn(mockTelegramResponse(20));
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
         when(file.getOriginalFilename()).thenReturn("image.png");
         when(file.getSize()).thenReturn(2048L);
@@ -266,7 +271,6 @@ class TelegramServiceTest {
         verify(executor).executeSendPhoto(any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
-
     }
 
     @Test
@@ -1144,6 +1148,7 @@ class TelegramServiceTest {
 
         assertEquals("File size exceeds Telegram bot limit (50MB)", exception.getMessage());
 
+        verify(telegramChatRepository).findById(1L);
         verifyNoInteractions(userRemoteWebClient);
         verifyNoInteractions(executor);
         verify(telegramMessageRepository, never()).save(any());
@@ -1543,6 +1548,189 @@ class TelegramServiceTest {
             assertThrows(RuntimeException.class,
                 () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
         }
+    }
+
+    @Test
+    void sendMessageToUser_WithMultipleImages_ShouldUseSendAsMediaGroup() throws IOException {
+        Long chatId = 123L;
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(chatId.toString());
+        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+
+        CreateTelegramMessageRequest request =
+            new CreateTelegramMessageRequest(chatId, "Test caption for group");
+
+        BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", baos);
+        byte[] imageBytes = baos.toByteArray();
+
+        MultipartFile image1 = mock(MultipartFile.class);
+        when(image1.getOriginalFilename()).thenReturn("img1.png");
+        when(image1.getSize()).thenReturn((long) imageBytes.length);
+        when(image1.getContentType()).thenReturn("image/png");
+        when(image1.getInputStream()).thenReturn(new ByteArrayInputStream(imageBytes));
+
+        MultipartFile image2 = mock(MultipartFile.class);
+        when(image2.getOriginalFilename()).thenReturn("img2.png");
+        when(image2.getSize()).thenReturn((long) imageBytes.length);
+        when(image2.getContentType()).thenReturn("image/png");
+        when(image2.getInputStream()).thenReturn(new ByteArrayInputStream(imageBytes));
+
+        MultipartFile[] files = new MultipartFile[] {image1, image2};
+
+        try (MockedStatic<MessageFactory> mf = mockStatic(MessageFactory.class)) {
+            SendMediaGroup fakeGroup = new SendMediaGroup();
+            mf.when(() -> MessageFactory.buildSendMediaGroup(anyString(), anyList(), any()))
+                .thenReturn(fakeGroup);
+
+            Message sentMsg1 = new Message();
+            sentMsg1.setMessageId(101);
+            sentMsg1.setMediaGroupId("mg1");
+
+            Message sentMsg2 = new Message();
+            sentMsg2.setMessageId(102);
+            sentMsg2.setMediaGroupId("mg1");
+
+            when(executor.executeSendMediaGroup(fakeGroup))
+                .thenReturn(List.of(sentMsg1, sentMsg2));
+
+            telegramService.sendMessageToUser(request, files);
+        }
+
+        verify(executor).executeSendMediaGroup(any(SendMediaGroup.class));
+
+        ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
+        verify(telegramMessageRepository).save(messageCaptor.capture());
+        TelegramMessage savedMessage = messageCaptor.getValue();
+        assertThat(savedMessage.getTelegramMessageId()).isEqualTo(101);
+        assertThat(savedMessage.getMediaGroupId()).isEqualTo("mg1");
+
+        ArgumentCaptor<List<MessageAsset>> assetCaptor = ArgumentCaptor.forClass(List.class);
+        verify(messageAssetRepository, atLeastOnce()).saveAll(assetCaptor.capture());
+        List<MessageAsset> savedAssets = assetCaptor.getValue();
+
+        assertThat(savedAssets).hasSize(2);
+        assertThat(savedAssets.get(0).getTelegramMessageId()).isEqualTo(101);
+        assertThat(savedAssets.get(1).getTelegramMessageId()).isEqualTo(102);
+    }
+
+    @Test
+    void sendMessageToUser_TextOnly_ShouldCallSendMessage() {
+        Long chatId = 1L;
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(chatId.toString());
+        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(chatId);
+        request.setText("Just text");
+
+        telegramService.sendMessageToUser(request, null);
+
+        verify(executor).executeSendMessage(any(SendMessage.class));
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatRepository).save(any(TelegramChat.class));
+    }
+
+    @Test
+    void sendMessageToUser_FilesNotImagesOrOthers_ShouldSendTextOnly() throws IOException {
+        Long chatId = 1L;
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(chatId.toString());
+        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(chatId);
+        request.setText("Text with non-image files");
+
+        MultipartFile nonImageFile = mock(MultipartFile.class);
+        when(nonImageFile.getOriginalFilename()).thenReturn("file.bin");
+        when(nonImageFile.getSize()).thenReturn(1024L);
+        when(nonImageFile.getContentType()).thenReturn("application/octet-stream");
+
+        Message sentDoc = new Message();
+        sentDoc.setMessageId(999);
+        when(executor.executeSendFile(any(SendDocument.class))).thenReturn(sentDoc);
+
+        when(userRemoteWebClient.uploadFile(nonImageFile)).thenReturn("http://fakeurl");
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {nonImageFile});
+
+        verify(userRemoteWebClient).uploadFile(nonImageFile);
+        verify(executor).executeSendFile(any(SendDocument.class));
+
+        ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
+        verify(telegramMessageRepository).save(messageCaptor.capture());
+        TelegramMessage savedMessage = messageCaptor.getValue();
+        assertThat(savedMessage.getTelegramMessageId()).isEqualTo(999);
+
+        ArgumentCaptor<MessageAsset> assetCaptor = ArgumentCaptor.forClass(MessageAsset.class);
+        verify(messageAssetRepository).save(assetCaptor.capture());
+        MessageAsset savedAsset = assetCaptor.getValue();
+        assertThat(savedAsset.getTelegramMessageId()).isEqualTo(999);
+
+        verify(telegramChatRepository).save(chat);
+    }
+
+    @Test
+    void sendMessageToUser_WhenFileSendingThrowsIOException_ShouldWrapInTelegramBotExecutionException()
+        throws IOException {
+        Long chatId = 1L;
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(chatId.toString());
+        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(chatId);
+        request.setText("Text");
+
+        MultipartFile badFile = mock(MultipartFile.class);
+        when(badFile.getContentType()).thenReturn("image/png");
+
+        when(badFile.getInputStream()).thenThrow(new IOException("fake IO fail"));
+
+        assertThrows(TelegramBotExecutionException.class,
+            () -> telegramService.sendMessageToUser(request, new MultipartFile[] {badFile}));
+
+        verify(telegramMessageRepository, never()).save(any());
+        verify(messageAssetRepository, never()).save(any());
+    }
+
+    @Test
+    void sendMessageToUser_WhenSendDocumentReturnsNull_ShouldNotThrowNPE() throws IOException {
+        Long chatId = 1L;
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(chatId.toString());
+        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(chatId);
+        request.setText("Text");
+
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getOriginalFilename()).thenReturn("file.bin");
+        when(file.getSize()).thenReturn(1024L);
+        when(file.getContentType()).thenReturn("application/octet-stream");
+
+        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://fakeurl");
+
+        Message fakeMessage = new Message();
+        fakeMessage.setMessageId(123);
+        when(executor.executeSendFile(any(SendDocument.class))).thenReturn(fakeMessage);
+
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        verify(userRemoteWebClient).uploadFile(file);
+        verify(executor).executeSendFile(any(SendDocument.class));
+        verify(telegramMessageRepository).save(any());
+        verify(messageAssetRepository).save(any());
+        verify(telegramChatRepository).save(chat);
     }
 
     @Test
