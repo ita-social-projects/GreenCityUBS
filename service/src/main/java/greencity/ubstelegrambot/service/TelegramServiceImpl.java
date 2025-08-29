@@ -175,7 +175,7 @@ public class TelegramServiceImpl implements TelegramService {
                 try {
                     sendPhoto = MessageFactory.createSendPhoto(chat.getChatId(), images.getFirst(), request.getText());
                 } catch (IOException e) {
-                    throw new RuntimeException("Unable to send file to Telegram", e);
+                    throw new TelegramBotExecutionException("Unable to send file to Telegram", e);
                 }
                 Message sentMessage = executor.executeSendPhoto(sendPhoto);
                 if (sentMessage != null) {
@@ -249,10 +249,10 @@ public class TelegramServiceImpl implements TelegramService {
 
     private boolean canSendAsPhoto(MultipartFile file) {
         BufferedImage image = null;
-        try {
-            image = ImageIO.read(file.getInputStream());
+        try (var stream = file.getInputStream()) {
+            image = ImageIO.read(stream);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new TelegramBotExecutionException("Failed to read image data", e);
         }
         if (image == null) {
             return false;
