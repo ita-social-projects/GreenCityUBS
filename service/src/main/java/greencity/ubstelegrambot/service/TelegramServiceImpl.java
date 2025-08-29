@@ -595,25 +595,26 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     @Transactional
     public void deleteManagerMessage(Long messageId, Long chatId) {
-        telegramChatRepository.findById(chatId).ifPresent(chat -> {
-            TelegramMessage message = telegramMessageRepository.findById(messageId)
-                .orElseThrow(NotFoundException::new);
-            if (Boolean.TRUE.equals(message.getFromManager())) {
-                if (message.getAssets() != null && !message.getAssets().isEmpty()) {
-                    executor.executeCommand(MessageFactory.buildDeleteMessages(chat.getChatId(),
-                        message.getAssets().stream()
-                            .map(MessageAsset::getTelegramMessageId)
-                            .toList()));
-                } else {
-                    executor.executeCommand(MessageFactory.buildDeleteMessage(chat.getChatId(),
-                        message.getTelegramMessageId()));
-                }
-                telegramMessageRepository.findById(messageId)
-                    .ifPresent(telegramMessageRepository::delete);
-
-                updateLastMessage(chat);
-            }
-        });
+        TelegramChat chat = telegramChatRepository.findById(chatId).orElseThrow(NotFoundException::new);
+        if (messageId == null || messageId == 0) {
+            throw new NotFoundException("Message id must be provided");
+        }
+        TelegramMessage message = telegramMessageRepository.findById(messageId).orElseThrow(NotFoundException::new);
+        if (!Boolean.TRUE.equals(message.getFromManager())) {
+            return;
+        }
+        if (message.getChat() == null || !message.getChat().getId().equals(chat.getId())) {
+            throw new NotFoundException("Message " + messageId + " does not belong to chat " + chatId);
+        }
+        if (message.getAssets() != null && !message.getAssets().isEmpty()) {
+            executor.executeCommand(MessageFactory.buildDeleteMessages(chat.getChatId(),
+                message.getAssets().stream().map(MessageAsset::getTelegramMessageId).toList()));
+        } else if (message.getTelegramMessageId() != null) {
+            executor.executeCommand(MessageFactory.buildDeleteMessage(chat.getChatId(),
+                message.getTelegramMessageId()));
+        }
+        telegramMessageRepository.delete(message);
+        updateLastMessage(chat);
     }
 
     @Override
