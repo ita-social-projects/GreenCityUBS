@@ -1323,14 +1323,14 @@ class TelegramServiceTest {
     @Test
     void deleteAsset_whenFromManagerIsFalse_shouldReturnNoting() {
         TelegramMessage mess = TelegramMessage.builder()
-                .fromManager(false)
-                .chat(TelegramChat.builder().chatId("123").build())
-                .build();
+            .fromManager(false)
+            .chat(TelegramChat.builder().chatId("123").build())
+            .build();
 
         MessageAsset asset = MessageAsset.builder()
-                .message(mess)
-                .telegramMessageId(1)
-                .build();
+            .message(mess)
+            .telegramMessageId(1)
+            .build();
         when(messageAssetRepository.findById(1L)).thenReturn(Optional.of(asset));
 
         telegramService.deleteManagerAsset(1L, 1L);
@@ -1368,9 +1368,8 @@ class TelegramServiceTest {
         telegramService.deleteManagerMessage(messageId, chatId);
 
         verify(executor).executeCommand(
-                argThat(cmd -> cmd instanceof DeleteMessages &&
-                        ((DeleteMessages) cmd).getMessageIds().containsAll(List.of(111, 222)))
-        );
+            argThat(cmd -> cmd instanceof DeleteMessages &&
+                ((DeleteMessages) cmd).getMessageIds().containsAll(List.of(111, 222))));
         verify(telegramMessageRepository).delete(message);
     }
 
@@ -1392,9 +1391,8 @@ class TelegramServiceTest {
         telegramService.deleteManagerMessage(messageId, chatId);
 
         verify(executor).executeCommand(
-                argThat(cmd -> cmd instanceof DeleteMessage &&
-                        ((DeleteMessage) cmd).getMessageId() == 999)
-        );
+            argThat(cmd -> cmd instanceof DeleteMessage &&
+                ((DeleteMessage) cmd).getMessageId() == 999));
         verify(telegramMessageRepository).delete(message);
     }
 
