@@ -521,8 +521,9 @@ public class TelegramServiceImpl implements TelegramService {
                 message.setUpdatedAt(Instant.now());
                 message.setText(request.newText());
                 if (!message.getAssets().isEmpty()) {
+                    MessageAsset firstAsset = message.getAssets().getFirst();
                     EditMessageCaption editMessageCaption = MessageFactory
-                        .buildEditMessageCaption(ch.getChatId(), message.getTelegramMessageId(), request.newText());
+                        .buildEditMessageCaption(ch.getChatId(), firstAsset.getTelegramMessageId(), request.newText());
                     executor.executeCommand(editMessageCaption);
                 } else {
                     EditMessageText editMessageText = MessageFactory
@@ -576,6 +577,7 @@ public class TelegramServiceImpl implements TelegramService {
                     asset.getTelegramMessageId());
                 executor.executeCommand(deleteMessage);
 
+                MessageAsset nextAsset = parent.getAssets().getFirst();
                 parent.getAssets().remove(asset);
                 messageAssetRepository.delete(asset);
 
@@ -583,9 +585,8 @@ public class TelegramServiceImpl implements TelegramService {
                     telegramMessageRepository.delete(parent);
                     updateLastMessage(parent.getChat());
                 } else {
-                    if (parent.getText() != null && !parent.getText().isBlank()) {
-                        MessageAsset nextAsset = parent.getAssets().getFirst();
-
+                    if (parent.getText() != null && !parent.getText().isBlank() && asset.equals(nextAsset)) {
+                        nextAsset = parent.getAssets().getFirst();
                         EditMessageCaption editCaption = MessageFactory.buildEditMessageCaption(
                             parent.getChat().getChatId(),
                             nextAsset.getTelegramMessageId(),

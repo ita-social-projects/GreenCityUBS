@@ -244,7 +244,7 @@ public class TelegramController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Delete only telegram manager asset")
+    @Operation(summary = "Delete only one telegram manager asset")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
