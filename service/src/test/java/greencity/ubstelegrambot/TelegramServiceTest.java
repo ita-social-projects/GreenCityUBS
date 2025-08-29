@@ -1532,7 +1532,6 @@ class TelegramServiceTest {
         chat.setChatId("123");
         when(telegramChatRepository.findById(any())).thenReturn(Optional.of(chat));
 
-        MultipartFile file = mock(MultipartFile.class);
         when(file.getSize()).thenReturn(1024L);
 
         CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
