@@ -33,6 +33,7 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
+import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +49,8 @@ public interface UBSClientService {
      */
     @Transactional
     PaymentResponseWayForPay validatePayment(PaymentResponseDto response);
+
+    PaymentResponseWayForPay convertMapIntoPaymentResponseDto(Map<String, String> formParams);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.

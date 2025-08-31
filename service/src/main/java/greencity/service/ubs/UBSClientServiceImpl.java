@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.maps.model.LatLng;
 import greencity.client.MonoBankClient;
 import greencity.client.UserRemoteClient;
@@ -136,6 +137,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -303,7 +305,36 @@ public class UBSClientServiceImpl implements UBSClientService {
             .status("accept")
             .time(response.getCreatedDate()).build();
         accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPaySecret));
+        log.info("Generated signature: {}", accept.getSignature());
         return accept;
+    }
+
+    public PaymentResponseWayForPay convertMapIntoPaymentResponseDto(Map<String, String> formParams) {
+        log.info("formParams: " + formParams);
+
+        if (!formParams.isEmpty()) {
+            formParams.forEach((key, value) -> log.info("Param key = {}\nParam value = {}", key, value));
+        } else {
+            log.info("No form params received");
+        }
+        PaymentResponseDto dto = new PaymentResponseDto();
+        if (!formParams.isEmpty()) {
+            String json = formParams.keySet().iterator().next();
+            log.info("Extracted potential JSON from param key: {}", json);
+
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                dto = objectMapper.readValue(json, PaymentResponseDto.class);
+                log.info("Parsed DTO: {}", dto);
+            } catch (Exception e) {
+                log.error("Failed to parse JSON from param key: {}", e.getMessage(), e);
+            }
+        }
+
+        if (dto == null) {
+            log.info("dto is null");
+        }
+        return validatePayment(dto);
     }
 
     private Payment mapPayment(PaymentResponseDto response, String decodedOrderReference) {
