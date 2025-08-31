@@ -42,7 +42,7 @@ class GoogleApiServiceTest {
     private GeocodingResult geocodingResult;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         coordinates = new LatLng(50.45, 30.523);
 
         AddressComponent cityComponent = new AddressComponent();

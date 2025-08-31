@@ -3,6 +3,7 @@ package greencity.repository;
 import greencity.entity.user.employee.Employee;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -60,6 +61,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * @param uuid {@link String}
      * @return employee.
      */
+    @EntityGraph(attributePaths = {"employeePosition"})
     Optional<Employee> findByUuid(String uuid);
 
     /**
@@ -117,4 +119,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         value = "SELECT e FROM Employee e JOIN e.tariffsInfoReceivingEmployees t"
             + " WHERE t.tariffsInfo.id = :tariffId AND t.hasChat = true")
     List<Employee> selectAllEmployeesByTariffIdAndChatEqualsTrue(@Param("tariffId") Long tariffId);
+
+    @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.employeePosition WHERE e.email = :email")
+    Optional<Employee> findByEmailWithPositions(@Param("email") String email);
 }

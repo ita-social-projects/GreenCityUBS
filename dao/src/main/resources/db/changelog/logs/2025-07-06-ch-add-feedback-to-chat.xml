@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="2025-07-06-modify-chat-feedback" author="vovasaienko">
+
+        <modifyDataType
+                tableName="chat_feedback"
+                columnName="chat_id"
+                newDataType="BIGINT"/>
+
+        <addColumn tableName="chat_feedback">
+            <column name="feedback_state" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="telegram_chat">
+            <column name="chat_state" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="chat_feedback"
+                baseColumnNames="chat_id"
+                constraintName="fk_chat_feedback_chat"
+                referencedTableName="telegram_chat"
+                referencedColumnNames="id"/>
+
+    </changeSet>
+
+
+</databaseChangeLog>

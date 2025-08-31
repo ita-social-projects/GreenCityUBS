@@ -32,7 +32,7 @@ public class BigOrderTableRepository {
     private final OrderFilterDataProvider orderFilterDataProvider;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String ORDER_PAYMENT_STATUS = "orderPaymentStatus";
-    private static final String UKRAINIAN_LANGUAGE = "ua";
+    private static final String UKRAINIAN_LANGUAGE = "uk";
     private static final int NULL_SORT_ORDER = 99;
 
     /**

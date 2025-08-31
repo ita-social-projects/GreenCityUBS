@@ -27,10 +27,10 @@ public class ErrorMessage {
     public static final String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
     public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
         "The user already has connected to Telegram bot.";
-    public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_VIBER_BOT =
-        "The user already has connected to Viber bot.";
     public static final String THE_MESSAGE_WAS_NOT_SENT = "The message was not sent.";
     public static final String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
+    public static final String USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS =
+        "User with current uuid already exists in UBS.";
     public static final String USER_WITH_CURRENT_ID_DOES_NOT_EXIST = "User with current id does not exist.";
     public static final String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist: ";
     public static final String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
@@ -41,6 +41,8 @@ public class ErrorMessage {
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String EMPLOYEE_WITH_UUID_NOT_FOUND = "Employee with current uuid doesn't exist: ";
+    public static final String EMPLOYEE_WITH_ENABLED_CHAT_NOT_FOUND_BY_TARIFF_ID =
+        "No employees with enabled chat found for tariff id: ";
     public static final String ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS =
         "Active employee with this email already exists: ";
     public static final String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
@@ -89,7 +91,7 @@ public class ErrorMessage {
     public static final String LOCATION_IS_DEACTIVATED_FOR_TARIFF = "Location is deactivated for tariff: ";
     public static final String COURIER_IS_NOT_FOUND_BY_ID = "Couldn't found courier by id: ";
     public static final String CANNOT_DEACTIVATE_COURIER = "Courier is already deactivated with id: ";
-    public static final String TO_MUCH_BAG_EXCEPTION = "You choose to much bags, maximum amount is: ";
+    public static final String TOO_MANY_BAGS_EXCEPTION = "You chose too many bags, maximum amount is: ";
     public static final String PRICE_OF_ORDER_GREATER_THAN_LIMIT =
         "The price of you're order without discount is greater than allowable limit: ";
     public static final String PRICE_OF_ORDER_LOWER_THAN_LIMIT =
@@ -174,6 +176,7 @@ public class ErrorMessage {
         "Predefined notification template cannot be deleted.";
     public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
     public static final String USER_AGREEMENT_NOT_FOUND_BY_ID = "User Agreement with ID %d not found";
+    public static final String USER_NOT_FOUND_BY_UUID = "User not found by uuid: ";
     public static final String REFUND_CONFLICT_MONEY_AND_BONUSES =
         "A refund cannot be processed with both money and bonuses at the same time";
     public static final String TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST =
@@ -197,4 +200,24 @@ public class ErrorMessage {
     public static final String ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED =
         "Cannot update order: status must be FORMED and payment must be UNPAID";
     public static final String ORDER_NOT_FOUND_BY_ID = "Order not found with id: ";
+    public static final String UUID_NOT_FOUND_BY_EMAIL = "UUID not found by email: ";
+    public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
+    public static final String TARIFF_VALIDATION_ERROR_MESSAGE = "Invalid tariff list.";
+    public static final String POSITION_VALIDATION_ERROR_MESSAGE = "Invalid position IDs.";
+    public static final String INVALID_POSITION_IDS = "Invalid position IDs: %s";
+    public static final String TARIFF_LIST_IS_NULL = "Tariffs cannot be null";
+    public static final String TARIFF_LIST_IS_EMPTY = "Tariffs cannot be empty";
+    public static final String TARIFF_IS_NULL = "Tariff cannot be null";
+    public static final String TARIFFID_IS_NULL = "Tariff id cannot be null";
+    public static final String TARIFFID_IS_NOT_POSITIVE = "Tariff Id must be greater than 0";
+    public static final String TARIFF_LIST_CONTAINS_DUPLICATES = "Tariffs cannot contain duplicates";
+    public static final String USER_APP_UNAVAILABLE = "the User service is unavailable";
+    public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
+    public static final String TELEGRAM_SEND_EXCEPTION = "Exception occurred while sending to telegram: %s";
+    public static final String TELEGRAM_RECEIVE_EXCEPTION = "Exception occurred while receiving from telegram: %s";
+    public static final String TELEGRAM_NULL_METHOD_EXCEPTION = "Execution method cannot be null";
+    public static final String TELEGRAM_INVALID_METHOD_EXCEPTION = "Invalid execution method type: %s";
+    public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
+    public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
+        "Template cannot be deleted while it is referenced by existing notifications";
 }

@@ -1,63 +1,96 @@
 package greencity.validator;
 
-import greencity.constant.ErrorMessage;
-import greencity.exceptions.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import jakarta.validation.ConstraintValidatorContext;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class PhoneNumberValidationTest {
+    private PhoneNumberValidation validator;
 
-    @Mock
-    private ConstraintValidatorContext context;
-    private PhoneNumberValidation validation = new PhoneNumberValidation();
+    @BeforeEach
+    void setUp() {
+        validator = new PhoneNumberValidation();
+    }
 
-    @Test
-    void isValid() {
-        String internationalFormat = "+380938754569";
-        String internationalFormat1 = "+38(093)87-54-569";
-        String internationalFormatWithoutPlus = "380998754569";
-        String nationalFormat = "0678754569";
-        String nationalFormatWithoutZero = "938754569";
+    @Nested
+    @DisplayName("Valid phone numbers")
+    class ValidPhoneNumbers {
 
-        String incorrectFormat1 = "0114860406";
-        String incorrectFormat2 = "4860406";
-        String incorrectFormat3 = "067875Dhgjh4569";
+        @Test
+        void shouldAcceptInternationalFormatWithPlus() {
+            assertTrue(validator.isValid("+380938754569", null));
+        }
 
-        assertTrue(validation.isValid(internationalFormat, context));
-        assertTrue(validation.isValid(internationalFormat1, context));
-        assertTrue(validation.isValid(internationalFormatWithoutPlus, context));
-        assertTrue(validation.isValid(nationalFormat, context));
-        assertTrue(validation.isValid(nationalFormatWithoutZero, context));
+        @Test
+        void shouldAcceptFormattedInternationalWithSymbols() {
+            assertTrue(validator.isValid("+38(093)87-54-569", null));
+        }
 
-        assertFalse(validation.isValid(incorrectFormat1, context));
-        assertFalse(validation.isValid(incorrectFormat2, context));
-        assertFalse(validation.isValid(incorrectFormat3, context));
+        @Test
+        void shouldAcceptInternationalFormatWithoutPlus() {
+            assertTrue(validator.isValid("380998754569", null));
+        }
+
+        @Test
+        void shouldAcceptNationalFormatStartingWithZero() {
+            assertTrue(validator.isValid("0678754569", null));
+        }
+
+        @Test
+        void shouldAcceptShortNationalFormatWithoutZero() {
+            assertTrue(validator.isValid("938754569", null));
+        }
+
+        @Test
+        void shouldAcceptValidPhoneNumberWithSpacesAround() {
+            assertTrue(validator.isValid("  +380938754569  ", null));
+        }
+    }
+
+    @Nested
+    @DisplayName("Invalid phone numbers")
+    class InvalidPhoneNumbers {
+
+        @Test
+        void shouldRejectInvalidCountryCode() {
+            assertFalse(validator.isValid("0114860406", null));
+        }
+
+        @Test
+        void shouldRejectTooShortNumber() {
+            assertFalse(validator.isValid("4860406", null));
+        }
+
+        @Test
+        void shouldRejectNumberWithLetters() {
+            assertFalse(validator.isValid("067875Dhgjh4569", null));
+        }
+
+        @Test
+        void shouldRejectCompletelyNonNumericString() {
+            assertFalse(validator.isValid("jldjfdavn", null));
+        }
+
+        @Test
+        void shouldRejectBlankString() {
+            assertFalse(validator.isValid("   ", null));
+        }
+
+        @Test
+        void shouldRejectEmptyString() {
+            assertFalse(validator.isValid("", null));
+        }
     }
 
     @Test
-    void isValidShouldThrowEmployeeValidationException() {
-        String incorrectStr = "jldjfdavn";
-        Exception thrown = assertThrows(NotFoundException.class,
-            () -> validation.isValid(incorrectStr, context));
-        assertEquals(thrown.getMessage(), ErrorMessage.PHONE_NUMBER_PARSING_FAIL + incorrectStr);
-    }
-
-    @Test
-    void isValidShouldReturnTrueWhenValueIsNull() {
-        assertTrue(validation.isValid(null, context));
-    }
-
-    @Test
-    void isValidShouldReturnTrueWhenValueIsEmpty() {
-        assertTrue(validation.isValid("", context));
+    @DisplayName("Should accept null as valid (field is optional)")
+    void shouldAcceptNullValue() {
+        assertTrue(validator.isValid(null, null));
     }
 }

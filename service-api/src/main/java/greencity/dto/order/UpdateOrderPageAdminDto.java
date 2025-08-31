@@ -1,8 +1,10 @@
 package greencity.dto.order;
 
+import greencity.annotations.ValidUpdateOrderPageAdmin;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UpdateResponsibleEmployeeDto;
 import greencity.dto.refund.RefundDto;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,8 +19,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ValidUpdateOrderPageAdmin
 public class UpdateOrderPageAdminDto {
     private OrderDetailStatusRequestDto generalOrderInfo;
+    @Valid
     private UbsCustomersDtoUpdate userInfoDto;
     private OrderAddressExportDetailsDtoUpdate addressExportDetailsDto;
     private EcoNumberDto ecoNumberFromShop;
