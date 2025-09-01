@@ -11,7 +11,6 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
-
 import java.util.HashSet;
 
 @Component
@@ -23,18 +22,21 @@ public class PaymentExpiryJob implements Job {
     private final OrderRepository orderRepository;
 
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext jobExecutionContext) {
         JobDataMap jobDataMap = jobExecutionContext.getMergedJobDataMap();
         Long orderId = jobDataMap.getLong("orderId");
         int pointsUsed = jobDataMap.getInt("pointsUsed");
         @SuppressWarnings("unchecked")
         HashSet<String> certificateCodes = (HashSet<String>) jobDataMap.get("certificateCodes");
 
-        log.info("Unlocking {} certificates and {} points from order {}", certificateCodes.size(), pointsUsed, orderId);
-        Order order = ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
+        log.info("Unlocking {} certificates and {} points from order {}",
+            certificateCodes.size(), pointsUsed, orderId);
+        Order order = ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(
+            orderId, pointsUsed, certificateCodes);
         order.setPaymentLink("");
         order.setPaymentLinkExpiry(null);
         orderRepository.save(order);
-        log.info("Successfully unlocked {} certificates and {} points from order {}", certificateCodes.size(), pointsUsed, orderId);
+        log.info("Successfully unlocked {} certificates and {} points from order {}",
+            certificateCodes.size(), pointsUsed, orderId);
     }
 }

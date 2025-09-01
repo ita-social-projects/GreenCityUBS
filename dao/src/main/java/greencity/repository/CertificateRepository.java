@@ -64,9 +64,10 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
         @Param("status") CertificateStatus status);
 
     /**
-     * Method to get all certificates by codes that belong to specific {@link Order}.
+     * Method to get all certificates by codes that belong to specific
+     * {@link Order}.
      *
-     * @param codes - certificate codes.
+     * @param codes   - certificate codes.
      * @param orderId - id of {@link Order} which certificates should belong to.
      * @return set of {@link Certificate} that belong to order.
      * @author Oleksandr Ilnytskyi
