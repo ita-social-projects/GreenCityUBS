@@ -8,10 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
-import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.*;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
 import java.util.Collections;
@@ -126,7 +123,7 @@ class TelegramControllerTest {
 
     @Test
     void markMessagesAsRead_ShouldReturnOk() throws Exception {
-        MarkMessagesAsReadRequest request = MarkMessagesAsReadRequest
+        MarkMessagesAsReadRequestDto request = MarkMessagesAsReadRequestDto
             .builder()
             .messagesIds(List.of(1L, 2L, 3L))
             .build();
@@ -139,5 +136,31 @@ class TelegramControllerTest {
             .andExpect(status().isNoContent());
 
         verify(telegramService).markMessagesAsRead(request);
+    }
+
+    @Test
+    void toggleNotifications_ShouldReturnOk() throws Exception {
+        ToggleNotificationsRequestDto request = ToggleNotificationsRequestDto
+            .builder()
+            .isNotify(true)
+            .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mockMvc.perform(put("/ubs/telegram/notifications")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNoContent());
+
+        verify(telegramService).toggleNotifications(any(), eq(request));
+    }
+
+    @Test
+    void getIsNotificationsEnabled_ShouldReturnOk() throws Exception {
+        mockMvc.perform(get("/ubs/telegram/notifications")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(telegramService).getIsNotificationsEnabled(any());
     }
 }

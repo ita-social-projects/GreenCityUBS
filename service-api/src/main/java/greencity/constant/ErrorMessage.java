@@ -203,6 +203,8 @@ public class ErrorMessage {
     public static final String UUID_NOT_FOUND_BY_EMAIL = "UUID not found by email: ";
     public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
     public static final String TARIFF_VALIDATION_ERROR_MESSAGE = "Invalid tariff list.";
+    public static final String POSITION_VALIDATION_ERROR_MESSAGE = "Invalid position IDs.";
+    public static final String INVALID_POSITION_IDS = "Invalid position IDs: %s";
     public static final String TARIFF_LIST_IS_NULL = "Tariffs cannot be null";
     public static final String TARIFF_LIST_IS_EMPTY = "Tariffs cannot be empty";
     public static final String TARIFF_IS_NULL = "Tariff cannot be null";
@@ -215,4 +217,7 @@ public class ErrorMessage {
     public static final String TELEGRAM_RECEIVE_EXCEPTION = "Exception occurred while receiving from telegram: %s";
     public static final String TELEGRAM_NULL_METHOD_EXCEPTION = "Execution method cannot be null";
     public static final String TELEGRAM_INVALID_METHOD_EXCEPTION = "Invalid execution method type: %s";
+    public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
+    public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
+        "Template cannot be deleted while it is referenced by existing notifications";
 }

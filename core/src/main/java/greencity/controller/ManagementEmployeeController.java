@@ -45,11 +45,12 @@ public class ManagementEmployeeController {
     private final UBSClientService ubsClientService;
 
     /**
-     * Controller method to save an employee.
+     * Saves a new employee with optional image upload.
      *
-     * @param employeeWithTariffsIdDto DTO for {@link EmployeeWithTariffsIdDto}.
-     * @param image                    Image of the employee (optional).
-     * @return ResponseEntity with {@link EmployeeWithTariffsDto} instance.
+     * @param employeeWithTariffsIdDto DTO containing employee details and tariffs.
+     * @param image                    Optional image file for the employee.
+     * @return ResponseEntity containing the saved {@link EmployeeWithTariffsDto}
+     *         and HTTP status 201 Created.
      */
     @Operation(summary = "Save employee")
     @ApiResponses(value = {
@@ -70,11 +71,12 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller gets all employees.
+     * Retrieves all employees with paging and filtering support.
      *
-     * @return PageableDto of {@link GetEmployeeDto} employees.
-     * @author Mykola Danylko.
-     * @author Olena Sotnik.
+     * @param employeePage           Pagination parameters.
+     * @param employeeFilterCriteria Filtering criteria for employees.
+     * @return PageableDto containing a list of {@link GetEmployeeDto} and paging
+     *         info.
      */
     @Operation(summary = "Get all employees")
     @ApiResponses(value = {
@@ -93,10 +95,12 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller updates information about employee.
+     * Updates an existing employee's information, optionally updating their image.
      *
-     * @return {@link EmployeeWithTariffsDto} update employee.
-     * @author Mykola Danylko.
+     * @param employeeWithTariffsIdDto DTO containing updated employee details and
+     *                                 tariffs.
+     * @param image                    Optional updated image file for the employee.
+     * @return ResponseEntity containing the updated {@link EmployeeWithTariffsDto}.
      */
     @Operation(summary = "Update information about employee")
     @ApiResponses(value = {
@@ -116,10 +120,10 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller deletes employee.
+     * Deactivates (soft deletes) an employee by their ID.
      *
-     * @return {@link HttpStatus}
-     * @author Mykola Danylko.
+     * @param id ID of the employee to deactivate. Must be positive.
+     * @return ResponseEntity with HTTP status 200 OK on successful deactivation.
      */
     @Operation(summary = "Delete employee")
     @ApiResponses(value = {
@@ -137,10 +141,10 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller activate employee.
+     * Activates an employee by their ID.
      *
-     * @return {@link HttpStatus}
-     * @author Oksana Spodaryk.
+     * @param id ID of the employee to activate. Must be positive.
+     * @return ResponseEntity with HTTP status 200 OK on successful activation.
      */
     @Operation(summary = "Activate employee")
     @ApiResponses(value = {
@@ -158,10 +162,10 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller gets all employee positions.
+     * Retrieves all available employee positions.
      *
-     * @return {@link PositionDto}
-     * @author Mykola Danylko.
+     * @return ResponseEntity containing a list of {@link PositionDto} and HTTP
+     *         status 200 OK.
      */
     @Operation(summary = "Get all employee positions")
     @ApiResponses(value = {

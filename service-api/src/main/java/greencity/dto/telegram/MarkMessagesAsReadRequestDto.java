@@ -10,6 +10,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MarkMessagesAsReadRequest {
+public class MarkMessagesAsReadRequestDto {
     private List<Long> messagesIds;
 }

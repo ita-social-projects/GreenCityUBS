@@ -15,6 +15,7 @@ public class AppConstant {
         "https://csb10032000a548f571.blob.core.windows.net/allfiles/90370622-3311-4ff1-9462-20cc98a64d1ddefault_image.jpg";
     public static final String UBS_LINK = "/ubs";
     public static final String UBS_MANAG_LINK = "/ubs/management";
+    public static final String UBS_CLIENT_LINK = "/ubs/client";
     public static final String ADMIN_LINK = "/admin";
     public static final String ADMIN_EMPL_LINK = "/admin/ubs-employee";
     public static final String SUPER_ADMIN_LINK = "/ubs/superAdmin";
@@ -22,7 +23,7 @@ public class AppConstant {
     public static final String UBS_EXPORT = UBS_LINK + "/order/pdf/export";
     public static final String LOGS_LINKS = "/logs/**";
     public static final String EXPORT_SETTINGS_LINKS = "/export/settings/**";
-    public static final String TELEGRAM_LINKS = "/telegram/**";
+    public static final String TELEGRAM_LINK = "/ubs/telegram";
     public static final String ADMIN = "ADMIN";
     public static final String USER = "USER";
     public static final String UBS_EMPLOYEE = "UBS_EMPLOYEE";

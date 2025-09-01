@@ -16,7 +16,6 @@ import greencity.dto.table.ColumnDTO;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.dto.user.ChatLinkDto;
-import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.table.TableColumnWidthForEmployee;
@@ -31,7 +30,6 @@ import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.order.Event;
 import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.enums.BonusReason;
 import greencity.enums.CancellationReason;
 import greencity.enums.EditType;
 import greencity.enums.OrderStatus;
@@ -40,14 +38,11 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.repository.CityRepository;
-import greencity.repository.DistrictRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.RegionRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.AddressRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -95,7 +90,6 @@ import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.OrderHistory.UBS_ADMIN;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -113,15 +107,13 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     private final TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     private final UserRemoteClient userRemoteClient;
     private final UserRepository userRepository;
-    private final AddressRepository addressRepository;
     private final EventService eventService;
     private final NotificationServiceImpl notificationService;
     private final SuperAdminService superAdminService;
     private final OrderLockService orderLockService;
     private final RegionRepository regionRepository;
-    private final CityRepository cityRepository;
-    private final DistrictRepository districtRepository;
     private final OrderAddressRepository orderAddressRepository;
+    private final PaymentService paymentService;
     private static final String ORDER_STATUS = "orderStatus";
     private static final String DATE_OF_EXPORT = "dateOfExport";
     private static final String RECEIVING = "receivingStation";
@@ -656,9 +648,11 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             try {
                 Order existedOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
                 if (isOrderBlockedByAnotherEmployee(existedOrder, employee.getId())) {
                     throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
+
                 if (existedOrder.getOrderStatus().checkPossibleStatus(updatedStatusValue)) {
                     existedOrder.setOrderStatus(OrderStatus.valueOf(updatedStatusValue));
                     removePickUpDetailsAndResponsibleEmployees(existedOrder);
@@ -667,19 +661,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                         "Such desired status isn't applicable with current status!");
                 }
 
-                if (existedOrder.getOrderStatus() == OrderStatus.CANCELED
-                    && (existedOrder.getPointsToUse() != 0 || !existedOrder.getCertificates().isEmpty())) {
-                    notificationService.notifyBonusesFromCanceledOrder(existedOrder);
-                    returnAllPointsFromOrder(existedOrder);
-                }
-
+                sendNotificationAboutOrderStatusChange(existedOrder, employee);
                 orderLockService.unlockOrder(existedOrder);
-
-                if (OrderStatus.BROUGHT_IT_HIMSELF == OrderStatus.valueOf(updatedStatusValue)) {
-                    eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK,
-                        employee.getFirstName() + "  " + employee.getLastName(), existedOrder);
-                    notificationService.notifySelfPickupOrder(existedOrder);
-                }
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -687,34 +670,32 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
         return unresolvedGoals;
     }
 
-    private void returnAllPointsFromOrder(Order order) {
-        Integer pointsToReturn = order.getPointsToUse();
-        if (isNull(pointsToReturn) || pointsToReturn == 0) {
-            return;
+    private void sendNotificationAboutOrderStatusChange(Order updatedOrder, Employee employee) {
+        if (updatedOrder.getOrderStatus() == OrderStatus.CONFIRMED) {
+            notificationService.notifyCourierItineraryFormed(updatedOrder);
         }
-        User user = order.getUser();
-        if (isNull(user.getCurrentPoints())) {
-            user.setCurrentPoints(0);
-        }
-        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
-        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
-            .amount(pointsToReturn)
-            .date(LocalDateTime.now())
-            .reason(BonusReason.REFUND_CANCELED_ORDER)
-            .user(user)
-            .order(order)
-            .build();
-        if (isNull(user.getChangeOfPointsList())) {
-            user.setChangeOfPointsList(new ArrayList<>());
-        }
-        user.getChangeOfPointsList().add(changeOfPoints);
-        userRepository.save(user);
-        if (!order.getCertificates().isEmpty()) {
-            Set<Certificate> certificates = order.getCertificates();
-            for (Certificate certificate : certificates) {
-                certificate.setPoints(0);
-                certificateRepository.save(certificate);
+
+        if (updatedOrder.getOrderStatus() == OrderStatus.CANCELED) {
+            notificationService.notifyCanceledOrder(updatedOrder);
+
+            if (updatedOrder.getPointsToUse() != 0 || !updatedOrder.getCertificates().isEmpty()) {
+                notificationService.notifyBonusesFromCanceledOrder(updatedOrder);
+                paymentService.processPointsRefundForOrder(updatedOrder);
+
+                if (!updatedOrder.getCertificates().isEmpty()) {
+                    Set<Certificate> certificates = updatedOrder.getCertificates();
+                    for (Certificate certificate : certificates) {
+                        certificate.setPoints(0);
+                        certificateRepository.save(certificate);
+                    }
+                }
             }
+        }
+
+        if (updatedOrder.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
+            eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK,
+                employee.getFirstName() + "  " + employee.getLastName(), updatedOrder);
+            notificationService.notifySelfPickupOrder(updatedOrder);
         }
     }
 

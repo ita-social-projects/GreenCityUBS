@@ -11,7 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class TelegramChatProducerTest {
+class TelegramChatProducerTest {
     @InjectMocks
     private TelegramChatProducer telegramChatProducer;
 

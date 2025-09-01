@@ -76,8 +76,8 @@ class NotificationTriggerTest {
     @Test
     void testOrderWasCanceled() {
         NotificationTrigger trigger = NotificationTrigger.ORDER_WAS_CANCELED;
-        assertEquals("Повернення бонусів після скасування замовлення", trigger.getDescriptionUk());
-        assertEquals("Refund of bonuses after order cancellation", trigger.getDescriptionEn());
+        assertEquals("Скасування замовлення", trigger.getDescriptionUk());
+        assertEquals("Order cancellation", trigger.getDescriptionEn());
     }
 
     @Test

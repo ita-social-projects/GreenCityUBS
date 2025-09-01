@@ -4,7 +4,6 @@ import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
-import greencity.constant.TelegramBotConstants;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationFullDto;
@@ -40,6 +39,7 @@ import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.OrderBagService;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -842,7 +842,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyCreatedOrder(Order order) {
         fillAndSendNotification(
-            getNotificationParametersForNewOrder(order),
+            getNotificationParametersWithCustomerInfo(order),
             order,
             NotificationType.CREATE_NEW_ORDER);
     }
@@ -895,7 +895,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {
+    private Set<NotificationParameter> getNotificationParametersWithCustomerInfo(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
@@ -952,16 +952,24 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username) {
+    public void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username, String lang) {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(username)
-            .subject(TelegramBotConstants.GREEN_OFFICE_SUBJECT)
+            .subject(MessageProvider.get(lang, "green.office.subject"))
             .body(userEmail)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
             .build();
         userRemoteClient.sendGreenOfficeRequestNotification(notification);
+    }
+
+    @Override
+    public void notifyCanceledOrder(Order order) {
+        fillAndSendNotification(
+            getNotificationParametersWithCustomerInfo(order),
+            order,
+            NotificationType.CANCELED_ORDER);
     }
 
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language,
