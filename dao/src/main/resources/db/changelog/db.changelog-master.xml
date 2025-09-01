@@ -290,4 +290,5 @@
     <include file="db/changelog/logs/2025-07-09-ch-drop-telegram-old-tables-and-columns.xml"/>
     <include file="db/changelog/logs/ch-drop-viber-bot-table-Popovych.xml"/>
     <include file="db/changelog/logs/ch-add-quartz-tables-Ilnytskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-payment-link-columns-into-orders-table-Ilnytskyi.xml"/>
 </databaseChangeLog>

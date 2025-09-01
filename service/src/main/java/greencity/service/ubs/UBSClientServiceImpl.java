@@ -1056,6 +1056,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .address(addressInfoDtoBuilder(order))
             .paymentStatusUk(paymentStatusTranslation.getTranslationValueUk())
             .paymentStatusEn(paymentStatusTranslation.getTranslationsValueEn())
+            .paymentLink(order.getPaymentLink())
+            .paymentLinkExpiry(order.getPaymentLinkExpiry())
             .build();
     }
 
