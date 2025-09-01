@@ -913,9 +913,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (certificateCodes == null) {
             certificateCodes = new HashSet<>();
         }
-        if (pointsUsed <= 0 && certificateCodes.isEmpty()) {
-            return;
-        }
         Long orderId = order.getId();
 
         JobDataMap jobDataMap = new JobDataMap();
