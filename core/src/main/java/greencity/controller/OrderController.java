@@ -17,6 +17,7 @@ import greencity.dto.order.EventDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
@@ -209,14 +210,13 @@ public class OrderController {
     }
 
     /**
-     * Receives payment notifications from WayForPay. Parses the JSON from the
-     * request parameters into a PaymentResponseDto, validates it, and returns a
-     * PaymentResponseWayForPay object. HTTP status: 200 OK — payment processed
-     * successfully 422 Unprocessable Entity — invalid payment data
+     * Receives payment notifications from WayForPay via form parameters, delegates
+     * validation/parsing to the service, and returns the acknowledgement payload.
+     * Always responds with HTTP 200 OK per WFP webhook requirements.
      *
-     * @param formParams Map with payment response parameters from WayForPay
-     * @return PaymentResponseWayForPay containing status and orderReference
-     * @throws IOException If an I/O error occurs (rare in normal webhook flow)
+     * @param formParams Map with payment response parameters from WayForPay.
+     * @return PaymentResponseWayForPay containing status and orderReference.
+     * @throws IOException If an I/O error occurs (rare in normal webhook flow).
      */
     @Operation(summary = "Receive payment from WayForPay.")
     @ApiResponses(value = {
