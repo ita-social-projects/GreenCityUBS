@@ -226,7 +226,6 @@ public class OrderController {
     @PostMapping("/receivePayment")
     public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
         throws IOException {
-
         return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
     }
 
