@@ -54,7 +54,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
         throws IOException, ServletException {
         String token = extractToken(request);
 
-        log.info("token: {}", token);
+        log.debug("token: {}", token);
         if (token != null) {
             try {
                 ((ProviderManager) authenticationManager).setEraseCredentialsAfterAuthentication(false);
