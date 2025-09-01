@@ -1,5 +1,7 @@
 package greencity.scheduler;
 
+import greencity.entity.order.Order;
+import greencity.repository.OrderRepository;
 import greencity.service.ubs.UBSClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +18,9 @@ import java.util.HashSet;
 @DisallowConcurrentExecution
 @Slf4j
 @RequiredArgsConstructor
-public class OrderExpiryJob implements Job {
+public class PaymentExpiryJob implements Job {
     private final UBSClientService ubsClientService;
+    private final OrderRepository orderRepository;
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
@@ -28,7 +31,10 @@ public class OrderExpiryJob implements Job {
         HashSet<String> certificateCodes = (HashSet<String>) jobDataMap.get("certificateCodes");
 
         log.info("Unlocking {} certificates and {} points from order {}", certificateCodes.size(), pointsUsed, orderId);
-        ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
+        Order order = ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
+        order.setPaymentLink("");
+        order.setPaymentLinkExpiry(null);
+        orderRepository.save(order);
         log.info("Successfully unlocked {} certificates and {} points from order {}", certificateCodes.size(), pointsUsed, orderId);
     }
 }

@@ -119,18 +119,16 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.scheduler.OrderExpiryJob;
+import greencity.scheduler.PaymentExpiryJob;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.quartz.JobBuilder;
@@ -191,6 +189,7 @@ import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF
 import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
+import static greencity.constant.ErrorMessage.ORDER_IN_ONGOING_PROCESSING;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
@@ -594,6 +593,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
 
+        validateOrderPaymentProcessingStatus(order);
+
         User currentUser = userRepository.findByUuid(uuid);
         checkIsOrderOfCurrentUser(currentUser, order);
 
@@ -635,6 +636,20 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
             throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
         }
+    }
+
+    private void validateOrderPaymentProcessingStatus(Order order) {
+        if (isOrderInActivePaymentAttempt(order)) {
+            throw new BadRequestException(ORDER_IN_ONGOING_PROCESSING);
+        }
+    }
+
+    private boolean isOrderInActivePaymentAttempt(Order order) {
+        String paymentLink = order.getPaymentLink();
+        if (paymentLink == null) {
+            return false;
+        }
+        return !paymentLink.isEmpty();
     }
 
     private void adjustPaymentDetails(OrderResponseDto dto) {
@@ -694,9 +709,9 @@ public class UBSClientServiceImpl implements UBSClientService {
         OrderResponseDto dto, Order order, long sumToPayInCoins) {
         PaymentWayForPayRequestDto requestDto = formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(requestDto));
-        scheduleOrderExpiryJob(
-            order.getId(), dto.getPointsToUse(),
-            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS);
+        schedulePaymentExpiryJob(
+            order, dto.getPointsToUse(),
+            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
         return getPaymentRequestDto(order, link);
     }
 
@@ -705,10 +720,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         MonoBankPaymentRequestDto requestDto =
             formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
         CheckoutResponseFromMonoBank checkoutResponse = monoBankClient.getCheckoutResponse(requestDto, token);
-        scheduleOrderExpiryJob(
-            order.getId(), dto.getPointsToUse(),
-            dto.getCertificates(), MONOBANK_LINK_VALIDITY_SECONDS);
-        return getPaymentRequestDto(order, checkoutResponse.pageUrl());
+        String link = checkoutResponse.pageUrl();
+        schedulePaymentExpiryJob(
+            order, dto.getPointsToUse(),
+            dto.getCertificates(), MONOBANK_LINK_VALIDITY_SECONDS, link);
+        return getPaymentRequestDto(order, link);
     }
 
     private MonoBankPaymentRequestDto formPaymentRequestForMonoBank(Long orderId, long sumToPayInCoins, User user) {
@@ -889,24 +905,25 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .build());
 
         userRepository.save(user);
-        return orderRepository.save(order);
+        return order;
     }
 
-    private void scheduleOrderExpiryJob(
-        Long orderId, int pointsUsed, Set<String> certificateCodes, Long expirySeconds) {
+    private void schedulePaymentExpiryJob(
+        Order order, int pointsUsed, Set<String> certificateCodes, Long expirySeconds, String paymentLink) {
         if (certificateCodes == null) {
             certificateCodes = new HashSet<>();
         }
         if (pointsUsed <= 0 && certificateCodes.isEmpty()) {
             return;
         }
+        Long orderId = order.getId();
 
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("orderId", orderId);
         jobDataMap.put("pointsUsed", pointsUsed);
         jobDataMap.put("certificateCodes", certificateCodes);
 
-        JobDetail job = JobBuilder.newJob(OrderExpiryJob.class)
+        JobDetail job = JobBuilder.newJob(PaymentExpiryJob.class)
             .withIdentity(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)
             .usingJobData(jobDataMap)
             .build();
@@ -918,6 +935,9 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         try {
             quartzScheduler.scheduleJob(job, trigger);
+            order.setPaymentLink(paymentLink);
+            order.setPaymentLinkExpiry(LocalDateTime.now().plusSeconds(expirySeconds));
+            orderRepository.save(order);
         } catch (SchedulerException exception) {
             throw new IllegalStateException(PAYMENT_EXPIRY_SCHEDULE_EXCEPTION);
         }
@@ -1829,6 +1849,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(dto.getOrderId())
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
         checkOrderIsPaid(order.getOrderPaymentStatus());
+        validateOrderPaymentProcessingStatus(order);
         User currentUser = userRepository.findUserByUuid(userUuid)
             .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid));
         checkForNullCounter(order);
@@ -1841,9 +1862,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             return getPaymentRequestDto(order, null);
         } else {
             String link = formedLink(order, sumToPayInCoins);
-            scheduleOrderExpiryJob(
-                order.getId(), dto.getPointsToUse(),
-                dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS);
+            schedulePaymentExpiryJob(
+                order, dto.getPointsToUse(),
+                dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
             return getPaymentRequestDto(order, link);
         }
     }
