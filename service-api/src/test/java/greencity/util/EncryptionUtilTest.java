@@ -1,5 +1,6 @@
 package greencity.util;
 
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import java.util.Arrays;
@@ -49,6 +50,38 @@ class EncryptionUtilTest {
         String expectedSignature = new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
 
         assertEquals(expectedSignature, signature);
+    }
+
+    @Test
+    void testGenerateResponseSignature_CorrectHmac() {
+        PaymentResponseDto dto = PaymentResponseDto.builder()
+            .merchantAccount("merchant123")
+            .orderReference("order456")
+            .amount("100")
+            .currency("UAH")
+            .authCode("auth001")
+            .cardPan("123456******7890")
+            .transactionStatus("Approved")
+            .reasonCode("1100")
+            .build();
+
+        String secretKey = "testSecret";
+
+        String signature = encryptionUtil.generateResponseSignature(dto, secretKey);
+
+        StringJoiner sj = new StringJoiner(";");
+        sj.add(dto.getMerchantAccount())
+            .add(dto.getOrderReference())
+            .add(String.valueOf(dto.getAmount()))
+            .add(dto.getCurrency())
+            .add(dto.getAuthCode())
+            .add(dto.getCardPan())
+            .add(dto.getTransactionStatus())
+            .add(dto.getReasonCode());
+
+        String expectedSignature = new HmacUtils("HmacMD5", secretKey).hmacHex(sj.toString());
+
+        assertEquals(expectedSignature, signature, "Generated signature should match expected HMAC-MD5");
     }
 
     @Test

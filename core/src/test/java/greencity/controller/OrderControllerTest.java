@@ -4,6 +4,7 @@ import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -13,6 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
@@ -25,6 +27,7 @@ import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.OrderRepository;
@@ -51,6 +54,8 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -253,16 +258,38 @@ class OrderControllerTest {
     @Test
     void receivePaymentTest() throws Exception {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String paymentResponseJson = objectMapper.writeValueAsString(dto);
+        PaymentResponseWayForPay mockResponse = new PaymentResponseWayForPay();
+        mockResponse.setStatus("approved");
+        mockResponse.setOrderReference(dto.getOrderReference());
 
-        setRedirectionConfigProp();
+        when(ubsClientService.convertMapIntoPaymentResponseDto(anyMap()))
+            .thenReturn(mockResponse);
 
         mockMvc.perform(post(ubsLink + "/receivePayment")
-            .content(paymentResponseJson)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().is3xxRedirection());
+                .param("merchantAccount", dto.getMerchantAccount())
+                .param("orderReference", dto.getOrderReference())
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.orderReference").value(dto.getOrderReference()))
+            .andExpect(jsonPath("$.status").value("approved"));
+    }
+
+    @Test
+    void receivePaymentReturnErrorTest() throws Exception {
+        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
+        PaymentResponseWayForPay mockResponse = new PaymentResponseWayForPay();
+        mockResponse.setStatus("ERROR");
+        mockResponse.setOrderReference(dto.getOrderReference());
+
+        when(ubsClientService.convertMapIntoPaymentResponseDto(anyMap()))
+            .thenReturn(mockResponse);
+
+        mockMvc.perform(post(ubsLink + "/receivePayment")
+                .param("merchantAccount", dto.getMerchantAccount())
+                .param("orderReference", dto.getOrderReference())
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isUnprocessableEntity());
     }
 
     @Test

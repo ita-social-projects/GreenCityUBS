@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.MonoBankClient;
 import greencity.client.UserRemoteClient;
@@ -130,6 +131,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -144,6 +146,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import static greencity.ModelUtils.TEST_BAG_FOR_USER_DTO;
 import static greencity.ModelUtils.TEST_EMAIL;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
@@ -241,6 +244,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -273,6 +277,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private ModelMapper modelMapper;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Mock
     private CertificateRepository certificateRepository;
@@ -3144,6 +3151,67 @@ class UBSClientServiceImplTest {
         assertEquals(PAYMENT_VALIDATION_ERROR, exception.getMessage());
         verify(orderRepository).findById(1L);
         verifyNoInteractions(encryptionUtil);
+    }
+    @Test
+    void testConvertMapIntoPaymentResponseDto_emptyMap() {
+        PaymentResponseWayForPay result = ubsClientService.convertMapIntoPaymentResponseDto(Collections.emptyMap());
+
+        assertNotNull(result);
+        assertEquals("ERROR", result.getStatus());
+        assertNull(result.getOrderReference());
+    }
+
+    @Test
+    void testConvertMapIntoPaymentResponseDto_invalidJson() throws Exception {
+        Map<String, String> params = Map.of("invalid", "not_json");
+
+        when(objectMapper.readValue(anyString(), eq(PaymentResponseDto.class)))
+            .thenThrow(JsonProcessingException.class);
+
+        PaymentResponseWayForPay result = ubsClientService.convertMapIntoPaymentResponseDto(params);
+
+        assertNotNull(result);
+        assertEquals("ERROR", result.getStatus());
+        assertNull(result.getOrderReference());
+    }
+
+    @Test
+    void testConvertMapIntoPaymentResponseDto_invalidSignature() throws Exception {
+        PaymentResponseDto dto = new PaymentResponseDto();
+        dto.setMerchantSignature("wrong");
+        dto.setOrderReference("ORD123");
+
+        Map<String, String> params = Map.of("json", "dummy");
+
+        when(objectMapper.readValue(anyString(), eq(PaymentResponseDto.class))).thenReturn(dto);
+        when(encryptionUtil.generateResponseSignature(dto, wayForPaySecret)).thenReturn("correct");
+
+        PaymentResponseWayForPay result = ubsClientService.convertMapIntoPaymentResponseDto(params);
+
+        assertNotNull(result);
+        assertEquals("ERROR", result.getStatus());
+        assertNull(result.getOrderReference());
+    }
+
+    @Test
+    void testConvertMapIntoPaymentResponseDto_valid() throws Exception {
+        PaymentResponseDto dto = new PaymentResponseDto();
+        dto.setMerchantSignature("correct");
+        dto.setOrderReference("ORD123");
+
+        Map<String, String> params = Map.of("json", "dummy");
+
+        when(objectMapper.readValue(anyString(), eq(PaymentResponseDto.class))).thenReturn(dto);
+        when(encryptionUtil.generateResponseSignature(dto, wayForPaySecret)).thenReturn("correct");
+
+        // Спаймо сервіс, щоб мокнути validatePayment і не заходити в реальну базу
+        UBSClientServiceImpl spyService = Mockito.spy(ubsClientService);
+        PaymentResponseWayForPay expected = new PaymentResponseWayForPay();
+        doReturn(expected).when(spyService).validatePayment(dto);
+
+        PaymentResponseWayForPay result = spyService.convertMapIntoPaymentResponseDto(params);
+
+        assertSame(expected, result);
     }
 
     @Test
