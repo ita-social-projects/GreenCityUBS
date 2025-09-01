@@ -1,6 +1,18 @@
 package greencity.service.ubs.pdf.exporter;
 
-import com.lowagie.text.*;
+//import com.lowagie.text.*;
+import com.google.zxing.WriterException;
+import com.lowagie.text.Annotation;
+import com.lowagie.text.Chunk;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.*;
 import com.lowagie.text.pdf.draw.LineSeparator;
 import greencity.constant.pdf.*;
@@ -273,7 +285,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         }
     }
 
-    private Image buildQrImage(String paymentLink) throws Exception {
+    private Image buildQrImage(String paymentLink) throws WriterException, IOException {
         BufferedImage qrImage = QrCodeGenerator.generateQrCodeImage(paymentLink, 150, 150);
         Image pdfImage = PdfImageUtil.convertBufferedImageToImage(qrImage);
         pdfImage.setAlignment(ALIGN_LEFT);
