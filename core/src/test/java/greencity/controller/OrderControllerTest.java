@@ -266,9 +266,9 @@ class OrderControllerTest {
             .thenReturn(mockResponse);
 
         mockMvc.perform(post(ubsLink + "/receivePayment")
-                .param("merchantAccount", dto.getMerchantAccount())
-                .param("orderReference", dto.getOrderReference())
-                .accept(MediaType.APPLICATION_JSON))
+            .param("merchantAccount", dto.getMerchantAccount())
+            .param("orderReference", dto.getOrderReference())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.orderReference").value(dto.getOrderReference()))
@@ -286,9 +286,9 @@ class OrderControllerTest {
             .thenReturn(mockResponse);
 
         mockMvc.perform(post(ubsLink + "/receivePayment")
-                .param("merchantAccount", dto.getMerchantAccount())
-                .param("orderReference", dto.getOrderReference())
-                .accept(MediaType.APPLICATION_JSON))
+            .param("merchantAccount", dto.getMerchantAccount())
+            .param("orderReference", dto.getOrderReference())
+            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isUnprocessableEntity());
     }
 

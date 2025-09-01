@@ -34,13 +34,13 @@ public class EncryptionUtil {
     }
 
     /**
-     * Generates a HMAC-MD5 signature for a WayForPay payment response.
-     * The signature is calculated based on the payment response fields in the
-     * specific order required by WayForPay:
-     * merchantAccount, orderReference, amount, currency, authCode, cardPan,
-     * transactionStatus, reasonCode.
+     * Generates a HMAC-MD5 signature for a WayForPay payment response. The
+     * signature is calculated based on the payment response fields in the specific
+     * order required by WayForPay: merchantAccount, orderReference, amount,
+     * currency, authCode, cardPan, transactionStatus, reasonCode.
      *
-     * @param dto       The {@link PaymentResponseDto} received from WayForPay callback.
+     * @param dto       The {@link PaymentResponseDto} received from WayForPay
+     *                  callback.
      * @param secretKey The secret key (merchant password) used for HMAC generation.
      * @return The generated HMAC-MD5 signature as a hexadecimal string.
      */

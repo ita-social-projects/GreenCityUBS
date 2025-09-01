@@ -3152,6 +3152,7 @@ class UBSClientServiceImplTest {
         verify(orderRepository).findById(1L);
         verifyNoInteractions(encryptionUtil);
     }
+
     @Test
     void testConvertMapIntoPaymentResponseDto_emptyMap() {
         PaymentResponseWayForPay result = ubsClientService.convertMapIntoPaymentResponseDto(Collections.emptyMap());
