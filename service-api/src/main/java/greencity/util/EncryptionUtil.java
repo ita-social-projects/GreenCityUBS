@@ -55,8 +55,7 @@ public class EncryptionUtil {
             dto.getAuthCode(),
             dto.getCardPan(),
             dto.getTransactionStatus(),
-            dto.getReasonCode()
-        );
+            dto.getReasonCode());
 
         if (requiredFields.stream().anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException("Missing required fields for WayForPay signature generation.");
