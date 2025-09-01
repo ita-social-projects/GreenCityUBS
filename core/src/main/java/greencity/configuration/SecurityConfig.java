@@ -34,7 +34,7 @@ import static greencity.constant.AppConstant.COMMIT_INFO;
 import static greencity.constant.AppConstant.EXPORT_SETTINGS_LINKS;
 import static greencity.constant.AppConstant.LOGS_LINKS;
 import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
-import static greencity.constant.AppConstant.TELEGRAM_LINKS;
+import static greencity.constant.AppConstant.TELEGRAM_LINK;
 import static greencity.constant.AppConstant.UBS_CLIENT_LINK;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE;
 import static greencity.constant.AppConstant.UBS_EXPORT;
@@ -109,6 +109,7 @@ public class SecurityConfig {
                     UBS_LINK + "/tariffs/{locationId}",
                     USER_AGREEMENT_LINK + "/latest",
                     UBS_LINK + "/districts-for-kyiv",
+                    UBS_LINK + "/order-details-for-tariff",
                     COMMIT_INFO)
                 .permitAll()
                 .requestMatchers("/v2/api-docs/**",
@@ -275,7 +276,6 @@ public class SecurityConfig {
                     "/notifications/**")
                 .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + "/**",
                     UBS_CLIENT_LINK + "/**",
                     UBS_LINK + "/order/{id}/cancellation",
                     UBS_LINK + "/certificate/{responseCode}",
@@ -285,17 +285,20 @@ public class SecurityConfig {
                     UBS_LINK + "/check-if-tariff-exists/{id}",
                     UBS_LINK + "/locations",
                     LOGS_LINKS,
-                    EXPORT_SETTINGS_LINKS)
+                    EXPORT_SETTINGS_LINKS,
+                    UBS_LINK + "/findAll-order-address",
+                    UBS_LINK + "/order-details-for-tariff",
+                    UBS_LINK + "/personal-data")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
-                    UBS_LINK + TELEGRAM_LINKS,
+                    TELEGRAM_LINK + "/**",
                     SUPER_ADMIN_LINK + "/tariff/{id}")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
-                    UBS_LINK + TELEGRAM_LINKS)
+                    TELEGRAM_LINK + "/**")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PUT,
-                    UBS_LINK + TELEGRAM_LINKS)
+                    TELEGRAM_LINK + "/**")
                 .hasRole(UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",

@@ -28,6 +28,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
+import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
@@ -52,7 +53,6 @@ import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.NotificationParameterRepository;
-import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -61,7 +61,6 @@ import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.ReceivingStationRepository;
-import greencity.repository.RefundRepository;
 import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserNotificationRepository;
@@ -69,6 +68,7 @@ import greencity.repository.UserRepository;
 import greencity.repository.CityRepository;
 import greencity.repository.DistrictRepository;
 import greencity.service.notification.NotificationServiceImpl;
+import java.util.HashMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,6 +76,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -105,67 +106,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static greencity.ModelUtils.ORDER_DETAIL_STATUS_DTO;
-import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO;
-import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO_LIST;
-import static greencity.ModelUtils.TEST_BAG;
-import static greencity.ModelUtils.TEST_BAG_INFO_DTO;
-import static greencity.ModelUtils.TEST_BAG_LIST;
-import static greencity.ModelUtils.TEST_BAG_MAPPING_DTO_LIST;
-import static greencity.ModelUtils.TEST_MAP_ADDITIONAL_BAG_LIST;
-import static greencity.ModelUtils.TEST_ORDER;
-import static greencity.ModelUtils.TEST_ORDER_DETAILS_INFO_DTO_LIST;
-import static greencity.ModelUtils.TEST_PAYMENT_LIST;
-import static greencity.ModelUtils.TEST_USER;
-import static greencity.ModelUtils.UPDATE_ORDER_PAGE_ADMIN_DTO;
-import static greencity.ModelUtils.getAdminEmployee;
-import static greencity.ModelUtils.getBagInfoDto;
-import static greencity.ModelUtils.getBaglist;
-import static greencity.ModelUtils.getCertificateList;
-import static greencity.ModelUtils.getEcoNumberDto;
-import static greencity.ModelUtils.getEmployee;
-import static greencity.ModelUtils.getExportDetailsRequest;
-import static greencity.ModelUtils.getExportDetailsRequestToday;
-import static greencity.ModelUtils.getFormedOrder;
-import static greencity.ModelUtils.getInfoPayment;
-import static greencity.ModelUtils.getNotificationParameterSet;
-import static greencity.ModelUtils.getOrder;
-import static greencity.ModelUtils.getOrderBag;
-import static greencity.ModelUtils.getOrderDoneByUser;
-import static greencity.ModelUtils.getOrderExportDetails;
-import static greencity.ModelUtils.getOrderExportDetailsWithDeliverFromTo;
-import static greencity.ModelUtils.getOrderExportDetailsWithExportDate;
-import static greencity.ModelUtils.getOrderExportDetailsWithExportDateDeliverFrom;
-import static greencity.ModelUtils.getOrderExportDetailsWithExportDateDeliverFromTo;
-import static greencity.ModelUtils.getOrderExportDetailsWithNullValues;
-import static greencity.ModelUtils.getOrderForGetOrderStatusData2Test;
-import static greencity.ModelUtils.getOrderForGetOrderStatusEmptyPriceDetails;
-import static greencity.ModelUtils.getOrderStatusPaymentTranslations;
-import static greencity.ModelUtils.getOrderStatusTranslation;
-import static greencity.ModelUtils.getOrderStatusTranslations;
-import static greencity.ModelUtils.getOrderUserFirst;
-import static greencity.ModelUtils.getOrderWithPaymentStatus;
-import static greencity.ModelUtils.getOrdersStatusBROUGHT_IT_HIMSELFDto;
-import static greencity.ModelUtils.getOrdersStatusCanceledDto;
-import static greencity.ModelUtils.getOrdersStatusConfirmedDto;
-import static greencity.ModelUtils.getOrdersStatusDoneDto;
-import static greencity.ModelUtils.getOrdersStatusFormedDto;
-import static greencity.ModelUtils.getOrdersStatusFormedDto2;
-import static greencity.ModelUtils.getOrdersStatusNotTakenOutDto;
-import static greencity.ModelUtils.getOrdersStatusOnThe_RouteDto;
-import static greencity.ModelUtils.getPayment;
-import static greencity.ModelUtils.getPaymentTableInfoDto;
-import static greencity.ModelUtils.getReceivingList;
-import static greencity.ModelUtils.getReceivingStation;
-import static greencity.ModelUtils.getService;
-import static greencity.ModelUtils.getStatusTranslation;
-import static greencity.ModelUtils.getTariffsInfo;
-import static greencity.ModelUtils.getTestDetailsOrderInfoDto;
-import static greencity.ModelUtils.getTestOrderDetailStatusRequestDto;
-import static greencity.ModelUtils.getTestUser;
-import static greencity.ModelUtils.getUserNotificationForUnpaidOrder;
-import static greencity.ModelUtils.updateAllOrderPageDto;
-import static greencity.ModelUtils.updateOrderPageAdminDto;
+import static greencity.ModelUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -177,8 +118,10 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -186,79 +129,50 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
-    @Mock(strictness = Mock.Strictness.LENIENT)
-    OrderAddressRepository orderAddressRepository;
-
     @Mock
     private UserRemoteWebClient userRemoteWebClient;
-
     @Mock(strictness = Mock.Strictness.LENIENT)
     OrderRepository orderRepository;
-
     @Mock
     UserRepository userRepository;
-
     @Mock
     CertificateRepository certificateRepository;
-
     @Mock(strictness = Mock.Strictness.LENIENT)
     private ModelMapper modelMapper;
-
     @Mock
     private ReceivingStationRepository receivingStationRepository;
-
     @Mock
     private PaymentRepository paymentRepository;
-
     @Mock
     private EmployeeOrderPositionRepository employeeOrderPositionRepository;
-
     @Mock
     private PositionRepository positionRepository;
-
     @Mock
     private EmployeeRepository employeeRepository;
-
     @Mock
     private BagRepository bagRepository;
-
     @Mock
     private UserRemoteClient userRemoteClient;
-
     @Mock(strictness = Mock.Strictness.LENIENT)
     private NotificationServiceImpl notificationService;
     @Mock
     private ObjectMapper objectMapper;
-
     @Mock
     private OrderDetailRepository orderDetailRepository;
-
-    @InjectMocks
-    private UBSManagementServiceImpl ubsManagementService;
-
     @Mock
     private EventService eventService;
-
     @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
-
     @Mock
     private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
-
     @Mock
     private UBSClientServiceImpl ubsClientService;
-
     @Mock
     private ServiceRepository serviceRepository;
-
     @Mock
     OrdersAdminsPageService ordersAdminsPageService;
-
     @Mock
     TariffsInfoRepository tariffsInfoRepository;
-
-    @Mock
-    RefundRepository refundRepository;
     @Mock
     private OrderBagService orderBagService;
     @Mock
@@ -279,6 +193,9 @@ class UBSManagementServiceImplTest {
     private CityRepository cityRepository;
     @Mock
     private DistrictRepository districtRepository;
+
+    @InjectMocks
+    private UBSManagementServiceImpl ubsManagementService;
 
     @Test
     void getAllCertificates() {
@@ -876,7 +793,7 @@ class UBSManagementServiceImplTest {
 
     @Test
     void testSetOrderDetailConfirmed() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(ModelUtils.getOrdersStatusConfirmedDto()));
+        when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(getOrdersStatusConfirmedDto()));
         doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
         when(orderRepository.getOrderDetails(anyLong()))
                 .thenReturn(Optional.ofNullable(getOrdersStatusFormedDto()));
@@ -1403,7 +1320,7 @@ class UBSManagementServiceImplTest {
     @Test
     void getOrderSumDetailsForAdjustmentPaidOrder() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
-        Order order = ModelUtils.getAdjustmentPaidOrder();
+        Order order = ModelUtils.getConfirmedPaidOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
@@ -1417,7 +1334,7 @@ class UBSManagementServiceImplTest {
     @Test
     void getOrderSumDetailsForFormedHalfPaidOrderWithDiffBags() {
         CounterOrderDetailsDto dto = ModelUtils.getcounterOrderDetailsDto();
-        Order order = ModelUtils.getFormedHalfPaidOrder();
+        Order order = getFormedHalfPaidOrder();
         order.setOrderDate(LocalDateTime.now());
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
 
@@ -2365,5 +2282,153 @@ class UBSManagementServiceImplTest {
         when(orderRepository.findById(paymentId)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> ubsManagementService.findOrderById(paymentId));
         verify(orderRepository, times(1)).findById(paymentId);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "ADJUSTMENT",
+        "CONFIRMED",
+        "FORMED",
+        "NOT_TAKEN_OUT",
+        "ON_THE_ROUTE",
+        "BROUGHT_IT_HIMSELF"
+    })
+    void setOrderDetailWithConfirmedOrdersTest(String orderStatus) {
+        Order order = getOrdersStatusDoneDto();
+        order.setOrderStatus(OrderStatus.valueOf(orderStatus));
+        order.setConfirmedQuantity(new HashMap<>());
+        order.setExportedQuantity(new HashMap<>());
+        order.setAmountOfBagsOrdered(new HashMap<>());
+        Long orderId = order.getId();
+        Map<Integer, Integer> confirmed = Map.of(1, 11);
+        Bag bag = TEST_BAG;
+
+        when(bagRepository.findCapacityById(1)).thenReturn(30);
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
+        when(orderDetailRepository.ifRecordExist(orderId, 1L)).thenReturn(1L);
+        when(orderDetailRepository.getConfirmWaste(orderId, 1L)).thenReturn(9L);
+        when(orderRepository.getOrderDetails(orderId)).thenReturn(Optional.of(order));
+        when(paymentRepository.selectSumPaid(orderId)).thenReturn(0L);
+        doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        doNothing().when(eventService).saveEvent(anyString(), anyString(), any());
+
+        ubsManagementService.setOrderDetail(order, confirmed, null, "test@mail.com");
+        verify(eventService).saveEvent(Mockito.contains(bag.getNameUk()), Mockito.eq("test@mail.com"),
+            Mockito.eq(order));
+        verify(eventService).saveEvent(anyString(), Mockito.eq("test@mail.com"), Mockito.eq(order));
+
+        Mockito.clearInvocations(eventService);
+        ubsManagementService.setOrderDetail(order, null, null, "test@mail.com");
+        verify(eventService, never()).saveEvent(anyString(), anyString(), any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"DONE", "CANCELED"})
+    void setOrderDetailWithExportedOrdersTest(String orderStatus) {
+        Order order = getOrdersStatusDoneDto();
+        order.setOrderStatus(OrderStatus.valueOf(orderStatus));
+        order.setConfirmedQuantity(new HashMap<>());
+        order.setExportedQuantity(new HashMap<>());
+        order.setAmountOfBagsOrdered(new HashMap<>());
+        Long orderId = order.getId();
+        Map<Integer, Integer> exported = Map.of(1, 15);
+        Bag bag = TEST_BAG;
+
+        when(bagRepository.findCapacityById(1)).thenReturn(30);
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(bag));
+        when(orderDetailRepository.ifRecordExist(orderId, 1L)).thenReturn(1L);
+        when(orderDetailRepository.getExporterWaste(orderId, 1L)).thenReturn(8L);
+        when(orderDetailRepository.getConfirmWaste(orderId, 1L)).thenReturn(8L);
+        when(orderRepository.getOrderDetails(orderId)).thenReturn(Optional.of(order));
+        when(paymentRepository.selectSumPaid(orderId)).thenReturn(0L);
+        doNothing().when(orderDetailRepository).updateExporter(anyInt(), anyLong(), anyLong());
+        doNothing().when(orderRepository).updateOrderPaymentStatus(anyLong(), anyString());
+        doNothing().when(eventService).saveEvent(anyString(), anyString(), any());
+
+        ubsManagementService.setOrderDetail(order, null, exported, "test@mail.com");
+        verify(eventService).saveEvent(Mockito.contains(bag.getNameUk()), Mockito.eq("test@mail.com"),
+            Mockito.eq(order));
+        verify(eventService, atLeastOnce()).saveEvent(anyString(), Mockito.eq("test@mail.com"), Mockito.eq(order));
+
+        Mockito.clearInvocations(eventService);
+        ubsManagementService.setOrderDetail(order, null, null, "test@mail.com");
+        verify(eventService, never()).saveEvent(anyString(), anyString(), any());
+    }
+
+    @Test
+    void setOrderDetailNeitherConfirmedNorExportedTest() {
+        Order order = getOrdersStatusDoneDto();
+        order.setOrderStatus(null);
+        order.setConfirmedQuantity(new HashMap<>());
+        order.setExportedQuantity(new HashMap<>());
+        order.setAmountOfBagsOrdered(new HashMap<>());
+        Long orderId = order.getId();
+        Map<Integer, Integer> confirmed = Map.of(1, 11);
+        Map<Integer, Integer> exported = Map.of(1, 15);
+
+        when(bagRepository.findCapacityById(1)).thenReturn(30);
+        when(bagRepository.findActiveBagById(1)).thenReturn(Optional.of(TEST_BAG));
+        when(orderDetailRepository.ifRecordExist(orderId, 1L)).thenReturn(1L);
+        when(orderRepository.getOrderDetails(orderId)).thenReturn(Optional.of(order));
+        when(paymentRepository.selectSumPaid(orderId)).thenReturn(0L);
+        doNothing().when(orderDetailRepository).updateConfirm(anyInt(), anyLong(), anyLong());
+        doNothing().when(orderRepository).updateOrderPaymentStatus(anyLong(), anyString());
+        doNothing().when(eventService).saveEvent(anyString(), anyString(), any());
+
+        ubsManagementService.setOrderDetail(order, confirmed, exported, "test@mail.com");
+        verify(eventService, atLeastOnce()).saveEvent(anyString(), Mockito.eq("test@mail.com"), Mockito.eq(order));
+    }
+
+    @Test
+    void getOrderSumDetailsWhenBeforeShipmentWithHalfPaidOrderTest() {
+        Order order = getFormedHalfPaidOrder();
+        Map<Integer, Integer> bagAmounts = new HashMap<>();
+        bagAmounts.put(1, 1);
+        order.setAmountOfBagsOrdered(bagAmounts);
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        doReturn(List.of(TEST_BAG)).when(orderBagService).findAllBagsInOrderBagsList(anyList());
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+
+        ubsManagementService.getOrderSumDetails(1L);
+
+        verify(notificationService).notifyHalfPaidPackage(order);
+    }
+
+    @Test
+    void getOrderSumDetailsWhenAfterConfirmationWithPaidOrderTest() {
+        Order order = getFormedHalfPaidOrder();
+        order.setOrderStatus(OrderStatus.DONE);
+        Map<Integer, Integer> bagAmounts = new HashMap<>();
+        bagAmounts.put(1, 1);
+        order.setAmountOfBagsOrdered(bagAmounts);
+
+        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+        doReturn(List.of(TEST_BAG)).when(orderBagService).findAllBagsInOrderBagsList(anyList());
+        doNothing().when(notificationService).notifyHalfPaidPackage(order);
+
+        ubsManagementService.getOrderSumDetails(1L);
+
+        verify(notificationService).notifyHalfPaidPackage(order);
+    }
+
+    @Test
+    void updateOrderDetailStatusToNotTakenOutTest() {
+        String email = "some@email.com";
+        Order saved = getOrder();
+        saved.setOrderStatus(OrderStatus.ON_THE_ROUTE);
+        Order updated = getOrder();
+        updated.setOrderStatus(OrderStatus.NOT_TAKEN_OUT);
+        OrderDetailStatusRequestDto detailStatusDto = OrderDetailStatusRequestDto.builder()
+            .orderStatus("NOT_TAKEN_OUT")
+            .build();
+
+        when(paymentRepository.findAllByOrderId(saved.getId())).thenReturn(saved.getPayment());
+
+        OrderDetailStatusDto result = ubsManagementService.updateOrderDetailStatus(saved, detailStatusDto, email);
+
+        verify(eventService).saveEvent(OrderHistory.ORDER_NOT_TAKEN_OUT_UK, email, updated);
+        verify(orderRepository).save(updated);
+        assertEquals(OrderStatus.NOT_TAKEN_OUT.name(), result.getOrderStatus());
     }
 }

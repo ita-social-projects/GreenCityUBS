@@ -1,13 +1,10 @@
 package greencity.ubstelegrambot;
 
+import greencity.client.UserRemoteClient;
 import greencity.client.config.UserRemoteWebClient;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.MarkMessagesAsReadRequest;
-import greencity.dto.telegram.MessageAssetDto;
-import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.*;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -54,6 +51,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -67,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -120,6 +119,12 @@ class TelegramServiceTest {
     @Mock
     private TelegramUtils telegramUtils;
 
+    @Mock
+    private UserRemoteClient userRemoteClient;
+
+    @Mock
+    private TelegramUpdateProcessor updateProcessor;
+
     private TelegramServiceImpl telegramService;
 
     public Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
@@ -127,12 +132,14 @@ class TelegramServiceTest {
     @BeforeEach
     void setUp() {
         telegramUpdateProcessorMap = new HashMap<>();
+        telegramUpdateProcessorMap.put("userUpdateProcessor", updateProcessor);
 
         telegramService = new TelegramServiceImpl(
             telegramMessageRepository,
             telegramManagerRepository,
             telegramChatRepository,
             userRemoteWebClient,
+            userRemoteClient,
             ubsClientService,
             telegramExecutor,
             employeeRepository,
@@ -310,7 +317,7 @@ class TelegramServiceTest {
             NotFoundException.class,
             () -> telegramService.findUserMessageByChatId(chatId, pageable));
 
-        assertEquals("There are no messages in the chat 1", exception.getMessage());
+        assertEquals("There are no messages in chat 1", exception.getMessage());
     }
 
     @Test
@@ -706,6 +713,7 @@ class TelegramServiceTest {
 
         CallbackQuery callbackQuery = new CallbackQuery();
         callbackQuery.setFrom(telegramUser);
+        callbackQuery.setData("manager_callback_example");
 
         Chat chat = new Chat();
         chat.setId(chatId);
@@ -922,6 +930,172 @@ class TelegramServiceTest {
         assertEquals(expected.getChatId(), result.getChatId());
     }
 
+    @Test
+    void processUpdate_shouldSetUserAndLanguage_whenUuidProvidedAndUserFound() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.empty());
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        String expectedLang = "en";
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenReturn(expectedLang);
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals(expectedLang, savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldSetDefaultLanguage_whenUserLanguageServiceFails() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.empty());
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenThrow(new RuntimeException("Service unavailable"));
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals("uk", savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldUpdateUserAndLanguage_whenExistingChatAndUserLanguageFound() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(existingChat));
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        String expectedLang = "en";
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenReturn(expectedLang);
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals(expectedLang, savedChat.getLanguageCode());
+    }
+
+    @Test
+    void processUpdate_shouldUpdateUserAndDefaultLanguage_whenExistingChatAndLanguageServiceFails() {
+        Long chatId = 12345L;
+        String uuid = "user-uuid";
+        String startCommand = "/start " + uuid;
+
+        var apiUser = getTelegramAPIUser(chatId);
+        apiUser.setUserName("testUser");
+        apiUser.setFirstName("Test");
+        apiUser.setLastName("User");
+
+        Message message = new Message();
+        message.setFrom(apiUser);
+        message.setText(startCommand);
+
+        Update update = new Update();
+        update.setMessage(message);
+
+        TelegramChat existingChat = TelegramChat.builder()
+            .id(1L)
+            .chatId(chatId.toString())
+            .build();
+        when(telegramChatRepository.findByChatId(chatId.toString()))
+            .thenReturn(Optional.of(existingChat));
+
+        User mockUser = new User();
+        mockUser.setUuid(uuid);
+        when(userRepository.findUserByUuid(uuid))
+            .thenReturn(Optional.of(mockUser));
+
+        when(userRemoteClient.findUserLanguageByUuid(uuid))
+            .thenThrow(new RuntimeException("Service unavailable"));
+
+        telegramService.processUpdate(update);
+
+        ArgumentCaptor<TelegramChat> chatCaptor = ArgumentCaptor.forClass(TelegramChat.class);
+        verify(telegramChatRepository).save(chatCaptor.capture());
+
+        TelegramChat savedChat = chatCaptor.getValue();
+        assertEquals(mockUser, savedChat.getUser());
+        assertEquals("uk", savedChat.getLanguageCode());
+    }
+
     private static org.telegram.telegrambots.meta.api.objects.User getTelegramAPIUser(Long chatId) {
         org.telegram.telegrambots.meta.api.objects.User apiUser = new org.telegram.telegrambots.meta.api.objects.User();
         apiUser.setId(chatId);
@@ -1000,7 +1174,7 @@ class TelegramServiceTest {
     }
 
     @Test
-    void testMarkMessagesAsRead() {
+    void testMarkMessagesAsRead_IdsSpecified_MessagesMarkedAsRead() {
         List<Long> messageIds = List.of(1L, 2L);
 
         TelegramChat chat1 = TelegramChat.builder()
@@ -1029,7 +1203,7 @@ class TelegramServiceTest {
             .thenReturn(List.of(message1, message2));
 
         telegramService.markMessagesAsRead(
-            MarkMessagesAsReadRequest.builder().messagesIds(messageIds).build());
+            MarkMessagesAsReadRequestDto.builder().messagesIds(messageIds).build());
 
         verify(telegramMessageRepository).findAllById(messageIds);
         verify(telegramMessageRepository).saveAll(List.of(message1, message2));
@@ -1041,4 +1215,120 @@ class TelegramServiceTest {
         assertEquals(0, chat2.getUnreadMessagesCount());
     }
 
+    @Test
+    void testToggleNotifications_UserNotFoundByUuid_ShouldThrowException() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+            .builder()
+            .isNotify(true)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> telegramService.toggleNotifications(uuid, requestDto));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testToggleNotifications_UserWithoutChat_ShouldThrowException() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+            .builder()
+            .isNotify(true)
+            .build();
+
+        User user = User.builder()
+            .uuid(uuid)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        assertThrows(NotFoundException.class,
+            () -> telegramService.toggleNotifications(uuid, requestDto));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testToggleNotifications_UserWithChat_NotificationsToggled() {
+        String uuid = "some-uuid";
+        ToggleNotificationsRequestDto requestDto = ToggleNotificationsRequestDto
+            .builder()
+            .isNotify(true)
+            .build();
+
+        TelegramChat telegramChat = TelegramChat
+            .builder()
+            .id(1L)
+            .build();
+
+        User user = User.builder()
+            .uuid(uuid)
+            .telegramBot(telegramChat)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        telegramService.toggleNotifications(uuid, requestDto);
+
+        verify(userRepository).findUserByUuid(uuid);
+        verify(telegramChatRepository).save(telegramChat);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserNotFoundByUuid_ShouldThrowException() {
+        String uuid = "some-uuid";
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> telegramService.getIsNotificationsEnabled(uuid));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserWithoutChat_ShouldThrowException() {
+        String uuid = "some-uuid";
+
+        User user = User.builder()
+            .uuid(uuid)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        assertThrows(NotFoundException.class,
+            () -> telegramService.getIsNotificationsEnabled(uuid));
+
+        verify(userRepository).findUserByUuid(uuid);
+        verifyNoInteractions(telegramChatRepository);
+    }
+
+    @Test
+    void testGetIsNotificationsEnabled_UserWithChat_NotificationsToggled() {
+        String uuid = "some-uuid";
+
+        TelegramChat telegramChat = TelegramChat
+            .builder()
+            .id(1L)
+            .isNotify(true)
+            .build();
+
+        User user = User.builder()
+            .uuid(uuid)
+            .telegramBot(telegramChat)
+            .build();
+
+        when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
+
+        boolean result = telegramService.getIsNotificationsEnabled(uuid);
+
+        verify(userRepository).findUserByUuid(uuid);
+        assertEquals(user.getTelegramBot().getIsNotify(), result);
+    }
 }

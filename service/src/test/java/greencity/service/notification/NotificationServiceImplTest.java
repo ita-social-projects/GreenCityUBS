@@ -13,19 +13,20 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
+import greencity.entity.order.Bag;
+import greencity.entity.notifications.NotificationParameter;
+import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Event;
+import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
+import greencity.entity.user.User;
+import greencity.entity.user.Violation;
+import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.NotificationReceiverType;
-import greencity.entity.notifications.NotificationParameter;
-import greencity.entity.notifications.UserNotification;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
-import greencity.entity.user.User;
-import greencity.entity.user.Violation;
 import greencity.enums.UserCategory;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
@@ -37,7 +38,11 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.OrderBagService;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -46,7 +51,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -55,7 +59,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -71,7 +74,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-
+import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
+import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
+import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
+import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT_UK;
+import static greencity.constant.OrderHistory.ORDER_CONFIRMED_UK;
+import static greencity.constant.OrderHistory.ORDER_FORMED_UK;
+import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT_UK;
+import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE_UK;
 import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE;
 import static greencity.ModelUtils.TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2;
 import static greencity.ModelUtils.TEST_UUID;
@@ -81,7 +91,6 @@ import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PARAMETER_SET2;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_2;
-import static greencity.ModelUtils.TEST_ORDER_2;
 import static greencity.ModelUtils.TEST_ORDER_3;
 import static greencity.ModelUtils.TEST_ORDER_4;
 import static greencity.ModelUtils.TEST_ORDER_5;
@@ -106,32 +115,25 @@ import static greencity.ModelUtils.getActiveCertificateWith10Points;
 import static greencity.ModelUtils.getUser;
 import static greencity.ModelUtils.getViolation;
 import static greencity.enums.NotificationReceiverType.SITE;
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.anyLong;
-import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
-import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
-import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
-import static greencity.constant.OrderHistory.ORDER_ADJUSTMENT_UK;
-import static greencity.constant.OrderHistory.ORDER_CONFIRMED_UK;
-import static greencity.constant.OrderHistory.ORDER_FORMED_UK;
-import static greencity.constant.OrderHistory.ORDER_NOT_TAKEN_OUT_UK;
-import static greencity.constant.OrderHistory.ORDER_ON_THE_ROUTE_UK;
-import static java.util.Arrays.asList;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
@@ -195,15 +197,15 @@ class NotificationServiceImplTest {
     @Mock
     private OrderBagService orderBagService;
 
+    @BeforeEach
+    void setUp() {
+        fixedClock = Clock.fixed(LOCAL_DATE_TIME.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
+        lenient().doReturn(fixedClock.instant()).when(clock).instant();
+        lenient().doReturn(fixedClock.getZone()).when(clock).getZone();
+    }
+
     @Nested
     class ClockNotification {
-        @BeforeEach
-        void setUp() {
-            fixedClock = Clock.fixed(LOCAL_DATE_TIME.toInstant(ZoneOffset.ofHours(0)), ZoneId.systemDefault());
-            lenient().doReturn(fixedClock.instant()).when(clock).instant();
-            lenient().doReturn(fixedClock.getZone()).when(clock).getZone();
-        }
-
         @Test
         void testNotifyUnpaidOrders() {
             List<Order> orders = List.of(
@@ -282,18 +284,61 @@ class NotificationServiceImplTest {
         }
 
         @Test
-        void testNotifyPaidOrder() {
-            when(userNotificationRepository.save(any())).thenReturn(TEST_USER_NOTIFICATION);
+        void testNotifyUnpaidOrdersWhenOrderDoesNotNeedNewNotification() {
+            Order order = Order.builder()
+                .id(1L)
+                .user(getUser())
+                .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+                .orderDate(LocalDateTime.now(fixedClock).minusDays(2))
+                .build();
 
-            notificationService.notifyPaidOrder(TEST_ORDER_2);
+            when(orderRepository
+                .findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus.CANCELED, OrderPaymentStatus.UNPAID))
+                .thenReturn(List.of(order));
+            when(userNotificationRepository.findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
+                order.getId(), NotificationType.UNPAID_ORDER))
+                .thenReturn(Optional.of(new UserNotification()));
 
-            verify(userNotificationRepository, times(1)).save(any());
+            notificationService.notifyUnpaidOrders();
 
+            verify(userNotificationRepository, never()).save(any());
+            verify(notificationParameterRepository, never()).saveAll(any());
+        }
+
+        @Test
+        void testNotifyUnpaidOrdersWhenPaymentLinkNotPresent() {
+            Map<Integer, Integer> amountOfBagsOrdered = new HashMap<>();
+            amountOfBagsOrdered.put(1, 2);
+            Order order = Order.builder()
+                .id(1L)
+                .user(getUser())
+                .orderPaymentStatus(OrderPaymentStatus.UNPAID)
+                .orderDate(LocalDateTime.now(fixedClock).minusDays(4))
+                .amountOfBagsOrdered(amountOfBagsOrdered)
+                .build();
+            Bag bag = Bag.builder()
+                .id(1)
+                .fullPrice(100L)
+                .build();
+
+            when(orderRepository.findAllByOrderStatusNotAndOrderPaymentStatus(
+                OrderStatus.CANCELED, OrderPaymentStatus.UNPAID))
+                .thenReturn(Collections.singletonList(order));
+            when(userNotificationRepository.findUserNotificationByOrderAndNotificationType(
+                order, NotificationType.UNPAID_ORDER))
+                .thenReturn(Optional.empty());
+            when(orderBagService.findAllBagsByOrderId(1L)).thenReturn(Collections.singletonList(bag));
+
+            notificationService.notifyUnpaidOrders();
+
+            verify(userNotificationRepository, never()).save(any());
+            verify(userNotificationRepository).findUserNotificationByOrderAndNotificationType(
+                order, NotificationType.UNPAID_ORDER);
         }
 
         @Test
         @SneakyThrows
-        void notifyPaidOrder() {
+        void testNotifyPaidOrder() {
             Order order = Order.builder().id(1L).build();
             NotificationParameter orderNumber = NotificationParameter.builder()
                 .key("orderNumber")
@@ -310,22 +355,36 @@ class NotificationServiceImplTest {
         }
 
         @Test
-        void notifyUnpaidOrderPermanentlyTest() {
-            Double amountToPay = 10000.0;
+        void testNotifyUnpaidOrderPermanently() {
+            long amountToPay = 10000L;
 
             when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
             when(mockUserNotification.getOrder()).thenReturn(mockOrder);
             when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
-            when(notificationParameterRepository.saveAll(any())).thenAnswer(invocation -> {
-                return new ArrayList<>(invocation.getArgument(0));
-            });
+            when(notificationParameterRepository.saveAll(any())).thenAnswer(
+                invocation -> new ArrayList<>(invocation.getArgument(0)));
 
             assertDoesNotThrow(() -> notificationService.notifyUnpaidOrderPermanently(mockUserNotification.getOrder(),
-                amountToPay.longValue(), PaymentSystemResponse.builder()
+                amountToPay, PaymentSystemResponse.builder()
                     .orderId(1L).link(PAYMENT_LINK).build()));
 
             verify(userNotificationRepository).save(any(UserNotification.class));
             verify(notificationParameterRepository).saveAll(any());
+        }
+
+        @Test
+        void testNotifyUnpaidOrderPermanentlyWhenOrderIsPaid() {
+            long amountToPay = 10000L;
+            Order order = Order.builder()
+                .id(1L)
+                .orderPaymentStatus(OrderPaymentStatus.PAID)
+                .build();
+
+            notificationService.notifyUnpaidOrderPermanently(order, amountToPay,
+                PaymentSystemResponse.builder().link(PAYMENT_LINK).build());
+
+            verify(userNotificationRepository, never()).save(any());
+            verify(notificationParameterRepository, never()).saveAll(any());
         }
 
         @Test
@@ -411,6 +470,16 @@ class NotificationServiceImplTest {
         }
 
         @Test
+        void testNotifyBonusesWhenOverpaymentZero() {
+            Order order = Order.builder().id(1L).build();
+
+            notificationService.notifyBonuses(order, 0L);
+
+            verify(userNotificationRepository, never()).save(any());
+            verify(notificationParameterRepository, never()).saveAll(any());
+        }
+
+        @Test
         void testNotifyBonusesFromCanceledOrder() {
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_5)).thenReturn(TEST_USER_NOTIFICATION_5);
 
@@ -425,6 +494,19 @@ class NotificationServiceImplTest {
             verify(userNotificationRepository).save(any());
             verify(notificationParameterRepository).saveAll(TEST_NOTIFICATION_PARAMETER_SET2);
 
+        }
+
+        @Test
+        void testNotifyBonusesFromCanceledOrderWhenPointsToReturnZero() {
+            Order order = Order.builder()
+                .id(1L)
+                .pointsToUse(0)
+                .build();
+
+            notificationService.notifyBonusesFromCanceledOrder(order);
+
+            verify(userNotificationRepository, never()).save(any());
+            verify(notificationParameterRepository, never()).saveAll(any());
         }
 
         @Test
@@ -452,7 +534,7 @@ class NotificationServiceImplTest {
         }
 
         @Test
-        void TestNotifyChangedViolation() {
+        void testNotifyChangedViolation() {
             Set<NotificationParameter> parameters = new HashSet<>();
             parameters.add(NotificationParameter.builder()
                 .key("orderNumber")
@@ -470,7 +552,7 @@ class NotificationServiceImplTest {
         }
 
         @Test
-        void TestNotifyDeleteViolation() {
+        void testNotifyDeleteViolation() {
             Set<NotificationParameter> parameters = new HashSet<>();
             parameters.add(NotificationParameter.builder()
                 .key("orderNumber")
@@ -801,7 +883,7 @@ class NotificationServiceImplTest {
             return parameters;
         }
 
-        private void mockUserNeedNotificationCheck(Order order,NotificationType notificationType){
+        private void mockUserNeedNotificationCheck(Order order, NotificationType notificationType) {
             when(userNotificationRepository
                 .findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(order.getId(),
                     notificationType)).thenReturn(Optional.empty());
@@ -880,6 +962,18 @@ class NotificationServiceImplTest {
             notificationService1.notifyInactiveAccounts();
 
             verify(userNotificationRepository, times(2)).save(any());
+        }
+
+        @Test
+        void testNotifyInactiveAccountsWhenExecutionException() throws Exception {
+            when(executorService.invokeAll(any())).thenReturn(List.of(mock(Future.class)));
+            when(executorService.invokeAll(any()).get(0).get())
+                .thenThrow(new ExecutionException("Test exception", null));
+
+            assertDoesNotThrow(() -> notificationService.notifyInactiveAccounts());
+
+            verify(executorService, times(2)).invokeAll(any());
+            verify(userNotificationRepository, never()).save(any());
         }
 
         @Test
@@ -1130,7 +1224,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getUnreadNotificationsTest() {
+    void testGetUnreadNotifications() {
         assertEquals(0, notificationService.getUnreadNotifications("Test"));
     }
 
@@ -1171,7 +1265,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getNotificationMarksAsReadWhenMarkAsReadTrueTest() {
+    void testGetNotificationMarksAsReadWhenMarkAsReadTrue() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         notification.setRead(false);
@@ -1191,7 +1285,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getNotificationDoesNotMarkAsReadWhenMarkAsReadFalseTest() {
+    void testGetNotificationDoesNotMarkAsReadWhenMarkAsReadFalse() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         notification.setRead(false);
@@ -1210,7 +1304,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getNotificationMarksAsReadThroughEndpointTest() {
+    void testGetNotificationMarksAsReadThroughEndpoint() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         notification.setRead(false);
@@ -1231,7 +1325,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getNotificationDoesNotSaveWhenAlreadyReadAndMarkAsReadTrueTest() {
+    void testGetNotificationDoesNotSaveWhenAlreadyReadAndMarkAsReadTrue() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         notification.setRead(true);
@@ -1250,7 +1344,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getNotificationViolationNotFoundException() {
+    void testGetNotificationViolationNotFoundException() {
         UserNotification notification = createUserNotificationForViolationWithParameters();
         notification.getUser().setUuid("abc");
         when(userNotificationRepository.findById(1L)).thenReturn(Optional.of(notification));
@@ -1265,7 +1359,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void viewNotificationTest() {
+    void testViewNotification() {
         Long notificationId = TEST_NOTIFICATION_TEMPLATE.getId();
         Long userId = TEST_USER.getId();
 
@@ -1280,7 +1374,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void readNonExistentNotificationAndGetNotFoundExceptionTest() {
+    void testReadNonExistentNotificationAndGetNotFoundException() {
         Long notificationId = TEST_NOTIFICATION_TEMPLATE.getId();
         Long userId = TEST_USER.getId();
 
@@ -1299,7 +1393,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void unreadNotificationTest() {
+    void testUnreadNotification() {
         Long notificationId = TEST_NOTIFICATION_TEMPLATE.getId();
         Long userId = TEST_USER.getId();
 
@@ -1314,7 +1408,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void unreadNonExistentNotificationAndGetNotFoundExceptionTest() {
+    void testUnreadNonExistentNotificationAndGetNotFoundException() {
         Long notificationId = TEST_NOTIFICATION_TEMPLATE.getId();
         Long userId = TEST_USER.getId();
 
@@ -1333,7 +1427,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void deleteNotificationTest() {
+    void testDeleteNotification() {
         Long notificationId = TEST_NOTIFICATION_TEMPLATE.getId();
         Long userId = TEST_USER.getId();
 
@@ -1348,7 +1442,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void deleteNonExistentNotificationAndGetNotFoundExceptionTest() {
+    void testDeleteNonExistentNotificationAndGetNotFoundException() {
         Long notificationId = TEST_NOTIFICATION_TEMPLATE.getId();
         Long userId = TEST_USER.getId();
 
@@ -1376,14 +1470,13 @@ class NotificationServiceImplTest {
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
-        Set<NotificationParameter> parameters = new HashSet<>();
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.ORDER_STATUS_CHANGED);
         notification.setUser(user);
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
         notificationService.notifyUnpaidOrder(order, PAYMENT_LINK);
 
@@ -1405,7 +1498,6 @@ class NotificationServiceImplTest {
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
-        Set<NotificationParameter> parameters = new HashSet<>();
 
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
@@ -1413,7 +1505,7 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
         notificationService.notifyUnpaidOrder(order, PAYMENT_LINK);
 
@@ -1436,7 +1528,6 @@ class NotificationServiceImplTest {
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
-        Set<NotificationParameter> parameters = new HashSet<>();
 
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
@@ -1444,7 +1535,7 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyUnpaidOrder(order, PAYMENT_LINK);
@@ -1467,7 +1558,6 @@ class NotificationServiceImplTest {
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
-        Set<NotificationParameter> parameters = new HashSet<>();
 
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
@@ -1475,7 +1565,7 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyHalfPaidPackage(order);
@@ -1494,7 +1584,6 @@ class NotificationServiceImplTest {
         order.setPayment(TEST_PAYMENT_LIST);
         order.setPointsToUse(0);
         order.setCertificates(Collections.emptySet());
-        Set<NotificationParameter> parameters = new HashSet<>();
 
         UserNotification notification = new UserNotification();
         notification.setNotificationType(NotificationType.ORDER_STATUS_CHANGED);
@@ -1502,7 +1591,7 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
 
         notificationService.notifyHalfPaidPackage(order);
@@ -1512,7 +1601,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void createNotificationDtoTitleUaLanguageTest() {
+    void testCreateNotificationDtoTitleUaLanguage() {
         String language = "uk";
 
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(any(), any()))
@@ -1525,7 +1614,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void createNotificationDtoTitleEnLanguageTest() {
+    void testCreateNotificationDtoTitleEnLanguage() {
         String language = "en";
 
         when(templateRepository.findNotificationTemplateByNotificationTypeAndNotificationReceiverType(any(), any()))
@@ -1538,16 +1627,19 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void createNotificationDtoOfCustomTemplateTest() {
+    void testCreateNotificationDtoOfCustomTemplate() {
         String language = "en";
 
-        var testNotificationTemplate = TEST_NOTIFICATION_TEMPLATE;
+        var testNotificationTemplate = ModelUtils.createNotificationTemplate();
         testNotificationTemplate.setNotificationType(NotificationType.CUSTOM);
         testNotificationTemplate.setTrigger(NotificationTrigger.CUSTOM);
 
-        var testUserNotification = TEST_USER_NOTIFICATION;
-        testUserNotification.setNotificationType(NotificationType.CUSTOM);
-        testUserNotification.setTemplateId(testNotificationTemplate.getId());
+        var testUserNotification = UserNotification.builder()
+            .notificationType(NotificationType.CUSTOM)
+            .user(TEST_USER_NOTIFICATION.getUser())
+            .order(TEST_USER_NOTIFICATION.getOrder())
+            .templateId(testNotificationTemplate.getId())
+            .build();
 
         when(templateRepository.findNotificationTemplateByIdAndNotificationReceiverType(any(), any()))
             .thenReturn(Optional.of(testNotificationTemplate));
@@ -1560,7 +1652,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void notifySelfPickupOrderTest() {
+    void testNotifySelfPickupOrder() {
         User user = getUser();
         Long orderId = 2L;
         Order order = Order.builder()
@@ -1587,7 +1679,27 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void notifyCreateNewOrderTest() {
+    void testNotifyAllHalfPaidPackagesWhenHalfPaidPackageDoesNotNeedNotification() {
+        Order order = Order.builder()
+            .id(1L)
+            .orderPaymentStatus(OrderPaymentStatus.HALF_PAID)
+            .orderDate(LocalDateTime.now(fixedClock).minusMonths(2))
+            .build();
+
+        when(orderRepository.findAllByOrderPaymentStatus(OrderPaymentStatus.HALF_PAID))
+            .thenReturn(List.of(order));
+        when(userNotificationRepository.findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
+            eq(order.getId()), any(NotificationType.class), any(NotificationType.class), any(NotificationType.class)))
+            .thenReturn(Optional.empty());
+
+        notificationService.notifyAllHalfPaidPackages();
+
+        verify(userNotificationRepository, never()).save(any());
+        verify(notificationParameterRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void testNotifyCreateNewOrder() {
         User user = getUser();
         Order newOrder = ModelUtils.getOrder();
         newOrder.setSumTotalAmountWithoutDiscounts(100L);
@@ -1618,20 +1730,43 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void notifyManagerWithNewGreenOfficeRequestFromTelegramBotTest() {
+    void testNotifyManagerWithNewGreenOfficeRequestFromTelegramBot() {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(USERNAME)
-            .subject(TelegramBotConstants.GREEN_OFFICE_SUBJECT)
+            .subject(MessageProvider.get(TelegramBotConstants.UK, "green.office.subject"))
             .body(USER_EMAIL)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
             .build();
         doNothing().when(userRemoteClient).sendGreenOfficeRequestNotification(notification);
 
-        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME);
+        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(USER_EMAIL, USERNAME,
+            TelegramBotConstants.UK);
 
         verify(userRemoteClient, times(1)).sendGreenOfficeRequestNotification(notification);
+    }
+
+    @Test
+    void testNotifyCanceledOrder() {
+        User user = getUser();
+        Order order = Order.builder()
+            .id(1L)
+            .user(user)
+            .sumTotalAmountWithoutDiscounts(10000L)
+            .build();
+        UserNotification notification = new UserNotification();
+        notification.setNotificationType(NotificationType.CANCELED_ORDER);
+        notification.setUser(user);
+        notification.setOrder(order);
+
+        when(userNotificationRepository.save(any())).thenReturn(notification);
+        when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
+
+        notificationService.notifyCanceledOrder(order);
+
+        verify(userNotificationRepository).save(any());
+        verify(notificationParameterRepository).saveAll(any());
     }
 
     @Test

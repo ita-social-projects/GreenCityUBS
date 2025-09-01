@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 import greencity.exceptions.GreenCityUserServiceException;
+import greencity.exceptions.ForbiddenException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -83,6 +84,9 @@ class CustomExceptionHandlerTest {
 
     @Mock
     NotFoundException notFoundException;
+
+    @Mock
+    ForbiddenException forbiddenException;
 
     @Mock
     private static GreenCityUserServiceException greenCityUserServiceException;
@@ -377,4 +381,15 @@ class CustomExceptionHandlerTest {
             Arguments.of(greenCityUserServiceException, HttpStatus.INTERNAL_SERVER_ERROR),
             Arguments.of(webClientResponseException, HttpStatus.INTERNAL_SERVER_ERROR));
     }
+
+    @Test
+    void handleForbiddenExceptionTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleForbiddenException(forbiddenException, webRequest),
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
 }

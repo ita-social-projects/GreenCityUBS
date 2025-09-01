@@ -24,6 +24,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
     private final TelegramSupportService telegramSupportService;
     private final TelegramGreenOfficeService telegramGreenOfficeService;
     private final TelegramCommandsService telegramCommandsService;
+    private final TelegramLanguageService telegramLanguageService;
 
     /**
      * Handles incoming updates related to user interactions in Telegram.
@@ -34,34 +35,35 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
         if (update.hasCallbackQuery()) {
             CallbackQuery callBackQuery = update.getCallbackQuery();
             String chatId = callBackQuery.getMessage().getChatId().toString();
+            String lang = telegramLanguageService.getChatLanguage(chatId);
             switch (callBackQuery.getData()) {
                 case TelegramBotConstants.CLIENT_SUPPORT_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
-                        MessageFactory::createSupportMessageCallBackQuery);
+                        MessageFactory.createSupportMessageCallBackQuery(chatId, lang));
                 }
                 case TelegramBotConstants.SORTING_PRICES_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory::createSortingPricesMessage);
+                        MessageFactory.createSortingPricesMessage(chatId, lang));
                 }
                 case TelegramBotConstants.WORK_SCHEDULE_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory::createWorkScheduleMessage);
+                        MessageFactory.createWorkScheduleMessage(chatId, lang));
                 }
                 case TelegramBotConstants.ADMISSION_RULES_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory::createAdmissionRulesMessage);
+                        MessageFactory.createAdmissionRulesMessage(chatId, lang));
                 }
                 case TelegramBotConstants.GREEN_OFFICE_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory::createGreenOfficeMessage);
+                        MessageFactory.createGreenOfficeMessage(chatId, lang));
                 }
                 case TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.ENTERING_GREEN_OFFICE_EMAIL,
-                        MessageFactory::createEnteringEmailMessage);
+                        MessageFactory.createEnteringEmailMessage(chatId, lang));
                 }
                 case TelegramBotConstants.FEEDBACK_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory::createFeedbackMessage);
+                        MessageFactory.createFeedbackMessage(chatId, lang));
                 }
                 case TelegramBotConstants.RATING_TERRIBLY_CALLBACK -> {
                     return telegramFeedbackService.processRatingFeedbackRequest(chatId, 1);
@@ -80,11 +82,11 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                 }
                 case TelegramBotConstants.LOGIN_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
-                        MessageFactory::createLoginMessage);
+                        MessageFactory.createLoginMessage(chatId, lang));
                 }
                 default -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory::createAvailableCommandsMessage);
+                        MessageFactory.createAvailableCommandsMessage(chatId, lang));
                 }
             }
         } else {
@@ -93,25 +95,26 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
             Optional<TelegramChat> chatOpt = telegramChatRepository.findByChatId(message.getChatId().toString());
 
             if (chatOpt.isEmpty()) {
-                return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
+                return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
+                    TelegramBotConstants.UK);
             }
-
+            String lang = chatOpt.get().getLanguageCode();
             TelegramChat chat = chatOpt.get();
             switch (chat.getChatState()) {
                 case IN_SUPPORT -> {
-                    return telegramSupportService.processSupportMessage(message);
+                    return telegramSupportService.processSupportMessage(message, lang);
                 }
                 case ENTERING_GREEN_OFFICE_EMAIL -> {
-                    return telegramGreenOfficeService.processGreenOfficeEmail(message);
+                    return telegramGreenOfficeService.processGreenOfficeEmail(message, lang);
                 }
                 case MAKING_FEEDBACK -> {
-                    return telegramFeedbackService.processInputCommentRequest(message);
+                    return telegramFeedbackService.processInputCommentRequest(message, lang);
                 }
                 case LOGGING_AS_MANAGER -> {
-                    return telegramLoginService.processInputManagerCredentialsRequest(message);
+                    return telegramLoginService.processInputManagerCredentialsRequest(message, lang);
                 }
                 default -> {
-                    return telegramCommandsService.processCommand(message);
+                    return telegramCommandsService.processCommand(message, lang);
                 }
             }
         }

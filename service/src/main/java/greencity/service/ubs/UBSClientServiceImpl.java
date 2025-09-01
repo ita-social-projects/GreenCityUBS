@@ -557,9 +557,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
 
         notificationService.notifyCreatedOrder(order);
-        if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
-        }
 
         return paymentSystemResponse;
     }

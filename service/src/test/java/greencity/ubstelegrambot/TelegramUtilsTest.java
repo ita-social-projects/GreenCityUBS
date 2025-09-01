@@ -9,6 +9,7 @@ import greencity.enums.ChatState;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +22,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -214,7 +219,7 @@ class TelegramUtilsTest {
         SendMessage result = telegramUtils.updateChatStateAndRespond(
             "123",
             ChatState.MAKING_FEEDBACK,
-            id -> message);
+            message);
 
         assertEquals(message, result);
         assertEquals(ChatState.MAKING_FEEDBACK, chat.getChatState());
@@ -223,14 +228,14 @@ class TelegramUtilsTest {
     @Test
     void updateChatStateAndRespond_WhenChatNotFound_ShouldReturnErrorMessage() {
         when(telegramChatRepository.findByChatId("999")).thenReturn(Optional.empty());
-
+        String id = "1";
         SendMessage result = telegramUtils.updateChatStateAndRespond(
                 "999",
                 ChatState.NORMAL,
-                id -> new SendMessage(id, "Should not be called")
+                new SendMessage(id, "Should not be called")
         );
 
         assertEquals("999", result.getChatId());
-        assertTrue(result.getText().contains(TelegramBotConstants.UNKNOWN_ERROR_OCCURRED_PLEASE_TRY_AGAIN));
+        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK,"unknown.error")));
     }
 }

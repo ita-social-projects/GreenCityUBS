@@ -13,6 +13,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -41,4 +44,5 @@ public class OrdersDataForUserDto {
     private Set<String> additionalOrders;
     private SenderInfoDto sender;
     private AddressInfoDto address;
+    private Long completedOrdersCount;
 }
