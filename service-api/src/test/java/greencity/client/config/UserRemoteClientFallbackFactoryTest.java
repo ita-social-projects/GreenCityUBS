@@ -101,7 +101,7 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void signUpEmployee() {
         EmployeeSignUpDto dto = EmployeeSignUpDto.builder().build();
-        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto));
+        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto, "en"));
     }
 
     @Test

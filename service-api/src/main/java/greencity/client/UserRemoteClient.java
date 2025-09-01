@@ -127,7 +127,7 @@ public interface UserRemoteClient {
      * @param dto {@link EmployeeSignUpDto}
      */
     @PostMapping("/ownSecurity/sign-up-employee")
-    void signUpEmployee(@RequestBody EmployeeSignUpDto dto);
+    void signUpEmployee(@RequestBody EmployeeSignUpDto dto, @RequestParam String lang);
 
     /**
      * Update employee email.
