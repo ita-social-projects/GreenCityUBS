@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,8 @@ class AccessTokenAuthenticationFilterTest {
 
     FilterChain chain = new MockFilterChain();
 
+    private LogCaptor logCaptor;
+
     @Mock
     private UserRepository userRepository;
 
@@ -63,6 +66,7 @@ class AccessTokenAuthenticationFilterTest {
         systemOut = System.out;
         systemOutContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(systemOutContent));
+        logCaptor = LogCaptor.forClass(AccessTokenAuthenticationFilter.class);
     }
 
     @AfterEach
@@ -97,7 +101,7 @@ class AccessTokenAuthenticationFilterTest {
             .thenThrow(ExpiredJwtException.class);
         authenticationFilter.doFilterInternal(request, response, chain);
 
-        assertTrue(systemOutContent.toString().contains("Token has expired: "));
+        assertTrue(logCaptor.getInfoLogs().contains("Token has expired"));
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(providerManager.authenticate(
@@ -116,7 +120,8 @@ class AccessTokenAuthenticationFilterTest {
 
         authenticationFilter.doFilterInternal(request, response, chain);
 
-        assertTrue(systemOutContent.toString().contains("Access denied with token: "));
+        assertTrue(logCaptor.getInfoLogs().stream()
+            .anyMatch(s -> s.contains("Access denied during token authentication")));
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(any());

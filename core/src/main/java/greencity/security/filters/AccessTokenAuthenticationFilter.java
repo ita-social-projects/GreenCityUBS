@@ -67,9 +67,9 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (ExpiredJwtException e) {
-                log.debug("Token has expired");
+                log.info("Token has expired");
             } catch (Exception e) {
-                log.debug("Access denied during token authentication: {}", e.getMessage());
+                log.info("Access denied during token authentication: {}", e.getMessage());
             }
         }
         chain.doFilter(request, response);
