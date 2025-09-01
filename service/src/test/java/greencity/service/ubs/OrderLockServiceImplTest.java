@@ -70,4 +70,11 @@ class OrderLockServiceImplTest {
         orderLockService.checkLockOrders();
         verify(orderRepository, times(1)).unlockExpiredOrders(any(LocalDateTime.class));
     }
+
+    @Test
+void testCheckLockOrders_noExpired() {
+        when(orderRepository.unlockExpiredOrders(any(LocalDateTime.class))).thenReturn(0);
+        orderLockService.checkLockOrders();
+        verify(orderRepository, times(1)).unlockExpiredOrders(any(LocalDateTime.class));
+        }
 }
