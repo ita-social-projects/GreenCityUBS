@@ -1,6 +1,5 @@
 package greencity.service.ubs.pdf.exporter;
 
-//import com.lowagie.text.*;
 import com.google.zxing.WriterException;
 import com.lowagie.text.Annotation;
 import com.lowagie.text.Chunk;
@@ -330,7 +329,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     }
 
     private void addQrCodeWithText(Document document, String paymentLink, Locale locale)
-        throws Exception {
+        throws IOException, WriterException {
         Image qrPdfImage = buildQrImage(paymentLink);
         PdfPTable qrTable = buildQrCodeTable(qrPdfImage, locale);
         document.add(qrTable);
