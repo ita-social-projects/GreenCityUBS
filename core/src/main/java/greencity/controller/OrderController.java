@@ -210,15 +210,14 @@ public class OrderController {
     }
 
     /**
-     * Receives payment information from Way for Pay payment gateway. This method
-     * decodes the received response, converts it into a PaymentResponseDto object,
-     * and validates the payment. If the HTTP status is successful, it sends a
-     * notification for the paid order and redirects to the GreenCityClient.
+     * Receives payment notifications from WayForPay. Parses the JSON from the
+     * request parameters into a PaymentResponseDto, validates it, and returns a
+     * PaymentResponseWayForPay object. HTTP status: 200 OK — payment processed
+     * successfully 422 Unprocessable Entity — invalid payment data
      *
-     * @param formParams The payment response received from Way for Pay, in Map
-     *                 format.
-     * @throws IOException If an input or output exception occurred during the
-     *                     redirection.
+     * @param formParams Map with payment response parameters from WayForPay
+     * @return PaymentResponseWayForPay containing status and orderReference
+     * @throws IOException If an I/O error occurs (rare in normal webhook flow)
      */
     @Operation(summary = "Receive payment from WayForPay.")
     @ApiResponses(value = {
@@ -228,7 +227,12 @@ public class OrderController {
     @PostMapping("/receivePayment")
     public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
         throws IOException {
-        return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
+        PaymentResponseWayForPay response = ubsClientService.convertMapIntoPaymentResponseDto(formParams);
+
+        HttpStatus status = "ERROR".equals(response.getStatus())
+            ? HttpStatus.UNPROCESSABLE_ENTITY
+            : HttpStatus.OK;
+        return ResponseEntity.status(status).body(response);
     }
 
     /**

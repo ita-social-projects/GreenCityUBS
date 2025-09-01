@@ -1,5 +1,6 @@
 package greencity.util;
 
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import java.util.StringJoiner;
@@ -30,6 +31,31 @@ public class EncryptionUtil {
         dto.getProductPrice().forEach(price -> stringJoiner.add(price.toString()));
 
         return new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
+    }
+
+    /**
+     * Generates a HMAC-MD5 signature for a WayForPay payment response.
+     * The signature is calculated based on the payment response fields in the
+     * specific order required by WayForPay:
+     * merchantAccount, orderReference, amount, currency, authCode, cardPan,
+     * transactionStatus, reasonCode.
+     *
+     * @param dto       The {@link PaymentResponseDto} received from WayForPay callback.
+     * @param secretKey The secret key (merchant password) used for HMAC generation.
+     * @return The generated HMAC-MD5 signature as a hexadecimal string.
+     */
+    public String generateResponseSignature(PaymentResponseDto dto, String secretKey) {
+        StringJoiner sj = new StringJoiner(";");
+        sj.add(dto.getMerchantAccount())
+            .add(dto.getOrderReference())
+            .add(dto.getAmount().toString())
+            .add(dto.getCurrency())
+            .add(dto.getAuthCode())
+            .add(dto.getCardPan())
+            .add(dto.getTransactionStatus())
+            .add(dto.getReasonCode());
+
+        return new HmacUtils("HmacMD5", secretKey).hmacHex(sj.toString());
     }
 
     /**
