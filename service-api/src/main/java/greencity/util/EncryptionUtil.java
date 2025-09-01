@@ -3,6 +3,8 @@ package greencity.util;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
+import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 import lombok.ToString;
 import org.apache.commons.codec.digest.HmacUtils;
@@ -45,17 +47,23 @@ public class EncryptionUtil {
      * @return The generated HMAC-MD5 signature as a hexadecimal string.
      */
     public String generateResponseSignature(PaymentResponseDto dto, String secretKey) {
-        StringJoiner sj = new StringJoiner(";");
-        sj.add(dto.getMerchantAccount())
-            .add(dto.getOrderReference())
-            .add(dto.getAmount().toString())
-            .add(dto.getCurrency())
-            .add(dto.getAuthCode())
-            .add(dto.getCardPan())
-            .add(dto.getTransactionStatus())
-            .add(dto.getReasonCode());
+        List<String> requiredFields = List.of(
+            dto.getMerchantAccount(),
+            dto.getOrderReference(),
+            dto.getAmount(),
+            dto.getCurrency(),
+            dto.getAuthCode(),
+            dto.getCardPan(),
+            dto.getTransactionStatus(),
+            dto.getReasonCode()
+        );
 
-        return new HmacUtils("HmacMD5", secretKey).hmacHex(sj.toString());
+        if (requiredFields.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("Missing required fields for WayForPay signature generation.");
+        }
+
+        String signatureData = String.join(";", requiredFields);
+        return new HmacUtils("HmacMD5", secretKey).hmacHex(signatureData);
     }
 
     /**

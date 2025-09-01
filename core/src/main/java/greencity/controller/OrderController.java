@@ -226,12 +226,8 @@ public class OrderController {
     @PostMapping("/receivePayment")
     public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
         throws IOException {
-        PaymentResponseWayForPay response = ubsClientService.convertMapIntoPaymentResponseDto(formParams);
 
-        HttpStatus status = "ERROR".equals(response.getStatus())
-            ? HttpStatus.UNPROCESSABLE_ENTITY
-            : HttpStatus.OK;
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
     }
 
     /**

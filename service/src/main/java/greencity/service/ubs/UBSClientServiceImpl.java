@@ -305,7 +305,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             .status("accept")
             .time(response.getCreatedDate()).build();
         accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPaySecret));
-        log.info("Generated signature: {}", accept.getSignature());
         return accept;
     }
 
@@ -316,7 +315,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             return buildErrorResponse("No form params received");
         }
 
-        formParams.forEach((key, value) -> log.debug("Param key: {}, value: {}", key, value));
+        log.debug("Received {} form param(s) from WayForPay", formParams.size());
 
         String jsonKey = formParams.keySet().iterator().next();
         log.debug("Extracted JSON from param key: {}", jsonKey);

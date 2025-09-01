@@ -54,8 +54,6 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -276,23 +274,6 @@ class OrderControllerTest {
     }
 
     @Test
-    void receivePaymentReturnErrorTest() throws Exception {
-        PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
-        PaymentResponseWayForPay mockResponse = new PaymentResponseWayForPay();
-        mockResponse.setStatus("ERROR");
-        mockResponse.setOrderReference(dto.getOrderReference());
-
-        when(ubsClientService.convertMapIntoPaymentResponseDto(anyMap()))
-            .thenReturn(mockResponse);
-
-        mockMvc.perform(post(ubsLink + "/receivePayment")
-            .param("merchantAccount", dto.getMerchantAccount())
-            .param("orderReference", dto.getOrderReference())
-            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isUnprocessableEntity());
-    }
-
-    @Test
     @SneakyThrows
     void getInfoAboutTariffTest() {
         mockMvc.perform(get(ubsLink + "/tariffinfo/{locationId}", 1L)
@@ -401,20 +382,5 @@ class OrderControllerTest {
             .content(new ObjectMapper().writeValueAsString(responseDto)));
 
         verify(ubsClientService).validatePaymentFromMonoBank(responseDto);
-    }
-
-    private void setRedirectionConfigProp() {
-        RedirectionConfigProp redirectionConfigProp = ModelUtils.getRedirectionConfig();
-
-        Arrays.stream(OrderController.class.getDeclaredFields())
-            .filter(field -> field.getName().equals("redirectionConfigProp"))
-            .forEach(field -> {
-                field.setAccessible(true);
-                try {
-                    field.set(orderController, redirectionConfigProp);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            });
     }
 }

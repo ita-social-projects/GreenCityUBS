@@ -3175,7 +3175,8 @@ class UBSClientServiceImplTest {
         Map<String, String> params = Map.of("invalid", "not_json");
 
         when(objectMapper.readValue(anyString(), eq(PaymentResponseDto.class)))
-            .thenThrow(JsonProcessingException.class);
+            .thenThrow(new JsonProcessingException("malformed JSON") {
+            });
 
         PaymentResponseWayForPay result = ubsClientService.convertMapIntoPaymentResponseDto(params);
 
