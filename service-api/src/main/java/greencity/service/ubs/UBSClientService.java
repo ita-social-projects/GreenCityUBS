@@ -373,4 +373,6 @@ public interface UBSClientService {
     void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
 
     public OrdersDataForUserDto getOrdersData(Order order);
+
+    public String formedLink(Order order, long sumToPayInCoins);
 }
