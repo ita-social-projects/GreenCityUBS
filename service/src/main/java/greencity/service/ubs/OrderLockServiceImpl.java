@@ -57,8 +57,12 @@ public class OrderLockServiceImpl implements OrderLockService {
     @Transactional
     public void checkLockOrders() {
         LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(lockDurationMinutes);
-        log.info("Time: {}", expirationTime);
-        orderRepository.unlockExpiredOrders(expirationTime);
-        log.info("Unlock orders");
+        int unlocked = orderRepository.unlockExpiredOrders(expirationTime);
+
+        if (unlocked > 0) {
+            log.info("Unlocked {} expired orders (cutoff time: {})", unlocked, expirationTime);
+        } else {
+            log.debug("No expired orders to unlock (time: {})", expirationTime);
+        }
     }
 }

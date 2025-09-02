@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OrderLockServiceImplTest {
@@ -66,8 +66,15 @@ class OrderLockServiceImplTest {
 
     @Test
     void testCheckLockOrders() {
-        doNothing().when(orderRepository).unlockExpiredOrders(any(LocalDateTime.class));
+        when(orderRepository.unlockExpiredOrders(any(LocalDateTime.class))).thenReturn(2);
         orderLockService.checkLockOrders();
         verify(orderRepository, times(1)).unlockExpiredOrders(any(LocalDateTime.class));
     }
+
+    @Test
+void testCheckLockOrders_noExpired() {
+        when(orderRepository.unlockExpiredOrders(any(LocalDateTime.class))).thenReturn(0);
+        orderLockService.checkLockOrders();
+        verify(orderRepository, times(1)).unlockExpiredOrders(any(LocalDateTime.class));
+        }
 }
