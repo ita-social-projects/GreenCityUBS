@@ -80,7 +80,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void signUpEmployee(EmployeeSignUpDto dto) {
+            public void signUpEmployee(EmployeeSignUpDto dto, String language) {
                 log.error(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);
             }
