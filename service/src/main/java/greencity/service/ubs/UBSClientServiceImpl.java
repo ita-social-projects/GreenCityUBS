@@ -37,6 +37,7 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
@@ -139,6 +140,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -206,6 +208,7 @@ import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
 import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.UNABLE_TO_CANCEL_PAYMENT_INVOICE;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
@@ -213,13 +216,14 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXI
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.QuartzConstants.MONOBANK_LINK_VALIDITY_SECONDS;
+import static greencity.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_NOT_FOUND_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
 import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
+import static greencity.constant.QuartzConstants.TRIGGER_NOT_FOUND;
 import static greencity.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
 import static greencity.util.OrderUtils.getLastPayment;
 import static java.util.Objects.nonNull;
@@ -908,6 +912,32 @@ public class UBSClientServiceImpl implements UBSClientService {
         return order;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Transactional
+    @Override
+    public void cancelPaymentAttempt(String uuid, Long orderId) {
+        if (!checkExistsOrderExpiryJob(orderId)) {
+            throw new BadRequestException(NO_PAYMENT_ATTEMPT_FOR_ORDER);
+        }
+
+        User currentUser = userRepository.findByUuid(uuid);
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        checkIsOrderOfCurrentUser(currentUser, order);
+
+        PaymentCancellationWayForPayRequestDto requestDto = formPaymentCancellationRequestForWayForPay(order);
+        String result = getResultFromWayForPayCancellationResponse(
+            wayForPayClient.getCancellationResponse(requestDto));
+
+        if (!result.equals("Removed")) {
+            throw new BadRequestException(UNABLE_TO_CANCEL_PAYMENT_INVOICE);
+        }
+
+        fireOrderExpiryJob(orderId);
+    }
+
     private void schedulePaymentExpiryJob(
         Order order, int pointsUsed, Set<String> certificateCodes, Long expirySeconds, String paymentLink) {
         if (certificateCodes == null) {
@@ -949,12 +979,19 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private JobDetail getOrderExpiryJob(Long orderId) {
-        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+    private void fireOrderExpiryJob(Long orderId) {
+        TriggerKey triggerKey = TriggerKey.triggerKey(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        Trigger oldTrigger;
         try {
-            return quartzScheduler.getJobDetail(jobKey);
+            oldTrigger = quartzScheduler.getTrigger(triggerKey);
         } catch (SchedulerException exception) {
-            throw new IllegalStateException(PAYMENT_EXPIRY_JOB_NOT_FOUND_EXCEPTION + orderId);
+            throw new IllegalStateException(TRIGGER_NOT_FOUND);
+        }
+        try {
+            Trigger instantTrigger = oldTrigger.getTriggerBuilder().startNow().build();
+            quartzScheduler.rescheduleJob(triggerKey, instantTrigger);
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
         }
     }
 
@@ -1317,6 +1354,21 @@ public class UBSClientServiceImpl implements UBSClientService {
         return paymentWayForPayRequestDto;
     }
 
+    private PaymentCancellationWayForPayRequestDto formPaymentCancellationRequestForWayForPay(Order order) {
+        PaymentCancellationWayForPayRequestDto paymentCancellationWayForPayRequestDto =
+            PaymentCancellationWayForPayRequestDto.builder()
+                .transactionType("REMOVE_INVOICE")
+                .apiVersion(1)
+                .merchantAccount(merchantAccount)
+                .orderReference(OrderUtils.generateEncodedOrderReference(order.getId(), order))
+                .build();
+
+        paymentCancellationWayForPayRequestDto.setSignature(
+            encryptionUtil.formRemoveInvoiceSignature(paymentCancellationWayForPayRequestDto, wayForPaySecret));
+
+        return paymentCancellationWayForPayRequestDto;
+    }
+
     private Double convertCoinsIntoBills(Long coins) {
         return BigDecimal.valueOf(coins)
             .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
@@ -1677,6 +1729,11 @@ public class UBSClientServiceImpl implements UBSClientService {
         return json.getString("invoiceUrl");
     }
 
+    private String getResultFromWayForPayCancellationResponse(String wayForPayResponse) {
+        JSONObject json = new JSONObject(wayForPayResponse);
+        return json.getString("reason");
+    }
+
     private void checkResponseStatusFailure(PaymentResponseDto dto, Payment orderPayment, Order order) {
         if (dto.getTransactionStatus().equals(FAILED_STATUS)) {
             orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
@@ -1695,7 +1752,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);
-            removePaymentLinkForOrder(order);
+            removePaymentLinkAndNotificationForOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
@@ -2123,7 +2180,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             case SUCCESS -> {
                 updatePaymentAndOrderStatus(payment, order, PaymentStatus.PAID, OrderPaymentStatus.PAID);
                 logPaymentEvent(order, payment.getPaymentId());
-                removePaymentLinkForOrder(order);
+                removePaymentLinkAndNotificationForOrder(order);
                 cancelOrderExpiryJob(order.getId());
             }
             case REVERSED -> {
@@ -2160,7 +2217,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + paymentId, OrderHistory.SYSTEM_UK, order);
     }
 
+    private void removePaymentLinkAndNotificationForOrder(Order order) {
+        removePaymentLinkForOrder(order);
+        removePaymentNotificationForOrder(order);
+    }
+
     private void removePaymentLinkForOrder(Order order) {
+        order.setPaymentLink("");
+        order.setPaymentLinkExpiry(null);
+    }
+
+    private void removePaymentNotificationForOrder(Order order) {
         List<UserNotification> userNotification = userNotificationRepository
             .findAllUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
         if (!userNotification.isEmpty()) {

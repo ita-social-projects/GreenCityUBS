@@ -1,5 +1,6 @@
 package greencity.util;
 
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import java.util.StringJoiner;
@@ -50,6 +51,13 @@ public class EncryptionUtil {
         stringJoiner.add(dto.getOrderReference())
             .add((dto.getStatus()))
             .add(dto.getTime());
+        return new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
+    }
+
+    public String formRemoveInvoiceSignature(PaymentCancellationWayForPayRequestDto dto, String password) {
+        StringJoiner stringJoiner = new StringJoiner(";");
+        stringJoiner.add(dto.getMerchantAccount())
+            .add(dto.getOrderReference());
         return new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
     }
 }

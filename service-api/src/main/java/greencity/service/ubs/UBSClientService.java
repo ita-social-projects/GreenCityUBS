@@ -371,4 +371,15 @@ public interface UBSClientService {
     void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
 
     public OrdersDataForUserDto getOrdersData(Order order);
+
+    /**
+     * This method cancels invoice, sets payment link empty and fires payment expiry
+     * job after, which returns points/certificates from that attempt to user
+     * account.
+     *
+     * @param uuid    current {@link User}'s uuid.
+     * @param orderId id of the order that belongs to user.
+     * @author Oleksandr Ilnytskyi
+     */
+    void cancelPaymentAttempt(String uuid, Long orderId);
 }
