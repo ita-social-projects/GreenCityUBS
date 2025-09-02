@@ -1761,7 +1761,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private String formedLink(Order order, long sumToPayInCoins) {
+    @Override
+    public String formedLink(Order order, long sumToPayInCoins) {
         Order increment = incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
