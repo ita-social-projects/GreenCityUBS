@@ -166,6 +166,12 @@ public interface UserRemoteClient {
     @PostMapping("/api/testers/sign-in")
     ResponseEntity<SuccessSignInDto> signIn(@RequestBody TestersSignInRequest request);
 
+    /**
+     * Send a Telegram user feedback.
+     *
+     * @param dto {@link UserTelegramFeedbackDto} - feedback details from the
+     *            Telegram bot.
+     */
     @PostMapping("/email/telegram-feedback")
     void sendTelegramFeedback(@RequestBody UserTelegramFeedbackDto dto);
 }

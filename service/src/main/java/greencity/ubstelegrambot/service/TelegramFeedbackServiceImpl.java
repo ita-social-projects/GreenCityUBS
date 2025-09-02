@@ -68,7 +68,7 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
             .rating(feedback.getRating())
             .comment(feedback.getComment())
             .name(chat.getUsername())
-            .subject("New Telegram Feedback")
+            .subject("Новий відгук з Telegram")
             .build();
 
         userRemoteClient.sendTelegramFeedback(feedbackDto);
