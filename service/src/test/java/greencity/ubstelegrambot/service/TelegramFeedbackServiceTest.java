@@ -83,13 +83,13 @@ class TelegramFeedbackServiceTest {
         message.setText(comment);
 
         TelegramChat telegramChat = TelegramChat.builder()
-                .id(chatDbId)
-                .chatId(chatId.toString())
-                .username(username)
-                .chatState(ChatState.MAKING_FEEDBACK)
-                .chatStateUpdatedAt(Instant.now().minus(1, ChronoUnit.DAYS))
-                .isNotify(true)
-                .build();
+            .id(chatDbId)
+            .chatId(chatId.toString())
+            .username(username)
+            .chatState(ChatState.MAKING_FEEDBACK)
+            .chatStateUpdatedAt(Instant.now().minus(1, ChronoUnit.DAYS))
+            .isNotify(true)
+            .build();
 
         ChatFeedback chatFeedback = new ChatFeedback();
         chatFeedback.setId(10L);
@@ -98,11 +98,12 @@ class TelegramFeedbackServiceTest {
         chatFeedback.setRating(rating);
 
         when(telegramChatRepository.findByChatId(chatId.toString()))
-                .thenReturn(Optional.of(telegramChat));
+            .thenReturn(Optional.of(telegramChat));
         when(chatFeedbackRepository.findByChatIdAndFeedbackState(chatDbId, FeedbackState.IN_PROGRESS))
-                .thenReturn(Optional.of(chatFeedback));
+            .thenReturn(Optional.of(chatFeedback));
 
-        ArgumentCaptor<UserTelegramFeedbackDto> feedbackDtoCaptor = ArgumentCaptor.forClass(UserTelegramFeedbackDto.class);
+        ArgumentCaptor<UserTelegramFeedbackDto> feedbackDtoCaptor =
+            ArgumentCaptor.forClass(UserTelegramFeedbackDto.class);
 
         SendMessage result = telegramFeedbackService.processInputCommentRequest(message, TelegramBotConstants.UK);
 
