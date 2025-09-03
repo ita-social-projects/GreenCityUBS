@@ -664,7 +664,7 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private void updateLastMessage(TelegramChat chat) {
-        telegramMessageRepository.findTopByChatOrderBySendAtDesc(chat)
+        telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)
             .ifPresentOrElse(chat::setLastMessage,
                 () -> chat.setLastMessage(null));
         telegramChatRepository.save(chat);

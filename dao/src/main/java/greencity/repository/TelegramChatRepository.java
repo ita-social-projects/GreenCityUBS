@@ -54,8 +54,6 @@ public interface TelegramChatRepository
     @EntityGraph(attributePaths = "lastMessage")
     Page<TelegramChat> findAll(Specification<TelegramChat> spec, Pageable pageable);
 
-    boolean existsByChatId(String chatId);
-  
     /**
      * The method finds telegram bot by userId.
      *
