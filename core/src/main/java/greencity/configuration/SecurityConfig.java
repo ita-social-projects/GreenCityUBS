@@ -288,7 +288,9 @@ public class SecurityConfig {
                     EXPORT_SETTINGS_LINKS,
                     UBS_LINK + "/findAll-order-address",
                     UBS_LINK + "/order-details-for-tariff",
-                    UBS_LINK + "/personal-data")
+                    UBS_LINK + "/personal-data",
+                    UBS_LINK + "/details-for-existing-order/{orderId}",
+                    UBS_LINK + "/orders/{id}/tariff")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     TELEGRAM_LINK + "/**",
