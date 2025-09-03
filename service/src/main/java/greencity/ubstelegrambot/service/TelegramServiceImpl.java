@@ -6,7 +6,13 @@ import greencity.constant.ErrorMessage;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.ChatUserDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
+import greencity.dto.telegram.MessageAssetDto;
+import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import greencity.entity.order.Order;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -14,7 +20,11 @@ import greencity.entity.telegram.TelegramManager;
 import greencity.entity.telegram.TelegramMessage;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
-import greencity.enums.*;
+import greencity.enums.AssetType;
+import greencity.enums.ChatState;
+import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.producers.TelegramChatProducer;
@@ -246,63 +256,27 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable) {
-        Specification<TelegramChat> spec = ChatSpecifications.withSearchAndSort(searchTerm);
+        Specification<TelegramChat> spec;
+        if (isNumeric(searchTerm)) {
+            Long userId = Long.parseLong(searchTerm);
+            Optional<TelegramChat> chatOpt = telegramChatRepository.findByUserId(userId);
+
+            if (chatOpt.isPresent()) {
+                String chatId = chatOpt.get().getChatId();
+                spec = ChatSpecifications.withSearchAndSort(chatId);
+            } else {
+                return new PageableDto<>(Collections.emptyList(), 0, pageable.getPageNumber(), 0);
+            }
+        } else {
+            spec = ChatSpecifications.withSearchAndSort(searchTerm);
+        }
 
         Page<TelegramChat> chats = telegramChatRepository.findAll(spec, pageable);
 
         List<ChatDto> chatDtos = chats
             .getContent()
             .stream()
-            .map(chat -> {
-                ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
-                    .id(chat.getId())
-                    .unreadMessagesCount(chat.getUnreadMessagesCount())
-                    .firstName(chat.getFirstName())
-                    .lastName(chat.getLastName())
-                    .username(chat.getUsername());
-
-                if (chat.getUser() != null) {
-                    ChatUserDto chatUserDto = ChatUserDto
-                        .builder()
-                        .firstName(chat.getUser().getRecipientName())
-                        .lastName(chat.getUser().getRecipientSurname())
-                        .email(chat.getUser().getRecipientEmail())
-                        .build();
-
-                    chatDtoBuilder
-                        .user(chatUserDto);
-                }
-
-                if (chat.getLastMessage() != null) {
-                    TelegramMessage message = chat.getLastMessage();
-
-                    List<MessageAssetDto> assetDtos = Optional.ofNullable(message.getAssets())
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(asset -> new MessageAssetDto(
-                            asset.getId(),
-                            asset.getUrl(),
-                            asset.getType(),
-                            asset.getFileName(),
-                            asset.getSize(),
-                            asset.getContentType()))
-                        .toList();
-
-                    TelegramMessageDto lastMessage = TelegramMessageDto.builder()
-                        .id(message.getId())
-                        .text(message.getText())
-                        .sendAt(message.getSendAt())
-                        .fromManager(message.getFromManager())
-                        .deliveryStatus(message.getStatus())
-                        .assets(assetDtos)
-                        .messageViewingStatus(message.getMessageViewingStatus())
-                        .build();
-
-                    chatDtoBuilder.lastMessage(lastMessage);
-                }
-
-                return chatDtoBuilder.build();
-            })
+            .map(TelegramServiceImpl::mapTelegramChatToChatDto)
             .toList();
 
         return new PageableDto<>(
@@ -310,6 +284,57 @@ public class TelegramServiceImpl implements TelegramService {
             chats.getTotalElements(),
             chats.getNumber(),
             chats.getTotalPages());
+    }
+
+    private static ChatDto mapTelegramChatToChatDto(TelegramChat chat) {
+        ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
+            .id(chat.getId())
+            .unreadMessagesCount(chat.getUnreadMessagesCount())
+            .firstName(chat.getFirstName())
+            .lastName(chat.getLastName())
+            .username(chat.getUsername());
+
+        if (chat.getUser() != null) {
+            ChatUserDto chatUserDto = ChatUserDto
+                .builder()
+                .firstName(chat.getUser().getRecipientName())
+                .lastName(chat.getUser().getRecipientSurname())
+                .email(chat.getUser().getRecipientEmail())
+                .build();
+
+            chatDtoBuilder
+                .user(chatUserDto);
+        }
+
+        if (chat.getLastMessage() != null) {
+            TelegramMessage message = chat.getLastMessage();
+
+            List<MessageAssetDto> assetDtos = Optional.ofNullable(message.getAssets())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(asset -> new MessageAssetDto(
+                    asset.getId(),
+                    asset.getUrl(),
+                    asset.getType(),
+                    asset.getFileName(),
+                    asset.getSize(),
+                    asset.getContentType()))
+                .toList();
+
+            TelegramMessageDto lastMessage = TelegramMessageDto.builder()
+                .id(message.getId())
+                .text(message.getText())
+                .sendAt(message.getSendAt())
+                .fromManager(message.getFromManager())
+                .deliveryStatus(message.getStatus())
+                .assets(assetDtos)
+                .messageViewingStatus(message.getMessageViewingStatus())
+                .build();
+
+            chatDtoBuilder.lastMessage(lastMessage);
+        }
+
+        return chatDtoBuilder.build();
     }
 
     /**
@@ -570,5 +595,17 @@ public class TelegramServiceImpl implements TelegramService {
             log.warn("User service is unavailable: {}", e.getMessage());
         }
         return url;
+    }
+
+    private boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        try {
+            Long.parseLong(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }
