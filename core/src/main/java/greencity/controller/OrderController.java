@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
@@ -33,16 +32,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -213,18 +210,13 @@ public class OrderController {
     }
 
     /**
-     * Receives payment information from Way for Pay payment gateway. This method
-     * decodes the received response, converts it into a PaymentResponseDto object,
-     * and validates the payment. If the HTTP status is successful, it sends a
-     * notification for the paid order and redirects to the GreenCityClient.
+     * Receives payment notifications from WayForPay via form parameters, delegates
+     * validation/parsing to the service, and returns the acknowledgement payload.
+     * Always responds with HTTP 200 OK per WFP webhook requirements.
      *
-     * @param response The payment response received from Way for Pay, in String
-     *                 format.
-     * @param servlet  The HttpServletResponse object to handle the redirection.
-     * @return A PaymentResponseWayForPay object representing the validated payment
-     *         response.
-     * @throws IOException If an input or output exception occurred during the
-     *                     redirection.
+     * @param formParams Map with payment response parameters from WayForPay.
+     * @return PaymentResponseWayForPay containing status and orderReference.
+     * @throws IOException If an I/O error occurs (rare in normal webhook flow).
      */
     @Operation(summary = "Receive payment from WayForPay.")
     @ApiResponses(value = {
@@ -232,27 +224,9 @@ public class OrderController {
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
     })
     @PostMapping("/receivePayment")
-    public PaymentResponseWayForPay receivePayment(
-        @RequestBody String response,
-        HttpServletResponse servlet) throws IOException {
-        log.info("Incoming request Way For Pay API: {}", servlet.toString());
-        log.info("Response: {}", response);
-
-        String decodedResponse =
-            URLDecoder.decode(response, StandardCharsets.UTF_8);
-        log.info("DecodedResponse: {}", decodedResponse);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        PaymentResponseDto paymentResponseDto =
-            objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
-        log.info("PaymentResponseDto: {}", paymentResponseDto);
-
-        if (HttpStatus.OK.is2xxSuccessful()) {
-            servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
-        }
-
-        return ubsClientService.validatePayment(paymentResponseDto);
+    public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
+        throws IOException {
+        return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
     }
 
     /**

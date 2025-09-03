@@ -1,11 +1,10 @@
-package greencity.service.ubs.exporter.pdf;
+package greencity.service.ubs.pdf.exporter;
 
 import greencity.ModelUtils;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.exceptions.NotFoundException;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.file.export.FileExporter;
-import greencity.service.ubs.pdf.exporter.OrderPdfExporterServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

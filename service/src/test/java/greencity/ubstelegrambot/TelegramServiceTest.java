@@ -521,6 +521,67 @@ class TelegramServiceTest {
     }
 
     @Test
+    void getChats_shouldReturnChatDtos_whenUserIdExists() {
+        Long userId = 123L;
+        String chatId = "456";
+
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId(chatId);
+        chat.setFirstName("John");
+        chat.setLastName("Doe");
+
+        when(telegramChatRepository.findByUserId(userId))
+            .thenReturn(Optional.of(chat));
+        when(telegramChatRepository.findAll(any(Specification.class), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(chat)));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        PageableDto<ChatDto> result = telegramService.getChats(userId.toString(), pageable);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("John", result.getPage().get(0).getFirstName());
+        verify(telegramChatRepository).findByUserId(userId);
+        verify(telegramChatRepository).findAll(any(Specification.class), eq(pageable));
+    }
+
+    @Test
+    void getChats_shouldReturnEmpty_whenUserIdNotFound() {
+        Long userId = 999L;
+        when(telegramChatRepository.findByUserId(userId))
+            .thenReturn(Optional.empty());
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        PageableDto<ChatDto> result = telegramService.getChats(userId.toString(), pageable);
+
+        assertTrue(result.getPage().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        verify(telegramChatRepository).findByUserId(userId);
+        verify(telegramChatRepository, never()).findAll(any(Specification.class), any(Pageable.class));
+    }
+
+    @Test
+    void getChats_shouldWorkWithNullSearchTerm() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("123");
+        chat.setFirstName("Jane");
+
+        when(telegramChatRepository.findAll(any(Specification.class), eq(pageable)))
+            .thenReturn(new PageImpl<>(List.of(chat)));
+
+        PageableDto<ChatDto> result = telegramService.getChats(null, pageable);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Jane", result.getPage().get(0).getFirstName());
+        verify(telegramChatRepository).findAll(any(Specification.class), eq(pageable));
+    }
+
+    @Test
     void testGetLastOrderByChatId_ChatNotFound_NotFoundExceptionThrown() {
         Long chatId = 2L;
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.empty());

@@ -55,4 +55,12 @@ public interface TelegramChatRepository
     Page<TelegramChat> findAll(Specification<TelegramChat> spec, Pageable pageable);
 
     boolean existsByChatId(String chatId);
+  
+    /**
+     * The method finds telegram bot by userId.
+     *
+     * @param userId {@link Long}.
+     * @return {@link TelegramChat}.
+     */
+    Optional<TelegramChat> findByUserId(Long userId);
 }
