@@ -15,6 +15,7 @@ import greencity.service.ubs.TelegramFeedbackService;
 import greencity.service.ubs.TelegramLanguageService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
     private final TelegramChatRepository telegramChatRepository;
@@ -71,7 +73,11 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
             .subject("Новий відгук з Telegram")
             .build();
 
-        userRemoteClient.sendTelegramFeedback(feedbackDto);
+        try {
+            userRemoteClient.sendTelegramFeedback(feedbackDto);
+        } catch (RuntimeException ex) {
+            log.warn("Failed to send Telegram feedback email for chatId={}, continuing", chat.getChatId(), ex);
+        }
         return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString(), lang);
     }
 
