@@ -25,6 +25,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -32,6 +33,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -64,6 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class OrderController {
     private final UBSClientService ubsClientService;
+    private final WayForPayRedirectService wayForPayRedirectService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
@@ -227,6 +230,40 @@ public class OrderController {
     public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
         throws IOException {
         return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
+    }
+
+    /**
+     * Handles the returnUrl callback from WayForPay after a payment attempt. This
+     * endpoint is triggered by WayForPay once the payment process is completed
+     * (either successfully or with failure). It receives payment data from
+     * WayForPay as request parameters, then performs a redirect to the frontend
+     * confirmation page. The method does not return any content in the response
+     * body.
+     *
+     * @param formParams a map of form parameters sent by WayForPay (e.g.
+     *                   orderReference, status, amount, etc.)
+     * @param response   the HttpServletResponse used to send the redirect
+     * @return ResponseEntity with HTTP status 204 (No Content)
+     * @throws IOException if the redirect cannot be performed
+     */
+
+    @Operation(
+        summary = "Handle returnUrl callback from WayForPay",
+        description = "This endpoint processes the WayForPay returnUrl callback after payment completion. "
+            + "It redirects the user to the frontend confirmation page with order details.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204",
+            description = "Redirect successfully executed (no content returned)",
+            content = @Content(
+                mediaType = "application/x-www-form-urlencoded",
+                schema = @Schema(implementation = PaymentResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters")
+    })
+    @PostMapping("/payment/return")
+    public ResponseEntity<Void> handleWayForPayReturn(@RequestParam Map<String, String> formParams,
+        HttpServletResponse response) throws IOException {
+        wayForPayRedirectService.redirectUser(formParams, response);
+        return ResponseEntity.noContent().build();
     }
 
     /**

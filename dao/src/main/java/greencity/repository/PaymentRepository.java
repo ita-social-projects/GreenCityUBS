@@ -2,6 +2,8 @@ package greencity.repository;
 
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+import greencity.enums.PaymentStatus;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +33,9 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
     @Query(nativeQuery = true,
         value = "SELECT sum(amount) FROM payment WHERE order_id = :orderId AND payment_status ='PAID'")
     Long selectSumPaid(@Param(value = "orderId") Long orderId);
+
+    @Query(nativeQuery = true,
+        value = "SELECT payment_status FROM payment WHERE order_id = :orderId AND id = :paymentId")
+    Optional<PaymentStatus> getPaymentStatusByOrderIdAndPaymentId(@Param(value = "orderId") Long orderId,
+                                                                  @Param(value = "paymentId") Long paymentId);
 }
