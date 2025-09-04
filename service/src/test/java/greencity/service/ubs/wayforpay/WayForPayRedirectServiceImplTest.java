@@ -142,8 +142,9 @@ class WayForPayRedirectServiceImplTest {
 
     @Test
     void redirectUser_shouldThrowException_whenMissingParams() {
+        Map<String, String> form = new HashMap<>();
         InvalidPaymentResponseException ex = assertThrows(InvalidPaymentResponseException.class,
-            () -> service.redirectUser(formParams, response));
+            () -> service.redirectUser(form, response));
 
         assertEquals("Invalid payment response", ex.getMessage());
     }
