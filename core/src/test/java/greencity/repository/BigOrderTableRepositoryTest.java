@@ -38,7 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class,
     properties = {
-        "WAY_FOR_PAY_RETURN_URL=testUrl"
+        "WAY_FOR_PAY_RETURN_URL=testUrl",
+        "WAY_FOR_PAY_REDIRECT=testRedirectUrl"
     })
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @MockBean

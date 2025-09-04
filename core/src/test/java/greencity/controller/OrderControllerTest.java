@@ -283,15 +283,14 @@ class OrderControllerTest {
     @Test
     void handleWayForPayReturn_shouldReturnNoContent() throws Exception {
         mockMvc.perform(post(ubsLink + "/payment/return")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .param("orderReference", "ORDER123")
-                .param("amount", "100.00"))
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("orderReference", "ORDER123")
+            .param("amount", "100.00"))
             .andExpect(status().isNoContent());
 
         verify(wayForPayRedirectService).redirectUser(
             Mockito.any(Map.class),
-            any(HttpServletResponse.class)
-        );
+            any(HttpServletResponse.class));
     }
 
     @Test

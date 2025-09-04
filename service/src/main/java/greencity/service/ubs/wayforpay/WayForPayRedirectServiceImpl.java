@@ -35,7 +35,7 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
 
         PaymentStatus paymentStatus = paymentRepository
             .getPaymentStatusByOrderIdAndPaymentId(orderId, paymentId)
-            .orElseThrow(() ->  new IllegalStateException("No payment found"));
+            .orElseThrow(() -> new IllegalStateException("No payment found"));
 
         log.info("Received orderPaymentStatus: {}", paymentStatus);
 
