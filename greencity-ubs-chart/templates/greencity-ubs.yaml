@@ -174,12 +174,6 @@ spec:
               name: {{ .Values.externalSecret.secretName }}
               key: WAY-FOR-PAY-LOGIN
 
-        - name: WAY_FOR_PAY_REDIRECT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: WAY-FOR-PAY-REDIRECT
-
         - name: WAY_FOR_PAY_SECRET
           valueFrom:
             secretKeyRef:
