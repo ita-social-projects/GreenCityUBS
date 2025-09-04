@@ -179,6 +179,12 @@ spec:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: WAY-FOR-PAY-SECRET
+
+        - name: GREENCITY_SECRET_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: GREENCITY-SECRET-TOKEN
         ports:
         - containerPort: 8060
           name: tomcat
