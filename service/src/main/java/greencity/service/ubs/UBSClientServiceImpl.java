@@ -1191,7 +1191,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .merchantAccount(merchantAccount)
             .merchantDomainName(merchantDomainName)
             .apiVersion(1)
-            .serviceUrl("https://729828883cab.ngrok-free.app/ubs/receivePayment")
+            .serviceUrl(resultWayForPayUrl)
             .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
             .orderDate(instant.getEpochSecond())
             .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())
