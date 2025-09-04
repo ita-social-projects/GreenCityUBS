@@ -3,8 +3,6 @@ package greencity.ubstelegrambot.messages;
 import greencity.constant.TelegramBotConstants;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -473,7 +471,9 @@ public class MessageFactory {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
         sendPhoto.setPhoto(new InputFile(file.getInputStream(), file.getOriginalFilename()));
-        sendPhoto.setCaption(caption);
+        if (caption != null && !caption.isBlank()) {
+            sendPhoto.setCaption(caption.length() > 1024 ? caption.substring(0, 1024) : caption);
+        }
         return sendPhoto;
     }
 
@@ -490,7 +490,9 @@ public class MessageFactory {
         throws IOException {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(chatId);
-        sendDocument.setCaption(caption);
+        if (caption != null && !caption.isBlank()) {
+            sendDocument.setCaption(caption.length() > 1024 ? caption.substring(0, 1024) : caption);
+        }
         sendDocument.setDocument(new InputFile(file.getInputStream(), file.getOriginalFilename()));
         return sendDocument;
     }
@@ -526,9 +528,9 @@ public class MessageFactory {
      * @return a EditMessageText object configured with the specified chat ID, text
      *         and telegram message ID
      */
-    public static EditMessageText buildEditMessageText(@NotBlank String chatId,
-        Integer telegramMessageId,
-        @NotBlank @Size(max = 1000) String text) {
+    public static EditMessageText buildEditMessageText(String chatId, Integer telegramMessageId, String text) {
+        validationChatId(chatId);
+        validationText(text);
         EditMessageText editMessage = new EditMessageText();
         editMessage.setChatId(chatId);
         editMessage.setMessageId(telegramMessageId);
@@ -575,9 +577,9 @@ public class MessageFactory {
      * @return a EditMessageText object configured with the specified chat ID,
      *         caption and telegram message ID
      */
-    public static EditMessageCaption buildEditMessageCaption(@NotBlank String chatId,
-        Integer telegramMessageId,
-        @NotBlank @Size(max = 1000) String text) {
+    public static EditMessageCaption buildEditMessageCaption(String chatId, Integer telegramMessageId, String text) {
+        validationChatId(chatId);
+        validationText(text);
         return EditMessageCaption.builder()
             .chatId(chatId)
             .messageId(telegramMessageId)
@@ -594,7 +596,8 @@ public class MessageFactory {
      * @return a DeleteMessage object configured with the specified chat ID and
      *         telegram message ID
      */
-    public static DeleteMessage buildDeleteMessage(@NotBlank String chatId, Integer telegramMessageId) {
+    public static DeleteMessage buildDeleteMessage(String chatId, Integer telegramMessageId) {
+        validationChatId(chatId);
         return DeleteMessage.builder()
             .chatId(chatId)
             .messageId(telegramMessageId)
@@ -610,10 +613,23 @@ public class MessageFactory {
      * @return a DeleteMessages object configured with the specified chat ID and
      *         telegram message IDs
      */
-    public static DeleteMessages buildDeleteMessages(@NotBlank String chatId, List<Integer> telegramMessagesId) {
+    public static DeleteMessages buildDeleteMessages(String chatId, List<Integer> telegramMessagesId) {
+        validationChatId(chatId);
         return DeleteMessages.builder()
             .chatId(chatId)
             .messageIds(telegramMessagesId)
             .build();
+    }
+
+    private static void validationChatId(String chatId) {
+        if (chatId == null || chatId.isBlank()) {
+            throw new IllegalArgumentException("chatId cannot be null or blank");
+        }
+    }
+
+    private static void validationText(String text) {
+        if (text == null || text.isBlank() || text.length() >= 1000) {
+            throw new IllegalArgumentException("text cannot be null or blank");
+        }
     }
 }
