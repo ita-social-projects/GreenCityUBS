@@ -1,14 +1,13 @@
 package greencity.service.ubs.wayforpay;
 
-import com.google.api.client.util.Value;
 import greencity.config.GreenCityRedirectionConfigProp;
-import greencity.enums.OrderPaymentStatus;
 import greencity.enums.PaymentStatus;
-import greencity.repository.OrderRepository;
+import greencity.exceptions.DecodeOrderReferenceException;
+import greencity.exceptions.payment.InvalidPaymentResponseException;
+import greencity.exceptions.payment.PaymentNotFoundException;
 import greencity.repository.PaymentRepository;
 import greencity.util.OrderUtils;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
     private final GreenCityRedirectionConfigProp redirectProp;
 
     @Override
-    public void redirectUser(Map<String, String> formParams,
+    public String redirectUser(Map<String, String> formParams,
         HttpServletResponse response) {
         String orderReference = formParams.get("orderReference");
         String transactionStatus = formParams.get("transactionStatus");
@@ -35,43 +34,28 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
 
         PaymentStatus paymentStatus = paymentRepository
             .getPaymentStatusByOrderIdAndPaymentId(orderId, paymentId)
-            .orElseThrow(() -> new IllegalStateException("No payment found"));
+            .orElseThrow(() -> new PaymentNotFoundException("No payment found"));
 
         log.info("Received orderPaymentStatus: {}", paymentStatus);
 
         String redirectUrl = buildRedirectUrl(orderId, paymentStatus, transactionStatus);
         log.info("Redirect URL: {}", redirectUrl);
-
-        doRedirect(response, redirectUrl);
-    }
-
-    private void doRedirect(HttpServletResponse response, String redirectUrl) {
-        try {
-            response.sendRedirect(redirectUrl);
-        } catch (IOException e) {
-            log.error("Failed to redirect user to {}, fallback to /", redirectUrl, e);
-            fallbackRedirect(response);
-        }
+        return redirectUrl;
     }
 
     private String buildRedirectUrl(Long orderId, PaymentStatus paymentStatus, String transactionStatus) {
-        return redirectProp.getConfirmPage()
+        return Optional.ofNullable(redirectProp.getConfirmPage())
+            .filter(s -> !s.isBlank())
+            .orElseThrow(() -> new IllegalStateException("Confirm page URL is not configured"))
             + "?orderId=" + orderId
             + "&status=" + finalStatus(paymentStatus, transactionStatus);
     }
 
     private void validateParams(String orderReference, String transactionStatus) {
-        if (orderReference == null || transactionStatus == null) {
-            log.error("Missing required WayForPay params");
-            throw new IllegalArgumentException("Invalid payment response");
-        }
-    }
-
-    private void fallbackRedirect(HttpServletResponse response) {
-        try {
-            response.sendRedirect("/");
-        } catch (IOException ex) {
-            log.error("Even fallback redirect failed", ex);
+        if (orderReference == null || orderReference.isBlank()
+            || transactionStatus == null || transactionStatus.isBlank()) {
+            log.error("Missing required WayForPay params: orderReference or transactionStatus");
+            throw new InvalidPaymentResponseException("Invalid payment response");
         }
     }
 
@@ -83,8 +67,16 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
     }
 
     private Long getOrderIdByOrderReference(String orderReference, int index) {
-        String decodeOrderReference = OrderUtils.decodeOrderReference(orderReference);
-        String[] parts = decodeOrderReference.split("_");
-        return Long.parseLong(parts[index]);
+        try {
+            String decoded = OrderUtils.decodeOrderReference(orderReference);
+            String[] parts = decoded.split("_");
+            if (index >= parts.length) {
+                throw new InvalidPaymentResponseException("Invalid payment response");
+            }
+            return Long.parseLong(parts[index]);
+        } catch (DecodeOrderReferenceException | NumberFormatException ex) {
+            log.error("Invalid orderReference format: {}", orderReference, ex);
+            throw new InvalidPaymentResponseException("Invalid payment response");
+        }
     }
 }

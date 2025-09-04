@@ -326,7 +326,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             return buildErrorResponse("Invalid JSON format");
         }
 
-        if (validSignature(dto)) {
+        if (isInvalidSignature(dto)) {
             return buildErrorResponse("Invalid signature");
         }
 
@@ -337,13 +337,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private PaymentResponseDto getPaymentResponseDto(String jsonKey) throws JsonProcessingException {
         PaymentResponseDto dto;
         dto = objectMapper.readValue(jsonKey, PaymentResponseDto.class);
-        log.debug("Parsed PaymentResponseDto: {}", dto);
         log.info("Processing payment: orderReference={}, status={}",
             dto.getOrderReference(), dto.getTransactionStatus());
         return dto;
     }
 
-    private boolean validSignature(PaymentResponseDto dto) {
+    private boolean isInvalidSignature(PaymentResponseDto dto) {
         String calculatedSignature = encryptionUtil.generateResponseSignature(dto, wayForPaySecret);
         if (!calculatedSignature.equals(dto.getMerchantSignature())) {
             log.error("Invalid signature for orderReference={}", dto.getOrderReference());
@@ -1192,7 +1191,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .merchantAccount(merchantAccount)
             .merchantDomainName(merchantDomainName)
             .apiVersion(1)
-            .serviceUrl(resultWayForPayUrl)
+            .serviceUrl("https://729828883cab.ngrok-free.app/ubs/receivePayment")
             .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
             .orderDate(instant.getEpochSecond())
             .amount(convertCoinsIntoBills(sumToPayInCoins).intValue())

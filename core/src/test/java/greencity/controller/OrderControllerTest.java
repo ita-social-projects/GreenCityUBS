@@ -286,7 +286,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .param("orderReference", "ORDER123")
             .param("amount", "100.00"))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isFound());
 
         verify(wayForPayRedirectService).redirectUser(
             Mockito.any(Map.class),

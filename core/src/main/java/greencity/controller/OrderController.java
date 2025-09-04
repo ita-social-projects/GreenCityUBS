@@ -254,7 +254,7 @@ public class OrderController {
      * @param formParams a map of form parameters sent by WayForPay (e.g.
      *                   orderReference, status, amount, etc.)
      * @param response   the HttpServletResponse used to send the redirect
-     * @return ResponseEntity with HTTP status 204 (No Content)
+     * @return 302 Redirect to the frontend confirmation page
      * @throws IOException if the redirect cannot be performed
      */
 
@@ -263,7 +263,7 @@ public class OrderController {
         description = "This endpoint processes the WayForPay returnUrl callback after payment completion. "
             + "It redirects the user to the frontend confirmation page with order details.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204",
+        @ApiResponse(responseCode = "302",
             description = "Redirect successfully executed (no content returned)",
             content = @Content(
                 mediaType = "application/x-www-form-urlencoded",
@@ -273,8 +273,10 @@ public class OrderController {
     @PostMapping("/payment/return")
     public ResponseEntity<Void> handleWayForPayReturn(@RequestParam Map<String, String> formParams,
         HttpServletResponse response) throws IOException {
-        wayForPayRedirectService.redirectUser(formParams, response);
-        return ResponseEntity.noContent().build();
+        String redirectUrl = wayForPayRedirectService.redirectUser(formParams, response);
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header("Location", redirectUrl)
+            .build();
     }
 
     /**

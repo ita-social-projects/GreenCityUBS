@@ -15,6 +15,8 @@ import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.exceptions.notification.IncorrectTemplateException;
 import greencity.exceptions.notification.TemplateDeleteException;
+import greencity.exceptions.payment.InvalidPaymentResponseException;
+import greencity.exceptions.payment.PaymentNotFoundException;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.exceptions.api.GoogleApiException;
@@ -377,5 +379,33 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleForbiddenException(ForbiddenException ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
+    }
+
+    /**
+     * Handles cases when a payment is not found in the system. Returns HTTP 404
+     * with a structured ExceptionResponse.
+     *
+     * @param ex      the thrown PaymentNotFoundException
+     * @param request the current web request
+     * @return ResponseEntity with status 404 and ExceptionResponse body
+     */
+    @ExceptionHandler(PaymentNotFoundException.class)
+    public ResponseEntity<Object> handlePaymentNotFound(PaymentNotFoundException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    /**
+     * Handles cases when the payment response is invalid. Returns HTTP 400 with a
+     * structured ExceptionResponse.
+     *
+     * @param ex      the thrown InvalidPaymentResponseException
+     * @param request the current web request
+     * @return ResponseEntity with status 400 and ExceptionResponse body
+     */
+    @ExceptionHandler(InvalidPaymentResponseException.class)
+    public ResponseEntity<Object> handleInvalidPayment(InvalidPaymentResponseException ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(getErrorAttributes(request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 }

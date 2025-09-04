@@ -35,7 +35,7 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
     Long selectSumPaid(@Param(value = "orderId") Long orderId);
 
     @Query(nativeQuery = true,
-        value = "SELECT payment_status FROM payment WHERE order_id = :orderId AND id = :paymentId")
+        value = "SELECT p.payment_status FROM Payment p WHERE p.order_id = :orderId AND p.id = :paymentId")
     Optional<PaymentStatus> getPaymentStatusByOrderIdAndPaymentId(@Param(value = "orderId") Long orderId,
         @Param(value = "paymentId") Long paymentId);
 }
