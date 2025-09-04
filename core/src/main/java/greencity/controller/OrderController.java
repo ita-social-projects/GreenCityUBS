@@ -221,10 +221,21 @@ public class OrderController {
      * @return PaymentResponseWayForPay containing status and orderReference.
      * @throws IOException If an I/O error occurs (rare in normal webhook flow).
      */
-    @Operation(summary = "Receive payment from WayForPay.")
+    @Operation(
+        summary = "Receive payment from WayForPay.",
+        description = "Endpoint receives payment notifications from WayForPay as form parameters "
+            + "(application/x-www-form-urlencoded).")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
+        @ApiResponse(
+            responseCode = "200",
+            description = HttpStatuses.OK,
+            content = @Content(
+                mediaType = "application/x-www-form-urlencoded",
+                schema = @Schema(implementation = PaymentResponseDto.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = HttpStatuses.BAD_REQUEST,
+            content = @Content)
     })
     @PostMapping("/receivePayment")
     public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
