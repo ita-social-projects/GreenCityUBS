@@ -23,6 +23,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -36,6 +37,10 @@ public class TelegramMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
+    @Column(name = "telegram_message_id")
+    private Integer telegramMessageId = 0;
+
     @CreatedDate
     @Column(updatable = false, nullable = false)
     private Instant sendAt;
@@ -43,8 +48,8 @@ public class TelegramMessage {
     @LastModifiedDate
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
-    private List<MessageAsset> assets;
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MessageAsset> assets = new ArrayList<>();
 
     @Column(length = 50, unique = true)
     private String mediaGroupId;
