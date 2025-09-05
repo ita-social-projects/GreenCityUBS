@@ -2,7 +2,6 @@ package greencity.service.ubs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.MonoBankClient;
 import greencity.client.UserRemoteClient;
 import greencity.client.WayForPayClient;
 import greencity.constant.ErrorMessage;
@@ -34,8 +33,6 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.dto.payment.monobank.MonoBankPaymentRequestDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.DeactivateUserRequestDto;
@@ -165,7 +162,6 @@ import static greencity.ModelUtils.getBag1list;
 import static greencity.ModelUtils.getBagForOrder;
 import static greencity.ModelUtils.getBagTranslationDto;
 import static greencity.ModelUtils.getCancellationDto;
-import static greencity.ModelUtils.getCheckoutResponseFromMonoBank;
 import static greencity.ModelUtils.getCourier;
 import static greencity.ModelUtils.getCourierDto;
 import static greencity.ModelUtils.getCourierDtoList;
@@ -175,7 +171,6 @@ import static greencity.ModelUtils.getEvent1;
 import static greencity.ModelUtils.getEvent2;
 import static greencity.ModelUtils.getGeocodingResultWithKyivRegion;
 import static greencity.ModelUtils.getLocation;
-import static greencity.ModelUtils.getMonoBankPaymentResponseDto;
 import static greencity.ModelUtils.getNotificationPaymentLink;
 import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrder2;
@@ -372,9 +367,6 @@ class UBSClientServiceImplTest {
     private String wayForPaySecret;
 
     @Mock
-    private MonoBankClient monoBankClient;
-
-    @Mock
     private NotificationServiceImpl notificationServiceImpl;
 
     @Mock
@@ -385,9 +377,6 @@ class UBSClientServiceImplTest {
 
     @Mock
     private AddressService addressService;
-
-    @Value("${greencity.monobank.token}")
-    private String token;
 
     private static MockedStatic<SecurityContextHolder> mockedContextHolder;
 
@@ -1106,8 +1095,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
-            .thenReturn(getCheckoutResponseFromMonoBank());
 
         PaymentSystemResponse result = ubsService
             .processExistingOrder(dto, "35467585763t4sfgchjfuyetf", order.getId());
@@ -1428,8 +1415,6 @@ class UBSClientServiceImplTest {
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(orderRepository.findById(any())).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
-            .thenReturn(getCheckoutResponseFromMonoBank());
 
         PaymentSystemResponse result = ubsClientService
             .processExistingOrder(dto, "35467585763t4sfgchjfuyetf", 1L);
@@ -2314,8 +2299,6 @@ class UBSClientServiceImplTest {
         Assertions.assertTrue(result.link() == null || result.link().isEmpty());
         Assertions.assertEquals(0, user.getCurrentPoints());
 
-        verify(monoBankClient, never()).getCheckoutResponse(any(), any());
-        verify(wayForPayClient, never()).getCheckOutResponse(any());
         verify(orderRepository).save(any(Order.class));
     }
 
@@ -3607,111 +3590,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void processOrderWithMonoBankPaymentSystemTest() {
-        User user = getUserWithInitializedFields();
-        user.setCurrentPoints(900);
-        OrderResponseDto dto = getOrderResponseDto();
-        dto.setPaymentSystem(PaymentSystem.MONOBANK);
-        dto.setPointsToUse(0);
-
-        List<BagDto> bags = new ArrayList<>();
-        bags.add(new BagDto(1, 5));
-        bags.add(new BagDto(2, 5));
-        dto.setBags(bags);
-
-        Order order = getOrder();
-        order.setOrderStatus(OrderStatus.FORMED);
-        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-        user.setOrders(new ArrayList<>(List.of(order)));
-
-        Bag bag = getBagForOrder();
-        TariffsInfo tariffsInfo = getTariffsInfo();
-        bag.setTariffsInfo(tariffsInfo);
-        tariffsInfo.setBags(List.of(bag));
-        order.setTariffsInfo(tariffsInfo);
-
-        Address address = getAddress();
-        address.setUser(user);
-        Location location = getLocation();
-        OrderAddress orderAddress = getOrderAddress();
-        orderAddress.setLocation(location);
-
-        UBSuser ubsUser = getUBSuser();
-        ubsUser.setOrderAddress(orderAddress);
-        order.setUbsUser(ubsUser);
-
-        when(userRepository.findByUuid(anyString())).thenReturn(user);
-        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
-        when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
-        when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
-        when(bagRepository.findActiveBagById(any())).thenReturn(Optional.of(bag));
-        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(monoBankClient.getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token)))
-            .thenReturn(getCheckoutResponseFromMonoBank());
-
-        PaymentSystemResponse result = ubsClientService.processExistingOrder(dto, user.getUuid(), 1L);
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.link().isBlank());
-
-        verify(userRepository, times(1)).findByUuid(anyString());
-        verify(orderRepository, times(2)).findById(anyLong());
-        verify(monoBankClient, times(1)).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
-    }
-
-    @Test
-    void validatePaymentFromMonoBankWithSuccessStatusTest() {
-        MonoBankPaymentResponseDto response = getMonoBankPaymentResponseDto("success");
-        Order order = getOrder();
-
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(any(Order.class),
-            any(NotificationType.class)))
-            .thenReturn(List.of(getUserNotificationForUnpaidOrder()));
-        when(notificationParameterRepository
-            .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
-            .thenReturn(getNotificationPaymentLink());
-
-        ubsClientService.validatePaymentFromMonoBank(response);
-
-        verify(orderRepository).findById(order.getId());
-        verify(paymentRepository).save(any());
-        verify(orderRepository).save(any());
-        verify(eventService, times(2)).save(anyString(), anyString(), any());
-        verify(userNotificationRepository)
-            .findAllUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
-        verify(notificationParameterRepository)
-            .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"failure", "reversed", "created", "processing", "hold", "expired"})
-    void validatePaymentFromMonoBankWithErrorsTest(String status) {
-        MonoBankPaymentResponseDto response = getMonoBankPaymentResponseDto(status);
-        Order order = getOrder();
-
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-
-        ubsClientService.validatePaymentFromMonoBank(response);
-
-        verify(orderRepository).findById(order.getId());
-        verify(paymentRepository).save(any());
-    }
-
-    @Test
-    void validatePaymentFromMonoBankThrowExceptionTest() {
-        MonoBankPaymentResponseDto response = getMonoBankPaymentResponseDto(null);
-
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        assertThrows(BadRequestException.class,
-            () -> ubsClientService.validatePaymentFromMonoBank(response));
-    }
-
-    @Test
     void processOrderIfPaidWithBonusesTest() {
         Order order = getOrder();
         order.setOrderStatus(OrderStatus.FORMED);
@@ -3755,7 +3633,6 @@ class UBSClientServiceImplTest {
         verify(bagRepository).findActiveBagById(anyInt());
         verify(orderRepository, times(1)).findById(anyLong());
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
-        verify(monoBankClient, times(0)).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
     }
 
     @Test
@@ -3835,24 +3712,6 @@ class UBSClientServiceImplTest {
         ubsService.processOrder(order.getUser().getUuid(), dto);
         verify(orderRepository, atLeastOnce()).save(order);
         verify(certificateRepository).findByCodeInAndCertificateStatus(any(), eq(CertificateStatus.ACTIVE));
-    }
-
-    @Test
-    void validatePaymentFromMonoBankWithDefaultPaymentInfo() {
-        MonoBankPaymentResponseDto response = MonoBankPaymentResponseDto.builder()
-            .orderReference(Base64.getEncoder().encodeToString("1_1_1".getBytes()))
-            .amount(1000)
-            .status("failure")
-            .createdDate("2025-08-19T12:22:13Z")
-            .modifiedDate("2025-08-19T12:22:13Z")
-            .build();
-        Order order = getOrder();
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-
-        ubsService.validatePaymentFromMonoBank(response);
-
-        verify(paymentRepository).save(any());
-        verify(orderRepository).save(any());
     }
 
     @Test
