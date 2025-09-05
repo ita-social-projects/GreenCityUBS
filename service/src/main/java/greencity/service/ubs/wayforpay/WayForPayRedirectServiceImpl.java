@@ -25,8 +25,7 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
     private static final int PAYMENT_ID_INDEX = 2;
 
     @Override
-    public String redirectUser(Map<String, String> formParams,
-        HttpServletResponse response) {
+    public String redirectUser(Map<String, String> formParams) {
         String orderReference = formParams.get("orderReference");
         String transactionStatus = formParams.get("transactionStatus");
         validateParams(orderReference, transactionStatus);

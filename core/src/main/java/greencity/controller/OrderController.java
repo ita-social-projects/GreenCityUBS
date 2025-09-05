@@ -32,7 +32,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -252,7 +251,6 @@ public class OrderController {
      *
      * @param formParams a map of form parameters sent by WayForPay (e.g.
      *                   orderReference, status, amount, etc.)
-     * @param response   the HttpServletResponse used to send the redirect
      * @return 302 Redirect to the frontend confirmation page
      * @throws IOException if the redirect cannot be performed
      */
@@ -270,9 +268,8 @@ public class OrderController {
         @ApiResponse(responseCode = "400", description = "Invalid request parameters")
     })
     @PostMapping("/payment/return")
-    public ResponseEntity<Void> handleWayForPayReturn(@RequestParam Map<String, String> formParams,
-        HttpServletResponse response) throws IOException {
-        String redirectUrl = wayForPayRedirectService.redirectUser(formParams, response);
+    public ResponseEntity<Void> handleWayForPayReturn(@RequestParam Map<String, String> formParams) throws IOException {
+        String redirectUrl = wayForPayRedirectService.redirectUser(formParams);
         return ResponseEntity.status(HttpStatus.FOUND)
             .header("Location", redirectUrl)
             .build();

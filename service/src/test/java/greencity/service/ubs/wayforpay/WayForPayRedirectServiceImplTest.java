@@ -11,7 +11,6 @@ import greencity.exceptions.payment.InvalidPaymentResponseException;
 import greencity.exceptions.payment.PaymentNotFoundException;
 import greencity.repository.PaymentRepository;
 import greencity.util.OrderUtils;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,9 +28,6 @@ class WayForPayRedirectServiceImplTest {
 
     @Mock
     private GreenCityRedirectionConfigProp redirectProp;
-
-    @Mock
-    private HttpServletResponse response;
 
     @InjectMocks
     private WayForPayRedirectServiceImpl service;
@@ -56,7 +52,7 @@ class WayForPayRedirectServiceImplTest {
             mocked.when(() -> OrderUtils.decodeOrderReference("MTlfMl80MA"))
                 .thenReturn("19_2_0");
 
-            String redirectUrl = service.redirectUser(formParams, response);
+            String redirectUrl = service.redirectUser(formParams);
 
             assertTrue(redirectUrl.startsWith("http://localhost:4200/#/ubs/confirm"));
             assertTrue(redirectUrl.contains("orderId=19"));
@@ -76,7 +72,7 @@ class WayForPayRedirectServiceImplTest {
             mocked.when(() -> OrderUtils.decodeOrderReference("MTlfMl80MA"))
                 .thenReturn("19_2_0");
 
-            String redirectUrl = service.redirectUser(formParams, response);
+            String redirectUrl = service.redirectUser(formParams);
 
             assertTrue(redirectUrl.contains("status=unpaid"));
         }
@@ -94,7 +90,7 @@ class WayForPayRedirectServiceImplTest {
             mocked.when(() -> OrderUtils.decodeOrderReference("MTlfMl80MA"))
                 .thenReturn("19_2_0");
 
-            String redirectUrl = service.redirectUser(formParams, response);
+            String redirectUrl = service.redirectUser(formParams);
 
             assertTrue(redirectUrl.contains("status=unpaid"));
         }
@@ -108,7 +104,7 @@ class WayForPayRedirectServiceImplTest {
                 .thenReturn("1920");
 
             InvalidPaymentResponseException ex = assertThrows(InvalidPaymentResponseException.class,
-                () -> service.redirectUser(formParams, response));
+                () -> service.redirectUser(formParams));
 
             assertEquals("Invalid payment response", ex.getMessage());
         }
@@ -123,7 +119,7 @@ class WayForPayRedirectServiceImplTest {
 
             InvalidPaymentResponseException ex = assertThrows(
                 InvalidPaymentResponseException.class,
-                () -> service.redirectUser(formParams, response));
+                () -> service.redirectUser(formParams));
             assertEquals("Invalid payment response", ex.getMessage());
         }
     }
@@ -137,7 +133,7 @@ class WayForPayRedirectServiceImplTest {
 
             InvalidPaymentResponseException ex = assertThrows(
                 InvalidPaymentResponseException.class,
-                () -> service.redirectUser(formParams, response));
+                () -> service.redirectUser(formParams));
 
             assertEquals("Invalid payment response", ex.getMessage());
         }
@@ -147,7 +143,7 @@ class WayForPayRedirectServiceImplTest {
     void redirectUser_shouldThrowException_whenMissingParams() {
         Map<String, String> form = new HashMap<>();
         InvalidPaymentResponseException ex = assertThrows(InvalidPaymentResponseException.class,
-            () -> service.redirectUser(form, response));
+            () -> service.redirectUser(form));
 
         assertEquals("Invalid payment response", ex.getMessage());
     }
@@ -155,7 +151,7 @@ class WayForPayRedirectServiceImplTest {
     @Test
     void redirectUser_shouldThrowException_whenOnlyOrderReferencePresent() {
         InvalidPaymentResponseException ex = assertThrows(InvalidPaymentResponseException.class,
-            () -> service.redirectUser(formParams, response));
+            () -> service.redirectUser(formParams));
 
         assertEquals("Invalid payment response", ex.getMessage());
     }
@@ -171,7 +167,7 @@ class WayForPayRedirectServiceImplTest {
                 .thenReturn("19_2_0");
 
             PaymentNotFoundException ex = assertThrows(PaymentNotFoundException.class,
-                () -> service.redirectUser(formParams, response));
+                () -> service.redirectUser(formParams));
 
             assertEquals("No payment found", ex.getMessage());
         }

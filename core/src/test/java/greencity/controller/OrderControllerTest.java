@@ -36,7 +36,6 @@ import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
-import jakarta.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
@@ -288,8 +287,7 @@ class OrderControllerTest {
             .andExpect(status().isFound());
 
         verify(wayForPayRedirectService).redirectUser(
-            Mockito.any(Map.class),
-            any(HttpServletResponse.class));
+            Mockito.any(Map.class));
     }
 
     @Test
