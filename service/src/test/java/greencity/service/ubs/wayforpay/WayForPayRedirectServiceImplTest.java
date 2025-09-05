@@ -102,6 +102,7 @@ class WayForPayRedirectServiceImplTest {
 
     @Test
     void redirectUser_shouldThrowException_whenWrongDecodedOrderReference() {
+        formParams.put("transactionStatus", "Approved");
         try (var mocked = mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.decodeOrderReference("MTlfMl80MA"))
                 .thenReturn("1920");
@@ -115,6 +116,7 @@ class WayForPayRedirectServiceImplTest {
 
     @Test
     void redirectUser_shouldThrowInvalidPaymentResponseException_whenDecodeFails() {
+        formParams.put("transactionStatus", "Approved");
         try (var mocked = mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.decodeOrderReference("MTlfMl80MA"))
                 .thenThrow(new DecodeOrderReferenceException("Decode failed"));
@@ -128,6 +130,7 @@ class WayForPayRedirectServiceImplTest {
 
     @Test
     void redirectUser_shouldThrowInvalidPaymentResponseException_whenNumberFormatInvalid() {
+        formParams.put("transactionStatus", "Approved");
         try (var mocked = mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.decodeOrderReference("MTlfMl80MA"))
                 .thenReturn("two_two_two");
