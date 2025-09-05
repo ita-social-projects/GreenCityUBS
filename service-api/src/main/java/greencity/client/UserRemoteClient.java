@@ -9,6 +9,7 @@ import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.telegram.UserTelegramFeedbackDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.entity.user.User;
@@ -127,7 +128,7 @@ public interface UserRemoteClient {
      * @param dto {@link EmployeeSignUpDto}
      */
     @PostMapping("/ownSecurity/sign-up-employee")
-    void signUpEmployee(@RequestBody EmployeeSignUpDto dto);
+    void signUpEmployee(@RequestBody EmployeeSignUpDto dto, @RequestParam String lang);
 
     /**
      * Update employee email.
@@ -164,4 +165,13 @@ public interface UserRemoteClient {
 
     @PostMapping("/api/testers/sign-in")
     ResponseEntity<SuccessSignInDto> signIn(@RequestBody TestersSignInRequest request);
+
+    /**
+     * Send a Telegram user feedback.
+     *
+     * @param dto {@link UserTelegramFeedbackDto} - feedback details from the
+     *            Telegram bot.
+     */
+    @PostMapping("/email/telegram-feedback")
+    void sendTelegramFeedback(@RequestBody UserTelegramFeedbackDto dto);
 }

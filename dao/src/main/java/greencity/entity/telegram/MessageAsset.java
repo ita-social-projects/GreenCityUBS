@@ -32,6 +32,10 @@ public class MessageAsset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
+    @Column(name = "telegram_message_id")
+    private Integer telegramMessageId = 0;
+
     @Column(nullable = false)
     @URL(message = "URL is not valid", protocol = "https")
     private String url;

@@ -147,7 +147,7 @@ class NotificationServiceImplTest {
     private static final String END_TIME_KEY = "endTime";
     private static final String PHONE_NUMBER_KEY = "phoneNumber";
     private static final String CUSTOMER = "customerName";
-    private static final String PAYMENT_LINK = "https://pay.monobank.ua/2412255Qb57omFE7dAjC";
+    private static final String PAYMENT_LINK = "https://pay.wayforpay.ua/2412255Qb57omFE7dAjC";
     private static final String USERNAME = "John Smith";
     private static final String USER_EMAIL = "test@some.com";
 

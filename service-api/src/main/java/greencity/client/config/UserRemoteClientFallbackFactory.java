@@ -10,6 +10,7 @@ import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.telegram.UserTelegramFeedbackDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
@@ -80,7 +81,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void signUpEmployee(EmployeeSignUpDto dto) {
+            public void signUpEmployee(EmployeeSignUpDto dto, String language) {
                 log.error(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);
             }
@@ -115,6 +116,11 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             public ResponseEntity<SuccessSignInDto> signIn(TestersSignInRequest request) {
                 log.error(ErrorMessage.TELEGRAM_BOT_ERROR_BAD_CREDENTIALS, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.TELEGRAM_BOT_ERROR_BAD_CREDENTIALS);
+            }
+
+            @Override
+            public void sendTelegramFeedback(UserTelegramFeedbackDto dto) {
+                log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
             }
         };
     }

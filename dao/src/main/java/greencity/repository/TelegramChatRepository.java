@@ -53,4 +53,12 @@ public interface TelegramChatRepository
      */
     @EntityGraph(attributePaths = "lastMessage")
     Page<TelegramChat> findAll(Specification<TelegramChat> spec, Pageable pageable);
+
+    /**
+     * The method finds telegram bot by userId.
+     *
+     * @param userId {@link Long}.
+     * @return {@link TelegramChat}.
+     */
+    Optional<TelegramChat> findByUserId(Long userId);
 }

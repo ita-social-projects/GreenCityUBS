@@ -288,7 +288,9 @@ public class SecurityConfig {
                     EXPORT_SETTINGS_LINKS,
                     UBS_LINK + "/findAll-order-address",
                     UBS_LINK + "/order-details-for-tariff",
-                    UBS_LINK + "/personal-data")
+                    UBS_LINK + "/personal-data",
+                    UBS_LINK + "/details-for-existing-order/{orderId}",
+                    UBS_LINK + "/orders/{id}/tariff")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     TELEGRAM_LINK + "/**",
@@ -300,6 +302,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT,
                     TELEGRAM_LINK + "/**")
                 .hasRole(UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.DELETE,
+                    TELEGRAM_LINK + "/**")
+                .hasAnyRole(UBS_EMPLOYEE, ADMIN)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",
                     "/notifications/{notificationId}/unreadNotification")
@@ -369,6 +374,5 @@ public class SecurityConfig {
         return web -> web.ignoring()
             .requestMatchers(UBS_LINK + "/receivePayment")
             .requestMatchers(UBS_LINK + "/payment/return")
-            .requestMatchers(UBS_LINK + "/monobank/payments");
     }
 }

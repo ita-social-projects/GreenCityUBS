@@ -28,7 +28,6 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSUserRepository;
@@ -391,16 +390,5 @@ class OrderControllerTest {
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
         verify(ubsClientService).getAllLocationsByCourierId(id);
-    }
-
-    @Test
-    void receivePaymentFromMonoBankTest() throws Exception {
-        MonoBankPaymentResponseDto responseDto = ModelUtils.getMonoBankPaymentResponseDto();
-
-        mockMvc.perform(post(ubsLink + "/monobank/payments")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(responseDto)));
-
-        verify(ubsClientService).validatePaymentFromMonoBank(responseDto);
     }
 }
