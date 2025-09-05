@@ -10,7 +10,6 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
@@ -361,16 +360,6 @@ public interface UBSClientService {
      * @return List of all locations.
      */
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
-
-    /**
-     * Validates the payment response received from MonoBank. This method checks the
-     * integrity and validity of the payment details contained in the response to
-     * ensure it meets the required criteria for processing.
-     *
-     * @param response the response object received from MonoBank containing payment
-     *                 details such as transaction ID, status, and amount.
-     */
-    void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
 
     public OrdersDataForUserDto getOrdersData(Order order);
 
