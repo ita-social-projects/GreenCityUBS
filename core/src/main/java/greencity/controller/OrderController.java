@@ -17,6 +17,7 @@ import greencity.dto.order.EventDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;

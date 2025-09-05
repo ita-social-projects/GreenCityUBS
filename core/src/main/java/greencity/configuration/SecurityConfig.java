@@ -373,6 +373,6 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring()
             .requestMatchers(UBS_LINK + "/receivePayment")
-            .requestMatchers(UBS_LINK + "/payment/return")
+            .requestMatchers(UBS_LINK + "/payment/return");
     }
 }
