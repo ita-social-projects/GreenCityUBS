@@ -21,6 +21,8 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
     private static final String APPROVED_STATUS = "Approved";
     private final PaymentRepository paymentRepository;
     private final GreenCityRedirectionConfigProp redirectProp;
+    private static final int ORDER_ID_INDEX = 0;
+    private static final int PAYMENT_ID_INDEX = 2;
 
     @Override
     public String redirectUser(Map<String, String> formParams,
@@ -29,8 +31,8 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
         String transactionStatus = formParams.get("transactionStatus");
         validateParams(orderReference, transactionStatus);
 
-        Long orderId = getOrderIdByOrderReference(orderReference, 0);
-        Long paymentId = getOrderIdByOrderReference(orderReference, 2);
+        Long orderId = getOrderIdByOrderReference(orderReference, ORDER_ID_INDEX);
+        Long paymentId = getOrderIdByOrderReference(orderReference, PAYMENT_ID_INDEX);
 
         PaymentStatus paymentStatus = paymentRepository
             .getPaymentStatusByOrderIdAndPaymentId(orderId, paymentId)

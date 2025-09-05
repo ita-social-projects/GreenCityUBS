@@ -335,8 +335,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     }
 
     private PaymentResponseDto getPaymentResponseDto(String jsonKey) throws JsonProcessingException {
-        PaymentResponseDto dto;
-        dto = objectMapper.readValue(jsonKey, PaymentResponseDto.class);
+        PaymentResponseDto dto = objectMapper.readValue(jsonKey, PaymentResponseDto.class);
         log.info("Processing payment: orderReference={}, status={}",
             dto.getOrderReference(), dto.getTransactionStatus());
         return dto;
