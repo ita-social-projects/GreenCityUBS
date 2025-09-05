@@ -17,12 +17,14 @@ import greencity.dto.order.EventDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -62,6 +64,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class OrderController {
     private final UBSClientService ubsClientService;
+    private final WayForPayRedirectService wayForPayRedirectService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
@@ -216,15 +219,60 @@ public class OrderController {
      * @return PaymentResponseWayForPay containing status and orderReference.
      * @throws IOException If an I/O error occurs (rare in normal webhook flow).
      */
-    @Operation(summary = "Receive payment from WayForPay.")
+    @Operation(
+        summary = "Receive payment from WayForPay.",
+        description = "Endpoint receives payment notifications from WayForPay as form parameters "
+            + "(application/x-www-form-urlencoded).")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
+        @ApiResponse(
+            responseCode = "200",
+            description = HttpStatuses.OK,
+            content = @Content(
+                mediaType = "application/x-www-form-urlencoded",
+                schema = @Schema(implementation = PaymentResponseDto.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = HttpStatuses.BAD_REQUEST,
+            content = @Content)
     })
     @PostMapping("/receivePayment")
     public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
         throws IOException {
         return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
+    }
+
+    /**
+     * Handles the returnUrl callback from WayForPay after a payment attempt. This
+     * endpoint is triggered by WayForPay once the payment process is completed
+     * (either successfully or with failure). It receives payment data from
+     * WayForPay as request parameters, then performs a redirect to the frontend
+     * confirmation page. The method does not return any content in the response
+     * body.
+     *
+     * @param formParams a map of form parameters sent by WayForPay (e.g.
+     *                   orderReference, status, amount, etc.)
+     * @return 302 Redirect to the frontend confirmation page
+     * @throws IOException if the redirect cannot be performed
+     */
+
+    @Operation(
+        summary = "Handle returnUrl callback from WayForPay",
+        description = "This endpoint processes the WayForPay returnUrl callback after payment completion. "
+            + "It redirects the user to the frontend confirmation page with order details.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302",
+            description = "Redirect successfully executed (no content returned)",
+            content = @Content(
+                mediaType = "application/x-www-form-urlencoded",
+                schema = @Schema(implementation = PaymentResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters")
+    })
+    @PostMapping("/payment/return")
+    public ResponseEntity<Void> handleWayForPayReturn(@RequestParam Map<String, String> formParams) throws IOException {
+        String redirectUrl = wayForPayRedirectService.redirectUser(formParams);
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header("Location", redirectUrl)
+            .build();
     }
 
     /**

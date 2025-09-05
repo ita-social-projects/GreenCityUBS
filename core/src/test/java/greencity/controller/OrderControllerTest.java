@@ -35,9 +35,11 @@ import greencity.repository.UserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -73,6 +76,9 @@ class OrderControllerTest {
 
     @Mock
     NotificationService notificationService;
+
+    @Mock
+    private WayForPayRedirectService wayForPayRedirectService;
 
     @InjectMocks
     OrderController orderController;
@@ -270,6 +276,18 @@ class OrderControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.orderReference").value(dto.getOrderReference()))
             .andExpect(jsonPath("$.status").value("approved"));
+    }
+
+    @Test
+    void handleWayForPayReturn_shouldReturnNoContent() throws Exception {
+        mockMvc.perform(post(ubsLink + "/payment/return")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("orderReference", "ORDER123")
+            .param("amount", "100.00"))
+            .andExpect(status().isFound());
+
+        verify(wayForPayRedirectService).redirectUser(
+            Mockito.any(Map.class));
     }
 
     @Test

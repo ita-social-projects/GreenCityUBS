@@ -12,6 +12,8 @@ import greencity.exceptions.ResourceNotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.WrongSignatureException;
 import greencity.exceptions.api.GoogleApiException;
+import greencity.exceptions.payment.InvalidPaymentResponseException;
+import greencity.exceptions.payment.PaymentNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.exceptions.validation.ValidationException;
 import jakarta.validation.ConstraintViolation;
@@ -96,6 +98,12 @@ class CustomExceptionHandlerTest {
 
     @Mock
     private static WebClientResponseException webClientResponseException;
+
+    @Mock
+    private PaymentNotFoundException paymentNotFoundException;
+
+    @Mock
+    private InvalidPaymentResponseException invalidPaymentResponseException;
 
     @Mock
     HttpStatus status;
@@ -389,6 +397,26 @@ class CustomExceptionHandlerTest {
             .thenReturn(objectMap);
         assertEquals(customExceptionHandler.handleForbiddenException(forbiddenException, webRequest),
             ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handlePaymentNotFoundTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handlePaymentNotFound(paymentNotFoundException, webRequest),
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse));
+        verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
+    }
+
+    @Test
+    void handleInvalidPaymentTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(objectMap);
+        when(errorAttributes.getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class)))
+            .thenReturn(objectMap);
+        assertEquals(customExceptionHandler.handleInvalidPayment(invalidPaymentResponseException, webRequest),
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse));
         verify(errorAttributes).getErrorAttributes(any(WebRequest.class), any(ErrorAttributeOptions.class));
     }
 
