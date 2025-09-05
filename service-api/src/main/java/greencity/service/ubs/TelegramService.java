@@ -2,7 +2,12 @@ package greencity.service.ubs;
 
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.EditTelegramMessageRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
+import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -95,4 +100,28 @@ public interface TelegramService {
      *         otherwise
      */
     boolean getIsNotificationsEnabled(String uuid);
+
+    /**
+     * Edit manager text message.
+     *
+     * @param request {@link EditTelegramMessageRequest} the DTO containing the chat
+     *                ID, message ID and new text.
+     */
+    void editManagerMessage(EditTelegramMessageRequest request);
+
+    /**
+     * Delete full manager message (with all assets).
+     *
+     * @param messageId {@link Long} message ID.
+     * @param chatId    {@link Long} telegram chat ID
+     */
+    void deleteManagerMessage(Long messageId, Long chatId);
+
+    /**
+     * Delete manager asset.
+     *
+     * @param assetId {@link Long} asset ID.
+     * @param chatId  {@link Long} telegram chat ID
+     */
+    void deleteManagerAsset(Long assetId, Long chatId);
 }

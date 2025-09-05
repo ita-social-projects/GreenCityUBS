@@ -1,18 +1,28 @@
 package greencity.ubstelegrambot.messages;
 
 import greencity.constant.TelegramBotConstants;
+import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessages;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
+import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageFactory {
@@ -457,10 +467,13 @@ public class MessageFactory {
      * @return a configured {@link SendPhoto} object
      * @throws IOException if reading the file input stream fails
      */
-    public static SendPhoto createSendPhoto(String chatId, MultipartFile file) throws IOException {
+    public static SendPhoto createSendPhoto(String chatId, MultipartFile file, String caption) throws IOException {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
         sendPhoto.setPhoto(new InputFile(file.getInputStream(), file.getOriginalFilename()));
+        if (caption != null && !caption.isBlank()) {
+            sendPhoto.setCaption(caption.length() > 1024 ? caption.substring(0, 1024) : caption);
+        }
         return sendPhoto;
     }
 
@@ -473,9 +486,13 @@ public class MessageFactory {
      * @return a configured {@link SendDocument} object
      * @throws IOException if reading the file input stream fails
      */
-    public static SendDocument createSendDocument(String chatId, MultipartFile file) throws IOException {
+    public static SendDocument createSendDocument(String chatId, String caption, MultipartFile file)
+        throws IOException {
         SendDocument sendDocument = new SendDocument();
         sendDocument.setChatId(chatId);
+        if (caption != null && !caption.isBlank()) {
+            sendDocument.setCaption(caption.length() > 1024 ? caption.substring(0, 1024) : caption);
+        }
         sendDocument.setDocument(new InputFile(file.getInputStream(), file.getOriginalFilename()));
         return sendDocument;
     }
@@ -499,5 +516,120 @@ public class MessageFactory {
         removeKeyboardMsg.setText(MessageProvider.get(lang, "client.stop.support.mode"));
         removeKeyboardMsg.setReplyMarkup(new ReplyKeyboardRemove(true));
         return removeKeyboardMsg;
+    }
+
+    /**
+     * Builds a EditMessageText object with the specified chat ID and text to edit
+     * message.
+     *
+     * @param chatId            {@link String} the telegram chat ID
+     * @param telegramMessageId {@link Integer} the ID from telegram API
+     * @param text              {@link String} the message text to edit
+     * @return a EditMessageText object configured with the specified chat ID, text
+     *         and telegram message ID
+     */
+    public static EditMessageText buildEditMessageText(String chatId, Integer telegramMessageId, String text) {
+        validationChatId(chatId);
+        validationText(text);
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setChatId(chatId);
+        editMessage.setMessageId(telegramMessageId);
+        editMessage.setText(text);
+        return editMessage;
+    }
+
+    /**
+     * Builds a SendMediaGroup object with the specified chat ID and images.
+     *
+     * @param chatId {@link String} the telegram chat ID
+     * @param images {@link List} the ID from telegram API
+     * @param text   {@link String} the message text to edit
+     * @return a SendMediaGroup object configured with the specified chat ID, images
+     *         and text
+     */
+    public static SendMediaGroup buildSendMediaGroup(String chatId, List<MultipartFile> images, String text) {
+        List<InputMedia> media = new ArrayList<>();
+        try {
+            for (MultipartFile file : images) {
+                InputMediaPhoto photo = new InputMediaPhoto();
+                photo.setMedia(file.getInputStream(), file.getOriginalFilename());
+                media.add(photo);
+            }
+        } catch (IOException e) {
+            throw new TelegramBotExecutionException("Failed to read image file for media group", e);
+        }
+        if (text != null && !text.isBlank()) {
+            media.getFirst().setCaption(text);
+        }
+        SendMediaGroup sendMediaGroup = new SendMediaGroup();
+        sendMediaGroup.setChatId(chatId);
+        sendMediaGroup.setMedias(media);
+        return sendMediaGroup;
+    }
+
+    /**
+     * Builds a EditMessageText object with the specified chat ID and caption to
+     * edit message with photo.
+     *
+     * @param chatId            {@link String} the telegram chat ID
+     * @param telegramMessageId {@link Integer} the ID from telegram API
+     * @param text              {@link String} the message text to edit
+     * @return a EditMessageText object configured with the specified chat ID,
+     *         caption and telegram message ID
+     */
+    public static EditMessageCaption buildEditMessageCaption(String chatId, Integer telegramMessageId, String text) {
+        validationChatId(chatId);
+        validationText(text);
+        return EditMessageCaption.builder()
+            .chatId(chatId)
+            .messageId(telegramMessageId)
+            .caption(text)
+            .build();
+    }
+
+    /**
+     * Builds a DeleteMessage object with the specified chat ID and text to delete
+     * message.
+     *
+     * @param chatId            {@link String} the telegram chat ID
+     * @param telegramMessageId {@link Integer} the ID from telegram API
+     * @return a DeleteMessage object configured with the specified chat ID and
+     *         telegram message ID
+     */
+    public static DeleteMessage buildDeleteMessage(String chatId, Integer telegramMessageId) {
+        validationChatId(chatId);
+        return DeleteMessage.builder()
+            .chatId(chatId)
+            .messageId(telegramMessageId)
+            .build();
+    }
+
+    /**
+     * Builds a DeleteMessages object with the specified chat ID and text to delete
+     * message.
+     *
+     * @param chatId             {@link String} the telegram chat ID
+     * @param telegramMessagesId {@link List} the List of IDs from telegram API
+     * @return a DeleteMessages object configured with the specified chat ID and
+     *         telegram message IDs
+     */
+    public static DeleteMessages buildDeleteMessages(String chatId, List<Integer> telegramMessagesId) {
+        validationChatId(chatId);
+        return DeleteMessages.builder()
+            .chatId(chatId)
+            .messageIds(telegramMessagesId)
+            .build();
+    }
+
+    private static void validationChatId(String chatId) {
+        if (chatId == null || chatId.isBlank()) {
+            throw new IllegalArgumentException("chatId cannot be null or blank");
+        }
+    }
+
+    private static void validationText(String text) {
+        if (text == null || text.isBlank() || text.length() >= 1000) {
+            throw new IllegalArgumentException("text cannot be null or blank");
+        }
     }
 }

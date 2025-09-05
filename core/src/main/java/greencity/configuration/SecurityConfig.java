@@ -302,6 +302,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT,
                     TELEGRAM_LINK + "/**")
                 .hasRole(UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.DELETE,
+                    TELEGRAM_LINK + "/**")
+                .hasAnyRole(UBS_EMPLOYEE, ADMIN)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",
                     "/notifications/{notificationId}/unreadNotification")

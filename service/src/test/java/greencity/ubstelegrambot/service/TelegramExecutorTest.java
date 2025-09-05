@@ -2,7 +2,7 @@ package greencity.ubstelegrambot.service;
 
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.ubstelegrambot.UBSTelegramBot;
-import java.io.Serializable;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,10 +12,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.io.Serializable;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -132,5 +137,31 @@ class TelegramExecutorTest {
         verify(ubsTelegramBot, never()).execute(any(GetFile.class));
         verify(ubsTelegramBot, never()).execute(any(SendDocument.class));
         verify(ubsTelegramBot, never()).execute(any(SendPhoto.class));
+    }
+
+    @Test
+    @SneakyThrows
+    void executeSendMessage() {
+        SendMessage sendMessage = Mockito.mock(SendMessage.class);
+        Message message = mock(Message.class);
+
+        doReturn(message).when(ubsTelegramBot).execute(any(SendMessage.class));
+
+        telegramExecutor.executeSendMessage(sendMessage);
+
+        verify(ubsTelegramBot).execute(sendMessage);
+    }
+
+    @Test
+    @SneakyThrows
+    void executeSendMediaGroup() {
+        SendMediaGroup sendMediaGroup = Mockito.mock(SendMediaGroup.class);
+        List<Message> messages = List.of(Mockito.mock(Message.class));
+
+        doReturn(messages).when(ubsTelegramBot).execute(any(SendMediaGroup.class));
+
+        telegramExecutor.executeSendMediaGroup(sendMediaGroup);
+
+        verify(ubsTelegramBot).execute(sendMediaGroup);
     }
 }
