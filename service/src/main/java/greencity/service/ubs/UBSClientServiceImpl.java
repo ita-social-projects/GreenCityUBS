@@ -296,7 +296,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (formParams == null || formParams.isEmpty()) {
             return buildErrorResponse("No form params received");
         }
-
         log.debug("Received {} form param(s) from WayForPay", formParams.size());
 
         String jsonKey = formParams.keySet().iterator().next();
@@ -304,22 +303,33 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         PaymentResponseDto dto;
         try {
-            dto = objectMapper.readValue(jsonKey, PaymentResponseDto.class);
-            log.debug("Parsed PaymentResponseDto: {}", dto);
-            log.info("Processing payment: orderReference={}, status={}",
-                dto.getOrderReference(), dto.getTransactionStatus());
+            dto = getPaymentResponseDto(jsonKey);
         } catch (JsonProcessingException e) {
             return buildErrorResponse("Invalid JSON format");
         }
 
-        String calculatedSignature = encryptionUtil.generateResponseSignature(dto, wayForPaySecret);
-        if (!calculatedSignature.equals(dto.getMerchantSignature())) {
-            log.error("Invalid signature for orderReference={}", dto.getOrderReference());
+        if (isInvalidSignature(dto)) {
             return buildErrorResponse("Invalid signature");
         }
 
         log.info("Valid signature for orderReference={}", dto.getOrderReference());
         return validatePayment(dto);
+    }
+
+    private PaymentResponseDto getPaymentResponseDto(String jsonKey) throws JsonProcessingException {
+        PaymentResponseDto dto = objectMapper.readValue(jsonKey, PaymentResponseDto.class);
+        log.info("Processing payment: orderReference={}, status={}",
+            dto.getOrderReference(), dto.getTransactionStatus());
+        return dto;
+    }
+
+    private boolean isInvalidSignature(PaymentResponseDto dto) {
+        String calculatedSignature = encryptionUtil.generateResponseSignature(dto, wayForPaySecret);
+        if (!calculatedSignature.equals(dto.getMerchantSignature())) {
+            log.error("Invalid signature for orderReference={}", dto.getOrderReference());
+            return true;
+        }
+        return false;
     }
 
     private PaymentResponseWayForPay buildErrorResponse(String message) {
