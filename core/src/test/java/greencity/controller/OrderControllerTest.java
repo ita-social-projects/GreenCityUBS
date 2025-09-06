@@ -28,7 +28,6 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSUserRepository;
@@ -36,9 +35,11 @@ import greencity.repository.UserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -74,6 +76,9 @@ class OrderControllerTest {
 
     @Mock
     NotificationService notificationService;
+
+    @Mock
+    private WayForPayRedirectService wayForPayRedirectService;
 
     @InjectMocks
     OrderController orderController;
@@ -274,6 +279,18 @@ class OrderControllerTest {
     }
 
     @Test
+    void handleWayForPayReturn_shouldReturnNoContent() throws Exception {
+        mockMvc.perform(post(ubsLink + "/payment/return")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("orderReference", "ORDER123")
+            .param("amount", "100.00"))
+            .andExpect(status().isFound());
+
+        verify(wayForPayRedirectService).redirectUser(
+            Mockito.any(Map.class));
+    }
+
+    @Test
     @SneakyThrows
     void getInfoAboutTariffTest() {
         mockMvc.perform(get(ubsLink + "/tariffinfo/{locationId}", 1L)
@@ -371,16 +388,5 @@ class OrderControllerTest {
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
         verify(ubsClientService).getAllLocationsByCourierId(id);
-    }
-
-    @Test
-    void receivePaymentFromMonoBankTest() throws Exception {
-        MonoBankPaymentResponseDto responseDto = ModelUtils.getMonoBankPaymentResponseDto();
-
-        mockMvc.perform(post(ubsLink + "/monobank/payments")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(responseDto)));
-
-        verify(ubsClientService).validatePaymentFromMonoBank(responseDto);
     }
 }

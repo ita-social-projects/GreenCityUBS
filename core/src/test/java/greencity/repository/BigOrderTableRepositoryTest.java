@@ -39,8 +39,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(classes = UbsApplication.class, properties = {
     "WAY_FOR_PAY_LOGIN=testLogin",
     "WAY_FOR_PAY_SECRET=testSecret",
-    "DOMAIN_NAME=http://testdomain/"
-})
+    "DOMAIN_NAME=http://testdomain/",
+    "WAY_FOR_PAY_RETURN_URL=testUrl",
+    "WAY_FOR_PAY_REDIRECT=testRedirectUrl"
+    })
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @MockBean
     private UBSTelegramBot telegramBot;

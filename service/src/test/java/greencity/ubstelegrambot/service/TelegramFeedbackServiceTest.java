@@ -1,8 +1,10 @@
 package greencity.ubstelegrambot.service;
 
+import greencity.client.UserRemoteClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.FeedbackDto;
+import greencity.dto.telegram.UserTelegramFeedbackDto;
 import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,10 +28,12 @@ import org.springframework.data.domain.Pageable;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -56,6 +61,9 @@ class TelegramFeedbackServiceTest {
     @Mock
     private TelegramLanguageService telegramLanguageService;
 
+    @Mock
+    private UserRemoteClient userRemoteClient;
+
     @BeforeEach
     void setUp() {
         lenient().when(telegramLanguageService.getChatLanguage(anyString()))
@@ -63,11 +71,12 @@ class TelegramFeedbackServiceTest {
     }
 
     @Test
-    void processInputCommentRequest_shouldProcessFeedbackSuccessfully() {
-        // given
+    void processInputCommentRequest_shouldProcessFeedbackSuccessfullyAndSendEmail() {
         Long chatId = 12345L;
         Long chatDbId = 1L;
-        String comment = "This is my feedback";
+        String comment = "This is a detailed feedback comment";
+        Integer rating = 4;
+        String username = "testUser";
 
         Message message = new Message();
         message.setChat(new Chat(chatId, "private"));
@@ -76,6 +85,7 @@ class TelegramFeedbackServiceTest {
         TelegramChat telegramChat = TelegramChat.builder()
             .id(chatDbId)
             .chatId(chatId.toString())
+            .username(username)
             .chatState(ChatState.MAKING_FEEDBACK)
             .chatStateUpdatedAt(Instant.now().minus(1, ChronoUnit.DAYS))
             .isNotify(true)
@@ -85,18 +95,17 @@ class TelegramFeedbackServiceTest {
         chatFeedback.setId(10L);
         chatFeedback.setChat(telegramChat);
         chatFeedback.setFeedbackState(FeedbackState.IN_PROGRESS);
+        chatFeedback.setRating(rating);
 
         when(telegramChatRepository.findByChatId(chatId.toString()))
             .thenReturn(Optional.of(telegramChat));
         when(chatFeedbackRepository.findByChatIdAndFeedbackState(chatDbId, FeedbackState.IN_PROGRESS))
             .thenReturn(Optional.of(chatFeedback));
 
-        // when
-        SendMessage result = telegramFeedbackService.processInputCommentRequest(message, TelegramBotConstants.UK);
+        ArgumentCaptor<UserTelegramFeedbackDto> feedbackDtoCaptor =
+            ArgumentCaptor.forClass(UserTelegramFeedbackDto.class);
 
-        // then
-        assertEquals(chatId.toString(), result.getChatId());
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "feedback.thank.you.message"), result.getText());
+        SendMessage result = telegramFeedbackService.processInputCommentRequest(message, TelegramBotConstants.UK);
 
         assertEquals(comment, chatFeedback.getComment());
         assertEquals(FeedbackState.CLOSED, chatFeedback.getFeedbackState());
@@ -106,6 +115,17 @@ class TelegramFeedbackServiceTest {
 
         verify(chatFeedbackRepository).save(chatFeedback);
         verify(telegramChatRepository).save(telegramChat);
+
+        assertEquals(chatId.toString(), result.getChatId());
+        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "feedback.thank.you.message"), result.getText());
+
+        verify(userRemoteClient).sendTelegramFeedback(feedbackDtoCaptor.capture());
+        UserTelegramFeedbackDto capturedDto = feedbackDtoCaptor.getValue();
+        assertEquals(telegramChat.getChatId(), capturedDto.getChatId());
+        assertEquals(rating, capturedDto.getRating());
+        assertEquals(comment, capturedDto.getComment());
+        assertEquals(username, capturedDto.getName());
+        assertEquals("Новий відгук з Telegram", capturedDto.getSubject());
     }
 
     @Test

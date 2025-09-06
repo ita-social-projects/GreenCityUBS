@@ -302,6 +302,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT,
                     TELEGRAM_LINK + "/**")
                 .hasRole(UBS_EMPLOYEE)
+                .requestMatchers(HttpMethod.DELETE,
+                    TELEGRAM_LINK + "/**")
+                .hasAnyRole(UBS_EMPLOYEE, ADMIN)
                 .requestMatchers(HttpMethod.PATCH,
                     "/notifications/{notificationId}/viewNotification",
                     "/notifications/{notificationId}/unreadNotification")
@@ -370,6 +373,6 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring()
             .requestMatchers(UBS_LINK + "/receivePayment")
-            .requestMatchers(UBS_LINK + "/monobank/payments");
+            .requestMatchers(UBS_LINK + "/payment/return");
     }
 }
