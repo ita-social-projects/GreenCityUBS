@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     "DOMAIN_NAME=http://testdomain/",
     "WAY_FOR_PAY_RETURN_URL=testUrl",
     "WAY_FOR_PAY_REDIRECT=testRedirectUrl"
-    })
+})
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @MockBean
     private UBSTelegramBot telegramBot;
