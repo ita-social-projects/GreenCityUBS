@@ -73,4 +73,5 @@ public class ValidationConstant {
         "Provided payment date format is not a valid.";
     public static final String VALIDATION_RESPONSE_HEADER = "Following violation occurred during validation: ";
     public static final String VIOLATION_CHUNK = "{%s}";
+    public static final String SCHEDULER_VALIDATION_ERROR_MESSAGE = "Invalid pattern value for scheduler";
 }
