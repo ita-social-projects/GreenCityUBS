@@ -12,8 +12,6 @@ import java.util.List;
 public interface PaymentCalculatorService {
     long calculateSumToPay(OrderWayForPayClientDto dto, Order order, User currentUser);
 
-    long reduceOrderSumDueToUsedPoints(long sumToPayInCoins, int pointsToUse);
-
     Long countPaidAmount(List<Payment> payments);
 
     long calculateOrderSumWithoutDiscounts(List<OrderBag> getOrderBagsAndQuantity);

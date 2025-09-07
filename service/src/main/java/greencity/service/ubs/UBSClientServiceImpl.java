@@ -146,6 +146,7 @@ import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.service.ubs.calculator.BagCalculatorService;
+import greencity.service.ubs.calculator.PointCalculatorService;
 import greencity.service.ubs.payment.PaymentCalculatorService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
@@ -231,6 +232,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PointsUtils pointsUtils;
     private final PaymentCalculatorService paymentCalculatorService;
     private final BagCalculatorService bagCalculatorService;
+    private final PointCalculatorService pointCalculatorService;
     private final MoneyConverterUtil moneyConverterUtil;
 
     @Value("${greencity.bots.ubs-bot-name}")
@@ -633,7 +635,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 bagsOrdered, dto.getBags(), tariffsInfo);
 
         pointsUtils.checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        long sumToPayInCoins = paymentCalculatorService
+        long sumToPayInCoins = pointCalculatorService
             .reduceOrderSumDueToUsedPoints(sumToPayInCoinsWithoutDiscount, dto.getPointsToUse());
         if (sumToPayInCoinsWithoutDiscount == sumToPayInCoins) {
             order.setPointsToUse(0);

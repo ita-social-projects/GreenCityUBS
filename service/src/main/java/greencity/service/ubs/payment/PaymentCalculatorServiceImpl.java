@@ -10,6 +10,7 @@ import greencity.entity.user.User;
 import greencity.enums.PaymentStatus;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.calculator.BagCalculatorService;
+import greencity.service.ubs.calculator.PointCalculatorService;
 import greencity.util.PointsUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class PaymentCalculatorServiceImpl implements PaymentCalculatorService {
     private final ModelMapper modelMapper;
     private final CertificateService certificateService;
     private final BagCalculatorService bagCalculatorService;
+    private final PointCalculatorService pointCalculatorService;
     private final PointsUtils pointsUtils;
 
     //TODO clean up this method to make it more readable
@@ -39,23 +41,12 @@ public class PaymentCalculatorServiceImpl implements PaymentCalculatorService {
         sumToPayInCoins = sumToPayInCoins - (long) AppConstant.CURRENCY_CONVERSION_RATE * (order.getPointsToUse()
             + certificateService.countCertificatesBonuses(certificateDtos));
 
-        //TODO think how to move this to Point
-        pointsUtils.checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayInCoins, dto.getPointsToUse());
+        sumToPayInCoins = pointCalculatorService.getPointSumToPayInCoins(dto, currentUser, sumToPayInCoins);
         //TODO why this is goes after point calculating think how to move this
         sumToPayInCoins = certificateService
             .formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPayInCoins);
 
         return sumToPayInCoins - countPaidAmount(order.getPayment());
-    }
-
-    //TODO move to Point
-    @Override
-    public long reduceOrderSumDueToUsedPoints(long sumToPayInCoins, int pointsToUse) {
-        if (sumToPayInCoins >= pointsToUse * (long) AppConstant.CURRENCY_CONVERSION_RATE) {
-            sumToPayInCoins -= pointsToUse * (long) AppConstant.CURRENCY_CONVERSION_RATE;
-        }
-        return sumToPayInCoins;
     }
 
     @Override
