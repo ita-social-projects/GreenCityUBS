@@ -146,6 +146,7 @@ import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.service.ubs.calculator.BagCalculatorService;
+import greencity.service.ubs.calculator.CertificateCalculatorService;
 import greencity.service.ubs.calculator.PointCalculatorService;
 import greencity.service.ubs.payment.PaymentCalculatorService;
 import greencity.util.Bot;
@@ -233,6 +234,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PaymentCalculatorService paymentCalculatorService;
     private final BagCalculatorService bagCalculatorService;
     private final PointCalculatorService pointCalculatorService;
+    private final CertificateCalculatorService certificateCalculatorService;
     private final MoneyConverterUtil moneyConverterUtil;
 
     @Value("${greencity.bots.ubs-bot-name}")
@@ -644,7 +646,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins =
-            certificateService.formCertificatesToBeSavedAndCalculateOrderSum(
+            certificateCalculatorService.formCertificatesToBeSavedAndCalculateOrderSum(
                 dto, orderCertificates, order, sumToPayInCoins);
         if (sumToPayInCoins <= 0) {
             dto.setShouldBePaid(false);
@@ -819,7 +821,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Long amountWithDiscountInCoins = fullPriceInCoins
             - (long) AppConstant.CURRENCY_CONVERSION_RATE * (order.getPointsToUse()
-            + certificateService.countCertificatesBonuses(certificateDtos));
+            + certificateCalculatorService.countCertificatesBonuses(certificateDtos));
 
         Long paidAmountInCoins = paymentCalculatorService.countPaidAmount(payments);
 

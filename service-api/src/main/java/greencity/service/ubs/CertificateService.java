@@ -1,17 +1,10 @@
 package greencity.service.ubs;
 
-import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
-import java.util.List;
-import java.util.Set;
 
 public interface CertificateService {
     /**
@@ -36,13 +29,4 @@ public interface CertificateService {
      */
     PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
         CertificateFilterCriteria certificateFilterCriteria);
-
-    long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderWayForPayClientDto dto,
-        Order order,
-        long sumToPayInCoins);
-
-    long formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-                                                       Order order, long sumToPayInCoins);
-
-    Integer countCertificatesBonuses(List<CertificateDto> certificateDtos);
 }

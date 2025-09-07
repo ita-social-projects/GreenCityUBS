@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PointCalculatorServiceImpl implements PointCalculatorService {
     private final PointsUtils pointsUtils;
+
     @Override
     public long reduceOrderSumDueToUsedPoints(long sumToPayInCoins, int pointsToUse) {
         if (sumToPayInCoins >= pointsToUse * (long) AppConstant.CURRENCY_CONVERSION_RATE) {

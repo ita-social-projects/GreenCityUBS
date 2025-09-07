@@ -1,49 +1,39 @@
 package greencity.service.ubs.payment;
 
-import greencity.constant.AppConstant;
-import greencity.dto.certificate.CertificateDto;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.enums.PaymentStatus;
-import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.calculator.BagCalculatorService;
+import greencity.service.ubs.calculator.CertificateCalculatorService;
 import greencity.service.ubs.calculator.PointCalculatorService;
-import greencity.util.PointsUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentCalculatorServiceImpl implements PaymentCalculatorService {
-    private final ModelMapper modelMapper;
-    private final CertificateService certificateService;
     private final BagCalculatorService bagCalculatorService;
     private final PointCalculatorService pointCalculatorService;
-    private final PointsUtils pointsUtils;
+    private final CertificateCalculatorService certificateCalculatorService;
 
-    //TODO clean up this method to make it more readable
     @Override
     public long calculateSumToPay(OrderWayForPayClientDto dto, Order order, User currentUser) {
-        long sumToPayInCoins = bagCalculatorService.getBagsSumToPayInCoins(order);
+        long sumToPayInCoins = bagCalculatorService
+            .getBagsSumToPayInCoins(order);
 
-        //TODO think how to move this to certificateCalculate
-        List<CertificateDto> certificateDtos = order.getCertificates().stream()
-            .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .toList();
+        sumToPayInCoins = certificateCalculatorService
+            .getCertificateSumToPayInCoins(order, sumToPayInCoins);
 
-        sumToPayInCoins = sumToPayInCoins - (long) AppConstant.CURRENCY_CONVERSION_RATE * (order.getPointsToUse()
-            + certificateService.countCertificatesBonuses(certificateDtos));
-
-        sumToPayInCoins = pointCalculatorService.getPointSumToPayInCoins(dto, currentUser, sumToPayInCoins);
+        sumToPayInCoins = pointCalculatorService
+            .getPointSumToPayInCoins(dto, currentUser, sumToPayInCoins);
         //TODO why this is goes after point calculating think how to move this
-        sumToPayInCoins = certificateService
+        sumToPayInCoins = certificateCalculatorService
             .formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPayInCoins);
 
         return sumToPayInCoins - countPaidAmount(order.getPayment());

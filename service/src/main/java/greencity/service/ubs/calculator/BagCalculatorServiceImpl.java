@@ -32,6 +32,7 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
     private final MoneyConverterUtil moneyConverterUtil;
     private final ModelMapper modelMapper;
     private final OrderBagService orderBagService;
+    //TODO clean up these methods to make it more readable
 
     @Override
     public long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,

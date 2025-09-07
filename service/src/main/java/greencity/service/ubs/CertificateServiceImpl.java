@@ -75,70 +75,6 @@ public class CertificateServiceImpl implements CertificateService {
         return getAllCertificatesTranslationDto(certificates);
     }
 
-    //TODO think to move this to certificateCalculator
-    //TODO why there is 2 similar methods
-    @Override
-    public long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderWayForPayClientDto dto, Order order,
-        long sumToPayInCoins) {
-        if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
-            Set<Certificate> certificates =
-                certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-                    CertificateStatus.ACTIVE);
-            if (certificates.isEmpty()) {
-                throw new NotFoundException(CERTIFICATE_NOT_FOUND);
-            }
-            checkValidationCertificates(certificates, dto);
-            for (Certificate temp : certificates) {
-                Certificate certificate = getCertificateForClient(temp, order);
-                sumToPayInCoins -= certificate.getPoints() * 100L;
-
-                if (dontSendLinkToWFPIfClient(sumToPayInCoins)) {
-                    certificate.setCertificateStatus(CertificateStatus.USED);
-                    certificate.setPoints(certificate.getPoints()
-                        + BigDecimal.valueOf(sumToPayInCoins)
-                            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-                            .setScale(0, RoundingMode.UP).intValue());
-                    sumToPayInCoins = 0L;
-                }
-            }
-        }
-        return sumToPayInCoins;
-    }
-
-    //TODO think to move this to certificateCalculator
-    @Override
-    public long formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-                                                              Order order, long sumToPayInCoins) {
-        if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
-            for (String temp : dto.getCertificates()) {
-                if (dto.getCertificates().size() > 5) {
-                    throw new BadRequestException(TOO_MANY_CERTIFICATES);
-                }
-                Certificate certificate = certificateRepository.findById(temp).orElseThrow(
-                    () -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
-                validateCertificate(certificate);
-                certificate.setOrder(order);
-                orderCertificates.add(certificate);
-                sumToPayInCoins -= certificate.getPoints() * AppConstant.CURRENCY_CONVERSION_RATE;
-                certificate.setCertificateStatus(CertificateStatus.USED);
-                certificate.setDateOfUse(LocalDate.now());
-                if (markCertificateAsUsedIfNoPaymentNeeded(sumToPayInCoins, certificate)) {
-                    sumToPayInCoins = 0L;
-                }
-            }
-        }
-        return sumToPayInCoins;
-    }
-
-    //TODO think to move this to certificateCalculator
-    @Override
-    public Integer countCertificatesBonuses(List<CertificateDto> certificateDtos) {
-        return certificateDtos.stream()
-            .map(CertificateDto::getPoints)
-            .reduce(0, Integer::sum);
-    }
-
-
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
         List<CertificateDtoForSearching> certificateForSearchingDTOS = pages
             .stream()
@@ -150,47 +86,5 @@ public class CertificateServiceImpl implements CertificateService {
             pages.getTotalElements(),
             pages.getPageable().getPageNumber(),
             pages.getTotalPages());
-    }
-
-    private void checkValidationCertificates(Set<Certificate> certificates, OrderWayForPayClientDto dto) {
-        if (certificates.size() != dto.getCertificates().size()) {
-            String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
-            throw new NotFoundException(SOME_CERTIFICATES_ARE_INVALID + validCertification);
-        }
-    }
-
-    private Certificate getCertificateForClient(Certificate certificate, Order order) {
-        certificate.setOrder(order);
-        certificate.setCertificateStatus(CertificateStatus.USED);
-        certificate.setDateOfUse(LocalDate.now());
-        return certificate;
-    }
-
-    private boolean dontSendLinkToWFPIfClient(long sumToPayInCoins) {
-        return sumToPayInCoins <= 0;
-    }
-
-    private void validateCertificate(Certificate certificate) {
-        if (certificate.getCertificateStatus() == CertificateStatus.NEW) {
-            throw new CertificateIsNotActivated(CERTIFICATE_IS_NOT_ACTIVATED + certificate.getCode());
-        } else if (certificate.getCertificateStatus() == CertificateStatus.USED) {
-            throw new BadRequestException(CERTIFICATE_IS_USED + certificate.getCode());
-        } else {
-            if (LocalDate.now().isAfter(certificate.getExpirationDate())) {
-                throw new BadRequestException(CERTIFICATE_EXPIRED + certificate.getCode());
-            }
-        }
-    }
-
-    private boolean markCertificateAsUsedIfNoPaymentNeeded(long sumToPayInCoins, Certificate certificate) {
-        if (sumToPayInCoins <= 0) {
-            certificate.setCertificateStatus(CertificateStatus.USED);
-            certificate.setPoints(certificate.getPoints()
-                + BigDecimal.valueOf(sumToPayInCoins)
-                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-                .setScale(0, RoundingMode.UP).intValue());
-            return true;
-        }
-        return false;
     }
 }
