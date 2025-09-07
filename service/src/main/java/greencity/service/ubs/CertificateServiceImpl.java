@@ -1,24 +1,42 @@
 package greencity.service.ubs;
 
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXIST;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
+import static java.util.stream.Collectors.joining;
+import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
+import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
+import greencity.entity.order.Order;
+import greencity.enums.CertificateStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.filters.CertificateFilterCriteria;
 import greencity.filters.CertificatePage;
 import greencity.repository.CertificateCriteriaRepo;
 import greencity.repository.CertificateRepository;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import java.util.List;
-import java.util.stream.Collectors;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXIST;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
 
 @org.springframework.stereotype.Service
 @Data
@@ -26,6 +44,7 @@ public class CertificateServiceImpl implements CertificateService {
     private final CertificateRepository certificateRepository;
     private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final ModelMapper modelMapper;
+    //TODO fix tests
 
     @Override
     public void addCertificate(CertificateDtoForAdding add) {
@@ -55,6 +74,108 @@ public class CertificateServiceImpl implements CertificateService {
         Page<Certificate> certificates =
             certificateCriteriaRepo.findAllWithFilter(certificatePage, certificateFilterCriteria);
         return getAllCertificatesTranslationDto(certificates);
+    }
+
+    //TODO think to move this to certificateCalculator or paymentCalculator
+    @Override
+    public long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderWayForPayClientDto dto, Order order,
+        long sumToPayInCoins) {
+        if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
+            Set<Certificate> certificates =
+                certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+                    CertificateStatus.ACTIVE);
+            if (certificates.isEmpty()) {
+                throw new NotFoundException(CERTIFICATE_NOT_FOUND);
+            }
+            checkValidationCertificates(certificates, dto);
+            for (Certificate temp : certificates) {
+                Certificate certificate = getCertificateForClient(temp, order);
+                sumToPayInCoins -= certificate.getPoints() * 100L;
+
+                if (dontSendLinkToWFPIfClient(sumToPayInCoins)) {
+                    certificate.setCertificateStatus(CertificateStatus.USED);
+                    certificate.setPoints(certificate.getPoints()
+                        + BigDecimal.valueOf(sumToPayInCoins)
+                            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                            .setScale(0, RoundingMode.UP).intValue());
+                    sumToPayInCoins = 0L;
+                }
+            }
+        }
+        return sumToPayInCoins;
+    }
+
+    @Override
+    public long formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
+                                                              Order order, long sumToPayInCoins) {
+        if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
+            for (String temp : dto.getCertificates()) {
+                if (dto.getCertificates().size() > 5) {
+                    throw new BadRequestException(TOO_MANY_CERTIFICATES);
+                }
+                Certificate certificate = certificateRepository.findById(temp).orElseThrow(
+                    () -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
+                validateCertificate(certificate);
+                certificate.setOrder(order);
+                orderCertificates.add(certificate);
+                sumToPayInCoins -= certificate.getPoints() * AppConstant.CURRENCY_CONVERSION_RATE;
+                certificate.setCertificateStatus(CertificateStatus.USED);
+                certificate.setDateOfUse(LocalDate.now());
+                if (markCertificateAsUsedIfNoPaymentNeeded(sumToPayInCoins, certificate)) {
+                    sumToPayInCoins = 0L;
+                }
+            }
+        }
+        return sumToPayInCoins;
+    }
+
+    private void validateCertificate(Certificate certificate) {
+        if (certificate.getCertificateStatus() == CertificateStatus.NEW) {
+            throw new CertificateIsNotActivated(CERTIFICATE_IS_NOT_ACTIVATED + certificate.getCode());
+        } else if (certificate.getCertificateStatus() == CertificateStatus.USED) {
+            throw new BadRequestException(CERTIFICATE_IS_USED + certificate.getCode());
+        } else {
+            if (LocalDate.now().isAfter(certificate.getExpirationDate())) {
+                throw new BadRequestException(CERTIFICATE_EXPIRED + certificate.getCode());
+            }
+        }
+    }
+
+    private boolean markCertificateAsUsedIfNoPaymentNeeded(long sumToPayInCoins, Certificate certificate) {
+        if (sumToPayInCoins <= 0) {
+            certificate.setCertificateStatus(CertificateStatus.USED);
+            certificate.setPoints(certificate.getPoints()
+                + BigDecimal.valueOf(sumToPayInCoins)
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(0, RoundingMode.UP).intValue());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Integer countCertificatesBonuses(List<CertificateDto> certificateDtos) {
+        return certificateDtos.stream()
+            .map(CertificateDto::getPoints)
+            .reduce(0, Integer::sum);
+    }
+
+    private void checkValidationCertificates(Set<Certificate> certificates, OrderWayForPayClientDto dto) {
+        if (certificates.size() != dto.getCertificates().size()) {
+            String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
+            throw new NotFoundException(SOME_CERTIFICATES_ARE_INVALID + validCertification);
+        }
+    }
+
+    private Certificate getCertificateForClient(Certificate certificate, Order order) {
+        certificate.setOrder(order);
+        certificate.setCertificateStatus(CertificateStatus.USED);
+        certificate.setDateOfUse(LocalDate.now());
+        return certificate;
+    }
+
+    private boolean dontSendLinkToWFPIfClient(long sumToPayInCoins) {
+        return sumToPayInCoins <= 0;
     }
 
     private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {

@@ -45,4 +45,19 @@ public class AppConstant {
     public static final String MESSAGE = "message";
     public static final String KYIV = "Kyiv";
     public static final String USER_SERVICE_UNAVAILABLE_LOG = "User service is unavailable: {}";
+    public static final String FAILED_STATUS = "failure";
+    public static final String APPROVED_STATUS = "Approved";
+    public static final String TELEGRAM_PART_1_OF_LINK = "https://telegram.me/";
+    public static final String TELEGRAM_PART_3_OF_LINK = "?start=";
+    public static final String LANGUAGE_EN = "en";
+    public static final String LANGUAGE_UK = "uk";
+    public static final Double KYIV_LATITUDE = 50.4546600;
+    public static final Double KYIV_LONGITUDE = 30.5238000;
+    public static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
+    public static final String UKRAINE_EN = "Ukraine";
+    public static final String LANG_EN = "en";
+    public static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
+    public static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
+        + "does not match, reselect correct data.";
+    public static final byte CURRENCY_CONVERSION_RATE = 100;
 }
