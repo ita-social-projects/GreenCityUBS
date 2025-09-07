@@ -37,7 +37,6 @@ public interface CertificateService {
     PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
         CertificateFilterCriteria certificateFilterCriteria);
 
-    //TODO add docs
     long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderWayForPayClientDto dto,
         Order order,
         long sumToPayInCoins);

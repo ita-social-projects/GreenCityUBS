@@ -7,7 +7,9 @@ import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
 import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
 import greencity.constant.AppConstant;
 import greencity.dto.bag.BagDto;
+import greencity.dto.bag.BagForUserDto;
 import greencity.entity.order.Bag;
+import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.entity.order.TariffsInfo;
 import greencity.enums.BagStatus;
@@ -15,14 +17,21 @@ import greencity.enums.CourierLimit;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
+import greencity.service.ubs.OrderBagService;
+import greencity.util.MoneyConverterUtil;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class BagCalculatorServiceImpl implements BagCalculatorService {
     private final BagRepository bagRepository;
+    private final MoneyConverterUtil moneyConverterUtil;
+    private final ModelMapper modelMapper;
+    private final OrderBagService orderBagService;
 
     @Override
     public long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,
@@ -54,6 +63,38 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
             .map(this::setAmountToOrderBag)
             .toList());
         return totalSumToPayInCoins;
+    }
+
+    @Override
+    public long getBagsSumToPayInCoins(Order order) {
+        List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
+        return calculateBugsSum(bagForUserDtos);
+    }
+
+    @Override
+    public List<BagForUserDto> bagForUserDtosBuilder(Order order) {
+        List<OrderBag> bagsAmountInOrder = order.getOrderBags();
+        Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsAmountInOrder);
+        return bagsAmountInOrder.stream()
+            .map(orderBag -> buildBagForUserDto(orderBag, actualBagsAmount.get(orderBag.getBag().getId())))
+            .toList();
+    }
+
+    @Override
+    public Long calculateBugsSum(List<BagForUserDto> bagForUserDtos) {
+        return bagForUserDtos.stream()
+            .map(b -> moneyConverterUtil.convertBillsIntoCoins(b.getTotalPrice()))
+            .reduce(0L, Long::sum);
+    }
+
+    private OrderBag createOrderBag(Bag bag) {
+        return OrderBag.builder()
+            .bag(bag)
+            .capacity(bag.getCapacity())
+            .price(bag.getFullPrice())
+            .nameUk(bag.getNameUk())
+            .nameEn(bag.getNameEn())
+            .build();
     }
 
     private Bag findActiveBagById(Integer id) {
@@ -89,14 +130,10 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
         return orderBag;
     }
 
-    @Override
-    public OrderBag createOrderBag(Bag bag) {
-        return OrderBag.builder()
-            .bag(bag)
-            .capacity(bag.getCapacity())
-            .price(bag.getFullPrice())
-            .nameUk(bag.getNameUk())
-            .nameEn(bag.getNameEn())
-            .build();
+    private BagForUserDto buildBagForUserDto(OrderBag orderBag, int count) {
+        BagForUserDto bagDto = modelMapper.map(orderBag, BagForUserDto.class);
+        bagDto.setCount(count);
+        bagDto.setTotalPrice(moneyConverterUtil.convertCoinsIntoBills(count * orderBag.getPrice()));
+        return bagDto;
     }
 }

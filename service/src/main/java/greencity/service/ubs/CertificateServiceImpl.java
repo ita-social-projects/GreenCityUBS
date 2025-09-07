@@ -44,7 +44,6 @@ public class CertificateServiceImpl implements CertificateService {
     private final CertificateRepository certificateRepository;
     private final CertificateCriteriaRepo certificateCriteriaRepo;
     private final ModelMapper modelMapper;
-    //TODO fix tests
 
     @Override
     public void addCertificate(CertificateDtoForAdding add) {
@@ -76,7 +75,8 @@ public class CertificateServiceImpl implements CertificateService {
         return getAllCertificatesTranslationDto(certificates);
     }
 
-    //TODO think to move this to certificateCalculator or paymentCalculator
+    //TODO think to move this to certificateCalculator
+    //TODO why there is 2 similar methods
     @Override
     public long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderWayForPayClientDto dto, Order order,
         long sumToPayInCoins) {
@@ -105,6 +105,7 @@ public class CertificateServiceImpl implements CertificateService {
         return sumToPayInCoins;
     }
 
+    //TODO think to move this to certificateCalculator
     @Override
     public long formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
                                                               Order order, long sumToPayInCoins) {
@@ -129,6 +130,46 @@ public class CertificateServiceImpl implements CertificateService {
         return sumToPayInCoins;
     }
 
+    //TODO think to move this to certificateCalculator
+    @Override
+    public Integer countCertificatesBonuses(List<CertificateDto> certificateDtos) {
+        return certificateDtos.stream()
+            .map(CertificateDto::getPoints)
+            .reduce(0, Integer::sum);
+    }
+
+
+    private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
+        List<CertificateDtoForSearching> certificateForSearchingDTOS = pages
+            .stream()
+            .map(certificatesTranslations -> modelMapper.map(certificatesTranslations,
+                CertificateDtoForSearching.class))
+            .collect(Collectors.toList());
+        return new PageableDto<>(
+            certificateForSearchingDTOS,
+            pages.getTotalElements(),
+            pages.getPageable().getPageNumber(),
+            pages.getTotalPages());
+    }
+
+    private void checkValidationCertificates(Set<Certificate> certificates, OrderWayForPayClientDto dto) {
+        if (certificates.size() != dto.getCertificates().size()) {
+            String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
+            throw new NotFoundException(SOME_CERTIFICATES_ARE_INVALID + validCertification);
+        }
+    }
+
+    private Certificate getCertificateForClient(Certificate certificate, Order order) {
+        certificate.setOrder(order);
+        certificate.setCertificateStatus(CertificateStatus.USED);
+        certificate.setDateOfUse(LocalDate.now());
+        return certificate;
+    }
+
+    private boolean dontSendLinkToWFPIfClient(long sumToPayInCoins) {
+        return sumToPayInCoins <= 0;
+    }
+
     private void validateCertificate(Certificate certificate) {
         if (certificate.getCertificateStatus() == CertificateStatus.NEW) {
             throw new CertificateIsNotActivated(CERTIFICATE_IS_NOT_ACTIVATED + certificate.getCode());
@@ -151,43 +192,5 @@ public class CertificateServiceImpl implements CertificateService {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public Integer countCertificatesBonuses(List<CertificateDto> certificateDtos) {
-        return certificateDtos.stream()
-            .map(CertificateDto::getPoints)
-            .reduce(0, Integer::sum);
-    }
-
-    private void checkValidationCertificates(Set<Certificate> certificates, OrderWayForPayClientDto dto) {
-        if (certificates.size() != dto.getCertificates().size()) {
-            String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
-            throw new NotFoundException(SOME_CERTIFICATES_ARE_INVALID + validCertification);
-        }
-    }
-
-    private Certificate getCertificateForClient(Certificate certificate, Order order) {
-        certificate.setOrder(order);
-        certificate.setCertificateStatus(CertificateStatus.USED);
-        certificate.setDateOfUse(LocalDate.now());
-        return certificate;
-    }
-
-    private boolean dontSendLinkToWFPIfClient(long sumToPayInCoins) {
-        return sumToPayInCoins <= 0;
-    }
-
-    private PageableDto<CertificateDtoForSearching> getAllCertificatesTranslationDto(Page<Certificate> pages) {
-        List<CertificateDtoForSearching> certificateForSearchingDTOS = pages
-            .stream()
-            .map(certificatesTranslations -> modelMapper.map(certificatesTranslations,
-                CertificateDtoForSearching.class))
-            .collect(Collectors.toList());
-        return new PageableDto<>(
-            certificateForSearchingDTOS,
-            pages.getTotalElements(),
-            pages.getPageable().getPageNumber(),
-            pages.getTotalPages());
     }
 }

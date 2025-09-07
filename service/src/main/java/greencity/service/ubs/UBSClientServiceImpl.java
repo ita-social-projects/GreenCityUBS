@@ -149,6 +149,7 @@ import greencity.service.ubs.calculator.BagCalculatorService;
 import greencity.service.ubs.payment.PaymentCalculatorService;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
+import greencity.util.MoneyConverterUtil;
 import greencity.util.OrderUtils;
 import greencity.util.PointsUtils;
 import jakarta.transaction.Transactional;
@@ -230,6 +231,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final PointsUtils pointsUtils;
     private final PaymentCalculatorService paymentCalculatorService;
     private final BagCalculatorService bagCalculatorService;
+    private final MoneyConverterUtil moneyConverterUtil;
 
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
@@ -800,14 +802,14 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     public OrdersDataForUserDto getOrdersData(Order order) {
         List<Payment> payments = order.getPayment();
-        List<BagForUserDto> bagForUserDtos = paymentCalculatorService.bagForUserDtosBuilder(order);
+        List<BagForUserDto> bagForUserDtos = bagCalculatorService.bagForUserDtosBuilder(order);
         OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
             .orElse(orderStatusTranslationRepository.getReferenceById(1L));
         OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
             .getById((long) order.getOrderPaymentStatus().getStatusValue());
 
-        Long fullPriceInCoins = paymentCalculatorService.getSumToPay(bagForUserDtos);
+        Long fullPriceInCoins = bagCalculatorService.calculateBugsSum(bagForUserDtos);
 
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
@@ -819,7 +821,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Long paidAmountInCoins = paymentCalculatorService.countPaidAmount(payments);
 
-        Double amountBeforePayment = paymentCalculatorService
+        Double amountBeforePayment = moneyConverterUtil
             .convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
 
         double refundedBonuses = order.getPayment().stream()
@@ -846,8 +848,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .amountBeforePayment(amountBeforePayment)
             .refundedBonuses(refundedBonuses)
             .refundedMoney(refundedMoney)
-            .paidAmount(paymentCalculatorService.convertCoinsIntoBills(paidAmountInCoins))
-            .orderFullPrice(paymentCalculatorService.convertCoinsIntoBills(fullPriceInCoins))
+            .paidAmount(moneyConverterUtil.convertCoinsIntoBills(paidAmountInCoins))
+            .orderFullPrice(moneyConverterUtil.convertCoinsIntoBills(fullPriceInCoins))
             .certificate(certificateDtos)
             .bonuses(order.getPointsToUse().doubleValue())
             .sender(senderInfoDtoBuilder(order))
@@ -1070,7 +1072,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             .serviceUrl(resultWayForPayUrl)
             .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
             .orderDate(instant.getEpochSecond())
-            .amount(paymentCalculatorService.convertCoinsIntoBills(sumToPayInCoins).intValue())
+            .amount(moneyConverterUtil.convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
             .orderTimeout(VALIDITY_DURATION_TEN_DAYS)
             .productName(order.getOrderBags().stream()
@@ -1080,7 +1082,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .toList())
             .productPrice(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
-                .map(product -> paymentCalculatorService.convertCoinsIntoBills(product.getPrice()).intValue())
+                .map(product -> moneyConverterUtil.convertCoinsIntoBills(product.getPrice()).intValue())
                 .toList())
             .productCount(order.getOrderBags().stream()
                 .map(OrderBag::getAmount)
