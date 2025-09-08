@@ -1,7 +1,14 @@
 package greencity.service.ubs;
 
 import greencity.dto.LocationsDto;
+import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffInfoByLocationDto;
+import greencity.dto.TariffsForLocationDto;
+import greencity.dto.certificate.CertificateDto;
+import greencity.dto.courier.CourierDto;
+import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.customer.UbsCustomersDtoUpdate;
+import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderPaymentDetailDto;
@@ -9,19 +16,10 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
-import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.user.DeactivateUserRequestDto;
-import greencity.dto.OrderCourierPopUpDto;
-import greencity.dto.TariffsForLocationDto;
-import greencity.dto.certificate.CertificateDto;
-import greencity.dto.courier.CourierDto;
-import greencity.dto.customer.UbsCustomersDto;
-import greencity.dto.customer.UbsCustomersDtoUpdate;
-import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointDto;
@@ -32,38 +30,12 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
-import java.util.Map;
-import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 public interface UBSClientService {
-    /**
-     * Validates the payment response received from the payment gateway.
-     *
-     * @param response The payment response data.
-     * @return An object representing the validated payment response.
-     */
-    @Transactional
-    PaymentResponseWayForPay validatePayment(PaymentResponseDto response);
-
-    /**
-     * Processes the form parameters received from WayForPay and converts them into
-     * a PaymentResponseWayForPay object. This method performs the following: -
-     * Checks that the form parameters are not empty. - Parses the URL-encoded JSON
-     * from the first map key into a PaymentResponseDto. - Validates the payment
-     * signature using generateResponseSignature. - Calls validatePayment to update
-     * the payment status.
-     *
-     * @param formParams the form parameters received from the WayForPay callback
-     * @return a PaymentResponseWayForPay representing the processed payment;
-     *         returns an error response if parameters are empty, invalid, or the
-     *         signature check fails
-     */
-    PaymentResponseWayForPay convertMapIntoPaymentResponseDto(Map<String, String> formParams);
-
     /**
      * Method returns all bags available for order.
      *

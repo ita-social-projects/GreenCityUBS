@@ -25,6 +25,7 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
+import greencity.service.ubs.wayforpay.WayForPayResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -65,6 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderController {
     private final UBSClientService ubsClientService;
     private final WayForPayRedirectService wayForPayRedirectService;
+    private final WayForPayResultService wayForPayResultService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
@@ -238,7 +240,7 @@ public class OrderController {
     @PostMapping("/receivePayment")
     public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
         throws IOException {
-        return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
+        return ResponseEntity.ok(wayForPayResultService.convertMapIntoPaymentResponseDto(formParams));
     }
 
     /**

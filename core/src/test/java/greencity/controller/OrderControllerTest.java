@@ -36,6 +36,7 @@ import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
+import greencity.service.ubs.wayforpay.WayForPayResultService;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
@@ -79,6 +80,9 @@ class OrderControllerTest {
 
     @Mock
     private WayForPayRedirectService wayForPayRedirectService;
+
+    @Mock
+    private WayForPayResultService wayForPayResultService;
 
     @InjectMocks
     OrderController orderController;
@@ -265,7 +269,7 @@ class OrderControllerTest {
         mockResponse.setStatus("approved");
         mockResponse.setOrderReference(dto.getOrderReference());
 
-        when(ubsClientService.convertMapIntoPaymentResponseDto(anyMap()))
+        when(wayForPayResultService.convertMapIntoPaymentResponseDto(anyMap()))
             .thenReturn(mockResponse);
 
         mockMvc.perform(post(ubsLink + "/receivePayment")

@@ -61,4 +61,6 @@ public class AppConstant {
         + "does not match, reselect correct data.";
     public static final byte CURRENCY_CONVERSION_RATE = 100;
     public static final byte MAX_CERTIFICATES_PER_ORDER = 5;
+    public static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
+    public static final String PAY_BUTTON = "payButton";
 }
