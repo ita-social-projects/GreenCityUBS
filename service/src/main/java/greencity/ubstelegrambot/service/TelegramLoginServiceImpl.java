@@ -47,7 +47,7 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
 
         if (parts.length < 2) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "incorrect.login.format"), TelegramBotConstants.UK);
+                MessageProvider.get(lang, "incorrect.login.format"), lang);
         }
 
         String login = parts[0];
@@ -57,14 +57,14 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
 
         if (employee.isEmpty()) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "user.not.employee"), TelegramBotConstants.UK);
+                MessageProvider.get(lang, "user.not.employee"), lang);
         }
 
         boolean isManager = telegramUtils.checkIsEmployeeManager(employee.get());
 
         if (!isManager) {
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(TelegramBotConstants.UK, "employee.not.manager"), TelegramBotConstants.UK);
+                MessageProvider.get(lang, "employee.not.manager"), lang);
         }
 
         try {
