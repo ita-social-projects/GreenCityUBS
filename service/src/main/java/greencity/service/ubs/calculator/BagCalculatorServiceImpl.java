@@ -19,6 +19,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
 import greencity.service.ubs.OrderBagService;
 import greencity.util.MoneyConverterUtil;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -32,38 +33,17 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
     private final MoneyConverterUtil moneyConverterUtil;
     private final ModelMapper modelMapper;
     private final OrderBagService orderBagService;
-    //TODO clean up these methods to make it more readable
 
     @Override
-    public long formBagsToBeSavedAndCalculateOrderSum(List<OrderBag> orderBagList, List<BagDto> bags,
-                                                      TariffsInfo tariffsInfo) {
-        long totalSumToPayInCoins = 0L;
-        long limitedSumToPayInCoins = 0L;
-        int limitedBags = 0;
-        final List<Integer> bagIds = bags.stream().map(BagDto::getId).toList();
-        for (BagDto temp : bags) {
-            Bag bag = findActiveBagById(temp.getId());
-            if (Boolean.TRUE.equals(bag.getLimitIncluded())) {
-                limitedSumToPayInCoins += bag.getFullPrice() * temp.getAmount();
-                limitedBags += temp.getAmount();
-            } else {
-                totalSumToPayInCoins += bag.getFullPrice() * temp.getAmount();
-            }
-            OrderBag orderBag = createOrderBag(bag);
-            orderBag.setAmount(temp.getAmount());
-            orderBagList.add(orderBag);
-        }
-        checkSumIfCourierLimitBySumOfOrder(tariffsInfo, limitedSumToPayInCoins);
-        checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, limitedBags);
-        totalSumToPayInCoins += limitedSumToPayInCoins;
-        List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
-            .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
-            .map(this::createOrderBag)
-            .toList();
-        orderBagList.addAll(notOrderedBags.stream()
-            .map(this::setAmountToOrderBag)
-            .toList());
-        return totalSumToPayInCoins;
+    public long prepareBagsAndCalculateTotal(List<OrderBag> orderBagList, List<BagDto> bags,
+                                             TariffsInfo tariffsInfo) {
+        CalculationContext context = calculateOrderedBags(orderBagList, bags);
+
+        validateLimits(tariffsInfo, context);
+
+        addNotOrderedBugs(orderBagList, tariffsInfo, context.bagIds);
+
+        return context.totalSumToPayInCoins;
     }
 
     @Override
@@ -86,6 +66,47 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
         return bagForUserDtos.stream()
             .map(b -> moneyConverterUtil.convertBillsIntoCoins(b.getTotalPrice()))
             .reduce(0L, Long::sum);
+    }
+
+    private void addNotOrderedBugs(List<OrderBag> orderBagList, TariffsInfo tariffsInfo, List<Integer> bagIds) {
+        List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
+            .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
+            .map(this::createOrderBag)
+            .toList();
+        orderBagList.addAll(notOrderedBags.stream()
+            .map(this::setAmountToOrderBag)
+            .toList());
+    }
+
+    private void validateLimits(TariffsInfo tariffsInfo, CalculationContext context) {
+        checkSumIfCourierLimitBySumOfOrder(tariffsInfo, context.limitedSumToPayInCoins);
+        checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, context.limitedBags);
+    }
+
+    private CalculationContext calculateOrderedBags(List<OrderBag> orderBagList, List<BagDto> bags) {
+        long totalSum = 0L;
+        long limitedSum = 0L;
+        int limitedBags = 0;
+        List<Integer> bagIds = new ArrayList<>();
+
+        for (BagDto dto : bags) {
+            Bag bag = findActiveBagById(dto.getId());
+            bagIds.add(dto.getId());
+
+            if (Boolean.TRUE.equals(bag.getLimitIncluded())) {
+                limitedSum += bag.getFullPrice() * dto.getAmount();
+                limitedBags += dto.getAmount();
+            } else {
+                totalSum += bag.getFullPrice() * dto.getAmount();
+            }
+
+            OrderBag orderBag = createOrderBag(bag);
+            orderBag.setAmount(dto.getAmount());
+            orderBagList.add(orderBag);
+        }
+
+        totalSum += limitedSum;
+        return new CalculationContext(totalSum, limitedSum, limitedBags, bagIds);
     }
 
     private OrderBag createOrderBag(Bag bag) {
@@ -137,4 +158,11 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
         bagDto.setTotalPrice(moneyConverterUtil.convertCoinsIntoBills(count * orderBag.getPrice()));
         return bagDto;
     }
+
+    private record CalculationContext(
+        long totalSumToPayInCoins,
+        long limitedSumToPayInCoins,
+        int limitedBags,
+        List<Integer> bagIds
+    ) {}
 }

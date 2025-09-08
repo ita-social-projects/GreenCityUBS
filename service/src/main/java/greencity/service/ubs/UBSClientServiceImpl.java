@@ -633,7 +633,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
         List<OrderBag> bagsOrdered = new ArrayList<>();
         long sumToPayInCoinsWithoutDiscount =
-            bagCalculatorService.formBagsToBeSavedAndCalculateOrderSum(
+            bagCalculatorService.prepareBagsAndCalculateTotal(
                 bagsOrdered, dto.getBags(), tariffsInfo);
 
         pointsUtils.checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
