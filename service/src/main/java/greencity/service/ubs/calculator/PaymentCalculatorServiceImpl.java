@@ -1,4 +1,4 @@
-package greencity.service.ubs.payment;
+package greencity.service.ubs.calculator;
 
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.entity.order.Order;
@@ -6,9 +6,6 @@ import greencity.entity.order.OrderBag;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.enums.PaymentStatus;
-import greencity.service.ubs.calculator.BagCalculatorService;
-import greencity.service.ubs.calculator.CertificateCalculatorService;
-import greencity.service.ubs.calculator.PointCalculatorService;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

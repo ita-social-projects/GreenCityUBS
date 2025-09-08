@@ -1,4 +1,4 @@
-package greencity.service.ubs.payment;
+package greencity.service.ubs.calculator;
 
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.entity.order.Order;
