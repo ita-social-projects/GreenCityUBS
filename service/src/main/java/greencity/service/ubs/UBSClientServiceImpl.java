@@ -646,7 +646,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
         Set<Certificate> orderCertificates = new HashSet<>();
         sumToPayInCoins =
-            certificateCalculatorService.formCertificatesToBeSavedAndCalculateOrderSum(
+            certificateCalculatorService.applyCertificatesToOrder(
                 dto, orderCertificates, order, sumToPayInCoins);
         if (sumToPayInCoins <= 0) {
             dto.setShouldBePaid(false);

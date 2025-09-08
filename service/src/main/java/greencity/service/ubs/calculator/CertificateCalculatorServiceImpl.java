@@ -19,6 +19,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.repository.CertificateRepository;
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -34,7 +35,6 @@ import org.springframework.stereotype.Service;
 public class CertificateCalculatorServiceImpl implements CertificateCalculatorService {
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
-    //TODO clean up these methods to make it more readable
 
     @Override
     public long getCertificateSumToPayInCoins(Order order, long sumToPayInCoins) {
@@ -47,55 +47,51 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
         return sumToPayInCoins;
     }
 
-    //TODO why there is 2 similar methods
     @Override
-    public long formCertificatesToBeSavedAndCalculateOrderSumClient(OrderWayForPayClientDto dto, Order order,
-                                                                    long sumToPayInCoins) {
-        if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
-            Set<Certificate> certificates =
-                certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
-                    CertificateStatus.ACTIVE);
-            if (certificates.isEmpty()) {
-                throw new NotFoundException(CERTIFICATE_NOT_FOUND);
-            }
-            checkValidationCertificates(certificates, dto);
-            for (Certificate temp : certificates) {
-                Certificate certificate = getCertificateForClient(temp, order);
-                sumToPayInCoins -= certificate.getPoints() * 100L;
+    @Transactional
+    public long applyCertificatesForClientOrder(OrderWayForPayClientDto dto,
+                                                Order order,
+                                                long sumToPayInCoins) {
+        if (sumToPayInCoins == 0 || dto.getCertificates() == null) {
+            return sumToPayInCoins;
+        }
 
-                if (dontSendLinkToWFPIfClient(sumToPayInCoins)) {
-                    certificate.setCertificateStatus(CertificateStatus.USED);
-                    certificate.setPoints(certificate.getPoints()
-                        + BigDecimal.valueOf(sumToPayInCoins)
-                        .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-                        .setScale(0, RoundingMode.UP).intValue());
-                    sumToPayInCoins = 0L;
-                }
-            }
+        Set<Certificate> certificates = certificateRepository.findByCodeInAndCertificateStatus(
+                new ArrayList<>(dto.getCertificates()), CertificateStatus.ACTIVE);
+
+        if (certificates.isEmpty()) {
+            throw new NotFoundException(CERTIFICATE_NOT_FOUND);
+        }
+
+        checkValidationCertificates(certificates, dto);
+
+        for (Certificate certificate : certificates) {
+            sumToPayInCoins = applyCertificate(order, sumToPayInCoins, certificate);
         }
         return sumToPayInCoins;
     }
 
     @Override
-    public long formCertificatesToBeSavedAndCalculateOrderSum(OrderResponseDto dto, Set<Certificate> orderCertificates,
-                                                              Order order, long sumToPayInCoins) {
-        if (sumToPayInCoins != 0 && dto.getCertificates() != null) {
-            for (String temp : dto.getCertificates()) {
-                if (dto.getCertificates().size() > 5) {
-                    throw new BadRequestException(TOO_MANY_CERTIFICATES);
-                }
-                Certificate certificate = certificateRepository.findById(temp).orElseThrow(
-                    () -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
-                validateCertificate(certificate);
-                certificate.setOrder(order);
-                orderCertificates.add(certificate);
-                sumToPayInCoins -= certificate.getPoints() * AppConstant.CURRENCY_CONVERSION_RATE;
-                certificate.setCertificateStatus(CertificateStatus.USED);
-                certificate.setDateOfUse(LocalDate.now());
-                if (markCertificateAsUsedIfNoPaymentNeeded(sumToPayInCoins, certificate)) {
-                    sumToPayInCoins = 0L;
-                }
-            }
+    @Transactional
+    public long applyCertificatesToOrder(OrderResponseDto dto,
+                                         Set<Certificate> orderCertificates,
+                                         Order order,
+                                         long sumToPayInCoins) {
+        if (sumToPayInCoins == 0 || dto.getCertificates() == null) {
+            return sumToPayInCoins;
+        }
+        if (dto.getCertificates().size() > AppConstant.MAX_CERTIFICATES_PER_ORDER) {
+            throw new BadRequestException(TOO_MANY_CERTIFICATES);
+        }
+        for (String temp : dto.getCertificates()) {
+            Certificate certificate = certificateRepository.findById(temp)
+                .orElseThrow(() -> new NotFoundException(CERTIFICATE_NOT_FOUND_BY_CODE + temp));
+
+            validateCertificate(certificate);
+
+            sumToPayInCoins = applyCertificate(order, sumToPayInCoins, certificate);
+
+            orderCertificates.add(certificate);
         }
         return sumToPayInCoins;
     }
@@ -109,20 +105,11 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
 
     private void checkValidationCertificates(Set<Certificate> certificates, OrderWayForPayClientDto dto) {
         if (certificates.size() != dto.getCertificates().size()) {
-            String validCertification = certificates.stream().map(Certificate::getCode).collect(joining(", "));
+            String validCertification = certificates.stream()
+                .map(Certificate::getCode)
+                .collect(joining(", "));
             throw new NotFoundException(SOME_CERTIFICATES_ARE_INVALID + validCertification);
         }
-    }
-
-    private Certificate getCertificateForClient(Certificate certificate, Order order) {
-        certificate.setOrder(order);
-        certificate.setCertificateStatus(CertificateStatus.USED);
-        certificate.setDateOfUse(LocalDate.now());
-        return certificate;
-    }
-
-    private boolean dontSendLinkToWFPIfClient(long sumToPayInCoins) {
-        return sumToPayInCoins <= 0;
     }
 
     private void validateCertificate(Certificate certificate) {
@@ -137,15 +124,28 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
         }
     }
 
-    private boolean markCertificateAsUsedIfNoPaymentNeeded(long sumToPayInCoins, Certificate certificate) {
+
+    private long applyCertificate(Order order,
+                                  long sumToPayInCoins,
+                                  Certificate certificate) {
+        certificate.setOrder(order);
+        certificate.setCertificateStatus(CertificateStatus.USED);
+        certificate.setDateOfUse(LocalDate.now());
+
+        sumToPayInCoins -= certificate.getPoints() * AppConstant.CURRENCY_CONVERSION_RATE;
+
         if (sumToPayInCoins <= 0) {
-            certificate.setCertificateStatus(CertificateStatus.USED);
-            certificate.setPoints(certificate.getPoints()
-                + BigDecimal.valueOf(sumToPayInCoins)
-                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-                .setScale(0, RoundingMode.UP).intValue());
-            return true;
+            adjustCertificateBalance(sumToPayInCoins, certificate);
+            sumToPayInCoins = 0L;
         }
-        return false;
+        return sumToPayInCoins;
+    }
+
+    private static void adjustCertificateBalance(long sumToPayInCoins, Certificate certificate) {
+        certificate.setCertificateStatus(CertificateStatus.USED);
+        certificate.setPoints(certificate.getPoints()
+            + BigDecimal.valueOf(sumToPayInCoins)
+            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+            .setScale(0, RoundingMode.UP).intValue());
     }
 }

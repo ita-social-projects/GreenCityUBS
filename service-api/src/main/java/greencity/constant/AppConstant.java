@@ -60,4 +60,5 @@ public class AppConstant {
     public static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
         + "does not match, reselect correct data.";
     public static final byte CURRENCY_CONVERSION_RATE = 100;
+    public static final byte MAX_CERTIFICATES_PER_ORDER = 5;
 }

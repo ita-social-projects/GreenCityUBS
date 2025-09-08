@@ -9,6 +9,7 @@ import greencity.enums.PaymentStatus;
 import greencity.service.ubs.calculator.BagCalculatorService;
 import greencity.service.ubs.calculator.CertificateCalculatorService;
 import greencity.service.ubs.calculator.PointCalculatorService;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class PaymentCalculatorServiceImpl implements PaymentCalculatorService {
     private final CertificateCalculatorService certificateCalculatorService;
 
     @Override
+    @Transactional
     public long calculateSumToPay(OrderWayForPayClientDto dto, Order order, User currentUser) {
         long sumToPayInCoins = bagCalculatorService
             .getBagsSumToPayInCoins(order);
@@ -32,9 +34,10 @@ public class PaymentCalculatorServiceImpl implements PaymentCalculatorService {
 
         sumToPayInCoins = pointCalculatorService
             .getPointSumToPayInCoins(dto, currentUser, sumToPayInCoins);
-        //TODO why this is goes after point calculating think how to move this
+        // Apply client certificates *after* points,
+        // because points must always reduce sum before certificates.
         sumToPayInCoins = certificateCalculatorService
-            .formCertificatesToBeSavedAndCalculateOrderSumClient(dto, order, sumToPayInCoins);
+            .applyCertificatesForClientOrder(dto, order, sumToPayInCoins);
 
         return sumToPayInCoins - countPaidAmount(order.getPayment());
     }
