@@ -697,13 +697,15 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void fillAndSendCustomNotification(User user, Long templateId) {
-        UserNotification userNotification = new UserNotification();
-        userNotification.setNotificationType(NotificationType.CUSTOM);
-        userNotification.setTemplateId(templateId);
-        userNotification.setUser(user);
-        UserNotification created = userNotificationRepository.save(userNotification);
-        created.setParameters(new HashSet<>());
-        sendNotificationsForBotsAndEmail(created, 0L);
+        if (isUserActive(user)) {
+            UserNotification userNotification = new UserNotification();
+            userNotification.setNotificationType(NotificationType.CUSTOM);
+            userNotification.setTemplateId(templateId);
+            userNotification.setUser(user);
+            UserNotification created = userNotificationRepository.save(userNotification);
+            created.setParameters(new HashSet<>());
+            sendNotificationsForBotsAndEmail(created, 0L);
+        }
     }
 
     /**
@@ -1079,14 +1081,21 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void fillAndSendNotification(Set<NotificationParameter> parameters, Order order,
         NotificationType notificationType) {
-        UserNotification userNotification = new UserNotification();
-        userNotification.setNotificationType(notificationType);
-        userNotification.setUser(order.getUser());
-        userNotification.setOrder(order);
-        UserNotification created = userNotificationRepository.save(userNotification);
-        parameters.forEach(parameter -> parameter.setUserNotification(created));
-        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
-        created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBotsAndEmail(created, 0L);
+        User user = order.getUser();
+        if (isUserActive(user)) {
+            UserNotification userNotification = new UserNotification();
+            userNotification.setNotificationType(notificationType);
+            userNotification.setUser(user);
+            userNotification.setOrder(order);
+            UserNotification created = userNotificationRepository.save(userNotification);
+            parameters.forEach(parameter -> parameter.setUserNotification(created));
+            List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
+            created.setParameters(new HashSet<>(notificationParameters));
+            sendNotificationsForBotsAndEmail(created, 0L);
+        }
+    }
+
+    private boolean isUserActive(User user) {
+        return userRemoteClient.checkIfActiveUserExistsByUuid(user.getUuid());
     }
 }

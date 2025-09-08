@@ -37,6 +37,11 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
+            public boolean checkIfActiveUserExistsByUuid(String uuid) {
+                throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_USER_DATA, throwable);
+            }
+
+            @Override
             public void markUserDeactivated(String uuid, DeactivateUserRequestDto request) {
                 throw new RemoteServerUnavailableException(ErrorMessage.USER_HAS_NOT_BEEN_DEACTIVATED, throwable);
             }
