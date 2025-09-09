@@ -12,6 +12,7 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
@@ -164,10 +165,20 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             && !message.hasSticker()
             && !message.hasAnimation()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
+            resetTelegramChatDataToInternalStatus(chat, telegramMessage);
             resultMessage = MessageFactory.buildMessage(message.getChatId().toString(),
                 MessageProvider.get(lang, "manager.file.failed"));
         }
         return resultMessage;
+    }
+
+    private void resetTelegramChatDataToInternalStatus(TelegramChat chat, TelegramMessage telegramMessage) {
+        telegramMessageRepository.delete(telegramMessage);
+        var lastMessage = telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat).orElse(null);
+        var messageCount = chat.getUnreadMessagesCount() - 1;
+        chat.setLastMessage(lastMessage);
+        chat.setUnreadMessagesCount(messageCount);
+        telegramChatRepository.save(chat);
     }
 
     private SendMessage setStickerInfo(Message message, TelegramMessage telegramMessage,
@@ -307,7 +318,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             }
 
             messageAssetRepository.save(asset);
-        } catch (TelegramBotExecutionException | IOException e) {
+        } catch (TelegramBotExecutionException | UnsupportedTelegramAssetException | IOException e) {
             log.error("Error loading or saving file from Telegram (Filename: {}): {}", fileInfo.getOriginalFileName(),
                 e.getMessage(), e);
             return MessageFactory.buildMessage(message.getChatId().toString(),
