@@ -29,7 +29,9 @@ public class OrderUtils {
             (order.getCounterOrderPaymentId() == null) ? 1 : order.getCounterOrderPaymentId(),
             getLastPayment(order).getId());
 
-        return Base64.getEncoder().encodeToString(rawOrderId.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder()
+            .withoutPadding()
+            .encodeToString(rawOrderId.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

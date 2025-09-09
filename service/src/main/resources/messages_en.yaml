@@ -1,0 +1,135 @@
+menu:
+  client_support: "Chat with a human"
+  work_schedule: "Station work schedule"
+  admission_rules: "Raw material acceptance rules"
+  green_office: "Green office"
+  feedback: "Leave feedback"
+  sorting_prices: "Sorting prices"
+  login: "Log in as manager"
+yes.answer: "Yes"
+incorrect.login.format: "Incorrect format. Please enter your credentials as login:password"
+logout.manager: "Exit manager role"
+successful.logout.manager: "Successfully exited manager role!"
+forbidden.commands.manager: "❌Managers are not allowed to use this command"
+user.not.employee: "User is not an employee"
+employee.not.manager: "Employee is not a manager"
+something.went.wrong: "Something went wrong, please try again"
+manager.photo.failed: "Manager couldn't receive your photo, please try again"
+manager.file.failed: "Manager couldn't receive your file, please try again"
+
+greeting.message: |
+  Hi! I'm a bot helping my fellow managers handle requests.
+  Please ask your question by choosing to chat with a human
+  or select another option.
+
+greeting.manager.message: "Hi manager!"
+login.message: "Enter your login and password in the format login:password"
+login.success: "Welcome, %s! You have successfully logged in."
+supported.commands: "List of available commands:"
+login.error: "Login failed: \"%s\""
+unknown.command: "Unknown command. Please choose one from the available list."
+
+work.schedule.message: |
+  <b>No Waste Recycling Station</b>
+  Kyiv, 25/4 Saperno-Slobidska St. (UBS)
+
+  <b>Station working hours</b>
+  Tue–Fri — 13:00–18:00
+  Sat–Sun — 10:00–15:30
+
+  <b>Paid service “UBS Uklon”</b>
+  Mon–Fri: 9:00–18:00
+  Sat–Sun: 10:00–15:30
+
+  <b>Paid service “Resorting”</b>
+  Available 24/7
+
+sorting.rules.pricing.message: |
+  Mixed recyclables and non-liquid waste (excluding hazardous,
+  contaminated, construction waste, and waste that contacted bodily fluids —
+  list here: <a href="https://nowaste.com.ua/sort-station">Link</a>)
+  should be packed in a 120-liter bag.
+
+  Textile waste (worn clothes, shoes, bags, soft toys, blankets)
+  must be packed separately.
+
+  Max weight for mixed packaging in a 120L bag: 5 kg
+  Max weight for textiles in a 120L bag: 10 kg.
+
+  <b>Service pricing</b>👇
+  Mixed recyclables:
+
+  120 UAH/35 L
+  180 UAH/60 L
+  270 UAH/120 L
+  350 UAH/160 L
+  520 UAH/240 L
+
+  Textile waste:
+
+  130 UAH/20 L
+  295 UAH/60 L
+
+admission.rules.text: |
+  Everything we accept at the station for recycling or safe incineration
+  (full list here: <a href="https://nowaste.com.ua/sort-station">Link</a>)
+
+green.office.text: "Want to order the service as a legal entity or entrepreneur?"
+
+entering.email.message: |
+  For legal entities and entrepreneurs, we offer the “Green Office” service 🏢
+
+  If you'd like to learn more, leave your email —
+  and we'll send you a detailed description.
+
+  Please enter your email ✍️👇
+
+invalid.email.message: |
+  That doesn't look like an email. Let's try again ⬅️
+
+  Please enter your email ✍️👇
+
+green.office.thank.you.message: "Thank you! You'll receive an email with details about the “Green Office” service within 24 hours 👌"
+
+feedback.message: |
+  We want to become the best version of ourselves 🤗
+
+  That's why we really need your honest feedback about our work ☝️
+
+  Your opinion matters! Please share your thoughts about our service.
+
+great.feedback.message: |
+  So happy to hear that! ❤️
+
+  Your feedback helps us grow! We'll keep improving 💪
+  Please leave a few words about what you liked in our service 👇
+
+bad.feedback.message: |
+  Sorry to hear that 😔
+
+  Please tell us what went wrong so we can fix it ✍️👇
+
+feedback.thank.you.message: |
+  Thank you so much for your feedback! 🙏
+
+  List of available commands:
+
+back.to.main.menu: "⏪ Back to main menu"
+client.end.support.mode: "End conversation with manager"
+client.stop.support.mode: "You ended the conversation with the manager, please rate our support from 1 to 5"
+client.end.support.notification: "Client %s ended the conversation"
+
+client.support.message.callback.query: |
+  Please ask your question — and I’ll call one of my human colleagues ✍️👇
+  If you want to return to my functions after talking to a human,
+  just click "End conversation with manager"
+
+green.office.subject: "Interested in Green Office"
+unknown.error: "An unknown error occurred, please try again"
+message.sent.to.manager: "Your message has been sent to the manager, please wait for a response"
+client.want.to.speak: "👨@%s wants to speak with a human\n\n👉 %s\n\n💬 http://localhost:4200/chat/%s"
+previous.session.expired: "Previous session expired. Please choose a command from the list to continue"
+photo.content: "Photo content"
+login.failed: "Incorrect login or password. Please check your credentials and try again."
+client.support.message.change.language: "Language was switched"
+manager.chat.already.open.message: "Chat with manager is already open. You can send a message whenever you're ready."

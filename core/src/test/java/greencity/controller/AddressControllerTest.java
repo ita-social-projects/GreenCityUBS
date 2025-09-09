@@ -2,12 +2,12 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.repository.UserRepository;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.UBSManagementService;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +24,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import static greencity.ModelUtils.getPrincipal;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -46,7 +48,7 @@ class AddressControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    private UserRemoteClient userRemoteClient;
+    private UserRepository userRepository;
 
     @Mock
     private UBSManagementService managementService;
@@ -60,16 +62,16 @@ class AddressControllerTest {
     private final Principal principal = getPrincipal();
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(addressController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .build();
     }
 
     @Test
     void getAllAddressesForCurrentUser() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
 
         mockMvc.perform(get(ubsLink + "/findAll-order-address")
             .principal(principal)
@@ -81,7 +83,7 @@ class AddressControllerTest {
 
     @Test
     void saveAddressForOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
 
         CreateAddressRequestDto dto = ModelUtils.getAddressRequestDto();
 
@@ -98,7 +100,7 @@ class AddressControllerTest {
 
     @Test
     void updateAddressForOrder() throws Exception {
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
+        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
 
         OrderAddressDtoRequest dto = ModelUtils.getOrderAddressDtoRequest();
 
@@ -115,6 +117,8 @@ class AddressControllerTest {
 
     @Test
     void deleteOrderAddress() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         mockMvc.perform(delete(ubsLink + "/order-addresses/{id}", 1L)
             .principal(principal))
             .andExpect(status().isOk());
@@ -125,7 +129,7 @@ class AddressControllerTest {
         Long addressId = 1L;
         String uuid = "35467585763t4sfgchjfuyetf";
 
-        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of(uuid));
 
         mockMvc.perform(patch(ubsLink + "/makeAddressActual/{addressId}", addressId)
             .principal(principal))

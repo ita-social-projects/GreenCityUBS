@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="add-ai-user" author="Pohranychnyi Oleksandr">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(*) FROM users WHERE recipient_email = 'ai.generated@gmail.com';
+                </sqlCheck>
+            </not>
+        </preConditions>
+
+        <insert tableName="users">
+            <column name="current_points" value="0"/>
+            <column name="uuid" value="12e65a1d-445e-4651-96bb-90fd21e30c89"/>
+            <column name="violations" value="0"/>
+            <column name="recipient_name" value="AIUser"/>
+            <column name="recipient_email" value="ai.generated@gmail.com"/>
+            <column name="recipient_phone" value="+380973434343"/>
+            <column name="recipient_surname" value="AI Generated"/>
+            <column name="date_of_registration" value="1970-01-01 00:00:00.000000"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>

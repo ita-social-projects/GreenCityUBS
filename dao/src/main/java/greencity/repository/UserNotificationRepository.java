@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.Order;
+import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationType;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
@@ -114,4 +115,15 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
      */
     List<UserNotification> findAllUserNotificationByOrderAndNotificationType(Order order,
         NotificationType notificationType);
+
+    /**
+     * Checks if there is at least one notification associated with the specified
+     * template ID.
+     *
+     * @param templateId the ID of {@link NotificationTemplate} to check for
+     *                   associated notifications
+     * @return true if at least one {@link UserNotification} exists with the
+     *         specified template ID, false otherwise
+     */
+    boolean existsByTemplateId(Long templateId);
 }

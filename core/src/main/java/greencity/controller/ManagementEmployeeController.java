@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import greencity.annotations.ValidImage;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.employee.EmployeeWithTariffsDto;
@@ -29,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -37,23 +39,25 @@ import java.util.Set;
 @RestController
 @RequestMapping("/admin/ubs-employee")
 @RequiredArgsConstructor
+@Validated
 public class ManagementEmployeeController {
     private final UBSManagementEmployeeService employeeService;
     private final UBSClientService ubsClientService;
 
     /**
-     * Controller method to save an employee.
+     * Saves a new employee with optional image upload.
      *
-     * @param employeeWithTariffsIdDto DTO for {@link EmployeeWithTariffsIdDto}.
-     * @param image                    Image of the employee (optional).
-     * @return ResponseEntity with {@link EmployeeWithTariffsDto} instance.
+     * @param employeeWithTariffsIdDto DTO containing employee details and tariffs.
+     * @param image                    Optional image file for the employee.
+     * @return ResponseEntity containing the saved {@link EmployeeWithTariffsDto}
+     *         and HTTP status 201 Created.
      */
     @Operation(summary = "Save employee")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
             content = @Content(schema = @Schema(implementation = EmployeeWithTariffsDto.class))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
@@ -62,16 +66,17 @@ public class ManagementEmployeeController {
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> saveEmployee(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @RequestPart(value = "image", required = false) MultipartFile image) {
+        @RequestPart(value = "image", required = false) @ValidImage MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.save(employeeWithTariffsIdDto, image));
     }
 
     /**
-     * Controller gets all employees.
+     * Retrieves all employees with paging and filtering support.
      *
-     * @return PageableDto of {@link GetEmployeeDto} employees.
-     * @author Mykola Danylko.
-     * @author Olena Sotnik.
+     * @param employeePage           Pagination parameters.
+     * @param employeeFilterCriteria Filtering criteria for employees.
+     * @return PageableDto containing a list of {@link GetEmployeeDto} and paging
+     *         info.
      */
     @Operation(summary = "Get all employees")
     @ApiResponses(value = {
@@ -90,10 +95,12 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller updates information about employee.
+     * Updates an existing employee's information, optionally updating their image.
      *
-     * @return {@link EmployeeWithTariffsDto} update employee.
-     * @author Mykola Danylko.
+     * @param employeeWithTariffsIdDto DTO containing updated employee details and
+     *                                 tariffs.
+     * @param image                    Optional updated image file for the employee.
+     * @return ResponseEntity containing the updated {@link EmployeeWithTariffsDto}.
      */
     @Operation(summary = "Update information about employee")
     @ApiResponses(value = {
@@ -108,15 +115,15 @@ public class ManagementEmployeeController {
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<EmployeeWithTariffsDto> update(
         @RequestPart("employee") @Valid EmployeeWithTariffsIdDto employeeWithTariffsIdDto,
-        @Parameter(description = "Employee image") @RequestPart(required = false) MultipartFile image) {
+        @Parameter(description = "Employee image") @RequestPart(required = false) @ValidImage MultipartFile image) {
         return ResponseEntity.status(HttpStatus.OK).body(employeeService.update(employeeWithTariffsIdDto, image));
     }
 
     /**
-     * Controller deletes employee.
+     * Deactivates (soft deletes) an employee by their ID.
      *
-     * @return {@link HttpStatus}
-     * @author Mykola Danylko.
+     * @param id ID of the employee to deactivate. Must be positive.
+     * @return ResponseEntity with HTTP status 200 OK on successful deactivation.
      */
     @Operation(summary = "Delete employee")
     @ApiResponses(value = {
@@ -134,10 +141,10 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller activate employee.
+     * Activates an employee by their ID.
      *
-     * @return {@link HttpStatus}
-     * @author Oksana Spodaryk.
+     * @param id ID of the employee to activate. Must be positive.
+     * @return ResponseEntity with HTTP status 200 OK on successful activation.
      */
     @Operation(summary = "Activate employee")
     @ApiResponses(value = {
@@ -155,10 +162,10 @@ public class ManagementEmployeeController {
     }
 
     /**
-     * Controller gets all employee positions.
+     * Retrieves all available employee positions.
      *
-     * @return {@link PositionDto}
-     * @author Mykola Danylko.
+     * @return ResponseEntity containing a list of {@link PositionDto} and HTTP
+     *         status 200 OK.
      */
     @Operation(summary = "Get all employee positions")
     @ApiResponses(value = {

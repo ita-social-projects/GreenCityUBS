@@ -4,13 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Optional;
+import greencity.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,11 +26,11 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import greencity.client.UserRemoteClient;
-import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +53,11 @@ class AccessTokenAuthenticationFilterTest {
 
     FilterChain chain = new MockFilterChain();
 
+    private LogCaptor logCaptor;
+
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private AccessTokenAuthenticationFilter authenticationFilter;
 
@@ -59,6 +66,7 @@ class AccessTokenAuthenticationFilterTest {
         systemOut = System.out;
         systemOutContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(systemOutContent));
+        logCaptor = LogCaptor.forClass(AccessTokenAuthenticationFilter.class);
     }
 
     @AfterEach
@@ -67,19 +75,20 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
-    @Disabled
     void doFilterInternalTest() throws IOException, ServletException {
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn("SuperSecretAccessToken");
         when(providerManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
-        when(userRemoteClient.findNotDeactivatedByEmail("test@mail.com"))
-            .thenReturn(Optional.of(UserVO.builder().id(1L).build()));
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail("test@mail.com")).thenReturn(Optional.of(uuid));
+        when(userRemoteClient.checkIfUserExistsByUuid(uuid))
+            .thenReturn(true);
 
         authenticationFilter.doFilterInternal(request, response, chain);
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(any());
-        verify(userRemoteClient).findNotDeactivatedByEmail("test@mail.com");
+        verify(userRemoteClient).checkIfUserExistsByUuid(uuid);
     }
 
     @Test
@@ -92,7 +101,7 @@ class AccessTokenAuthenticationFilterTest {
             .thenThrow(ExpiredJwtException.class);
         authenticationFilter.doFilterInternal(request, response, chain);
 
-        assertTrue(systemOutContent.toString().contains("Token has expired: "));
+        assertTrue(logCaptor.getInfoLogs().contains("Token has expired"));
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(providerManager.authenticate(
@@ -100,20 +109,34 @@ class AccessTokenAuthenticationFilterTest {
     }
 
     @Test
-    @Disabled
     void doFilterInternalAccessDeniedTest() throws IOException, ServletException {
         String token = "SuperSecretAccessToken";
         when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
         when(providerManager.authenticate(any()))
             .thenReturn(new UsernamePasswordAuthenticationToken("test@mail.com", null));
-        when(userRemoteClient.findNotDeactivatedByEmail("test@mail.com")).thenThrow(RuntimeException.class);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail("test@mail.com")).thenReturn(Optional.of(uuid));
+        when(userRemoteClient.checkIfUserExistsByUuid(uuid)).thenThrow(RuntimeException.class);
 
         authenticationFilter.doFilterInternal(request, response, chain);
 
-        assertTrue(systemOutContent.toString().contains("Access denied with token: "));
+        assertTrue(logCaptor.getInfoLogs().stream()
+            .anyMatch(s -> s.contains("Access denied during token authentication")));
 
         verify(jwtTool).getTokenFromHttpServletRequest(request);
         verify(providerManager).authenticate(any());
-        verify(userRemoteClient).findNotDeactivatedByEmail("test@mail.com");
+        verify(userRemoteClient).checkIfUserExistsByUuid(uuid);
+    }
+
+    @Test
+    @SneakyThrows
+    void doFilterInternalWhenNoTokenTest() {
+        String token = null;
+        FilterChain spyChain = spy(chain);
+        when(jwtTool.getTokenFromHttpServletRequest(request)).thenReturn(token);
+
+        authenticationFilter.doFilterInternal(request, response, spyChain);
+
+        verify(spyChain).doFilter(request, response);
     }
 }
