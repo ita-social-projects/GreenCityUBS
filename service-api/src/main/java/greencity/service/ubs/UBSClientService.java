@@ -17,10 +17,8 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.DeactivateUserRequestDto;
-import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointDto;
-import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
@@ -33,35 +31,7 @@ import java.util.Set;
 import org.springframework.data.domain.Pageable;
 
 public interface UBSClientService {
-    /**
-     * Method returns all bags available for order.
-     *
-     * @param tariffId   {@link Long} tariff id.
-     * @param locationId {@link Long} location id.
-     * @return {@link UserPointsAndAllBagsDto}.
-     * @author Safarov Renat
-     */
-    UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(Long tariffId, Long locationId);
-
-    /**
-     * Methods returns all available for order bags and current user's bonus points.
-     *
-     * @param uuid    current {@link User}'s uuid.
-     * @param orderId {@link Long} id of existing order.
-     * @return {@link UserPointsAndAllBagsDto}.
-     * @author Safarov Renat
-     */
-    UserPointsAndAllBagsDto getFirstPageDataByOrderId(String uuid, Long orderId);
-
-    /**
-     * Methods returns all saved user data.
-     *
-     * @param uuid current {@link User}'s uuid.
-     * @return instance of {@link PersonalDataDto}.
-     * @author Oleh Bilonizhka
-     */
-    PersonalDataDto getSecondPageData(String uuid);
-
+    //TODO Move to CertificateService
     /**
      * Methods return status of entered certificate, empty string if absent.
      *
@@ -71,6 +41,7 @@ public interface UBSClientService {
      */
     CertificateDto checkCertificate(String code, String userUuid);
 
+    //TODO Move to OrderService
     /**
      * Method that returns info about all orders for specified userID.
      *
@@ -79,6 +50,7 @@ public interface UBSClientService {
      */
     PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses);
 
+    //TODO Move to OrderService
     /**
      * Method that returns info about order for specified userID.
      *
@@ -87,6 +59,8 @@ public interface UBSClientService {
      */
     OrdersDataForUserDto getOrderForUser(String uuid, Long id);
 
+
+    //TODO Move to PointService
     /**
      * Method returns list all bonuses of user.
      *
@@ -96,6 +70,8 @@ public interface UBSClientService {
      */
     AllPointsUserDto findAllCurrentPointsForUser(String uuid);
 
+
+    //TODO Move to UserService
     /**
      * Method returns info about user, ubsUser and user violations by order orderId.
      *
@@ -106,6 +82,7 @@ public interface UBSClientService {
      */
     UserInfoDto getUserAndUserUbsAndViolationsInfoByOrderId(Long orderId, String uuid);
 
+    //TODO Move to UserService
     /**
      * Method updates ubs_user information order in order.
      *
@@ -115,6 +92,8 @@ public interface UBSClientService {
      */
     UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid);
 
+
+    //TODO Move to UserService
     /**
      * Method creates ubs user profile if it does not exist.
      *
@@ -125,6 +104,7 @@ public interface UBSClientService {
      */
     Long createUserProfile(UserProfileCreateDto userProfileCreateDto);
 
+    //TODO Move to UserService
     /**
      * Method that update user.
      *
@@ -136,6 +116,7 @@ public interface UBSClientService {
      */
     UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto dto);
 
+    //TODO Move to UserService
     /**
      * Method that get user profile for current user.
      *
@@ -145,6 +126,7 @@ public interface UBSClientService {
      */
     UserProfileDto getProfileData(String uuid);
 
+    //TODO Move to OrderService
     /**
      * Method returns information about order payment by orderId.
      *
@@ -155,6 +137,7 @@ public interface UBSClientService {
      */
     OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
 
+    //TODO Move to UserService prolly will be removed by Rostyslav
     /**
      * Method that mark user as DEACTIVATED.
      *
@@ -164,6 +147,7 @@ public interface UBSClientService {
      */
     void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request);
 
+    //TODO Move to OrderService
     /**
      * Method returns cancellation reason and comment.
      *
@@ -175,6 +159,7 @@ public interface UBSClientService {
      */
     OrderCancellationReasonDto getOrderCancellationReason(Long orderId, String uuid);
 
+    //TODO Move to EventService
     /**
      * Methods for finding all events for Order.
      *
@@ -186,6 +171,7 @@ public interface UBSClientService {
      */
     List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 
+    //TODO Move to OrderService
     /**
      * Method for delete user order.
      *
@@ -194,6 +180,7 @@ public interface UBSClientService {
      */
     void deleteOrder(String uuid, Long id);
 
+    //TODO Move to UserService
     /**
      * Methods returns current user's bonus points.
      *
@@ -203,6 +190,7 @@ public interface UBSClientService {
      */
     UserPointDto getUserPoint(String uuid);
 
+    //TODO Move to OrderService
     /**
      * Method for getting info about all active locations by courier ID or if user
      * has made an order before to get info about tariff.
@@ -216,6 +204,7 @@ public interface UBSClientService {
      */
     OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc, Long courierId);
 
+    //TODO Move to CouriersService
     /**
      * Method for getting all active couriers.
      *
@@ -224,6 +213,7 @@ public interface UBSClientService {
      */
     List<CourierDto> getAllActiveCouriers();
 
+    //TODO Move to TariffsService
     /**
      * Method for getting info about tariff by courier ID and location ID.
      *
@@ -234,6 +224,7 @@ public interface UBSClientService {
      */
     TariffInfoByLocationDto getTariffInfoForLocation(Long courierId, Long locationId);
 
+    //TODO Move to TariffsService
     /**
      * Method for getting info about tariff by order's id.
      *
@@ -242,6 +233,7 @@ public interface UBSClientService {
      */
     TariffsForLocationDto getTariffForOrder(Long id);
 
+    //TODO Move to UserService
     /**
      * Get information about all employee's authorities.
      *
@@ -250,6 +242,7 @@ public interface UBSClientService {
      */
     Set<String> getAllAuthorities(String email);
 
+    //TODO Move to UserService
     /**
      * Method that gets an employee`s positions and all possible related authorities
      * to these positions.
@@ -260,6 +253,7 @@ public interface UBSClientService {
      */
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email);
 
+    //TODO Move to UserService
     /**
      * Method updates Authority for {@link User}.
      *
@@ -267,6 +261,7 @@ public interface UBSClientService {
      */
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
 
+    //TODO Move to TariffsService
     /**
      * Checks if a tariff exists by its ID.
      *
@@ -275,6 +270,7 @@ public interface UBSClientService {
      */
     boolean checkIfTariffExistsById(Long tariffInfoId);
 
+    //TODO Move to AddressService
     /**
      * Retrieves all locations.
      *
@@ -282,6 +278,7 @@ public interface UBSClientService {
      */
     List<LocationsDto> getAllLocations();
 
+    //TODO Move to TariffsService
     /**
      * Retrieves the tariff ID associated with the specified location ID.
      *
@@ -290,6 +287,7 @@ public interface UBSClientService {
      */
     List<Long> getTariffIdByLocationId(Long locationId);
 
+    //TODO Move to AddressService
     /**
      * Retrieves all active locations by courier id.
      *
@@ -299,5 +297,6 @@ public interface UBSClientService {
      */
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
 
+    //TODO Move to OrderService
     public OrdersDataForUserDto getOrdersData(Order order);
 }

@@ -63,6 +63,8 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     private final WayForPayClient wayForPayClient;
     private final ModelMapper modelMapper;
 
+    //TODO fix related problem in test UBSClientServiceImpl
+    //TODO make code more readable
     @Override
     @Transactional
     public PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid) {

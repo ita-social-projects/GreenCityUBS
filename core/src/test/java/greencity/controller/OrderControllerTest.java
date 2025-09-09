@@ -35,6 +35,7 @@ import greencity.repository.UserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.order.OrderCheckoutService;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
@@ -88,6 +89,9 @@ class OrderControllerTest {
     @Mock
     private ProcessPaymentService processPaymentService;
 
+    @Mock
+    private OrderCheckoutService orderCheckoutService;
+
     @InjectMocks
     OrderController orderController;
 
@@ -95,7 +99,7 @@ class OrderControllerTest {
     RedirectionConfigProp prop;
     private MockMvc mockMvc;
     @Mock
-    private UBSUserRepository ubSuserRepository;
+    private UBSUserRepository ubsUserRepository;
     private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
 
     @BeforeEach
@@ -116,7 +120,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).getFirstPageDataByTariffAndLocationId(1L, 1L);
+        verify(orderCheckoutService).getFirstPageDataByTariffAndLocationId(1L, 1L);
     }
 
     @Test
@@ -130,7 +134,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageDataByOrderId("35467585763t4sfgchjfuyetf", 1L);
+        verify(orderCheckoutService).getFirstPageDataByOrderId("35467585763t4sfgchjfuyetf", 1L);
     }
 
     @Test
@@ -155,7 +159,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
-        verify(ubsClientService).getSecondPageData("35467585763t4sfgchjfuyetf");
+        verify(orderCheckoutService).getSecondPageData("35467585763t4sfgchjfuyetf");
     }
 
     @Test

@@ -24,6 +24,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.order.OrderCheckoutService;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
@@ -69,6 +70,7 @@ public class OrderController {
     private final WayForPayRedirectService wayForPayRedirectService;
     private final WayForPayResultService wayForPayResultService;
     private final ProcessPaymentService processPaymentService;
+    private final OrderCheckoutService orderCheckoutService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
@@ -91,7 +93,7 @@ public class OrderController {
         @RequestParam Long tariffId,
         @RequestParam Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageDataByTariffAndLocationId(tariffId, locationId));
+            .body(orderCheckoutService.getFirstPageDataByTariffAndLocationId(tariffId, locationId));
     }
 
     /**
@@ -117,7 +119,7 @@ public class OrderController {
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Positive @PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getFirstPageDataByOrderId(userUuid, orderId));
+            .body(orderCheckoutService.getFirstPageDataByOrderId(userUuid, orderId));
     }
 
     /**
@@ -162,7 +164,7 @@ public class OrderController {
     public ResponseEntity<PersonalDataDto> getUBSUsers(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getSecondPageData(userUuid));
+            .body(orderCheckoutService.getSecondPageData(userUuid));
     }
 
     /**

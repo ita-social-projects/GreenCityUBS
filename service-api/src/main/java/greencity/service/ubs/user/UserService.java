@@ -1,5 +1,4 @@
 package greencity.service.ubs.user;
 
-public interface UbsUserService {
-
+public interface UserService {
 }
