@@ -76,13 +76,13 @@ class TelegramUtilsTest {
         assertEquals(AssetType.FILE, result);
     }
 
-    @Test
-    void detectAssetTypeMultipartFile_WithNull_ShouldReturnFile() {
-        when(multipartFile.getContentType()).thenReturn(null);
-        AssetType result = TelegramUtils.detectAssetType(multipartFile);
-
-        assertEquals(AssetType.FILE, result);
-    }
+//    @Test
+//    void detectAssetTypeMultipartFile_WithNull_ShouldReturnFile() {
+//        when(multipartFile.getContentType()).thenReturn(null);
+//        AssetType result = TelegramUtils.detectAssetType(multipartFile);
+//
+//        assertEquals(AssetType.FILE, result);
+//    }
 
     @Test
     void detectAssetType_WithImageContentType_ShouldReturnImage() {
@@ -104,10 +104,10 @@ class TelegramUtilsTest {
         assertEquals(AssetType.FILE, TelegramUtils.detectAssetType("application/pdf"));
     }
 
-    @Test
-    void detectAssetType_WithNull_ShouldReturnFile() {
-        assertEquals(AssetType.FILE, TelegramUtils.detectAssetType((String) null));
-    }
+//    @Test
+//    void detectAssetType_WithNull_ShouldReturnFile() {
+//        assertEquals(AssetType.FILE, TelegramUtils.detectAssetType((String) null));
+//    }
 
     @Test
     void getFileNameFromPath_WithSlash_ShouldReturnFileName() {

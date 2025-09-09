@@ -36,6 +36,8 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.games.Animation;
+import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -62,7 +64,6 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
      */
     @Override
     @Transactional
-
     public SendMessage processSupportMessage(Message message, String lang) {
         Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
@@ -149,16 +150,65 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             resultMessage = setPhotoInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
         } else if (message.hasDocument()) {
             resultMessage = setDocumentInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+        } else if (message.hasSticker()) {
+            resultMessage = setStickerInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+        } else if (message.hasAnimation()) {
+            resultMessage = setAnimationInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
         }
 
         if (fileInfo.getFileId() != null) {
             return setFileAsMessageAsset(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
-        } else if (!message.hasText() && !message.hasPhoto() && !message.hasDocument()) {
+        } else if (!message.hasText()
+            && !message.hasPhoto()
+            && !message.hasDocument()
+            && !message.hasSticker()
+            && !message.hasAnimation()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
             resultMessage = MessageFactory.buildMessage(message.getChatId().toString(),
                 MessageProvider.get(lang, "manager.file.failed"));
         }
         return resultMessage;
+    }
+
+    private SendMessage setStickerInfo(Message message, TelegramMessage telegramMessage,
+        Optional<TelegramMessage> telegramMessageOpt, FileInfo fileInfo, String lang) {
+        Sticker sticker = message.getSticker();
+        if (sticker == null) {
+            if (telegramMessageOpt.isEmpty()) {
+                telegramMessageRepository.delete(telegramMessage);
+            }
+            return MessageFactory.buildMessage(message.getChatId().toString(),
+                MessageProvider.get(lang, "manager.file.failed"));
+        } else {
+            fileInfo.setFileId(sticker.getFileId());
+            fileInfo.setFileSize(sticker.getFileSize() != null ? sticker.getFileSize().longValue() : 0L);
+            fileInfo.setContentType("image/webp");
+            fileInfo.setOriginalFileName("sticker.webp");
+            return null;
+        }
+    }
+
+    private SendMessage setAnimationInfo(Message message,
+        TelegramMessage telegramMessage,
+        Optional<TelegramMessage> telegramMessageOpt,
+        FileInfo fileInfo,
+        String lang) {
+        Animation animation = message.getAnimation();
+        if (animation == null) {
+            if (telegramMessageOpt.isEmpty()) {
+                telegramMessageRepository.delete(telegramMessage);
+            }
+            return MessageFactory.buildMessage(message.getChatId().toString(),
+                MessageProvider.get(lang, "manager.file.failed"));
+        } else {
+            fileInfo.setFileId(animation.getFileId());
+            fileInfo.setFileSize(animation.getFileSize() != null ? animation.getFileSize() : 0L);
+            fileInfo.setContentType(animation.getMimetype());
+            fileInfo.setOriginalFileName(animation.getFileName() != null
+                ? animation.getFileName()
+                : "animation.mp4");
+            return null;
+        }
     }
 
     private SendMessage setPhotoInfo(Message message,
