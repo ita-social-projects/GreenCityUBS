@@ -1,84 +1,48 @@
 package greencity.service.ubs.payment;
 
-import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.util.OrderUtils.getLastPayment;
-import static java.util.Objects.nonNull;
-import com.google.maps.model.LatLng;
 import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.constant.KyivTariffLocation;
 import greencity.constant.OrderHistory;
-import greencity.constant.TariffLocation;
-import greencity.dto.bag.BagDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.user.PersonalDataDto;
-import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
-import greencity.entity.order.OrderBag;
-import greencity.entity.order.Payment;
-import greencity.entity.order.TariffsInfo;
-import greencity.entity.user.Location;
 import greencity.entity.user.User;
-import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.AddressStatus;
 import greencity.enums.BonusReason;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.AddressRepository;
-import greencity.repository.LocationRepository;
-import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderRepository;
-import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
-import greencity.service.DistanceCalculationUtils;
-import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
+import greencity.service.ubs.AddressService;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.NotificationService;
-import greencity.service.ubs.calculator.BagCalculatorService;
-import greencity.service.ubs.calculator.CertificateCalculatorService;
 import greencity.service.ubs.calculator.PaymentCalculatorService;
-import greencity.service.ubs.calculator.PointCalculatorService;
+import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.wayforpay.WayForPayService;
 import greencity.util.OrderUtils;
-import greencity.util.PointsUtils;
 import jakarta.transaction.Transactional;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -87,28 +51,17 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     private final UserRepository userRepository;
-    private final AddressRepository addressRepo;
-    private final LocationRepository locationRepository;
-    private final OrderAddressRepository orderAddressRepository;
     private final UBSUserRepository ubsUserRepository;
-    private final TariffsInfoRepository tariffsInfoRepository;
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
-    private final GoogleApiService googleApiService;
-    private final BagCalculatorService bagCalculatorService;
-    private final PointCalculatorService pointCalculatorService;
-    private final CertificateCalculatorService certificateCalculatorService;
     private final PaymentCalculatorService paymentCalculatorService;
     private final EventService eventService;
-    private final PaymentStrategyFactory paymentStrategyFactory;
     private final WayForPayService wayForPayService;
+    private final AddressService addressService;
+    private final OrderService orderService;
+    private final PaymentStrategyFactory paymentStrategyFactory;
     private final WayForPayClient wayForPayClient;
     private final ModelMapper modelMapper;
-    private final PointsUtils pointsUtils;
-    //TODO make class more readable,
-    // extract some methods to the other services
-    // clean up this service
-    // remove duplicates
 
     @Override
     @Transactional
@@ -124,13 +77,12 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
 
         User currentUser = userRepository.findByUuid(uuid);
 
-        OrderAddress orderAddress = formAndSaveOrderAddress(
+        OrderAddress orderAddress = addressService.formAndSaveOrderAddress(
             dto.getAddressId(), dto.getLocationId(), currentUser);
 
         UBSuser userData = formAndSaveUbsUser(
             dto.getPersonalData(), null, orderAddress, currentUser);
-        //TODO another changes think about OrderService
-        order = formAndSaveOrderRequest(dto, order, currentUser, userData);
+        order = orderService.formAndSaveOrderRequest(dto, order, currentUser, userData);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
@@ -167,13 +119,13 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         order.setAdditionalOrders(dto.getAdditionalOrders());
         order.setComment(dto.getOrderComment());
 
-        OrderAddress orderAddress = getOrUpdateOrderAddress(
+        OrderAddress orderAddress = addressService.getOrUpdateOrderAddress(
             order.getUbsUser().getOrderAddress(), dto.getAddressId(), dto.getLocationId(), currentUser);
 
         UBSuser userData = formAndSaveUbsUser(
             dto.getPersonalData(), order.getUbsUser().getId(), orderAddress, currentUser);
 
-        order = formAndSaveOrderRequest(dto, order, currentUser, userData);
+        order = orderService.formAndSaveOrderRequest(dto, order, currentUser, userData);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
@@ -201,7 +153,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         checkForNullCounter(order);
         long sumToPayInCoins = paymentCalculatorService.calculateSumToPay(dto, order, currentUser);
 
-        transferUserPointsToOrder(order, dto.getPointsToUse());
+        orderService.transferUserPointsToOrder(order, dto.getPointsToUse());
         paymentVerification(sumToPayInCoins, order);
 
         if (sumToPayInCoins <= 0) {
@@ -225,52 +177,8 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     }
 
     private void validateOrderRequestAddress(OrderResponseDto dto) {
-        if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
+        if (!addressService.checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
             throw new AddressNotWithinLocationAreaException(AppConstant.ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
-        }
-    }
-
-    //TODO move to address
-    private boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
-        Address address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new NotFoundException(AppConstant.ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
-
-        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
-
-        if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
-            return isKyivTariff;
-        } else if (locationId == TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId()) {
-            checkAndCalculateAddressCoordinatesIfEmpty(address);
-
-            double addressLatitude = address.getCoordinates().getLatitude();
-            double addressLongitude = address.getCoordinates().getLongitude();
-
-            double distanceInKm =
-                DistanceCalculationUtils.calculateDistanceInKmByHaversineFormula(AppConstant.KYIV_LATITUDE,
-                    AppConstant.KYIV_LONGITUDE,
-                    addressLatitude, addressLongitude);
-
-            return distanceInKm <= AppConstant.LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
-        } else {
-            return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
-        }
-    }
-
-    private boolean checkIfCityBelongsToKyivTariff(String cityName) {
-        return Arrays.stream(KyivTariffLocation.values())
-            .anyMatch(kyivTariffLocation -> kyivTariffLocation.getLocationName().equalsIgnoreCase(cityName));
-    }
-
-    //TODO Move to Address
-    private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
-        if (address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0) {
-            LatLng latLng = googleApiService
-                .getGeocodingResultByCityAndCountryAndLocale(AppConstant.UKRAINE_EN,
-                    address.getBaseAddress().getCityEn(),
-                    AppConstant.LANG_EN).geometry.location;
-            Coordinates addressCoordinates = Coordinates.builder().latitude(latLng.lat).longitude(latLng.lng).build();
-            address.setCoordinates(addressCoordinates);
-            addressRepo.save(address);
         }
     }
 
@@ -278,41 +186,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         if (!dto.isShouldBePaid()) {
             dto.setCertificates(Collections.emptySet());
             dto.setPointsToUse(0);
-        }
-    }
-
-    //TODO move to OrderAdress
-    private OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser) {
-        return orderAddressRepository.save(formOrderAddress(addressId, locationId, currentUser));
-    }
-
-    private OrderAddress formOrderAddress(Long addressId, Long locationId, User currentUser) {
-        Address address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
-        Location location = locationRepository.findById(locationId)
-            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
-
-        checkIfAddressHasBeenDeleted(address);
-        checkAddressUser(address, currentUser);
-
-        OrderAddress orderAddress = modelMapper.map(address, OrderAddress.class);
-        orderAddress.setLocation(location);
-
-        return orderAddress;
-    }
-
-
-    private void checkIfAddressHasBeenDeleted(Address address) {
-        if (address.getBaseAddress().getAddressStatus().equals(AddressStatus.DELETED)) {
-            throw new NotFoundException(
-                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
-        }
-    }
-
-    private void checkAddressUser(Address address, User user) {
-        if (!address.getUser().equals(user)) {
-            throw new NotFoundException(
-                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
         }
     }
 
@@ -333,85 +206,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         userRepository.save(currentUser);
 
         return userData;
-    }
-
-    private Order formAndSaveOrderRequest(OrderResponseDto dto, Order order, User currentUser, UBSuser userData) {
-        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(
-            getBagIds(dto.getBags()), dto.getLocationId());
-        List<OrderBag> bagsOrdered = new ArrayList<>();
-        long sumToPayInCoinsWithoutDiscount = bagCalculatorService
-            .prepareBagsAndCalculateTotal(bagsOrdered, dto.getBags(), tariffsInfo);
-
-        pointsUtils.checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        long sumToPayInCoins = pointCalculatorService
-            .reduceOrderSumDueToUsedPoints(sumToPayInCoinsWithoutDiscount, dto.getPointsToUse());
-        if (sumToPayInCoinsWithoutDiscount == sumToPayInCoins) {
-            order.setPointsToUse(0);
-            dto.setPointsToUse(0);
-        }
-
-        Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPayInCoins =
-            certificateCalculatorService.applyCertificatesToOrder(
-                dto, orderCertificates, order, sumToPayInCoins);
-        if (sumToPayInCoins <= 0) {
-            dto.setShouldBePaid(false);
-        }
-        return formAndSaveOrder(order, orderCertificates, bagsOrdered, userData, currentUser, sumToPayInCoins,
-            tariffsInfo);
-    }
-
-    //TODO move to tarifs
-    private TariffsInfo findTariffsInfoByBagIdsWithinLocation(List<Integer> bagIds, Long locationId) {
-        return tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(bagIds, locationId)
-            .orElseThrow(
-                () -> new NotFoundException(String.format(TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST, bagIds, locationId)));
-    }
-
-    private List<Integer> getBagIds(List<BagDto> dto) {
-        return dto.stream()
-            .map(BagDto::getId)
-            .toList();
-    }
-
-    private Order formAndSaveOrder(
-        Order order, Set<Certificate> orderCertificates, List<OrderBag> bagsOrdered,
-        UBSuser userData, User currentUser, long sumToPayInCoins, TariffsInfo tariffsInfo
-    ) {
-        order.setTariffsInfo(tariffsInfo);
-        order.setCertificates(orderCertificates);
-        order.setOrderBags(bagsOrdered);
-        order.setUbsUser(userData);
-        order.setUser(currentUser);
-        order.setSumTotalAmountWithoutDiscounts(
-            paymentCalculatorService.calculateOrderSumWithoutDiscounts(bagsOrdered));
-        order.setCounterOrderPaymentId(order.getCounterOrderPaymentId() + 1);
-        setOrderPaymentStatus(order, sumToPayInCoins);
-
-        Payment payment = Payment.builder()
-            .amount(sumToPayInCoins)
-            .orderStatus(OrderStatus.FORMED)
-            .currency("UAH")
-            .paymentStatus(PaymentStatus.UNPAID)
-            .settlementDate(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
-            .order(order).build();
-
-        if (order.getPayment() == null) {
-            order.setPayment(new ArrayList<>());
-        }
-        order.getPayment().add(payment);
-        return orderRepository.save(order);
-    }
-
-    private void setOrderPaymentStatus(Order order, long sumToPay) {
-        if (sumToPay <= 0) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-        } else {
-            order.setOrderPaymentStatus(
-                order.getPointsToUse() > 0 || CollectionUtils.isNotEmpty(order.getCertificates())
-                    ? OrderPaymentStatus.HALF_PAID
-                    : OrderPaymentStatus.UNPAID);
-        }
     }
 
     private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
@@ -443,22 +237,10 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         }
     }
 
-    //TODO make duplicate or move to conroler like in project learning with pre authorised
     private void checkIsOrderOfCurrentUser(User user, Order order) {
         if (!order.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException(ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER);
         }
-    }
-
-    //TODO move to AdressService
-    private OrderAddress getOrUpdateOrderAddress(
-        OrderAddress currentOrderAddress, Long newAddressId, Long newLocationId, User currentUser) {
-        OrderAddress newOrderAddress = formOrderAddress(newAddressId, newLocationId, currentUser);
-        newOrderAddress.setId(currentOrderAddress.getId());
-        if (currentOrderAddress.equals(newOrderAddress)) {
-            return currentOrderAddress;
-        }
-        return orderAddressRepository.save(newOrderAddress);
     }
 
     private void checkOrderIsPaid(OrderPaymentStatus orderPaymentStatus) {
@@ -480,45 +262,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_CONFIRMED_UK, OrderHistory.SYSTEM_UK, order);
         }
-    }
-
-    private void transferUserPointsToOrder(Order order, Integer pointsToUse) {
-        if (pointsToUse <= 0) {
-            return;
-        }
-
-        User user = order.getUser();
-        pointsUtils.checkIfUserHaveEnoughPoints(user.getCurrentPoints(), pointsToUse);
-
-        int maxPointsToTransfer = countAmountToPayForOrder(order);
-        if (pointsToUse > maxPointsToTransfer) {
-            throw new BadRequestException(TOO_MUCH_POINTS_FOR_ORDER + maxPointsToTransfer);
-        }
-
-        order.setPointsToUse(order.getPointsToUse() + pointsToUse);
-        user.setCurrentPoints(user.getCurrentPoints() - pointsToUse);
-        user.getChangeOfPointsList()
-            .add(ChangeOfPoints.builder()
-                .user(user)
-                .amount(-pointsToUse)
-                .date(LocalDateTime.now())
-                .order(order)
-                .reason(BonusReason.DEBIT_PAYMENT)
-                .build());
-
-        orderRepository.save(order);
-    }
-
-    private int countAmountToPayForOrder(Order order) {
-        int certificatesAmount = nonNull(order.getCertificates())
-            ? order.getCertificates().stream()
-            .map(Certificate::getPoints)
-            .reduce(0, Integer::sum)
-            : 0;
-        return -order.getPointsToUse() - certificatesAmount
-            + BigDecimal.valueOf(order.getSumTotalAmountWithoutDiscounts())
-            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(0, RoundingMode.UP).intValue();
     }
 
     private Order incrementCounter(Order order) {
