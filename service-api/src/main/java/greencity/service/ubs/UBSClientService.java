@@ -10,10 +10,6 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.DeactivateUserRequestDto;
@@ -22,13 +18,10 @@ import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
-import greencity.entity.order.Order;
 import greencity.entity.user.User;
-import greencity.enums.OrderStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.data.domain.Pageable;
 
 public interface UBSClientService {
     //TODO Move to CertificateService
@@ -40,25 +33,6 @@ public interface UBSClientService {
      * @author Oleh Bilonizhka
      */
     CertificateDto checkCertificate(String code, String userUuid);
-
-    //TODO Move to OrderService
-    /**
-     * Method that returns info about all orders for specified userID.
-     *
-     * @param uuid current {@link User}'s uuid;
-     * @author Oleksandr Khomiakov
-     */
-    PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses);
-
-    //TODO Move to OrderService
-    /**
-     * Method that returns info about order for specified userID.
-     *
-     * @param uuid current {@link User}'s uuid;
-     * @author Oleg Postolovskyi
-     */
-    OrdersDataForUserDto getOrderForUser(String uuid, Long id);
-
 
     //TODO Move to PointService
     /**
@@ -126,17 +100,6 @@ public interface UBSClientService {
      */
     UserProfileDto getProfileData(String uuid);
 
-    //TODO Move to OrderService
-    /**
-     * Method returns information about order payment by orderId.
-     *
-     * @param orderId {@link Long}
-     * @return {@link OrderPaymentDetailDto} dto that contain information about
-     *         order payment.
-     * @author Mykola Danylko
-     */
-    OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
-
     //TODO Move to UserService prolly will be removed by Rostyslav
     /**
      * Method that mark user as DEACTIVATED.
@@ -146,18 +109,6 @@ public interface UBSClientService {
      * @author Liubomyr Bratakh
      */
     void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request);
-
-    //TODO Move to OrderService
-    /**
-     * Method returns cancellation reason and comment.
-     *
-     * @param orderId {@link Long};
-     * @param uuid    current {@link User}'s uuid;
-     * @return {@link OrderCancellationReasonDto} dto that contains cancellation
-     *         reason and comment;
-     * @author Oleksandr Khomiakov
-     */
-    OrderCancellationReasonDto getOrderCancellationReason(Long orderId, String uuid);
 
     //TODO Move to EventService
     /**
@@ -171,15 +122,6 @@ public interface UBSClientService {
      */
     List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 
-    //TODO Move to OrderService
-    /**
-     * Method for delete user order.
-     *
-     * @param id - current order id.
-     * @author Max Boyarchuk
-     */
-    void deleteOrder(String uuid, Long id);
-
     //TODO Move to UserService
     /**
      * Methods returns current user's bonus points.
@@ -190,7 +132,7 @@ public interface UBSClientService {
      */
     UserPointDto getUserPoint(String uuid);
 
-    //TODO Move to OrderService
+    //TODO Move to CourierService
     /**
      * Method for getting info about all active locations by courier ID or if user
      * has made an order before to get info about tariff.
@@ -296,7 +238,4 @@ public interface UBSClientService {
      * @return List of all locations.
      */
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
-
-    //TODO Move to OrderService
-    public OrdersDataForUserDto getOrdersData(Order order);
 }

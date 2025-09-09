@@ -36,6 +36,7 @@ import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.order.OrderCheckoutService;
+import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
@@ -91,6 +92,9 @@ class OrderControllerTest {
 
     @Mock
     private OrderCheckoutService orderCheckoutService;
+
+    @Mock
+    private OrderService orderService;
 
     @InjectMocks
     OrderController orderController;
@@ -252,12 +256,12 @@ class OrderControllerTest {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
         when(userRepository.findUuidByRecipientEmail((anyString())))
             .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
-        when(ubsClientService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
+        when(orderService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
 
         mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L)
             .principal(principal))
             .andExpect(status().isOk());
-        verify(ubsClientService).getOrderCancellationReason(1L, "35467585763t4sfgchjfuyetf");
+        verify(orderService).getOrderCancellationReason(1L, "35467585763t4sfgchjfuyetf");
     }
 
     @Test

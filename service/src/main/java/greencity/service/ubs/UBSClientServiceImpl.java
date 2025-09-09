@@ -1,9 +1,7 @@
 package greencity.service.ubs;
 
-import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
 import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
 import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
@@ -33,20 +31,13 @@ import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffInfoDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
-import greencity.dto.address.AddressInfoDto;
-import greencity.dto.bag.BagForUserDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
-import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.OrderAddressDtoRequest;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.DeactivateUserRequestDto;
@@ -60,20 +51,15 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
-import greencity.entity.order.OrderPaymentStatusTranslation;
-import greencity.entity.order.OrderStatusTranslation;
-import greencity.entity.order.Payment;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.ubs.Address;
-import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
-import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
@@ -86,20 +72,13 @@ import greencity.repository.CourierRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.LocationRepository;
-import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
-import greencity.repository.OrderStatusTranslationRepository;
-import greencity.repository.OrdersForUserRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
-import greencity.service.ubs.calculator.BagCalculatorService;
-import greencity.service.ubs.calculator.CertificateCalculatorService;
-import greencity.service.ubs.calculator.PaymentCalculatorService;
 import greencity.util.Bot;
-import greencity.util.MoneyConverterUtil;
 import jakarta.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -112,16 +91,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -143,19 +118,12 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final AddressRepository addressRepo;
     private final UserRemoteClient userRemoteClient;
     private final EventRepository eventRepository;
-    private final OrdersForUserRepository ordersForUserRepository;
-    private final OrderStatusTranslationRepository orderStatusTranslationRepository;
-    private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final EventService eventService;
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final TelegramChatRepository telegramBotRepository;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
     private final AddressService addressService;
-    private final PaymentCalculatorService paymentCalculatorService;
-    private final BagCalculatorService bagCalculatorService;
-    private final CertificateCalculatorService certificateCalculatorService;
-    private final MoneyConverterUtil moneyConverterUtil;
 
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
@@ -212,136 +180,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                 .build();
         }
         return modelMapper.map(certificate, CertificateDto.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
-        Page<Order> orderPages = nonNull(statuses)
-            ? ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(page, uuid, statuses)
-            : ordersForUserRepository.getAllByUserUuid(page, uuid);
-        List<Order> orders = orderPages.getContent();
-        List<OrdersDataForUserDto> dtos = new ArrayList<>();
-        orders.forEach(order -> dtos.add(getOrdersData(order)));
-
-        return new PageableDto<>(
-            dtos,
-            orderPages.getTotalElements(),
-            orderPages.getPageable().getPageNumber(),
-            orderPages.getTotalPages());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public OrdersDataForUserDto getOrderForUser(String uuid, Long id) {
-        Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
-        if (order == null) {
-            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
-
-        return getOrdersData(order);
-    }
-
-    public OrdersDataForUserDto getOrdersData(Order order) {
-        List<Payment> payments = order.getPayment();
-        List<BagForUserDto> bagForUserDtos = bagCalculatorService.bagForUserDtosBuilder(order);
-        OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
-            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
-            .orElse(orderStatusTranslationRepository.getReferenceById(1L));
-        OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
-            .getById((long) order.getOrderPaymentStatus().getStatusValue());
-
-        Long fullPriceInCoins = bagCalculatorService.calculateBugsSum(bagForUserDtos);
-
-        List<CertificateDto> certificateDtos = order.getCertificates().stream()
-            .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .toList();
-
-        Long amountWithDiscountInCoins = fullPriceInCoins
-            - (long) AppConstant.CURRENCY_CONVERSION_RATE * (order.getPointsToUse()
-            + certificateCalculatorService.countCertificatesBonuses(certificateDtos));
-
-        Long paidAmountInCoins = paymentCalculatorService.countPaidAmount(payments);
-
-        Double amountBeforePayment = moneyConverterUtil
-            .convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
-
-        double refundedBonuses = order.getPayment().stream()
-            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN.equals(payment.getReceiptLink()))
-            .map(payment -> payment.getAmount().doubleValue())
-            .reduce(0.0, Double::sum);
-
-        refundedBonuses /= -AppConstant.CURRENCY_CONVERSION_RATE;
-
-        Double refundedMoney =
-            order.getRefund() == null
-                ? 0.0
-                : order.getRefund().getAmount().doubleValue() / AppConstant.CURRENCY_CONVERSION_RATE;
-
-        return OrdersDataForUserDto.builder()
-            .id(order.getId())
-            .dateForm(order.getOrderDate())
-            .datePaid(order.getOrderDate())
-            .orderStatusUk(orderStatusTranslation.getNameUk())
-            .orderStatusEn(orderStatusTranslation.getNameEn())
-            .orderComment(order.getComment())
-            .bags(bagForUserDtos)
-            .additionalOrders(order.getAdditionalOrders())
-            .amountBeforePayment(amountBeforePayment)
-            .refundedBonuses(refundedBonuses)
-            .refundedMoney(refundedMoney)
-            .paidAmount(moneyConverterUtil.convertCoinsIntoBills(paidAmountInCoins))
-            .orderFullPrice(moneyConverterUtil.convertCoinsIntoBills(fullPriceInCoins))
-            .certificate(certificateDtos)
-            .bonuses(order.getPointsToUse().doubleValue())
-            .sender(senderInfoDtoBuilder(order))
-            .address(addressInfoDtoBuilder(order))
-            .paymentStatusUk(paymentStatusTranslation.getTranslationValueUk())
-            .paymentStatusEn(paymentStatusTranslation.getTranslationsValueEn())
-            .build();
-    }
-
-    private SenderInfoDto senderInfoDtoBuilder(Order order) {
-        UBSuser sender = order.getUbsUser();
-        if (sender.getSenderFirstName() != null && !sender.getSenderFirstName().isEmpty()
-            && sender.getSenderLastName() != null && !sender.getSenderLastName().isEmpty()
-            && sender.getSenderPhoneNumber() != null && !sender.getSenderPhoneNumber().isEmpty()) {
-            return SenderInfoDto.builder()
-                .senderName(sender.getSenderFirstName())
-                .senderSurname(sender.getSenderLastName())
-                .senderEmail(sender.getSenderEmail())
-                .senderPhone(sender.getSenderPhoneNumber())
-                .build();
-        } else {
-            return SenderInfoDto.builder()
-                .senderName(sender.getFirstName())
-                .senderSurname(sender.getLastName())
-                .senderEmail(sender.getEmail())
-                .senderPhone(sender.getPhoneNumber())
-                .build();
-        }
-    }
-
-    private AddressInfoDto addressInfoDtoBuilder(Order order) {
-        OrderAddress address = order.getUbsUser().getOrderAddress();
-        return AddressInfoDto.builder()
-            .addressCityUk(address.getBaseAddress().getCityUk())
-            .addressCityEn(address.getBaseAddress().getCityEn())
-            .addressComment(address.getBaseAddress().getAddressComment())
-            .addressDistinctUk(address.getBaseAddress().getDistrictUk())
-            .addressDistinctEn(address.getBaseAddress().getDistrictEn())
-            .addressRegionUk(address.getBaseAddress().getRegionUk())
-            .addressRegionEn(address.getBaseAddress().getRegionEn())
-            .addressStreetUk(address.getBaseAddress().getStreetUk())
-            .addressStreetEn(address.getBaseAddress().getStreetEn())
-            .houseCorpus(address.getBaseAddress().getHouseCorpus())
-            .houseNumber(address.getBaseAddress().getHouseNumber())
-            .entranceNumber(address.getBaseAddress().getEntranceNumber())
-            .build();
     }
 
     /**
@@ -465,34 +303,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         return ubsUser;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public OrderPaymentDetailDto getOrderPaymentDetail(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        return buildOrderPaymentDetailDto(order);
-    }
-
-    private OrderPaymentDetailDto buildOrderPaymentDetailDto(Order order) {
-        int certificatePointsInCoins = order.getCertificates().stream()
-            .flatMapToInt(c -> IntStream.of(c.getPoints()))
-            .reduce(Integer::sum).orElse(0) * AppConstant.CURRENCY_CONVERSION_RATE;
-        int pointsToUseInCoins = order.getPointsToUse() * AppConstant.CURRENCY_CONVERSION_RATE;
-        long amountInCoins = order.getPayment().stream()
-            .flatMapToLong(p -> LongStream.of(p.getAmount()))
-            .reduce(Long::sum).orElse(0);
-        String currency = order.getPayment().isEmpty() ? "UAH" : order.getPayment().getFirst().getCurrency();
-        return OrderPaymentDetailDto.builder()
-            .amount(amountInCoins != 0L ? amountInCoins + certificatePointsInCoins + pointsToUseInCoins : 0L)
-            .certificates(-certificatePointsInCoins)
-            .pointsToUse(-pointsToUseInCoins)
-            .amountToPay(amountInCoins)
-            .currency(currency)
-            .build();
-    }
-
     @Override
     public AllPointsUserDto findAllCurrentPointsForUser(String uuid) {
         User currentUser = userRepository.findUserByUuid(uuid)
@@ -614,31 +424,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
         }
         userRemoteClient.markUserDeactivated(currentUser.getUuid(), request);
-    }
-
-    @Override
-    public OrderCancellationReasonDto getOrderCancellationReason(final Long orderId, String uuid) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
-            throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
-        }
-        return OrderCancellationReasonDto.builder()
-            .cancellationReason(order.getCancellationReason())
-            .cancellationComment(order.getCancellationComment())
-            .build();
-    }
-
-    @Override
-    @Transactional
-    public void deleteOrder(String uuid, Long id) {
-        Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
-        if (order == null) {
-            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
-        }
-        order.getOrderBags().clear();
-        orderRepository.saveAndFlush(order);
-        orderRepository.delete(order);
     }
 
     @Override

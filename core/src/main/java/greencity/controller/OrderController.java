@@ -25,6 +25,7 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.order.OrderCheckoutService;
+import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
@@ -71,6 +72,7 @@ public class OrderController {
     private final WayForPayResultService wayForPayResultService;
     private final ProcessPaymentService processPaymentService;
     private final OrderCheckoutService orderCheckoutService;
+    private final OrderService orderService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
@@ -375,7 +377,7 @@ public class OrderController {
     public ResponseEntity<OrderCancellationReasonDto> getCancellationReason(
         @Positive @PathVariable("id") final Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id, uuid));
+        return ResponseEntity.ok().body(orderService.getOrderCancellationReason(id, uuid));
     }
 
     /**

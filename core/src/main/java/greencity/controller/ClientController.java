@@ -12,6 +12,7 @@ import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
 import greencity.enums.OrderStatus;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClientController {
     private final UBSClientService ubsClientService;
     private final ProcessPaymentService processPaymentService;
+    private final OrderService orderService;
 
     /**
      * Controller for getting all user orders.
@@ -62,7 +64,7 @@ public class ClientController {
     public ResponseEntity<PageableDto<OrdersDataForUserDto>> getAllDataForOrder(
         @Parameter(hidden = true) @CurrentUserUuid String uuid, @Parameter(hidden = true) Pageable page,
         @RequestParam(value = "status", required = false) List<OrderStatus> statuses) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, page, statuses));
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrdersForUser(uuid, page, statuses));
     }
 
     /**
@@ -82,7 +84,7 @@ public class ClientController {
     @GetMapping("/user-order/{id}")
     public ResponseEntity<OrdersDataForUserDto> getAllDataForOneOrder(
         @Parameter(hidden = true) @CurrentUserUuid String uuid, @Positive @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderForUser(uuid, id));
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrderForUser(uuid, id));
     }
 
     /**
@@ -102,7 +104,7 @@ public class ClientController {
     public ResponseEntity<HttpStatus> deleteOrder(
         @Parameter(hidden = true) @CurrentUserUuid String uuid,
         @Positive @PathVariable Long id) {
-        ubsClientService.deleteOrder(uuid, id);
+        orderService.deleteOrder(uuid, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -142,7 +144,7 @@ public class ClientController {
     })
     @GetMapping("/order-payment-detail/{orderId}")
     public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@Positive @PathVariable Long orderId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderPaymentDetail(orderId));
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrderPaymentDetail(orderId));
     }
 
     /**

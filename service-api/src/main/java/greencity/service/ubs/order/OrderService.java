@@ -1,11 +1,18 @@
 package greencity.service.ubs.order;
 
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 //TODO add test
 
@@ -43,4 +50,62 @@ public interface OrderService {
      * @throws BadRequestException if points exceed the maximum allowed or user balance
      */
     void transferUserPointsToOrder(Order order, Integer pointsToUse);
+
+    /**
+     * Method that returns info about all orders for specified userID.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @author Oleksandr Khomiakov
+     */
+    PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses);
+
+    /**
+     * Method that returns info about order for specified userID.
+     *
+     * @param uuid current {@link User}'s uuid;
+     * @author Oleg Postolovskyi
+     */
+    OrdersDataForUserDto getOrderForUser(String uuid, Long id);
+
+    /**
+     * Method returns information about order payment by orderId.
+     *
+     * @param orderId {@link Long}
+     * @return {@link OrderPaymentDetailDto} dto that contain information about
+     *         order payment.
+     * @author Mykola Danylko
+     */
+    OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
+
+    /**
+     * Method returns cancellation reason and comment.
+     *
+     * @param orderId {@link Long};
+     * @param uuid    current {@link User}'s uuid;
+     * @return {@link OrderCancellationReasonDto} dto that contains cancellation
+     *         reason and comment;
+     * @author Oleksandr Khomiakov
+     */
+    OrderCancellationReasonDto getOrderCancellationReason(Long orderId, String uuid);
+
+    /**
+     * Method for delete user order.
+     *
+     * @param id - current order id.
+     * @author Max Boyarchuk
+     */
+    void deleteOrder(String uuid, Long id);
+
+    /**
+     * Aggregates order details into a user-facing DTO.
+     *
+     * <p>Calculates total price, discounts from certificates and points,
+     * paid amount, refunds, and localized statuses. The result is
+     * returned as {@link OrdersDataForUserDto} for displaying order info
+     * to the user.</p>
+     *
+     * @param order the {@link Order} entity with all related data
+     * @return aggregated {@link OrdersDataForUserDto}
+     */
+    public OrdersDataForUserDto getOrdersData(Order order);
 }
