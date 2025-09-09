@@ -107,14 +107,12 @@ import greencity.service.google.GoogleApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
-import greencity.util.OrderUtils;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -176,8 +174,6 @@ import static greencity.ModelUtils.getBagForOrder;
 import static greencity.ModelUtils.getBagTranslationDto;
 import static greencity.ModelUtils.getCancellationDto;
 import static greencity.ModelUtils.getCertificate;
-import static greencity.ModelUtils.getCertificateList;
-import static greencity.ModelUtils.getCheckoutResponseFromMonoBank;
 import static greencity.ModelUtils.getCourier;
 import static greencity.ModelUtils.getCourierDto;
 import static greencity.ModelUtils.getCourierDtoList;
@@ -187,7 +183,6 @@ import static greencity.ModelUtils.getEvent1;
 import static greencity.ModelUtils.getEvent2;
 import static greencity.ModelUtils.getGeocodingResultWithKyivRegion;
 import static greencity.ModelUtils.getLocation;
-import static greencity.ModelUtils.getMonoBankPaymentResponseDto;
 import static greencity.ModelUtils.getNotificationPaymentLink;
 import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrder2;
@@ -231,21 +226,12 @@ import static greencity.ModelUtils.getUserProfileUpdateDtoWithBotsIsNotifyFalse;
 import static greencity.ModelUtils.getUserWithBotNotifyTrue;
 import static greencity.ModelUtils.getUserWithInitializedFields;
 import static greencity.ModelUtils.getUserWithLastLocation;
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
 import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
 import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
@@ -263,6 +249,7 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static greencity.constant.ErrorMessage.UNABLE_TO_CANCEL_PAYMENT_INVOICE;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
@@ -3602,9 +3589,8 @@ class UBSClientServiceImplTest {
         when(locationToLocationsDtoMapper.convert(location)).thenReturn(locationsDto);
         when(tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(id, id)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            ubsClientService.getAllLocationsByCourierId(id);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> ubsClientService.getAllLocationsByCourierId(id));
 
         assertEquals(COURIER_IS_NOT_FOUND_BY_ID + id, exception.getMessage());
         verify(locationRepository, never()).findAllActiveLocationsByCourierId(id);
@@ -3917,9 +3903,8 @@ class UBSClientServiceImplTest {
         when(courierRepository.existsCourierById(1L)).thenReturn(true);
         when(locationRepository.existsById(2L)).thenReturn(false);
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-            ubsClientService.getTariffInfoForLocation(1L, 2L);
-        });
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> ubsClientService.getTariffInfoForLocation(1L, 2L));
         assertTrue(exception.getMessage().contains(ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID + "2"));
     }
 

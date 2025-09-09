@@ -207,7 +207,6 @@ import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EX
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
-import static greencity.constant.QuartzConstants.MONOBANK_LINK_VALIDITY_SECONDS;
 import static greencity.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
@@ -215,7 +214,6 @@ import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
 import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
-import static greencity.constant.QuartzConstants.TRIGGER_NOT_FOUND;
 import static greencity.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
 import static greencity.util.OrderUtils.getLastPayment;
 import static java.util.Objects.nonNull;
@@ -1909,10 +1907,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (sumToPayInCoins <= 0) {
             return getPaymentRequestDto(order, null);
         } else {
-            String link = formedLink(order, sumToPayInCoins);
-            schedulePaymentExpiryJob(
-                order, dto.getPointsToUse(),
-                dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
+            String link = formedLink(order, sumToPayInCoins, dto);
             return getPaymentRequestDto(order, link);
         }
     }
@@ -1924,7 +1919,22 @@ public class UBSClientServiceImpl implements UBSClientService {
             formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
             .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
-        return getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        schedulePaymentExpiryJob(order, 0, new HashSet<>(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
+        return link;
+    }
+
+    private String formedLink(Order order, long sumToPayInCoins, OrderWayForPayClientDto dto) {
+        Order increment = incrementCounter(order);
+        PaymentWayForPayRequestDto paymentWayForPayRequestDto =
+            formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
+        paymentWayForPayRequestDto
+            .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
+        String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        schedulePaymentExpiryJob(
+            order, dto.getPointsToUse(),
+            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
+        return link;
     }
 
     private Order incrementCounter(Order order) {
