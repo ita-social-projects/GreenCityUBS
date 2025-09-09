@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class WayForPayResultServiceimpl implements WayForPayResultService {
+public class WayForPayResultServiceImpl implements WayForPayResultService {
     private final ObjectMapper objectMapper;
     private final EncryptionUtil encryptionUtil;
     private final OrderRepository orderRepository;
