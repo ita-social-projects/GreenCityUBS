@@ -14,6 +14,7 @@ import greencity.enums.OrderStatus;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
+import greencity.service.ubs.point.PointService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,6 +46,7 @@ public class ClientController {
     private final UBSClientService ubsClientService;
     private final ProcessPaymentService processPaymentService;
     private final OrderService orderService;
+    private final PointService pointService;
 
     /**
      * Controller for getting all user orders.
@@ -125,7 +127,7 @@ public class ClientController {
     @GetMapping("/users-pointsToUse")
     public ResponseEntity<AllPointsUserDto> getAllPointsForUser(
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.findAllCurrentPointsForUser(uuid));
+        return ResponseEntity.status(HttpStatus.OK).body(pointService.findAllCurrentPointsForUser(uuid));
     }
 
     /**

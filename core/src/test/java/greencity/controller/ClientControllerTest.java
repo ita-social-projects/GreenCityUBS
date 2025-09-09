@@ -17,6 +17,7 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.order.OrderService;
+import greencity.service.ubs.point.PointService;
 import java.security.Principal;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,9 @@ class ClientControllerTest {
 
     @Mock
     private OrderService orderService;
+
+    @Mock
+    private PointService pointService;
 
     @InjectMocks
     ClientController clientController;
@@ -79,7 +83,7 @@ class ClientControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).findAllCurrentPointsForUser(any());
+        verify(pointService).findAllCurrentPointsForUser(any());
     }
 
     @Test

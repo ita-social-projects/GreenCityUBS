@@ -23,10 +23,15 @@ import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
+import greencity.service.ubs.AddressService;
+import greencity.service.ubs.CertificateService;
+import greencity.service.ubs.EventService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.order.OrderCheckoutService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
+import greencity.service.ubs.tariff.TariffService;
+import greencity.service.ubs.user.CourierService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,6 +78,11 @@ public class OrderController {
     private final ProcessPaymentService processPaymentService;
     private final OrderCheckoutService orderCheckoutService;
     private final OrderService orderService;
+    private final TariffService tariffService;
+    private final AddressService addressService;
+    private final CourierService courierService;
+    private final EventService eventService;
+    private final CertificateService certificateService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
@@ -145,7 +155,7 @@ public class OrderController {
             message = ValidationConstant.CERTIFICATE_CODE_REGEXP_MESSAGE) String responseCode,
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.checkCertificate(responseCode, userUuid));
+            .body(certificateService.checkCertificate(responseCode, userUuid));
     }
 
     /**
@@ -332,7 +342,7 @@ public class OrderController {
         Principal principal,
         @Parameter(hidden = true) Locale locale) {
         return ResponseEntity.ok()
-            .body(ubsClientService.getAllEventsForOrder(id, principal.getName(), locale.getLanguage()));
+            .body(eventService.getAllEventsForOrder(id, principal.getName(), locale.getLanguage()));
     }
 
     /**
@@ -405,7 +415,7 @@ public class OrderController {
         @Parameter(hidden = true) @CurrentUserUuid String uuid,
         @Positive @PathVariable Long courierId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getInfoForCourierOrderingByCourierId(uuid, changeLoc, courierId));
+            .body(courierService.getInfoForCourierOrderingByCourierId(uuid, changeLoc, courierId));
     }
 
     /**
@@ -422,7 +432,7 @@ public class OrderController {
     })
     @GetMapping("/getAllActiveCouriers")
     public ResponseEntity<List<CourierDto>> getAllActiveCouriers() {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getAllActiveCouriers());
+        return ResponseEntity.status(HttpStatus.OK).body(courierService.getAllActiveCouriers());
     }
 
     /**
@@ -444,7 +454,7 @@ public class OrderController {
         @Positive @RequestParam Long courierId,
         @Positive @PathVariable Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getTariffInfoForLocation(courierId, locationId));
+            .body(tariffService.getTariffInfoForLocation(courierId, locationId));
     }
 
     /**
@@ -462,7 +472,7 @@ public class OrderController {
     })
     @GetMapping("/orders/{id}/tariff")
     public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@Positive @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffForOrder(id));
+        return ResponseEntity.status(HttpStatus.OK).body(tariffService.getTariffForOrder(id));
     }
 
     /**
@@ -482,7 +492,7 @@ public class OrderController {
     })
     @GetMapping(value = "/check-if-tariff-exists/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> checkIfTariffExistsById(@Positive @PathVariable Long id) {
-        boolean exists = ubsClientService.checkIfTariffExistsById(id);
+        boolean exists = tariffService.checkIfTariffExistsById(id);
         if (!exists) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -503,7 +513,7 @@ public class OrderController {
     })
     @GetMapping(value = "/locations", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<LocationsDto>> getAllLocations() {
-        List<LocationsDto> locations = ubsClientService.getAllLocations();
+        List<LocationsDto> locations = addressService.getAllLocations();
         return ResponseEntity.status(HttpStatus.OK).body(locations);
     }
 
@@ -521,7 +531,7 @@ public class OrderController {
     })
     @GetMapping(value = "/tariffs/{locationId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Long>> getTariffIdByLocationId(@Positive @PathVariable("locationId") Long locationId) {
-        List<Long> tariffId = ubsClientService.getTariffIdByLocationId(locationId);
+        List<Long> tariffId = tariffService.getTariffIdByLocationId(locationId);
         return ResponseEntity.status(HttpStatus.OK).body(tariffId);
     }
 
@@ -539,7 +549,7 @@ public class OrderController {
     @GetMapping(value = "/locationsByCourier/{courierId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<LocationsDto>> getAllLocationsByCourierId(
         @Positive @PathVariable("courierId") Long courierId) {
-        List<LocationsDto> locations = ubsClientService.getAllLocationsByCourierId(courierId);
+        List<LocationsDto> locations = addressService.getAllLocationsByCourierId(courierId);
         return ResponseEntity.status(HttpStatus.OK).body(locations);
     }
 }

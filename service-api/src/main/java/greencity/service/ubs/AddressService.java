@@ -1,6 +1,7 @@
 package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
@@ -178,4 +179,20 @@ public interface AddressService {
                                          Long newAddressId,
                                          Long newLocationId,
                                          User currentUser);
+
+    /**
+     * Retrieves all locations.
+     *
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocations();
+
+    /**
+     * Retrieves all active locations by courier id.
+     *
+     * @param courierId The ID of the courier for which to retrieve all active the
+     *                  locations.
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocationsByCourierId(Long courierId);
 }

@@ -6,12 +6,14 @@ import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
 import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
 import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
 import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ID;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
 import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -22,6 +24,7 @@ import greencity.constant.KyivTariffLocation;
 import greencity.constant.OrderHistory;
 import greencity.constant.TariffLocation;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
@@ -44,13 +47,16 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
+import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.CityRepository;
+import greencity.repository.CourierRepository;
 import greencity.repository.DistrictRepository;
 import greencity.repository.LocationRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.RegionRepository;
+import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
@@ -79,10 +85,13 @@ public class AddressServiceImpl implements AddressService {
     private final AddressRepository addressRepo;
     private final OrderRepository orderRepository;
     private final LocationRepository locationRepository;
+    private final CourierRepository courierRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
     private final GoogleApiService googleApiService;
     private final EventService eventService;
     private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
     private final ModelMapper modelMapper;
+    private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
 
     /**
@@ -207,6 +216,27 @@ public class AddressServiceImpl implements AddressService {
             return currentOrderAddress;
         }
         return orderAddressRepository.save(newOrderAddress);
+    }
+
+    @Override
+    public List<LocationsDto> getAllLocations() {
+        List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
+        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).toList();
+    }
+
+    @Override
+    public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
+        if (!courierRepository.existsCourierById(courierId)) {
+            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
+        }
+        List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
+        return locations.stream()
+            .map(locationToLocationsDtoMapper::convert)
+            .map(locationsDto -> locationsDto.setTariffsId(
+                tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
+                    .orElseThrow(() -> new NotFoundException(
+                        String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, locationsDto.getId(), courierId)))))
+            .toList();
     }
 
     /**

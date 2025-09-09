@@ -1,6 +1,8 @@
 package greencity.service.ubs;
 
+import greencity.dto.order.EventDto;
 import greencity.entity.order.Order;
+import java.util.List;
 
 public interface EventService {
     /**
@@ -31,4 +33,16 @@ public interface EventService {
      * @author Hlazova Nataliia.
      */
     void saveEvent(String name, String email, Order order);
+
+    //TODO add test
+    /**
+     * Methods for finding all events for Order.
+     *
+     * @param orderId  {@link Long} id.
+     * @param email    {@link String};
+     * @param language {@link String};
+     * @return {@link List} that contains list of EventsDTOS.
+     * @author Yuriy Bahlay.
+     */
+    List<EventDto> getAllEventsForOrder(Long orderId, String email, String language);
 }
