@@ -551,7 +551,7 @@ public class OrderController {
      * @param id       id of the order that belongs to user.
      * @author Oleksandr Ilnytskyi
      */
-    @Operation(summary = "Process existing order.")
+    @Operation(summary = "Cancel payment attempt.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),

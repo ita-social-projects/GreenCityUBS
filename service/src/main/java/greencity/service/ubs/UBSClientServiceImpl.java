@@ -923,9 +923,10 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         User currentUser = userRepository.findByUuid(uuid);
-        Order order = orderRepository.findById(orderId).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+        Order order = orderRepository.findById(orderId).get();
         checkIsOrderOfCurrentUser(currentUser, order);
+
+        fireOrderExpiryJob(orderId);
 
         PaymentCancellationWayForPayRequestDto requestDto = formPaymentCancellationRequestForWayForPay(order);
         String result = getResultFromWayForPayCancellationResponse(
@@ -934,8 +935,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!result.equals("Removed")) {
             throw new BadRequestException(UNABLE_TO_CANCEL_PAYMENT_INVOICE);
         }
-
-        fireOrderExpiryJob(orderId);
     }
 
     private void schedulePaymentExpiryJob(
@@ -981,13 +980,8 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void fireOrderExpiryJob(Long orderId) {
         TriggerKey triggerKey = TriggerKey.triggerKey(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
-        Trigger oldTrigger;
         try {
-            oldTrigger = quartzScheduler.getTrigger(triggerKey);
-        } catch (SchedulerException exception) {
-            throw new IllegalStateException(TRIGGER_NOT_FOUND);
-        }
-        try {
+            Trigger oldTrigger = quartzScheduler.getTrigger(triggerKey);
             Trigger instantTrigger = oldTrigger.getTriggerBuilder().startNow().build();
             quartzScheduler.rescheduleJob(triggerKey, instantTrigger);
         } catch (SchedulerException exception) {
@@ -1715,6 +1709,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.getOrderBags().clear();
         orderRepository.saveAndFlush(order);
         orderRepository.delete(order);
+        cancelOrderExpiryJob(id);
     }
 
     private Long convertBillsIntoCoins(Double bills) {

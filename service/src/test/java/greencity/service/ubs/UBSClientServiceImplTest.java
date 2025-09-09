@@ -30,6 +30,7 @@ import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
@@ -109,11 +110,13 @@ import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -121,6 +124,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -134,7 +139,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -162,6 +172,8 @@ import static greencity.ModelUtils.getBag1list;
 import static greencity.ModelUtils.getBagForOrder;
 import static greencity.ModelUtils.getBagTranslationDto;
 import static greencity.ModelUtils.getCancellationDto;
+import static greencity.ModelUtils.getCertificate;
+import static greencity.ModelUtils.getCertificateList;
 import static greencity.ModelUtils.getCheckoutResponseFromMonoBank;
 import static greencity.ModelUtils.getCourier;
 import static greencity.ModelUtils.getCourierDto;
@@ -235,9 +247,14 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
 import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.UNABLE_TO_CANCEL_PAYMENT_INVOICE;
 import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
+import static greencity.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -252,6 +269,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -3683,5 +3701,176 @@ class UBSClientServiceImplTest {
         verify(orderRepository, times(1)).findById(anyLong());
         verify(modelMapper).map(dto.getPersonalData(), UBSuser.class);
         verify(monoBankClient, times(0)).getCheckoutResponse(any(MonoBankPaymentRequestDto.class), eq(token));
+    }
+
+    @Test
+    void cancelPaymentAttemptTest() throws SchedulerException, JSONException {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        String response = new JSONObject().put("reason", "Removed").toString();
+
+        TriggerKey triggerKey = TriggerKey.triggerKey(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        Trigger oldTrigger = mock(Trigger.class);
+        Trigger instantTrigger = mock(Trigger.class);
+        TriggerBuilder<?> triggerBuilder = mock(TriggerBuilder.class);
+
+        when(quartzScheduler
+            .checkExists(JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)))
+            .thenReturn(true);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(wayForPayClient.getCancellationResponse(any(PaymentCancellationWayForPayRequestDto.class)))
+            .thenReturn(response);
+        when(quartzScheduler.getTrigger(triggerKey)).thenReturn(oldTrigger);
+        doReturn(triggerBuilder).when(oldTrigger).getTriggerBuilder();
+        doReturn(triggerBuilder).when(triggerBuilder).startNow();
+        doReturn(instantTrigger).when(triggerBuilder).build();
+        when(quartzScheduler.rescheduleJob(triggerKey, instantTrigger)).thenReturn(any(Date.class));
+
+        ubsClientService.cancelPaymentAttempt(uuid, orderId);
+    }
+
+    @Test
+    void cancelPaymentAttemptTestWhenNoPending() {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
+
+        assertTrue(exception.getMessage().contains(NO_PAYMENT_ATTEMPT_FOR_ORDER));
+    }
+
+    @Test
+    void cancelPaymentAttemptTestWhenOrderNotBelongsToUser() throws SchedulerException {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        order.setUser(getUserWithInitializedFields().setId(2L));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        when(quartzScheduler
+            .checkExists(JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)))
+            .thenReturn(true);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+            () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
+
+        assertEquals(ORDER_DOES_NOT_BELONG_TO_USER, exception.getMessage());
+    }
+
+    @Test
+    void cancelPaymentAttemptTestWhenWayForPayDeclines() throws SchedulerException, JSONException {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        String response = new JSONObject().put("reason", "Any wrong reason").toString();
+
+        TriggerKey triggerKey = TriggerKey.triggerKey(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        Trigger oldTrigger = mock(Trigger.class);
+        Trigger instantTrigger = mock(Trigger.class);
+        TriggerBuilder<?> triggerBuilder = mock(TriggerBuilder.class);
+
+        when(quartzScheduler
+            .checkExists(JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)))
+            .thenReturn(true);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(wayForPayClient.getCancellationResponse(any(PaymentCancellationWayForPayRequestDto.class)))
+            .thenReturn(response);
+        when(quartzScheduler.getTrigger(triggerKey)).thenReturn(oldTrigger);
+        doReturn(triggerBuilder).when(oldTrigger).getTriggerBuilder();
+        doReturn(triggerBuilder).when(triggerBuilder).startNow();
+        doReturn(instantTrigger).when(triggerBuilder).build();
+        when(quartzScheduler.rescheduleJob(triggerKey, instantTrigger)).thenReturn(any(Date.class));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
+
+        assertEquals(UNABLE_TO_CANCEL_PAYMENT_INVOICE, exception.getMessage());
+    }
+
+    @Test
+    void unlockSpecifiedPointsAndCertificatesFromOrderTest() {
+        Order order = getOrder();
+        HashSet<Certificate> certificates = new HashSet<>(List.of(
+            getCertificate().setCode("7777-7777").setCertificateStatus(CertificateStatus.USED)
+                .setInitialPointsValue(100).setPoints(100),
+            getCertificate().setCode("1111-1111").setCertificateStatus(CertificateStatus.USED)
+                .setInitialPointsValue(120).setPoints(100)));
+        order.setCertificates(certificates);
+        HashSet<String> certificateCodes = new HashSet<>(List.of("7777-7777", "1111-1111"));
+        Long orderId = order.getId();
+        int pointsUsed = order.getPointsToUse();
+
+        User user = getUserWithInitializedFields();
+        int pointsBefore = user.getCurrentPoints();
+        order.setUser(user);
+
+        HashSet<Certificate> expectedCertificates = new HashSet<>();
+        Certificate expectedCertificate1 = getCertificate()
+            .setCode("7777-7777")
+            .setOrder(null)
+            .setDateOfUse(null)
+            .setCertificateStatus(CertificateStatus.ACTIVE)
+            .setInitialPointsValue(100)
+            .setPoints(100);
+        expectedCertificate1.setPoints(expectedCertificate1.getInitialPointsValue());
+        expectedCertificates.add(expectedCertificate1);
+        Certificate expectedCertificate2 = getCertificate()
+            .setCode("1111-1111")
+            .setOrder(null)
+            .setDateOfUse(null)
+            .setCertificateStatus(CertificateStatus.ACTIVE)
+            .setInitialPointsValue(120)
+            .setPoints(120);
+        expectedCertificate2.setPoints(expectedCertificate2.getInitialPointsValue());
+        expectedCertificates.add(expectedCertificate2);
+
+        when(certificateRepository.findAllByCodesAndOrderId(certificateCodes.stream().toList(), orderId))
+            .thenReturn(certificates);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.save(order)).thenReturn(order);
+
+        ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
+
+        assertEquals(pointsBefore + pointsUsed, user.getCurrentPoints());
+        assertEquals(expectedCertificates, certificates);
+    }
+
+    @Test
+    void unlockSpecifiedPointsAndCertificatesFromOrderTestWhenOrderNotExists() {
+        Long orderId = 1L;
+        HashSet<String> certificateCodes = new HashSet<>(List.of("7777-7777", "1111-1111"));
+
+        when(certificateRepository.findAllByCodesAndOrderId(List.of("7777-7777", "1111-1111"), orderId))
+            .thenReturn(Set.of());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(
+                orderId, 0, certificateCodes));
+
+        assertTrue(exception.getMessage().contains(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
     }
 }

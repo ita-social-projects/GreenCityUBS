@@ -384,6 +384,22 @@ class OrderControllerTest {
         verify(ubsClientService).validatePaymentFromMonoBank(responseDto);
     }
 
+    @Test
+    void cancelPaymentAttemptTest() throws Exception {
+        Long orderId = 1L;
+        String uuid = "35467585763t4sfgchjfuyetf";
+
+        when(userRemoteClient.findUuidByEmail(anyString())).thenReturn(uuid);
+
+        mockMvc.perform(post(ubsLink + "/cancelPaymentAttempt/{id}", orderId)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(userRemoteClient).findUuidByEmail("test@gmail.com");
+        verify(ubsClientService).cancelPaymentAttempt(uuid, orderId);
+    }
+
     private void setRedirectionConfigProp() {
         RedirectionConfigProp redirectionConfigProp = ModelUtils.getRedirectionConfig();
 
