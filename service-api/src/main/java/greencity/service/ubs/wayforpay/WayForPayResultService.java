@@ -3,6 +3,7 @@ package greencity.service.ubs.wayforpay;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import java.util.Map;
 
+//TODO add test
 public interface WayForPayResultService {
     /**
      * Processes the form parameters received from WayForPay and converts them into

@@ -35,6 +35,7 @@ import greencity.repository.UserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
 import java.security.Principal;
@@ -83,6 +84,9 @@ class OrderControllerTest {
 
     @Mock
     private WayForPayResultService wayForPayResultService;
+
+    @Mock
+    private ProcessPaymentService processPaymentService;
 
     @InjectMocks
     OrderController orderController;
@@ -169,7 +173,7 @@ class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
         verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
-        verify(ubsClientService).processNewOrder(any(), eq("35467585763t4sfgchjfuyetf"));
+        verify(processPaymentService).processNewOrder(any(), eq("35467585763t4sfgchjfuyetf"));
 
     }
 
@@ -188,7 +192,7 @@ class OrderControllerTest {
         String resultJson = objectMapper.writeValueAsString(resultObject);
 
         when(userRepository.findUuidByRecipientEmail(anyString())).thenReturn(Optional.of(uuid));
-        when(ubsClientService.processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong()))
+        when(processPaymentService.processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong()))
             .thenReturn(resultObject);
 
         mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
@@ -200,7 +204,7 @@ class OrderControllerTest {
             .andExpect(content().json(resultJson));
 
         verify(userRepository).findUuidByRecipientEmail(anyString());
-        verify(ubsClientService).processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong());
+        verify(processPaymentService).processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong());
     }
 
     @Test

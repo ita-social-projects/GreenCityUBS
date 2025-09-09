@@ -12,6 +12,7 @@ import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
 import greencity.enums.OrderStatus;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.payment.ProcessPaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,12 +30,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import java.util.List;
 
 @RestController
 @RequestMapping("/ubs/client")
@@ -41,6 +42,7 @@ import java.util.List;
 @Validated
 public class ClientController {
     private final UBSClientService ubsClientService;
+    private final ProcessPaymentService processPaymentService;
 
     /**
      * Controller for getting all user orders.
@@ -184,6 +186,6 @@ public class ClientController {
     public ResponseEntity<PaymentSystemResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderWayForPayClientDto dto) {
-        return ResponseEntity.ok(ubsClientService.processOrder(userUuid, dto));
+        return ResponseEntity.ok(processPaymentService.processOrder(userUuid, dto));
     }
 }

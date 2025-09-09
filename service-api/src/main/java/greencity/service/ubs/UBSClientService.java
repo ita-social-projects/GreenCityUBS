@@ -12,10 +12,7 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.order.EventDto;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrdersDataForUserDto;
-import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
@@ -73,28 +70,6 @@ public interface UBSClientService {
      * @author Oleh Bilonizhka
      */
     CertificateDto checkCertificate(String code, String userUuid);
-
-    /**
-     * Methods creates and adjusts new order and generates payment link for the
-     * order.
-     *
-     * @param dto  {@link OrderResponseDto} user entered data;
-     * @param uuid current {@link User}'s uuid;
-     * @return {@link PaymentSystemResponse} which contains data to pay order out.
-     * @author Oleksandr Ilnytskyi
-     */
-    PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid);
-
-    /**
-     * Methods adjusts existing order and generates payment link for the order if
-     * order is unpaid.
-     *
-     * @param dto  {@link OrderResponseDto} user entered data;
-     * @param uuid current {@link User}'s uuid;
-     * @return {@link PaymentSystemResponse} which contains data to pay order out.
-     * @author Oleksandr Ilnytskyi
-     */
-    PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
      * Method that returns info about all orders for specified userID.
@@ -293,15 +268,6 @@ public interface UBSClientService {
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
 
     /**
-     * Method to generate payment link.
-     *
-     * @param userUuid current {@link User} uuid.
-     * @param dto      order information.
-     * @return {@link PaymentSystemResponse} payment link and order id.
-     */
-    PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
-
-    /**
      * Checks if a tariff exists by its ID.
      *
      * @param tariffInfoId The ID of the tariff to check.
@@ -334,6 +300,4 @@ public interface UBSClientService {
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
 
     public OrdersDataForUserDto getOrdersData(Order order);
-
-    public String formedLink(Order order, long sumToPayInCoins);
 }

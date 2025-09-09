@@ -24,6 +24,7 @@ import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,6 +68,7 @@ public class OrderController {
     private final UBSClientService ubsClientService;
     private final WayForPayRedirectService wayForPayRedirectService;
     private final WayForPayResultService wayForPayResultService;
+    private final ProcessPaymentService processPaymentService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
@@ -184,7 +186,7 @@ public class OrderController {
     public ResponseEntity<PaymentSystemResponse> processNewOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processNewOrder(dto, userUuid));
+        return ResponseEntity.status(HttpStatus.OK).body(processPaymentService.processNewOrder(dto, userUuid));
     }
 
     /**
@@ -209,7 +211,7 @@ public class OrderController {
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
         @Positive @PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processExistingOrder(dto, userUuid, id));
+        return ResponseEntity.status(HttpStatus.OK).body(processPaymentService.processExistingOrder(dto, userUuid, id));
     }
 
     /**

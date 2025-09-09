@@ -1,5 +1,14 @@
 package greencity.service.ubs.pdf.exporter;
 
+import static com.lowagie.text.Element.ALIGN_LEFT;
+import static greencity.constant.AppConstant.LOCALE_EN_NAME;
+import static greencity.constant.AppConstant.LOCALE_UK_NAME;
+import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.pdf.PdfFileHeaders.ADDRESS_INFO;
+import static greencity.constant.pdf.PdfFileHeaders.ORDER_COMMENT;
+import static greencity.constant.pdf.PdfFileHeaders.ORDER_DETAILS;
+import static greencity.constant.pdf.PdfFileHeaders.SENDER_INFO;
 import com.google.zxing.WriterException;
 import com.lowagie.text.Annotation;
 import com.lowagie.text.Chunk;
@@ -12,39 +21,37 @@ import com.lowagie.text.Image;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.draw.LineSeparator;
-import greencity.constant.pdf.*;
+import greencity.constant.pdf.PdfAddressConstants;
+import greencity.constant.pdf.PdfFileHeaders;
+import greencity.constant.pdf.PdfOrderContentDetailsHeaders;
+import greencity.constant.pdf.PdfOrderDetailsHeaders;
+import greencity.constant.pdf.PdfQrCodeText;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.entity.order.Order;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.repository.OrderRepository;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.file.export.FileExporter;
+import greencity.service.ubs.payment.ProcessPaymentService;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import static com.lowagie.text.Element.ALIGN_LEFT;
-import static greencity.constant.AppConstant.LOCALE_EN_NAME;
-import static greencity.constant.AppConstant.LOCALE_UK_NAME;
-import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.pdf.PdfFileHeaders.ADDRESS_INFO;
-import static greencity.constant.pdf.PdfFileHeaders.ORDER_COMMENT;
-import static greencity.constant.pdf.PdfFileHeaders.SENDER_INFO;
-import static greencity.constant.pdf.PdfFileHeaders.ORDER_DETAILS;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -60,7 +67,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private static final int DEFAULT_SPACING_VALUE = 10;
     private static final float[] ORDER_DETAILS_TABLE_COLUMN_WIDTH = new float[] {50, 95, 100, 100, 80, 100, 80};
     private static final float[] ORDER_CONTENT_TABLE_COLUMN_WIDTH = new float[] {125, 120, 120, 120, 120};
-    private final UBSClientService ubsClientService;
+    private final ProcessPaymentService processPaymentService;
     private final OrderRepository orderRepository;
 
     /**
@@ -271,7 +278,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
                 return;
             }
 
-            String paymentLink = ubsClientService.formedLink(order, sumInCoins);
+            String paymentLink = processPaymentService.formedLink(order, sumInCoins);
             if (paymentLink == null || paymentLink.isBlank()) {
                 addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);
                 return;
