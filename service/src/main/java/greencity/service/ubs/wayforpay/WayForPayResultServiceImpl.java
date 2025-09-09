@@ -4,29 +4,21 @@ import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.constant.AppConstant;
-import greencity.constant.OrderHistory;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
-import greencity.entity.notifications.UserNotification;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.exceptions.BadRequestException;
-import greencity.repository.NotificationParameterRepository;
 import greencity.repository.OrderRepository;
-import greencity.repository.PaymentRepository;
-import greencity.repository.UserNotificationRepository;
-import greencity.service.ubs.EventService;
+import greencity.service.ubs.payment.PaymentStatusHandlerService;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +32,7 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
     private final ObjectMapper objectMapper;
     private final EncryptionUtil encryptionUtil;
     private final OrderRepository orderRepository;
-    private final PaymentRepository paymentRepository;
-    private final UserNotificationRepository userNotificationRepository;
-    private final NotificationParameterRepository notificationParameterRepository;
-    private final EventService eventService;
+    private final PaymentStatusHandlerService paymentStatusHandlerService;
 
     @Value("${greencity.wayforpay.secret}")
     private String wayForPaySecret;
@@ -103,11 +92,21 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
     private PaymentResponseWayForPay validatePayment(PaymentResponseDto response) {
         String decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
         Payment orderPayment = mapPayment(response, decodedOrderReference);
-        String[] ids = decodedOrderReference.split("_");
-        Order order = orderRepository.findById(Long.valueOf(ids[0]))
+        long orderId = OrderUtils.getIdByOrderReference(
+            response.getOrderReference(), AppConstant.ORDER_ID_INDEX);
+
+        Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
-        checkResponseStatusFailure(response, orderPayment, order);
-        checkOrderStatusApproved(response, orderPayment, order, decodedOrderReference);
+
+        paymentStatusHandlerService
+            .checkResponseStatusFailure(orderPayment, order, response.getTransactionStatus());
+        paymentStatusHandlerService
+            .checkOrderStatusApproved(orderPayment, order, decodedOrderReference, response.getTransactionStatus());
+
+        return getPaymentResponseWayForPay(response);
+    }
+
+    private PaymentResponseWayForPay getPaymentResponseWayForPay(PaymentResponseDto response) {
         PaymentResponseWayForPay accept = PaymentResponseWayForPay.builder()
             .orderReference(response.getOrderReference())
             .status("accept")
@@ -122,7 +121,8 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
         }
         return Payment.builder()
             .id(Long.valueOf(decodedOrderReference
-                .substring(decodedOrderReference.lastIndexOf("_") + 1)))
+                .substring(decodedOrderReference.lastIndexOf("_")
+                    + AppConstant.COUNTER_ORDER_PAYMENT_ID_INDEX)))
             .currency(response.getCurrency())
             .amount(Long.parseLong(response.getAmount()) * AppConstant.CURRENCY_CONVERSION_RATE)
             .orderStatus(OrderStatus.FORMED)
@@ -142,50 +142,5 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
         return settlementDate.isEmpty()
             ? LocalDate.now().toString()
             : LocalDate.parse(settlementDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")).toString();
-    }
-
-    private void removePaymentLinkForOrder(Order order) {
-        List<UserNotification> userNotification = userNotificationRepository
-            .findAllUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
-        if (!userNotification.isEmpty()) {
-            userNotification.stream()
-                .map(notification -> notificationParameterRepository
-                    .findNotificationParameterByUserNotificationAndKey(notification, AppConstant.PAY_BUTTON))
-                .forEach(parameter -> parameter.ifPresent(notificationParameterRepository::delete));
-        }
-    }
-
-    private void checkResponseStatusFailure(PaymentResponseDto dto, Payment orderPayment, Order order) {
-        if (dto.getTransactionStatus().equals(AppConstant.FAILED_STATUS)) {
-            orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
-            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-            paymentRepository.save(orderPayment);
-            orderRepository.save(order);
-            log.info("Payment failed: orderId={}, transactionStatus={}, paymentStatus={}",
-                order.getId(), dto.getTransactionStatus(), orderPayment.getPaymentStatus());
-        }
-    }
-
-    private void checkOrderStatusApproved(PaymentResponseDto dto,
-                                            Payment orderPayment,
-                                            Order order,
-                                            String decodedOrderReference) {
-        if (dto.getTransactionStatus().equals(AppConstant.APPROVED_STATUS)) {
-            orderPayment.setPaymentId(decodedOrderReference.split("_")[1]);
-            orderPayment.setPaymentStatus(PaymentStatus.PAID);
-            order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-            orderPayment.setOrder(order);
-            removePaymentLinkForOrder(order);
-            paymentRepository.save(orderPayment);
-            orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
-            eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM_UK, order);
-            log.info("Payment approved: orderId={}, status={}",
-                order.getId(), orderPayment.getPaymentStatus());
-        } else {
-            log.info("Payment not approved: orderId={}, transactionStatus={}",
-                order.getId(), dto.getTransactionStatus());
-        }
     }
 }

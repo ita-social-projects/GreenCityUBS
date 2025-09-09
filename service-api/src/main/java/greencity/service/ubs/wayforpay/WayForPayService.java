@@ -4,7 +4,6 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.entity.order.Order;
 
-//TODO add docs
 //TODO add test
 /**
  * Service for integration with the WayForPay payment system.
