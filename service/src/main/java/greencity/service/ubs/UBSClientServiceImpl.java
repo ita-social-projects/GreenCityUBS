@@ -141,6 +141,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -967,12 +969,32 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private void fireOrderExpiryJob(Long orderId) {
         TriggerKey triggerKey = TriggerKey.triggerKey(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        Trigger oldTrigger;
         try {
-            Trigger oldTrigger = quartzScheduler.getTrigger(triggerKey);
-            Trigger instantTrigger = oldTrigger.getTriggerBuilder().startNow().build();
-            quartzScheduler.rescheduleJob(triggerKey, instantTrigger);
+            oldTrigger = quartzScheduler.getTrigger(triggerKey);
         } catch (SchedulerException exception) {
             throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
+        }
+
+        JobKey jobKey = oldTrigger.getJobKey();
+
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    try {
+                        quartzScheduler.triggerJob(jobKey);
+                    } catch (SchedulerException e) {
+                        throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
+                    }
+                }
+            });
+        } else {
+            try {
+                quartzScheduler.triggerJob(jobKey);
+            } catch (SchedulerException e) {
+                throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
+            }
         }
     }
 
@@ -1919,7 +1941,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
             .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
-        String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        String link =
+            getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
         schedulePaymentExpiryJob(order, 0, new HashSet<>(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
         return link;
     }
@@ -1930,7 +1953,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
             .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
-        String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        String link =
+            getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
         schedulePaymentExpiryJob(
             order, dto.getPointsToUse(),
             dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);

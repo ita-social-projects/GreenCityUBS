@@ -382,8 +382,8 @@ class OrderControllerTest {
             Optional.of("35467585763t4sfgchjfuyetf"));
 
         mockMvc.perform(post(ubsLink + "/cancelPaymentAttempt/{id}", orderId)
-                .principal(principal)
-                .contentType(MediaType.APPLICATION_JSON))
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         verify(ubsClientService).cancelPaymentAttempt(uuid, orderId);

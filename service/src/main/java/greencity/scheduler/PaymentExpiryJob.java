@@ -9,9 +9,11 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
 import java.util.HashSet;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
 
 @Component
 @DisallowConcurrentExecution
@@ -20,6 +22,7 @@ import java.util.HashSet;
 public class PaymentExpiryJob implements Job {
     private final UBSClientService ubsClientService;
     private final OrderRepository orderRepository;
+    private final Scheduler quartzScheduler;
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
@@ -36,6 +39,11 @@ public class PaymentExpiryJob implements Job {
         order.setPaymentLink("");
         order.setPaymentLinkExpiry(null);
         orderRepository.save(order);
+        try {
+            quartzScheduler.deleteJob(jobExecutionContext.getJobDetail().getKey());
+        } catch (SchedulerException e) {
+            throw new IllegalStateException(PAYMENT_EXPIRY_CANCEL_EXCEPTION);
+        }
         log.info("Successfully unlocked {} certificates and {} points from order {}",
             certificateCodes.size(), pointsUsed, orderId);
     }

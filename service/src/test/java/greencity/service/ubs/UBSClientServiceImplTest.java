@@ -114,7 +114,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -3936,7 +3935,6 @@ class UBSClientServiceImplTest {
         doReturn(triggerBuilder).when(oldTrigger).getTriggerBuilder();
         doReturn(triggerBuilder).when(triggerBuilder).startNow();
         doReturn(instantTrigger).when(triggerBuilder).build();
-        when(quartzScheduler.rescheduleJob(triggerKey, instantTrigger)).thenReturn(any(Date.class));
 
         ubsClientService.cancelPaymentAttempt(uuid, orderId);
     }
@@ -4008,7 +4006,6 @@ class UBSClientServiceImplTest {
         doReturn(triggerBuilder).when(oldTrigger).getTriggerBuilder();
         doReturn(triggerBuilder).when(triggerBuilder).startNow();
         doReturn(instantTrigger).when(triggerBuilder).build();
-        when(quartzScheduler.rescheduleJob(triggerKey, instantTrigger)).thenReturn(any(Date.class));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
