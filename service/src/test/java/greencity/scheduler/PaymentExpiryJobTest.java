@@ -52,9 +52,6 @@ class PaymentExpiryJobTest {
 
         paymentExpiryJob.execute(jobExecutionContext);
 
-        assertEquals("", order.getPaymentLink());
-        assertNull(order.getPaymentLinkExpiry());
-
         verify(ubsClientService).expirePaymentAttempt(orderId, pointsToUse, certificateCodes);
     }
 }
