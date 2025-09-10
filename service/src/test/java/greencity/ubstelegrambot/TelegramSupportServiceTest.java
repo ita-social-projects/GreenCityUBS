@@ -736,7 +736,6 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        log.info(result.getText());
         assertTrue(result.getText().contains("sent"));
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
