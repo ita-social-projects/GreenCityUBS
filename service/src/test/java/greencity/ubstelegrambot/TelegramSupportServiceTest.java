@@ -645,7 +645,7 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_WithSticker_ShouldSaveFileAsset() throws Exception {
         TelegramChat chat = new TelegramChat();
         chat.setId(1L);
-        chat.setChatId("12345");
+        chat.setChatId("111");
         chat.setChatState(ChatState.IN_SUPPORT);
         chat.setLanguageCode("en");
 
@@ -670,7 +670,7 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        assertTrue(result.getText().contains("message.sent.to.manager"));
+        assertEquals(MessageProvider.get("en", "message.sent.to.manager"), result.getText());
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
 
@@ -678,11 +678,10 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_WithNullSticker_ShouldReturnErrorMessage() {
         TelegramChat chat = new TelegramChat();
         chat.setId(1L);
-        chat.setChatId("12345");
+        chat.setChatId("111");
         chat.setChatState(ChatState.IN_SUPPORT);
         chat.setLanguageCode("en");
 
-        Sticker sticker = mock(Sticker.class);
         Message message = mock(Message.class);
 
         User from = new User();
@@ -690,16 +689,13 @@ class TelegramSupportServiceTest {
         when(message.getFrom()).thenReturn(from);
         when(telegramChatRepository.findByChatId("111")).thenReturn(Optional.of(chat));
         when(message.hasSticker()).thenReturn(true);
-        when(message.getSticker()).thenReturn(sticker);
-
-        when(message.hasSticker()).thenReturn(true);
         when(message.getSticker()).thenReturn(null);
-        when(message.getChatId()).thenReturn(12345L);
+        when(message.getChatId()).thenReturn(111L);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        assertTrue(result.getText().contains("file.failed"));
+        assertEquals(MessageProvider.get("en", "manager.file.failed"), result.getText());
 
         verify(telegramMessageRepository).delete(any());
     }
@@ -708,7 +704,7 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_WithAnimation_ShouldSaveFileAsset() throws Exception {
         TelegramChat chat = new TelegramChat();
         chat.setId(1L);
-        chat.setChatId("12345");
+        chat.setChatId("111");
         chat.setChatState(ChatState.IN_SUPPORT);
         chat.setLanguageCode("en");
 
@@ -736,7 +732,7 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        assertTrue(result.getText().contains("sent"));
+        assertTrue(result.getText().contains(MessageProvider.get("en", "message.sent.to.manager")));
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
 
@@ -744,7 +740,7 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_WithNullAnimation_ShouldReturnErrorMessage() {
         TelegramChat chat = new TelegramChat();
         chat.setId(1L);
-        chat.setChatId("12345");
+        chat.setChatId("111");
         chat.setChatState(ChatState.IN_SUPPORT);
         chat.setLanguageCode("en");
 
@@ -757,12 +753,12 @@ class TelegramSupportServiceTest {
         when(message.getFrom()).thenReturn(from);
         when(message.hasAnimation()).thenReturn(true);
         when(message.getAnimation()).thenReturn(null);
-        when(message.getChatId()).thenReturn(98765L);
+        when(message.getChatId()).thenReturn(111L);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        assertTrue(result.getText().contains("file.failed"));
+        assertEquals((MessageProvider.get("en", "manager.file.failed")), result.getText());
         verify(telegramMessageRepository).delete(any());
     }
 
