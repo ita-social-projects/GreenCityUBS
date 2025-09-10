@@ -51,7 +51,8 @@ public class TelegramUtils {
      * Detects the asset type based on the given content type string.
      *
      * <ul>
-     * <li>If {@code fileType} is {@code null}, throws {@link UnsupportedTelegramAssetException}.</li>
+     * <li>If {@code fileType} is {@code null}, throws
+     * {@link UnsupportedTelegramAssetException}.</li>
      * <li>If content type starts with {@code image/webp} or
      * {@code application/x-tgsticker}, returns {@link AssetType#STICKER}.</li>
      * <li>If content type starts with {@code image/} (excluding SVG), returns
