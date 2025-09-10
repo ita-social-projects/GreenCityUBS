@@ -74,7 +74,10 @@ public class TelegramUtils {
         if (fileType.equals("image/webp") || fileType.equals("application/x-tgsticker")) {
             return AssetType.STICKER;
         }
-        if (fileType.startsWith("image/") && !fileType.contains("svg")) {
+        if (fileType.startsWith("application/") || fileType.startsWith("text/") || fileType.contains("svg")) {
+            return AssetType.FILE;
+        }
+        if (fileType.startsWith("image/")) {
             return AssetType.IMAGE;
         }
         if (fileType.startsWith("video/")) {
@@ -82,9 +85,6 @@ public class TelegramUtils {
         }
         if (fileType.startsWith("audio/")) {
             return AssetType.AUDIO;
-        }
-        if (fileType.startsWith("application/") || fileType.startsWith("text/") || fileType.contains("svg")) {
-            return AssetType.FILE;
         }
 
         throw new UnsupportedTelegramAssetException("Unsupported asset type: " + fileType);
