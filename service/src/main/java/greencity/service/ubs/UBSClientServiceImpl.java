@@ -133,7 +133,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -141,8 +140,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -689,7 +686,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (paymentLink == null) {
             return false;
         }
-        return !paymentLink.isEmpty();
+        return !paymentLink.isBlank();
     }
 
     private void adjustPaymentDetails(OrderResponseDto dto) {
@@ -856,14 +853,21 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Transactional
     @Override
-    public Order unlockSpecifiedPointsAndCertificatesFromOrder(
+    public void expirePaymentAttempt(Long orderId, int pointsUsed, Set<String> certificateCodes) {
+        Order order = unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
+        order.setPaymentLink("");
+        order.setPaymentLinkExpiry(null);
+        orderRepository.save(order);
+    }
+
+    private Order unlockSpecifiedPointsAndCertificatesFromOrder(
         Long orderId, int pointsToUse, Set<String> certificateCodes) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
         if (!certificateCodes.isEmpty()) {
             unlockSpecifiedCertificatesFromOrder(orderId, certificateCodes);
         }
-
-        Order order = orderRepository.findById(orderId).orElseThrow(
-            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
 
         if (pointsToUse > 0) {
             return unlockSpecifiedPointsFromOrder(order, pointsToUse);
@@ -916,15 +920,14 @@ public class UBSClientServiceImpl implements UBSClientService {
             () -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         checkIsOrderOfCurrentUser(currentUser, order);
 
-        fireOrderExpiryJob(orderId);
+        JobDataMap jobDataMap = getPaymentExpiryJobData(orderId);
+        int pointsUsed = jobDataMap.getInt("pointsUsed");
+        @SuppressWarnings("unchecked")
+        HashSet<String> certificateCodes = (HashSet<String>) jobDataMap.get("certificateCodes");
 
-        PaymentCancellationWayForPayRequestDto requestDto = formPaymentCancellationRequestForWayForPay(order);
-        String result = getResultFromWayForPayCancellationResponse(
-            wayForPayClient.getCancellationResponse(requestDto));
-
-        if (!result.equals("Removed")) {
-            throw new BadRequestException(UNABLE_TO_CANCEL_PAYMENT_INVOICE);
-        }
+        expirePaymentAttempt(orderId, pointsUsed, certificateCodes);
+        cancelPaymentExpiryJob(orderId);
+        handleWayForPayPaymentCancellation(order);
     }
 
     private void schedulePaymentExpiryJob(
@@ -959,7 +962,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void cancelOrderExpiryJob(Long orderId) {
+    private void cancelPaymentExpiryJob(Long orderId) {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
         try {
             quartzScheduler.deleteJob(jobKey);
@@ -968,34 +971,13 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private void fireOrderExpiryJob(Long orderId) {
-        TriggerKey triggerKey = TriggerKey.triggerKey(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
-        Trigger oldTrigger;
+    private JobDataMap getPaymentExpiryJobData(Long orderId) {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+
         try {
-            oldTrigger = quartzScheduler.getTrigger(triggerKey);
-        } catch (SchedulerException exception) {
+            return quartzScheduler.getJobDetail(jobKey).getJobDataMap();
+        } catch (SchedulerException e) {
             throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
-        }
-
-        JobKey jobKey = oldTrigger.getJobKey();
-
-        if (TransactionSynchronizationManager.isSynchronizationActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    try {
-                        quartzScheduler.triggerJob(jobKey);
-                    } catch (SchedulerException e) {
-                        throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
-                    }
-                }
-            });
-        } else {
-            try {
-                quartzScheduler.triggerJob(jobKey);
-            } catch (SchedulerException e) {
-                throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
-            }
         }
     }
 
@@ -1005,6 +987,16 @@ public class UBSClientServiceImpl implements UBSClientService {
             return quartzScheduler.checkExists(jobKey);
         } catch (SchedulerException exception) {
             throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
+        }
+    }
+
+    private void handleWayForPayPaymentCancellation(Order order) {
+        PaymentCancellationWayForPayRequestDto requestDto = formPaymentCancellationRequestForWayForPay(order);
+        String result = getResultFromWayForPayCancellationResponse(
+            wayForPayClient.getCancellationResponse(requestDto));
+
+        if (!result.equals("Removed")) {
+            throw new BadRequestException(UNABLE_TO_CANCEL_PAYMENT_INVOICE);
         }
     }
 
@@ -1720,7 +1712,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.getOrderBags().clear();
         orderRepository.saveAndFlush(order);
         orderRepository.delete(order);
-        cancelOrderExpiryJob(id);
+        cancelPaymentExpiryJob(id);
     }
 
     private Long convertBillsIntoCoins(Double bills) {
@@ -1766,7 +1758,7 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
                 OrderHistory.SYSTEM_UK, order);
-            cancelOrderExpiryJob(order.getId());
+            cancelPaymentExpiryJob(order.getId());
             log.info("Payment approved: orderId={}, status={}",
                 order.getId(), orderPayment.getPaymentStatus());
         } else {
@@ -1937,6 +1929,7 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     @Override
     public String formedLink(Order order, long sumToPayInCoins) {
+        validateOrderPaymentProcessingStatus(order);
         Order increment = incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);

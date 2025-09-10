@@ -139,12 +139,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -236,6 +236,8 @@ import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF
 import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
 import static greencity.constant.ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER;
+import static greencity.constant.ErrorMessage.ORDER_IN_ONGOING_PROCESSING;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
@@ -254,9 +256,11 @@ import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
 import static greencity.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
+import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -272,8 +276,8 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -397,6 +401,9 @@ class UBSClientServiceImplTest {
 
     @Mock
     private AddressService addressService;
+
+    @Mock
+    private JobDetail jobDetail;
 
     private static MockedStatic<SecurityContextHolder> mockedContextHolder;
 
@@ -3165,6 +3172,33 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void testValidatePaymentWhenSchedulerFailsToCancelJob() throws SchedulerException {
+        PaymentResponseDto response = getPaymentResponseDto();
+
+        Order expectedOrder = getOrder2();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(expectedOrder));
+        when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(any(Order.class),
+            any(NotificationType.class)))
+            .thenReturn(List.of(getUserNotificationForUnpaidOrder()));
+        when(notificationParameterRepository
+            .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
+            .thenReturn(getNotificationPaymentLink());
+        doThrow(SchedulerException.class).when(quartzScheduler).deleteJob(any(JobKey.class));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> ubsClientService.validatePayment(response));
+
+        assertEquals(PAYMENT_EXPIRY_CANCEL_EXCEPTION, exception.getMessage());
+
+        verify(orderRepository).findById(1L);
+        verify(userNotificationRepository)
+            .findAllUserNotificationByOrderAndNotificationType(any(Order.class), any(NotificationType.class));
+        verify(notificationParameterRepository)
+            .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString());
+    }
+
+    @Test
     void testConvertMapIntoPaymentResponseDto_emptyMap() {
         PaymentResponseWayForPay result = ubsClientService.convertMapIntoPaymentResponseDto(Collections.emptyMap());
 
@@ -3497,6 +3531,118 @@ class UBSClientServiceImplTest {
         OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
         when(orderRepository.findById(1L)).thenReturn(Optional.ofNullable(order));
         assertThrows(BadRequestException.class, () -> ubsService.processOrder("uuid", dto));
+    }
+
+    @Test
+    void processOrderWFPClientWhenSchedulerFails() throws Exception {
+        Order order = getOrderCount();
+        Certificate certificate = ModelUtils.getCertificate();
+
+        HashMap<Integer, Integer> value = new HashMap<>();
+        value.put(1, 22);
+        order.setAmountOfBagsOrdered(value);
+        order.setPointsToUse(100);
+        order.setSumTotalAmountWithoutDiscounts(1000_00L);
+        order.setCertificates(Set.of(certificate));
+        order.setPayment(TEST_PAYMENT_LIST);
+        User user = getUser();
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
+        order.setUser(user);
+
+        OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
+        dto.setCertificates(Set.of("1111-1234"));
+
+        order.setCertificates(Set.of(ModelUtils.getCertificate()));
+        order.setPayment(TEST_PAYMENT_LIST);
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        Field[] fields = UBSClientServiceImpl.class.getDeclaredFields();
+        for (Field f : fields) {
+            if (f.getName().equals("merchantId")) {
+                f.setAccessible(true);
+                f.set(ubsService, "1");
+            }
+        }
+
+        order.setPointsToUse(-10000);
+        CertificateDto certificateDto = createCertificateDto();
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(userRepository.findUserByUuid("uuid")).thenReturn(Optional.of(user));
+        when(modelMapper.map(certificate, CertificateDto.class)).thenReturn(certificateDto);
+        when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
+        when(certificateRepository.findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE)).thenReturn(Set.of(certificate));
+        when(orderBagService.getActualBagsAmountForOrder(Collections.singletonList(ModelUtils.getOrderBag())))
+            .thenReturn(ModelUtils.getAmount());
+        when(wayForPayClient.getCheckOutResponse(any())).thenReturn("{\"invoiceUrl\":\"link\"}");
+        doThrow(SchedulerException.class).when(quartzScheduler)
+            .scheduleJob(any(JobDetail.class), any(Trigger.class));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> ubsService.processOrder("uuid", dto));
+
+        assertEquals(PAYMENT_EXPIRY_SCHEDULE_EXCEPTION, exception.getMessage());
+
+        verify(userRepository).findUserByUuid("uuid");
+        verify(certificateRepository).findByCodeInAndCertificateStatus(new ArrayList<>(dto.getCertificates()),
+            CertificateStatus.ACTIVE);
+        verify(modelMapper).map(any(OrderBag.class), eq(BagForUserDto.class));
+    }
+
+    @Test
+    void processOrderClientWhenInPayment() {
+        OrderWayForPayClientDto dto = getOrderWayForPayClientDto();
+
+        Order order = getOrder();
+        order.setPaymentLink("https://pay.example.com/invoice/TEST123");
+
+        User user = getUser();
+        String uuid = user.getUuid();
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsClientService.processOrder(uuid, dto));
+
+        assertEquals(ORDER_IN_ONGOING_PROCESSING, exception.getMessage());
+    }
+
+    @Test
+    void processExistingOrderWhenInPayment() {
+        OrderResponseDto dto = getOrderResponseDto();
+
+        Order order = getOrder();
+        order.setPaymentLink("https://pay.example.com/invoice/TEST123");
+        Long orderId = order.getId();
+
+        User user = getUser();
+        String uuid = user.getUuid();
+
+        Address address = getAddress();
+        address.setUser(user);
+        Location location = getLocation();
+
+        when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
+        when(locationRepository.findById(anyLong())).thenReturn(Optional.of(location));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsService.processExistingOrder(dto, uuid, orderId));
+
+        assertEquals(ORDER_IN_ONGOING_PROCESSING, exception.getMessage());
+    }
+
+    @Test
+    void formedLinkWhenInPayment() {
+        Order order = getOrder();
+        order.setPaymentLink("https://pay.example.com/invoice/TEST123");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+            () -> ubsClientService.formedLink(order, 500));
+
+        assertEquals(ORDER_IN_ONGOING_PROCESSING, exception.getMessage());
     }
 
     @Test
@@ -3908,7 +4054,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void cancelPaymentAttemptTest() throws SchedulerException, JSONException {
+    void cancelPaymentAttempt() throws SchedulerException, JSONException {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
@@ -3917,30 +4063,28 @@ class UBSClientServiceImplTest {
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
 
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("orderId", orderId);
+        jobDataMap.put("pointsUsed", 0);
+        jobDataMap.put("certificateCodes", new HashSet<>());
+
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+
         String response = new JSONObject().put("reason", "Removed").toString();
 
-        TriggerKey triggerKey = TriggerKey.triggerKey(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
-        Trigger oldTrigger = mock(Trigger.class);
-        Trigger instantTrigger = mock(Trigger.class);
-        TriggerBuilder<?> triggerBuilder = mock(TriggerBuilder.class);
-
-        when(quartzScheduler
-            .checkExists(JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)))
-            .thenReturn(true);
+        when(quartzScheduler.checkExists(jobKey)).thenReturn(true);
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(quartzScheduler.getJobDetail(jobKey)).thenReturn(jobDetail);
+        when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
         when(wayForPayClient.getCancellationResponse(any(PaymentCancellationWayForPayRequestDto.class)))
             .thenReturn(response);
-        when(quartzScheduler.getTrigger(triggerKey)).thenReturn(oldTrigger);
-        doReturn(triggerBuilder).when(oldTrigger).getTriggerBuilder();
-        doReturn(triggerBuilder).when(triggerBuilder).startNow();
-        doReturn(instantTrigger).when(triggerBuilder).build();
 
         ubsClientService.cancelPaymentAttempt(uuid, orderId);
     }
 
     @Test
-    void cancelPaymentAttemptTestWhenNoPending() {
+    void cancelPaymentAttemptWhenNoPending() {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
@@ -3956,7 +4100,46 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void cancelPaymentAttemptTestWhenOrderNotBelongsToUser() throws SchedulerException {
+    void cancelPaymentAttemptWhenSchedulerFailsToCheck() throws SchedulerException {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        doThrow(SchedulerException.class).when(quartzScheduler).checkExists(any(JobKey.class));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
+
+        assertEquals(QUARTZ_SCHEDULER_EXCEPTION, exception.getMessage());
+    }
+
+    @Test
+    void cancelPaymentAttemptWhenOrderNotFound() throws SchedulerException {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+
+        when(quartzScheduler.checkExists(jobKey)).thenReturn(true);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
+
+        assertTrue(exception.getMessage().contains(ORDER_NOT_FOUND_BY_ID));
+    }
+
+    @Test
+    void cancelPaymentAttemptWhenOrderNotBelongsToUser() throws SchedulerException {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
@@ -3979,7 +4162,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void cancelPaymentAttemptTestWhenWayForPayDeclines() throws SchedulerException, JSONException {
+    void cancelPaymentAttemptWhenSchedulerFailsToGetJobData() throws SchedulerException {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
@@ -3988,24 +4171,75 @@ class UBSClientServiceImplTest {
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
 
-        String response = new JSONObject().put("reason", "Any wrong reason").toString();
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
 
-        TriggerKey triggerKey = TriggerKey.triggerKey(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
-        Trigger oldTrigger = mock(Trigger.class);
-        Trigger instantTrigger = mock(Trigger.class);
-        TriggerBuilder<?> triggerBuilder = mock(TriggerBuilder.class);
-
-        when(quartzScheduler
-            .checkExists(JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)))
-            .thenReturn(true);
+        when(quartzScheduler.checkExists(jobKey)).thenReturn(true);
         when(userRepository.findByUuid(uuid)).thenReturn(user);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        doThrow(SchedulerException.class).when(quartzScheduler).getJobDetail(jobKey);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
+
+        assertEquals(QUARTZ_SCHEDULER_EXCEPTION, exception.getMessage());
+    }
+
+    @Test
+    void cancelPaymentAttemptWhenSchedulerFailsToCancelJob() throws SchedulerException {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("orderId", orderId);
+        jobDataMap.put("pointsUsed", 0);
+        jobDataMap.put("certificateCodes", new HashSet<>());
+
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+
+        when(quartzScheduler.checkExists(jobKey)).thenReturn(true);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(quartzScheduler.getJobDetail(jobKey)).thenReturn(jobDetail);
+        when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
+        doThrow(SchedulerException.class).when(quartzScheduler).deleteJob(jobKey);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
+
+        assertEquals(PAYMENT_EXPIRY_CANCEL_EXCEPTION, exception.getMessage());
+    }
+
+    @Test
+    void cancelPaymentAttemptWhenWayForPayDeclines() throws SchedulerException, JSONException {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("orderId", orderId);
+        jobDataMap.put("pointsUsed", 0);
+        jobDataMap.put("certificateCodes", new HashSet<>());
+
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+
+        String response = new JSONObject().put("reason", "Any wrong reason").toString();
+
+        when(quartzScheduler.checkExists(jobKey)).thenReturn(true);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(quartzScheduler.getJobDetail(jobKey)).thenReturn(jobDetail);
+        when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
         when(wayForPayClient.getCancellationResponse(any(PaymentCancellationWayForPayRequestDto.class)))
             .thenReturn(response);
-        when(quartzScheduler.getTrigger(triggerKey)).thenReturn(oldTrigger);
-        doReturn(triggerBuilder).when(oldTrigger).getTriggerBuilder();
-        doReturn(triggerBuilder).when(triggerBuilder).startNow();
-        doReturn(instantTrigger).when(triggerBuilder).build();
 
         BadRequestException exception = assertThrows(BadRequestException.class,
             () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
@@ -4014,7 +4248,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void unlockSpecifiedPointsAndCertificatesFromOrderTest() {
+    void expirePaymentAttempt() {
         Order order = getOrder();
         HashSet<Certificate> certificates = new HashSet<>(List.of(
             getCertificate().setCode("7777-7777").setCertificateStatus(CertificateStatus.USED)
@@ -4023,6 +4257,7 @@ class UBSClientServiceImplTest {
                 .setInitialPointsValue(120).setPoints(100)));
         order.setCertificates(certificates);
         HashSet<String> certificateCodes = new HashSet<>(List.of("7777-7777", "1111-1111"));
+        List<String> certificateCodesList = certificateCodes.stream().toList();
         Long orderId = order.getId();
         int pointsUsed = order.getPointsToUse();
 
@@ -4050,29 +4285,83 @@ class UBSClientServiceImplTest {
         expectedCertificate2.setPoints(expectedCertificate2.getInitialPointsValue());
         expectedCertificates.add(expectedCertificate2);
 
-        when(certificateRepository.findAllByCodesAndOrderId(certificateCodes.stream().toList(), orderId))
+        when(certificateRepository.findAllByCodesAndOrderId(certificateCodesList, orderId))
             .thenReturn(certificates);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(orderRepository.save(order)).thenReturn(order);
 
-        ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
+        ubsClientService.expirePaymentAttempt(orderId, pointsUsed, certificateCodes);
 
         assertEquals(pointsBefore + pointsUsed, user.getCurrentPoints());
         assertEquals(expectedCertificates, certificates);
+        assertEquals("", order.getPaymentLink());
+        assertNull(order.getPaymentLinkExpiry());
+
+        verify(certificateRepository).findAllByCodesAndOrderId(certificateCodesList, orderId);
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository).save(order);
     }
 
     @Test
-    void unlockSpecifiedPointsAndCertificatesFromOrderTestWhenOrderNotExists() {
+    void expirePaymentAttemptWhenNoBonusesSpecified() {
+        Order order = getOrder();
+        HashSet<Certificate> certificates = new HashSet<>(List.of(
+            getCertificate().setCode("7777-7777").setCertificateStatus(CertificateStatus.USED)
+                .setInitialPointsValue(100).setPoints(100),
+            getCertificate().setCode("1111-1111").setCertificateStatus(CertificateStatus.USED)
+                .setInitialPointsValue(120).setPoints(100)));
+        order.setCertificates(certificates);
+        Long orderId = order.getId();
+        int orderPointsBefore = order.getPointsToUse();
+
+        User user = getUserWithInitializedFields();
+        int userPointsBefore = user.getCurrentPoints();
+        order.setUser(user);
+
+        HashSet<Certificate> expectedCertificates = new HashSet<>(List.of(
+            getCertificate().setCode("7777-7777").setCertificateStatus(CertificateStatus.USED)
+                .setInitialPointsValue(100).setPoints(100),
+            getCertificate().setCode("1111-1111").setCertificateStatus(CertificateStatus.USED)
+                .setInitialPointsValue(120).setPoints(100)));
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        ubsClientService.expirePaymentAttempt(orderId, 0, new HashSet<>());
+
+        assertEquals(orderPointsBefore, order.getPointsToUse());
+        assertEquals(userPointsBefore, user.getCurrentPoints());
+        assertEquals(expectedCertificates, certificates);
+        assertEquals("", order.getPaymentLink());
+        assertNull(order.getPaymentLinkExpiry());
+
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository).save(order);
+
+        verifyNoInteractions(certificateRepository);
+    }
+
+    @Test
+    void expirePaymentAttemptWhenOrderNotExists() {
         Long orderId = 1L;
         HashSet<String> certificateCodes = new HashSet<>(List.of("7777-7777", "1111-1111"));
 
-        when(certificateRepository.findAllByCodesAndOrderId(List.of("7777-7777", "1111-1111"), orderId))
-            .thenReturn(Set.of());
-
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> ubsClientService.unlockSpecifiedPointsAndCertificatesFromOrder(
-                orderId, 0, certificateCodes));
+            () -> ubsClientService.expirePaymentAttempt(orderId, 0, certificateCodes));
 
         assertTrue(exception.getMessage().contains(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+    }
+
+    @Test
+    void formedLink() {
+        Order order = getOrderCount();
+        order.setPayment(List.of(getPayment()));
+        order.setPaymentLink(" ");
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(wayForPayClient.getCheckOutResponse(any()))
+            .thenReturn("{\"invoiceUrl\":\"https://pay.example.com/invoice/TEST123\"}");
+
+        String result = ubsService.formedLink(order, 560);
+
+        assertEquals("https://pay.example.com/invoice/TEST123", result);
     }
 }
