@@ -82,6 +82,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramChatRepository telegramChatRepository;
     private final UserRemoteWebClient userRemoteWebClient;
     private final UserRemoteClient userRemoteClient;
+    private final OrderService orderService;
     private final TelegramExecutor executor;
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
@@ -89,7 +90,6 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
     private final MessageAssetRepository messageAssetRepository;
-    private final OrderService orderService;
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
 
     /**

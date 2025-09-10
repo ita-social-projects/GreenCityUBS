@@ -15,7 +15,6 @@ import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.point.PointService;
 import java.security.Principal;
@@ -39,9 +38,6 @@ class ClientControllerTest {
     private static final String getOrderPaymentDetailLink = "/order-payment-detail/";
     private static final String getAllPointsForUser = "/users-pointsToUse";
     private MockMvc mockMvc;
-
-    @Mock
-    UBSClientService ubsClientService;
 
     @Mock
     UserRepository userRepository;

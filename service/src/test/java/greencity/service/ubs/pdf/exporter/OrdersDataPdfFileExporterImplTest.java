@@ -18,7 +18,6 @@ import greencity.constant.pdf.PdfQrCodeText;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.repository.OrderRepository;
-import greencity.service.ubs.UBSClientServiceImpl;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import java.io.IOException;
 import java.util.Locale;
@@ -31,9 +30,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersDataPdfFileExporterImplTest {
-    @Mock
-    private UBSClientServiceImpl ubsClientService;
-
     @Mock
     private ProcessPaymentService processPaymentService;
 
