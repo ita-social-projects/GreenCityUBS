@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
-import greencity.configuration.RedirectionConfigProp;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.LocationsDto;
@@ -26,12 +25,12 @@ import greencity.entity.user.User;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.EventService;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.order.OrderCheckoutService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.tariff.TariffService;
 import greencity.service.ubs.user.CourierService;
+import greencity.service.ubs.user.UserService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,7 +71,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderController {
-    private final UBSClientService ubsClientService;
     private final WayForPayRedirectService wayForPayRedirectService;
     private final WayForPayResultService wayForPayResultService;
     private final ProcessPaymentService processPaymentService;
@@ -83,7 +81,7 @@ public class OrderController {
     private final CourierService courierService;
     private final EventService eventService;
     private final CertificateService certificateService;
-    private final RedirectionConfigProp redirectionConfigProp;
+    private final UserService userService;
 
     /**
      * Controller returns all available bags by tariff and location ids.
@@ -315,7 +313,7 @@ public class OrderController {
         @Positive @PathVariable("orderId") Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.ok()
-            .body(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(id, uuid));
+            .body(userService.getUserAndUserUbsAndViolationsInfoByOrderId(id, uuid));
     }
 
     /**
@@ -364,7 +362,7 @@ public class OrderController {
     public ResponseEntity<UbsCustomersDto> updateRecipientsInfo(
         @Valid @RequestBody UbsCustomersDtoUpdate dto, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.updateUbsUserInfoInOrder(dto, uuid));
+            .body(userService.updateUbsUserInfoInOrder(dto, uuid));
     }
 
     /**

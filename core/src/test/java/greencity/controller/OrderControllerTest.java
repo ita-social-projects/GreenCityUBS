@@ -18,7 +18,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.LocationsDto;
@@ -29,15 +28,10 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.exception.handler.CustomExceptionHandler;
-import greencity.repository.OrderRepository;
-import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.EventService;
-import greencity.service.ubs.NotificationService;
-import greencity.service.ubs.UBSClientService;
-import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.order.OrderCheckoutService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
@@ -70,20 +64,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class OrderControllerTest {
     private static final String ubsLink = "/ubs";
     private final Principal principal = getPrincipal();
-    @Mock
-    UBSClientService ubsClientService;
-
-    @Mock
-    UBSManagementService ubsManagementService;
 
     @Mock
     UserRepository userRepository;
-
-    @Mock
-    OrderRepository orderRepository;
-
-    @Mock
-    NotificationService notificationService;
 
     @Mock
     private WayForPayRedirectService wayForPayRedirectService;
@@ -115,11 +98,8 @@ class OrderControllerTest {
     @InjectMocks
     OrderController orderController;
 
-    @Mock
-    RedirectionConfigProp prop;
     private MockMvc mockMvc;
-    @Mock
-    private UBSUserRepository ubsUserRepository;
+
     private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
 
     @BeforeEach

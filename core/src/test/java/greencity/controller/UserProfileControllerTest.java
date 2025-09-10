@@ -1,16 +1,27 @@
 package greencity.controller;
 
+import static greencity.ModelUtils.getPrincipal;
+import static greencity.ModelUtils.getUserProfileCreateDto;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.address.AddressDto;
+import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.user.UserService;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,18 +36,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
-
-import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getUserProfileCreateDto;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -44,9 +43,6 @@ class UserProfileControllerTest {
     private static final String deactivateUser = "/user/markUserAsDeactivated";
 
     private MockMvc mockMvc;
-
-    @Mock
-    UBSClientService ubsClientService;
 
     @InjectMocks
     UserProfileController userProfileController;
@@ -56,6 +52,9 @@ class UserProfileControllerTest {
 
     @Mock
     private Validator mockValidator;
+
+    @Mock
+    private UserService userService;
 
     private Principal principal = getPrincipal();
     private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
@@ -120,6 +119,6 @@ class UserProfileControllerTest {
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
-        verify(ubsClientService).createUserProfile(getUserProfileCreateDto());
+        verify(userService).createUserProfile(getUserProfileCreateDto());
     }
 }

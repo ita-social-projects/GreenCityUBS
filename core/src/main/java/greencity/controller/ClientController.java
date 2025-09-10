@@ -11,10 +11,10 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
 import greencity.enums.OrderStatus;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.point.PointService;
+import greencity.service.ubs.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,10 +43,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Validated
 public class ClientController {
-    private final UBSClientService ubsClientService;
     private final ProcessPaymentService processPaymentService;
     private final OrderService orderService;
     private final PointService pointService;
+    private final UserService userService;
 
     /**
      * Controller for getting all user orders.
@@ -167,7 +167,7 @@ public class ClientController {
     public ResponseEntity<UserPointDto> getUserBonuses(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getUserPoint(userUuid));
+            .body(userService.getUserPoint(userUuid));
     }
 
     /**
