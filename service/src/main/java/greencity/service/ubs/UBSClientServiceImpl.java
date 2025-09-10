@@ -912,7 +912,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
 
         User currentUser = userRepository.findByUuid(uuid);
-        Order order = orderRepository.findById(orderId).get();
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         checkIsOrderOfCurrentUser(currentUser, order);
 
         fireOrderExpiryJob(orderId);

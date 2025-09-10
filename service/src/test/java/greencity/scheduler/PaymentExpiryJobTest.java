@@ -28,7 +28,7 @@ import java.util.List;
 
 @ExtendWith({MockitoExtension.class})
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class PaymentExpiryJobTest {
+class PaymentExpiryJobTest {
     @Mock
     private UBSClientService ubsClientService;
 
