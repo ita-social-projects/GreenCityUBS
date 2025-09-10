@@ -125,13 +125,13 @@ public interface UBSClientService {
     PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
-     * Method removes payment link data and returns specified certificates/points to user with proper change of points reason.
+     * Method removes payment link data and returns specified certificates/points to
+     * user with proper change of points reason.
      *
      * @param orderId          {@link Long} id of order to modify;
      * @param pointsToUse      {@link Integer} amount of points to be returned;
      * @param certificateCodes {@link List} of certificate {@link String} codes to
      *                         be refunded;
-     * @return up-to-date {@link Order} with all changes applied.
      * @author Oleksandr Ilnytskyi
      */
     void expirePaymentAttempt(Long orderId, int pointsToUse, Set<String> certificateCodes);
