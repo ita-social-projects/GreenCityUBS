@@ -4,6 +4,7 @@ import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUbsCustomersDtoUpdate;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -13,6 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
@@ -25,7 +27,7 @@ import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
+import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSUserRepository;
@@ -33,9 +35,11 @@ import greencity.repository.UserRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementService;
+import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -71,6 +76,9 @@ class OrderControllerTest {
 
     @Mock
     NotificationService notificationService;
+
+    @Mock
+    private WayForPayRedirectService wayForPayRedirectService;
 
     @InjectMocks
     OrderController orderController;
@@ -253,16 +261,33 @@ class OrderControllerTest {
     @Test
     void receivePaymentTest() throws Exception {
         PaymentResponseDto dto = ModelUtils.getPaymentResponseDto();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String paymentResponseJson = objectMapper.writeValueAsString(dto);
+        PaymentResponseWayForPay mockResponse = new PaymentResponseWayForPay();
+        mockResponse.setStatus("approved");
+        mockResponse.setOrderReference(dto.getOrderReference());
 
-        setRedirectionConfigProp();
+        when(ubsClientService.convertMapIntoPaymentResponseDto(anyMap()))
+            .thenReturn(mockResponse);
 
         mockMvc.perform(post(ubsLink + "/receivePayment")
-            .content(paymentResponseJson)
-            .principal(principal)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().is3xxRedirection());
+            .param("merchantAccount", dto.getMerchantAccount())
+            .param("orderReference", dto.getOrderReference())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.orderReference").value(dto.getOrderReference()))
+            .andExpect(jsonPath("$.status").value("approved"));
+    }
+
+    @Test
+    void handleWayForPayReturn_shouldReturnNoContent() throws Exception {
+        mockMvc.perform(post(ubsLink + "/payment/return")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("orderReference", "ORDER123")
+            .param("amount", "100.00"))
+            .andExpect(status().isFound());
+
+        verify(wayForPayRedirectService).redirectUser(
+            Mockito.any(Map.class));
     }
 
     @Test
@@ -363,31 +388,5 @@ class OrderControllerTest {
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
         verify(ubsClientService).getAllLocationsByCourierId(id);
-    }
-
-    @Test
-    void receivePaymentFromMonoBankTest() throws Exception {
-        MonoBankPaymentResponseDto responseDto = ModelUtils.getMonoBankPaymentResponseDto();
-
-        mockMvc.perform(post(ubsLink + "/monobank/payments")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(new ObjectMapper().writeValueAsString(responseDto)));
-
-        verify(ubsClientService).validatePaymentFromMonoBank(responseDto);
-    }
-
-    private void setRedirectionConfigProp() {
-        RedirectionConfigProp redirectionConfigProp = ModelUtils.getRedirectionConfig();
-
-        Arrays.stream(OrderController.class.getDeclaredFields())
-            .filter(field -> field.getName().equals("redirectionConfigProp"))
-            .forEach(field -> {
-                field.setAccessible(true);
-                try {
-                    field.set(orderController, redirectionConfigProp);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            });
     }
 }

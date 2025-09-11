@@ -76,9 +76,6 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
-import greencity.dto.payment.monobank.CheckoutResponseFromMonoBank;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
-import greencity.dto.payment.monobank.PaymentInfo;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.position.PositionWithTranslateDto;
@@ -464,7 +461,7 @@ public class ModelUtils {
                 .phoneNumber("067894522")
                 .ubsUserId(1L)
                 .build())
-            .paymentSystem(PaymentSystem.MONOBANK)
+            .paymentSystem(PaymentSystem.WAY_FOR_PAY)
             .build();
     }
 
@@ -2924,13 +2921,13 @@ public class ModelUtils {
 
     public static Set<NotificationParameter> getNotificationParameterSet() {
         Set<NotificationParameter> parameters = new HashSet<>();
-        parameters.add(NotificationParameter.builder().key("payButton").value("https://pay.monobank.ua/api").build());
+        parameters.add(NotificationParameter.builder().key("payButton").value("https://pay.wayforpay.ua/api").build());
         return parameters;
     }
 
     public static Optional<NotificationParameter> getNotificationPaymentLink() {
         return Optional
-            .ofNullable(NotificationParameter.builder().key("payButton").value("https://pay.monobank.ua/api").build());
+            .ofNullable(NotificationParameter.builder().key("payButton").value("https://pay.wayforpay.ua/api").build());
     }
 
     private static Set<NotificationParameter> createNotificationParameterSet2() {
@@ -5611,34 +5608,6 @@ public class ModelUtils {
                 .nameEn("Kyiv")
                 .districts(Set.of(getDistrict()))
                 .build()))
-            .build();
-    }
-
-    public static CheckoutResponseFromMonoBank getCheckoutResponseFromMonoBank() {
-        return CheckoutResponseFromMonoBank.builder()
-            .invoiceId("invoiceID")
-            .pageUrl("https://www.monobank/api")
-            .build();
-    }
-
-    public static MonoBankPaymentResponseDto getMonoBankPaymentResponseDto(String status) {
-        return MonoBankPaymentResponseDto.builder()
-            .invoiceId("testInvoiceId")
-            .status(status)
-            .failureReason("reason")
-            .errorCode("81")
-            .amount(1000)
-            .currency(980)
-            .createdDate("2019-08-24T14:15:22Z")
-            .modifiedDate("2019-08-24T14:17:22Z")
-            .orderReference("MV8xXzE=")
-            .paymentInfo(PaymentInfo.builder()
-                .cardNumber("444403******1902")
-                .terminal("MI001088")
-                .paymentSystem("visa")
-                .paymentMethod("pan")
-                .fee(0)
-                .build())
             .build();
     }
 

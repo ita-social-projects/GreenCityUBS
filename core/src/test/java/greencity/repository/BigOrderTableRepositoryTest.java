@@ -36,7 +36,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = UbsApplication.class)
+@SpringBootTest(classes = UbsApplication.class, properties = {
+    "WAY_FOR_PAY_LOGIN=testLogin",
+    "WAY_FOR_PAY_SECRET=testSecret",
+    "DOMAIN_NAME=http://testdomain/",
+    "WAY_FOR_PAY_RETURN_URL=testUrl",
+    "WAY_FOR_PAY_REDIRECT=testRedirectUrl"
+})
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @MockBean
     private UBSTelegramBot telegramBot;

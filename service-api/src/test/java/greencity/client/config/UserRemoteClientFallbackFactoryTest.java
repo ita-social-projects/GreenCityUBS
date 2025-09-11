@@ -45,6 +45,11 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
+    void checkIfActiveUserExistsByUuid() {
+        assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfActiveUserExistsByUuid(USER_UUID));
+    }
+
+    @Test
     void markUserDeactivated() {
         DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
             .reason("test")
@@ -101,7 +106,7 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void signUpEmployee() {
         EmployeeSignUpDto dto = EmployeeSignUpDto.builder().build();
-        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto));
+        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto, "en"));
     }
 
     @Test

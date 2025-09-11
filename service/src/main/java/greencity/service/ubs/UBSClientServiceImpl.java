@@ -1,7 +1,8 @@
 package greencity.service.ubs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.maps.model.LatLng;
-import greencity.client.MonoBankClient;
 import greencity.client.UserRemoteClient;
 import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;
@@ -40,12 +41,6 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.dto.payment.monobank.BasketOrder;
-import greencity.dto.payment.monobank.CheckoutResponseFromMonoBank;
-import greencity.dto.payment.monobank.MerchantPaymentInfo;
-import greencity.dto.payment.monobank.MonoBankPaymentRequestDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
-import greencity.dto.payment.monobank.PaymentInfo;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.DeactivateUserRequestDto;
@@ -83,12 +78,10 @@ import greencity.enums.BotType;
 import greencity.enums.CertificateStatus;
 import greencity.enums.CourierLimit;
 import greencity.enums.LocationStatus;
-import greencity.enums.MonoBankStatuses;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
-import greencity.enums.PaymentType;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -125,7 +118,6 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -145,7 +137,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -164,44 +155,7 @@ import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
-import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
-import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
-import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
-import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
-import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
-import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
-import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
-import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
-import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
-import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
-import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
-import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
-import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.*;
 import static greencity.util.OrderUtils.getLastPayment;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
@@ -221,6 +175,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final BagRepository bagRepository;
     private final UBSUserRepository ubsUserRepository;
     private final ModelMapper modelMapper;
+    private final ObjectMapper objectMapper;
     private final CertificateRepository certificateRepository;
     private final OrderRepository orderRepository;
     private final CourierRepository courierRepository;
@@ -245,7 +200,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final NotificationService notificationService;
     private final WayForPayClient wayForPayClient;
     private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
-    private final MonoBankClient monoBankClient;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
@@ -260,12 +214,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String wayForPaySecret;
     @Value("${greencity.wayforpay.merchant.domain.name}")
     private String merchantDomainName;
-    @Value("${greencity.monobank.token}")
-    private String token;
-    @Value("${greencity.monobank.redirect}")
-    private String monoBankRedirectionUrl;
-    @Value("${greencity.monobank.redirect.result-monobank-url}")
-    private String monoBankPaymentRedirectUrl;
     @Value("${greencity.redirect.green-city-client}")
     private String greenCityClientUrl;
     private static final String FAILED_STATUS = "failure";
@@ -283,7 +231,6 @@ public class UBSClientServiceImpl implements UBSClientService {
     private static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
         + "does not match, reselect correct data.";
     private static final byte CURRENCY_CONVERSION_RATE = 100;
-    private static final String DEFAULT_VALUE_FOR_PAYMENT = "Unknown";
 
     /**
      * {@inheritDoc}
@@ -304,6 +251,58 @@ public class UBSClientServiceImpl implements UBSClientService {
             .time(response.getCreatedDate()).build();
         accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPaySecret));
         return accept;
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponseWayForPay convertMapIntoPaymentResponseDto(Map<String, String> formParams) {
+        if (formParams == null || formParams.isEmpty()) {
+            return buildErrorResponse("No form params received");
+        }
+        log.debug("Received {} form param(s) from WayForPay", formParams.size());
+
+        String jsonKey = formParams.keySet().iterator().next();
+        log.debug("Extracted JSON from param key: {}", jsonKey);
+
+        PaymentResponseDto dto;
+        try {
+            dto = getPaymentResponseDto(jsonKey);
+        } catch (JsonProcessingException e) {
+            return buildErrorResponse("Invalid JSON format");
+        }
+
+        if (isInvalidSignature(dto)) {
+            return buildErrorResponse("Invalid signature");
+        }
+
+        log.info("Valid signature for orderReference={}", dto.getOrderReference());
+        return validatePayment(dto);
+    }
+
+    private PaymentResponseDto getPaymentResponseDto(String jsonKey) throws JsonProcessingException {
+        PaymentResponseDto dto = objectMapper.readValue(jsonKey, PaymentResponseDto.class);
+        log.info("Processing payment: orderReference={}, status={}",
+            dto.getOrderReference(), dto.getTransactionStatus());
+        return dto;
+    }
+
+    private boolean isInvalidSignature(PaymentResponseDto dto) {
+        String calculatedSignature = encryptionUtil.generateResponseSignature(dto, wayForPaySecret);
+        if (!calculatedSignature.equals(dto.getMerchantSignature())) {
+            log.error("Invalid signature for orderReference={}", dto.getOrderReference());
+            return true;
+        }
+        return false;
+    }
+
+    private PaymentResponseWayForPay buildErrorResponse(String message) {
+        log.error("Payment processing error: {}", message);
+        return PaymentResponseWayForPay.builder()
+            .status("ERROR")
+            .orderReference(null)
+            .time(LocalDateTime.now().toString())
+            .signature(null)
+            .build();
     }
 
     private Payment mapPayment(PaymentResponseDto response, String decodedOrderReference) {
@@ -554,7 +553,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         saveOrderEvent(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
 
         PaymentSystemResponse paymentSystemResponse =
-            processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
+            processPaymentResponse(dto, order, sumToPayInCoins);
 
         notificationService.notifyCreatedOrder(order);
 
@@ -600,7 +599,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         saveOrderEvent(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
 
         PaymentSystemResponse paymentSystemResponse =
-            processPaymentResponse(dto, order, sumToPayInCoins, currentUser);
+            processPaymentResponse(dto, order, sumToPayInCoins);
 
         if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
             notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
@@ -651,20 +650,17 @@ public class UBSClientServiceImpl implements UBSClientService {
         log.info("Saved event: eventName={}, author={}, orderId={}", eventName, author, order.getId());
     }
 
-    private PaymentSystemResponse processPaymentResponse(OrderResponseDto dto, Order order, long sumToPayInCoins,
-        User currentUser) {
+    private PaymentSystemResponse processPaymentResponse(OrderResponseDto dto, Order order, long sumToPayInCoins) {
         if (dto.isShouldBePaid()) {
-            return processPayment(dto, order, sumToPayInCoins, currentUser);
+            return processPayment(dto, order, sumToPayInCoins);
         } else {
             return getPaymentRequestDto(order, "");
         }
     }
 
-    private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins,
-        User currentUser) {
+    private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins) {
         return switch (dto.getPaymentSystem()) {
             case WAY_FOR_PAY -> processWayForPay(order, sumToPayInCoins);
-            case MONOBANK -> processMonoBank(order, sumToPayInCoins, currentUser);
         };
     }
 
@@ -672,45 +668,6 @@ public class UBSClientServiceImpl implements UBSClientService {
         PaymentWayForPayRequestDto requestDto = formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(requestDto));
         return getPaymentRequestDto(order, link);
-    }
-
-    private PaymentSystemResponse processMonoBank(Order order, long sumToPayInCoins, User currentUser) {
-        MonoBankPaymentRequestDto requestDto =
-            formPaymentRequestForMonoBank(order.getId(), sumToPayInCoins, currentUser);
-        CheckoutResponseFromMonoBank checkoutResponse = monoBankClient.getCheckoutResponse(requestDto, token);
-        return getPaymentRequestDto(order, checkoutResponse.pageUrl());
-    }
-
-    private MonoBankPaymentRequestDto formPaymentRequestForMonoBank(Long orderId, long sumToPayInCoins, User user) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
-        return MonoBankPaymentRequestDto.builder()
-            .amount((int) sumToPayInCoins)
-            .merchantPaymentInfo(MerchantPaymentInfo.builder()
-                .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
-                .emails(Set.of(user.getRecipientEmail()))
-                .orderList(getBasketOrders(order))
-                .build())
-            .redirectUrl(monoBankRedirectionUrl)
-            .webHookUrl(monoBankPaymentRedirectUrl)
-            .validity(VALIDITY_DURATION_TEN_DAYS)
-            .build();
-    }
-
-    private List<BasketOrder> getBasketOrders(Order order) {
-        return order.getOrderBags().stream()
-            .filter(bag -> bag.getAmount() != 0)
-            .map(this::convert)
-            .toList();
-    }
-
-    private BasketOrder convert(OrderBag bag) {
-        return BasketOrder.builder()
-            .name(bag.getNameUk())
-            .quantity(bag.getAmount().floatValue())
-            .sum((int) (bag.getPrice() * bag.getAmount()))
-            .code(bag.getNameUk())
-            .build();
     }
 
     private boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
@@ -1243,7 +1200,7 @@ public class UBSClientServiceImpl implements UBSClientService {
                 sumToPayInCoins -= certificate.getPoints() * 100L;
                 certificate.setCertificateStatus(CertificateStatus.USED);
                 certificate.setDateOfUse(LocalDate.now());
-                if (dontSendLinkToFondyIf(sumToPayInCoins, certificate)) {
+                if (markCertificateAsUsedIfNoPaymentNeeded(sumToPayInCoins, certificate)) {
                     sumToPayInCoins = 0L;
                 }
             }
@@ -1251,7 +1208,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         return sumToPayInCoins;
     }
 
-    private boolean dontSendLinkToFondyIf(long sumToPayInCoins, Certificate certificate) {
+    private boolean markCertificateAsUsedIfNoPaymentNeeded(long sumToPayInCoins, Certificate certificate) {
         if (sumToPayInCoins <= 0) {
             certificate.setCertificateStatus(CertificateStatus.USED);
             certificate.setPoints(certificate.getPoints()
@@ -1530,6 +1487,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
+            log.info("Payment failed: orderId={}, transactionStatus={}, paymentStatus={}",
+                order.getId(), dto.getTransactionStatus(), orderPayment.getPaymentStatus());
         }
     }
 
@@ -1548,6 +1507,11 @@ public class UBSClientServiceImpl implements UBSClientService {
             eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
                 OrderHistory.SYSTEM_UK, order);
+            log.info("Payment approved: orderId={}, status={}",
+                order.getId(), orderPayment.getPaymentStatus());
+        } else {
+            log.info("Payment not approved: orderId={}, transactionStatus={}",
+                order.getId(), dto.getTransactionStatus());
         }
     }
 
@@ -1710,7 +1674,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         }
     }
 
-    private String formedLink(Order order, long sumToPayInCoins) {
+    @Override
+    public String formedLink(Order order, long sumToPayInCoins) {
         Order increment = incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
@@ -1899,106 +1864,6 @@ public class UBSClientServiceImpl implements UBSClientService {
                     .orElseThrow(() -> new NotFoundException(
                         String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, locationsDto.getId(), courierId)))))
             .toList();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response) {
-        String decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
-        String[] ids = decodedOrderReference.split("_");
-        Order order = orderRepository.findById(Long.valueOf(ids[0]))
-            .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
-        Payment payment = createPayment(response, order, decodedOrderReference);
-        checkPaymentResponseStatus(response, payment, order);
-    }
-
-    private Payment createPayment(MonoBankPaymentResponseDto response, Order order, String decodedOrderReference) {
-        PaymentInfo paymentInfo = Optional.ofNullable(response.getPaymentInfo()).orElseGet(() -> PaymentInfo.builder()
-            .cardNumber(DEFAULT_VALUE_FOR_PAYMENT)
-            .paymentSystem(DEFAULT_VALUE_FOR_PAYMENT)
-            .paymentMethod(DEFAULT_VALUE_FOR_PAYMENT)
-            .fee(0)
-            .terminal(DEFAULT_VALUE_FOR_PAYMENT)
-            .build());
-        return Payment.builder()
-            .id(extractIdFromReference(decodedOrderReference))
-            .currency("UAH")
-            .amount((long) response.getAmount())
-            .orderStatus(OrderStatus.FORMED)
-            .responseStatus(response.getStatus())
-            .senderCellPhone(order.getUser().getRecipientPhone())
-            .maskedCard(paymentInfo.cardNumber())
-            .cardType(paymentInfo.paymentSystem())
-            .responseCode(parseErrorCode(response.getErrorCode()))
-            .responseDescription(Optional.ofNullable(response.getFailureReason()).orElse("0"))
-            .orderTime(formatDate(response.getCreatedDate()))
-            .settlementDate(formatDate(response.getModifiedDate()))
-            .fee(paymentInfo.fee().longValue())
-            .paymentSystem(paymentInfo.paymentSystem())
-            .senderEmail(order.getUser().getRecipientEmail())
-            .paymentId(response.getInvoiceId())
-            .order(order)
-            .paymentType(PaymentType.AUTO)
-            .paymentStatus(PaymentStatus.UNPAID)
-            .build();
-    }
-
-    private Long extractIdFromReference(String decodedOrderReference) {
-        return Long.valueOf(decodedOrderReference.substring(decodedOrderReference.lastIndexOf("_") + 1));
-    }
-
-    private int parseErrorCode(String errorCode) {
-        return (errorCode == null) ? 0 : Integer.parseInt(errorCode);
-    }
-
-    private String formatDate(String modifiedDate) {
-        return OffsetDateTime.parse(modifiedDate).format(DateTimeFormatter.ISO_LOCAL_DATE);
-    }
-
-    private void checkPaymentResponseStatus(MonoBankPaymentResponseDto response, Payment payment, Order order) {
-        MonoBankStatuses status = MonoBankStatuses.valueOf(response.getStatus().toUpperCase());
-
-        switch (status) {
-            case SUCCESS -> {
-                updatePaymentAndOrderStatus(payment, order, PaymentStatus.PAID, OrderPaymentStatus.PAID);
-                logPaymentEvent(order, payment.getPaymentId());
-                removePaymentLinkForOrder(order);
-            }
-            case REVERSED -> {
-                updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_REVERSED_UK);
-            }
-            case PROCESSING -> {
-                updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_PENDING_UK);
-            }
-            case FAILURE -> {
-                updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-                logOrderEvent(order, OrderHistory.PAYMENT_FAILURE_UK);
-            }
-            default -> updatePaymentAndOrderStatus(payment, order, PaymentStatus.UNPAID, OrderPaymentStatus.UNPAID);
-        }
-
-        paymentRepository.save(payment);
-        orderRepository.save(order);
-    }
-
-    private void updatePaymentAndOrderStatus(Payment payment, Order order, PaymentStatus paymentStatus,
-        OrderPaymentStatus orderStatus) {
-        payment.setPaymentStatus(paymentStatus);
-        order.setOrderPaymentStatus(orderStatus);
-    }
-
-    private void logOrderEvent(Order order, String event) {
-        eventService.save(event, OrderHistory.SYSTEM_UK, order);
-    }
-
-    private void logPaymentEvent(Order order, String paymentId) {
-        eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
-        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + paymentId, OrderHistory.SYSTEM_UK, order);
     }
 
     private void removePaymentLinkForOrder(Order order) {

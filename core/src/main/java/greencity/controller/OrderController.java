@@ -1,6 +1,5 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
@@ -20,12 +19,12 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -33,16 +32,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +64,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class OrderController {
     private final UBSClientService ubsClientService;
+    private final WayForPayRedirectService wayForPayRedirectService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
@@ -213,46 +211,68 @@ public class OrderController {
     }
 
     /**
-     * Receives payment information from Way for Pay payment gateway. This method
-     * decodes the received response, converts it into a PaymentResponseDto object,
-     * and validates the payment. If the HTTP status is successful, it sends a
-     * notification for the paid order and redirects to the GreenCityClient.
+     * Receives payment notifications from WayForPay via form parameters, delegates
+     * validation/parsing to the service, and returns the acknowledgement payload.
+     * Always responds with HTTP 200 OK per WFP webhook requirements.
      *
-     * @param response The payment response received from Way for Pay, in String
-     *                 format.
-     * @param servlet  The HttpServletResponse object to handle the redirection.
-     * @return A PaymentResponseWayForPay object representing the validated payment
-     *         response.
-     * @throws IOException If an input or output exception occurred during the
-     *                     redirection.
+     * @param formParams Map with payment response parameters from WayForPay.
+     * @return PaymentResponseWayForPay containing status and orderReference.
+     * @throws IOException If an I/O error occurs (rare in normal webhook flow).
      */
-    @Operation(summary = "Receive payment from WayForPay.")
+    @Operation(
+        summary = "Receive payment from WayForPay.",
+        description = "Endpoint receives payment notifications from WayForPay as form parameters "
+            + "(application/x-www-form-urlencoded).")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
+        @ApiResponse(
+            responseCode = "200",
+            description = HttpStatuses.OK,
+            content = @Content(
+                mediaType = "application/x-www-form-urlencoded",
+                schema = @Schema(implementation = PaymentResponseDto.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = HttpStatuses.BAD_REQUEST,
+            content = @Content)
     })
     @PostMapping("/receivePayment")
-    public PaymentResponseWayForPay receivePayment(
-        @RequestBody String response,
-        HttpServletResponse servlet) throws IOException {
-        log.info("Incoming request Way For Pay API: {}", servlet.toString());
-        log.info("Response: {}", response);
+    public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
+        throws IOException {
+        return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
+    }
 
-        String decodedResponse =
-            URLDecoder.decode(response, StandardCharsets.UTF_8);
-        log.info("DecodedResponse: {}", decodedResponse);
+    /**
+     * Handles the returnUrl callback from WayForPay after a payment attempt. This
+     * endpoint is triggered by WayForPay once the payment process is completed
+     * (either successfully or with failure). It receives payment data from
+     * WayForPay as request parameters, then performs a redirect to the frontend
+     * confirmation page. The method does not return any content in the response
+     * body.
+     *
+     * @param formParams a map of form parameters sent by WayForPay (e.g.
+     *                   orderReference, status, amount, etc.)
+     * @return 302 Redirect to the frontend confirmation page
+     * @throws IOException if the redirect cannot be performed
+     */
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        PaymentResponseDto paymentResponseDto =
-            objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
-        log.info("PaymentResponseDto: {}", paymentResponseDto);
-
-        if (HttpStatus.OK.is2xxSuccessful()) {
-            servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
-        }
-
-        return ubsClientService.validatePayment(paymentResponseDto);
+    @Operation(
+        summary = "Handle returnUrl callback from WayForPay",
+        description = "This endpoint processes the WayForPay returnUrl callback after payment completion. "
+            + "It redirects the user to the frontend confirmation page with order details.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302",
+            description = "Redirect successfully executed (no content returned)",
+            content = @Content(
+                mediaType = "application/x-www-form-urlencoded",
+                schema = @Schema(implementation = PaymentResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid request parameters")
+    })
+    @PostMapping("/payment/return")
+    public ResponseEntity<Void> handleWayForPayReturn(@RequestParam Map<String, String> formParams) throws IOException {
+        String redirectUrl = wayForPayRedirectService.redirectUser(formParams);
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header("Location", redirectUrl)
+            .build();
     }
 
     /**
@@ -513,25 +533,5 @@ public class OrderController {
         @Positive @PathVariable("courierId") Long courierId) {
         List<LocationsDto> locations = ubsClientService.getAllLocationsByCourierId(courierId);
         return ResponseEntity.status(HttpStatus.OK).body(locations);
-    }
-
-    /**
-     * Receives and processes payment information from the Monobank API. This method
-     * handles the incoming payment response and validates the payment details
-     * provided by Monobank. The payment details are logged and then passed to the
-     * {@code validatePaymentFromMonoBank} method for further validation and
-     * processing.
-     *
-     * @param response the payment response received from Monobank, containing
-     *                 details such as transaction ID, status, and amount.
-     */
-    @Operation(summary = "Receive payment information from Monobank API")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
-    })
-    @PostMapping("/monobank/payments")
-    public void receivePaymentFromMonoBank(@RequestBody @Valid MonoBankPaymentResponseDto response) {
-        log.info("Response from MONOBANK API: {}", response);
-        ubsClientService.validatePaymentFromMonoBank(response);
     }
 }
