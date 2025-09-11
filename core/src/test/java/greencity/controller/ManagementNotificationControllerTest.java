@@ -213,4 +213,11 @@ class ManagementNotificationControllerTest {
 
         verify(notificationTemplateService).removeNotificationTemplate(any());
     }
+
+    @Test
+    void getAllUserCategoriesTest() throws Exception {
+        mockMvc.perform(get(url + "/get-all-user-categories")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
 }
