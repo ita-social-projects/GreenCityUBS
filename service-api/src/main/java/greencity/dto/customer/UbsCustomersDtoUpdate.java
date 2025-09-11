@@ -1,8 +1,5 @@
 package greencity.dto.customer;
 
-import greencity.annotations.ValidPhoneNumber;
-import greencity.constant.ValidationConstant;
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -25,21 +22,21 @@ import jakarta.validation.constraints.NotNull;
 public class UbsCustomersDtoUpdate {
     @NotNull
     @Min(1)
-    private Long customerId;
+    private Long recipientId;
     @NotNull
     @Length(max = 60)
     @NotBlank
-    private String customerName;
+    private String recipientName;
     @NotNull
     @Length(max = 60)
     @NotBlank
-    private String customerSurname;
+    private String recipientSurName;
     @NotNull
+    @Length(max = 9)
     @NotBlank
-    @ValidPhoneNumber
-    private String customerPhoneNumber;
+    private String recipientPhoneNumber;
     @NotNull
+    @Length(max = 50)
     @NotBlank
-    @Email(regexp = ValidationConstant.EMAIL_REGEXP)
-    private String customerEmail;
+    private String recipientEmail;
 }

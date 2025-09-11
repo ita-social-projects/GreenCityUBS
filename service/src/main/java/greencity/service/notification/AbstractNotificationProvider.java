@@ -3,12 +3,12 @@ package greencity.service.notification;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.enums.NotificationReceiverType;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.NotificationTemplateRepository;
-import greencity.repository.UserRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import jakarta.annotation.PostConstruct;
@@ -19,7 +19,6 @@ public abstract class AbstractNotificationProvider {
     private final UserRemoteClient userRemoteClient;
     private final NotificationTemplateRepository templateRepository;
     private final NotificationReceiverType notificationType;
-    private final UserRepository userRepository;
 
     /**
      * Initializes the notification provider.
@@ -69,11 +68,11 @@ public abstract class AbstractNotificationProvider {
         UserNotification notification,
         NotificationReceiverType receiverType,
         long monthsOfAccountInactivity) {
-        String uuid = userRepository.findUuidByRecipientEmail(notification.getUser().getRecipientEmail())
-            .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-        String languageCode = userRemoteClient.findUserLanguageByUuid(uuid);
+        UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(notification.getUser().getRecipientEmail())
+            .orElseThrow(() -> new UserNotFoundException(
+                ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + notification.getUser().getRecipientEmail()));
         return NotificationServiceImpl
-            .createNotificationDto(notification, languageCode, receiverType, templateRepository,
+            .createNotificationDto(notification, userVO.getLanguageVO().getCode(), receiverType, templateRepository,
                 monthsOfAccountInactivity);
     }
 }

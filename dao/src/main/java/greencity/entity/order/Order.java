@@ -187,7 +187,7 @@ public class Order {
     @OneToMany(
         mappedBy = "order",
         cascade = CascadeType.ALL, orphanRemoval = true)
-    @Setter(AccessLevel.NONE)
+    @Setter(AccessLevel.PRIVATE)
     @Builder.Default
     private List<OrderBag> orderBags = new ArrayList<>();
 
@@ -204,7 +204,7 @@ public class Order {
      * @param orderBags The new list of order bags to associate with this order.
      * @throws NullPointerException If the provided 'orderBags' argument is null.
      */
-    public void setOrderBags(List<OrderBag> orderBags) {
+    public void updateWithNewOrderBags(List<OrderBag> orderBags) {
         if (!CollectionUtils.isEmpty(this.orderBags)) {
             this.orderBags.clear();
         }

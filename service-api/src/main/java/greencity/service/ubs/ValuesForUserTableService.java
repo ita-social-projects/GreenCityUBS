@@ -1,6 +1,6 @@
 package greencity.service.ubs;
 
-import greencity.dto.order.UserWithSomeOrderDetailAndChatIdDto;
+import greencity.dto.order.UserWithSomeOrderDetailDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
@@ -10,9 +10,9 @@ public interface ValuesForUserTableService {
     /**
      * Method that returns users that have made at least one order.
      *
-     * @return {@link UserWithSomeOrderDetailAndChatIdDto}.
+     * @return {@link UserWithSomeOrderDetailDto}.
      * @author Stepan Tehlivets.
      */
-    PageableDto<UserWithSomeOrderDetailAndChatIdDto> getAllFields(CustomerPage page, String columnName,
+    PageableDto<UserWithSomeOrderDetailDto> getAllFields(CustomerPage page, String columnName,
         SortingOrder sortingOrder, UserFilterCriteria userFilterCriteria, String email);
 }

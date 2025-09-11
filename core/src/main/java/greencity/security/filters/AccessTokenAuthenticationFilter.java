@@ -1,10 +1,8 @@
 package greencity.security.filters;
 
-import greencity.client.UserRemoteClient;
-import greencity.constant.ErrorMessage;
-import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.UserRepository;
+import greencity.dto.user.UserVO;
 import greencity.security.JwtTool;
+import greencity.service.FeignClientCallAsync;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +30,7 @@ import java.util.Optional;
 public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTool jwtTool;
     private final AuthenticationManager authenticationManager;
-    private final UserRemoteClient userRemoteClient;
-    private final UserRepository userRepository;
+    private final FeignClientCallAsync userRemoteClient;
 
     private String extractToken(HttpServletRequest request) {
         return jwtTool.getTokenFromHttpServletRequest(request);
@@ -54,22 +51,26 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
         throws IOException, ServletException {
         String token = extractToken(request);
 
+        log.info("token: {}", token);
         if (token != null) {
             try {
                 ((ProviderManager) authenticationManager).setEraseCredentialsAfterAuthentication(false);
                 Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(token, null));
-                String uuid = userRepository.findUuidByRecipientEmail((String) authentication.getPrincipal())
-                    .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-                boolean exists = userRemoteClient.checkIfUserExistsByUuid(uuid);
-                if (exists) {
+                Optional<UserVO> user =
+                    userRemoteClient.getRecordsAsync((String) authentication.getPrincipal()).get();
+                log.info("user: {}", user);
+                if (user.isPresent()) {
                     log.debug("User successfully authenticate - {}", authentication.getPrincipal());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (ExpiredJwtException e) {
-                log.info("Token has expired");
+                log.info("Token has expired: {}", token);
+            } catch (InterruptedException e) {
+                log.info("Thread was interrupted: {}", e.getMessage());
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
-                log.info("Access denied during token authentication: {}", e.getMessage());
+                log.info("Access denied with token: {}", e.getMessage());
             }
         }
         chain.doFilter(request, response);

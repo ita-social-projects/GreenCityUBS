@@ -1,14 +1,13 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.dto.order.UserWithSomeOrderDetailAndChatIdDto;
+import greencity.dto.order.UserWithSomeOrderDetailDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.user.User;
 import greencity.enums.SortingOrder;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.repository.EmployeeRepository;
-import greencity.repository.TelegramChatRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,8 +36,6 @@ class ValuesForUserTableServiceImplTest {
 
     @Mock
     private EmployeeRepository employeeRepository;
-    @Mock
-    private TelegramChatRepository telegramChatRepository;
 
     @InjectMocks
     private ValuesForUserTableServiceImpl service;
@@ -72,9 +69,8 @@ class ValuesForUserTableServiceImplTest {
             Mockito.eq(page),
             Mockito.anyList()))
             .thenReturn(mockPage);
-        Mockito.when(telegramChatRepository.findByUser(Mockito.any())).thenReturn(Optional.empty());
 
-        PageableDto<UserWithSomeOrderDetailAndChatIdDto> result =
+        PageableDto<UserWithSomeOrderDetailDto> result =
             service.getAllFields(page, columnName, sortingOrder, filterCriteria, TEST_EMAIL);
 
         assertThat(result).isNotNull();
@@ -82,13 +78,11 @@ class ValuesForUserTableServiceImplTest {
         assertThat(result.getPage())
             .extracting("clientName")
             .containsExactly("John Doe", "Jane Smith");
-        assertThat(result.getPage()).allSatisfy(user -> assertThat(user.getChatId()).isNull());
         Mockito.verify(employeeRepository).findByEmail(TEST_EMAIL);
         Mockito.verify(employeeRepository).findTariffsInfoForEmployee(employeeId);
         Mockito.verify(userRepository, Mockito.times(tariffsInfoIds.size()))
             .getAllUsersByTariffsInfoId(Mockito.anyLong());
         Mockito.verify(userTableRepo).findAll(filterCriteria, columnName, sortingOrder, page, userIds);
-        Mockito.verify(telegramChatRepository, Mockito.times(2)).findByUser(Mockito.any());
     }
 
     @Test

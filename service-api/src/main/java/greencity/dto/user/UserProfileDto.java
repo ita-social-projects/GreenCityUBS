@@ -26,10 +26,10 @@ import java.util.List;
 @EqualsAndHashCode
 public class UserProfileDto {
     @NotBlank
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientName;
     @NotBlank
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientSurname;
     @NotBlank
     @Email(regexp = ValidationConstant.EMAIL_REGEXP)
@@ -45,4 +45,6 @@ public class UserProfileDto {
     private Boolean hasPassword;
     @NonNull
     private Boolean telegramIsNotify;
+    @NonNull
+    private Boolean viberIsNotify;
 }

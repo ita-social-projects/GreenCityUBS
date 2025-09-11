@@ -1,12 +1,12 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
@@ -34,12 +34,15 @@ import greencity.repository.RegionRepository;
 import greencity.repository.CityRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.OrderRepository;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Collections;
+
+import greencity.service.locations.LocationApiService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,6 +73,8 @@ class AddressServiceTest {
     private ModelMapper mapper;
     @Mock
     private AddressRequestDtoToBaseEntityMapper addressMapper;
+    @Mock
+    private LocationApiService locationApiService;
     @Mock
     private OrderRepository orderRepository;
     @Mock
@@ -123,21 +128,18 @@ class AddressServiceTest {
 
     @Test
     void getAllDistrictsTest() {
-        String region = "SomeRegion";
-        String cityName = "Kyiv";
-        Long cityId = 123L;
-        List<District> districts = Arrays.asList(new District(), new District());
-        List<DistrictDto> expectedDtos = Arrays.asList(DistrictDto.builder().nameEn("District 1").build(),
+        List<LocationDto> locationDtos;
+        List<DistrictDto> districtDtos;
+        locationDtos = Arrays.asList(LocationDto.builder().id("1").build(), LocationDto.builder().id("2").build());
+        districtDtos = Arrays.asList(DistrictDto.builder().nameEn("District 1").build(),
             DistrictDto.builder().nameEn("District 2").build());
-        when(cityRepository.findIdByNameUkOrNameEn(cityName)).thenReturn(cityId);
-        when(districtRepository.findAllByCityId(cityId)).thenReturn(districts);
-        when(mapper.map(districts.get(0), DistrictDto.class)).thenReturn(expectedDtos.get(0));
-        when(mapper.map(districts.get(1), DistrictDto.class)).thenReturn(expectedDtos.get(1));
-        List<DistrictDto> result = addressService.getAllDistricts(region, cityName);
-        verify(cityRepository).findIdByNameUkOrNameEn(cityName);
-        verify(districtRepository).findAllByCityId(cityId);
-        verify(mapper, times(2)).map(any(District.class), eq(DistrictDto.class));
-        assertEquals(expectedDtos, result);
+        when(locationApiService.getAllDistrictsInCityByNames(anyString(), anyString())).thenReturn(locationDtos);
+        when(mapper.map(any(LocationDto.class), eq(DistrictDto.class))).thenAnswer(i -> new DistrictDto());
+        List<DistrictDto> results = addressService.getAllDistricts("region", "city");
+        verify(locationApiService, times(1)).getAllDistrictsInCityByNames(anyString(), anyString());
+        assertEquals(districtDtos.size(), results.size());
+        verify(locationApiService, times(1)).getAllDistrictsInCityByNames(anyString(), anyString());
+        verify(mapper, times(locationDtos.size())).map(any(LocationDto.class), eq(DistrictDto.class));
     }
 
     @Test
@@ -945,22 +947,8 @@ class AddressServiceTest {
     void getAllDistrictsForKyivTest() {
         List<District> district = List.of(ModelUtils.getDistrict());
         when(districtRepository.findAllByCityId(1L)).thenReturn(district);
-        when(cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)).thenReturn(Optional.of(1L));
-
         addressService.getAllDistrictsForKyiv();
-
-        verify(cityRepository, times(1)).findIdByCityNameEnIgnoreCase(AppConstant.KYIV);
         verify(districtRepository, times(1)).findAllByCityId(anyLong());
-    }
-
-    @Test
-    void getAllDistrictsForKyivAndCityKyivNotFoundThenExceptionThrownTest() {
-        when(cityRepository.findIdByCityNameEnIgnoreCase(AppConstant.KYIV)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> addressService.getAllDistrictsForKyiv());
-
-        verify(cityRepository, times(1)).findIdByCityNameEnIgnoreCase(AppConstant.KYIV);
-        verify(districtRepository, times(0)).findAllByCityId(anyLong());
     }
 
     @Test

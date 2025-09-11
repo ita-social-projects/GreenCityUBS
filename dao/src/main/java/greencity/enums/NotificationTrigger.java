@@ -36,8 +36,8 @@ public enum NotificationTrigger {
                                 "2 місяці після останнього замовлення",
                                 "2 months after last order"),
     ORDER_WAS_CANCELED(
-                       "Скасування замовлення",
-                       "Order cancellation"),
+                       "Повернення бонусів після скасування замовлення",
+                       "Refund of bonuses after order cancellation"),
     CUSTOM(
            "Кастомна",
            "Custom"),

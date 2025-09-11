@@ -2,11 +2,10 @@ package greencity.mapping.user;
 
 import greencity.dto.address.AddressDto;
 import greencity.dto.location.api.DistrictDto;
+import greencity.dto.location.api.LocationDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
-import greencity.repository.CityRepository;
-import greencity.repository.DistrictRepository;
+import greencity.service.locations.LocationApiService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
@@ -21,8 +20,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class AddressToAddressDtoMapper extends AbstractConverter<Address, AddressDto> {
-    private final DistrictRepository districtRepository;
-    private final CityRepository cityRepository;
+    private final LocationApiService locationApiService;
 
     /**
      * Method convert {@link Address} to {@link AddressDto}.
@@ -50,22 +48,17 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
                 .longitude(address.getCoordinates().getLongitude())
                 .build())
             .addressRegionDistrictList(
-                getAllDistricts(address.getBaseAddress().getCityUk()))
+                getAllDistricts((address.getBaseAddress().getRegionUk()), address.getBaseAddress().getCityUk()))
             .actual(address.getBaseAddress().getActual())
             .build();
     }
 
-    private List<DistrictDto> getAllDistricts(String city) {
-        List<District> districtDtos = districtRepository.findAllByCityId(cityRepository.findIdByNameUkOrNameEn(city));
-
-        if (districtDtos == null) {
-            return List.of();
-        }
-
-        return districtDtos.stream()
-            .map(districtDto -> DistrictDto.builder()
-                .nameUk(districtDto.getNameUk())
-                .nameEn(districtDto.getNameEn())
+    private List<DistrictDto> getAllDistricts(String region, String city) {
+        List<LocationDto> locationDtos = locationApiService.getAllDistrictsInCityByNames(region, city);
+        return locationDtos.stream()
+            .map(locationDto -> DistrictDto.builder()
+                .nameUk(locationDto.getLocationNameMap().get("name_uk"))
+                .nameEn(locationDto.getLocationNameMap().get("name_en"))
                 .build())
             .collect(Collectors.toList());
     }

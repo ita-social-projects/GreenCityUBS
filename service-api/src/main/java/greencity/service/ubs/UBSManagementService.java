@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
+import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -158,6 +159,16 @@ public interface UBSManagementService {
      * Method that save ReasonNotTakeBagDto.
      */
     void saveReason(Order order, String description, MultipartFile[] images);
+
+    /**
+     * This is method which save Admin comment.
+     *
+     * @param adminCommentDto {@link AdminCommentDto}.
+     * @param email           {@link String}.
+     *
+     * @author Yuriy Bahlay.
+     */
+    void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String email);
 
     /**
      * This is method updates eco id from the shop for order by id.

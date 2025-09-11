@@ -30,7 +30,7 @@ class JwtToolTest {
     private JwtTool jwtTool;
 
     @BeforeEach
-    void setup() {
+    public void setup() {
         jwtTool = new JwtTool();
         ReflectionTestUtils.setField(jwtTool, "accessTokenKey", "secret-refresh-token-key-bigger-key");
     }

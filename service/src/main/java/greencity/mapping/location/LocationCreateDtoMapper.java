@@ -10,7 +10,7 @@ import java.util.List;
 
 @Component
 public class LocationCreateDtoMapper extends AbstractConverter<Location, LocationCreateDto> {
-    private static final String UALangCode = "uk";
+    private static final String UALangCode = "ua";
     private static final String ENLangCode = "en";
 
     @Override

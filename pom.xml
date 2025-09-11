@@ -32,7 +32,6 @@
         <test.containers.version>1.19.3</test.containers.version>
         <junit.version>4.13.2</junit.version>
         <jjwt.version>0.12.3</jjwt.version>
-        <telegrambot.version>6.9.7.1</telegrambot.version>
         <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
         <net.java.dev.jna.version>5.13.0</net.java.dev.jna.version>
         <cloudstorage.version>2.29.1</cloudstorage.version>

@@ -1,6 +1,5 @@
 package greencity.dto.notification;
 
-import greencity.annotations.ValidSchedulePattern;
 import greencity.enums.NotificationTime;
 import greencity.enums.NotificationTrigger;
 import greencity.enums.NotificationType;
@@ -31,6 +30,5 @@ public class NotificationTemplateUpdateInfoDto {
     private UserCategory userCategory;
     @NotNull
     private NotificationTime time;
-    @ValidSchedulePattern
     private String schedule;
 }

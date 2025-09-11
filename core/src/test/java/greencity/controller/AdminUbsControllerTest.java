@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.BlockedOrderDto;
@@ -8,7 +9,6 @@ import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.user.ChatLinkDto;
-import greencity.repository.UserRepository;
 import greencity.service.ubs.OrdersAdminsPageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,11 +23,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
 import static greencity.ModelUtils.getUuid;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -49,18 +45,18 @@ class AdminUbsControllerTest {
 
     private final Principal principal = getUuid();
     @Mock
-    UserRepository userRepository;
+    UserRemoteClient userRemoteClient;
 
     @BeforeEach
     void setup() {
         this.mockMvc = standaloneSetup(adminUbsController)
-            .setCustomArgumentResolvers(new UserArgumentResolver(userRepository))
+            .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
             .build();
     }
 
     @Test
     void getTableParameters() throws Exception {
-        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         mockMvc.perform(get(management + "/tableParams" + "?region=")
             .principal(principal))
             .andExpect(status().isOk());
@@ -69,7 +65,7 @@ class AdminUbsControllerTest {
 
     @Test
     void getTableParametersWithRegion() throws Exception {
-        when(userRepository.findUuidByRecipientEmail(anyString())).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         mockMvc.perform(get(management + "/tableParams" + "?region=KHARKIV_OBLAST")
                 .principal(principal))
             .andExpect(status().isOk());
@@ -101,10 +97,8 @@ class AdminUbsControllerTest {
         List<Long> unblockedOrdersId = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(listOfOrdersId);
-        String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
-        when(ordersAdminsPageService.unblockOrder(uuid, listOfOrdersId)).thenReturn(unblockedOrdersId);
+        when(ordersAdminsPageService.unblockOrder(null, listOfOrdersId)).thenReturn(unblockedOrdersId);
 
         mockMvc.perform(put(management + "/unblockOrders")
             .principal(principal)
@@ -112,7 +106,7 @@ class AdminUbsControllerTest {
             .content(json))
             .andExpect(status().isOk());
 
-        verify(ordersAdminsPageService).unblockOrder(uuid, listOfOrdersId);
+        verify(ordersAdminsPageService).unblockOrder(null, listOfOrdersId);
     }
 
     @Test
@@ -120,10 +114,8 @@ class AdminUbsControllerTest {
         List<BlockedOrderDto> dto = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(dto);
-        String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
-        when(ordersAdminsPageService.requestToBlockOrder(uuid, List.of())).thenReturn(dto);
+        when(ordersAdminsPageService.requestToBlockOrder(null, List.of())).thenReturn(dto);
 
         mockMvc.perform(put(management + "/blockOrders")
             .principal(principal)
@@ -131,12 +123,12 @@ class AdminUbsControllerTest {
             .content(json))
             .andExpect(status().isOk());
 
-        verify(ordersAdminsPageService).requestToBlockOrder(uuid, List.of());
+        verify(ordersAdminsPageService).requestToBlockOrder(null, List.of());
     }
 
     @Test
     void getColumnWidthForEmployeeTest() throws Exception {
-        when(userRepository.findUuidByRecipientEmail((anyString()))).thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         when(ordersAdminsPageService.getColumnWidthForEmployee(anyString())).thenReturn(new ColumnWidthDto());
 
         mockMvc.perform(get(management + "/orderTableColumnsWidth")
@@ -149,8 +141,7 @@ class AdminUbsControllerTest {
         ColumnWidthDto columnWidthDto = new ColumnWidthDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(columnWidthDto);
-        when(userRepository.findUuidByRecipientEmail((anyString())))
-            .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
+        when(userRemoteClient.findUuidByEmail((anyString()))).thenReturn("35467585763t4sfgchjfuyetf");
         doNothing().when(ordersAdminsPageService).saveColumnWidthForEmployee(any(ColumnWidthDto.class), anyString());
         mockMvc.perform(put(management + "/orderTableColumnsWidth")
             .principal(principal)

@@ -9,22 +9,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class PaymentSystemTest {
     @Test
     void testEnumValues() {
+        assertNotNull(PaymentSystem.MONOBANK);
         assertNotNull(PaymentSystem.WAY_FOR_PAY);
     }
 
     @Test
     void testEnumByName() {
+        assertEquals(PaymentSystem.MONOBANK, PaymentSystem.valueOf("MONOBANK"));
         assertEquals(PaymentSystem.WAY_FOR_PAY, PaymentSystem.valueOf("WAY_FOR_PAY"));
     }
 
     @Test
     void testEnumLength() {
-        assertEquals(1, PaymentSystem.values().length);
+        assertEquals(2, PaymentSystem.values().length);
     }
 
     @Test
     void testEnumValuesArray() {
-        PaymentSystem[] expected = {PaymentSystem.WAY_FOR_PAY};
+        PaymentSystem[] expected = {PaymentSystem.MONOBANK, PaymentSystem.WAY_FOR_PAY};
         assertArrayEquals(expected, PaymentSystem.values());
     }
 }

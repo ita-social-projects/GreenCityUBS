@@ -13,6 +13,7 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import java.util.List;
+import java.util.Optional;
 
 public interface AddressService {
     /**
@@ -41,10 +42,9 @@ public interface AddressService {
      *
      * @param addressDto {@link UpdateAddressDto}
      * @param email      {@link String} the user's email
-     * @return {@link OrderAddressDtoResponse} that contains address.
      * @author Kizerov Dmytro
      */
-    OrderAddressDtoResponse addressUpdate(UpdateAddressDto addressDto, String email);
+    void addressUpdate(UpdateAddressDto addressDto, String email);
 
     /**
      * Method that save address for current user.
@@ -66,7 +66,7 @@ public interface AddressService {
      * @return {@link OrderAddressDtoResponse} that contains address.
      * @author Mahdziak Orest
      */
-    OrderAddressDtoResponse updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
+    Optional<OrderAddressDtoResponse> updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
         String email);
 
     /**

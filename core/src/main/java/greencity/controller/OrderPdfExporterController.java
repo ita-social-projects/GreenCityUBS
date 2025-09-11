@@ -9,12 +9,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.core.io.Resource;
@@ -25,7 +23,6 @@ import java.util.Locale;
 @RestController
 @RequestMapping("ubs/order/pdf/export")
 @RequiredArgsConstructor
-@Validated
 public class OrderPdfExporterController {
     private final PdfExporterService pdfExporterService;
 
@@ -38,7 +35,7 @@ public class OrderPdfExporterController {
     })
     @GetMapping(produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<Resource> exportOrderPdf(@Parameter(hidden = true) @CurrentUserUuid String userUuid,
-        @Positive @Parameter @RequestParam("id") Long orderId,
+        @Parameter @RequestParam("id") Long orderId,
         @Parameter @RequestParam(name = "lang") @ValidLanguage Locale locale) {
         Resource resource = pdfExporterService.generatePdfFileByObjectId(orderId, locale, userUuid);
         HttpHeaders headers = new HttpHeaders();

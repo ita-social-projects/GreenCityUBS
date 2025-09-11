@@ -44,7 +44,7 @@ class EmailServiceTest {
         NotificationDto notificationDto = ModelUtils.TEST_NOTIFICATION_DTO;
 
         ScheduledEmailMessage emailNotificationDto = ScheduledEmailMessage.builder()
-            .userUuid(notification.getUser().getUuid())
+            .email(notification.getUser().getRecipientEmail())
             .subject(notificationDto.getTitle())
             .body(notificationDto.getBody())
             .language("en")

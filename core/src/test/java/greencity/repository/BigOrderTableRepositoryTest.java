@@ -12,13 +12,11 @@ import greencity.enums.PaymentStatus;
 import greencity.filters.DateFilter;
 import greencity.filters.OrderPage;
 import greencity.filters.OrderSearchCriteria;
-import greencity.ubstelegrambot.UBSTelegramBot;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -36,20 +34,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/insert.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = UbsApplication.class, properties = {
-    "WAY_FOR_PAY_LOGIN=testLogin",
-    "WAY_FOR_PAY_SECRET=testSecret",
-    "DOMAIN_NAME=http://testdomain/",
-    "WAY_FOR_PAY_RETURN_URL=testUrl",
-    "WAY_FOR_PAY_REDIRECT=testRedirectUrl"
-})
+@SpringBootTest(classes = UbsApplication.class)
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
-    @MockBean
-    private UBSTelegramBot telegramBot;
     @Autowired
     private BigOrderTableRepository bigOrderTableRepository;
     private static final String USER_LANGUAGE_ENG = "eng";
-    private static final String USER_LANGUAGE_UA = "uk";
+    private static final String USER_LANGUAGE_UA = "ua";
     private static final List<Long> TARIFFS_ID_LIST = Collections.singletonList(1L);
     private static final OrderSearchCriteria DEFAULT_ORDER_SEARCH_CRITERIA = new OrderSearchCriteria();
     private static final LocalDateTime ORDER_DATE_START = LocalDateTime.of(2022, 1, 31, 23, 59, 59);

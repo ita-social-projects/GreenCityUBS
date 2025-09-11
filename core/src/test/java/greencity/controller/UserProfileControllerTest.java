@@ -2,6 +2,7 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
@@ -9,7 +10,6 @@ import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.exception.handler.CustomExceptionHandler;
-import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,12 +27,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
-
 import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUserProfileCreateDto;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -52,7 +49,7 @@ class UserProfileControllerTest {
     UserProfileController userProfileController;
 
     @Mock
-    UserRepository userRepository;
+    UserRemoteClient userRemoteClient;
 
     @Mock
     private Validator mockValidator;
@@ -65,7 +62,7 @@ class UserProfileControllerTest {
         this.mockMvc = MockMvcBuilders.standaloneSetup(userProfileController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRepository))
+                new UserArgumentResolver(userRemoteClient))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .setValidator(mockValidator)
             .build();
@@ -80,10 +77,7 @@ class UserProfileControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(userProfileDto);
 
-        String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
-
-        mockMvc.perform(put(AppConstant.UBS_LINK_USERPROFILE + "/user/update")
+        mockMvc.perform(put(AppConstant.ubsLink + "/user/update")
             .content(responseJSON)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -92,9 +86,7 @@ class UserProfileControllerTest {
 
     @Test
     void getProfileData() throws Exception {
-        String uuid = "uuid";
-        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
-        mockMvc.perform(get(AppConstant.UBS_LINK_USERPROFILE + "/user/getUserProfile")
+        mockMvc.perform(get(AppConstant.ubsLink + "/user/getUserProfile")
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
@@ -106,7 +98,7 @@ class UserProfileControllerTest {
         DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
             .reason("test")
             .build();
-        mockMvc.perform(put(AppConstant.UBS_LINK_USERPROFILE + deactivateUser)
+        mockMvc.perform(put(AppConstant.ubsLink + deactivateUser)
             .contentType(MediaType.APPLICATION_JSON)
             .content(mapper.writeValueAsString(request)))
             .andExpect(status().isOk());
@@ -116,7 +108,7 @@ class UserProfileControllerTest {
     void createUserProfile() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String content = objectMapper.writeValueAsString(getUserProfileCreateDto());
-        mockMvc.perform(post(AppConstant.UBS_LINK_USERPROFILE + "/user/create")
+        mockMvc.perform(post(AppConstant.ubsLink + "/user/create")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());

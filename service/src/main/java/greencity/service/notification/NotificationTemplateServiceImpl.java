@@ -14,12 +14,10 @@ import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationType;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.ForbiddenException;
 import greencity.exceptions.notification.IncorrectTemplateException;
 import greencity.exceptions.notification.TemplateDeleteException;
 import greencity.notificator.listener.NotificationPlanner;
 import greencity.repository.NotificationTemplateRepository;
-import greencity.repository.UserNotificationRepository;
 import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,15 +29,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class NotificationTemplateServiceImpl implements NotificationTemplateService {
     private final NotificationTemplateRepository notificationTemplateRepository;
-    private final UserNotificationRepository userNotificationRepository;
     private final NotificationPlanner notificationPlanner;
     private final ModelMapper modelMapper;
+    private final NotificationPlanner planner;
 
     /**
      * {@inheritDoc}
@@ -85,9 +84,9 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     }
 
     private void updateNotificationTemplatePlatforms(List<NotificationPlatform> platforms,
-        List<NotificationPlatformDto> platformDTOs) {
+        List<NotificationPlatformDto> platformDtos) {
         for (NotificationPlatform platform : platforms) {
-            NotificationPlatformDto platformDto = platformDTOs.stream()
+            NotificationPlatformDto platformDto = platformDtos.stream()
                 .filter(dto -> dto.getId().equals(platform.getId()))
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_PLATFORM_NOT_FOUND));
@@ -111,7 +110,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         Page<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findAll(pageRequest);
         List<NotificationTemplateDto> templateDtoList = notificationTemplates.stream()
             .map(notificationTemplate -> modelMapper.map(notificationTemplate, NotificationTemplateDto.class))
-            .toList();
+            .collect(Collectors.toList());
         return new PageableDto<>(
             templateDtoList,
             notificationTemplates.getTotalElements(),
@@ -130,13 +129,11 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Override
     @Transactional
     public void changeNotificationStatusById(Long id, String status) {
-        NotificationStatus newStatus = getValidNotificationStatusByNameOrThrow(status);
-        NotificationTemplate notificationTemplate = getById(id);
+        var newStatus = getValidNotificationStatusByNameOrThrow(status);
+        var notificationTemplate = getById(id);
         notificationTemplate.setNotificationStatus(newStatus);
         notificationTemplate.getNotificationPlatforms()
             .forEach(platform -> platform.setNotificationStatus(newStatus));
-
-        restartNotificationSchedule(NotificationType.CUSTOM);
     }
 
     private NotificationStatus getValidNotificationStatusByNameOrThrow(String status) {
@@ -153,7 +150,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
             modelMapper.map(notificationTemplateDto, NotificationTemplate.class);
         checkTemplateContainsMessagesForAllPlatforms(notificationTemplate.getNotificationPlatforms());
         notificationTemplateRepository.save(notificationTemplate);
-        restartNotificationSchedule(NotificationType.CUSTOM);
+        restartCustomNotificator();
     }
 
     private void checkTemplateContainsMessagesForAllPlatforms(List<NotificationPlatform> notificationPlatforms) {
@@ -186,13 +183,8 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Transactional
     public void removeNotificationTemplate(Long id) {
         checkTemplateIsCustom(id);
-
-        if (userNotificationRepository.existsByTemplateId(id)) {
-            throw new ForbiddenException(ErrorMessage.TEMPLATE_IN_USE_CANNOT_BE_DELETED);
-        }
-
         removeTemplate(id);
-        restartNotificationSchedule(NotificationType.CUSTOM);
+        restartCustomNotificator();
     }
 
     private void checkTemplateIsCustom(Long id) {
@@ -204,6 +196,10 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
 
     private void removeTemplate(Long id) {
         notificationTemplateRepository.deleteById(id);
+    }
+
+    private void restartCustomNotificator() {
+        planner.restartNotificator(NotificationType.CUSTOM);
     }
 
     /**

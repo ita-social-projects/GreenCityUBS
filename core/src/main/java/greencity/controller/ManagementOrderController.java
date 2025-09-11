@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
-import greencity.annotations.ValidImage;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
 import greencity.dto.bag.AdditionalBagInfoDto;
@@ -10,6 +9,7 @@ import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.location.CoordinatesDto;
+import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -62,8 +62,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -140,10 +138,10 @@ public class ManagementOrderController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @PreAuthorize("@preAuthorizer.hasAuthority('CREATE_NEW_CERTIFICATE', authentication)")
     @PostMapping("/addCertificate")
-    public ResponseEntity<Void> addCertificate(
+    public ResponseEntity<HttpStatus> addCertificate(
         @Valid @RequestBody CertificateDtoForAdding certificateDtoForAdding) {
         certificateService.addCertificate(certificateDtoForAdding);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**
@@ -163,10 +161,10 @@ public class ManagementOrderController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_CERTIFICATE', authentication)")
     @DeleteMapping("/deleteCertificate/{responseCode}")
-    public ResponseEntity<Void> deleteCertificate(
-        @PathVariable String responseCode) {
+    public ResponseEntity<HttpStatus> deleteCertificate(
+        @Valid @PathVariable String responseCode) {
         certificateService.deleteCertificate(responseCode);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -225,8 +223,8 @@ public class ManagementOrderController {
     @PostMapping("/group-undelivered-with-specified")
     public ResponseEntity<List<GroupedOrderDto>> groupCoordsWithSpecifiedOnes(
         @Valid @RequestBody Set<CoordinatesDto> specified,
-        @PositiveOrZero @RequestParam(required = false, defaultValue = "3000") Integer litres,
-        @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Double additionalDistance) {
+        @RequestParam(required = false, defaultValue = "3000") Integer litres,
+        @RequestParam(required = false, defaultValue = "0") Double additionalDistance) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(coordinateService.getClusteredCoordsAlongWithSpecified(specified, litres, additionalDistance));
     }
@@ -245,10 +243,10 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
     @PatchMapping(value = "/addPointsToUser")
-    public ResponseEntity<Void> addPointsToUser(
+    public ResponseEntity<HttpStatus> addPointsToUser(
         @Valid @RequestBody AddingPointsToUserDto addingPointsToUserDto) {
         ubsManagementService.addPointsToUser(addingPointsToUserDto);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -268,7 +266,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/getUsersViolations")
     public ResponseEntity<ViolationsInfoDto> getUserViolations(
-        @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
+        @Valid @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAllUserViolations(email));
     }
@@ -294,15 +292,15 @@ public class ManagementOrderController {
     @Operation(summary = "Add Violation to User")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PostMapping(value = "/addViolationToUser",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Void> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
-        @RequestPart(required = false) @Nullable @ValidImage MultipartFile[] files,
+    public ResponseEntity<HttpStatus> addUsersViolation(@Valid @RequestPart AddingViolationsToUserDto add,
+        @RequestPart(required = false) @Nullable MultipartFile[] files,
         Principal principal) {
         violationService.addUserViolation(add, files, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -389,8 +387,8 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/getPaymentInfo")
-    public ResponseEntity<PaymentTableInfoDto> paymentInfo(@Positive @RequestParam long orderId,
-        @PositiveOrZero @RequestParam Double sumToPay) {
+    public ResponseEntity<PaymentTableInfoDto> paymentInfo(@RequestParam long orderId,
+        @RequestParam Double sumToPay) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(paymentService.getPaymentInfo(orderId, sumToPay));
     }
@@ -412,7 +410,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/read-order-info/{id}")
     public ResponseEntity<List<OrderDetailInfoDto>> getOrderInfo(
-        @Positive @PathVariable("id") Long id, @RequestParam String language) {
+        @Valid @PathVariable("id") Long id, @RequestParam String language) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderDetails(id, language));
     }
@@ -434,7 +432,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-order-sum-detail/{id}")
     public ResponseEntity<CounterOrderDetailsDto> getOrderSumDetails(
-        @Positive @PathVariable("id") Long id) {
+        @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderSumDetails(id));
     }
@@ -454,7 +452,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/getOrderBagsInfo/{id}")
     public ResponseEntity<List<DetailsOrderInfoDto>> getOrderBagsInfo(
-        @Positive @PathVariable("id") Long id) {
+        @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderBagsDetails(id));
     }
@@ -477,7 +475,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/violation-details/{orderId}")
     public ResponseEntity<ViolationDetailInfoDto> getViolationDetailsForCurrentOrder(
-        @Positive @PathVariable("orderId") Long orderId) {
+        @Valid @PathVariable("orderId") Long orderId) {
         Optional<ViolationDetailInfoDto> violationDetailsByOrderId =
             violationService.getViolationDetailsByOrderId(orderId);
         if (violationDetailsByOrderId.isEmpty()) {
@@ -505,7 +503,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/read-order-detail-status/{id}")
     public ResponseEntity<OrderDetailStatusDto> getOrderDetailStatus(
-        @Positive @PathVariable("id") Long id) {
+        @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderDetailStatus(id));
     }
@@ -528,7 +526,7 @@ public class ManagementOrderController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PutMapping("/update-order-detail-status/{id}")
     public ResponseEntity<OrderDetailStatusDto> updateOrderDetailStatus(
-        @Positive @PathVariable("id") Long id, @Valid @RequestBody OrderDetailStatusRequestDto dto,
+        @Valid @PathVariable("id") Long id, @RequestBody OrderDetailStatusRequestDto dto,
         Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateOrderDetailStatusById(id, dto, principal.getName()));
@@ -551,7 +549,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-order-export-details/{id}")
     public ResponseEntity<ExportDetailsDto> getOrderExportInfo(
-        @Positive @PathVariable("id") Long id) {
+        @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderExportDetails(id));
     }
@@ -613,7 +611,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-data-for-order/{id}")
     public ResponseEntity<OrderStatusPageDto> getDataForOrderStatusPage(
-        @Positive @PathVariable(name = "id") Long orderId,
+        @PathVariable(name = "id") Long orderId,
         Principal principal) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderStatusData(orderId, principal.getName()));
@@ -629,13 +627,12 @@ public class ManagementOrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = OrderStatusPageDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/check-employee-for-order/{id}")
     public ResponseEntity<Boolean> checkEmployeeForOrderPage(
-        @Positive @PathVariable(name = "id") Long orderId,
+        @PathVariable(name = "id") Long orderId,
         Principal principal) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.checkEmployeeForOrder(orderId, principal.getName()));
@@ -659,7 +656,7 @@ public class ManagementOrderController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PutMapping("/update-order-export-details/{id}")
     public ResponseEntity<ExportDetailsDto> updateOrderExportInfo(
-        @Positive @PathVariable("id") Long id, @Valid @RequestBody ExportDetailsDtoUpdate dto,
+        @Valid @PathVariable("id") Long id, @RequestBody ExportDetailsDtoUpdate dto,
         Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ubsManagementService.updateOrderExportDetailsById(id, dto, principal.getName()));
@@ -680,7 +677,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/getAdditionalOrderBagsInfo/{id}")
     public ResponseEntity<List<AdditionalBagInfoDto>> getAdditionalOrderBagsInfo(
-        @Positive @PathVariable("id") Long id) {
+        @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAdditionalBagsInfo(id));
     }
@@ -700,10 +697,10 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @DeleteMapping("/delete-violation-from-order/{orderId}")
-    public ResponseEntity<Void> deleteViolationFromOrder(@Positive @PathVariable Long orderId,
+    public ResponseEntity<HttpStatus> deleteViolationFromOrder(@PathVariable Long orderId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         violationService.deleteViolation(orderId, uuid);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -726,9 +723,9 @@ public class ManagementOrderController {
     })
     @PostMapping(value = "/add-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@Positive @PathVariable(name = "id") Long orderId,
+    public ResponseEntity<ManualPaymentResponseDto> addManualPayment(@PathVariable(name = "id") Long orderId,
         @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) @ValidImage MultipartFile image, Principal principal) {
+        @RequestPart(required = false) MultipartFile image, Principal principal) {
         manualPaymentRequestValidator.validate(manualPaymentDto, orderId, ADD);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(paymentService.saveNewManualPayment(orderId, manualPaymentDto, image, principal.getName()));
@@ -750,10 +747,10 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @DeleteMapping("/delete-manual-payment/{id}")
-    public ResponseEntity<Void> deleteManualPayment(@Positive @PathVariable(name = "id") Long paymentId,
+    public ResponseEntity<ResponseStatus> deleteManualPayment(@PathVariable(name = "id") Long paymentId,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         paymentService.deleteManualPayment(paymentId, uuid);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -775,11 +772,9 @@ public class ManagementOrderController {
     })
     @PutMapping(value = "/update-manual-payment/{id}",
         consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(
-        @Positive @PathVariable(name = "id") Long paymentId,
+    public ResponseEntity<ManualPaymentResponseDto> updateManualPayment(@PathVariable(name = "id") Long paymentId,
         @Valid @RequestPart ManualPaymentRequestDto manualPaymentDto,
-        @RequestPart(required = false) @ValidImage MultipartFile image,
-        @Parameter(hidden = true) @CurrentUserUuid String uuid) {
+        @RequestPart(required = false) MultipartFile image, @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         manualPaymentRequestValidator.validate(manualPaymentDto, paymentId, UPDATE);
         return ResponseEntity.status(HttpStatus.OK)
             .body(paymentService.updateManualPayment(paymentId, manualPaymentDto, image, uuid));
@@ -796,14 +791,12 @@ public class ManagementOrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = EmployeePositionDtoRequest.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/get-all-employee-by-position/{id}")
-    public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(
-        @Positive @PathVariable("id") Long orderId,
+    public ResponseEntity<EmployeePositionDtoRequest> getAllEmployeeByPosition(@Valid @PathVariable("id") Long orderId,
         Principal principal) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getAllEmployeesByPosition(orderId, principal.getName()));
@@ -816,42 +809,66 @@ public class ManagementOrderController {
      */
     @Operation(summary = "Update Violation to User")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @ApiLocale
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PutMapping(value = "/updateViolationToUser", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateUsersViolation(@Valid @RequestPart UpdateViolationToUserDto add,
-        @Nullable @RequestPart(required = false) @ValidImage MultipartFile[] multipartFiles,
+    public ResponseEntity<HttpStatus> updateUsersViolation(@Valid @RequestPart UpdateViolationToUserDto add,
+        @Nullable @RequestPart(required = false) MultipartFile[] multipartFiles,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         violationService.updateUserViolation(add, multipartFiles, uuid);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**
-     * Controller for updating id From eco-store for order.
+     * Controller for saving Admin comment.
      *
-     * @param ecoNumberDto {@link EcoNumberDto}.
+     * @param adminCommentDto {@link AdminCommentDto}.
      * @author Bahlay Yuriy.
      */
-    @Operation(summary = "update eco-store id for order")
+    @Operation(summary = "Save admin comment")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
-    @PutMapping("/update-eco-store/{id}")
-    public ResponseEntity<Void> updateEcoStoreIdToOrder(
-        @RequestBody @Valid EcoNumberDto ecoNumberDto, @Positive @PathVariable(name = "id") Long orderId,
+    @PostMapping("/save-admin-comment")
+    public ResponseEntity<HttpStatus> saveAdminCommentToOrder(
+        @RequestBody @Valid AdminCommentDto adminCommentDto,
+        Principal principal) {
+        ubsManagementService.saveAdminCommentToOrder(adminCommentDto, principal.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Controller for updating Id From eco-store for order.
+     *
+     * @param ecoNumberDto {@link EcoNumberDto}.
+     * @author Bahlay Yuriy.
+     */
+    @Operation(summary = "update eco-store id for order")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
+        @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
+    })
+    @PutMapping("/update-eco-store{id}")
+    public ResponseEntity<HttpStatus> updateEcoStoreIdToOrder(
+        @RequestBody @Valid EcoNumberDto ecoNumberDto, @PathVariable(name = "id") Long orderId,
         Principal principal) {
         ubsManagementService.updateEcoNumberForOrderById(ecoNumberDto, orderId, principal.getName());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -869,7 +886,7 @@ public class ManagementOrderController {
 
     @Operation(summary = "update order admin page info and save reason if needed")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
@@ -879,16 +896,16 @@ public class ManagementOrderController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_ORDER', authentication)")
     @PatchMapping(value = "/update-order-page-admin-info/{id}",
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<BigOrderTableDTO> updatePageAdminInfo(@Positive @PathVariable(name = "id") Long orderId,
+    public ResponseEntity<BigOrderTableDTO> updatePageAdminInfo(@PathVariable(name = "id") Long orderId,
         @Valid @RequestPart UpdateOrderPageAdminDto updateOrderPageAdminDto,
         @RequestParam String language,
         @Parameter(hidden = true) Principal principal,
-        @RequestPart(required = false) @Nullable @ValidImage MultipartFile[] images) {
+        @RequestPart(required = false) @Nullable MultipartFile[] images) {
         BigOrderTableDTO bigOrderTableDTO =
             ubsManagementService.updateOrderAdminPageInfoAndSaveReason(orderId, updateOrderPageAdminDto, language,
                 principal.getName(), images);
 
-        return ResponseEntity.status(HttpStatus.OK).body(bigOrderTableDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(bigOrderTableDTO);
     }
 
     /**
@@ -900,7 +917,7 @@ public class ManagementOrderController {
      */
     @Operation(summary = "update all order admin page info")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED, content = @Content),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
@@ -908,11 +925,11 @@ public class ManagementOrderController {
         @ApiResponse(responseCode = "422", description = HttpStatuses.UNPROCESSABLE_ENTITY, content = @Content)
     })
     @PutMapping("/all-order-page-admin-info")
-    public ResponseEntity<Void> updateAllOrderPageAdminInfo(
+    public ResponseEntity<HttpStatus> updateAllOrderPageAdminInfo(
         @RequestBody @Valid UpdateAllOrderPageDto updateAllOrderPageDto, Principal principal,
         @RequestParam String lang) {
         ubsManagementService.updateAllOrderAdminPageInfo(updateAllOrderPageDto, principal.getName(), lang);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -932,7 +949,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-order-cancellation-reason/{id}")
     public ResponseEntity<OrderCancellationReasonDto> getOrderCancellationReason(
-        @Positive @PathVariable("id") Long id) {
+        @Valid @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getOrderCancellationReason(id));
     }
@@ -956,7 +973,7 @@ public class ManagementOrderController {
     })
     @GetMapping("/get-not-taken-order-reason/{id}")
     public ResponseEntity<NotTakenOrderReasonDto> getNotTakenOrderReason(
-        @Positive @PathVariable("id") Long orderId) {
+        @Valid @PathVariable("id") Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.getNotTakenOrderReason(orderId));
     }
@@ -974,12 +991,11 @@ public class ManagementOrderController {
     @Operation(summary = "Check if the order status transitioned from FORMED to CANCELED")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
     })
     @GetMapping("/check-status-transition/formed-to-canceled/{id}")
-    public ResponseEntity<Boolean> checkIfOrderStatusIsFormedToCanceled(@Positive @PathVariable Long id) {
+    public ResponseEntity<Boolean> checkIfOrderStatusIsFormedToCanceled(@Valid @PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsManagementService.checkIfOrderStatusIsFormedToCanceled(id));
     }

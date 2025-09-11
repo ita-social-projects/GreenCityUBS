@@ -5,7 +5,6 @@ import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.position.PositionDto;
-import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import java.util.List;
@@ -161,13 +160,6 @@ public class ModelUtils {
             .houseNumber("1")
             .entranceNumber("2")
             .houseCorpus("A")
-            .build();
-    }
-
-    public static TariffWithChatAccess getTariffWithChatAccess() {
-        return TariffWithChatAccess.builder()
-            .tariffId(1L)
-            .hasChat(true)
             .build();
     }
 }

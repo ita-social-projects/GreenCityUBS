@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface CityRepository extends JpaRepository<City, Long> {
     /**
@@ -53,17 +52,4 @@ public interface CityRepository extends JpaRepository<City, Long> {
             + " AND (c.name_uk = :nameUk OR c.name_en = :nameEn) LIMIT 1",
         nativeQuery = true)
     Optional<City> findCityByRegionIdAndNameUkAndNameEn(Long regionId, String nameUk, String nameEn);
-
-    /**
-     * Retrieves the ID of a city by its eng name, ignoring case.
-     *
-     * @param cityName the eng name of the city to search for (case-insensitive)
-     * @return an {@link Optional} containing the city's ID if found, or empty if
-     *         not found
-     */
-    @Query("SELECT c.id FROM City c WHERE LOWER(c.nameEn) = LOWER(:cityName)")
-    Optional<Long> findIdByCityNameEnIgnoreCase(@Param("cityName") String cityName);
-
-    @Query("SELECT d.id FROM City d WHERE d.nameUk = :name OR d.nameEn = :name")
-    Long findIdByNameUkOrNameEn(@Param("name") String name);
 }

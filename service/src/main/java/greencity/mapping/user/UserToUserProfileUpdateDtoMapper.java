@@ -38,6 +38,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
             .alternateEmail(user.getAlternateEmail())
             .addressDto(addressDtoList)
             .telegramIsNotify(user.getTelegramBot() != null && user.getTelegramBot().getIsNotify())
+            .viberIsNotify(user.getViberBot() != null && user.getViberBot().getIsNotify())
             .build();
     }
 

@@ -4,15 +4,7 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ValidationConstant {
-    public static final String EMAIL_REGEXP =
-        "^(?=.{3,72}$)"
-            + "([a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+"
-            + "(?:\\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*)"
-            + "@"
-            + "(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+"
-            + "[a-zA-Z]{2,63}|"
-            + "\\[(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)"
-            + "(?:\\.(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)){3}\\])$";
+    public static final String EMAIL_REGEXP = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
     public static final String CERTIFICATE_CODE_REGEXP = "\\d{4}-\\d{4}";
     public static final String CERTIFICATE_CODE_REGEXP_MESSAGE = "This certificate code is not valid";
     public static final String SELECT_CORRECT_LANGUAGE = "Select correct language: 'en' or 'ua'";
@@ -26,24 +18,12 @@ public class ValidationConstant {
         "^([A-Z][a-z]{0,39}[ʼ'`ʹ]?[a-z]{0,39}'?[a-z]{0,39}($|[ -](?=[A-Z]))){1,10}$";
     public static final String CH_EN = "[A-Za-z\\s-ʼ'`ʹ,.]";
     public static final String CH_UK = "[ЁёІіЇїҐґЄєА-Яа-я\\s-ʼ'`ʹ,.]";
-    public static final String CH_NUM = "^([A-Za-zА-Яа-яЇїЄєІіҐґ0-9]([\\-/,]?))";
+    public static final String CH_NUM = "[-A-Za-zА-Яа-яЁёЇїІіЄєҐґ0-9.,ʼ'`ʹ—/\"\\s]";
     public static final String COURIER_NAME_EN_REGEXP = "^[A-Z][A-Za-zА0-9'\\s]{1,29}$";
     public static final String COURIER_NAME_UK_REGEXP = "^[ЁІЇҐЄА-Я][ЁёІіЇїҐґЄєА-Яа-яA[0-9]'\\s]{1,29}$";
 
-    public static final String NAME_REGEXP =
-        "^[ґҐіІєЄїЇА-Яа-яa-zA-Z]"
-            + "(?!.*\\.$)"
-            + "(?!.*\\.\\.)"
-            + "(?!.*--)"
-            + "(?!.*'')"
-            + "(?!.*(?:[-'ʼ’\\.]\\s+[-'ʼ’\\.]))"
-            + "[-'ʼ’ ґҐіІєЄїЇА-Яа-я\\w\\.]{0,29}$";
-    public static final String NAME_VALIDATION_MESSAGE =
-        "Name must start with an English or Ukrainian letter, "
-            + "be 1 to 30 characters long, "
-            + "cannot end with a dot, "
-            + "and cannot contain consecutive dots, dashes or apostrophes. "
-            + "Allowed: English/Ukrainian letters, digits, underscore, space, dot, hyphen and apostrophe.";
+    public static final String NAME_REGEXP = "^(?!\\.)(?!.*\\.$)(?!.*?\\.\\.)(?!.*?\\-\\-)(?!.*?\\'\\')(?!\\s*$)"
+        + "(?<![ЭэЁёъЪЫы])[-'ʼ ґҐіІєЄїЇА-Яа-я+\\w.]{1,30}$";
     public static final String STREET_REGEXP = "^(?![0-9]+$)[-A-Za-zА-Яа-яЇїІіЄєҐґ .,ʼ'`ʹ0-9-]*$";
     public static final String STREET_VALIDATION_MESSAGE =
         "Use only English, or Ukrainian letters. Both English or Ukrainian letters valid, "
@@ -57,7 +37,6 @@ public class ValidationConstant {
         {1,30}\
         (?<![ЭэЁёъЪЫы])$\
         """;
-    public static final String NAMESURNAME_REGEXP = "^[A-Za-zА-Яа-я\\-'\\s]+$";
     public static final String USERNAME_MESSAGE = """
         Name must start with a letter, \
         cannot end with dot \
@@ -73,5 +52,4 @@ public class ValidationConstant {
         "Provided payment date format is not a valid.";
     public static final String VALIDATION_RESPONSE_HEADER = "Following violation occurred during validation: ";
     public static final String VIOLATION_CHUNK = "{%s}";
-    public static final String SCHEDULER_VALIDATION_ERROR_MESSAGE = "Invalid pattern value for scheduler";
 }
