@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="add-created-at-to-telegram-chat" author="Anton Pampukha">
+        <addColumn tableName="telegram_chat">
+            <column name="created_at" type="timestamp"/>
+        </addColumn>
+
+        <update tableName="telegram_chat">
+            <column name="created_at" valueDate="NOW()"/>
+            <where>created_at IS NULL</where>
+        </update>
+
+        <addNotNullConstraint tableName="telegram_chat"
+                              columnName="created_at"
+                              columnDataType="timestamp"/>
+    </changeSet>
+
+
+</databaseChangeLog>

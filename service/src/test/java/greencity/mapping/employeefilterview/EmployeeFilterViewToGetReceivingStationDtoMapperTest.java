@@ -11,7 +11,7 @@ class EmployeeFilterViewToGetReceivingStationDtoMapperTest {
     private EmployeeFilterViewToGetReceivingStationDtoMapper mapper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         this.mapper = new EmployeeFilterViewToGetReceivingStationDtoMapper();
     }
 

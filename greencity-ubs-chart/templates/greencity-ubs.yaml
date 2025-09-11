@@ -60,11 +60,11 @@ spec:
               name: {{ .Values.externalSecret.secretName }}
               key: DATABASE-USER
 
-        - name: DIALECT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: DIALECT
+        # - name: DIALECT
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: {{ .Values.externalSecret.secretName }}
+        #       key: DIALECT
 
         - name: DRIVER
           valueFrom:
@@ -138,24 +138,6 @@ spec:
               name: {{ .Values.externalSecret.secretName }}
               key: MERCHANT-ID
 
-        - name: LIQPAY_PUBLIC_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: LIQPAY-PUBLIC-KEY
-
-        - name: LIQPAY_PRIVATE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: LIQPAY-PRIVATE-KEY
-
-        - name: FONDY_PAYMENT_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: FONDY-PAYMENT-KEY
-
         - name: TELEGRAM_BOT_TOKEN
           valueFrom:
             secretKeyRef:
@@ -168,53 +150,59 @@ spec:
               name: {{ .Values.externalSecret.secretName }}
               key: TELEGRAM-BOT-NAME
 
-        - name: VIBER_BOT_URL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: VIBER-BOT-URL
-
-        - name: VIBER_BOT_URI
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: VIBER-BOT-URI
-
-        - name: VIBER_BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: VIBER-BOT-TOKEN
-
-        - name: FONDY_REDIRECT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: FONDY-REDIRECT
-
-        - name: FONDY_PERSONAL_CABINET
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: FONDY-PERSONAL-CABINET
-
-        - name: LIQPAY_REDIRECT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: LIQPAY-REDIRECT
-
         - name: GOOGLE_API_KEY
           valueFrom:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: GOOGLE-API-KEY
+
+        - name: LDM_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: LDM-SECRET-KEY
         
         - name: DOMAIN_NAME
           valueFrom:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: DOMAIN-NAME
+
+        - name: WAY_FOR_PAY_REDIRECT
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: WAY-FOR-PAY-REDIRECT
+
+        - name: WAY_FOR_PAY_RETURN_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: WAY-FOR-PAY-RETURN-URL
+
+        - name: WAY_FOR_PAY_CONFIRM_PAGE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: WAY-FOR-PAY-CONFIRM-PAGE
+
+        - name: WAY_FOR_PAY_LOGIN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: WAY-FOR-PAY-LOGIN
+
+        - name: WAY_FOR_PAY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: WAY-FOR-PAY-SECRET
+
+        - name: GREENCITY_SECRET_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: GREENCITY-SECRET-TOKEN
         ports:
         - containerPort: 8060
           name: tomcat

@@ -173,9 +173,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         Integer bagId = bag.getId();
         Map<Integer, Integer> amount = orderBagService.getActualBagsAmountForOrder(order.getOrderBags());
         Integer totalBagsAmount = amount.values().stream().reduce(0, Integer::sum);
-        if (amount.get(bagId).equals(0) || order.getOrderPaymentStatus().equals(OrderPaymentStatus.UNPAID)) {
-            if (totalBagsAmount.equals(amount.get(bagId))) {
-                order.updateWithNewOrderBags(new ArrayList<>());
+        if (Objects.equals(amount.get(bagId), 0)
+            || Objects.equals(order.getOrderPaymentStatus(), OrderPaymentStatus.UNPAID)) {
+            if (Objects.equals(totalBagsAmount, amount.get(bagId))) {
+                order.setOrderBags(new ArrayList<>());
                 orderRepository.delete(order);
                 return;
             }
@@ -394,7 +395,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .nameEn(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("en")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName())
-            .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("ua")).findFirst()
+            .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("uk")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName())
             .region(region)
@@ -403,7 +404,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto, Long regionId) {
         Optional<Location> location = locationRepository.findLocationByNameAndRegionId(
-            dto.stream().filter(translation -> translation.getLanguageCode().equals("ua")).findFirst()
+            dto.stream().filter(translation -> translation.getLanguageCode().equals("uk")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName(),
             dto.stream().filter(translation -> translation.getLanguageCode().equals("en")).findFirst()
@@ -423,7 +424,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
         String ukName = dto.getRegionTranslationDtos().stream()
-            .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("ua")).findAny()
+            .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("uk")).findAny()
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
 
@@ -512,9 +513,15 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .collect(Collectors.toList());
     }
 
+    @Override
+    public GetTariffsInfoDto getTariffInfoById(Long id) {
+        TariffsInfo tariffsInfo = tryToFindTariffById(id);
+        return modelMapper.map(tariffsInfo, GetTariffsInfoDto.class);
+    }
+
     private Region createRegionWithTranslation(LocationCreateDto dto) {
         String enName = getRegionTranslation(dto, "en");
-        String uaName = getRegionTranslation(dto, "ua");
+        String uaName = getRegionTranslation(dto, "uk");
         return Region.builder()
             .nameEn(enName)
             .nameUk(uaName)

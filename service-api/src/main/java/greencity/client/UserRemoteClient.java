@@ -2,19 +2,20 @@ package greencity.client;
 
 import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.client.config.UserRemoteClientInterceptor;
-import greencity.dto.customer.UbsCustomersDto;
+import greencity.dto.SuccessSignInDto;
+import greencity.dto.TestersSignInRequest;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.telegram.UserTelegramFeedbackDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
-import java.util.Optional;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -44,24 +45,6 @@ public interface UserRemoteClient {
     String findUuidByEmail(@RequestParam(EMAIL) String email);
 
     /**
-     * Finds {@link UserVO} that is not 'DEACTIVATED' by {@link UserVO}'s Email.
-     *
-     * @param email {@link UserVO}'s Email.
-     * @return {@link Optional} of {@link UserVO}.
-     */
-    @GetMapping("/user/findNotDeactivatedByEmail")
-    Optional<UserVO> findNotDeactivatedByEmail(@RequestParam(EMAIL) String email);
-
-    /**
-     * Finds {@link UbsCustomersDto} by {@link User}'s UUID.
-     *
-     * @param uuid {@link User}'s UUID.
-     * @return {@link Optional} of {@link UbsCustomersDto}.
-     */
-    @GetMapping("/user/findByUuId")
-    Optional<UbsCustomersDto> findByUuid(@RequestParam(UUID) String uuid);
-
-    /**
      * Method checks the existence of the user by uuid.
      *
      * @param uuid {@link User}'s UUID.
@@ -69,6 +52,15 @@ public interface UserRemoteClient {
      */
     @GetMapping("/user/checkByUuid")
     boolean checkIfUserExistsByUuid(@RequestParam(UUID) String uuid);
+
+    /**
+     * Method checks the existence of an active user by uuid.
+     *
+     * @param uuid {@link User}'s UUID.
+     * @return {@link Boolean}
+     */
+    @GetMapping("/user/checkActiveUserByUuid")
+    boolean checkIfActiveUserExistsByUuid(@RequestParam(UUID) String uuid);
 
     /**
      * Gets user's positions and all possible related authorities to these positions
@@ -106,6 +98,14 @@ public interface UserRemoteClient {
     void sendScheduledEmailNotification(@RequestBody ScheduledEmailMessage notification);
 
     /**
+     * Send email notification to manager about green office request.
+     *
+     * @param notification {@link ScheduledEmailMessage} - notification details.
+     */
+    @PostMapping("/email/greenoffice/notification")
+    void sendGreenOfficeRequestNotification(@RequestBody ScheduledEmailMessage notification);
+
+    /**
      * Get user language by uuid.
      *
      * @param uuid user uuid.
@@ -137,7 +137,7 @@ public interface UserRemoteClient {
      * @param dto {@link EmployeeSignUpDto}
      */
     @PostMapping("/ownSecurity/sign-up-employee")
-    void signUpEmployee(@RequestBody EmployeeSignUpDto dto);
+    void signUpEmployee(@RequestBody EmployeeSignUpDto dto, @RequestParam String lang);
 
     /**
      * Update employee email.
@@ -171,4 +171,16 @@ public interface UserRemoteClient {
      */
     @PutMapping("/user/markUserAsActivated")
     void activateEmployee(@RequestParam String uuid);
+
+    @PostMapping("/api/testers/sign-in")
+    ResponseEntity<SuccessSignInDto> signIn(@RequestBody TestersSignInRequest request);
+
+    /**
+     * Send a Telegram user feedback.
+     *
+     * @param dto {@link UserTelegramFeedbackDto} - feedback details from the
+     *            Telegram bot.
+     */
+    @PostMapping("/email/telegram-feedback")
+    void sendTelegramFeedback(@RequestBody UserTelegramFeedbackDto dto);
 }

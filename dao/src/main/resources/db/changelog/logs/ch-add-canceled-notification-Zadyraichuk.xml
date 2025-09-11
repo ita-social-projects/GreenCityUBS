@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="addCanceledNotificationTemplateZadyraichuk" author="Rostyslav Zadyraichuk">
+        <insert tableName="notification_templates">
+            <column name="notification_type" value="CANCELED_ORDER" />
+            <column name="trigger" value="ORDER_WAS_CANCELED" />
+            <column name="time" value="IMMEDIATELY" />
+            <column name="title_uk" value="Скасоване замовлення" />
+            <column name="title_en" value="Canceled order" />
+            <column name="notification_status" value="ACTIVE" />
+            <column name="is_schedule_update_forbidden" value="true" />
+        </insert>
+        <rollback>
+            <delete tableName="notification_templates">
+                <where>notification_type='CANCELED_ORDER' AND trigger='ORDER_WAS_CANCELED'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="addCanceledNotificationPlatformsZadyraichuk" author="Rostyslav Zadyraichuk">
+        <sql>
+            INSERT INTO notification_platforms (body_uk, body_en, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Шановний(-а) ${customerName}, Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було скасовано.',
+                'Dear ${customerName}, We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been canceled.',
+                'SITE', 'ACTIVE', id
+            FROM notification_templates WHERE notification_type = 'CANCELED_ORDER';
+
+            INSERT INTO notification_platforms (body_uk, body_en, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Шановний(-а) ${customerName}, Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було скасовано.',
+                'Dear ${customerName}, We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been canceled.',
+                'EMAIL', 'ACTIVE', id
+            FROM notification_templates WHERE notification_type = 'CANCELED_ORDER';
+
+            INSERT INTO notification_platforms (body_uk, body_en, notification_receiver_type, notification_status, notification_id)
+            SELECT
+                'Шановний(-а) ${customerName}, Ваше замовлення №${orderNumber} на суму ${amountToPay} грн. було скасовано.',
+                'Dear ${customerName}, We are pleased to inform you that your order №${orderNumber} for the amount of ${amountToPay} UAH has been canceled.',
+                'MOBILE', 'ACTIVE', id
+            FROM notification_templates WHERE notification_type = 'CANCELED_ORDER';
+        </sql>
+        <rollback>
+            <sql>
+                DELETE FROM notification_platforms
+                WHERE notification_id = (
+                SELECT id
+                FROM notification_templates
+                WHERE notification_type = 'CANCELED_ORDER'
+                );
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

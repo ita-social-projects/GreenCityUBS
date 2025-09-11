@@ -1,26 +1,33 @@
 package greencity.service.ubs.pdf.exporter;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
+import com.google.zxing.WriterException;
+import com.lowagie.text.Annotation;
 import com.lowagie.text.Chunk;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.FontFactory;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
 import com.lowagie.text.Font;
-import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.*;
 import com.lowagie.text.pdf.draw.LineSeparator;
-import greencity.constant.pdf.PdfAddressConstants;
-import greencity.constant.pdf.PdfFileHeaders;
-import greencity.constant.pdf.PdfOrderDetailsHeaders;
-import greencity.constant.pdf.PdfOrderContentDetailsHeaders;
+import greencity.constant.pdf.*;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.order.OrdersDataForUserDto;
+import greencity.entity.order.Order;
+import greencity.exceptions.NotFoundException;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
+import greencity.repository.OrderRepository;
+import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.file.export.FileExporter;
+import java.awt.image.BufferedImage;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
@@ -29,14 +36,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import static com.lowagie.text.Element.ALIGN_LEFT;
 import static greencity.constant.AppConstant.LOCALE_EN_NAME;
 import static greencity.constant.AppConstant.LOCALE_UK_NAME;
 import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.pdf.PdfFileHeaders.ADDRESS_INFO;
 import static greencity.constant.pdf.PdfFileHeaders.ORDER_COMMENT;
 import static greencity.constant.pdf.PdfFileHeaders.SENDER_INFO;
 import static greencity.constant.pdf.PdfFileHeaders.ORDER_DETAILS;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataForUserDto> {
@@ -50,6 +60,8 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private static final int DEFAULT_SPACING_VALUE = 10;
     private static final float[] ORDER_DETAILS_TABLE_COLUMN_WIDTH = new float[] {50, 95, 100, 100, 80, 100, 80};
     private static final float[] ORDER_CONTENT_TABLE_COLUMN_WIDTH = new float[] {125, 120, 120, 120, 120};
+    private final UBSClientService ubsClientService;
+    private final OrderRepository orderRepository;
 
     /**
      * {@inheritDoc}
@@ -61,7 +73,9 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
             PdfWriter.getInstance(document, byteArrayOutputStream);
             document.open();
             document.setDocumentLanguage(locale.getLanguage());
-            addHeader(PdfFileHeaders.getByLocale(ORDER_DETAILS, locale), document);
+            addQrCode(objectToWrite, document, locale);
+            String title = PdfFileHeaders.getByLocale(ORDER_DETAILS, locale) + objectToWrite.getId();
+            addHeader(title, document);
             addNewLine(document);
             addLineSeparator(document);
             PdfPTable tableOrderDetails = createTable(PdfOrderDetailsHeaders.getAllByLocale(locale),
@@ -157,7 +171,6 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         cell.setVerticalAlignment(Element.ALIGN_CENTER);
         cell.setPadding(DEFAULT_SPACING_VALUE);
         cell.setMinimumHeight(DEFAULT_SPACING_VALUE * 2f);
-        cell.setPadding(DEFAULT_SPACING_VALUE);
         cell.setUseBorderPadding(true);
         return cell;
     }
@@ -174,7 +187,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
             && !orderDetails.getOrderComment().isBlank()) {
             addHeader(PdfFileHeaders.getByLocale(ORDER_COMMENT, locale), document);
             addParagraph(document, orderDetails.getOrderComment(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         }
     }
 
@@ -182,46 +195,46 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         addHeader(PdfFileHeaders.getByLocale(SENDER_INFO, locale), document);
         addParagraph(document, String.join(" ", orderDetails.getSender().getSenderName(),
             orderDetails.getSender().getSenderSurname()),
-            DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+            DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         addParagraph(document, orderDetails.getSender().getSenderPhone(), DEFAULT_FONT_NAME,
-            DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+            DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         addParagraph(document, orderDetails.getSender().getSenderEmail(), DEFAULT_FONT_NAME,
-            DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+            DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
     }
 
     private void addSenderAddress(OrdersDataForUserDto orderDetails, Locale locale, Document document) {
         addHeader(PdfFileHeaders.getByLocale(ADDRESS_INFO, locale), document);
         if (Objects.equals(LOCALE_EN_NAME, locale.getLanguage())) {
             addParagraph(document, orderDetails.getAddress().getAddressCityEn(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressRegionEn(), DEFAULT_FONT_NAME,
-                DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             addParagraph(document, String.join(", ", orderDetails.getAddress().getAddressStreetEn(),
                 orderDetails.getAddress().getHouseNumber()), DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE,
-                false, Element.ALIGN_LEFT);
+                false, ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressDistinctEn(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         } else {
             addParagraph(document, orderDetails.getAddress().getAddressCityUk(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressRegionUk(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             addParagraph(document, String.join(", ", orderDetails.getAddress().getAddressStreetUk(),
                 orderDetails.getAddress().getHouseNumber()), DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE,
-                false, Element.ALIGN_LEFT);
+                false, ALIGN_LEFT);
             addParagraph(document, orderDetails.getAddress().getAddressDistinctUk(),
-                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_FONT_NAME, DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
         }
         if (Objects.nonNull(orderDetails.getAddress().getHouseCorpus())) {
             addParagraph(document, String.join(" ",
                 PdfAddressConstants.getByLocale(PdfAddressConstants.HOUSE_CORPUS_NUMBER, locale),
                 orderDetails.getAddress().getHouseCorpus()), DEFAULT_FONT_NAME,
-                DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             if (Objects.nonNull(orderDetails.getAddress().getEntranceNumber())) {
                 addParagraph(document, String.join(" ",
                     PdfAddressConstants.getByLocale(PdfAddressConstants.ENTRANCE_NUMBER, locale),
                     orderDetails.getAddress().getEntranceNumber()), DEFAULT_FONT_NAME,
-                    DEFAULT_PARAGRAPH_FONT_SIZE, false, Element.ALIGN_LEFT);
+                    DEFAULT_PARAGRAPH_FONT_SIZE, false, ALIGN_LEFT);
             }
         }
     }
@@ -240,5 +253,85 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
         Paragraph paragraph = new Paragraph(text, FontFactory.getFont(fontName, fontSize, bold ? Font.BOLD : 0));
         paragraph.setAlignment(alignment);
         document.add(paragraph);
+    }
+
+    private void addQrCode(OrdersDataForUserDto orderDetails, Document document, Locale locale) {
+        try {
+            Order order = orderRepository.findById(orderDetails.getId())
+                .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderDetails.getId()));
+
+            double amount = orderDetails.getAmountBeforePayment();
+            long sumInCoins = BigDecimal.valueOf(amount)
+                .movePointRight(2)
+                .setScale(0, RoundingMode.HALF_UP)
+                .longValueExact();
+
+            if (sumInCoins <= 0) {
+                addQrCodeMessage(document, PdfQrCodeText.ALREADY_PAID, locale);
+                return;
+            }
+
+            String paymentLink = ubsClientService.formedLink(order, sumInCoins);
+            if (paymentLink == null || paymentLink.isBlank()) {
+                addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);
+                return;
+            }
+
+            addQrCodeWithText(document, paymentLink, locale);
+        } catch (Exception e) {
+            log.warn("Cannot add QR code to PDF for order {}: {}", orderDetails.getId(), e.getMessage(), e);
+            addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);
+        }
+    }
+
+    private Image buildQrImage(String paymentLink) throws WriterException, IOException {
+        BufferedImage qrImage = QrCodeGenerator.generateQrCodeImage(paymentLink, 150, 150);
+        Image pdfImage = PdfImageUtil.convertBufferedImageToImage(qrImage);
+        pdfImage.setAlignment(ALIGN_LEFT);
+        pdfImage.setAnnotation(new Annotation(0, 0, 0, 0, paymentLink));
+        return pdfImage;
+    }
+
+    private PdfPTable buildQrCodeTable(Image pdfImage, Locale locale) throws DocumentException {
+        PdfPTable table = new PdfPTable(2);
+        table.setWidths(new float[] {1, 2});
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(10);
+        table.setSpacingAfter(5);
+
+        PdfPCell imageCell = new PdfPCell(pdfImage, true);
+        imageCell.setBorder(Rectangle.NO_BORDER);
+        imageCell.setHorizontalAlignment(ALIGN_LEFT);
+        imageCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        imageCell.setFixedHeight(150);
+
+        Paragraph label = new Paragraph(
+            PdfQrCodeText.getByLocale(PdfQrCodeText.QR_CODE_HINT, locale),
+            FontFactory.getFont(DEFAULT_FONT_NAME, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD));
+        PdfPCell textCell = new PdfPCell(label);
+        textCell.setBorder(Rectangle.NO_BORDER);
+        textCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        textCell.setPaddingLeft(10);
+
+        table.addCell(imageCell);
+        table.addCell(textCell);
+        return table;
+    }
+
+    private void addQrCodeMessage(Document document, PdfQrCodeText messageKey, Locale locale) {
+        Paragraph message = new Paragraph(
+            PdfQrCodeText.getByLocale(messageKey, locale),
+            FontFactory.getFont(DEFAULT_FONT_NAME, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD));
+        message.setAlignment(ALIGN_LEFT);
+        message.setSpacingBefore(10);
+        message.setSpacingAfter(10);
+        document.add(message);
+    }
+
+    private void addQrCodeWithText(Document document, String paymentLink, Locale locale)
+        throws IOException, WriterException {
+        Image qrPdfImage = buildQrImage(paymentLink);
+        PdfPTable qrTable = buildQrCodeTable(qrPdfImage, locale);
+        document.add(qrTable);
     }
 }

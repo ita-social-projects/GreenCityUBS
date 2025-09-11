@@ -73,9 +73,7 @@ public interface BagRepository extends JpaRepository<Bag, Integer> {
      * @return {@link Optional} of {@link Bag}
      * @author Oksana Spodaryk
      */
-    @Query(nativeQuery = true,
-        value = "SELECT * FROM bag "
-            + "WHERE id = :bagId AND status = 'ACTIVE'")
+    @Query(value = "SELECT b FROM Bag b WHERE b.id = :bagId AND b.status = greencity.enums.BagStatus.ACTIVE")
     Optional<Bag> findActiveBagById(Integer bagId);
 
     /**

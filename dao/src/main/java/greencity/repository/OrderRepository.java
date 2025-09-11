@@ -184,10 +184,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * method returns all orders that contain a bag with id.
      */
-    @Query(nativeQuery = true,
-        value = "select o.* from orders o "
-            + "left join order_bag_mapping obm on o.id = obm.order_id "
-            + "where obm.bag_id = :bagId")
+    @Query(value = "SELECT o FROM Order o JOIN o.orderBags b WHERE b.id = :bagId")
     List<Order> findAllByBagId(Integer bagId);
 
     /**
@@ -248,7 +245,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Transactional
     @Query("UPDATE Order o SET o.blocked = false, o.blockedByEmployee = NULL,"
         + "o.blockedAt = NULL WHERE o.blockedAt < :expirationTime")
-    void unlockExpiredOrders(@Param("expirationTime") LocalDateTime expirationTime);
+    int unlockExpiredOrders(@Param("expirationTime") LocalDateTime expirationTime);
 
     List<Order> findAllByOrderStatusNotAndOrderPaymentStatus(OrderStatus orderStatus,
         OrderPaymentStatus orderPaymentStatus);
@@ -261,4 +258,21 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT p.order FROM Payment p WHERE p.id = ?1")
     Optional<Order> findOrderByPaymentId(long paymentId);
+
+    /**
+     * Returns the most recent order of the user by order date.
+     *
+     * @param userId the ID of the user
+     * @return an Optional containing the latest order, or empty if no orders exist
+     */
+    Optional<Order> findFirstByUserIdOrderByOrderDateDesc(Long userId);
+
+    /**
+     * Counts the number of orders with status DONE for a specific user.
+     *
+     * @param userId the ID of the user
+     * @param status the completed status (OrderStatus.DONE)
+     * @return the number of completed orders
+     */
+    Long countByUserIdAndOrderStatus(Long userId, OrderStatus status);
 }
