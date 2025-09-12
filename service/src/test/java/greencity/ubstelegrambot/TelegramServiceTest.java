@@ -23,6 +23,7 @@ import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.MessageAssetRepository;
@@ -197,17 +198,15 @@ class TelegramServiceTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123456");
 
-        when(executor.executeSendFile(any(SendDocument.class))).thenReturn(mockTelegramResponse(10));
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
-        when(file.getOriginalFilename()).thenReturn("image.svg");
-        when(file.getSize()).thenReturn(2048L);
         when(file.getContentType()).thenReturn(null);
-        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
 
-        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+        assertThrows(UnsupportedTelegramAssetException.class,
+            () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
 
-        verify(userRemoteWebClient).uploadFile(file);
-        verify(executor).executeSendFile(any(SendDocument.class));
+        verify(telegramChatRepository).findById(1L);
+        verifyNoInteractions(userRemoteWebClient);
+        verifyNoInteractions(executor);
     }
 
     @Test
@@ -1195,6 +1194,7 @@ class TelegramServiceTest {
         chat.setChatId("123456");
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getContentType()).thenReturn("application/pdf");
         when(file.getName()).thenReturn("large_file.pdf");
         when(file.getSize()).thenReturn(51L * 1024 * 1024);
 
@@ -1242,6 +1242,7 @@ class TelegramServiceTest {
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
         MultipartFile badFile = mock(MultipartFile.class);
+        when(badFile.getContentType()).thenReturn("application/pdf");
         when(badFile.getInputStream()).thenThrow(new IOException("fake IO fail"));
 
         MultipartFile[] files = new MultipartFile[] {badFile};
@@ -1427,8 +1428,6 @@ class TelegramServiceTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
         when(telegramChatRepository.findById(any())).thenReturn(Optional.of(chat));
-
-        when(file.getSize()).thenReturn(1024L);
 
         CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
         request.setChatId(1L);
