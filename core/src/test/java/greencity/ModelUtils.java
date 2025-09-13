@@ -28,7 +28,6 @@ import greencity.dto.notification.NotificationTemplateMainInfoDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
-import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
@@ -44,8 +43,6 @@ import greencity.dto.order.UpdateAllOrderPageDto;
 import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
-import greencity.dto.payment.monobank.PaymentInfo;
 import greencity.dto.service.GetServiceDto;
 import greencity.dto.service.GetTariffServiceDto;
 import greencity.dto.service.ServiceDto;
@@ -65,7 +62,6 @@ import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.entity.coords.Coordinates;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
-import greencity.enums.MonoBankStatuses;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationTime;
@@ -193,7 +189,6 @@ public class ModelUtils {
             .recipientPhone("666051373")
             .recipientEmail("petrov@gmail.com")
             .telegramIsNotify(true)
-            .viberIsNotify(false)
             .build();
     }
 
@@ -219,11 +214,11 @@ public class ModelUtils {
 
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
-            .recipientId(2L)
-            .recipientName("Anatolii")
-            .recipientSurName("Petyrov")
-            .recipientPhoneNumber("095123456")
-            .recipientEmail("anatolii.andr@gmail.com")
+            .customerId(2L)
+            .customerName("Anatolii")
+            .customerSurname("Petyrov")
+            .customerPhoneNumber("0951234561")
+            .customerEmail("anatolii.andr@gmail.com")
             .build();
     }
 
@@ -332,12 +327,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static AdminCommentDto getAdminComment() {
-        return AdminCommentDto.builder()
-            .orderId(1L)
-            .adminComment("Admin").build();
-    }
-
     public static EcoNumberDto getEcoNumberDto() {
         return EcoNumberDto.builder()
             .ecoNumber(Set.of("1111111111"))
@@ -372,7 +361,7 @@ public class ModelUtils {
 
     public static List<RegionTranslationDto> getRegionTranslationsDto() {
         return List.of(RegionTranslationDto.builder()
-            .languageCode("ua")
+            .languageCode("uk")
             .regionName("Київська область")
             .build());
     }
@@ -389,7 +378,7 @@ public class ModelUtils {
     public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
         return List.of(AddLocationTranslationDto.builder()
             .locationName("Київ")
-            .languageCode("ua")
+            .languageCode("uk")
             .build());
     }
 
@@ -650,27 +639,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static MonoBankPaymentResponseDto getMonoBankPaymentResponseDto() {
-        return MonoBankPaymentResponseDto.builder()
-            .invoiceId("testInvoice")
-            .status(MonoBankStatuses.CREATED.getName())
-            .failureReason("")
-            .errorCode("8")
-            .amount(1000)
-            .currency(980)
-            .createdDate(LocalDateTime.now().toString())
-            .modifiedDate(LocalDateTime.now().plusHours(1).toString())
-            .orderReference("11_11_11")
-            .paymentInfo(PaymentInfo.builder()
-                .cardNumber("4490XXXXXXXX4456")
-                .terminal("")
-                .paymentSystem(PaymentSystem.MONOBANK.name())
-                .paymentMethod("VISA")
-                .fee(0)
-                .build())
-            .build();
-    }
-
     public static UpdateAddressDto getUpdateAddressDto() {
         OrderAddressExportDetailsDtoUpdate orderAddressDetails = OrderAddressExportDetailsDtoUpdate.builder()
             .id(1L)
@@ -724,7 +692,6 @@ public class ModelUtils {
      * This method creates an AddingViolationsToUserDto using its builder pattern,
      * setting the order ID to 1, the violation description to "Violation
      * description", and the violation level to "LOW".
-     *
      * </p>
      *
      * @return an AddingViolationsToUserDto instance populated with preset values

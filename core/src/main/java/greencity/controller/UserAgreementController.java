@@ -9,10 +9,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +29,7 @@ import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 @RestController
 @RequestMapping(USER_AGREEMENT_LINK)
 @AllArgsConstructor
+@Validated
 public class UserAgreementController {
     private final UserAgreementService userAgreementService;
 
@@ -81,7 +84,7 @@ public class UserAgreementController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_ALL_AGREEMENTS', authentication)")
     @GetMapping("/{id}")
-    public ResponseEntity<UserAgreementDetailDto> getUserAgreementById(@PathVariable Long id) {
+    public ResponseEntity<UserAgreementDetailDto> getUserAgreementById(@Positive @PathVariable Long id) {
         UserAgreementDetailDto userAgreement = userAgreementService.read(id);
         return ResponseEntity.status(HttpStatus.OK).body(userAgreement);
     }
@@ -123,7 +126,7 @@ public class UserAgreementController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_AGREEMENT', authentication)")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUserAgreement(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUserAgreement(@Positive @PathVariable Long id) {
         userAgreementService.delete(id);
         return ResponseEntity.noContent().build();
     }

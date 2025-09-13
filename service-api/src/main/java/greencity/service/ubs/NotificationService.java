@@ -200,14 +200,29 @@ public interface NotificationService {
      *
      * @author Ihor Volianskyi
      */
-    NotificationDto getNotification(String uuid, Long id, String language);
+    NotificationDto getNotification(String uuid, Long notificationId, String language);
 
     /**
-     * Method that return all quantity of unreaden notification.
+     * Retrieves a notification by its ID for a specific user with an option to mark
+     * it as read.
+     *
+     * @param uuid           The UUID of the user requesting the notification
+     * @param notificationId The ID of the notification to retrieve.
+     * @param language       The language code for localization.
+     * @param markAsRead     If true, marks the notification as read; if false, the
+     *                       status remains unchanged.
+     * @return A {@link NotificationDto} with notification details (title, body, and
+     *         images if present).
+     * @author Nazar Vavrushchak
+     */
+    NotificationDto getNotification(String uuid, Long notificationId, String language, boolean markAsRead);
+
+    /**
+     * Method that return all quantity of unread notification.
      *
      * @author Igor Boykov
      */
-    long getUnreadenNotifications(String userUuid);
+    long getUnreadNotifications(String userUuid);
 
     /**
      * Notifies that a new order has been created.
@@ -256,4 +271,25 @@ public interface NotificationService {
      * @author Vladyslav Haliara
      */
     void notifyUnpaidOrderPermanently(Order order, Long sumToPay, PaymentSystemResponse paymentSystemResponse);
+
+    /**
+     * Notify manager that user requested info about green office service from
+     * telegram bot.
+     *
+     * @param userEmail {@link String} an email address that user sent in the tg bot
+     *                  chat.
+     *
+     * @author Chernenko Vitaliy
+     */
+    void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username, String lang);
+
+    /**
+     * Notify user that order has been canceled. This method is used when order
+     * status changed to CANCELED.
+     *
+     * @param order the order to send notification for
+     *
+     * @author Rostyslav Zadyraichuk
+     */
+    void notifyCanceledOrder(Order order);
 }

@@ -10,7 +10,6 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
@@ -20,7 +19,6 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
@@ -31,8 +29,10 @@ import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
+import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.enums.OrderStatus;
+import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +50,22 @@ public interface UBSClientService {
     PaymentResponseWayForPay validatePayment(PaymentResponseDto response);
 
     /**
-     * Methods returns all available for order bags and current user's bonus points.
+     * Processes the form parameters received from WayForPay and converts them into
+     * a PaymentResponseWayForPay object. This method performs the following: -
+     * Checks that the form parameters are not empty. - Parses the URL-encoded JSON
+     * from the first map key into a PaymentResponseDto. - Validates the payment
+     * signature using generateResponseSignature. - Calls validatePayment to update
+     * the payment status.
+     *
+     * @param formParams the form parameters received from the WayForPay callback
+     * @return a PaymentResponseWayForPay representing the processed payment;
+     *         returns an error response if parameters are empty, invalid, or the
+     *         signature check fails
+     */
+    PaymentResponseWayForPay convertMapIntoPaymentResponseDto(Map<String, String> formParams);
+
+    /**
+     * Method returns all bags available for order.
      *
      * @param tariffId   {@link Long} tariff id.
      * @param locationId {@link Long} location id.
@@ -88,16 +103,26 @@ public interface UBSClientService {
     CertificateDto checkCertificate(String code, String userUuid);
 
     /**
-     * Methods saves all entered by user data to database.
+     * Methods creates and adjusts new order and generates payment link for the
+     * order.
      *
-     * @param dto     {@link OrderResponseDto} user entered data;
-     * @param uuid    current {@link User}'s uuid;
-     * @param orderId {@link Long} order id;
-     * @return {@link PaymentWayForPayRequestDto} which contains data to pay order
-     *         out.
-     * @author Oleh Bilonizhka
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentSystemResponse} which contains data to pay order out.
+     * @author Oleksandr Ilnytskyi
      */
-    PaymentSystemResponse saveFullOrderToDB(OrderResponseDto dto, String uuid, Long orderId);
+    PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid);
+
+    /**
+     * Methods adjusts existing order and generates payment link for the order if
+     * order is unpaid.
+     *
+     * @param dto  {@link OrderResponseDto} user entered data;
+     * @param uuid current {@link User}'s uuid;
+     * @return {@link PaymentSystemResponse} which contains data to pay order out.
+     * @author Oleksandr Ilnytskyi
+     */
+    PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
      * Method that returns info about all orders for specified userID.
@@ -336,13 +361,7 @@ public interface UBSClientService {
      */
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
 
-    /**
-     * Validates the payment response received from MonoBank. This method checks the
-     * integrity and validity of the payment details contained in the response to
-     * ensure it meets the required criteria for processing.
-     *
-     * @param response the response object received from MonoBank containing payment
-     *                 details such as transaction ID, status, and amount.
-     */
-    void validatePaymentFromMonoBank(MonoBankPaymentResponseDto response);
+    public OrdersDataForUserDto getOrdersData(Order order);
+
+    public String formedLink(Order order, long sumToPayInCoins);
 }

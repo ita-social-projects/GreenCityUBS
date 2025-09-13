@@ -1,14 +1,14 @@
 trigger:
   branches:
     include:
-    - dev, master
+      - dev, master
   paths:
     exclude:
-    - README.md
-    
+      - README.md
+
 pr: none
-    
-    
+
+
 variables:
   agentOS: ubuntu-latest
   

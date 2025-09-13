@@ -1,29 +1,26 @@
 package greencity.service.ubs;
 
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.api.RegionInfoDto;
+import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.user.ChatLinkDto;
-
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
 import greencity.entity.order.Event;
 import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeOrderPosition;
 import greencity.entity.user.employee.Position;
 import greencity.entity.user.ubs.OrderAddress;
-import greencity.enums.BonusReason;
 import greencity.enums.CancellationReason;
 import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
@@ -58,7 +55,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -117,8 +113,6 @@ class OrdersAdminsPageServiceImplTest {
     @Mock
     private SuperAdminService superAdminService;
     @Mock
-    private UserRemoteClient userRemoteClient;
-    @Mock
     private TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
     @Mock
     private OrderLockService orderLockService;
@@ -126,6 +120,8 @@ class OrdersAdminsPageServiceImplTest {
     private RegionRepository regionRepository;
     @Mock
     private OrderAddressRepository orderAddressRepository;
+    @Mock
+    private PaymentService paymentService;
     @InjectMocks
     private OrdersAdminsPageServiceImpl ordersAdminsPageService;
     private static final String EMAIL = "test@email.com";
@@ -135,7 +131,7 @@ class OrdersAdminsPageServiceImplTest {
     private static final String CHAT_LINK = "https://my.binotel.ua/f/chat/#/visitor/21269249.12893974";
 
     @Test
-    void getParametersForOrdersExceptionTable() {
+    void getParametersForOrdersExceptionTableTest() {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
 
@@ -145,7 +141,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void getParametersForOrdersExceptionTable2() {
+    void getParametersForOrdersExceptionTable2Test() {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation();
@@ -160,13 +156,10 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void getParametersForOrdersExceptionTable3() {
+    void getParametersForOrdersExceptionTable3Test() {
 
         OrderStatusTranslation orderStatusTranslation = ModelUtils.getOrderStatusTranslation();
         OrderStatusTranslation orderStatusTranslation2 = ModelUtils.getOrderStatusTranslation();
-
-        List<Employee> employeeList = new ArrayList<>();
-        employeeList.add(ModelUtils.getEmployee());
 
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(1L))
             .thenReturn(Optional.ofNullable(orderStatusTranslation));
@@ -438,7 +431,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void adminCommentForDevelopStageReturnNotEmptyList() {
+    void adminCommentForDevelopStageReturnNotEmptyListTest() {
         String email = ModelUtils.TEST_EMAIL;
         var requestToChangeOrdersDataDto = ModelUtils.getRequestToAddAdminCommentForOrder();
         var employee = ModelUtils.getEmployee();
@@ -460,7 +453,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void adminCommentForDevelopStageReturnEmptyList() {
+    void adminCommentForDevelopStageReturnEmptyListTest() {
         String email = ModelUtils.TEST_EMAIL;
         var requestToChangeOrdersDataDto = ModelUtils.getRequestToAddAdminCommentForOrder();
         var employee = ModelUtils.getEmployee();
@@ -539,7 +532,7 @@ class OrdersAdminsPageServiceImplTest {
         "CONFIRMED, ON_THE_ROUTE",
         "ON_THE_ROUTE, DONE",
     })
-    void orderStatusForDevelopStage(String oldStatus, String newStatus) {
+    void orderStatusForDevelopStageTest(String oldStatus, String newStatus) {
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.valueOf(oldStatus))
             .setDateOfExport(LocalDate.now())
@@ -587,49 +580,20 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void orderStatusForDevelopStageTest_ChangeOrderStatusFromFormedToCanceled() {
+    void orderStatusForDevelopStageChangeOrderStatusFromFormedToCanceledTest() {
         long orderId = 1;
         List<Long> orderIdsList = List.of(orderId);
         String newStatus = "CANCELED";
         Order order = spy(ModelUtils.getOrder());
         order.setOrderStatus(OrderStatus.FORMED);
-        int pointsToUse = 100;
-        int currentUserPoints = 200;
-        Set<Certificate> certificates = Set.of(
-            new Certificate());
-        User user = Mockito.mock(User.class);
-        List<ChangeOfPoints> changeOfPointsList = spy(new ArrayList<>());
-        ArgumentCaptor<ChangeOfPoints> argumentCaptor = ArgumentCaptor.forClass(ChangeOfPoints.class);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(order.getPointsToUse())
-            .thenReturn(pointsToUse);
-        when(order.getUser())
-            .thenReturn(user);
-        when(user.getCurrentPoints())
-            .thenReturn(currentUserPoints);
-        when(user.getChangeOfPointsList())
-            .thenReturn(changeOfPointsList);
-        when(order.getCertificates())
-            .thenReturn(certificates);
 
         ordersAdminsPageService.orderStatusForDevelopStage(orderIdsList, newStatus, ModelUtils.getEmployee());
 
         verify(orderRepository).findById(orderId);
         verify(notificationService).notifyBonusesFromCanceledOrder(order);
-        verify(user).setCurrentPoints(currentUserPoints + pointsToUse);
-        verify(changeOfPointsList).add(argumentCaptor.capture());
-
-        ChangeOfPoints changeOfPoints = argumentCaptor.getValue();
-        assertEquals(pointsToUse, changeOfPoints.getAmount());
-        assertEquals(LocalDateTime.now().toLocalDate(), changeOfPoints.getDate().toLocalDate());
-        assertEquals(BonusReason.REFUND_CANCELED_ORDER, changeOfPoints.getReason());
-        assertEquals(user, changeOfPoints.getUser());
-        assertEquals(order, changeOfPoints.getOrder());
-
-        verify(userRepository).save(user);
-        verify(certificateRepository, times(certificates.size()))
-            .save(any(Certificate.class));
+        verify(paymentService).processPointsRefundForOrder(order);
         verify(orderLockService).unlockOrder(order);
     }
 
@@ -640,7 +604,7 @@ class OrdersAdminsPageServiceImplTest {
         "ON_THE_ROUTE, NOT_TAKEN_OUT",
         "FORMED, CANCELED"
     })
-    void orderStatusForDevelopStageErasedPickUpDetailsAndResponsibleEmployees(String oldStatus, String newStatus) {
+    void orderStatusForDevelopStageErasedPickUpDetailsAndResponsibleEmployeesTest(String oldStatus, String newStatus) {
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.valueOf(oldStatus))
             .setDateOfExport(LocalDate.now())
@@ -660,14 +624,14 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void orderStatusForDevelopStageEntityNotFoundException() {
+    void orderStatusForDevelopStageEntityNotFoundExceptionTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
         assertEquals(List.of(1L),
             ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "", ModelUtils.getEmployee()));
     }
 
     @Test
-    void orderStatusForDevelopStageBadOrderStatusRequestException() {
+    void orderStatusForDevelopStageBadOrderStatusRequestExceptionTest() {
         when(orderRepository.findById(1L))
             .thenReturn(Optional.of(ModelUtils.getOrder().setOrderStatus(OrderStatus.FORMED)));
         assertEquals(List.of(1L),
@@ -699,6 +663,60 @@ class OrdersAdminsPageServiceImplTest {
         assertEquals(anotherEmployeeId, order.getBlockedByEmployee().getId());
         assertNull(order.getOrderStatus());
         assertEquals(List.of(orderId), result);
+    }
+
+    @Test
+    void orderStatusForDevelopStageWhenStatusNotConfirmedTest() {
+        // 680
+        Long orderId = 1L;
+        String newStatus = "ADJUSTMENT";
+        Employee employee = ModelUtils.getEmployee();
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.FORMED);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        doNothing().when(orderLockService).unlockOrder(order);
+
+        List<Long> result = ordersAdminsPageService.orderStatusForDevelopStage(
+            List.of(orderId), newStatus, employee);
+
+        verify(orderRepository).findById(orderId);
+        verify(notificationService, never()).notifyCourierItineraryFormed(order);
+        verify(orderLockService).unlockOrder(order);
+        assertEquals(OrderStatus.ADJUSTMENT, order.getOrderStatus());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void orderStatusForDevelopStageWhenStatusCanceledTest() {
+        // 684
+        Long orderId = 1L;
+        String newStatus = "CANCELED";
+        Employee employee = ModelUtils.getEmployee();
+        Order order = ModelUtils.getOrder();
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setPointsToUse(100);
+        Certificate certificate = ModelUtils.getCertificate();
+        order.setCertificates(Set.of(certificate));
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(certificateRepository.save(certificate)).thenReturn(certificate);
+        doNothing().when(notificationService).notifyCanceledOrder(order);
+        doNothing().when(notificationService).notifyBonusesFromCanceledOrder(order);
+        doNothing().when(paymentService).processPointsRefundForOrder(order);
+        doNothing().when(orderLockService).unlockOrder(order);
+
+        List<Long> result = ordersAdminsPageService.orderStatusForDevelopStage(List.of(orderId), newStatus, employee);
+
+        verify(orderRepository).findById(orderId);
+        verify(notificationService).notifyCanceledOrder(order);
+        verify(notificationService).notifyBonusesFromCanceledOrder(order);
+        verify(paymentService).processPointsRefundForOrder(order);
+        verify(certificateRepository).save(certificate);
+        verify(orderLockService).unlockOrder(order);
+        assertEquals(OrderStatus.CANCELED, order.getOrderStatus());
+        assertEquals(0, certificate.getPoints());
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -758,7 +776,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void responsibleEmployeeThrowsUserNotFoundException() {
+    void responsibleEmployeeThrowsUserNotFoundExceptionTest() {
         String email = "test@gmail.com";
         List<Long> ordersId = List.of(1L);
 
@@ -767,7 +785,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void responsibleEmployeeThrowsPositionNotFoundException() {
+    void responsibleEmployeeThrowsPositionNotFoundExceptionTest() {
         String uuid = "uuid";
         List<Long> ordersId = List.of(1L);
         Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
@@ -779,7 +797,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void responsibleEmployeeCatchException() {
+    void responsibleEmployeeCatchExceptionTest() {
         String email = "test@gmail.com";
         List<Long> ordersId = List.of(1L);
         Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
@@ -797,7 +815,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void responsibleEmployeeOrderBlockedByAnotherEmployee() {
+    void responsibleEmployeeOrderBlockedByAnotherEmployeeTest() {
         String email = "test@gmail.com";
         Optional<Employee> currentEmployee = Optional.of(Employee.builder().id(2L).build());
         Optional<Employee> blockedByEmployee = Optional.of(Employee.builder().id(3L).build());
@@ -859,7 +877,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void receivingStationForDevelopStage() {
+    void receivingStationForDevelopStageTest() {
         Optional<Order> order = Optional.of(ModelUtils.getOrder());
 
         when(orderRepository.findById(1L)).thenReturn(order);
@@ -898,7 +916,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void chooseOrdersDataSwitcherTestForResponsibleEmployee() {
+    void chooseOrdersDataSwitcherTestForResponsibleEmployeeTest() {
         String email = "test@gmail.com";
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
         Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
@@ -1121,29 +1139,160 @@ class OrdersAdminsPageServiceImplTest {
     @Test
     void requestToBlockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
+        String email = user.getRecipientEmail();
         List<Long> orders = new ArrayList<>();
         orders.add(1L);
 
-        when(userRemoteClient.findByUuid(user.getUuid()))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(userRepository.findByUuid(user.getUuid()))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         assertNotNull(ordersAdminsPageService.requestToBlockOrder(user.getUuid(), orders));
     }
 
     @Test
+    void requestToBlockOrderWithEmptyOrderListTest() {
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        String email = user.getRecipientEmail();
+        Employee employee = ModelUtils.getEmployee();
+        employee.setEmail(email);
+
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email))
+            .thenReturn(Optional.of(employee));
+        doNothing().when(orderRepository)
+            .setBlockedEmployeeForAllOrders(eq(employee.getId()), any(LocalDateTime.class));
+
+        List<BlockedOrderDto> result = ordersAdminsPageService.requestToBlockOrder(
+            userUuid, Collections.emptyList());
+
+        verify(userRepository).findByUuid(userUuid);
+        verify(employeeRepository).findByEmail(email);
+        verify(orderRepository).setBlockedEmployeeForAllOrders(eq(employee.getId()), any(LocalDateTime.class));
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void requestToBlockOrderWhenBlockedByAnotherEmployeeTest() {
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        String email = user.getRecipientEmail();
+        Long orderId = 1L;
+        Employee employee = ModelUtils.getEmployee();
+        employee.setId(1L);
+        employee.setEmail(email);
+        Employee anotherEmployee = ModelUtils.getEmployee();
+        anotherEmployee.setId(2L);
+        anotherEmployee.setFirstName("Jane");
+        anotherEmployee.setLastName("Doe");
+        anotherEmployee.setEmail("another-test@gmail.com");
+        anotherEmployee.setUuid("another-test-uuid");
+        Order blockedOrder = ModelUtils.getOrder();
+        blockedOrder.setId(orderId);
+        blockedOrder.setBlocked(true);
+        blockedOrder.setBlockedByEmployee(anotherEmployee);
+        List<Long> orders = List.of(orderId);
+
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email))
+            .thenReturn(Optional.of(employee));
+        when(orderRepository.findById(orderId))
+            .thenReturn(Optional.of(blockedOrder));
+
+        List<BlockedOrderDto> result = ordersAdminsPageService.requestToBlockOrder(userUuid, orders);
+
+        verify(userRepository).findByUuid(userUuid);
+        verify(employeeRepository).findByEmail(email);
+        verify(orderRepository).findById(orderId);
+        assertEquals(1, result.size());
+        assertEquals(orderId, result.getFirst().getOrderId());
+        assertEquals("Jane Doe", result.getFirst().getUserName());
+    }
+
+    @Test
+    void requestToBlockOrderWhenUserNotFoundTest() {
+        String uuid = "uuid";
+        List<Long> orders = List.of(1L, 2L);
+        String expectedExceptionMessage = ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid;
+
+        when(userRepository.findByUuid(uuid))
+            .thenReturn(null);
+
+        var notFoundException = assertThrows(
+            NotFoundException.class,
+            () -> ordersAdminsPageService.requestToBlockOrder(uuid, orders));
+        assertEquals(expectedExceptionMessage, notFoundException.getMessage());
+    }
+
+    @Test
     void unblockOrderTest() {
         User user = ModelUtils.getUser().setUuid("uuid");
+        String email = user.getRecipientEmail();
         List<Long> orders = new ArrayList<>();
         orders.add(1L);
 
-        when(userRemoteClient.findByUuid(user.getUuid()))
-            .thenReturn(Optional.of(ModelUtils.getUbsCustomersDto().setEmail("test@gmail.com")));
-        when(employeeRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(ModelUtils.getEmployee()));
+        when(userRepository.findByUuid(user.getUuid()))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getOrder()));
 
         assertNotNull(ordersAdminsPageService.unblockOrder(user.getUuid(), orders));
+    }
+
+    @Test
+    void unblockOrderWithEmptyOrderListTest() {
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        String email = user.getRecipientEmail();
+        Employee employee = ModelUtils.getEmployee();
+        employee.setEmail(email);
+
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        doNothing().when(orderRepository).unblockAllOrders(employee.getId());
+
+        List<Long> result = ordersAdminsPageService.unblockOrder(userUuid, Collections.emptyList());
+
+        verify(userRepository).findByUuid(userUuid);
+        verify(employeeRepository).findByEmail(email);
+        verify(orderRepository).unblockAllOrders(employee.getId());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void unblockOrderWhenBlockedByCurrentEmployeeTest() {
+        User user = ModelUtils.getUser();
+        String userUuid = user.getUuid();
+        String email = user.getRecipientEmail();
+        Long orderId = 1L;
+        Employee employee = ModelUtils.getEmployee();
+        employee.setId(1L);
+        employee.setEmail(email);
+        Order blockedOrder = ModelUtils.getOrder();
+        blockedOrder.setId(orderId);
+        blockedOrder.setBlocked(true);
+        blockedOrder.setBlockedByEmployee(employee);
+        List<Long> orders = List.of(orderId);
+
+        when(userRepository.findByUuid(userUuid))
+            .thenReturn(user);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(blockedOrder));
+        doNothing().when(orderLockService).unlockOrder(blockedOrder);
+
+        List<Long> result = ordersAdminsPageService.unblockOrder(userUuid, orders);
+
+        verify(userRepository).findByUuid(userUuid);
+        verify(employeeRepository).findByEmail(email);
+        verify(orderRepository).findById(orderId);
+        verify(orderLockService).unlockOrder(blockedOrder);
+        assertEquals(1, result.size());
+        assertEquals(orderId, result.getFirst());
     }
 
     @Test
@@ -1213,6 +1362,33 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
+    void saveColumnWidthForEmployeeWhenNoExistingTableColumnWidthTest() {
+        // 426
+        String userUuid = "test-uuid";
+        Employee employee = ModelUtils.getEmployee();
+        ColumnWidthDto columnWidthDto = ModelUtils.getTestColumnWidthDto();
+        TableColumnWidthForEmployee newTableColumnWidth = ModelUtils.getTestTableColumnWidth();
+
+        when(employeeRepository.findByUuid(userUuid)).thenReturn(Optional.of(employee));
+        when(tableColumnWidthForEmployeeRepository.findByEmployeeId(employee.getId()))
+            .thenReturn(Optional.empty());
+        when(modelMapper.map(columnWidthDto, TableColumnWidthForEmployee.class))
+            .thenReturn(newTableColumnWidth);
+        when(tableColumnWidthForEmployeeRepository.save(any(TableColumnWidthForEmployee.class)))
+            .thenReturn(newTableColumnWidth);
+
+        ordersAdminsPageService.saveColumnWidthForEmployee(columnWidthDto, userUuid);
+
+        verify(employeeRepository).findByUuid(userUuid);
+        verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(employee.getId());
+        verify(modelMapper).map(columnWidthDto, TableColumnWidthForEmployee.class);
+        ArgumentCaptor<TableColumnWidthForEmployee> captor = ArgumentCaptor.forClass(
+            TableColumnWidthForEmployee.class);
+        verify(tableColumnWidthForEmployeeRepository).save(captor.capture());
+        assertEquals(employee, captor.getValue().getEmployee());
+    }
+
+    @Test
     void getAllLocationsInfoTest() {
         when(regionRepository.findAllRegionsWithCitiesAndDistricts())
             .thenReturn(List.of(ModelUtils.getRegionForAllLocationsTest()));
@@ -1273,7 +1449,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void remove() {
+    void removeTest() {
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(ModelUtils.getEmployee()));
         when(positionRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getPosition()));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(ModelUtils.getOrder()));
@@ -1435,7 +1611,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void dateOfExportForDevelopStage_ShouldThrowException_WhenDateIsInThePast() {
+    void dateOfExportForDevelopStageWhenDateIsInThePastTest() {
         Long employeeId = 1L;
         Long orderId = 100L;
 
@@ -1450,7 +1626,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void dateOfExportForDevelopStage_ShouldProcessSuccessfully_WhenDateIsInFuture() {
+    void dateOfExportForDevelopStageWhenDateIsInFutureTest() {
         Long employeeId = 1L;
         Long orderId = 100L;
 
@@ -1467,7 +1643,7 @@ class OrdersAdminsPageServiceImplTest {
     }
 
     @Test
-    void dateOfExportForDevelopStage_ShouldAddToUnresolvedGoals_WhenOrderDoesNotExist() {
+    void dateOfExportForDevelopStageWhenOrderDoesNotExistTest() {
         Long employeeId = 1L;
         Long orderId = 100L;
 
@@ -1478,7 +1654,7 @@ class OrdersAdminsPageServiceImplTest {
         List<Long> result = ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, futureDate, employeeId);
 
         assertEquals(1, result.size());
-        assertEquals(orderId, result.get(0));
+        assertEquals(orderId, result.getFirst());
         verify(orderRepository, times(1)).findById(orderId);
     }
 
