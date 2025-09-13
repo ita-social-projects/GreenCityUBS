@@ -29,7 +29,7 @@ public class PersonalDataDto implements Serializable {
     private String email;
 
     @NotBlank
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String firstName;
 
     @Min(1)
@@ -37,17 +37,17 @@ public class PersonalDataDto implements Serializable {
     private Long id;
 
     @NotBlank
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String lastName;
 
     @NotBlank
     @ValidPhoneNumber
     private String phoneNumber;
 
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String senderFirstName;
 
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String senderLastName;
 
     @Email(regexp = ValidationConstant.EMAIL_REGEXP)

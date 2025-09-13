@@ -2,6 +2,7 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
@@ -11,7 +12,6 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.notification.IncorrectTemplateException;
 import greencity.exceptions.notification.TemplateDeleteException;
-import greencity.repository.UserRepository;
 import greencity.service.notification.NotificationTemplateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,14 +56,14 @@ class ManagementNotificationControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
-    UserRepository userRepository;
+    UserRemoteClient userRemoteClient;
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRepository))
+                new UserArgumentResolver(userRemoteClient))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .build();
     }

@@ -3,6 +3,7 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
+import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.EcoNumberDto;
 import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.OrderDetailStatusDto;
@@ -134,7 +135,7 @@ class ManagementOrderControllerTest {
     @Test
     void getOrderDetail() throws Exception {
         this.mockMvc.perform(get(ubsManagementLink + "/read-order-info" + "/{id}", 1L)
-            .param("language", "uk"))
+            .param("language", "ua"))
             .andExpect(status().isOk());
     }
 
@@ -297,16 +298,29 @@ class ManagementOrderControllerTest {
     }
 
     @Test
+    void saveAdminCommentToOrder() throws Exception {
+        AdminCommentDto adminCommentDto = ModelUtils.getAdminComment();
+
+        String writeValueAsString = objectMapper.writeValueAsString(adminCommentDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(ubsManagementLink + "/save-admin-comment", 1L)
+            .content(writeValueAsString)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
     void updateEcoNumberForOrder() throws Exception {
         EcoNumberDto ecoNumberDto = getEcoNumberDto();
 
         String writeValueAsString = objectMapper.writeValueAsString(ecoNumberDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put(ubsManagementLink + "/update-eco-store/{id}", 1L)
+        mockMvc.perform(MockMvcRequestBuilders.put(ubsManagementLink + "/update-eco-store{id}", 1L)
             .content(writeValueAsString)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isCreated());
     }
 
     @Test
@@ -404,9 +418,9 @@ class ManagementOrderControllerTest {
         mockMvc.perform(put(ubsManagementLink + "/all-order-page-admin-info")
             .content(jsonDto)
             .principal(principal)
-            .param("lang", "uk")
+            .param("lang", "ua")
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isCreated());
     }
 
     @Test
@@ -447,7 +461,7 @@ class ManagementOrderControllerTest {
                 .param("language", "en")
                 .principal(principal)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
-            .andExpect(status().isOk());
+            .andExpect(status().isCreated());
     }
 
     @Test

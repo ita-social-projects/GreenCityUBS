@@ -1,7 +1,5 @@
 package greencity.service.ubs;
 
-import greencity.client.config.UserRemoteWebClient;
-import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.pageble.PageableDto;
@@ -28,7 +26,6 @@ import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,8 +38,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_HAS_VIOLATION;
@@ -54,7 +49,6 @@ import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class ViolationServiceImpl implements ViolationService {
     private ViolationRepository violationRepository;
     private UserRepository userRepository;
@@ -64,7 +58,7 @@ public class ViolationServiceImpl implements ViolationService {
 
     private EventService eventService;
     private NotificationServiceImpl notificationService;
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
 
     @Override
     public UserViolationsWithUserName getAllViolations(Pageable page, Long userId, String columnName,
@@ -187,7 +181,6 @@ public class ViolationServiceImpl implements ViolationService {
 
     /**
      * Deletes an active violation associated with the specified order.
-     *
      * <p>
      * This method retrieves the employee corresponding to the provided uuid and
      * locates the active violation for the given order id. If found, it marks the
@@ -245,15 +238,11 @@ public class ViolationServiceImpl implements ViolationService {
         if (add.getImagesToDelete() != null) {
             List<String> images = add.getImagesToDelete();
             for (String image : images) {
-                try {
-                    userRemoteWebClient.deleteFile(image);
-                } catch (WebClientRequestException | WebClientResponseException e) {
-                    log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
-                }
+                fileService.delete(image);
                 violationImages.remove(image);
             }
         }
-        if (multipartFiles != null && multipartFiles.length > 0) {
+        if (multipartFiles.length > 0) {
             List<String> images = new LinkedList<>();
             setImages(multipartFiles, images);
             if (violation.getImages().isEmpty()) {
@@ -267,11 +256,7 @@ public class ViolationServiceImpl implements ViolationService {
 
     private void setImages(MultipartFile[] multipartFiles, List<String> images) {
         for (MultipartFile multipartFile : multipartFiles) {
-            try {
-                images.add(userRemoteWebClient.uploadFile(multipartFile));
-            } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
-            }
+            images.add(fileService.upload(multipartFile));
         }
     }
 }

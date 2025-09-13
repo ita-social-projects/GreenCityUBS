@@ -18,67 +18,67 @@
         </addColumn>
 
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=1</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=3</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=5</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=7</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=9</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=11</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=13</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=15</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=17</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=19</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=21</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=23</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=25</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=27</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=29</where>
         </update>
         <update tableName="notification_templates" >
-            <column name="language_code" value="uk"/>
+            <column name="language_code" value="ua"/>
             <where>id=31</where>
         </update>
 

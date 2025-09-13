@@ -27,9 +27,9 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class UserProfileUpdateDto implements Serializable {
     @NotBlank
-    @Pattern(regexp = ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
+    @Pattern(regexp = ValidationConstant.NAME_REGEXP)
     private String recipientName;
-    @Pattern(regexp = "^$|" + ValidationConstant.NAME_REGEXP, message = ValidationConstant.NAME_VALIDATION_MESSAGE)
+    @Pattern(regexp = "^$|" + ValidationConstant.NAME_REGEXP)
     private String recipientSurname;
     @Email(regexp = ValidationConstant.EMAIL_REGEXP)
     private String alternateEmail;
@@ -39,4 +39,5 @@ public class UserProfileUpdateDto implements Serializable {
     private List<AddressDto> addressDto;
     @NotNull
     private Boolean telegramIsNotify;
+    private Boolean viberIsNotify;
 }

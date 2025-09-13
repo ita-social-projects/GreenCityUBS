@@ -12,17 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class UserRemoteClientFallbackFactoryTest {
     private static final String USER_EMAIL = "user@mail.com";
     private static final String USER_UUID = "849446d9-186f-4386-b76e-32aed1c3b1aa";
-    private static final String USER_NAME = "John Doe";
-    private static final String SUBJECT = "some subject";
-    private static final String LANGUAGE_UA = "uk";
     @InjectMocks
     private UserRemoteClientFallbackFactory fallbackFactory;
 
@@ -40,13 +38,18 @@ class UserRemoteClientFallbackFactoryTest {
     }
 
     @Test
-    void checkIfUserExistsByUuid() {
-        assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfUserExistsByUuid(USER_UUID));
+    void findNotDeactivatedByEmail() {
+        assertEquals(Optional.empty(), client.findNotDeactivatedByEmail(USER_EMAIL));
     }
 
     @Test
-    void checkIfActiveUserExistsByUuid() {
-        assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfActiveUserExistsByUuid(USER_UUID));
+    void findByUuid() {
+        assertEquals(Optional.empty(), client.findByUuid(USER_EMAIL));
+    }
+
+    @Test
+    void checkIfUserExistsByUuid() {
+        assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfUserExistsByUuid(USER_UUID));
     }
 
     @Test
@@ -70,21 +73,8 @@ class UserRemoteClientFallbackFactoryTest {
 
     @Test
     void sendScheduledEmailNotification() {
-        ScheduledEmailMessage dto = ScheduledEmailMessage.builder().userUuid(USER_UUID).build();
+        ScheduledEmailMessage dto = ScheduledEmailMessage.builder().email(USER_EMAIL).build();
         assertDoesNotThrow(() -> client.sendScheduledEmailNotification(dto));
-    }
-
-    @Test
-    void sendGreenOfficeRequestNotificationTest() {
-        ScheduledEmailMessage dto = ScheduledEmailMessage
-            .builder()
-            .username(USER_NAME)
-            .subject(SUBJECT)
-            .body(USER_EMAIL)
-            .language(LANGUAGE_UA)
-            .isUbs(true)
-            .build();
-        assertDoesNotThrow(() -> client.sendGreenOfficeRequestNotification(dto));
     }
 
     @Test
@@ -106,7 +96,7 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void signUpEmployee() {
         EmployeeSignUpDto dto = EmployeeSignUpDto.builder().build();
-        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto, "en"));
+        assertThrows(RemoteServerUnavailableException.class, () -> client.signUpEmployee(dto));
     }
 
     @Test

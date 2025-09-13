@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.configuration.RedirectionConfigProp;
@@ -14,17 +15,23 @@ import greencity.dto.courier.CourierDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.EventDto;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailStatusDto;
+import greencity.dto.order.OrderResponseDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
+import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
+import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.exceptions.NotFoundException;
 import greencity.service.ubs.UBSClientService;
-import greencity.service.ubs.wayforpay.WayForPayRedirectService;
+import greencity.service.ubs.UBSManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -32,15 +39,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import java.io.IOException;
-import java.security.Principal;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -56,6 +59,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/ubs")
@@ -64,18 +72,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class OrderController {
     private final UBSClientService ubsClientService;
-    private final WayForPayRedirectService wayForPayRedirectService;
+    private final UBSManagementService ubsManagementService;
     private final RedirectionConfigProp redirectionConfigProp;
 
     /**
-     * Controller returns all available bags by tariff and location ids.
+     * Controller returns all available bags and bonus points of current user by
+     * tariff and location ids. {@link UserVO}.
      *
-     * @param tariffId   - id of tariff.
-     * @param locationId - id of location.
+     * @param tariffId   {@link UserVO} id of tariff.
+     * @param locationId {@link UserVO} id of location.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
-    @Operation(summary = "Get details for the given tariff and location")
+    @Operation(summary = "Get order points by details")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = UserPointsAndAllBagsDto.class))),
@@ -92,10 +101,10 @@ public class OrderController {
 
     /**
      * Controller returns all available bags and bonus points of current user by
-     * order id.
+     * order id. {@link UserVO}.
      *
-     * @param userUuid - user's uuid.
-     * @param orderId  - id of the order.
+     * @param userUuid {@link UserVO} id.
+     * @param orderId  {@link UserVO} id of order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
@@ -103,7 +112,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = UserPointsAndAllBagsDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -111,7 +119,7 @@ public class OrderController {
     @GetMapping("/details-for-existing-order/{orderId}")
     public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByOrderId(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
-        @Positive @PathVariable Long orderId) {
+        @PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getFirstPageDataByOrderId(userUuid, orderId));
     }
@@ -141,9 +149,9 @@ public class OrderController {
     }
 
     /**
-     * Controller returns list of saved user's data.
+     * Controller returns list of saved {@link UserVO} data.
      *
-     * @param userUuid - user's id.
+     * @param userUuid {@link UserVO} id.
      * @return list of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */
@@ -162,117 +170,79 @@ public class OrderController {
     }
 
     /**
-     * Controller adjusts and creates new order and generates payment link for the
-     * order.
+     * Controller saves all entered by user data to database.
      *
-     * @param userUuid - user's id.
+     * @param userUuid {@link UserVO} id.
      * @param dto      {@link OrderResponseDto} order data.
-     * @return {@link PaymentSystemResponse}.
+     * @param id       {@link Long} orderId.
+     * @return {@link HttpStatus}.
      * @author Oleh Bilonizhka
      */
-    @Operation(summary = "Process new order.")
+    @Operation(summary = "Process user order.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @PostMapping("/processOrder")
-    public ResponseEntity<PaymentSystemResponse> processNewOrder(
-        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
-        @Valid @RequestBody OrderResponseDto dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processNewOrder(dto, userUuid));
-    }
-
-    /**
-     * Controller adjusts and saves existing order to database and generates payment
-     * link for the order.
-     *
-     * @param userUuid current {@link User}'s uuid.
-     * @param dto      {@link OrderResponseDto} order data.
-     * @return {@link PaymentSystemResponse}.
-     * @author Oleksandr Ilnytskyi
-     */
-    @Operation(summary = "Process existing order.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @PostMapping("/processOrder/{id}")
-    public ResponseEntity<PaymentSystemResponse> processExistingOrder(
+    @PostMapping(value = {"/processOrder", "/processOrder/{id}"})
+    public ResponseEntity<PaymentSystemResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderResponseDto dto,
-        @Positive @PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.processExistingOrder(dto, userUuid, id));
+        @Valid @PathVariable("id") Optional<Long> id) {
+        if (id.isPresent()) {
+            OrderDetailStatusDto orderDetailStatusDto = ubsManagementService.getOrderDetailStatus(id.get());
+            if (PaymentStatus.PAID.name().equals(orderDetailStatusDto.getPaymentStatus())
+                || !OrderStatus.FORMED.name().equals(orderDetailStatusDto.getOrderStatus())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(ubsClientService.saveFullOrderToDB(dto, userUuid, id.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.saveFullOrderToDB(dto, userUuid, null));
+        }
     }
 
     /**
-     * Receives payment notifications from WayForPay via form parameters, delegates
-     * validation/parsing to the service, and returns the acknowledgement payload.
-     * Always responds with HTTP 200 OK per WFP webhook requirements.
+     * Receives payment information from Way for Pay payment gateway. This method
+     * decodes the received response, converts it into a PaymentResponseDto object,
+     * and validates the payment. If the HTTP status is successful, it sends a
+     * notification for the paid order and redirects to the GreenCityClient.
      *
-     * @param formParams Map with payment response parameters from WayForPay.
-     * @return PaymentResponseWayForPay containing status and orderReference.
-     * @throws IOException If an I/O error occurs (rare in normal webhook flow).
+     * @param response The payment response received from Way for Pay, in String
+     *                 format.
+     * @param servlet  The HttpServletResponse object to handle the redirection.
+     * @return A PaymentResponseWayForPay object representing the validated payment
+     *         response.
+     * @throws IOException If an input or output exception occurred during the
+     *                     redirection.
      */
-    @Operation(
-        summary = "Receive payment from WayForPay.",
-        description = "Endpoint receives payment notifications from WayForPay as form parameters "
-            + "(application/x-www-form-urlencoded).")
+    @Operation(summary = "Receive payment from WayForPay.")
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = HttpStatuses.OK,
-            content = @Content(
-                mediaType = "application/x-www-form-urlencoded",
-                schema = @Schema(implementation = PaymentResponseDto.class))),
-        @ApiResponse(
-            responseCode = "400",
-            description = HttpStatuses.BAD_REQUEST,
-            content = @Content)
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content)
     })
     @PostMapping("/receivePayment")
-    public ResponseEntity<PaymentResponseWayForPay> receivePayment(@RequestParam Map<String, String> formParams)
-        throws IOException {
-        return ResponseEntity.ok(ubsClientService.convertMapIntoPaymentResponseDto(formParams));
-    }
+    public PaymentResponseWayForPay receivePayment(
+        @RequestBody String response,
+        HttpServletResponse servlet) throws IOException {
+        log.info("Incoming request Way For Pay API: {}", servlet.toString());
+        log.info("Response: {}", response);
 
-    /**
-     * Handles the returnUrl callback from WayForPay after a payment attempt. This
-     * endpoint is triggered by WayForPay once the payment process is completed
-     * (either successfully or with failure). It receives payment data from
-     * WayForPay as request parameters, then performs a redirect to the frontend
-     * confirmation page. The method does not return any content in the response
-     * body.
-     *
-     * @param formParams a map of form parameters sent by WayForPay (e.g.
-     *                   orderReference, status, amount, etc.)
-     * @return 302 Redirect to the frontend confirmation page
-     * @throws IOException if the redirect cannot be performed
-     */
+        String decodedResponse =
+            URLDecoder.decode(response, StandardCharsets.UTF_8);
+        log.info("DecodedResponse: {}", decodedResponse);
 
-    @Operation(
-        summary = "Handle returnUrl callback from WayForPay",
-        description = "This endpoint processes the WayForPay returnUrl callback after payment completion. "
-            + "It redirects the user to the frontend confirmation page with order details.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "302",
-            description = "Redirect successfully executed (no content returned)",
-            content = @Content(
-                mediaType = "application/x-www-form-urlencoded",
-                schema = @Schema(implementation = PaymentResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "Invalid request parameters")
-    })
-    @PostMapping("/payment/return")
-    public ResponseEntity<Void> handleWayForPayReturn(@RequestParam Map<String, String> formParams) throws IOException {
-        String redirectUrl = wayForPayRedirectService.redirectUser(formParams);
-        return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", redirectUrl)
-            .build();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        PaymentResponseDto paymentResponseDto =
+            objectMapper.readValue(decodedResponse, PaymentResponseDto.class);
+        log.info("PaymentResponseDto: {}", paymentResponseDto);
+
+        if (HttpStatus.OK.is2xxSuccessful()) {
+            servlet.sendRedirect(redirectionConfigProp.getGreenCityClient());
+        }
+
+        return ubsClientService.validatePayment(paymentResponseDto);
     }
 
     /**
@@ -286,7 +256,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = UserInfoDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -294,7 +263,7 @@ public class OrderController {
     @ApiLocale
     @GetMapping("/user-info/{orderId}")
     public ResponseEntity<UserInfoDto> getOrderDetailsByOrderId(
-        @Positive @PathVariable("orderId") Long id,
+        @Valid @PathVariable("orderId") Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.ok()
             .body(ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(id, uuid));
@@ -312,7 +281,6 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = EventDto.class)))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -320,7 +288,7 @@ public class OrderController {
     @ApiLocale
     @GetMapping("/order_history/{orderId}")
     public ResponseEntity<List<EventDto>> getOderHistoryByOrderId(
-        @Positive @PathVariable("orderId") Long id,
+        @Valid @PathVariable("orderId") Long id,
         Principal principal,
         @Parameter(hidden = true) Locale locale) {
         return ResponseEntity.ok()
@@ -367,7 +335,7 @@ public class OrderController {
     })
     @GetMapping("/order/{id}/cancellation")
     public ResponseEntity<OrderCancellationReasonDto> getCancellationReason(
-        @Positive @PathVariable("id") final Long id,
+        @PathVariable("id") final Long id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.ok().body(ubsClientService.getOrderCancellationReason(id, uuid));
     }
@@ -395,7 +363,7 @@ public class OrderController {
     public ResponseEntity<OrderCourierPopUpDto> getAllActiveLocationsByCourierId(
         @RequestParam Optional<String> changeLoc,
         @Parameter(hidden = true) @CurrentUserUuid String uuid,
-        @Positive @PathVariable Long courierId) {
+        @Valid @PathVariable Long courierId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getInfoForCourierOrderingByCourierId(uuid, changeLoc, courierId));
     }
@@ -404,6 +372,7 @@ public class OrderController {
      * Controller for getting all active couriers.
      *
      * @return list of {@link CourierDto}
+     *
      * @author Anton Bondar
      */
     @Operation(summary = "Get all active couriers")
@@ -433,8 +402,8 @@ public class OrderController {
     })
     @GetMapping("/tariffinfo/{locationId}")
     public ResponseEntity<TariffInfoByLocationDto> getInfoAboutTariff(
-        @Positive @RequestParam Long courierId,
-        @Positive @PathVariable Long locationId) {
+        @RequestParam Long courierId,
+        @PathVariable Long locationId) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(ubsClientService.getTariffInfoForLocation(courierId, locationId));
     }
@@ -453,7 +422,7 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/orders/{id}/tariff")
-    public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@Positive @PathVariable Long id) {
+    public ResponseEntity<TariffsForLocationDto> getTariffForOrder(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getTariffForOrder(id));
     }
 
@@ -461,24 +430,22 @@ public class OrderController {
      * Check if a tariff exists by its ID.
      *
      * @param id The ID of the tariff to check.
-     * @return {@code ResponseEntity} with HTTP 200 OK if tariff exists, HTTP 404
-     *         NOT FOUND if it doesn't exist.
+     * @return ResponseEntity with a boolean indicating whether the tariff exists.
+     * @throws NotFoundException if the tariff with the specified ID is not found.
      * @author Yurii Ososvskyi
      */
     @Operation(summary = "Check if tariff exists by Id")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/check-if-tariff-exists/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> checkIfTariffExistsById(@Positive @PathVariable Long id) {
-        boolean exists = ubsClientService.checkIfTariffExistsById(id);
-        if (!exists) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<Boolean> checkIfTariffExistsById(@PathVariable Long id) {
+        Boolean exists = ubsClientService.checkIfTariffExistsById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(exists);
     }
 
     /**
@@ -489,6 +456,7 @@ public class OrderController {
     @Operation(summary = "Get All Active Locations")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -512,7 +480,7 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/tariffs/{locationId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Long>> getTariffIdByLocationId(@Positive @PathVariable("locationId") Long locationId) {
+    public ResponseEntity<List<Long>> getTariffIdByLocationId(@PathVariable("locationId") Long locationId) {
         List<Long> tariffId = ubsClientService.getTariffIdByLocationId(locationId);
         return ResponseEntity.status(HttpStatus.OK).body(tariffId);
     }
@@ -530,8 +498,28 @@ public class OrderController {
     })
     @GetMapping(value = "/locationsByCourier/{courierId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<LocationsDto>> getAllLocationsByCourierId(
-        @Positive @PathVariable("courierId") Long courierId) {
+        @PathVariable("courierId") Long courierId) {
         List<LocationsDto> locations = ubsClientService.getAllLocationsByCourierId(courierId);
         return ResponseEntity.status(HttpStatus.OK).body(locations);
+    }
+
+    /**
+     * Receives and processes payment information from the Monobank API. This method
+     * handles the incoming payment response and validates the payment details
+     * provided by Monobank. The payment details are logged and then passed to the
+     * {@code validatePaymentFromMonoBank} method for further validation and
+     * processing.
+     *
+     * @param response the payment response received from Monobank, containing
+     *                 details such as transaction ID, status, and amount.
+     */
+    @Operation(summary = "Receive payment information from Monobank API")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK)
+    })
+    @PostMapping("/monobank/payments")
+    public void receivePaymentFromMonoBank(@RequestBody MonoBankPaymentResponseDto response) {
+        log.info("Response from MONOBANK API: {}", response);
+        ubsClientService.validatePaymentFromMonoBank(response);
     }
 }

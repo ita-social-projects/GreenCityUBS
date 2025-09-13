@@ -111,11 +111,11 @@ public class NotificationController {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
     })
-    @GetMapping(value = "quantityUnreadNotifications")
-    public ResponseEntity<Long> getAllUnreadNotificationsForCurrentUser(
+    @GetMapping(value = "quantityUnreadenNotifications")
+    public ResponseEntity<Long> getAllUnreadenNotificationsForCurrentUser(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(notificationService.getUnreadNotifications(userUuid));
+            .body(notificationService.getUnreadenNotifications(userUuid));
     }
 
     /**

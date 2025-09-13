@@ -63,10 +63,16 @@ class AddressDtoTest {
             Arguments.of("1B", "Pryp'yat'", "Khreschatyk"),
             Arguments.of("1Ї", "Kam'yanets Podilskyi", "Хрещатик"),
             Arguments.of("1-А", "Korsun Shevchenkivskiy", "Shevchenka-Khreschatyk"),
-            Arguments.of("ЄєІіЇ", "Bilgorod-Dnistrovskyi", "Вулиця"),
+            Arguments.of("1.Б", "Bila Krynytsya", "Шевченка-Хрещатик"),
+            Arguments.of("1 G", "Kam'yanets Podilskyi", "Street"),
+            Arguments.of("ЁёІіЇ", "Bilgorod-Dnistrovskyi", "Вулиця"),
             Arguments.of("їҐґЄє", "Blagovishchens'k", "Street-Вулиця"),
             Arguments.of("1/3", "Ternopil'", "Sviatoshins'ka"),
-            Arguments.of("35/34", "Vinnitsa", "Святошиньска"));
+            Arguments.of("35/34", "Vinnitsa", "Святошиньска"),
+            Arguments.of("35-/34", "Vilnohirs'k", "Незалежності"),
+            Arguments.of("35-/ 34", "Rivne", "1-ho Travnya"),
+            Arguments.of("35-/\"34", "Pereyaslav", "Protasiv Yar"),
+            Arguments.of("14\"o\"", "Zytomyr", "Протасів Яр"));
     }
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {

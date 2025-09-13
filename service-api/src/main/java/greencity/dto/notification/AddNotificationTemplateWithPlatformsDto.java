@@ -1,6 +1,5 @@
 package greencity.dto.notification;
 
-import greencity.annotations.ValidSchedulePattern;
 import greencity.enums.UserCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +20,6 @@ public class AddNotificationTemplateWithPlatformsDto {
     @NotNull
     @NotBlank
     private String titleUk;
-    @ValidSchedulePattern
     private String schedule;
     @NotNull
     private UserCategory userCategory;

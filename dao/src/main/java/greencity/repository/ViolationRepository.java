@@ -20,9 +20,9 @@ public interface ViolationRepository extends CrudRepository<Violation, Long> {
      *
      * @author Roman Sulymka
      */
-    @Query(value = "SELECT order_id FROM violations_description_mapping"
-        + " INNER JOIN orders o ON o.id = violations_description_mapping.order_id"
-        + " INNER JOIN users ON o.users_id = users.id "
+    @Query(value = "select order_id from violations_description_mapping"
+        + " INNER JOIN orders o on o.id = violations_description_mapping.order_id"
+        + " INNER JOIN users on o.users_id = users.id "
         + " WHERE violations_description_mapping.id = :violationId", nativeQuery = true)
     Long getOrderIdByViolationId(@Param(value = "violationId") Long violationId);
 
@@ -31,10 +31,12 @@ public interface ViolationRepository extends CrudRepository<Violation, Long> {
      *
      * @author Roman Sulymka
      */
-    @Query(value = "SELECT COUNT(vdm.id) FROM violations_description_mapping vdm"
-        + " INNER JOIN orders o ON o.id = vdm.order_id"
-        + " INNER JOIN users u ON u.id = o.users_id"
-        + " WHERE u.id = :userId AND vdm.violation_status = 'ACTIVE'", nativeQuery = true)
+    @Query(value = "select count(vdm.id)"
+        + "from violations_description_mapping vdm"
+        + "    inner join orders o on o.id = vdm.order_id"
+        + "    inner join users u on o.users_id = u.id"
+        + "where u.id = :userId"
+        + "  and vdm.violation_status = 'ACTIVE'", nativeQuery = true)
     Long getNumberOfViolationsByUser(@Param(value = "userId") Long userId);
 
     /**

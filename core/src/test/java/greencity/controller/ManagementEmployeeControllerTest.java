@@ -2,20 +2,16 @@ package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
+import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
-import greencity.constant.ErrorMessage;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.employee.CreateUpdateEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.tariff.TariffWithChatAccess;
-import greencity.exception.handler.CustomExceptionHandler;
-import greencity.exceptions.NotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -33,13 +28,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
+
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,7 +52,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,28 +73,27 @@ class ManagementEmployeeControllerTest {
     @Mock
     private UBSClientService ubsClientService;
     @Mock
-    UserRepository userRepository;
+    UserRemoteClient userRemoteClient;
     @Mock
     private Validator mockValidator;
 
     @InjectMocks
-    private ManagementEmployeeController controller;
+    ManagementEmployeeController controller;
 
     private final Principal principal = getUuid();
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
-            .setControllerAdvice(new CustomExceptionHandler(new DefaultErrorAttributes()))
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRepository))
+                new UserArgumentResolver(userRemoteClient))
             .setValidator(mockValidator)
             .build();
     }
 
     @Test
     void saveEmployeeTest() throws Exception {
-        CreateUpdateEmployeeDto employeeDto = new CreateUpdateEmployeeDto();
+        EmployeeDto employeeDto = new EmployeeDto();
         List<TariffWithChatAccess> tariffs = new ArrayList<>();
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         dto.setEmployeeDto(employeeDto);
@@ -141,7 +137,7 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void updateEmployeeTest() throws Exception {
-        CreateUpdateEmployeeDto employeeDto = new CreateUpdateEmployeeDto();
+        EmployeeDto employeeDto = new EmployeeDto();
         List<TariffWithChatAccess> tariffs = new ArrayList<>();
         EmployeeWithTariffsIdDto dto = new EmployeeWithTariffsIdDto();
         dto.setEmployeeDto(employeeDto);
@@ -260,25 +256,12 @@ class ManagementEmployeeControllerTest {
 
         MvcResult result = mockMvc.perform(get(UBS_LINK + "/get-employees/{tariffId}", tariffId))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
 
         String jsonResponse = result.getResponse().getContentAsString();
 
         assertTrue(jsonResponse.contains("\"firstName\":\"John\""));
-
-        verify(service, times(1)).getEmployeesByTariffId(tariffId);
-    }
-
-    @Test
-    void getEmployeesByTariffIdShouldReturn404WhenNotFound() throws Exception {
-        Long tariffId = 1L;
-        when(service.getEmployeesByTariffId(tariffId))
-            .thenThrow(new NotFoundException(
-                ErrorMessage.EMPLOYEE_WITH_ENABLED_CHAT_NOT_FOUND_BY_TARIFF_ID + tariffId));
-
-        mockMvc.perform(get(UBS_LINK + "/get-employees/{tariffId}", tariffId))
-            .andExpect(status().isNotFound());
 
         verify(service, times(1)).getEmployeesByTariffId(tariffId);
     }
@@ -293,7 +276,7 @@ class ManagementEmployeeControllerTest {
 
         mockMvc.perform(get(UBS_LINK + "/" + email))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8"))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8"))
             .andReturn();
 
         verify(service, times(1)).getEmployeeByEmail(email);

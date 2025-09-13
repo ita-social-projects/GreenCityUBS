@@ -2,7 +2,6 @@ package greencity.service.ubs;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
@@ -36,13 +35,8 @@ import greencity.repository.TariffsInfoRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.transaction.Transactional;
@@ -50,14 +44,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.LinkedHashMap;
-import java.util.Set;
 import java.util.UUID;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import java.util.stream.Collectors;
 
 @Service
 @Data
-@Slf4j
 public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeService {
     private final EmployeeRepository employeeRepository;
     private final PositionRepository positionRepository;
@@ -65,7 +56,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final ReceivingStationRepository stationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final UserRemoteClient userRemoteClient;
-    private final UserRemoteWebClient userRemoteWebClient;
+    private final FileService fileService;
     private final ModelMapper modelMapper;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
@@ -96,21 +87,12 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             employeeRepository.save(employee);
             return employeeWithTariffsDto;
         }
-        checkValidPosition(dto.getEmployeeDto().getEmployeePositionIds());
+        checkValidPosition(dto.getEmployeeDto().getEmployeePositions());
 
         Employee employee = buildEmployeeFromEmployeeWithTariffsIdDto(dto);
         employee.setUuid(UUID.randomUUID().toString());
         employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-        if (image != null) {
-            try {
-                employee.setImagePath(userRemoteWebClient.uploadFile(image));
-            } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
-            }
-        } else {
-            employee.setImagePath(defaultImagePath);
-        }
-
+        employee.setImagePath(image != null ? fileService.upload(image) : defaultImagePath);
         if (employee.getTariffsInfoReceivingEmployees() == null) {
             employee.setTariffsInfoReceivingEmployees(new ArrayList<>());
         }
@@ -136,8 +118,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             .lastName(employeeWithTariffsIdDto.getEmployeeDto().getLastName())
             .phoneNumber(employeeWithTariffsIdDto.getEmployeeDto().getPhoneNumber())
             .email(employeeWithTariffsIdDto.getEmployeeDto().getEmail())
-            .employeePosition(
-                positionRepository.findByIdIn((employeeWithTariffsIdDto.getEmployeeDto().getEmployeePositionIds())))
+            .employeePosition(employeeWithTariffsIdDto.getEmployeeDto().getEmployeePositions().stream()
+                .map(positionDto -> Position.builder()
+                    .id(positionDto.getId())
+                    .nameUk(positionDto.getNameUk())
+                    .nameEn(positionDto.getNameEn())
+                    .build())
+                .collect(Collectors.toSet()))
             .build();
     }
 
@@ -152,11 +139,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                     .nameUk(position.getNameUk())
                     .nameEn(position.getNameEn())
                     .build())
-                .toList())
+                .collect(Collectors.toList()))
             .isUbs(true)
             .build();
         try {
-            userRemoteClient.signUpEmployee(signUpDto, "uk");
+            userRemoteClient.signUpEmployee(signUpDto);
         } catch (HystrixRuntimeException e) {
             throw new BadRequestException(
                 "Error to create user(): User with this email already exists or not valid data ");
@@ -169,23 +156,23 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public PageableDto<GetEmployeeDto> findAll(EmployeePage employeePage, EmployeeFilterCriteria filterCriteria) {
         List<EmployeeFilterView> employeeFilterViews = employeeCriteriaRepository.findAll(employeePage, filterCriteria);
-        List<GetEmployeeDto> resultList = mapEmployeeFilterViewsToGetEmployeeDTOs(employeeFilterViews);
+        List<GetEmployeeDto> resultList = mapEmployeeFilterViewsToGetEmployeeDtos(employeeFilterViews);
         Pageable pageable = getPageable(employeePage);
         return getAllTranslationDto(new PageImpl<>(resultList, pageable, employeeFilterViews.size()));
     }
 
-    private List<GetEmployeeDto> mapEmployeeFilterViewsToGetEmployeeDTOs(List<EmployeeFilterView> employeeFilterViews) {
+    private List<GetEmployeeDto> mapEmployeeFilterViewsToGetEmployeeDtos(List<EmployeeFilterView> employeeFilterViews) {
         List<Employee> employees = employeeRepository.findAll();
         Map<Long, GetEmployeeDto> getEmployeeDtoMap = new LinkedHashMap<>();
-        for (EmployeeFilterView employeeFilterView : employeeFilterViews) {
-            GetEmployeeDto getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
+        for (var employeeFilterView : employeeFilterViews) {
+            var getEmployeeDto = getEmployeeDtoMap.computeIfAbsent(employeeFilterView.getEmployeeId(),
                 id -> modelMapper.map(employeeFilterView, GetEmployeeDto.class));
             getEmployeeDto.setTariffs(employees.stream()
                 .filter(employee -> employee.getId().equals(employeeFilterView.getEmployeeId()))
                 .flatMap(employee -> employee.getTariffsInfoReceivingEmployees().stream()
                     .map(tariffsInfoRecievingEmployee -> modelMapper.map(tariffsInfoRecievingEmployee.getTariffsInfo(),
                         GetTariffInfoForEmployeeDto.class)))
-                .toList());
+                .collect(Collectors.toList()));
             initializeGetEmployeeDtoCollections(getEmployeeDto);
             fillGetEmployeeDto(employeeFilterView, getEmployeeDto, employees);
         }
@@ -204,13 +191,13 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void fillPositionDto(EmployeeFilterView emplView, GetEmployeeDto getEmployeeDto, List<Employee> employees) {
-        List<PositionDto> positionsDTOs = employees.stream()
+        List<PositionDto> positionsDtos = employees.stream()
             .filter(employee -> employee.getId().equals(emplView.getEmployeeId()))
             .flatMap(employee -> employee.getEmployeePosition().stream()
                 .map(position -> modelMapper.map(position, PositionDto.class)))
             .toList();
 
-        getEmployeeDto.getEmployeePositions().addAll(positionsDTOs);
+        getEmployeeDto.getEmployeePositions().addAll(positionsDtos);
     }
 
     private void fillGetTariffInfoForEmployeeDto(
@@ -225,7 +212,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
                     tariffDto.setHasChat(tariffsInfoRecievingEmployee.getHasChat());
                     return tariffDto;
                 }))
-            .toList();
+            .collect(Collectors.toList());
 
         getEmployeeDto.setTariffs(tariffs);
     }
@@ -236,9 +223,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private PageableDto<GetEmployeeDto> getAllTranslationDto(Page<GetEmployeeDto> pages) {
-        List<GetEmployeeDto> getEmployeeDTOs = pages.getContent();
+        List<GetEmployeeDto> getEmployeeDtos = pages.getContent();
         return new PageableDto<>(
-            getEmployeeDTOs,
+            getEmployeeDtos,
             pages.getTotalElements(),
             pages.getPageable().getPageNumber(),
             pages.getTotalPages());
@@ -258,7 +245,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
             throw new BadRequestException(
                 "Email already exist in another employee: " + dto.getEmployeeDto().getEmail());
         }
-        checkValidPosition(dto.getEmployeeDto().getEmployeePositionIds());
+        checkValidPosition(dto.getEmployeeDto().getEmployeePositions());
         dto.getEmployeeDto()
             .setPhoneNumber(UAPhoneNumberUtil.getE164PhoneNumberFormat(dto.getEmployeeDto().getPhoneNumber()));
         updateEmployeeEmail(dto, upEmployee.getUuid());
@@ -284,17 +271,9 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
 
         if (image != null) {
             String imageUrlToDelete = upEmployee.getImagePath();
-            try {
-                updatedEmployee.setImagePath(userRemoteWebClient.uploadFile(image));
-            } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
-            }
+            updatedEmployee.setImagePath(fileService.upload(image));
             if (!imageUrlToDelete.equals(defaultImagePath)) {
-                try {
-                    userRemoteWebClient.deleteFile(imageUrlToDelete);
-                } catch (WebClientRequestException | WebClientResponseException e) {
-                    log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
-                }
+                fileService.delete(upEmployee.getImagePath());
             }
         } else {
             updatedEmployee.setImagePath(dto.getEmployeeDto().getImage());
@@ -317,13 +296,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     }
 
     private void updateEmployeeAuthoritiesToRelatedPositions(EmployeeWithTariffsIdDto dto) {
-        Set<Position> positions = positionRepository.findByIdIn(dto.getEmployeeDto().getEmployeePositionIds());
-
-        EmployeePositionsDto employeePositionsDto = EmployeePositionsDto.builder()
+        var positions = EmployeePositionsDto.builder()
             .email(dto.getEmployeeDto().getEmail())
-            .positions(positions.stream().map(position -> modelMapper.map(position, PositionDto.class)).toList())
+            .positions(dto.getEmployeeDto().getEmployeePositions())
             .build();
-        userRemoteClient.updateAuthoritiesToRelatedPositions(employeePositionsDto);
+        userRemoteClient.updateAuthoritiesToRelatedPositions(positions);
     }
 
     /**
@@ -373,11 +350,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
         if (!employee.getImagePath().equals(defaultImagePath)) {
-            try {
-                userRemoteWebClient.deleteFile(employee.getImagePath());
-            } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
-            }
+            fileService.delete(employee.getImagePath());
             employee.setImagePath(defaultImagePath);
             employeeRepository.save(employee);
         } else {
@@ -411,7 +384,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     public List<PositionDto> getAllPositions() {
         return positionRepository.findAll().stream()
             .map(p -> modelMapper.map(p, PositionDto.class))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**
@@ -442,15 +415,15 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         }
     }
 
-    private void checkValidPosition(Set<Long> positionIds) {
-        if (!existPositions(positionIds)) {
+    private void checkValidPosition(List<PositionDto> positions) {
+        if (!existPositions(positions)) {
             throw new NotFoundException(ErrorMessage.POSITION_NOT_FOUND);
         }
     }
 
-    private boolean existPositions(Set<Long> positionIds) {
-        return positionIds.stream()
-            .allMatch(positionRepository::existsById);
+    private boolean existPositions(List<PositionDto> positions) {
+        return positions.stream()
+            .allMatch(p -> positionRepository.existsPositionByIdAndNameUk(p.getId(), p.getNameUk()));
     }
 
     /**
@@ -462,7 +435,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         return tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**
@@ -473,14 +446,10 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
         List<Employee> employeeWithEnabledChat =
             employeeRepository.selectAllEmployeesByTariffIdAndChatEqualsTrue(tariffId);
 
-        if (employeeWithEnabledChat.isEmpty()) {
-            throw new NotFoundException(ErrorMessage.EMPLOYEE_WITH_ENABLED_CHAT_NOT_FOUND_BY_TARIFF_ID + tariffId);
-        }
-
         return employeeWithEnabledChat
             .stream()
             .map(employee -> modelMapper.map(employee, EmployeeWithTariffsDto.class))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**

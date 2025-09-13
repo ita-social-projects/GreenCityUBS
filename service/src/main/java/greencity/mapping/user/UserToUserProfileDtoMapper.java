@@ -16,6 +16,7 @@ public class UserToUserProfileDtoMapper extends AbstractConverter<User, UserProf
             .alternateEmail(user.getAlternateEmail())
             .recipientPhone(user.getRecipientPhone())
             .telegramIsNotify(user.getTelegramBot() != null && user.getTelegramBot().getIsNotify())
+            .viberIsNotify(user.getViberBot() != null && user.getViberBot().getIsNotify())
             .build();
     }
 }

@@ -1,47 +1,17 @@
 package greencity.service.ubs;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import greencity.ModelUtils;
-import greencity.client.config.UserRemoteWebClient;
-import greencity.constant.ErrorMessage;
-import greencity.constant.OrderHistory;
-import greencity.dto.violation.AddingViolationsToUserDto;
-import greencity.dto.violation.UpdateViolationToUserDto;
-import greencity.dto.violation.ViolationDetailInfoDto;
-import greencity.entity.order.Order;
-import greencity.entity.order.TariffsInfo;
-import greencity.entity.user.User;
-import greencity.entity.user.Violation;
-import greencity.entity.user.employee.Employee;
-import greencity.enums.OrderStatus;
-import greencity.enums.SortingOrder;
-import greencity.enums.ViolationStatus;
-import greencity.exceptions.BadRequestException;
-import greencity.exceptions.NotFoundException;
-import greencity.exceptions.user.UserNotFoundException;
-import greencity.repository.EmployeeRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.UserRepository;
-import greencity.repository.UserViolationsTableRepo;
-import greencity.repository.ViolationRepository;
-import greencity.service.notification.NotificationServiceImpl;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.altindag.log.LogCaptor;
+import greencity.constant.ErrorMessage;
+import greencity.constant.OrderHistory;
+import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.employee.Employee;
+import greencity.enums.OrderStatus;
+import greencity.enums.ViolationStatus;
+import greencity.exceptions.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +28,32 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
+import greencity.ModelUtils;
+import greencity.dto.violation.AddingViolationsToUserDto;
+import greencity.dto.violation.UpdateViolationToUserDto;
+import greencity.dto.violation.ViolationDetailInfoDto;
+import greencity.enums.SortingOrder;
+import greencity.entity.order.Order;
+import greencity.entity.user.User;
+import greencity.entity.user.Violation;
+import greencity.exceptions.NotFoundException;
+import greencity.exceptions.user.UserNotFoundException;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.UserRepository;
+import greencity.repository.UserViolationsTableRepo;
+import greencity.repository.ViolationRepository;
+import greencity.service.notification.NotificationServiceImpl;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ViolationServiceImplTest {
@@ -73,40 +68,13 @@ class ViolationServiceImplTest {
     @Mock
     UserRepository userRepository;
     @Mock
-    WebClientRequestException webClientRequestException;
-    @Mock
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
     @Mock
     private EventService eventService;
     @Mock
     private NotificationServiceImpl notificationService;
     @Mock
     private EmployeeRepository employeeRepository;
-
-    private static Stream<Arguments> provideCheckAddUserViolationThrowsException() {
-        return Stream.of(
-            Arguments.of(
-                OrderStatus.ADJUSTMENT, BadRequestException.class,
-                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.ADJUSTMENT.name(), null),
-            Arguments.of(
-                OrderStatus.FORMED, BadRequestException.class,
-                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.FORMED.name(), null),
-            Arguments.of(
-                OrderStatus.BROUGHT_IT_HIMSELF, BadRequestException.class,
-                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.BROUGHT_IT_HIMSELF.name(), null),
-            Arguments.of(
-                OrderStatus.CONFIRMED, BadRequestException.class,
-                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.CONFIRMED.name(), null),
-            Arguments.of(
-                OrderStatus.ON_THE_ROUTE, BadRequestException.class,
-                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.ON_THE_ROUTE.name(), null),
-            Arguments.of(
-                OrderStatus.CANCELED, BadRequestException.class,
-                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.CANCELED.name(), null),
-            Arguments.of(
-                OrderStatus.DONE, NotFoundException.class, ErrorMessage.ORDER_ALREADY_HAS_VIOLATION,
-                ModelUtils.getViolation()));
-    }
 
     @Test
     void getAllViolations() {
@@ -118,8 +86,7 @@ class ViolationServiceImplTest {
 
         violationService.getAllViolations(Pageable.unpaged(), 1L, "violationDate", SortingOrder.ASC);
         assertEquals(violationService.getAllViolations(Pageable.unpaged(), 1L, "violationDate", SortingOrder.ASC)
-                .getUserViolationsDto().getPage().getFirst().getViolationDate(),
-            ModelUtils.getViolation().getViolationDate());
+            .getUserViolationsDto().getPage().getFirst().getViolationDate(), ModelUtils.getViolation().getViolationDate());
     }
 
     @Test
@@ -201,6 +168,31 @@ class ViolationServiceImplTest {
         assertEquals(message, ex.getMessage());
     }
 
+    private static Stream<Arguments> provideCheckAddUserViolationThrowsException() {
+        return Stream.of(
+            Arguments.of(
+                OrderStatus.ADJUSTMENT, BadRequestException.class,
+                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.ADJUSTMENT.name(), null),
+            Arguments.of(
+                OrderStatus.FORMED, BadRequestException.class,
+                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.FORMED.name(), null),
+            Arguments.of(
+                OrderStatus.BROUGHT_IT_HIMSELF, BadRequestException.class,
+                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.BROUGHT_IT_HIMSELF.name(), null),
+            Arguments.of(
+                OrderStatus.CONFIRMED, BadRequestException.class,
+                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.CONFIRMED.name(), null),
+            Arguments.of(
+                OrderStatus.ON_THE_ROUTE, BadRequestException.class,
+                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.ON_THE_ROUTE.name(), null),
+            Arguments.of(
+                OrderStatus.CANCELED, BadRequestException.class,
+                ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_VIOLATION + OrderStatus.CANCELED.name(), null),
+            Arguments.of(
+                OrderStatus.DONE, NotFoundException.class, ErrorMessage.ORDER_ALREADY_HAS_VIOLATION,
+                ModelUtils.getViolation()));
+    }
+
     @Test
     void updateUserViolation() {
         Employee employee = ModelUtils.getEmployee();
@@ -213,7 +205,7 @@ class ViolationServiceImplTest {
         if (updateViolationToUserDto.getImagesToDelete() != null) {
             List<String> images = updateViolationToUserDto.getImagesToDelete();
             for (String image : images) {
-                doNothing().when(userRemoteWebClient).deleteFile(image);
+                doNothing().when(fileService).delete(image);
                 violationImages.remove(image);
             }
         }
@@ -224,54 +216,6 @@ class ViolationServiceImplTest {
 
         verify(employeeRepository).findByUuid("abc");
         verify(violationRepository).findActiveViolationByOrderId(1L);
-    }
-
-    @Test
-    void updateUserViolation_ShouldThrowLogWarn() {
-        LogCaptor logCaptor = LogCaptor.forClass(ViolationServiceImpl.class);
-        Employee employee = ModelUtils.getEmployee();
-        UpdateViolationToUserDto updateViolationToUserDto = ModelUtils.getUpdateViolationToUserDto();
-        Violation violation = ModelUtils.getViolation();
-        List<String> violationImages = violation.getImages();
-
-        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
-        when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
-        if (updateViolationToUserDto.getImagesToDelete() != null) {
-            List<String> images = updateViolationToUserDto.getImagesToDelete();
-            for (String image : images) {
-                doThrow(webClientRequestException).when(userRemoteWebClient).deleteFile(image);
-                violationImages.remove(image);
-            }
-        }
-
-        violationService.updateUserViolation(updateViolationToUserDto, new MultipartFile[2], "abc");
-        List<String> warns = logCaptor.getWarnLogs();
-        assertTrue(warns.getFirst().contains("User service is unavailable: null"));
-    }
-
-    @Test
-    void updateUserViolation_SetImage_ShouldThrowLogWarn() {
-        LogCaptor logCaptor = LogCaptor.forClass(ViolationServiceImpl.class);
-        Employee employee = ModelUtils.getEmployee();
-        UpdateViolationToUserDto updateViolationToUserDto = ModelUtils.getUpdateViolationToUserDto();
-        Violation violation = ModelUtils.getViolation();
-        List<String> violationImages = violation.getImages();
-
-        when(employeeRepository.findByUuid("abc")).thenReturn(Optional.of(employee));
-        when(violationRepository.findActiveViolationByOrderId(1L)).thenReturn(Optional.of(violation));
-        if (updateViolationToUserDto.getImagesToDelete() != null) {
-            List<String> images = updateViolationToUserDto.getImagesToDelete();
-            for (String image : images) {
-                doNothing().when(userRemoteWebClient).deleteFile(image);
-                violationImages.remove(image);
-            }
-        }
-        when(userRemoteWebClient.uploadFile(any()))
-            .thenThrow(webClientRequestException);
-
-        violationService.updateUserViolation(updateViolationToUserDto, new MultipartFile[2], "abc");
-        List<String> warns = logCaptor.getWarnLogs();
-        assertTrue(warns.getFirst().contains("User service is unavailable: null"));
     }
 
     @Test

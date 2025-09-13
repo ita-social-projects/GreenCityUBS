@@ -46,7 +46,7 @@ class AddressValidatorTest {
     private AddressResponseFromGoogleAPI addressResponseFromGoogleAPI;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         CoordinatesDto coordinatesDto = new CoordinatesDto(50.45, 30.523);
         addressRequestDto = CreateAddressRequestDto.builder()
             .cityUk("Kyiv")

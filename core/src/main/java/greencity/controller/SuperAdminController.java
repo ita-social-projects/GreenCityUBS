@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +56,6 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
             content = @Content(schema = @Schema(implementation = GetTariffServiceDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -65,7 +63,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/{tariffId}/createTariffService")
     public ResponseEntity<GetTariffServiceDto> createTariffService(
-        @Positive @PathVariable long tariffId,
+        @Valid @PathVariable long tariffId,
         @RequestBody @Valid TariffServiceDto dto,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addTariffService(tariffId, dto, uuid));
@@ -85,7 +83,6 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = GetTariffServiceDto.class)))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -93,7 +90,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_PRICING_CARD', authentication)")
     @GetMapping("/{tariffId}/getTariffService")
     public ResponseEntity<List<GetTariffServiceDto>> getTariffService(
-        @Positive @PathVariable long tariffId) {
+        @Valid @PathVariable long tariffId) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffService(tariffId));
     }
 
@@ -107,8 +104,7 @@ class SuperAdminController {
 
     @Operation(summary = "Delete tariff service by Id")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -116,9 +112,9 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_DEACTIVATE_PRICING_CARD', authentication)")
     @DeleteMapping("/deleteTariffService/{id}")
     public ResponseEntity<HttpStatus> deleteTariffService(
-        @Positive @PathVariable Integer id) {
+        @Valid @PathVariable Integer id) {
         superAdminService.deleteTariffService(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     /**
@@ -136,7 +132,6 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = GetTariffServiceDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -145,7 +140,7 @@ class SuperAdminController {
     @PutMapping("/editTariffService/{id}")
     public ResponseEntity<GetTariffServiceDto> editTariffService(
         @Valid @RequestBody TariffServiceDto dto,
-        @Positive @PathVariable Integer id,
+        @Valid @PathVariable Integer id,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editTariffService(dto, id, uuid));
     }
@@ -174,7 +169,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PostMapping("/{tariffId}/createService")
     public ResponseEntity<GetServiceDto> createServices(
-        @Positive @PathVariable Long tariffId,
+        @Valid @PathVariable Long tariffId,
         @Valid @RequestBody ServiceDto dto,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.CREATED).body(superAdminService.addService(tariffId, dto, uuid));
@@ -194,7 +189,6 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = GetServiceDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -202,12 +196,12 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/{tariffId}/getService")
     public ResponseEntity<GetServiceDto> getService(
-        @Positive @PathVariable Long tariffId) {
+        @Valid @PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getService(tariffId));
     }
 
     /**
-     * Controller for delete service by id.
+     * Controller for delete service by Id.
      *
      * @param id {@link Long} - service id.
      * @author Vadym Makitra
@@ -216,7 +210,6 @@ class SuperAdminController {
     @Operation(summary = "Delete service by Id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -224,7 +217,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @DeleteMapping("/deleteService/{id}")
     public ResponseEntity<HttpStatus> deleteService(
-        @Positive @PathVariable Long id) {
+        @Valid @PathVariable Long id) {
         superAdminService.deleteService(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -245,7 +238,6 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = GetServiceDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -253,7 +245,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('CONTROL_SERVICE', authentication)")
     @PutMapping("/editService/{id}")
     public ResponseEntity<GetServiceDto> editService(
-        @Positive @PathVariable Long id,
+        @Valid @PathVariable Long id,
         @Valid @RequestBody ServiceDto dto,
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.editService(id, dto, uuid));
@@ -358,7 +350,7 @@ class SuperAdminController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_LOCATION', authentication)")
     @DeleteMapping("/deleteLocation/{id}")
-    public ResponseEntity<HttpStatus> deleteLocation(@Positive @PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteLocation(@PathVariable Long id) {
         superAdminService.deleteLocation(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -373,14 +365,13 @@ class SuperAdminController {
     @Operation(summary = "Active location Id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DELETE_LOCATION', authentication)")
     @PatchMapping("/activeLocations/{id}")
     public ResponseEntity<HttpStatus> activeLocation(
-        @Positive @PathVariable Long id) {
+        @PathVariable Long id) {
         superAdminService.activateLocation(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -396,7 +387,6 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = CreateCourierDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
@@ -462,7 +452,7 @@ class SuperAdminController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
     })
     @PatchMapping("/deactivateCourier/{id}")
-    public ResponseEntity<CourierDto> deactivateCourier(@Positive @PathVariable Long id) {
+    public ResponseEntity<CourierDto> deactivateCourier(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.deactivateCourier(id));
     }
 
@@ -533,14 +523,13 @@ class SuperAdminController {
     @Operation(summary = "Deletes employee receiving station")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_STATION', authentication)")
     @DeleteMapping("/delete-receiving-station/{id}")
-    public ResponseEntity<HttpStatus> deleteReceivingStation(@Positive @PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteReceivingStation(@PathVariable Long id) {
         superAdminService.deleteReceivingStation(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -562,26 +551,6 @@ class SuperAdminController {
     @GetMapping("/tariffs")
     public ResponseEntity<List<GetTariffsInfoDto>> getAllTariffsInfo(TariffsInfoFilterCriteria filterCriteria) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTariffsInfo(filterCriteria));
-    }
-
-    /**
-     * Controller for get tariff info by id.
-     *
-     * @return {@link GetTariffsInfoDto}
-     * @author Volodymyr Saienko
-     */
-    @Operation(summary = "Get tariff info by id.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @PreAuthorize("@preAuthorizer.hasAuthority('SEE_PRICING_CARD', authentication)")
-    @GetMapping("/tariff/{id}")
-    public ResponseEntity<GetTariffsInfoDto> getTariffInfoById(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffInfoById(id));
     }
 
     /**
@@ -645,7 +614,7 @@ class SuperAdminController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_DELETE_DEACTIVATE_PRICING_CARD', authentication)")
     @PutMapping("/editTariffInfo/{id}")
     public ResponseEntity<HttpStatus> editTariff(
-        @Positive @PathVariable Long id, @Valid @RequestBody EditTariffDto dto) {
+        @Valid @PathVariable Long id, @Valid @RequestBody EditTariffDto dto) {
         superAdminService.editTariff(id, dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -670,7 +639,7 @@ class SuperAdminController {
     })
     @PutMapping("/setTariffLimits/{tariffId}")
     public ResponseEntity<HttpStatus> setLimitsForTariff(
-        @Positive @PathVariable Long tariffId,
+        @Valid @PathVariable Long tariffId,
         @Valid @RequestBody SetTariffLimitsDto dto) {
         superAdminService.setTariffLimits(tariffId, dto);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -689,14 +658,13 @@ class SuperAdminController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = GetTariffLimitsDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/getTariffLimits/{tariffId}")
     public ResponseEntity<GetTariffLimitsDto> getTariffLimits(
-        @Positive @PathVariable long tariffId) {
+        @Valid @PathVariable long tariffId) {
         return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getTariffLimits(tariffId));
     }
 
@@ -719,7 +687,7 @@ class SuperAdminController {
     })
     @PatchMapping("/switchTariffStatus/{tariffId}")
     public ResponseEntity<HttpStatus> switchTariffStatus(
-        @Positive @PathVariable @Parameter(name = "tariffId", required = true, description = "tariff id") Long tariffId,
+        @PathVariable @Parameter(name = "tariffId", required = true, description = "tariff id") Long tariffId,
         @Valid @RequestParam @Parameter(name = "status", required = true, description = "status",
             schema = @Schema(type = "string", allowableValues = {"Active", "Deactivated"})) String status) {
         superAdminService.switchTariffStatus(tariffId, status);
@@ -741,7 +709,7 @@ class SuperAdminController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_LOCATION', authentication)")
     @PutMapping("tariffs/{id}/locations/change-status")
-    public ResponseEntity<HttpStatus> changeLocationsInTariffStatus(@Positive @PathVariable Long id,
+    public ResponseEntity<HttpStatus> changeLocationsInTariffStatus(@PathVariable Long id,
         @Valid @RequestBody ChangeTariffLocationStatusDto dto, @RequestParam String status) {
         superAdminService.changeTariffLocationsStatus(id, dto, status);
         return ResponseEntity.status(HttpStatus.OK).build();

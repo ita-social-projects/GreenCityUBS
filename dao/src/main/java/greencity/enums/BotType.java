@@ -1,5 +1,6 @@
 package greencity.enums;
 
 public enum BotType {
-    TELEGRAM
+    TELEGRAM,
+    VIBER
 }

@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(exclude = {"user", "order"})
 @Table(name = "change_of_points")
 public class ChangeOfPoints {
     @Id
@@ -33,7 +33,6 @@ public class ChangeOfPoints {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @EqualsAndHashCode.Include
     private User user;
 
     @Column
@@ -44,7 +43,6 @@ public class ChangeOfPoints {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    @EqualsAndHashCode.Include
     private Order order;
 
     @Column(nullable = false, name = "reason", length = 50)

@@ -60,7 +60,7 @@ public class Payment {
     private Long fee;
     @Column(length = 50)
     private String paymentSystem;
-    @Column(length = 72)
+    @Column(length = 254)
     private String senderEmail;
     @Column
     private String receiptLink;

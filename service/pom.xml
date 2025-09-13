@@ -22,8 +22,6 @@
         <json.version>20231013</json.version>
         <telegrambots.version>6.9.7.0</telegrambots.version>
         <com.github.librepdf.version>2.0.3</com.github.librepdf.version>
-        <emoji-java.version>5.1.1</emoji-java.version>
-        <springwolf.version>1.16.0</springwolf.version>
     </properties>
 
     <dependencyManagement>
@@ -71,12 +69,6 @@
             <artifactId>spring-social-facebook</artifactId>
             <version>${org.springframework.social.version}</version>
             <scope>compile</scope>
-        </dependency>
-        <!-- emoji -->
-        <dependency>
-            <groupId>com.vdurmont</groupId>
-            <artifactId>emoji-java</artifactId>
-            <version>${emoji-java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -162,12 +154,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.github.hakky54</groupId>
-            <artifactId>logcaptor</artifactId>
-            <version>2.12.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
@@ -182,27 +168,6 @@
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
             <version>${com.github.librepdf.version}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/io.github.springwolf/springwolf-stomp -->
-        <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>core</artifactId>
-            <version>3.5.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>javase</artifactId>
-            <version>3.5.3</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.springwolf</groupId>
-            <artifactId>springwolf-stomp</artifactId>
-            <version>${springwolf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.springwolf</groupId>
-            <artifactId>springwolf-ui</artifactId>
-            <version>${springwolf.version}</version>
         </dependency>
     </dependencies>
 </project>

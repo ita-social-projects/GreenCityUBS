@@ -1,12 +1,12 @@
 package greencity.dto.employee;
 
-import greencity.annotations.ValidTariffs;
 import greencity.dto.tariff.TariffWithChatAccess;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 
 @Data
@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class EmployeeWithTariffsIdDto {
     @Valid
-    private CreateUpdateEmployeeDto employeeDto;
-    @ValidTariffs
+    private EmployeeDto employeeDto;
+    @NotEmpty
     private List<TariffWithChatAccess> tariffs;
 }

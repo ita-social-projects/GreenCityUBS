@@ -33,9 +33,9 @@ class PositionWithTranslateDtoTest {
     @Test
     void testValidNameMap() {
         PositionWithTranslateDto dto =
-            new PositionWithTranslateDto(1L, Map.of("en", "Valid Name", "uk", "Дійсне ім'я"));
+            new PositionWithTranslateDto(1L, Map.of("en", "Valid Name", "ua", "Дійсне ім'я"));
         assertEquals("Valid Name", dto.getName().get("en"));
-        assertEquals("Дійсне ім'я", dto.getName().get("uk"));
+        assertEquals("Дійсне ім'я", dto.getName().get("ua"));
     }
 
     @Test

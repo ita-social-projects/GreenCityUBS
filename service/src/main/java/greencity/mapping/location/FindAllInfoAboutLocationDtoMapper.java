@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class FindAllInfoAboutLocationDtoMapper extends AbstractConverter<Region, LocationInfoDto> {
-    private static final String UALangCode = "uk";
+    private static final String UALangCode = "ua";
     private static final String ENLangCode = "en";
 
     @Override

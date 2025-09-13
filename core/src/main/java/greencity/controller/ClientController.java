@@ -10,6 +10,7 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
+import greencity.dto.user.UserVO;
 import greencity.enums.OrderStatus;
 import greencity.service.ubs.UBSClientService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,12 +20,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +37,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/ubs/client")
 @RequiredArgsConstructor
-@Validated
 public class ClientController {
     private final UBSClientService ubsClientService;
 
@@ -73,13 +71,12 @@ public class ClientController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = OrdersDataForUserDto.class))),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/user-order/{id}")
     public ResponseEntity<OrdersDataForUserDto> getAllDataForOneOrder(
-        @Parameter(hidden = true) @CurrentUserUuid String uuid, @Positive @PathVariable Long id) {
+        @Parameter(hidden = true) @CurrentUserUuid String uuid, @PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderForUser(uuid, id));
     }
 
@@ -92,20 +89,19 @@ public class ClientController {
     @Operation(summary = "delete user order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @DeleteMapping("/delete-order/{id}")
     public ResponseEntity<HttpStatus> deleteOrder(
         @Parameter(hidden = true) @CurrentUserUuid String uuid,
-        @Positive @PathVariable Long id) {
+        @PathVariable Long id) {
         ubsClientService.deleteOrder(uuid, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
-     * Controller returns all bonuses of user.
+     * Controller returns all bonuses of user..
      *
      * @param uuid {@link String} id.
      * @return list of {@link AllPointsUserDto}.
@@ -139,12 +135,12 @@ public class ClientController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/order-payment-detail/{orderId}")
-    public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@Positive @PathVariable Long orderId) {
+    public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderPaymentDetail(orderId));
     }
 
     /**
-     * Controller returns bonus points of current user.
+     * Controller returns bonus points of current user. {@link UserVO}.
      *
      * @param userUuid {@link String} uuid.
      * @return {@link UserPointDto}.

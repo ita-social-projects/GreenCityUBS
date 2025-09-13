@@ -1,19 +1,7 @@
 package greencity.service.ubs;
 
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
-import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_PAYMENT_ID;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
-import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.UserRemoteClient;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
@@ -29,6 +17,7 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.employee.EmployeeNameIdDto;
 import greencity.dto.employee.EmployeePositionDtoRequest;
 import greencity.dto.location.api.DistrictDto;
+import greencity.dto.order.AdminCommentDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
 import greencity.dto.order.DetailsOrderInfoDto;
@@ -85,6 +74,7 @@ import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.NotificationParameterRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -97,10 +87,21 @@ import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.CityRepository;
-import greencity.repository.DistrictRepository;
+import greencity.service.locations.LocationApiService;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -118,20 +119,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_PAYMENT_ID;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -139,6 +136,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final OrderRepository orderRepository;
+    private final OrderAddressRepository orderAddressRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final UserRemoteClient userRemoteClient;
@@ -150,7 +148,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final NotificationServiceImpl notificationService;
-    private final UserRemoteWebClient userRemoteWebClient;
+    private final FileService fileService;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
@@ -158,6 +156,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
     private final ServiceRepository serviceRepository;
     private final OrdersAdminsPageService ordersAdminsPageService;
+    private final LocationApiService locationApiService;
     private final OrderLockService orderLockService;
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
@@ -176,8 +175,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
     private static final String PAY_BUTTON = "payButton";
-    private final CityRepository cityRepository;
-    private final DistrictRepository districtRepository;
 
     /**
      * {@inheritDoc}
@@ -345,11 +342,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto.getSumAmount();
     }
 
-    private boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
+    private Boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
         return dto.getSumConfirmed() != 0;
     }
 
-    private boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
+    private Boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
         return dto.getSumExported() != 0;
     }
 
@@ -376,10 +373,12 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .regionUk(address.getBaseAddress().getRegionUk())
             .regionEn(address.getBaseAddress().getRegionEn())
             .addressRegionDistrictList(
-                districtRepository.findAllByCityId(cityRepository.findIdByNameUkOrNameEn(
-                    address.getBaseAddress().getCityUk()))
-                    .stream().map(p -> modelMapper.map(p, DistrictDto.class))
-                    .collect(toList()))
+                locationApiService
+                    .getAllDistrictsInCityByNames(address.getBaseAddress().getRegionUk(),
+                        address.getBaseAddress().getCityUk())
+                    .stream()
+                    .map(p -> modelMapper.map(p, DistrictDto.class))
+                    .collect(Collectors.toList()))
             .build();
     }
 
@@ -744,17 +743,16 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void setOrderPaymentStatusForConfirmedBags(Order currentOrder, long paymentsForCurrentOrder,
         long totalSumAmount, long totalConfirmed) {
-        boolean paidCondition = paymentsForCurrentOrder > 0
-            && paymentsForCurrentOrder >= totalSumAmount
+        boolean paidCondition = paymentsForCurrentOrder > 0 && paymentsForCurrentOrder >= totalSumAmount
             && paymentsForCurrentOrder >= totalConfirmed;
-        boolean halfPaidCondition = paymentsForCurrentOrder > 0
-            && (totalSumAmount > paymentsForCurrentOrder || totalConfirmed > paymentsForCurrentOrder);
+        boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalSumAmount > paymentsForCurrentOrder
+            || totalConfirmed > paymentsForCurrentOrder;
 
         if (paidCondition) {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             notificationService.notifyPaidOrder(currentOrder);
 
-            if (currentOrder.getOrderStatus() == OrderStatus.CONFIRMED) {
+            if (currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
                 notificationService.notifyCourierItineraryFormed(currentOrder);
             }
         } else if (halfPaidCondition) {
@@ -820,9 +818,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+                notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
-                notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_CONFIRMED_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED_UK, email, order);
@@ -873,10 +871,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
-        notificationService.notifyCanceledOrder(order);
         if (order.getPointsToUse() != 0 || !order.getCertificates().isEmpty()) {
             notificationService.notifyBonusesFromCanceledOrder(order);
-            paymentService.processPointsRefundForOrder(order);
+            returnAllPointsFromOrder(order);
         }
         order.setCancellationComment(cancellationComment);
         order.setCancellationReason(CancellationReason.valueOf(cancellationReason));
@@ -907,6 +904,29 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .collect(Collectors.toList()));
 
         dto.setOrderId(order.getId());
+    }
+
+    private void returnAllPointsFromOrder(Order order) {
+        Integer pointsToReturn = order.getPointsToUse();
+        if (isNull(pointsToReturn) || pointsToReturn == 0) {
+            return;
+        }
+        User user = order.getUser();
+        if (isNull(user.getCurrentPoints())) {
+            user.setCurrentPoints(0);
+        }
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
+        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
+            .amount(pointsToReturn)
+            .date(LocalDateTime.now())
+            .user(user)
+            .order(order)
+            .build();
+        if (isNull(user.getChangeOfPointsList())) {
+            user.setChangeOfPointsList(new ArrayList<>());
+        }
+        user.getChangeOfPointsList().add(changeOfPoints);
+        userRepository.save(user);
     }
 
     /**
@@ -1138,14 +1158,25 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String processImage(MultipartFile image) {
-        if (image != null) {
-            try {
-                return userRemoteWebClient.uploadFile(image);
-            } catch (WebClientRequestException | WebClientResponseException e) {
-                log.warn("User service is unavailable: {}", e.getMessage());
-            }
-        }
-        return DEFAULT_IMAGE_PATH;
+        return (image != null) ? fileService.upload(image) : DEFAULT_IMAGE_PATH;
+    }
+
+    /**
+     * This is service method which is save adminComment.
+     *
+     * @param adminCommentDto {@link AdminCommentDto}.
+     * @param email           {@link String}.
+     * @author Yuriy Bahlay.
+     */
+    @Override
+    public void saveAdminCommentToOrder(AdminCommentDto adminCommentDto, String email) {
+        Order order = orderRepository.findById(adminCommentDto.getOrderId()).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + adminCommentDto.getOrderId()));
+        checkAvailableOrderForEmployee(order, email);
+        order.setAdminComment(adminCommentDto.getAdminComment());
+        orderRepository.save(order);
+        eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, email
+            + "  " + email, order);
     }
 
     /**

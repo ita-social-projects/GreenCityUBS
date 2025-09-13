@@ -8,7 +8,7 @@ import java.util.Locale;
 @Getter
 @RequiredArgsConstructor
 public enum PdfFileHeaders {
-    ORDER_DETAILS("Деталі замовлення: №", "Order details: #"),
+    ORDER_DETAILS("Деталі замовлення", "Order details"),
     SENDER_INFO("Відправник", "Sender"),
     ORDER_COMMENT("Коментар до замовлення", "Comment to the order"),
     ADDRESS_INFO("Адреса вивезення відходів", "The address of export of the ordered services");
