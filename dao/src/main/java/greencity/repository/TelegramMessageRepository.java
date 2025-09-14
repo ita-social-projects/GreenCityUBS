@@ -1,5 +1,6 @@
 package greencity.repository;
 
+import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,4 +28,14 @@ public interface TelegramMessageRepository extends JpaRepository<TelegramMessage
      *         otherwise empty
      */
     Optional<TelegramMessage> findByMediaGroupId(String mediaGroupId);
+
+    /**
+     * Finds the most recent {@link TelegramMessage} in a given chat, ordered by
+     * send time descending.
+     *
+     * @param chat the {@link TelegramChat} entity
+     * @return an {@link Optional} containing the latest {@link TelegramMessage} in
+     *         this chat, otherwise empty
+     */
+    Optional<TelegramMessage> findFirstByChatOrderBySendAtDesc(TelegramChat chat);
 }
