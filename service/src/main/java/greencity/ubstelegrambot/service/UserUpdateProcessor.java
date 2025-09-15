@@ -89,7 +89,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                         MessageFactory.createAvailableCommandsMessage(chatId, lang));
                 }
             }
-        } else {
+        } else if (update.hasMessage()){
             var message = update.getMessage();
 
             Optional<TelegramChat> chatOpt = telegramChatRepository.findByChatId(message.getChatId().toString());
@@ -117,6 +117,21 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     return telegramCommandsService.processCommand(message, lang);
                 }
             }
+        } else if (update.hasEditedMessage()) {
+            Message edited = update.getEditedMessage();
+            String chatId = edited.getChatId().toString();
+
+            Optional<TelegramChat> chatOpt = telegramChatRepository.findByChatId(chatId);
+            if (chatOpt.isEmpty()) {
+                return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK);
+            }
+
+            String lang = chatOpt.get().getLanguageCode();
+            TelegramChat chat = chatOpt.get();
+            //TODO: can a user edit his message outside the chat(after 15 min)?
+            if(chat.getChatState() == ChatState.IN_SUPPORT)
+                return telegramSupportService.processEditedSupportMessage(edited, lang);
         }
+        return null;
     }
 }

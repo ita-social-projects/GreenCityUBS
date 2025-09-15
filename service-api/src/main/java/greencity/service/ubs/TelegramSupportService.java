@@ -14,4 +14,6 @@ public interface TelegramSupportService {
      *         occurred.
      */
     SendMessage processSupportMessage(Message message, String lang);
+
+    SendMessage processEditedSupportMessage(Message edited, String lang);
 }

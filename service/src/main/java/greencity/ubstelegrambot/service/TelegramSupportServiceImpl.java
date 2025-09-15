@@ -96,6 +96,41 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         return processMessageContent(chat, message);
     }
 
+    @Override
+    @Transactional
+    public SendMessage processEditedSupportMessage(Message edited, String lang) {
+        Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(edited.getFrom().getId().toString());
+        if (optionalChat.isEmpty()) {
+            log.warn("Telegram chat not found by ID: {}", edited.getFrom().getId());
+            return MessageFactory.createUnknownErrorOccurredMessage(edited.getChatId().toString(),
+                    TelegramBotConstants.UK);
+        }
+        TelegramChat chat = optionalChat.get();
+
+        if (edited.hasText()
+                && edited.getText().startsWith("/start")
+                && chat.getChatState() == ChatState.IN_SUPPORT) {
+            log.info("User is already in support chat {}. Filtering system /start edited", chat.getChatId());
+            return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), lang);
+        }
+
+        TelegramMessage telegramMessage =
+                telegramMessageRepository.findByTelegramMessageId(edited.getMessageId()).orElse(null);
+
+        if (telegramMessage == null) {
+            log.warn("Edited message {} not found in DB", edited.getMessageId());
+            return null;
+        }
+        if (edited.hasText()) {
+            telegramMessage.setText(edited.getText());
+        } else if (edited.getCaption() != null) {
+            telegramMessage.setText(edited.getCaption());
+        }
+
+        telegramMessageRepository.save(telegramMessage);
+        return null;
+    }
+
     private SendMessage processMessageContent(TelegramChat chat, Message message) {
         String mediaGroupId = message.getMediaGroupId();
         Optional<TelegramMessage> previouslySavedMessage = mediaGroupId == null
@@ -113,9 +148,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private TelegramMessage getOrSaveTelegramMessage(TelegramChat chat,
         Message message,
         String mediaGroupId,
-        Optional<TelegramMessage> telegramMessageOpt) {
-        if (telegramMessageOpt.isPresent()) {
-            return telegramMessageOpt.get();
+        Optional<TelegramMessage> previouslySavedMessage) {
+        if (previouslySavedMessage.isPresent()) {
+            return previouslySavedMessage.get();
         }
 
         String messageText = Optional.ofNullable(message.getText())
@@ -129,6 +164,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .sendAt(Instant.now())
             .text(messageText)
             .messageViewingStatus(MessageViewingStatus.UNREAD)
+            .telegramMessageId(message.getMessageId())
             .build();
 
         telegramMessageRepository.save(telegramMessage);
@@ -142,23 +178,23 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private SendMessage processMessageFiles(TelegramChat chat,
         Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         String lang) {
         SendMessage resultMessage = null;
         FileInfo fileInfo = new FileInfo();
 
         if (message.hasPhoto()) {
-            resultMessage = setPhotoInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+            resultMessage = setPhotoInfo(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
         } else if (message.hasDocument()) {
-            resultMessage = setDocumentInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+            resultMessage = setDocumentInfo(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
         } else if (message.hasSticker()) {
-            resultMessage = setStickerInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+            resultMessage = setStickerInfo(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
         } else if (message.hasAnimation()) {
-            resultMessage = setAnimationInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+            resultMessage = setAnimationInfo(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
         }
 
         if (fileInfo.getFileId() != null) {
-            return setFileAsMessageAsset(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+            return setFileAsMessageAsset(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
         } else if (!message.hasText()
             && !message.hasPhoto()
             && !message.hasDocument()
