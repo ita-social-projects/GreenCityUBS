@@ -1,5 +1,5 @@
 package greencity.enums;
 
 public enum AssetType {
-    IMAGE, VIDEO, FILE, AUDIO, STICKER
+    IMAGE, VIDEO, FILE, AUDIO
 }

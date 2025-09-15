@@ -98,6 +98,7 @@ class UserProfileCreateDtoTest {
             Arguments.of("username@.com"),
             Arguments.of("username@com"), // missing dot-suffix
             Arguments.of("username@domain.c"), // TLD too short
+            // Arguments.of("username@domain.toolongtld"), // TLD too long (>6)
             Arguments.of("user@@example.com"),
             Arguments.of("user@ example.com"), // space in domain
             Arguments.of("user@example..com") // double dots

@@ -7,7 +7,6 @@ import greencity.entity.user.employee.Position;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.exceptions.NotFoundException;
-import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -51,10 +50,7 @@ public class TelegramUtils {
      * Detects the asset type based on the given content type string.
      *
      * <ul>
-     * <li>If {@code fileType} is {@code null}, throws
-     * {@link UnsupportedTelegramAssetException}.</li>
-     * <li>If content type starts with {@code image/webp} or
-     * {@code application/x-tgsticker}, returns {@link AssetType#STICKER}.</li>
+     * <li>If {@code file} is {@code null}, returns {@link AssetType#FILE}.</li>
      * <li>If content type starts with {@code image/} (excluding SVG), returns
      * {@link AssetType#IMAGE}.</li>
      * <li>If content type starts with {@code video/}, returns
@@ -64,31 +60,25 @@ public class TelegramUtils {
      * <li>Otherwise, returns {@link AssetType#FILE}.</li>
      * </ul>
      *
-     * @param fileType the MIME type string
+     * @param file the MIME type string
      * @return the corresponding {@link AssetType}
      */
-    public static AssetType detectAssetType(String fileType) {
-        if (fileType == null) {
-            throw new UnsupportedTelegramAssetException("Unsupported asset: no content type");
-        }
-
-        if (fileType.equals("image/webp") || fileType.equals("application/x-tgsticker")) {
-            return AssetType.STICKER;
-        }
-        if (fileType.startsWith("application/") || fileType.startsWith("text/") || fileType.contains("svg")) {
+    public static AssetType detectAssetType(String file) {
+        if (file == null) {
             return AssetType.FILE;
         }
-        if (fileType.startsWith("image/")) {
+
+        if (file.startsWith("image/") && !file.contains("svg")) {
             return AssetType.IMAGE;
         }
-        if (fileType.startsWith("video/")) {
+        if (file.startsWith("video/")) {
             return AssetType.VIDEO;
         }
-        if (fileType.startsWith("audio/")) {
+        if (file.startsWith("audio/")) {
             return AssetType.AUDIO;
         }
 
-        throw new UnsupportedTelegramAssetException("Unsupported asset type: " + fileType);
+        return AssetType.FILE;
     }
 
     /**
