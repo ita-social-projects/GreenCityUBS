@@ -15,18 +15,6 @@ import java.util.Optional;
 public interface TelegramChatRepository
     extends JpaRepository<TelegramChat, Long>, JpaSpecificationExecutor<TelegramChat> {
     /**
-     * The method finds telegram bot by user and chat id and isNotify.
-     *
-     * @param user     {@link User}.
-     * @param chatId   {@link Long}.
-     * @param isNotify {@link Boolean}
-     * @return {@link Optional} {@link TelegramChat}.
-     *
-     * @author Julia Seti
-     */
-    Optional<TelegramChat> findByUserAndChatIdAndIsNotify(User user, String chatId, Boolean isNotify);
-
-    /**
      * The method finds telegram bot by user.
      *
      * @param user {@link User}.

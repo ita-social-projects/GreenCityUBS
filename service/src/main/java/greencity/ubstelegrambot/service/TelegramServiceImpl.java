@@ -54,7 +54,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -605,69 +604,6 @@ public class TelegramServiceImpl implements TelegramService {
         }, () -> {
             throw new NotFoundException();
         });
-    }
-
-    @Override
-    @Transactional
-    public void deleteManagerMessage(Long messageId, Long chatId) {
-        TelegramChat chat = telegramChatRepository.findById(chatId).orElseThrow(NotFoundException::new);
-        if (messageId == null || messageId == 0) {
-            throw new NotFoundException("Message id must be provided");
-        }
-        TelegramMessage message = telegramMessageRepository.findById(messageId).orElseThrow(NotFoundException::new);
-        if (!Boolean.TRUE.equals(message.getFromManager())) {
-            return;
-        }
-        if (message.getChat() == null || !message.getChat().getId().equals(chat.getId())) {
-            throw new NotFoundException("Message " + messageId + " does not belong to chat " + chatId);
-        }
-        if (message.getAssets() != null && !message.getAssets().isEmpty()) {
-            executor.executeCommand(MessageFactory.buildDeleteMessages(chat.getChatId(),
-                message.getAssets().stream().map(MessageAsset::getTelegramMessageId).toList()));
-        } else if (message.getTelegramMessageId() != null) {
-            executor.executeCommand(MessageFactory.buildDeleteMessage(chat.getChatId(),
-                message.getTelegramMessageId()));
-        }
-        telegramMessageRepository.delete(message);
-        updateLastMessage(chat);
-    }
-
-    @Override
-    @Transactional
-    public void deleteManagerAsset(Long assetId, Long chatId) {
-        messageAssetRepository.findById(assetId).ifPresent(asset -> {
-            TelegramMessage parent = asset.getMessage();
-            if (parent.getFromManager()) {
-                DeleteMessage deleteMessage = MessageFactory.buildDeleteMessage(parent.getChat().getChatId(),
-                    asset.getTelegramMessageId());
-                executor.executeCommand(deleteMessage);
-
-                MessageAsset nextAsset = parent.getAssets().getFirst();
-                parent.getAssets().remove(asset);
-                messageAssetRepository.delete(asset);
-
-                if (parent.getAssets().isEmpty()) {
-                    telegramMessageRepository.delete(parent);
-                    updateLastMessage(parent.getChat());
-                } else {
-                    if (parent.getText() != null && !parent.getText().isBlank() && asset.equals(nextAsset)) {
-                        nextAsset = parent.getAssets().getFirst();
-                        EditMessageCaption editCaption = MessageFactory.buildEditMessageCaption(
-                            parent.getChat().getChatId(),
-                            nextAsset.getTelegramMessageId(),
-                            parent.getText());
-                        executor.executeCommand(editCaption);
-                    }
-                }
-            }
-        });
-    }
-
-    private void updateLastMessage(TelegramChat chat) {
-        telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat)
-            .ifPresentOrElse(chat::setLastMessage,
-                () -> chat.setLastMessage(null));
-        telegramChatRepository.save(chat);
     }
 
     private boolean isStartCommand(Message message) {
