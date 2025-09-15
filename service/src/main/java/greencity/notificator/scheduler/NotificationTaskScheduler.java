@@ -2,6 +2,7 @@ package greencity.notificator.scheduler;
 
 import greencity.constant.AppConstant;
 import greencity.enums.NotificationType;
+import java.time.ZoneId;
 import java.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,8 @@ public class NotificationTaskScheduler {
     private ScheduledFuture<Void> scheduleTask(Runnable task, String schedule, NotificationType notificationType) {
         ScheduledFuture<Void> scheduledFuture = null;
         if (isExpressionCorrect(schedule, notificationType)) {
-            scheduledFuture = (ScheduledFuture<Void>) taskScheduler.schedule(task, new CronTrigger(schedule));
+            scheduledFuture = (ScheduledFuture<Void>) taskScheduler.schedule(task,
+                new CronTrigger(schedule, ZoneId.of("Europe/Kyiv")));
             log.info(AppConstant.NOTIFICATOR_SUCCESSFULLY_START_LOG_MESSAGE, notificationType, schedule);
         }
         return scheduledFuture;
