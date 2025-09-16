@@ -220,4 +220,5 @@ public class ErrorMessage {
     public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
     public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
         "Template cannot be deleted while it is referenced by existing notifications";
+    public static final String BOT_RESPONSE_NOT_FOUND = "Bot response with ID %d not found";
 }
