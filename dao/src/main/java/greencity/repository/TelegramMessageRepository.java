@@ -38,4 +38,6 @@ public interface TelegramMessageRepository extends JpaRepository<TelegramMessage
      *         this chat, otherwise empty
      */
     Optional<TelegramMessage> findFirstByChatOrderBySendAtDesc(TelegramChat chat);
+
+    Optional<TelegramMessage> findByTelegramMessageId(Integer messageId);
 }
