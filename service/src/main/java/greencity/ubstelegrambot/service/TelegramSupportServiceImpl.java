@@ -348,9 +348,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (telegramMessageOpt.isPresent()) {
                 List<MessageAsset> existingAssets = new ArrayList<>(telegramMessage.getAssets());
                 existingAssets.add(asset);
-                telegramMessage.setAssets(existingAssets);
+                telegramMessage.getAssets().addAll(existingAssets);
             } else {
-                telegramMessage.setAssets(new ArrayList<>(List.of(asset)));
+                telegramMessage.setAssets((new ArrayList<>(List.of(asset))));
             }
 
             messageAssetRepository.save(asset);
