@@ -42,13 +42,17 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
     }
 
     private SendMessage processMainMenuRequest(String chatId, String lang) {
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+            MessageType.SUPPORTED_COMMANDS);
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory.createAvailableCommandsMessage(chatId, lang));
+            MessageFactory.createAvailableCommandsMessage(chatId, lang, text));
     }
 
     private SendMessage processManagerMessageRequest(String chatId, String lang) {
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+            MessageType.SUPPORTED_COMMANDS);
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang));
+            MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang, text));
     }
 
     private SendMessage processManagerCallBackQueryRequest(String chatId, String lang) {

@@ -40,34 +40,46 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
             String lang = telegramLanguageService.getChatLanguage(chatId);
             switch (callBackQuery.getData()) {
                 case TelegramBotConstants.CLIENT_SUPPORT_CALLBACK -> {
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.CLIENT_SUPPORT_MESSAGE_CALLBACK_QUERY);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
-                        MessageFactory.createSupportMessageCallBackQuery(chatId, lang));
+                        MessageFactory.createSupportMessageCallBackQuery(chatId, lang, text));
                 }
                 case TelegramBotConstants.SORTING_PRICES_CALLBACK -> {
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.SORTING_RULES_PRICING_MESSAGE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createSortingPricesMessage(chatId, lang));
+                        MessageFactory.createSortingPricesMessage(chatId, lang, text));
                 }
                 case TelegramBotConstants.WORK_SCHEDULE_CALLBACK -> {
                     String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
-                        MessageType.MENU_WORK_SCHEDULE);
+                        MessageType.WORK_SCHEDULE_MESSAGE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
                         MessageFactory.createWorkScheduleMessage(chatId, lang, text));
                 }
                 case TelegramBotConstants.ADMISSION_RULES_CALLBACK -> {
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.ADMISSION_RULES_TEXT);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createAdmissionRulesMessage(chatId, lang));
+                        MessageFactory.createAdmissionRulesMessage(chatId, lang, text));
                 }
                 case TelegramBotConstants.GREEN_OFFICE_CALLBACK -> {
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.GREEN_OFFICE_TEXT);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createGreenOfficeMessage(chatId, lang));
+                        MessageFactory.createGreenOfficeMessage(chatId, lang, text));
                 }
                 case TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK -> {
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.ENTERING_EMAIL_MESSAGE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.ENTERING_GREEN_OFFICE_EMAIL,
-                        MessageFactory.createEnteringEmailMessage(chatId, lang));
+                        MessageFactory.createEnteringEmailMessage(chatId, lang, text));
                 }
                 case TelegramBotConstants.FEEDBACK_CALLBACK -> {
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.FEEDBACK_MESSAGE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createFeedbackMessage(chatId, lang));
+                        MessageFactory.createFeedbackMessage(chatId, lang, text));
                 }
                 case TelegramBotConstants.RATING_TERRIBLY_CALLBACK -> {
                     return telegramFeedbackService.processRatingFeedbackRequest(chatId, 1);
@@ -85,22 +97,27 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     return telegramFeedbackService.processRatingFeedbackRequest(chatId, 5);
                 }
                 case TelegramBotConstants.LOGIN_CALLBACK -> {
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.LOGIN_MESSAGE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
-                        MessageFactory.createLoginMessage(chatId, lang));
+                        MessageFactory.createLoginMessage(chatId, lang, text));
                 }
                 default -> {
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.SUPPORTED_COMMANDS);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createAvailableCommandsMessage(chatId, lang));
+                        MessageFactory.createAvailableCommandsMessage(chatId, lang, text));
                 }
             }
         } else {
             var message = update.getMessage();
 
             Optional<TelegramChat> chatOpt = telegramChatRepository.findByChatId(message.getChatId().toString());
-
             if (chatOpt.isEmpty()) {
+                String text = telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+                    MessageType.UNKNOWN_ERROR);
                 return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
-                    TelegramBotConstants.UK);
+                    TelegramBotConstants.UK, text);
             }
             String lang = chatOpt.get().getLanguageCode();
             TelegramChat chat = chatOpt.get();

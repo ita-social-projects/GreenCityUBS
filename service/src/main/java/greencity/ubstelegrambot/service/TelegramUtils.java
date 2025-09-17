@@ -6,10 +6,12 @@ import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
+import greencity.enums.MessageType;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
+import greencity.service.ubs.TelegramBotResponseService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
@@ -34,6 +36,7 @@ public class TelegramUtils {
     private String telegramBotToken;
     private final PositionRepository positionRepository;
     private final TelegramChatRepository telegramChatRepository;
+    private final TelegramBotResponseService telegramBotResponseService;
 
     /**
      * Detects the asset type based on the content type of the given multipart file.
@@ -183,8 +186,10 @@ public class TelegramUtils {
         ChatState newState,
         SendMessage message) {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR);
         if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK);
+            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK, text);
         }
         chat.get().setChatState(newState);
         chat.get().setChatStateUpdatedAt(Instant.now());

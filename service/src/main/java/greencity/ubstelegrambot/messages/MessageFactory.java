@@ -45,8 +45,8 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the list of available commands
      *         message.
      */
-    public static SendMessage createAvailableCommandsMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "supported.commands"),
+    public static SendMessage createAvailableCommandsMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createHelpKeyboard(lang));
     }
 
@@ -60,8 +60,8 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the list of supported manager
      *         commands message.
      */
-    public static SendMessage createAvailableForManagerCommandsMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "supported.commands"),
+    public static SendMessage createAvailableForManagerCommandsMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
@@ -73,8 +73,8 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the unknown command message.
      */
-    public static SendMessage createUnknownCommandMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "unknown.command"),
+    public static SendMessage createUnknownCommandMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createHelpKeyboard(lang));
     }
 
@@ -86,8 +86,8 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the login message.
      */
-    public static SendMessage createLoginMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "login.message"),
+    public static SendMessage createLoginMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
@@ -101,8 +101,8 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the fail login message with error
      *         message.
      */
-    public static SendMessage createFailLoginMessage(String chatId, String errorMessage, String lang) {
-        return buildReplyMarkUpMessage(chatId, String.format(MessageProvider.get(lang, "login.error"), errorMessage),
+    public static SendMessage createFailLoginMessage(String chatId, String errorMessage, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, String.format(text, errorMessage),
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
@@ -116,8 +116,8 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the success login message with
      *         username.
      */
-    public static SendMessage createSuccessLoginMessage(String chatId, String userName, String lang) {
-        return buildReplyMarkUpMessage(chatId, String.format(MessageProvider.get(lang, "login.success"), userName),
+    public static SendMessage createSuccessLoginMessage(String chatId, String userName, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, String.format(text, userName),
             KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
@@ -128,14 +128,13 @@ public class MessageFactory {
      * @param username       {@link String} is username in telegram.
      * @param messageText    {@link String} is message.
      * @param innerChatId    {@link Long} is id for link.
-     * @param lang           {@link String} is a language code of the telegram chat.
      *
      * @return {@link SendMessage} configured with the manager notification message.
      */
     public static SendMessage createNotificationMessageForManager(String telegramChatId, String username,
-        String messageText, Long innerChatId, String lang) {
+        String messageText, Long innerChatId, String text) {
         SendMessage message = buildMessage(telegramChatId,
-            String.format(MessageProvider.get(lang, "client.want.to.speak"), username, messageText, innerChatId));
+            String.format(text, username, messageText, innerChatId));
         message.enableHtml(true);
         message.setParseMode(ParseMode.HTML);
         return message;
@@ -158,13 +157,11 @@ public class MessageFactory {
      *
      * @param chatId   {@link String} is telegram chat id.
      * @param username {@link String} is username in telegram.
-     * @param lang     {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the user notification end support
      *         mode message.
      */
-    public static SendMessage createEndSupportModeNotification(String chatId, String username, String lang) {
-        return buildMessage(chatId,
-            String.format(MessageProvider.get(lang, "client.end.support.notification"), username));
+    public static SendMessage createEndSupportModeNotification(String chatId, String username, String text) {
+        return buildMessage(chatId, String.format(text, username));
     }
 
     /**
@@ -193,11 +190,11 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the support message with call
      *         back query.
      */
-    public static SendMessage createSupportMessageCallBackQuery(String chatId, String lang) {
+    public static SendMessage createSupportMessageCallBackQuery(String chatId, String lang, String text) {
         return SendMessage
             .builder()
             .chatId(chatId)
-            .text(MessageProvider.get(lang, "client.support.message.callback.query"))
+            .text(text)
             .replyMarkup(KeyboardFactory.userSupportKeyboard(lang))
             .build();
     }
@@ -209,11 +206,11 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the support message.
      */
-    public static SendMessage createSupportReplyMarkup(String chatId, String lang) {
+    public static SendMessage createSupportReplyMarkup(String chatId, String lang, String text) {
         return SendMessage
             .builder()
             .chatId(chatId)
-            .text(MessageProvider.get(lang, "client.support.message.change.language"))
+            .text(text)
             .replyMarkup(KeyboardFactory.userSupportKeyboard(lang))
             .build();
     }
@@ -239,8 +236,8 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the sorting prices message.
      */
-    public static SendMessage createSortingPricesMessage(String chatId, String lang) {
-        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "sorting.rules.pricing.message"),
+    public static SendMessage createSortingPricesMessage(String chatId, String lang, String text) {
+        var message = buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
         message.setParseMode(ParseMode.HTML);
         return message;
@@ -253,8 +250,8 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the admission rules message.
      */
-    public static SendMessage createAdmissionRulesMessage(String chatId, String lang) {
-        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "admission.rules.text"),
+    public static SendMessage createAdmissionRulesMessage(String chatId, String lang, String text) {
+        var message = buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
         message.setParseMode(ParseMode.HTML);
         return message;
@@ -267,8 +264,8 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the green office message.
      */
-    public static SendMessage createGreenOfficeMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "green.office.text"),
+    public static SendMessage createGreenOfficeMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createProcessOrBackToMainMenuKeyboard(TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK,
                 lang));
     }
@@ -280,8 +277,8 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the entering email message.
      */
-    public static SendMessage createEnteringEmailMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "entering.email.message"),
+    public static SendMessage createEnteringEmailMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
@@ -292,8 +289,8 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the invalid email message.
      */
-    public static SendMessage createInvalidEmailMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "invalid.email.message"),
+    public static SendMessage createInvalidEmailMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
@@ -303,8 +300,8 @@ public class MessageFactory {
      * @param chatId {@link String} is telegram chat id.
      * @return {@link SendMessage} configured with the green office thanks message.
      */
-    public static SendMessage createGreenOfficeThanksMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "green.office.thank.you.message"),
+    public static SendMessage createGreenOfficeThanksMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createHelpKeyboard(lang));
     }
 
@@ -315,8 +312,8 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the feedback message.
      */
-    public static SendMessage createFeedbackMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "feedback.message"),
+    public static SendMessage createFeedbackMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createFeedbackOrBackToMainMenuKeyboard(lang));
     }
 
@@ -324,22 +321,20 @@ public class MessageFactory {
      * Method for creating great feedback message.
      *
      * @param chatId {@link String} is telegram chat id.
-     * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the great feedback message.
      */
-    public static SendMessage createGreatFeedbackMessage(String chatId, String lang) {
-        return buildMessage(chatId, MessageProvider.get(lang, "great.feedback.message"));
+    public static SendMessage createGreatFeedbackMessage(String chatId, String text) {
+        return buildMessage(chatId, text);
     }
 
     /**
      * Method for creating bad feedback message.
      *
      * @param chatId {@link String} is telegram chat id.
-     * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the bad feedback message.
      */
-    public static SendMessage createBadFeedbackMessage(String chatId, String lang) {
-        return buildMessage(chatId, MessageProvider.get(lang, "bad.feedback.message"));
+    public static SendMessage createBadFeedbackMessage(String chatId, String text) {
+        return buildMessage(chatId, text);
     }
 
     /**
@@ -349,8 +344,8 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the thanks feedback message.
      */
-    public static SendMessage createFeedbackThanksMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "feedback.thank.you.message"),
+    public static SendMessage createFeedbackThanksMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createHelpKeyboard(lang));
     }
 
@@ -362,8 +357,8 @@ public class MessageFactory {
      * @return {@link SendMessage} configured with the unknown error occurred
      *         message.
      */
-    public static SendMessage createUnknownErrorOccurredMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "unknown.error"),
+    public static SendMessage createUnknownErrorOccurredMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
     }
 
@@ -372,11 +367,10 @@ public class MessageFactory {
      * already open.
      *
      * @param chatId {@link String} is the Telegram chat ID.
-     * @param lang   {@link String} is the language code of the Telegram chat.
      * @return {@link SendMessage} configured with the chat already open message.
      */
-    public static SendMessage createChatAlreadyOpenMessage(String chatId, String lang) {
-        return buildMessage(chatId, MessageProvider.get(lang, "manager.chat.already.open.message"));
+    public static SendMessage createChatAlreadyOpenMessage(String chatId, String text) {
+        return buildMessage(chatId, text);
     }
 
     /**
@@ -463,13 +457,12 @@ public class MessageFactory {
      * </p>
      *
      * @param chatId the ID of the chat to send the message to
-     * @param lang   {@link String} is a language code of the telegram chat.
      * @return a {@link SendMessage} object configured to remove the keyboard
      */
-    public static SendMessage deleteEndSupportKeyboardMessage(String chatId, String lang) {
+    public static SendMessage deleteEndSupportKeyboardMessage(String chatId, String text) {
         SendMessage removeKeyboardMsg = new SendMessage();
         removeKeyboardMsg.setChatId(chatId);
-        removeKeyboardMsg.setText(MessageProvider.get(lang, "client.stop.support.mode"));
+        removeKeyboardMsg.setText(text);
         removeKeyboardMsg.setReplyMarkup(new ReplyKeyboardRemove(true));
         return removeKeyboardMsg;
     }

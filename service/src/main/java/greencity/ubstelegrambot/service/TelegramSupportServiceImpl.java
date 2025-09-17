@@ -7,10 +7,7 @@ import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
-import greencity.enums.AssetType;
-import greencity.enums.ChatState;
-import greencity.enums.MessageDeliveryStatus;
-import greencity.enums.MessageViewingStatus;
+import greencity.enums.*;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.producers.TelegramChatProducer;
@@ -59,6 +56,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final TelegramNotificationService telegramNotificationService;
     private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
+    private final TelegramBotResponseServiceImpl telegramBotResponseService;
 
     /**
      * {@inheritDoc}
@@ -69,7 +67,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
             log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.UNKNOWN_ERROR);
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), text,
                 TelegramBotConstants.UK);
         }
 
@@ -79,15 +78,23 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             && message.getText().startsWith("/start")
             && chat.getChatState() == ChatState.IN_SUPPORT) {
             log.info("User is already in support chat {}. Filtering system /start message", chat.getChatId());
-            return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), lang);
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                MessageType.MANAGER_CHAT_ALREADY_OPEN_MESSAGE);
+            return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), text);
         }
 
-        if (message.hasText() && message.getText().contains(MessageProvider.get(lang, "client.end.support.mode"))) {
+        if (message.hasText() && message.getText().contains(telegramBotResponseService.getResponseByLangAndMessageType(
+            lang, MessageType.CLIENT_END_SUPPORT_MODE))) {
+            String feedbackText = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.FEEDBACK_MESSAGE);
             SendMessage endSupportSendMessage =
                 telegramUtils.updateChatStateAndRespond(chat.getChatId(), ChatState.NORMAL,
-                    MessageFactory.createFeedbackMessage(chat.getChatId(), lang));
+                    MessageFactory.createFeedbackMessage(chat.getChatId(), lang, feedbackText));
 
-            telegramExecutor.executeCommand(MessageFactory.deleteEndSupportKeyboardMessage(chat.getChatId(), lang));
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.CLIENT_STOP_SUPPORT_MODE);
+            telegramExecutor.executeCommand(MessageFactory.deleteEndSupportKeyboardMessage(
+                chat.getChatId(), text));
 
             telegramNotificationService.notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
             return endSupportSendMessage;

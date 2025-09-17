@@ -4,12 +4,13 @@ import greencity.client.UserRemoteClient;
 import greencity.dto.TestersSignInRequest;
 import greencity.entity.telegram.TelegramManager;
 import greencity.entity.user.employee.Employee;
+import greencity.enums.MessageType;
 import greencity.exceptions.BadRequestException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
+import greencity.service.ubs.TelegramBotResponseService;
 import greencity.service.ubs.TelegramLoginService;
 import greencity.ubstelegrambot.messages.MessageFactory;
-import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
     private final TelegramManagerRepository telegramManagerRepository;
     private final EmployeeRepository employeeRepository;
     private final TelegramUtils telegramUtils;
+    private final TelegramBotResponseService telegramBotResponseService;
     private final UserRemoteClient userRemoteClient;
     @Value("${greencity.sing-in.secret-token}")
     private String secretToken;
@@ -44,9 +46,13 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
     public SendMessage processInputManagerCredentialsRequest(Message message, String lang) {
         String[] parts = message.getText().split(":");
 
+        String template = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.LOGIN_ERROR);
+
         if (parts.length < 2) {
+            String errorText = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.INCORRECT_LOGIN_FORMAT);
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "incorrect.login.format"), lang);
+                errorText, lang, template);
         }
 
         String login = parts[0];
@@ -55,15 +61,19 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
         Optional<Employee> employee = employeeRepository.findByEmailWithPositions(login);
 
         if (employee.isEmpty()) {
+            String errorText = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.USER_NOT_EMPLOYEE);
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "user.not.employee"), lang);
+                errorText, lang, template);
         }
 
         boolean isManager = telegramUtils.checkIsEmployeeManager(employee.get());
 
         if (!isManager) {
+            String errorText = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.ENTERING_EMAIL_MESSAGE);
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "employee.not.manager"), lang);
+                errorText, lang, template);
         }
 
         try {
@@ -79,14 +89,20 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
                     .employee(employee.get())
                     .build());
 
+            String successText = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                MessageType.LOGIN_SUCCESS);
             return MessageFactory.createSuccessLoginMessage(message.getChatId().toString(), name,
-                lang);
+                lang, successText);
         } catch (BadRequestException e) {
+            String errorText = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.LOGIN_FAILED);
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "login.failed"), lang);
+                errorText, lang, template);
         } catch (Exception e) {
+            String errorText = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.SOMETHING_WENT_WRONG);
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "something.went.wrong"), lang);
+                errorText, lang, template);
         }
     }
 }
