@@ -4,8 +4,10 @@ import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.UserCategoryDto;
 import greencity.dto.pageble.PageableDto;
 import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 public interface NotificationTemplateService {
     /**
@@ -50,4 +52,9 @@ public interface NotificationTemplateService {
      * @author Denys Ryhal
      */
     void removeNotificationTemplate(Long id);
+
+    /**
+     * Method that returns all user categories.
+     */
+    List<UserCategoryDto> getAllUserCategories();
 }
