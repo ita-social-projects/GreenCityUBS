@@ -534,4 +534,28 @@ public class OrderController {
         List<LocationsDto> locations = ubsClientService.getAllLocationsByCourierId(courierId);
         return ResponseEntity.status(HttpStatus.OK).body(locations);
     }
+
+    /**
+     * Cancels pending payment attempt and returns points/certificates from that
+     * attempt to user account.
+     *
+     * @param userUuid current {@link User}'s uuid.
+     * @param id       id of the order that belongs to user.
+     * @author Oleksandr Ilnytskyi
+     */
+    @Operation(summary = "Cancel payment attempt.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = PaymentSystemResponse.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @PostMapping("/cancelPaymentAttempt/{id}")
+    public ResponseEntity<Void> cancelPaymentAttempt(
+        @Parameter(hidden = true) @CurrentUserUuid String userUuid,
+        @Positive @PathVariable("id") Long id) {
+        ubsClientService.cancelPaymentAttempt(userUuid, id);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

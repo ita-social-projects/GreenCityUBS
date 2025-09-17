@@ -18,7 +18,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.configuration.RedirectionConfigProp;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.LocationsDto;
@@ -29,12 +28,8 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.exception.handler.CustomExceptionHandler;
-import greencity.repository.OrderRepository;
-import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.UBSClientService;
-import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import java.security.Principal;
 import java.util.Arrays;
@@ -66,16 +61,7 @@ class OrderControllerTest {
     UBSClientService ubsClientService;
 
     @Mock
-    UBSManagementService ubsManagementService;
-
-    @Mock
     UserRepository userRepository;
-
-    @Mock
-    OrderRepository orderRepository;
-
-    @Mock
-    NotificationService notificationService;
 
     @Mock
     private WayForPayRedirectService wayForPayRedirectService;
@@ -83,11 +69,8 @@ class OrderControllerTest {
     @InjectMocks
     OrderController orderController;
 
-    @Mock
-    RedirectionConfigProp prop;
     private MockMvc mockMvc;
-    @Mock
-    private UBSUserRepository ubSuserRepository;
+
     private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
 
     @BeforeEach
@@ -388,5 +371,21 @@ class OrderControllerTest {
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
         verify(ubsClientService).getAllLocationsByCourierId(id);
+    }
+
+    @Test
+    void cancelPaymentAttemptTest() throws Exception {
+        Long orderId = 1L;
+        String uuid = "35467585763t4sfgchjfuyetf";
+
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(
+            Optional.of("35467585763t4sfgchjfuyetf"));
+
+        mockMvc.perform(post(ubsLink + "/cancelPaymentAttempt/{id}", orderId)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(ubsClientService).cancelPaymentAttempt(uuid, orderId);
     }
 }
