@@ -1,16 +1,16 @@
 package greencity.client.config;
 
+import greencity.dto.files.CleanupFilesDto;
+import greencity.dto.files.DeleteFileDto;
+import greencity.dto.files.UploadFileDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -19,77 +19,52 @@ public class UserRemoteWebClient {
     private final WebClient webClient;
 
     /**
-     * Method for uploading files.
-     *
-     * @param files files to save.
-     * @return urls of the saved files.
-     */
-    public List<String> uploadAllFiles(List<MultipartFile> files) {
-        MultipartFile[] multipartFiles = files.toArray(new MultipartFile[0]);
-
-        return webClient.post()
-            .uri("/files")
-            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(multipartInserter(multipartFiles))
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<List<String>>() {
-            })
-            .block();
-    }
-
-    /**
      * Method for uploading a file.
      *
-     * @param file file to save.
+     * @param fileDto {@link UploadFileDto} file to save.
      * @return url of the saved file.
      */
-    public String uploadFile(MultipartFile file) {
+    public String uploadFile(UploadFileDto fileDto) {
         return webClient.post()
             .uri("/files/single")
             .contentType(MediaType.MULTIPART_FORM_DATA)
-            .body(multipartInserter(file))
+            .body(multipartInserter(fileDto))
             .retrieve()
             .bodyToMono(String.class)
             .block();
     }
 
     /**
-     * Method for deleting files.
+     * Method for deleting a file.
      *
-     * @param paths urls of files to delete.
+     * @param fileDto {@link DeleteFileDto} file to delete.
      */
-    public void deleteAllFiles(List<String> paths) {
+    public void deleteFile(DeleteFileDto fileDto) {
         webClient.method(HttpMethod.DELETE)
-            .uri("/files")
-            .bodyValue(paths)
+            .uri("/files/single")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(fileDto)
             .retrieve()
             .bodyToMono(Void.class)
             .block();
     }
 
-    /**
-     * Method for deleting files.
-     *
-     * @param path urls of files to delete.
-     */
-    public void deleteFile(String path) {
-        webClient.method(HttpMethod.DELETE)
-            .uri(uriBuilder -> uriBuilder
-                .path("/files/single")
-                .queryParam("path", path)
-                .build())
+    public void cleanUp(CleanupFilesDto cleanupFilesDto) {
+        webClient.post()
+            .uri("/cleanup")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(cleanupFilesDto)
             .retrieve()
             .bodyToMono(Void.class)
             .block();
     }
 
-    private BodyInserters.MultipartInserter multipartInserter(MultipartFile... multipartFiles) {
+    private BodyInserters.MultipartInserter multipartInserter(UploadFileDto fileDto) {
         MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
-
-        for (MultipartFile multipartFile : multipartFiles) {
-            multipartBodyBuilder.part("file", multipartFile.getResource());
-        }
+        multipartBodyBuilder.part("file", fileDto.getFile().getResource());
+        multipartBodyBuilder.part("owner", fileDto.getOwner());
 
         return BodyInserters.fromMultipartData(multipartBodyBuilder.build());
     }
+
 }
