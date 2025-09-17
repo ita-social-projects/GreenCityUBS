@@ -19,12 +19,12 @@ public class BotMessage {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "message_type", nullable = false, unique = true)
+    @Column(name = "message_type", nullable = false)
     private MessageType messageType;
 
-    @Column(name = "message_uk", columnDefinition = "TEXT")
-    private String messageUk;
+    @Column(nullable = false)
+    private String lang;
 
-    @Column(name = "message_en", columnDefinition = "TEXT")
-    private String messageEn;
+    @Column(name = "text", columnDefinition = "TEXT")
+    private String text;
 }

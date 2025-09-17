@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 public class BotResponseDto {
     private Long id;
     private MessageType messageType;
-    private String messageUk;
-    private String messageEn;
+    private String lang;
+    private String text;
 }

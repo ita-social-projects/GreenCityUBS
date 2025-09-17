@@ -25,45 +25,6 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageFactory {
     /**
-     * Method for creating welcome SendMessage for TelegramLongPollingBot.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     * @param lang   {@link String} is a language code of the telegram chat.
-     *
-     * @return {@link SendMessage} configured with the welcome message.
-     */
-    public static SendMessage createWelcomeMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "greeting.message"),
-            KeyboardFactory.createHelpKeyboard(lang));
-    }
-
-    /**
-     * Method for creating welcome manager SendMessage.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     * @param lang   {@link String} is a language code of the telegram chat.
-     *
-     * @return {@link SendMessage} configured with the welcome manager message.
-     */
-    public static SendMessage createWelcomeManagerMessage(String chatId, String lang) {
-        return buildMessage(chatId, MessageProvider.get(lang, "greeting.manager.message"));
-    }
-
-    /**
-     * Method for creating successful logout manager SendMessage for
-     * TelegramLongPollingBot.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     * @param lang   {@link String} is a language code of the telegram chat.
-     *
-     * @return {@link SendMessage} configured with the successful logout manager
-     *         message.
-     */
-    public static SendMessage createLogoutManagerMessage(String chatId, String lang) {
-        return buildMessage(chatId, MessageProvider.get(lang, "successful.logout.manager"));
-    }
-
-    /**
      * Method for creating forbidden manager SendMessage for TelegramLongPollingBot.
      *
      * @param chatId {@link String} is telegram chat id.
@@ -71,11 +32,8 @@ public class MessageFactory {
      *
      * @return {@link SendMessage} configured with the forbidden manager messages.
      */
-    public static SendMessage createForbiddenCommandsManagerMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId,
-            MessageProvider.get(lang, "forbidden.commands.manager") + "\n"
-                + MessageProvider.get(lang, "supported.commands"),
-            KeyboardFactory.createHelpKeyboardForManager(lang));
+    public static SendMessage createForbiddenCommandsManagerMessage(String chatId, String lang, String text) {
+        return buildReplyMarkUpMessage(chatId, text, KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
     /**
@@ -267,8 +225,8 @@ public class MessageFactory {
      * @param lang   {@link String} is a language code of the telegram chat.
      * @return {@link SendMessage} configured with the work schedule message.
      */
-    public static SendMessage createWorkScheduleMessage(String chatId, String lang) {
-        var message = buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "work.schedule.message"),
+    public static SendMessage createWorkScheduleMessage(String chatId, String lang, String text) {
+        var message = buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
         message.setParseMode(ParseMode.HTML);
         return message;

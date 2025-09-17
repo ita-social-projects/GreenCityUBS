@@ -3,6 +3,7 @@ package greencity.service.ubs;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.BotResponseDto;
 import greencity.dto.telegram.UpdateBotMessageRequestDto;
+import greencity.enums.MessageType;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -29,4 +30,6 @@ public interface TelegramBotResponseService {
      * @param dto the request containing updated bot response data
      */
     void updateBotResponse(UpdateBotMessageRequestDto dto);
+
+    String getResponseByLangAndMessageType(String lang, MessageType messageType);
 }

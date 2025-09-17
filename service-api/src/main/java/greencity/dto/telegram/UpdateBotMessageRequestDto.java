@@ -11,6 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateBotMessageRequestDto {
     private Long id;
-    private String messageUk;
-    private String messageEn;
+    private String text;
 }

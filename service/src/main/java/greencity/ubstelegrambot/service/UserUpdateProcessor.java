@@ -3,6 +3,7 @@ package greencity.ubstelegrambot.service;
 import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.*;
 import greencity.enums.ChatState;
+import greencity.enums.MessageType;
 import greencity.repository.*;
 import greencity.service.ubs.*;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -25,6 +26,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
     private final TelegramGreenOfficeService telegramGreenOfficeService;
     private final TelegramCommandsService telegramCommandsService;
     private final TelegramLanguageService telegramLanguageService;
+    private final TelegramBotResponseServiceImpl telegramBotResponseService;
 
     /**
      * Handles incoming updates related to user interactions in Telegram.
@@ -46,8 +48,9 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                         MessageFactory.createSortingPricesMessage(chatId, lang));
                 }
                 case TelegramBotConstants.WORK_SCHEDULE_CALLBACK -> {
+                    String text =  telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MENU_WORK_SCHEDULE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createWorkScheduleMessage(chatId, lang));
+                        MessageFactory.createWorkScheduleMessage(chatId, lang, text));
                 }
                 case TelegramBotConstants.ADMISSION_RULES_CALLBACK -> {
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,

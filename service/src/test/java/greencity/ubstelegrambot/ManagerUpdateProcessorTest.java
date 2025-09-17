@@ -119,7 +119,7 @@ class ManagerUpdateProcessorTest {
         update.setCallbackQuery(callbackQuery);
 
         SendMessage expectedMessage =
-            MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramBotConstants.UK);
+            MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramBotConstants.UK, "test");
 
         when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
@@ -129,7 +129,7 @@ class ManagerUpdateProcessorTest {
         verify(telegramUtils).updateChatStateAndRespond(
             eq(chatId),
             eq(ChatState.NORMAL),
-            eq(MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramBotConstants.UK)));
+            eq(MessageFactory.createForbiddenCommandsManagerMessage(chatId, TelegramBotConstants.UK, "test")));
 
         verifyNoInteractions(telegramLoginService);
         assertEquals(expectedMessage, actualMessage);
