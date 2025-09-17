@@ -1,8 +1,8 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.constant.ErrorMessage;
+import greencity.dto.BotResponseProjection;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.BotResponseDto;
 import greencity.dto.telegram.UpdateBotMessageRequestDto;
 import greencity.entity.telegram.BotMessage;
 import greencity.enums.MessageType;
@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -26,22 +25,11 @@ public class TelegramBotResponseServiceImpl implements TelegramBotResponseServic
      * {@inheritDoc}
      */
     @Override
-    public PageableDto<BotResponseDto> getAllBotResponses(Pageable pageable) {
-        Page<BotMessage> botMessages = telegramBotMessageRepository.findAll(pageable);
-        List<BotResponseDto> botResponseDtos = botMessages
-            .getContent()
-            .stream()
-            .map(message -> BotResponseDto
-                .builder()
-                .id(message.getId())
-                .lang(message.getLang())
-                .text(message.getText())
-                .messageType(message.getMessageType())
-                .build())
-            .toList();
+    public PageableDto<BotResponseProjection> getAllBotResponses(Pageable pageable) {
+        Page<BotResponseProjection> botMessages = telegramBotMessageRepository.findAllPivot(pageable);
 
         return new PageableDto<>(
-            botResponseDtos,
+            botMessages.stream().toList(),
             botMessages.getTotalElements(),
             botMessages.getNumber(),
             botMessages.getTotalPages());

@@ -172,7 +172,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             && !message.hasAnimation()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
             resetTelegramChatDataToInternalStatus(chat, telegramMessage);
-            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
             resultMessage = MessageFactory.buildMessage(message.getChatId().toString(), text);
         }
         return resultMessage;
@@ -194,7 +195,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (telegramMessageOpt.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
-            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
             return MessageFactory.buildMessage(message.getChatId().toString(), text);
         } else {
             fileInfo.setFileId(sticker.getFileId());
@@ -215,7 +217,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (telegramMessageOpt.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
-            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
             return MessageFactory.buildMessage(message.getChatId().toString(), text);
         } else {
             fileInfo.setFileId(animation.getFileId());
@@ -241,7 +244,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (telegramMessageOpt.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
-            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_PHOTO_FAILED);
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_PHOTO_FAILED);
             return MessageFactory.buildMessage(message.getChatId().toString(), text);
         } else {
             fileInfo.setFileId(largestPhoto.getFileId());
@@ -260,7 +264,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (telegramMessageOpt.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
-            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
             return MessageFactory.buildMessage(message.getChatId().toString(), text);
         } else {
             fileInfo.setFileId(document.getFileId());
@@ -280,7 +285,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             File telegramFile = telegramExecutor.executeGetFile(new GetFile(fileInfo.getFileId()));
             if (telegramFile == null || telegramFile.getFilePath() == null) {
                 log.warn("Telegram file not found for fileId: {}", fileInfo.getFileId());
-                String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+                String text =
+                    telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
                 return MessageFactory.buildMessage(message.getChatId().toString(), text);
             }
 
@@ -327,7 +333,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         } catch (TelegramBotExecutionException | UnsupportedTelegramAssetException | IOException e) {
             log.error("Error loading or saving file from Telegram (Filename: {}): {}", fileInfo.getOriginalFileName(),
                 e.getMessage(), e);
-            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
             return MessageFactory.buildMessage(message.getChatId().toString(), text);
         }
 
@@ -371,7 +378,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
                 contentForNotification,
                 chat.getId());
-            String text = telegramBotResponseService.getResponseByLangAndMessageType(chat.getLanguageCode(), MessageType.MESSAGE_SENT_TO_MANAGER);
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(chat.getLanguageCode(),
+                MessageType.MESSAGE_SENT_TO_MANAGER);
             return MessageFactory.buildMessage(chat.getChatId(), text);
         } else {
             telegramMessageRepository.save(telegramMessage);

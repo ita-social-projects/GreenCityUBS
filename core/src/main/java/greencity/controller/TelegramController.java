@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
+import greencity.dto.BotResponseProjection;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.*;
@@ -252,17 +253,17 @@ public class TelegramController {
      * Retrieves a paginated list of all available bot responses.
      *
      * <p>
-     * This endpoint returns a pageable collection of {@link BotResponseDto} objects
-     * containing configured bot responses. Access is restricted to users with the
-     * {@code TELEGRAM_MANAGEMENT} authority.
+     * This endpoint returns a pageable collection of {@link BotResponseProjection}
+     * objects containing configured bot responses. Access is restricted to users
+     * with the {@code TELEGRAM_MANAGEMENT} authority.
      * </p>
      *
      * @param pageable the pagination and sorting information
      * @return {@link ResponseEntity} containing a {@link PageableDto} of
-     *         {@link BotResponseDto} and HTTP status {@code 200 (OK)} if the
+     *         {@link BotResponseProjection} and HTTP status {@code 200 (OK)} if the
      *         request is successful
      *
-     * @see BotResponseDto
+     * @see BotResponseProjection
      * @see PageableDto
      */
     @Operation(summary = "Get all bot responses")
@@ -273,7 +274,7 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/bot_responses", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageableDto<BotResponseDto>> getAllBotResponses(Pageable pageable) {
+    public ResponseEntity<PageableDto<BotResponseProjection>> getAllBotResponses(Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(telegramBotResponseService.getAllBotResponses(pageable));
     }
