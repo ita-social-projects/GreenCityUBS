@@ -141,18 +141,6 @@ public class MessageFactory {
     }
 
     /**
-     * Method for creating end support mode message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     * @param lang   {@link String} is a language code of the telegram chat.
-     * @return {@link SendMessage} configured with the end support mode message.
-     */
-    public static SendMessage createEndSupportMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "client.stop.support.mode"),
-            KeyboardFactory.createChatFeedbackRatingKeyboard());
-    }
-
-    /**
      * Method for creating user notification end support mode message.
      *
      * @param chatId   {@link String} is telegram chat id.
