@@ -2191,10 +2191,11 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void deleteOrder() {
+    void deleteOrder() throws SchedulerException {
         Order order = getOrder();
         when(ordersForUserRepository.getAllByUserUuidAndId(order.getUser().getUuid(), order.getId()))
             .thenReturn(order);
+        when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(true);
 
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
 
@@ -3126,7 +3127,7 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void testValidatePaymentSuccess() {
+    void testValidatePaymentSuccess() throws SchedulerException {
         PaymentResponseDto response = getPaymentResponseDto();
 
         Order expectedOrder = getOrder2();
@@ -3140,6 +3141,7 @@ class UBSClientServiceImplTest {
         when(notificationParameterRepository
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
             .thenReturn(getNotificationPaymentLink());
+        when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(true);
 
         PaymentResponseWayForPay result = ubsClientService.validatePayment(response);
 
@@ -3189,7 +3191,7 @@ class UBSClientServiceImplTest {
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> ubsClientService.validatePayment(response));
 
-        assertEquals(PAYMENT_EXPIRY_CANCEL_EXCEPTION, exception.getMessage());
+        assertEquals(QUARTZ_SCHEDULER_EXCEPTION, exception.getMessage());
 
         verify(orderRepository).findById(1L);
         verify(userNotificationRepository)
@@ -4077,6 +4079,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(quartzScheduler.getJobDetail(jobKey)).thenReturn(jobDetail);
         when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
+        when(quartzScheduler.deleteJob(jobKey)).thenReturn(true);
         when(wayForPayClient.getCancellationResponse(any(PaymentCancellationWayForPayRequestDto.class)))
             .thenReturn(response);
 
@@ -4185,6 +4188,35 @@ class UBSClientServiceImplTest {
     }
 
     @Test
+    void cancelPaymentAttemptWhenSchedulerReturnsFalseOnCancel() throws SchedulerException {
+        Order order = getOrder();
+        order.setPaymentLink("testInvoice");
+        order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
+        Long orderId = order.getId();
+
+        User user = getUserWithInitializedFields();
+        String uuid = user.getUuid();
+
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("orderId", orderId);
+        jobDataMap.put("pointsUsed", 0);
+        jobDataMap.put("certificateCodes", new HashSet<>());
+
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+
+        when(quartzScheduler.checkExists(jobKey)).thenReturn(true);
+        when(userRepository.findByUuid(uuid)).thenReturn(user);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(quartzScheduler.getJobDetail(jobKey)).thenReturn(jobDetail);
+        when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
+
+        assertEquals(PAYMENT_EXPIRY_CANCEL_EXCEPTION, exception.getMessage());
+    }
+
+    @Test
     void cancelPaymentAttemptWhenSchedulerFailsToCancelJob() throws SchedulerException {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
@@ -4211,7 +4243,7 @@ class UBSClientServiceImplTest {
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> ubsClientService.cancelPaymentAttempt(uuid, orderId));
 
-        assertEquals(PAYMENT_EXPIRY_CANCEL_EXCEPTION, exception.getMessage());
+        assertEquals(QUARTZ_SCHEDULER_EXCEPTION, exception.getMessage());
     }
 
     @Test
@@ -4238,6 +4270,7 @@ class UBSClientServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(quartzScheduler.getJobDetail(jobKey)).thenReturn(jobDetail);
         when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
+        when(quartzScheduler.deleteJob(jobKey)).thenReturn(true);
         when(wayForPayClient.getCancellationResponse(any(PaymentCancellationWayForPayRequestDto.class)))
             .thenReturn(response);
 

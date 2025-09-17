@@ -5,8 +5,6 @@ import greencity.entity.order.Order;
 import greencity.service.ubs.UBSClientService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.InjectMocks;
@@ -16,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
