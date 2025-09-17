@@ -3,11 +3,16 @@ package greencity;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.courier.CreateCourierDto;
+import greencity.dto.files.DeleteFileDto;
+import greencity.dto.files.UploadFileDto;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 public class ModelUtils {
@@ -169,5 +174,23 @@ public class ModelUtils {
             .tariffId(1L)
             .hasChat(true)
             .build();
+    }
+
+    public static UploadFileDto getUploadFileDto() {
+        return UploadFileDto.builder()
+            .file(getMultipartFile())
+            .owner("Owner")
+            .build();
+    }
+
+    public static DeleteFileDto getDeleteFileDto() {
+        return DeleteFileDto.builder()
+            .path("file.txt")
+            .owner("Owner")
+            .build();
+    }
+
+    private static MultipartFile getMultipartFile() {
+        return new MockMultipartFile("file.txt", "file.txt", "text/plain", "content".getBytes());
     }
 }

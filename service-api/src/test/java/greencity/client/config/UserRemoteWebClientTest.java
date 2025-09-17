@@ -1,14 +1,13 @@
 package greencity.client.config;
 
+import static greencity.ModelUtils.getDeleteFileDto;
+import static greencity.ModelUtils.getUploadFileDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
+import greencity.dto.files.DeleteFileDto;
+import greencity.dto.files.UploadFileDto;
 import lombok.SneakyThrows;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -22,8 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,43 +48,17 @@ class UserRemoteWebClientTest {
 
     @SneakyThrows
     @Test
-    void uploadAllFilesTest() {
-        List<String> expectedUrls = List.of("url1", "url2");
-        String expectedJson = toJson(expectedUrls);
-        String expectedRequestPath = "/files";
-        String expectedRequestMethod = HttpMethod.POST.name();
-
-        MultipartFile file1 = createMockMultipartFile("file1.txt", "content1");
-        MultipartFile file2 = createMockMultipartFile("file2.txt", "content2");
-        List<MultipartFile> files = Arrays.asList(file1, file2);
-
-        mockWebServer.enqueue(new MockResponse()
-            .setBody(expectedJson)
-            .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
-
-        List<String> actualResult = userRemoteWebClient.uploadAllFiles(files);
-
-        assertEquals(expectedUrls, actualResult);
-        RecordedRequest recordedRequest = mockWebServer.takeRequest();
-        assertEquals(expectedRequestMethod, recordedRequest.getMethod());
-        assertEquals(expectedRequestPath, recordedRequest.getPath());
-        assertTrue(recordedRequest.getHeader(HttpHeaders.CONTENT_TYPE).startsWith(MediaType.MULTIPART_FORM_DATA_VALUE));
-    }
-
-    @SneakyThrows
-    @Test
     void uploadFileTest() {
         String expectedUrl = "upload-file-url";
         String expectedRequestPath = "/files/single";
         String expectedRequestMethod = HttpMethod.POST.name();
 
-        MultipartFile file = createMockMultipartFile("file.txt", "content");
-
         mockWebServer.enqueue(new MockResponse()
             .setBody(expectedUrl)
             .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
-        String actualResult = userRemoteWebClient.uploadFile(file);
+        UploadFileDto uploadFileDto = getUploadFileDto();
+        String actualResult = userRemoteWebClient.uploadFile(uploadFileDto);
 
         assertEquals(expectedUrl, actualResult);
         RecordedRequest recordedRequest = mockWebServer.takeRequest();
@@ -98,60 +69,21 @@ class UserRemoteWebClientTest {
 
     @SneakyThrows
     @Test
-    void deleteAllFilesTest() {
-        List<String> pathToDelete = List.of("path1", "path2");
-        String expectedRequestPath = "/files";
-        String expectedRequestMethod = HttpMethod.DELETE.name();
-
-        mockWebServer.enqueue(new MockResponse()
-            .setResponseCode(200)
-            .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
-
-        userRemoteWebClient.deleteAllFiles(pathToDelete);
-
-        RecordedRequest recordedRequest = mockWebServer.takeRequest();
-        assertEquals(expectedRequestMethod, recordedRequest.getMethod());
-        assertEquals(expectedRequestPath, recordedRequest.getPath());
-
-        String requestBody = recordedRequest.getBody().readUtf8();
-        List<String> actualPath = fromJson(requestBody, new TypeReference<>() {
-        });
-        assertEquals(pathToDelete, actualPath);
-    }
-
-    @SneakyThrows
-    @Test
     void deleteFileTest() {
-        String expectedPath = "delete-file-url";
-        String expectedRequestPath = "/files/single?path=" + URLEncoder.encode(expectedPath, StandardCharsets.UTF_8);
+        DeleteFileDto deleteFileDto = getDeleteFileDto();
+        String expectedRequestBody = objectMapper.writeValueAsString(deleteFileDto);
         String expectedRequestMethod = HttpMethod.DELETE.name();
 
         mockWebServer.enqueue(new MockResponse()
             .setResponseCode(200)
             .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
-        userRemoteWebClient.deleteFile(expectedPath);
+        userRemoteWebClient.deleteFile(deleteFileDto);
 
         RecordedRequest recordedRequest = mockWebServer.takeRequest();
-        assertEquals(expectedRequestMethod, recordedRequest.getMethod());
-        assertEquals(expectedRequestPath, recordedRequest.getPath());
-
         String requestBody = recordedRequest.getBody().readUtf8();
-        assertTrue(requestBody.isEmpty());
-    }
 
-    @SneakyThrows
-    private String toJson(Object object) {
-        return objectMapper.writeValueAsString(object);
+        assertEquals(expectedRequestMethod, recordedRequest.getMethod());
+        assertEquals(expectedRequestBody, requestBody);
     }
-
-    private MultipartFile createMockMultipartFile(String name, String content) {
-        return new MockMultipartFile(name, name, "text/plain", content.getBytes());
-    }
-
-    @SneakyThrows
-    private <T> T fromJson(String json, TypeReference<T> typeReference) {
-        return objectMapper.readValue(json, typeReference);
-    }
-
 }
