@@ -52,7 +52,8 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
     }
 
     private SendMessage processManagerCallBackQueryRequest(String chatId, String lang) {
-        String text =  telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.FORBIDDEN_COMMANDS_MANAGER);
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+            MessageType.FORBIDDEN_COMMANDS_MANAGER);
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
             MessageFactory.createForbiddenCommandsManagerMessage(chatId, lang, text));
     }

@@ -66,8 +66,9 @@ public class TelegramBotResponseServiceImpl implements TelegramBotResponseServic
     @Override
     public String getResponseByLangAndMessageType(String lang, MessageType messageType) {
         return telegramBotMessageRepository
-                .findByLangAndMessageType(lang, messageType)
-                .orElseThrow(() -> new NotFoundException(String.format(ErrorMessage.BOT_MESSAGE_WITH_TYPE_AND_LANG_NOT_FOUND, messageType, lang)))
-                .getText();
+            .findByLangAndMessageType(lang, messageType)
+            .orElseThrow(() -> new NotFoundException(
+                String.format(ErrorMessage.BOT_MESSAGE_WITH_TYPE_AND_LANG_NOT_FOUND, messageType, lang)))
+            .getText();
     }
 }

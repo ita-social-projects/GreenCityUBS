@@ -48,7 +48,8 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                         MessageFactory.createSortingPricesMessage(chatId, lang));
                 }
                 case TelegramBotConstants.WORK_SCHEDULE_CALLBACK -> {
-                    String text =  telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MENU_WORK_SCHEDULE);
+                    String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                        MessageType.MENU_WORK_SCHEDULE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
                         MessageFactory.createWorkScheduleMessage(chatId, lang, text));
                 }

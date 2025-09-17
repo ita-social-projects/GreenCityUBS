@@ -7,140 +7,260 @@
     <changeSet id="insert-initial-bot-messages" author="AnastasiaRakuta">
         <insert tableName="bot_messages">
             <column name="message_type" value="MENU_CLIENT_SUPPORT"/>
-            <column name="message_uk" value="Чат з людиною"/>
-            <column name="message_en" value="Chat with a human"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Чат з людиною"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MENU_CLIENT_SUPPORT"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Chat with a human"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MENU_WORK_SCHEDULE"/>
-            <column name="message_uk" value="Графік роботи станції"/>
-            <column name="message_en" value="Station work schedule"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Графік роботи станції"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MENU_WORK_SCHEDULE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Station work schedule"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MENU_ADMISSION_RULES"/>
-            <column name="message_uk" value="Правила прийому сировини"/>
-            <column name="message_en" value="Raw material acceptance rules"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Правила прийому сировини"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MENU_ADMISSION_RULES"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Raw material acceptance rules"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MENU_GREEN_OFFICE"/>
-            <column name="message_uk" value="Зелений офіс"/>
-            <column name="message_en" value="Green office"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Зелений офіс"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MENU_GREEN_OFFICE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Green office"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MENU_FEEDBACK"/>
-            <column name="message_uk" value="Залишити відгук"/>
-            <column name="message_en" value="Leave feedback"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Залишити відгук"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MENU_FEEDBACK"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Leave feedback"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MENU_SORTING_PRICES"/>
-            <column name="message_uk" value="Ціни на сортування"/>
-            <column name="message_en" value="Sorting prices"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Ціни на сортування"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MENU_SORTING_PRICES"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Sorting prices"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MENU_LOGIN"/>
-            <column name="message_uk" value="Увійти як менеджер"/>
-            <column name="message_en" value="Log in as manager"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Увійти як менеджер"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MENU_LOGIN"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Log in as manager"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="YES_ANSWER"/>
-            <column name="message_uk" value="Так"/>
-            <column name="message_en" value="Yes"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Так"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="YES_ANSWER"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Yes"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="INCORRECT_LOGIN_FORMAT"/>
-            <column name="message_uk" value="Некоректний формат. Будь ласка, введіть дані в форматі login:password"/>
-            <column name="message_en" value="Incorrect format. Please enter your credentials as login:password"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Некоректний формат. Будь ласка, введіть дані в форматі login:password"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="INCORRECT_LOGIN_FORMAT"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Incorrect format. Please enter your credentials as login:password"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="LOGOUT_MANAGER"/>
-            <column name="message_uk" value="Вийти з ролі менеджера"/>
-            <column name="message_en" value="Exit manager role"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Вийти з ролі менеджера"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="LOGOUT_MANAGER"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Exit manager role"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="SUCCESSFUL_LOGOUT_MANAGER"/>
-            <column name="message_uk" value="Успішно вийшли з ролі менеджера!"/>
-            <column name="message_en" value="Successfully exited manager role!"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Успішно вийшли з ролі менеджера!"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="SUCCESSFUL_LOGOUT_MANAGER"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Successfully exited manager role!"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="FORBIDDEN_COMMANDS_MANAGER"/>
-            <column name="message_uk" value="❌Менеджеру заборонено викликати таку команду"/>
-            <column name="message_en" value="❌Managers are not allowed to use this command"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="❌Менеджеру заборонено викликати таку команду"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="FORBIDDEN_COMMANDS_MANAGER"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="❌Managers are not allowed to use this command"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="USER_NOT_EMPLOYEE"/>
-            <column name="message_uk" value="Користувач не є співробітником"/>
-            <column name="message_en" value="User is not an employee"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Користувач не є співробітником"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="USER_NOT_EMPLOYEE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="User is not an employee"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="EMPLOYEE_NOT_MANAGER"/>
-            <column name="message_uk" value="Співробітник не є менеджером"/>
-            <column name="message_en" value="Employee is not a manager"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Співробітник не є менеджером"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="EMPLOYEE_NOT_MANAGER"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Employee is not a manager"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="SOMETHING_WENT_WRONG"/>
-            <column name="message_uk" value="Щось пішло не так спробуйте, будь ласка, знову"/>
-            <column name="message_en" value="Something went wrong, please try again"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Щось пішло не так спробуйте, будь ласка, знову"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="SOMETHING_WENT_WRONG"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Something went wrong, please try again"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MANAGER_PHOTO_FAILED"/>
-            <column name="message_uk" value="Менеджер не зміг отримати ваше фото, спробуйте будь ласка, знову"/>
-            <column name="message_en" value="Manager couldn't receive your photo, please try again"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Менеджер не зміг отримати ваше фото, спробуйте будь ласка, знову"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MANAGER_PHOTO_FAILED"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Manager couldn't receive your photo, please try again"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MANAGER_FILE_FAILED"/>
-            <column name="message_uk" value="Менеджер не зміг отримати ваш файл, спробуйте будь ласка, знову"/>
-            <column name="message_en" value="Manager couldn't receive your file, please try again"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Менеджер не зміг отримати ваш файл, спробуйте будь ласка, знову"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MANAGER_FILE_FAILED"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Manager couldn't receive your file, please try again"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="GREETING_MESSAGE"/>
-            <column name="message_uk">
+            <column name="lang" value="uk"/>
+            <column name="text">
                 <![CDATA[
 Привіт! Я бот і допомагаю своїм колегам-менеджеркам обробляти запити.
 Будь ласка, поставте своє запитання, обравши чат з людиною або виберіть
 інший варіант.
-            ]]>
+                ]]>
             </column>
-            <column name="message_en">
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="GREETING_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text">
                 <![CDATA[
 Hi! I'm a bot helping my fellow managers handle requests.
 Please ask your question by choosing to chat with a human
 or select another option.
-            ]]>
+                ]]>
             </column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="GREETING_MANAGER_MESSAGE"/>
-            <column name="message_uk" value="Привіт менеджер!"/>
-            <column name="message_en" value="Hi manager!"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Привіт менеджер!"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="GREETING_MANAGER_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Hi manager!"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="LOGIN_MESSAGE"/>
-            <column name="message_uk" value="Введіть логін та пароль в форматі логін:пароль"/>
-            <column name="message_en" value="Enter your login and password in the format login:password"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Введіть логін та пароль в форматі логін:пароль"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="LOGIN_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Enter your login and password in the format login:password"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="LOGIN_SUCCESS"/>
-            <column name="message_uk" value="Вітаємо, %s ! Ви успішно авторизувалися."/>
-            <column name="message_en" value="Welcome, %s! You have successfully logged in."/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Вітаємо, %s ! Ви успішно авторизувалися."/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="LOGIN_SUCCESS"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Welcome, %s! You have successfully logged in."/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="SUPPORTED_COMMANDS"/>
-            <column name="message_uk" value="Список доступних команд:"/>
-            <column name="message_en" value="List of available commands:"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Список доступних команд:"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="SUPPORTED_COMMANDS"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="List of available commands:"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="LOGIN_ERROR"/>
-            <column name="message_uk" value="Авторизація не вдалася: &quot;%s&quot;"/>
-            <column name="message_en" value="Login failed: &quot;%s&quot;"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Авторизація не вдалася: &quot;%s&quot;"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="LOGIN_ERROR"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Login failed: &quot;%s&quot;"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="UNKNOWN_COMMAND"/>
-            <column name="message_uk" value="Невідома команда. Оберіть команду зі списку доступних."/>
-            <column name="message_en" value="Unknown command. Please choose one from the available list."/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Невідома команда. Оберіть команду зі списку доступних."/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="UNKNOWN_COMMAND"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Unknown command. Please choose one from the available list."/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="WORK_SCHEDULE_MESSAGE"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 <b>Станція No Waste Recycling Station</b>
 Київ, вул. Саперно-Слобідська, 25/4 (Україна без сміття)
 
@@ -154,10 +274,12 @@ or select another option.
 
 <b>Платна послуга «Досортування»</b>
 Доступна 24/7
-            ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+            ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="WORK_SCHEDULE_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 <b>No Waste Recycling Station</b>
 Kyiv, 25/4 Saperno-Slobidska St. (UBS)
 
@@ -171,13 +293,12 @@ Sat–Sun: 10:00–15:30
 
 <b>Paid service “Resorting”</b>
 Available 24/7
-            ]]>
-            </column>
+            ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="SORTING_RULES_PRICING_MESSAGE"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 У 120-ти літровий пакет потрібно скласти змішану вторсировину й неліквіди
 (окрім небезпечних, забруднених, будівельних відходів, а також відходів,
 які контактували з рідинами тіла — перелік тут —
@@ -200,10 +321,12 @@ Available 24/7
 Текстильні відходи:
 130 грн/20 л
 295 грн/60 л
-            ]]>
-            </column>
-            <column name="message_en">
-            <![CDATA[
+            ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="SORTING_RULES_PRICING_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 Mixed recyclables and non-liquid waste (excluding hazardous,
 contaminated, construction waste, and waste that contacted bodily fluids —
 list here: <a href="https://nowaste.com.ua/sort-station">Link</a>)
@@ -228,231 +351,313 @@ Textile waste:
 
 130 UAH/20 L
 295 UAH/60 L
-            ]]>
-            </column>
+            ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="ADMISSION_RULES_TEXT"/>
-            <column name="message_uk">
-            <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 Все, що ми приймаємо на станції на переробку або безпечне спалення
 (перелік тут — <a href="https://nowaste.com.ua/sort-station">Посилання</a>)
-            ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+            ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="ADMISSION_RULES_TEXT"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 Everything we accept at the station for recycling or safe incineration
 (full list here: <a href="https://nowaste.com.ua/sort-station">Link</a>)
-            ]]>
-            </column>
+            ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="GREEN_OFFICE_TEXT"/>
-            <column name="message_uk" value="Бажаєте замовити послугу, як юридична особа або ФОП?"/>
-            <column name="message_en" value="Want to order the service as a legal entity or entrepreneur?"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Бажаєте замовити послугу, як юридична особа або ФОП?"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="GREEN_OFFICE_TEXT"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Want to order the service as a legal entity or entrepreneur?"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="ENTERING_EMAIL_MESSAGE"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 Для юридичних осіб і ФОП у нас діє послуга «Зелений Офіс» 🏢
 
 Якщо хочете дізнатися більше про цю послугу, залиште свій e-mail —
 і ми надішлемо вам лист із детальним описом.
 
 Напишіть ваш e-mail ✍️👇
-                ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+                ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="ENTERING_EMAIL_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 For legal entities and entrepreneurs, we offer the “Green Office” service 🏢
 
 If you'd like to learn more, leave your email —
 and we'll send you a detailed description.
 
 Please enter your email ✍️👇
-                ]]>
-            </column>
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="INVALID_EMAIL_MESSAGE"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 Це не схоже на e-mail. Спробуймо ще раз ⬅️
 
 Напишіть ваш e-mail ✍️👇
-                ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+                ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="INVALID_EMAIL_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 That doesn't look like an email. Let's try again ⬅️
 
 Please enter your email ✍️👇
-                ]]>
-            </column>
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="GREEN_OFFICE_THANK_YOU_MESSAGE"/>
-            <column name="message_uk" value="Дякую! Упродовж доби вам прийде лист із описом послуги «Зелений Офіс» 👌"/>
-            <column name="message_en" value="Thank you! You'll receive an email with details about the “Green Office” service within 24 hours 👌"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Дякую! Упродовж доби вам прийде лист із описом послуги «Зелений Офіс» 👌"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="GREEN_OFFICE_THANK_YOU_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Thank you! You'll receive an email with details about the “Green Office” service within 24 hours 👌"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="FEEDBACK_MESSAGE"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 Ми хочемо ставати кращою версією себе 🤗
 
 Тому нам дуже потрібні ваші чесні відгуки про нашу роботу ☝️
 
 Нам важливо знати вашу думку! Поділіться, будь ласка, своїм враженням
 про нашу роботу.
-                ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+                ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="FEEDBACK_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 We want to become the best version of ourselves 🤗
 
 That's why we really need your honest feedback about our work ☝️
 
 Your opinion matters! Please share your thoughts about our service.
-                ]]>
-            </column>
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="GREAT_FEEDBACK_MESSAGE"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 Дуже рада це чути! ❤️
 
 Ваші відгуки допомагають нам розвиватися! Будемо й надалі вдосконалювати
 нашу роботу 💪
 Залиште, будь ласка, кілька слів, що саме вам вподобалося в нашому сервісі 👇
-                ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+                ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="GREAT_FEEDBACK_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 So happy to hear that! ❤️
 
 Your feedback helps us grow! We'll keep improving 💪
 Please leave a few words about what you liked in our service 👇
-                ]]>
-            </column>
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="BAD_FEEDBACK_MESSAGE"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 Дуже прикро, що так сталося 😔
 
 Напишіть, будь ласка, що саме було не так, щоб ми це виправили ✍️👇
-                ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+                ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="BAD_FEEDBACK_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 Sorry to hear that 😔
 
 Please tell us what went wrong so we can fix it ✍️👇
-                ]]>
-            </column>
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="FEEDBACK_THANK_YOU_MESSAGE"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 Щиро дякую за ваш відгук! 🙏
 
 Список доступних команд :
-                ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+                ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="FEEDBACK_THANK_YOU_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 Thank you so much for your feedback! 🙏
 
 List of available commands:
-                ]]>
-            </column>
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="BACK_TO_MAIN_MENU"/>
-            <column name="message_uk" value="⏪ В головне меню"/>
-            <column name="message_en" value="⏪ Back to main menu"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="⏪ В головне меню"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="BACK_TO_MAIN_MENU"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="⏪ Back to main menu"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_END_SUPPORT_MODE"/>
-            <column name="message_uk" value="Закінчити розмову з менеджером"/>
-            <column name="message_en" value="End conversation with manager"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Закінчити розмову з менеджером"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="CLIENT_END_SUPPORT_MODE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="End conversation with manager"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_STOP_SUPPORT_MODE"/>
-            <column name="message_uk" value="Ви закінчили розмову з менеджером, оцініть будь ласка роботу нашої підтримки від 1 до 5"/>
-            <column name="message_en" value="You ended the conversation with the manager, please rate our support from 1 to 5"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Ви закінчили розмову з менеджером, оцініть будь ласка роботу нашої підтримки від 1 до 5"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="CLIENT_STOP_SUPPORT_MODE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="You ended the conversation with the manager, please rate our support from 1 to 5"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_END_SUPPORT_NOTIFICATION"/>
-            <column name="message_uk" value="Клієнт %s закінчив розмову"/>
-            <column name="message_en" value="Client %s ended the conversation"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Клієнт %s закінчив розмову"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="CLIENT_END_SUPPORT_NOTIFICATION"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Client %s ended the conversation"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_SUPPORT_MESSAGE_CALLBACK_QUERY"/>
-            <column name="message_uk">
-                <![CDATA[
+            <column name="lang" value="uk"/>
+            <column name="text"><![CDATA[
 Поставте, будь ласка, своє запитання — і я покличу когось із моїх колег-людей ✍️👇
 Якщо після спілкування з людиною ви захочете повернутися до моїх функцій,
 просто натисніть кнопку "Завершити розмову з менеджером"
-                ]]>
-            </column>
-            <column name="message_en">
-                <![CDATA[
+                ]]></column>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="CLIENT_SUPPORT_MESSAGE_CALLBACK_QUERY"/>
+            <column name="lang" value="en"/>
+            <column name="text"><![CDATA[
 Please ask your question — and I’ll call one of my human colleagues ✍️👇
 If you want to return to my functions after talking to a human,
 just click "End conversation with manager"
-                ]]>
-            </column>
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="GREEN_OFFICE_SUBJECT"/>
-            <column name="message_uk" value="Цікавить Зелений офіс"/>
-            <column name="message_en" value="Interested in Green Office"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Цікавить Зелений офіс"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="GREEN_OFFICE_SUBJECT"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Interested in Green Office"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="UNKNOWN_ERROR"/>
-            <column name="message_uk" value="Сталася невідома помилка, спробуйте, будь ласка, знову"/>
-            <column name="message_en" value="An unknown error occurred, please try again"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Сталася невідома помилка, спробуйте, будь ласка, знову"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="UNKNOWN_ERROR"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="An unknown error occurred, please try again"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MESSAGE_SENT_TO_MANAGER"/>
-            <column name="message_uk" value="Ваше повідомлення надіслано менеджеру, очікуйте на відповідь"/>
-            <column name="message_en" value="Your message has been sent to the manager, please wait for a response"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Ваше повідомлення надіслано менеджеру, очікуйте на відповідь"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MESSAGE_SENT_TO_MANAGER"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Your message has been sent to the manager, please wait for a response"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_WANT_TO_SPEAK"/>
-            <column name="message_uk" value="👨@%s хоче поговорити з людиною\n\n👉 %s\n\n💬 http://localhost:4200/chat/%s"/>
-            <column name="message_en" value="👨@%s wants to speak with a human\n\n👉 %s\n\n💬 http://localhost:4200/chat/%s"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="👨@%s хоче поговорити з людиною\n\n👉 %s\n\n💬 http://localhost:4200/chat/%s"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="CLIENT_WANT_TO_SPEAK"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="👨@%s wants to speak with a human\n\n👉 %s\n\n💬 http://localhost:4200/chat/%s"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="PREVIOUS_SESSION_EXPIRED"/>
-            <column name="message_uk" value="Час попередньої сесії минув. Оберіть, будь ласка, команду зі списку щоб продовжити"/>
-            <column name="message_en" value="Previous session expired. Please choose a command from the list to continue"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Час попередньої сесії минув. Оберіть, будь ласка, команду зі списку щоб продовжити"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="PREVIOUS_SESSION_EXPIRED"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Previous session expired. Please choose a command from the list to continue"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="PHOTO_CONTENT"/>
-            <column name="message_uk" value="Фото контент"/>
-            <column name="message_en" value="Photo content"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Фото контент"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="PHOTO_CONTENT"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Photo content"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="LOGIN_FAILED"/>
-            <column name="message_uk" value="Неправильний логін або пароль. Перевірте введені дані та спробуйте ще раз."/>
-            <column name="message_en" value="Incorrect login or password. Please check your credentials and try again."/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Неправильний логін або пароль. Перевірте введені дані та спробуйте ще раз."/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="LOGIN_FAILED"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Incorrect login or password. Please check your credentials and try again."/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_SUPPORT_MESSAGE_CHANGE_LANGUAGE"/>
-            <column name="message_uk" value="Мова змінена"/>
-            <column name="message_en" value="Language was switched"/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Мова змінена"/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="CLIENT_SUPPORT_MESSAGE_CHANGE_LANGUAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Language was switched"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="MANAGER_CHAT_ALREADY_OPEN_MESSAGE"/>
-            <column name="message_uk" value="Чат із менеджером уже відкрито. Ви можете залишити своє повідомлення, коли будете готові."/>
-            <column name="message_en" value="Chat with manager is already open. You can send a message whenever you're ready."/>
+            <column name="lang" value="uk"/>
+            <column name="text" value="Чат із менеджером уже відкрито. Ви можете залишити своє повідомлення, коли будете готові."/>
+        </insert>
+        <insert tableName="bot_messages">
+            <column name="message_type" value="MANAGER_CHAT_ALREADY_OPEN_MESSAGE"/>
+            <column name="lang" value="en"/>
+            <column name="text" value="Chat with manager is already open. You can send a message whenever you're ready."/>
         </insert>
     </changeSet>
 </databaseChangeLog>

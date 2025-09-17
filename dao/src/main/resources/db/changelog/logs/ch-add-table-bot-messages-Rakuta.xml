@@ -10,14 +10,12 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="message_type" type="VARCHAR(255)">
-                <constraints nullable="false" unique="true"/>
+                <constraints nullable="false"/>
             </column>
-            <column name="message_uk" type="TEXT">
-                <constraints nullable="true"/>
+            <column name="lang" type="VARCHAR(10)">
+                <constraints nullable="false"/>
             </column>
-            <column name="message_en" type="TEXT">
-                <constraints nullable="true"/>
-            </column>
+            <column name="text" type="TEXT"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
