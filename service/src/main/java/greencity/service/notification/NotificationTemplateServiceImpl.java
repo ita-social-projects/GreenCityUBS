@@ -201,7 +201,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     public List<UserCategoryDto> getAllUserCategories() {
         return Arrays.stream(UserCategory.values())
             .map(userCategory -> new UserCategoryDto(
-                userCategory.name(),
+                userCategory,
                 userCategory.getDescriptionUk(),
                 userCategory.getDescriptionEn()))
             .toList();

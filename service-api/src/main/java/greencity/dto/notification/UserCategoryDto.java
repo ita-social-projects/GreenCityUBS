@@ -1,5 +1,6 @@
 package greencity.dto.notification;
 
+import greencity.enums.UserCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserCategoryDto {
-    private String name;
+    private UserCategory userCategory;
     private String descriptionUk;
     private String descriptionEn;
 }

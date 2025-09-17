@@ -335,7 +335,7 @@ class NotificationTemplateServiceImplTest {
             UserCategory enumVal = UserCategory.values()[i];
             UserCategoryDto dto = userCategories.get(i);
 
-            assertEquals(enumVal.name(), dto.getName());
+            assertEquals(enumVal, dto.getUserCategory());
             assertEquals(enumVal.getDescriptionUk(), dto.getDescriptionUk());
             assertEquals(enumVal.getDescriptionEn(), dto.getDescriptionEn());
         }
