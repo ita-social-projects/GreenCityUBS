@@ -12,7 +12,10 @@ import com.lowagie.text.Image;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.draw.LineSeparator;
 import greencity.constant.pdf.*;
 import greencity.dto.bag.BagForUserDto;
@@ -271,7 +274,10 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
                 return;
             }
 
-            String paymentLink = ubsClientService.formedLink(order, sumInCoins);
+            String paymentLink = order.getPaymentLink();
+            if (paymentLink == null || paymentLink.isBlank()) {
+                paymentLink = ubsClientService.formedLink(order, sumInCoins);
+            }
             if (paymentLink == null || paymentLink.isBlank()) {
                 addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);
                 return;

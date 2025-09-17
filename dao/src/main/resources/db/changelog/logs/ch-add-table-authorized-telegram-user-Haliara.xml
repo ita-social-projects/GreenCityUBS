@@ -1,0 +1,29 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1-create-authorized-telegram-user" author="Vladyslav Haliara">
+        <createTable tableName="authorized_user">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chat_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_support_status_active" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notify" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_manager" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_telegram_authorized_user" references="users(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

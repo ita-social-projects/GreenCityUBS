@@ -29,6 +29,8 @@ public class OrdersDataForUserDto {
     private String orderStatusEn;
     private String paymentStatusUk;
     private String paymentStatusEn;
+    private String paymentLink;
+    private LocalDateTime paymentLinkExpiry;
     private Double paidAmount;
     private Double orderFullPrice;
     private Double amountBeforePayment;

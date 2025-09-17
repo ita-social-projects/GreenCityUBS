@@ -1,6 +1,7 @@
 package greencity.client.config;
 
 import greencity.client.WayForPayClient;
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,5 +30,11 @@ class WayForPayClientFallbackFactoryTest {
     void getCheckoutResponse() {
         PaymentWayForPayRequestDto dto = PaymentWayForPayRequestDto.builder().build();
         assertThrows(RemoteServerUnavailableException.class, () -> client.getCheckOutResponse(dto));
+    }
+
+    @Test
+    void getCancellationResponse() {
+        PaymentCancellationWayForPayRequestDto dto = PaymentCancellationWayForPayRequestDto.builder().build();
+        assertThrows(RemoteServerUnavailableException.class, () -> client.getCancellationResponse(dto));
     }
 }
