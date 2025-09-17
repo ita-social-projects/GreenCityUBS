@@ -6,12 +6,14 @@ import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.UserCategoryDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationType;
+import greencity.enums.UserCategory;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.ForbiddenException;
@@ -40,6 +42,13 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationPlanner notificationPlanner;
     private final ModelMapper modelMapper;
+
+    private static final List<UserCategoryDto> USER_CATEGORIES = Arrays.stream(UserCategory.values())
+        .map(userCategory -> new UserCategoryDto(
+            userCategory,
+            userCategory.getDescriptionUk(),
+            userCategory.getDescriptionEn()))
+        .toList();
 
     /**
      * {@inheritDoc}
@@ -195,6 +204,11 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         restartNotificationSchedule(NotificationType.CUSTOM);
     }
 
+    @Override
+    public List<UserCategoryDto> getAllUserCategories() {
+        return USER_CATEGORIES;
+    }
+
     private void checkTemplateIsCustom(Long id) {
         NotificationTemplate template = getById(id);
         if (!template.getNotificationType().equals(NotificationType.CUSTOM)) {
@@ -206,9 +220,6 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         notificationTemplateRepository.deleteById(id);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     private NotificationTemplate getById(Long id) {
         return notificationTemplateRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id));

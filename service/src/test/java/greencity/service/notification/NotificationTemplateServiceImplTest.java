@@ -4,6 +4,7 @@ import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.UserCategoryDto;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
@@ -322,6 +323,22 @@ class NotificationTemplateServiceImplTest {
 
         assertThrows(TemplateDeleteException.class, () -> notificationService.removeNotificationTemplate(1L));
         verify(templateRepository).findById(anyLong());
+    }
+
+    @Test
+    void getAllUserCategoriesTest() {
+        List<UserCategoryDto> userCategories = notificationService.getAllUserCategories();
+
+        assertEquals(UserCategory.values().length, userCategories.size());
+
+        for (int i = 0; i < UserCategory.values().length; i++) {
+            UserCategory enumVal = UserCategory.values()[i];
+            UserCategoryDto dto = userCategories.get(i);
+
+            assertEquals(enumVal, dto.getUserCategory());
+            assertEquals(enumVal.getDescriptionUk(), dto.getDescriptionUk());
+            assertEquals(enumVal.getDescriptionEn(), dto.getDescriptionEn());
+        }
     }
 
 }
