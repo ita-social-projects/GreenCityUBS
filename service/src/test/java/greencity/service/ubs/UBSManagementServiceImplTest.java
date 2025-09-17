@@ -3,7 +3,6 @@ package greencity.service.ubs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.OrderHistory;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
@@ -67,6 +66,7 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.CityRepository;
 import greencity.repository.DistrictRepository;
+import greencity.service.files.FileService;
 import greencity.service.notification.NotificationServiceImpl;
 import java.util.HashMap;
 import org.junit.jupiter.api.Assertions;
@@ -130,7 +130,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UBSManagementServiceImplTest {
     @Mock
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
     @Mock(strictness = Mock.Strictness.LENIENT)
     OrderRepository orderRepository;
     @Mock

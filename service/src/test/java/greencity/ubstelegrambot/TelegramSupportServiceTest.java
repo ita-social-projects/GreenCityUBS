@@ -1,6 +1,5 @@
 package greencity.ubstelegrambot;
 
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
@@ -12,6 +11,7 @@ import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
+import greencity.service.files.FileService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.messages.MessageProvider;
@@ -84,7 +84,7 @@ class TelegramSupportServiceTest {
     private TelegramMessageRepository telegramMessageRepository;
 
     @Mock
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
 
     @Mock
     private TelegramExecutor telegramExecutor;
@@ -367,12 +367,12 @@ class TelegramSupportServiceTest {
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
-        when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("azureFileUrl");
+        when(fileService.uploadFile(any(MultipartFile.class))).thenReturn("azureFileUrl");
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
         assertNull(result);
-        verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
+        verify(fileService).uploadFile(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
         verify(telegramMessageRepository).findByMediaGroupId(mediaGroupId);
 
@@ -460,7 +460,7 @@ class TelegramSupportServiceTest {
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
         when(file.getFilePath()).thenReturn("/path/to/file.pdf");
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
-        when(userRemoteWebClient.uploadFile(any())).thenReturn("https://azure.com/file");
+        when(fileService.uploadFile(any())).thenReturn("https://azure.com/file");
 
         TelegramChat chat = TelegramChat.builder()
             .id(1L)
@@ -473,7 +473,7 @@ class TelegramSupportServiceTest {
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
         assertEquals(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager"), result.getText());
-        verify(userRemoteWebClient).uploadFile(any());
+        verify(fileService).uploadFile(any());
         verify(messageAssetRepository).save(any());
 
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
@@ -539,7 +539,7 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn("/path/to/file.pdf");
 
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
-        when(userRemoteWebClient.uploadFile(any())).thenReturn("https://azure.com/file");
+        when(fileService.uploadFile(any())).thenReturn("https://azure.com/file");
 
         TelegramChat chat = TelegramChat.builder()
             .id(1L)
@@ -556,7 +556,7 @@ class TelegramSupportServiceTest {
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
-        verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
+        verify(fileService).uploadFile(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
 
     }
@@ -595,7 +595,7 @@ class TelegramSupportServiceTest {
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
         when(file.getFilePath()).thenReturn("/path/photo.jpeg");
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
-        when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("https://azure.com/photo");
+        when(fileService.uploadFile(any(MultipartFile.class))).thenReturn("https://azure.com/photo");
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
@@ -609,7 +609,7 @@ class TelegramSupportServiceTest {
             eq(chatDbId));
         assertEquals("Image content (1 images) + text", contentCaptor.getValue());
 
-        verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
+        verify(fileService).uploadFile(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
 
@@ -666,7 +666,7 @@ class TelegramSupportServiceTest {
         tgFile.setFilePath("files/sticker.webp");
         when(telegramExecutor.executeGetFile(any())).thenReturn(tgFile);
         when(telegramUtils.fileToByteArray(any())).thenReturn("bytes".getBytes());
-        when(userRemoteWebClient.uploadFile(any())).thenReturn("http://cdn/sticker.webp");
+        when(fileService.uploadFile(any())).thenReturn("http://cdn/sticker.webp");
 
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
@@ -728,7 +728,7 @@ class TelegramSupportServiceTest {
         tgFile.setFilePath("files/clip.mp4");
         when(telegramExecutor.executeGetFile(any())).thenReturn(tgFile);
         when(telegramUtils.fileToByteArray(any())).thenReturn("video".getBytes());
-        when(userRemoteWebClient.uploadFile(any())).thenReturn("http://cdn/clip.mp4");
+        when(fileService.uploadFile(any())).thenReturn("http://cdn/clip.mp4");
 
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
@@ -789,7 +789,7 @@ class TelegramSupportServiceTest {
         telegramFile.setFilePath("video/file.mp4");
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(telegramFile);
         when(telegramUtils.fileToByteArray(any(File.class))).thenReturn(new byte[] {1, 2, 3});
-        when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("http://file-url");
+        when(fileService.uploadFile(any(MultipartFile.class))).thenReturn("http://file-url");
 
         // when
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");

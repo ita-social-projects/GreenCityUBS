@@ -1,7 +1,6 @@
 package greencity.ubstelegrambot;
 
 import greencity.client.UserRemoteClient;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;
@@ -32,6 +31,7 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
+import greencity.service.files.FileService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -104,7 +104,7 @@ class TelegramServiceTest {
     private TelegramChatRepository telegramChatRepository;
 
     @Mock
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
 
     @Mock
     private TelegramMessageRepository telegramMessageRepository;
@@ -158,7 +158,7 @@ class TelegramServiceTest {
             telegramMessageRepository,
             telegramManagerRepository,
             telegramChatRepository,
-            userRemoteWebClient,
+            fileService,
             userRemoteClient,
             ubsClientService,
             executor,
@@ -205,7 +205,7 @@ class TelegramServiceTest {
             () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
 
         verify(telegramChatRepository).findById(1L);
-        verifyNoInteractions(userRemoteWebClient);
+        verifyNoInteractions(fileService);
         verifyNoInteractions(executor);
     }
 
@@ -228,11 +228,11 @@ class TelegramServiceTest {
         when(file.getSize()).thenReturn(2048L);
         when(file.getContentType()).thenReturn("image/png");
         when(file.getInputStream()).thenReturn(bais);
-        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
+        when(fileService.uploadFile(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(userRemoteWebClient).uploadFile(file);
+        verify(fileService).uploadFile(file);
         verify(executor).executeSendFile(any(SendDocument.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
@@ -257,11 +257,11 @@ class TelegramServiceTest {
         when(file.getSize()).thenReturn(2048L);
         when(file.getContentType()).thenReturn("image/png");
         when(file.getInputStream()).thenReturn(bais);
-        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
+        when(fileService.uploadFile(file)).thenReturn("http://image");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(userRemoteWebClient).uploadFile(file);
+        verify(fileService).uploadFile(file);
         verify(executor).executeSendPhoto(any(SendPhoto.class));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatRepository).save(any(TelegramChat.class));
@@ -1205,7 +1205,7 @@ class TelegramServiceTest {
         assertEquals("File size exceeds Telegram bot limit (50MB)", exception.getMessage());
 
         verify(telegramChatRepository).findById(1L);
-        verifyNoInteractions(userRemoteWebClient);
+        verifyNoInteractions(fileService);
         verifyNoInteractions(executor);
         verify(telegramMessageRepository, never()).save(any());
     }
@@ -1546,11 +1546,11 @@ class TelegramServiceTest {
         sentDoc.setMessageId(999);
         when(executor.executeSendFile(any(SendDocument.class))).thenReturn(sentDoc);
 
-        when(userRemoteWebClient.uploadFile(nonImageFile)).thenReturn("http://fakeurl");
+        when(fileService.uploadFile(nonImageFile)).thenReturn("http://fakeurl");
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {nonImageFile});
 
-        verify(userRemoteWebClient).uploadFile(nonImageFile);
+        verify(fileService).uploadFile(nonImageFile);
         verify(executor).executeSendFile(any(SendDocument.class));
 
         ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
@@ -1607,7 +1607,7 @@ class TelegramServiceTest {
         when(file.getSize()).thenReturn(1024L);
         when(file.getContentType()).thenReturn("application/octet-stream");
 
-        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://fakeurl");
+        when(fileService.uploadFile(file)).thenReturn("http://fakeurl");
 
         Message fakeMessage = new Message();
         fakeMessage.setMessageId(123);
@@ -1615,7 +1615,7 @@ class TelegramServiceTest {
 
         telegramService.sendMessageToUser(request, new MultipartFile[] {file});
 
-        verify(userRemoteWebClient).uploadFile(file);
+        verify(fileService).uploadFile(file);
         verify(executor).executeSendFile(any(SendDocument.class));
         verify(telegramMessageRepository).save(any());
         verify(messageAssetRepository).save(any());

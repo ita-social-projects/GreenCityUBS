@@ -1,6 +1,5 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
@@ -17,6 +16,7 @@ import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramMessageRepository;
+import greencity.service.files.FileService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramSupportService;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -52,7 +52,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final TelegramChatRepository telegramChatRepository;
-    private final UserRemoteWebClient userRemoteWebClient;
+    private final FileService fileService;
     private final TelegramMessageRepository telegramMessageRepository;
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramExecutor telegramExecutor;
@@ -450,7 +450,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private String uploadFile(MultipartFile file) {
         String url = "";
         try {
-            url = userRemoteWebClient.uploadFile(file);
+            url = fileService.uploadFile(file);
         } catch (WebClientRequestException | WebClientResponseException e) {
             log.warn("User service is unavailable: {}", e.getMessage());
         }

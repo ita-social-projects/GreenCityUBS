@@ -13,7 +13,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.violation.AddingViolationsToUserDto;
@@ -35,6 +34,7 @@ import greencity.repository.OrderRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
+import greencity.service.files.FileService;
 import greencity.service.notification.NotificationServiceImpl;
 import java.util.Arrays;
 import java.util.List;
@@ -75,7 +75,7 @@ class ViolationServiceImplTest {
     @Mock
     WebClientRequestException webClientRequestException;
     @Mock
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
     @Mock
     private EventService eventService;
     @Mock
@@ -213,7 +213,7 @@ class ViolationServiceImplTest {
         if (updateViolationToUserDto.getImagesToDelete() != null) {
             List<String> images = updateViolationToUserDto.getImagesToDelete();
             for (String image : images) {
-                doNothing().when(userRemoteWebClient).deleteFile(image);
+                doNothing().when(fileService).deleteFile(image);
                 violationImages.remove(image);
             }
         }
@@ -239,7 +239,7 @@ class ViolationServiceImplTest {
         if (updateViolationToUserDto.getImagesToDelete() != null) {
             List<String> images = updateViolationToUserDto.getImagesToDelete();
             for (String image : images) {
-                doThrow(webClientRequestException).when(userRemoteWebClient).deleteFile(image);
+                doThrow(webClientRequestException).when(fileService).deleteFile(image);
                 violationImages.remove(image);
             }
         }
@@ -262,11 +262,11 @@ class ViolationServiceImplTest {
         if (updateViolationToUserDto.getImagesToDelete() != null) {
             List<String> images = updateViolationToUserDto.getImagesToDelete();
             for (String image : images) {
-                doNothing().when(userRemoteWebClient).deleteFile(image);
+                doNothing().when(fileService).deleteFile(image);
                 violationImages.remove(image);
             }
         }
-        when(userRemoteWebClient.uploadFile(any()))
+        when(fileService.uploadFile(any()))
             .thenThrow(webClientRequestException);
 
         violationService.updateUserViolation(updateViolationToUserDto, new MultipartFile[2], "abc");

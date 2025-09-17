@@ -1,7 +1,6 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
@@ -36,6 +35,7 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
+import greencity.service.files.FileService;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.UBSClientService;
@@ -79,7 +79,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramMessageRepository telegramMessageRepository;
     private final TelegramManagerRepository telegramManagerRepository;
     private final TelegramChatRepository telegramChatRepository;
-    private final UserRemoteWebClient userRemoteWebClient;
+    private final FileService fileService;
     private final UserRemoteClient userRemoteClient;
     private final UBSClientService ubsClientService;
     private final TelegramExecutor executor;
@@ -191,7 +191,7 @@ public class TelegramServiceImpl implements TelegramService {
         List<MessageAsset> assets = new ArrayList<>();
         for (MultipartFile img : images) {
             validateFileSize(img);
-            String url = userRemoteWebClient.uploadFile(img);
+            String url = fileService.uploadFile(img);
             assets.add(MessageAsset.builder()
                 .url(url)
                 .fileName(img.getOriginalFilename())
@@ -736,7 +736,7 @@ public class TelegramServiceImpl implements TelegramService {
     private String uploadFile(MultipartFile file) {
         String url = "";
         try {
-            url = userRemoteWebClient.uploadFile(file);
+            url = fileService.uploadFile(file);
         } catch (WebClientRequestException | WebClientResponseException e) {
             log.warn("User service is unavailable: {}", e.getMessage());
         }

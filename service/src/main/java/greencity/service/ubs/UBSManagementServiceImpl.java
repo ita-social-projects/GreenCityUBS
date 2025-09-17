@@ -13,7 +13,6 @@ import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.UserRemoteClient;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
@@ -99,6 +98,7 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.CityRepository;
 import greencity.repository.DistrictRepository;
+import greencity.service.files.FileService;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
@@ -150,7 +150,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final NotificationServiceImpl notificationService;
-    private final UserRemoteWebClient userRemoteWebClient;
+    private final FileService fileService;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
@@ -1140,7 +1140,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private String processImage(MultipartFile image) {
         if (image != null) {
             try {
-                return userRemoteWebClient.uploadFile(image);
+                return fileService.uploadFile(image);
             } catch (WebClientRequestException | WebClientResponseException e) {
                 log.warn("User service is unavailable: {}", e.getMessage());
             }

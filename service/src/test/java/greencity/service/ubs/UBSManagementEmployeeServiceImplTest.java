@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import greencity.client.UserRemoteClient;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.employee.EmployeeWithTariffsDto;
@@ -53,6 +52,7 @@ import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.TariffsInfoRepository;
+import greencity.service.files.FileService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +78,7 @@ class UBSManagementEmployeeServiceImplTest {
     @Mock
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
     @Mock
     private UserRemoteClient userRemoteClient;
     @Mock
@@ -124,7 +124,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(positionRepository.findByIdIn(any())).thenReturn(Set.of(getPosition()));
         when(positionRepository.existsById(any())).thenReturn(true);
-        when(userRemoteWebClient.uploadFile(file)).thenThrow(webClientRequestException);
+        when(fileService.uploadFile(file)).thenThrow(webClientRequestException);
         employeeService.save(dto, file);
 
         List<String> warns = logCaptor.getWarnLogs();
@@ -272,13 +272,13 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.existsById(position.getId())).thenReturn(true);
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(getTariffInfo()));
         when(repository.save(any())).thenReturn(employee);
-        doNothing().when(userRemoteWebClient).deleteFile(retrievedEmployee.getImagePath());
+        doNothing().when(fileService).deleteFile(retrievedEmployee.getImagePath());
         when(repository.findById(anyLong())).thenReturn(Optional.of(retrievedEmployee));
         employeeService.update(dto, file);
 
         verify(modelMapper, times(2)).map(any(), any());
         verify(repository).save(any());
-        verify(userRemoteWebClient).deleteFile(retrievedEmployee.getImagePath());
+        verify(fileService).deleteFile(retrievedEmployee.getImagePath());
         verify(positionRepository, atLeastOnce()).existsById(position.getId());
         verify(repository, times(2)).findById(anyLong());
     }
@@ -330,7 +330,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.existsById(position.getId())).thenReturn(true);
         when(positionRepository.findByIdIn(any())).thenReturn(Set.of(getPosition()));
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
-        doThrow(webClientRequestException).when(userRemoteWebClient).deleteFile(anyString());
+        doThrow(webClientRequestException).when(fileService).deleteFile(anyString());
         employeeService.update(dto, file);
 
         List<String> warns = logCaptor.getWarnLogs();
@@ -351,7 +351,7 @@ class UBSManagementEmployeeServiceImplTest {
         when(positionRepository.findByIdIn(any())).thenReturn(Set.of(getPosition()));
         when(positionRepository.existsById(position.getId())).thenReturn(true);
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
-        when(userRemoteWebClient.uploadFile(file)).thenThrow(webClientRequestException);
+        when(fileService.uploadFile(file)).thenThrow(webClientRequestException);
 
         employeeService.update(dto, file);
         List<String> warns = logCaptor.getWarnLogs();
@@ -564,7 +564,7 @@ class UBSManagementEmployeeServiceImplTest {
         employeeService.deleteEmployeeImage(anyLong());
 
         verify(repository, times(1)).findById(anyLong());
-        verify(userRemoteWebClient, times(1)).deleteFile("path");
+        verify(fileService, times(1)).deleteFile("path");
         verify(repository, times(1)).save(employee);
     }
 
@@ -574,7 +574,7 @@ class UBSManagementEmployeeServiceImplTest {
         Employee employee = getEmployee();
         employee.setImagePath("path");
         when(repository.findById(anyLong())).thenReturn(Optional.of(employee));
-        doThrow(webClientRequestException).when(userRemoteWebClient).deleteFile("path");
+        doThrow(webClientRequestException).when(fileService).deleteFile("path");
 
         employeeService.deleteEmployeeImage(anyLong());
 

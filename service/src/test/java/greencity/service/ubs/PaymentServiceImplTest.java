@@ -45,7 +45,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
 import greencity.dto.payment.ManualPaymentRequestDto;
@@ -71,6 +70,7 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.RefundRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
+import greencity.service.files.FileService;
 import greencity.service.notification.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
@@ -88,7 +88,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -115,7 +114,7 @@ class PaymentServiceImplTest {
     @Mock
     RefundRepository refundRepository;
     @Mock
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
     @Mock
     private ModelMapper modelMapper;
     @Mock
@@ -123,7 +122,7 @@ class PaymentServiceImplTest {
     @Mock
     private EmployeeRepository employeeRepository;
     @Mock
-    private NotificationServiceImpl notificationService;
+    private NotificationService notificationService;
     @Mock
     private EventService eventService;
     @Mock
@@ -208,7 +207,7 @@ class PaymentServiceImplTest {
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1L);
-        doNothing().when(userRemoteWebClient).deleteFile("");
+        doNothing().when(fileService).deleteFile("");
         doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + getManualPayment().getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(),
             getOrder());
@@ -227,7 +226,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         doNothing().when(paymentRepository).deletePaymentById(1L);
         doThrow(webClientRequestException)
-            .when(userRemoteWebClient).deleteFile(anyString());
+            .when(fileService).deleteFile(anyString());
         doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + getManualPayment().getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(),
             getOrder());
@@ -251,7 +250,7 @@ class PaymentServiceImplTest {
         verify(employeeRepository).findByUuid("abc");
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
-        verify(userRemoteWebClient).deleteFile(payment.getImagePath());
+        verify(fileService).deleteFile(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
 
@@ -273,7 +272,7 @@ class PaymentServiceImplTest {
         verify(employeeRepository).findByUuid("abc");
         verify(paymentRepository).findById(1L);
         verify(paymentRepository).deletePaymentById(1L);
-        verify(userRemoteWebClient, times(0)).deleteFile(payment.getImagePath());
+        verify(fileService, times(0)).deleteFile(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
     }
@@ -309,7 +308,7 @@ class PaymentServiceImplTest {
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
         verify(eventService, times(2)).save(any(), any(), any());
-        verify(userRemoteWebClient, times(0)).deleteFile(null);
+        verify(fileService, times(0)).deleteFile(null);
     }
 
     @Test
@@ -324,7 +323,7 @@ class PaymentServiceImplTest {
             "", "application/json", "random Bytes".getBytes());
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
-        when(userRemoteWebClient.uploadFile(file)).thenReturn("path");
+        when(fileService.uploadFile(file)).thenReturn("path");
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK + 1, "Yuriy" + "  " + "Gerasum",
             getOrder());
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
@@ -387,7 +386,7 @@ class PaymentServiceImplTest {
             "", "application/json", "random Bytes".getBytes());
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
-        when(userRemoteWebClient.uploadFile(any()))
+        when(fileService.uploadFile(any()))
             .thenThrow(webClientRequestException);
         paymentServiceImpl.updateManualPayment(1L, requestDto, file, "abc");
         List<String> warns = logCaptor.getWarnLogs();
@@ -409,7 +408,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.findById(1L)).thenReturn(Optional.of(getManualPayment()));
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         doThrow(webClientRequestException)
-            .when(userRemoteWebClient).deleteFile(anyString());
+            .when(fileService).deleteFile(anyString());
         paymentServiceImpl.updateManualPayment(1L, requestDto, file, "abc");
         List<String> warns = logCaptor.getWarnLogs();
         assertTrue(warns.getFirst().contains("User service is unavailable: null"));
@@ -471,7 +470,7 @@ class PaymentServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any())).thenReturn(payment);
-        when(userRemoteWebClient.uploadFile(any()))
+        when(fileService.uploadFile(any()))
             .thenThrow(webClientRequestException);
         doNothing().when(eventService).save(anyString(), anyString(), any(Order.class));
 

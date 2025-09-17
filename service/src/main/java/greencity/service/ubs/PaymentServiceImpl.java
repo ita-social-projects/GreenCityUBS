@@ -13,7 +13,6 @@ import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.REFUND_CONFLICT_MONEY_AND_BONUSES;
 import static greencity.service.ubs.UBSManagementServiceImpl.FORMAT_DATE;
 import static java.util.Objects.isNull;
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
@@ -44,6 +43,7 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.RefundRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
+import greencity.service.files.FileService;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,7 +51,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -75,7 +74,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final EmployeeRepository employeeRepository;
     private final EventService eventService;
-    private final UserRemoteWebClient userRemoteWebClient;
+    private final FileService fileService;
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
     private final OrderBagService orderBagService;
@@ -143,7 +142,7 @@ public class PaymentServiceImpl implements PaymentService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment not found"));
         if (payment.getImagePath() != null) {
             try {
-                userRemoteWebClient.deleteFile(payment.getImagePath());
+                fileService.deleteFile(payment.getImagePath());
             } catch (WebClientRequestException | WebClientResponseException e) {
                 log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
@@ -403,7 +402,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (requestDto.getImagePath().isEmpty()) {
             if (updatePayment.getImagePath() != null) {
                 try {
-                    userRemoteWebClient.deleteFile(updatePayment.getImagePath());
+                    fileService.deleteFile(updatePayment.getImagePath());
                 } catch (WebClientRequestException | WebClientResponseException e) {
                     log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
                 }
@@ -412,7 +411,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
         if (image != null) {
             try {
-                updatePayment.setImagePath(userRemoteWebClient.uploadFile(image));
+                updatePayment.setImagePath(fileService.uploadFile(image));
             } catch (WebClientRequestException | WebClientResponseException e) {
                 log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
@@ -448,7 +447,7 @@ public class PaymentServiceImpl implements PaymentService {
             .build();
         if (image != null) {
             try {
-                payment.setImagePath(userRemoteWebClient.uploadFile(image));
+                payment.setImagePath(fileService.uploadFile(image));
             } catch (WebClientRequestException | WebClientResponseException e) {
                 log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }

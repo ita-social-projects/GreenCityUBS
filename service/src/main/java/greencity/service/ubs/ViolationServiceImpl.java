@@ -1,6 +1,5 @@
 package greencity.service.ubs;
 
-import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
@@ -26,6 +25,7 @@ import greencity.repository.OrderRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserViolationsTableRepo;
 import greencity.repository.ViolationRepository;
+import greencity.service.files.FileService;
 import greencity.service.notification.NotificationServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +64,7 @@ public class ViolationServiceImpl implements ViolationService {
 
     private EventService eventService;
     private NotificationServiceImpl notificationService;
-    private UserRemoteWebClient userRemoteWebClient;
+    private FileService fileService;
 
     @Override
     public UserViolationsWithUserName getAllViolations(Pageable page, Long userId, String columnName,
@@ -246,7 +246,7 @@ public class ViolationServiceImpl implements ViolationService {
             List<String> images = add.getImagesToDelete();
             for (String image : images) {
                 try {
-                    userRemoteWebClient.deleteFile(image);
+                    fileService.deleteFile(image);
                 } catch (WebClientRequestException | WebClientResponseException e) {
                     log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
                 }
@@ -268,7 +268,7 @@ public class ViolationServiceImpl implements ViolationService {
     private void setImages(MultipartFile[] multipartFiles, List<String> images) {
         for (MultipartFile multipartFile : multipartFiles) {
             try {
-                images.add(userRemoteWebClient.uploadFile(multipartFile));
+                images.add(fileService.uploadFile(multipartFile));
             } catch (WebClientRequestException | WebClientResponseException e) {
                 log.warn(AppConstant.USER_SERVICE_UNAVAILABLE_LOG, e.getMessage());
             }
