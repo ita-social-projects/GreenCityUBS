@@ -43,6 +43,13 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     private final NotificationPlanner notificationPlanner;
     private final ModelMapper modelMapper;
 
+    private static final List<UserCategoryDto> USER_CATEGORIES = Arrays.stream(UserCategory.values())
+        .map(userCategory -> new UserCategoryDto(
+            userCategory,
+            userCategory.getDescriptionUk(),
+            userCategory.getDescriptionEn()))
+        .toList();
+
     /**
      * {@inheritDoc}
      */
@@ -199,12 +206,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
 
     @Override
     public List<UserCategoryDto> getAllUserCategories() {
-        return Arrays.stream(UserCategory.values())
-            .map(userCategory -> new UserCategoryDto(
-                userCategory,
-                userCategory.getDescriptionUk(),
-                userCategory.getDescriptionEn()))
-            .toList();
+        return USER_CATEGORIES;
     }
 
     private void checkTemplateIsCustom(Long id) {
