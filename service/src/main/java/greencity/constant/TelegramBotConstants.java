@@ -27,4 +27,7 @@ public class TelegramBotConstants {
     public static final String RATING_GOOD_CALLBACK = "rating_good_callback";
     public static final String RATING_PERFECTLY_CALLBACK = "rating_perfectly_callback";
     public static final String SORTING_PRICES_CALLBACK = "sorting_prices_command";
+    public static final String BACK_TO_MAIN_MENU = "back.to.main.menu";
+    public static final String SUPPORTED_COMMANDS = "supported.commands";
+    public static final String MANAGER_FILE_FAILED = "manager.file.failed";
 }

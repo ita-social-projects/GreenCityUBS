@@ -149,7 +149,7 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup createBackToMainMenuKeyboard(String lang) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard
-            .add(createRow(MessageProvider.get(lang, "back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
+            .add(createRow(MessageProvider.get(lang, BACK_TO_MAIN_MENU), TelegramBotConstants.MAIN_MENU_CALLBACK));
         return InlineKeyboardMarkup
             .builder()
             .keyboard(keyboard)
@@ -169,7 +169,7 @@ public class KeyboardFactory {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(createRow(MessageProvider.get(lang, "yes.answer"), callBackData));
         keyboard
-            .add(createRow(MessageProvider.get(lang, "back.to.main.menu"), TelegramBotConstants.MAIN_MENU_CALLBACK));
+            .add(createRow(MessageProvider.get(lang, BACK_TO_MAIN_MENU), TelegramBotConstants.MAIN_MENU_CALLBACK));
 
         return InlineKeyboardMarkup
             .builder()
@@ -192,7 +192,7 @@ public class KeyboardFactory {
 
         keyboardRows.add(List.of(
             InlineKeyboardButton.builder()
-                .text(MessageProvider.get(lang, "back.to.main.menu"))
+                .text(MessageProvider.get(lang, BACK_TO_MAIN_MENU))
                 .callbackData(TelegramBotConstants.MAIN_MENU_CALLBACK)
                 .build()));
 

@@ -74,7 +74,7 @@ public class MessageFactory {
     public static SendMessage createForbiddenCommandsManagerMessage(String chatId, String lang) {
         return buildReplyMarkUpMessage(chatId,
             MessageProvider.get(lang, "forbidden.commands.manager") + "\n"
-                + MessageProvider.get(lang, "supported.commands"),
+                + MessageProvider.get(lang, TelegramBotConstants.SUPPORTED_COMMANDS),
             KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
@@ -88,7 +88,7 @@ public class MessageFactory {
      *         message.
      */
     public static SendMessage createAvailableCommandsMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "supported.commands"),
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, TelegramBotConstants.SUPPORTED_COMMANDS),
             KeyboardFactory.createHelpKeyboard(lang));
     }
 
@@ -103,7 +103,7 @@ public class MessageFactory {
      *         commands message.
      */
     public static SendMessage createAvailableForManagerCommandsMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "supported.commands"),
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, TelegramBotConstants.SUPPORTED_COMMANDS),
             KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
