@@ -127,10 +127,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
             }
 
             String lang = chatOpt.get().getLanguageCode();
-            TelegramChat chat = chatOpt.get();
-            //TODO: can a user edit his message outside the chat(after 15 min)?
-            if(chat.getChatState() == ChatState.IN_SUPPORT)
-                return telegramSupportService.processEditedSupportMessage(edited, lang);
+            return telegramSupportService.processEditedSupportMessage(edited, lang);
         }
         return null;
     }
