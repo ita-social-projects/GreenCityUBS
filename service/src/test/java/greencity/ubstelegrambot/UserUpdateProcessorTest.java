@@ -4,7 +4,12 @@ import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
 import greencity.repository.TelegramChatRepository;
-import greencity.service.ubs.*;
+import greencity.service.ubs.TelegramCommandsService;
+import greencity.service.ubs.TelegramFeedbackService;
+import greencity.service.ubs.TelegramGreenOfficeService;
+import greencity.service.ubs.TelegramLanguageService;
+import greencity.service.ubs.TelegramLoginService;
+import greencity.service.ubs.TelegramSupportService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.ubstelegrambot.service.TelegramUtils;
@@ -14,13 +19,30 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
+
 import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserUpdateProcessorTest {
@@ -362,6 +384,74 @@ class UserUpdateProcessorTest {
         verify(telegramLoginService).processInputManagerCredentialsRequest(any(), nullable(String.class));
     }
 
+    @Test
+    void process_HasEditedMessageAndChatFound_CallsSupportService() {
+        // Given
+        Update update = createUpdateWithEditedMessage(CHAT_ID);
+        TelegramChat mockChat = new TelegramChat();
+        mockChat.setChatId(CHAT_ID);
+        mockChat.setLanguageCode("uk");
+
+        SendMessage expectedMessage = new SendMessage(CHAT_ID, "Processed edited message");
+        when(telegramChatRepository.findByChatId(CHAT_ID)).thenReturn(Optional.of(mockChat));
+        when(telegramSupportService.processEditedSupportMessage(any(Message.class), eq("uk")))
+                .thenReturn(expectedMessage);
+
+        // When
+        SendMessage actualMessage = updateProcessor.process(update);
+
+        // Then
+        assertNotNull(actualMessage);
+        assertEquals(expectedMessage, actualMessage);
+        verify(telegramChatRepository).findByChatId(CHAT_ID);
+        verify(telegramSupportService).processEditedSupportMessage(update.getEditedMessage(), "uk");
+    }
+
+    @Test
+    void process_HasEditedMessageAndChatNotFound_ReturnsError() {
+        // Given
+        Update update = createUpdateWithEditedMessage(CHAT_ID);
+
+        when(telegramChatRepository.findByChatId(CHAT_ID)).thenReturn(Optional.empty());
+
+        SendMessage expectedError = new SendMessage(CHAT_ID, "Сталася невідома помилка, спробуйте, будь ласка, знову");
+        try (MockedStatic<MessageFactory> mockedMessageFactory = mockStatic(MessageFactory.class)) {
+            mockedMessageFactory.when(() -> MessageFactory.createUnknownErrorOccurredMessage(anyString(), eq(TelegramBotConstants.UK)))
+                    .thenReturn(expectedError);
+        }
+        // When
+        SendMessage actualError = updateProcessor.process(update);
+
+        // Then
+        assertNotNull(actualError);
+        assertEquals(expectedError.getText(), actualError.getText());
+        verify(telegramChatRepository).findByChatId(CHAT_ID);
+        verify(telegramSupportService, never()).processEditedSupportMessage(any(), any());
+    }
+
+    @Test
+    void process_NoEditedMessage_ReturnsErrorMessage() {
+        // Given
+        Update update = createUpdateWithoutEditedMessage();
+
+        // When
+        SendMessage result = updateProcessor.process(update);
+
+        // Then
+        assertEquals("Сталася невідома помилка, спробуйте, будь ласка, знову", result.getText());
+        verify(telegramChatRepository).findByChatId(any());
+        verify(telegramSupportService, never()).processEditedSupportMessage(any(), any());
+    }
+
+    @Test
+    void process_NoMessage_ReturnsNull() {
+        Update update = mock(Update.class);
+
+        SendMessage result = updateProcessor.process(update);
+
+        assertNull(result);
+    }
+
     private Update createUpdateWithCallback(String callbackData) {
         Update update = new Update();
         CallbackQuery callbackQuery = new CallbackQuery();
@@ -391,6 +481,31 @@ class UserUpdateProcessorTest {
         return update;
     }
 
+    private Update createUpdateWithEditedMessage(String chatId) {
+        Update update = new Update();
+        Message editedMessage = new Message();
+        Chat chat = new Chat();
+        chat.setId(Long.valueOf(chatId));
+        editedMessage.setChat(chat);
+        editedMessage.setText("Edited text");
+        editedMessage.setMessageId(12345);
+        User user = new User();
+        user.setId(Long.valueOf(chatId));
+        editedMessage.setFrom(user);
+        update.setEditedMessage(editedMessage);
+        return update;
+    }
+
+    private Update createUpdateWithoutEditedMessage() {
+        Update update = new Update();
+        Message message = new Message();
+        Chat chat = new Chat();
+        chat.setId(Long.valueOf(CHAT_ID));
+        message.setText("Normal text");
+        update.setMessage(message);
+        message.setChat(chat);
+        return update;
+    }
     private TelegramChat createTelegramChat(ChatState state) {
         return TelegramChat.builder()
             .chatId(CHAT_ID)
