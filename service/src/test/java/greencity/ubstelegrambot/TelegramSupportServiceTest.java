@@ -147,7 +147,7 @@ class TelegramSupportServiceTest {
 
             SendMessage feedbackMessage = new SendMessage(chatId, "feedback");
             SendMessage deleteKeyboardMessage = new SendMessage(chatId, "delete_keyboard");
-            mfMock.when(() -> MessageFactory.createFeedbackMessage(chatId, lang))
+            mfMock.when(() -> MessageFactory.createFeedbackMessage(chatId, lang, "text"))
                 .thenReturn(feedbackMessage);
             mfMock.when(() -> MessageFactory.deleteEndSupportKeyboardMessage(chatId, lang))
                 .thenReturn(deleteKeyboardMessage);

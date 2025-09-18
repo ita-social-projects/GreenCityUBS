@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
+
+import greencity.service.ubs.TelegramBotResponseService;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -196,6 +198,9 @@ class NotificationServiceImplTest {
     ExecutorService mockExecutor = MoreExecutors.newDirectExecutorService();
     @Mock
     private OrderBagService orderBagService;
+
+    @Mock
+    private TelegramBotResponseService telegramBotResponseService;
 
     @BeforeEach
     void setUp() {
@@ -989,6 +994,7 @@ class NotificationServiceImplTest {
                 violationRepository,
                 notificationParameterRepository,
                 userRemoteClient,
+                telegramBotResponseService,
                 clock,
                 List.of(abstractNotificationProvider),
                 templateRepository,
