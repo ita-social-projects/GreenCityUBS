@@ -66,9 +66,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     @Override
     @Transactional
     public SendMessage processSupportMessage(Message message, String lang) {
-        Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
+        Optional<TelegramChat> optionalChat = findAndValidateChat(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
-            log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
             return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
                 TelegramBotConstants.UK);
         }
@@ -99,9 +98,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     @Override
     @Transactional
     public SendMessage processEditedSupportMessage(Message edited, String lang) {
-        Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(edited.getFrom().getId().toString());
+        Optional<TelegramChat> optionalChat = findAndValidateChat(edited.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
-            log.warn("Telegram chat not found by ID: {}", edited.getFrom().getId());
             return MessageFactory.createUnknownErrorOccurredMessage(edited.getChatId().toString(),
                     TelegramBotConstants.UK);
         }
@@ -129,6 +127,14 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         telegramMessageRepository.save(telegramMessage);
         return null;
+    }
+
+    private Optional<TelegramChat> findAndValidateChat(String chatId) {
+        Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(chatId);
+        if (optionalChat.isEmpty()) {
+            log.warn("Telegram chat not found by ID: {}", chatId);
+        }
+        return optionalChat;
     }
 
     private SendMessage processMessageContent(TelegramChat chat, Message message) {
