@@ -101,19 +101,19 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         Optional<TelegramChat> optionalChat = findAndValidateChat(edited.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
             return MessageFactory.createUnknownErrorOccurredMessage(edited.getChatId().toString(),
-                    TelegramBotConstants.UK);
+                TelegramBotConstants.UK);
         }
         TelegramChat chat = optionalChat.get();
 
         if (edited.hasText()
-                && edited.getText().startsWith("/start")
-                && chat.getChatState() == ChatState.IN_SUPPORT) {
+            && edited.getText().startsWith("/start")
+            && chat.getChatState() == ChatState.IN_SUPPORT) {
             log.info("User is already in support chat {}. Filtering system /start edited", chat.getChatId());
             return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), lang);
         }
 
         TelegramMessage telegramMessage =
-                telegramMessageRepository.findByTelegramMessageId(edited.getMessageId()).orElse(null);
+            telegramMessageRepository.findByTelegramMessageId(edited.getMessageId()).orElse(null);
 
         if (telegramMessage == null) {
             log.warn("Edited message {} not found in DB", edited.getMessageId());
@@ -123,6 +123,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             telegramMessage.setText(edited.getText());
         } else if (edited.getCaption() != null) {
             telegramMessage.setText(edited.getCaption());
+        } else {
+            telegramMessage.setText(null);
         }
 
         telegramMessageRepository.save(telegramMessage);

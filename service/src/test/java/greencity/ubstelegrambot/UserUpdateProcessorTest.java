@@ -395,7 +395,7 @@ class UserUpdateProcessorTest {
         SendMessage expectedMessage = new SendMessage(CHAT_ID, "Processed edited message");
         when(telegramChatRepository.findByChatId(CHAT_ID)).thenReturn(Optional.of(mockChat));
         when(telegramSupportService.processEditedSupportMessage(any(Message.class), eq("uk")))
-                .thenReturn(expectedMessage);
+            .thenReturn(expectedMessage);
 
         // When
         SendMessage actualMessage = updateProcessor.process(update);
@@ -416,8 +416,9 @@ class UserUpdateProcessorTest {
 
         SendMessage expectedError = new SendMessage(CHAT_ID, "Сталася невідома помилка, спробуйте, будь ласка, знову");
         try (MockedStatic<MessageFactory> mockedMessageFactory = mockStatic(MessageFactory.class)) {
-            mockedMessageFactory.when(() -> MessageFactory.createUnknownErrorOccurredMessage(anyString(), eq(TelegramBotConstants.UK)))
-                    .thenReturn(expectedError);
+            mockedMessageFactory
+                .when(() -> MessageFactory.createUnknownErrorOccurredMessage(anyString(), eq(TelegramBotConstants.UK)))
+                .thenReturn(expectedError);
         }
         // When
         SendMessage actualError = updateProcessor.process(update);
@@ -506,6 +507,7 @@ class UserUpdateProcessorTest {
         message.setChat(chat);
         return update;
     }
+
     private TelegramChat createTelegramChat(ChatState state) {
         return TelegramChat.builder()
             .chatId(CHAT_ID)

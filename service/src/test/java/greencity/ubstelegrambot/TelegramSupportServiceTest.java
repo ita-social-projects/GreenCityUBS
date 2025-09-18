@@ -839,7 +839,7 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByTelegramMessageId(editedMessage.getMessageId()))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         // When
         SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
@@ -857,12 +857,11 @@ class TelegramSupportServiceTest {
         chat.setChatId(String.valueOf(editedMessage.getFrom().getId()));
         when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
 
-
         TelegramMessage existingMessage = new TelegramMessage();
         existingMessage.setTelegramMessageId(editedMessage.getMessageId());
         existingMessage.setText("Old text");
         when(telegramMessageRepository.findByTelegramMessageId(editedMessage.getMessageId()))
-                .thenReturn(Optional.of(existingMessage));
+            .thenReturn(Optional.of(existingMessage));
 
         // When
         SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
@@ -892,7 +891,7 @@ class TelegramSupportServiceTest {
         existingMessage.setTelegramMessageId(editedMessage.getMessageId());
         existingMessage.setText("Old text");
         when(telegramMessageRepository.findByTelegramMessageId(editedMessage.getMessageId()))
-                .thenReturn(Optional.of(existingMessage));
+            .thenReturn(Optional.of(existingMessage));
 
         // When
         SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
@@ -900,6 +899,35 @@ class TelegramSupportServiceTest {
         // Then
         assertNull(result);
         assertEquals("New edited caption", existingMessage.getText());
+        verify(telegramMessageRepository).save(existingMessage);
+    }
+
+    @Test
+    void processEditedSupportMessage_HasNone_UpdatesMessageAndSaves() {
+        // Given
+        Message editedMessage = new Message();
+        editedMessage.setMessageId(98765);
+
+        User user = new User();
+        user.setId(67890L);
+        editedMessage.setFrom(user);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(user.getId()));
+        when(telegramChatRepository.findByChatId(user.getId().toString())).thenReturn(Optional.of(chat));
+
+        TelegramMessage existingMessage = new TelegramMessage();
+        existingMessage.setTelegramMessageId(editedMessage.getMessageId());
+        existingMessage.setText("Old text");
+        when(telegramMessageRepository.findByTelegramMessageId(editedMessage.getMessageId()))
+            .thenReturn(Optional.of(existingMessage));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        assertNull(existingMessage.getText());
         verify(telegramMessageRepository).save(existingMessage);
     }
 

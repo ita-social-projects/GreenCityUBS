@@ -705,7 +705,7 @@ public class TelegramServiceImpl implements TelegramService {
 
     private TelegramUpdateProcessor handleDefaultUpdate(Update update) {
         String chatId;
-        if(update.hasCallbackQuery()){
+        if (update.hasCallbackQuery()) {
             chatId = update.getCallbackQuery().getFrom().getId().toString();
         } else if (update.hasMessage()) {
             chatId = update.getMessage().getChatId().toString();

@@ -89,7 +89,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                         MessageFactory.createAvailableCommandsMessage(chatId, lang));
                 }
             }
-        } else if (update.hasMessage()){
+        } else if (update.hasMessage()) {
             var message = update.getMessage();
 
             Optional<TelegramChat> chatOpt = telegramChatRepository.findByChatId(message.getChatId().toString());
