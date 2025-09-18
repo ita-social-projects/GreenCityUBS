@@ -92,6 +92,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
             addNewLine(document);
             addLineSeparator(document);
             addFooter(objectToWrite, locale, document);
+            document.close();
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
             throw new PdfFileExportingException(CANNOT_EXPORT_DATA_TO_PDF, e);
