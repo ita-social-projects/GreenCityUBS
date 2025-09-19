@@ -77,8 +77,8 @@ class LanguageSwitcherProcessorTest {
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
         when(telegramBotResponseService
-                .getResponseByLangAndMessageType(anyString(), eq(MessageType.SUPPORTED_COMMANDS)))
-                .thenReturn("Some text");
+            .getResponseByLangAndMessageType(anyString(), eq(MessageType.SUPPORTED_COMMANDS)))
+            .thenReturn("Some text");
 
         SendMessage result = processor.process(update);
 
@@ -98,8 +98,8 @@ class LanguageSwitcherProcessorTest {
 
         when(chatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
         when(telegramBotResponseService
-                .getResponseByLangAndMessageType(anyString(), eq(MessageType.CLIENT_SUPPORT_MESSAGE_CHANGE_LANGUAGE)))
-                .thenReturn("Some text");
+            .getResponseByLangAndMessageType(anyString(), eq(MessageType.CLIENT_SUPPORT_MESSAGE_CHANGE_LANGUAGE)))
+            .thenReturn("Some text");
 
         SendMessage result = processor.process(update);
 
@@ -177,8 +177,8 @@ class LanguageSwitcherProcessorTest {
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
         when(telegramBotResponseService
-                .getResponseByLangAndMessageType(anyString(), eq(MessageType.SUPPORTED_COMMANDS)))
-                .thenReturn("Some text");
+            .getResponseByLangAndMessageType(anyString(), eq(MessageType.SUPPORTED_COMMANDS)))
+            .thenReturn("Some text");
 
         SendMessage result = processor.process(update);
 

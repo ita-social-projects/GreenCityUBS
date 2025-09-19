@@ -16,16 +16,6 @@
             <column name="text" value="Incorrect format. Please enter your credentials as login:password"/>
         </insert>
         <insert tableName="bot_messages">
-            <column name="message_type" value="LOGOUT_MANAGER"/>
-            <column name="lang" value="uk"/>
-            <column name="text" value="Вийти з ролі менеджера"/>
-        </insert>
-        <insert tableName="bot_messages">
-            <column name="message_type" value="LOGOUT_MANAGER"/>
-            <column name="lang" value="en"/>
-            <column name="text" value="Exit manager role"/>
-        </insert>
-        <insert tableName="bot_messages">
             <column name="message_type" value="SUCCESSFUL_LOGOUT_MANAGER"/>
             <column name="lang" value="uk"/>
             <column name="text" value="Успішно вийшли з ролі менеджера!"/>
@@ -101,8 +91,7 @@
             <column name="text">
                 <![CDATA[
 Привіт! Я бот і допомагаю своїм колегам-менеджеркам обробляти запити.
-Будь ласка, поставте своє запитання, обравши чат з людиною або виберіть
-інший варіант.
+Будь ласка, поставте своє запитання, обравши чат з людиною або виберіть інший варіант.
                 ]]>
             </column>
         </insert>
@@ -112,8 +101,7 @@
             <column name="text">
                 <![CDATA[
 Hi! I'm a bot helping my fellow managers handle requests.
-Please ask your question by choosing to chat with a human
-or select another option.
+Please ask your question by choosing to chat with a human or select another option.
                 ]]>
             </column>
         </insert>
@@ -219,13 +207,9 @@ Available 24/7
             <column name="message_type" value="SORTING_RULES_PRICING_MESSAGE"/>
             <column name="lang" value="uk"/>
             <column name="text"><![CDATA[
-У 120-ти літровий пакет потрібно скласти змішану вторсировину й неліквіди
-(окрім небезпечних, забруднених, будівельних відходів, а також відходів,
-які контактували з рідинами тіла — перелік тут —
-<a href="https://nowaste.com.ua/sort-station">Посилання</a>).
+У 120-ти літровий пакет потрібно скласти змішану вторсировину й неліквіди (окрім небезпечних, забруднених, будівельних відходів, а також відходів, які контактували з рідинами тіла — перелік тут — <a href="https://nowaste.com.ua/sort-station">Посилання</a>).
 
-Текстильні відходи (зношений одяг, взуття, сумки, м’які іграшки, ковдри)
-потрібно складати в окремі пакети.
+Текстильні відходи (зношений одяг, взуття, сумки, м’які іграшки, ковдри) потрібно складати в окремі пакети.
 
 Максимальна вага пакету на 120 л для міксу паковання — до 5 кг
 Максимальна вага пакету на 120 л для текстилю — до 10 кг.
@@ -247,20 +231,15 @@ Available 24/7
             <column name="message_type" value="SORTING_RULES_PRICING_MESSAGE"/>
             <column name="lang" value="en"/>
             <column name="text"><![CDATA[
-Mixed recyclables and non-liquid waste (excluding hazardous,
-contaminated, construction waste, and waste that contacted bodily fluids —
-list here: <a href="https://nowaste.com.ua/sort-station">Link</a>)
-should be packed in a 120-liter bag.
+Mixed recyclables and non-liquid waste (excluding hazardous, contaminated, construction waste, and waste that contacted bodily fluids — list here: <a href="https://nowaste.com.ua/sort-station">Link</a>) should be packed in a 120-liter bag.
 
-Textile waste (worn clothes, shoes, bags, soft toys, blankets)
-must be packed separately.
+Textile waste (worn clothes, shoes, bags, soft toys, blankets) must be packed separately.
 
 Max weight for mixed packaging in a 120L bag: 5 kg
 Max weight for textiles in a 120L bag: 10 kg.
 
 <b>Service pricing</b>👇
 Mixed recyclables:
-
 120 UAH/35 L
 180 UAH/60 L
 270 UAH/120 L
@@ -268,7 +247,6 @@ Mixed recyclables:
 520 UAH/240 L
 
 Textile waste:
-
 130 UAH/20 L
 295 UAH/60 L
             ]]></column>
@@ -277,16 +255,14 @@ Textile waste:
             <column name="message_type" value="ADMISSION_RULES_TEXT"/>
             <column name="lang" value="uk"/>
             <column name="text"><![CDATA[
-Все, що ми приймаємо на станції на переробку або безпечне спалення
-(перелік тут — <a href="https://nowaste.com.ua/sort-station">Посилання</a>)
+Все, що ми приймаємо на станції на переробку або безпечне спалення (перелік тут — <a href="https://nowaste.com.ua/sort-station">Посилання</a>)
             ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="ADMISSION_RULES_TEXT"/>
             <column name="lang" value="en"/>
             <column name="text"><![CDATA[
-Everything we accept at the station for recycling or safe incineration
-(full list here: <a href="https://nowaste.com.ua/sort-station">Link</a>)
+Everything we accept at the station for recycling or safe incineration (full list here: <a href="https://nowaste.com.ua/sort-station">Link</a>)
             ]]></column>
         </insert>
         <insert tableName="bot_messages">
@@ -305,8 +281,7 @@ Everything we accept at the station for recycling or safe incineration
             <column name="text"><![CDATA[
 Для юридичних осіб і ФОП у нас діє послуга «Зелений Офіс» 🏢
 
-Якщо хочете дізнатися більше про цю послугу, залиште свій e-mail —
-і ми надішлемо вам лист із детальним описом.
+Якщо хочете дізнатися більше про цю послугу, залиште свій e-mail — і ми надішлемо вам лист із детальним описом.
 
 Напишіть ваш e-mail ✍️👇
                 ]]></column>
@@ -317,8 +292,7 @@ Everything we accept at the station for recycling or safe incineration
             <column name="text"><![CDATA[
 For legal entities and entrepreneurs, we offer the “Green Office” service 🏢
 
-If you'd like to learn more, leave your email —
-and we'll send you a detailed description.
+If you'd like to learn more, leave your email — and we'll send you a detailed description.
 
 Please enter your email ✍️👇
                 ]]></column>
@@ -359,8 +333,7 @@ Please enter your email ✍️👇
 
 Тому нам дуже потрібні ваші чесні відгуки про нашу роботу ☝️
 
-Нам важливо знати вашу думку! Поділіться, будь ласка, своїм враженням
-про нашу роботу.
+Нам важливо знати вашу думку! Поділіться, будь ласка, своїм враженням про нашу роботу.
                 ]]></column>
         </insert>
         <insert tableName="bot_messages">
@@ -380,8 +353,7 @@ Your opinion matters! Please share your thoughts about our service.
             <column name="text"><![CDATA[
 Дуже рада це чути! ❤️
 
-Ваші відгуки допомагають нам розвиватися! Будемо й надалі вдосконалювати
-нашу роботу 💪
+Ваші відгуки допомагають нам розвиватися! Будемо й надалі вдосконалювати нашу роботу 💪
 Залиште, будь ласка, кілька слів, що саме вам вподобалося в нашому сервісі 👇
                 ]]></column>
         </insert>
@@ -432,26 +404,6 @@ List of available commands:
                 ]]></column>
         </insert>
         <insert tableName="bot_messages">
-            <column name="message_type" value="BACK_TO_MAIN_MENU"/>
-            <column name="lang" value="uk"/>
-            <column name="text" value="⏪ В головне меню"/>
-        </insert>
-        <insert tableName="bot_messages">
-            <column name="message_type" value="BACK_TO_MAIN_MENU"/>
-            <column name="lang" value="en"/>
-            <column name="text" value="⏪ Back to main menu"/>
-        </insert>
-        <insert tableName="bot_messages">
-            <column name="message_type" value="CLIENT_END_SUPPORT_MODE"/>
-            <column name="lang" value="uk"/>
-            <column name="text" value="Закінчити розмову з менеджером"/>
-        </insert>
-        <insert tableName="bot_messages">
-            <column name="message_type" value="CLIENT_END_SUPPORT_MODE"/>
-            <column name="lang" value="en"/>
-            <column name="text" value="End conversation with manager"/>
-        </insert>
-        <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_STOP_SUPPORT_MODE"/>
             <column name="lang" value="uk"/>
             <column name="text" value="Ви закінчили розмову з менеджером, оцініть будь ласка роботу нашої підтримки від 1 до 5"/>
@@ -476,8 +428,7 @@ List of available commands:
             <column name="lang" value="uk"/>
             <column name="text"><![CDATA[
 Поставте, будь ласка, своє запитання — і я покличу когось із моїх колег-людей ✍️👇
-Якщо після спілкування з людиною ви захочете повернутися до моїх функцій,
-просто натисніть кнопку "Завершити розмову з менеджером"
+Якщо після спілкування з людиною ви захочете повернутися до моїх функцій, просто натисніть кнопку "Завершити розмову з менеджером"
                 ]]></column>
         </insert>
         <insert tableName="bot_messages">
@@ -485,8 +436,7 @@ List of available commands:
             <column name="lang" value="en"/>
             <column name="text"><![CDATA[
 Please ask your question — and I’ll call one of my human colleagues ✍️👇
-If you want to return to my functions after talking to a human,
-just click "End conversation with manager"
+If you want to return to my functions after talking to a human, just click "End conversation with manager"
                 ]]></column>
         </insert>
         <insert tableName="bot_messages">
@@ -538,16 +488,6 @@ just click "End conversation with manager"
             <column name="message_type" value="PREVIOUS_SESSION_EXPIRED"/>
             <column name="lang" value="en"/>
             <column name="text" value="Previous session expired. Please choose a command from the list to continue"/>
-        </insert>
-        <insert tableName="bot_messages">
-            <column name="message_type" value="PHOTO_CONTENT"/>
-            <column name="lang" value="uk"/>
-            <column name="text" value="Фото контент"/>
-        </insert>
-        <insert tableName="bot_messages">
-            <column name="message_type" value="PHOTO_CONTENT"/>
-            <column name="lang" value="en"/>
-            <column name="text" value="Photo content"/>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="LOGIN_FAILED"/>

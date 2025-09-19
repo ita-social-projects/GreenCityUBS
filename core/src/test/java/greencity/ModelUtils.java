@@ -707,9 +707,9 @@ public class ModelUtils {
 
     public static UpdateBotMessageRequestDto getUpdateBotMessageRequestDto() {
         return UpdateBotMessageRequestDto
-                .builder()
-                .id(1L)
-                .text("New bot message text")
-                .build();
+            .builder()
+            .id(1L)
+            .text("New bot message text")
+            .build();
     }
 }

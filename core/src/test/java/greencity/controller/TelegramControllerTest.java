@@ -211,8 +211,8 @@ class TelegramControllerTest {
     @Test
     void getAllBotResponses_ShouldReturnOk() throws Exception {
         mockMvc.perform(get("/ubs/telegram/bot_responses")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
 
         verify(telegramBotResponseService).getAllBotResponses(any(Pageable.class));
     }
@@ -221,9 +221,9 @@ class TelegramControllerTest {
     void updateBotResponse_ShouldReturnOk() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put("/ubs/telegram/bot_responses")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(ModelUtils.getUpdateBotMessageRequestDto())))
-                .andExpect(status().isNoContent());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(ModelUtils.getUpdateBotMessageRequestDto())))
+            .andExpect(status().isNoContent());
 
         verify(telegramBotResponseService).updateBotResponse(any(UpdateBotMessageRequestDto.class));
     }

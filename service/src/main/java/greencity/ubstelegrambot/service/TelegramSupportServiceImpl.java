@@ -17,6 +17,7 @@ import greencity.repository.TelegramMessageRepository;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.service.ubs.TelegramSupportService;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.util.SimpleMultipartFile;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -82,8 +83,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), text);
         }
 
-        if (message.hasText() && message.getText().contains(telegramBotResponseService.getResponseByLangAndMessageType(
-            lang, MessageType.CLIENT_END_SUPPORT_MODE))) {
+        if (message.hasText() && message.getText().contains(MessageProvider.get(lang, "client.end.support.mode"))) {
             String feedbackText = telegramBotResponseService.getResponseByLangAndMessageType(
                 lang, MessageType.FEEDBACK_MESSAGE);
             SendMessage endSupportSendMessage =

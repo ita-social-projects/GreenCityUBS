@@ -122,7 +122,8 @@ class TelegramSupportServiceTest {
         when(message.getFrom()).thenReturn(user);
         when(user.getId()).thenReturn(1L);
         when(telegramChatRepository.findByChatId(anyString())).thenReturn(Optional.empty());
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.UNKNOWN_ERROR)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
@@ -135,7 +136,7 @@ class TelegramSupportServiceTest {
             String chatId = "1";
             String lang = TelegramBotConstants.UK;
             String username = "tg_user";
-            String endSupportText = "Client end support mode";
+            String endSupportText = MessageProvider.get(lang, "client.end.support.mode");
 
             Message message = mock(Message.class);
             User user = mock(User.class);
@@ -158,9 +159,8 @@ class TelegramSupportServiceTest {
             mfMock.when(() -> MessageFactory.deleteEndSupportKeyboardMessage(chatId, lang))
                 .thenReturn(deleteKeyboardMessage);
 
-            when(telegramBotResponseService.getResponseByLangAndMessageType(chatEntity.getLanguageCode(), MessageType.CLIENT_END_SUPPORT_MODE)).thenReturn(endSupportText);
-            when(telegramBotResponseService.getResponseByLangAndMessageType(chatEntity.getLanguageCode(), MessageType.FEEDBACK_MESSAGE)).thenReturn(feedbackMessage.getText());
-            when(telegramBotResponseService.getResponseByLangAndMessageType(chatEntity.getLanguageCode(), MessageType.CLIENT_STOP_SUPPORT_MODE)).thenReturn(endSupportText);
+            when(telegramBotResponseService.getResponseByLangAndMessageType(chatEntity.getLanguageCode(),
+                MessageType.FEEDBACK_MESSAGE)).thenReturn(feedbackMessage.getText());
 
             when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), eq(feedbackMessage)))
                 .thenReturn(feedbackMessage);
@@ -204,9 +204,7 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-                eq(chat.getLanguageCode()),
-                argThat(type -> type == MessageType.CLIENT_END_SUPPORT_MODE || type == MessageType.MESSAGE_SENT_TO_MANAGER)
-        )).thenReturn(responseText);
+            eq(chat.getLanguageCode()), eq(MessageType.MESSAGE_SENT_TO_MANAGER))).thenReturn(responseText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, chat.getLanguageCode());
 
@@ -250,7 +248,8 @@ class TelegramSupportServiceTest {
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(null);
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MANAGER_FILE_FAILED)).thenReturn(messageText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(messageText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
@@ -294,7 +293,8 @@ class TelegramSupportServiceTest {
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenThrow(new TelegramBotExecutionException());
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
@@ -340,7 +340,8 @@ class TelegramSupportServiceTest {
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
@@ -422,8 +423,8 @@ class TelegramSupportServiceTest {
             .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
-
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
@@ -455,7 +456,8 @@ class TelegramSupportServiceTest {
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
@@ -488,7 +490,8 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn("/path/to/file.pdf");
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(userRemoteWebClient.uploadFile(any())).thenReturn("https://azure.com/file");
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
 
         TelegramChat chat = TelegramChat.builder()
             .id(1L)
@@ -530,7 +533,8 @@ class TelegramSupportServiceTest {
         lenient().when(message.getPhoto()).thenReturn(Collections.emptyList());
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MANAGER_PHOTO_FAILED)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_PHOTO_FAILED)).thenReturn(expectedText);
 
         ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
         doNothing().when(telegramMessageRepository).delete(any());
@@ -579,7 +583,8 @@ class TelegramSupportServiceTest {
             .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
@@ -629,7 +634,8 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn("/path/photo.jpeg");
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("https://azure.com/photo");
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
@@ -666,7 +672,8 @@ class TelegramSupportServiceTest {
             .build();
         when(telegramChatRepository.findByChatId(chatId))
             .thenReturn(Optional.of(chatEntity));
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK, MessageType.MANAGER_CHAT_ALREADY_OPEN_MESSAGE)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_CHAT_ALREADY_OPEN_MESSAGE)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, lang);
 
@@ -706,7 +713,8 @@ class TelegramSupportServiceTest {
         when(telegramUtils.fileToByteArray(any())).thenReturn("bytes".getBytes());
         when(userRemoteWebClient.uploadFile(any())).thenReturn("http://cdn/sticker.webp");
 
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN, MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
@@ -735,7 +743,8 @@ class TelegramSupportServiceTest {
         when(message.getSticker()).thenReturn(null);
         when(message.getChatId()).thenReturn(111L);
 
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN, MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
@@ -776,7 +785,8 @@ class TelegramSupportServiceTest {
         when(telegramUtils.fileToByteArray(any())).thenReturn("video".getBytes());
         when(userRemoteWebClient.uploadFile(any())).thenReturn("http://cdn/clip.mp4");
 
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN, MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
@@ -806,7 +816,8 @@ class TelegramSupportServiceTest {
         when(message.getAnimation()).thenReturn(null);
         when(message.getChatId()).thenReturn(111L);
 
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN, MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
@@ -843,7 +854,8 @@ class TelegramSupportServiceTest {
         when(telegramUtils.fileToByteArray(any(File.class))).thenReturn(new byte[] {1, 2, 3});
         when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("http://file-url");
 
-        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN, MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn("");
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn("");
 
         // when
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");

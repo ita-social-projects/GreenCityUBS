@@ -62,7 +62,8 @@ class TelegramNotificationServiceTest {
             .build();
 
         when(telegramManagerRepository.findAll()).thenReturn(List.of(telegramManager1, telegramManager2));
-        when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), eq(MessageType.CLIENT_WANT_TO_SPEAK))).thenReturn("text");
+        when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(),
+            eq(MessageType.CLIENT_WANT_TO_SPEAK))).thenReturn("text");
 
         telegramNotificationService.notifyManagerAboutNewMessagesFromUser(username, messageText, chatId);
 
@@ -81,7 +82,8 @@ class TelegramNotificationServiceTest {
             .build();
 
         when(telegramManagerRepository.findAll()).thenReturn(List.of(telegramManager1, telegramManager2));
-        when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), eq(MessageType.CLIENT_END_SUPPORT_NOTIFICATION))).thenReturn("text");
+        when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(),
+            eq(MessageType.CLIENT_END_SUPPORT_NOTIFICATION))).thenReturn("text");
 
         telegramNotificationService.notifyManagerAboutEndSupportModeFromUser("username");
 
