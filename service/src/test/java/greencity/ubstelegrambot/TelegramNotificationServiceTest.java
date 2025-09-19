@@ -2,8 +2,10 @@ package greencity.ubstelegrambot;
 
 import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramManager;
+import greencity.enums.MessageType;
 import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramLanguageService;
+import greencity.ubstelegrambot.service.TelegramBotResponseServiceImpl;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramNotificationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.List;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +36,9 @@ class TelegramNotificationServiceTest {
 
     @Mock
     private TelegramLanguageService telegramLanguageService;
+
+    @Mock
+    private TelegramBotResponseServiceImpl telegramBotResponseService;
 
     @BeforeEach
     void setUp() {
@@ -57,6 +62,7 @@ class TelegramNotificationServiceTest {
             .build();
 
         when(telegramManagerRepository.findAll()).thenReturn(List.of(telegramManager1, telegramManager2));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), eq(MessageType.CLIENT_WANT_TO_SPEAK))).thenReturn("text");
 
         telegramNotificationService.notifyManagerAboutNewMessagesFromUser(username, messageText, chatId);
 
@@ -75,6 +81,7 @@ class TelegramNotificationServiceTest {
             .build();
 
         when(telegramManagerRepository.findAll()).thenReturn(List.of(telegramManager1, telegramManager2));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), eq(MessageType.CLIENT_END_SUPPORT_NOTIFICATION))).thenReturn("text");
 
         telegramNotificationService.notifyManagerAboutEndSupportModeFromUser("username");
 

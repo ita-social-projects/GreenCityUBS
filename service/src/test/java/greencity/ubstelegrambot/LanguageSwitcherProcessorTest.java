@@ -3,9 +3,11 @@ package greencity.ubstelegrambot;
 import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
+import greencity.enums.MessageType;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.ubstelegrambot.service.LanguageSwitcherProcessor;
+import greencity.ubstelegrambot.service.TelegramBotResponseServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -41,6 +44,9 @@ class LanguageSwitcherProcessorTest {
 
     @Mock
     private TelegramManagerRepository telegramManagerRepository;
+
+    @Mock
+    private TelegramBotResponseServiceImpl telegramBotResponseService;
 
     @InjectMocks
     private LanguageSwitcherProcessor processor;
@@ -70,6 +76,9 @@ class LanguageSwitcherProcessorTest {
         SendMessage expectedMessage = new SendMessage("123", "Some commands");
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
+        when(telegramBotResponseService
+                .getResponseByLangAndMessageType(anyString(), eq(MessageType.SUPPORTED_COMMANDS)))
+                .thenReturn("Some text");
 
         SendMessage result = processor.process(update);
 
@@ -88,6 +97,9 @@ class LanguageSwitcherProcessorTest {
         chat.setChatState(ChatState.IN_SUPPORT);
 
         when(chatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
+        when(telegramBotResponseService
+                .getResponseByLangAndMessageType(anyString(), eq(MessageType.CLIENT_SUPPORT_MESSAGE_CHANGE_LANGUAGE)))
+                .thenReturn("Some text");
 
         SendMessage result = processor.process(update);
 
@@ -164,6 +176,9 @@ class LanguageSwitcherProcessorTest {
         SendMessage expectedMessage = new SendMessage("123", "Manager commands");
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any()))
             .thenReturn(expectedMessage);
+        when(telegramBotResponseService
+                .getResponseByLangAndMessageType(anyString(), eq(MessageType.SUPPORTED_COMMANDS)))
+                .thenReturn("Some text");
 
         SendMessage result = processor.process(update);
 
