@@ -1,18 +1,14 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.ModelUtils;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.EditTelegramMessageRequest;
-import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
-import greencity.dto.telegram.TelegramMessageDto;
-import greencity.dto.telegram.ToggleNotificationsRequestDto;
+import greencity.dto.telegram.*;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
+import greencity.ubstelegrambot.service.TelegramBotResponseServiceImpl;
 import greencity.ubstelegrambot.service.TelegramFeedbackServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +50,9 @@ class TelegramControllerTest {
 
     @Mock
     private TelegramFeedbackServiceImpl telegramFeedbackService;
+
+    @Mock
+    private TelegramBotResponseServiceImpl telegramBotResponseService;
 
     private PageableDto<TelegramMessageDto> messageDtoPage;
     private PageableDto<ChatDto> chatDtoPage;
@@ -207,5 +206,25 @@ class TelegramControllerTest {
             .andExpect(status().isOk());
 
         verify(telegramService).getIsNotificationsEnabled(any());
+    }
+
+    @Test
+    void getAllBotResponses_ShouldReturnOk() throws Exception {
+        mockMvc.perform(get("/ubs/telegram/bot_responses")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(telegramBotResponseService).getAllBotResponses(any(Pageable.class));
+    }
+
+    @Test
+    void updateBotResponse_ShouldReturnOk() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(put("/ubs/telegram/bot_responses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(ModelUtils.getUpdateBotMessageRequestDto())))
+                .andExpect(status().isNoContent());
+
+        verify(telegramBotResponseService).updateBotResponse(any(UpdateBotMessageRequestDto.class));
     }
 }

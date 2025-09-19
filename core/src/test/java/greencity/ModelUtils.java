@@ -50,6 +50,7 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.dto.telegram.UpdateBotMessageRequestDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -702,5 +703,13 @@ public class ModelUtils {
             .violationDescription("Violation description")
             .violationLevel("LOW")
             .build();
+    }
+
+    public static UpdateBotMessageRequestDto getUpdateBotMessageRequestDto() {
+        return UpdateBotMessageRequestDto
+                .builder()
+                .id(1L)
+                .text("New bot message text")
+                .build();
     }
 }
