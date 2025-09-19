@@ -67,8 +67,8 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         if (optionalChat.isEmpty()) {
             log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
             String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.UNKNOWN_ERROR);
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), text,
-                TelegramBotConstants.UK);
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
+                TelegramBotConstants.UK, text);
         }
 
         TelegramChat chat = optionalChat.get();
