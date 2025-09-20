@@ -113,7 +113,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         }
 
         TelegramMessage telegramMessage =
-            telegramMessageRepository.findByTelegramMessageId(edited.getMessageId()).orElse(null);
+            telegramMessageRepository.findByChatAndTelegramMessageId(chat, edited.getMessageId()).orElse(null);
 
         if (telegramMessage == null) {
             log.warn("Edited message {} not found in DB", edited.getMessageId());

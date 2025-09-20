@@ -838,7 +838,7 @@ class TelegramSupportServiceTest {
         chat.setChatId(String.valueOf(editedMessage.getFrom().getId()));
 
         when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
-        when(telegramMessageRepository.findByTelegramMessageId(editedMessage.getMessageId()))
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
             .thenReturn(Optional.empty());
 
         // When
@@ -860,7 +860,7 @@ class TelegramSupportServiceTest {
         TelegramMessage existingMessage = new TelegramMessage();
         existingMessage.setTelegramMessageId(editedMessage.getMessageId());
         existingMessage.setText("Old text");
-        when(telegramMessageRepository.findByTelegramMessageId(editedMessage.getMessageId()))
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
             .thenReturn(Optional.of(existingMessage));
 
         // When
@@ -890,7 +890,7 @@ class TelegramSupportServiceTest {
         TelegramMessage existingMessage = new TelegramMessage();
         existingMessage.setTelegramMessageId(editedMessage.getMessageId());
         existingMessage.setText("Old text");
-        when(telegramMessageRepository.findByTelegramMessageId(editedMessage.getMessageId()))
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
             .thenReturn(Optional.of(existingMessage));
 
         // When
@@ -919,7 +919,7 @@ class TelegramSupportServiceTest {
         TelegramMessage existingMessage = new TelegramMessage();
         existingMessage.setTelegramMessageId(editedMessage.getMessageId());
         existingMessage.setText("Old text");
-        when(telegramMessageRepository.findByTelegramMessageId(editedMessage.getMessageId()))
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
             .thenReturn(Optional.of(existingMessage));
 
         // When
