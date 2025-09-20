@@ -226,10 +226,10 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     }
 
     private SendMessage setStickerInfo(Message message, TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt, FileInfo fileInfo, String lang) {
+        Optional<TelegramMessage> previouslySavedMessage, FileInfo fileInfo, String lang) {
         Sticker sticker = message.getSticker();
         if (sticker == null) {
-            if (telegramMessageOpt.isEmpty()) {
+            if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
@@ -245,12 +245,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
     private SendMessage setAnimationInfo(Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         FileInfo fileInfo,
         String lang) {
         Animation animation = message.getAnimation();
         if (animation == null) {
-            if (telegramMessageOpt.isEmpty()) {
+            if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
@@ -268,7 +268,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
     private SendMessage setPhotoInfo(Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         FileInfo fileInfo,
         String lang) {
         PhotoSize largestPhoto = message.getPhoto().stream()
@@ -276,7 +276,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .orElse(null);
 
         if (largestPhoto == null) {
-            if (telegramMessageOpt.isEmpty()) {
+            if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
@@ -290,12 +290,12 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
     private SendMessage setDocumentInfo(Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         FileInfo fileInfo,
         String lang) {
         Document document = message.getDocument();
         if (document == null) {
-            if (telegramMessageOpt.isEmpty()) {
+            if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
@@ -311,7 +311,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
     private SendMessage setFileAsMessageAsset(Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         FileInfo fileInfo,
         String lang) {
         try {
@@ -353,10 +353,11 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .message(telegramMessage)
                 .build();
 
-            if (telegramMessageOpt.isPresent()) {
-                List<MessageAsset> existingAssets = new ArrayList<>(telegramMessage.getAssets());
-                existingAssets.add(asset);
-                telegramMessage.getAssets().addAll(existingAssets);
+            if (previouslySavedMessage.isPresent()) {
+                if (telegramMessage.getAssets() == null) {
+                    telegramMessage.setAssets(new ArrayList<>());
+                }
+                telegramMessage.getAssets().add(asset);
             } else {
                 telegramMessage.setAssets((new ArrayList<>(List.of(asset))));
             }
@@ -376,7 +377,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         Message message,
         String mediaGroupId,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt) {
+        Optional<TelegramMessage> previouslySavedMessage) {
         List<MessageAssetDto> assetDtos = Optional.ofNullable(telegramMessage.getAssets())
             .orElse(Collections.emptyList())
             .stream()
@@ -400,7 +401,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .assets(assetDtos)
             .build();
 
-        if (telegramMessageOpt.isEmpty()) {
+        if (previouslySavedMessage.isEmpty()) {
             telegramChatProducer.notifyNewMessage(telegramMessageDto, chat.getId());
 
             String contentForNotification = buildContentForNotification(telegramMessage);
