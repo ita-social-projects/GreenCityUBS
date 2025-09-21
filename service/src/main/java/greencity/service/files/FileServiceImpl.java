@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FileServiceImpl implements FileService {
-    private final FileStorageFacadeImpl fileStorageFacade;
+    private final FileStorageFacade fileStorageFacade;
     private final UserRemoteWebClient userRemoteWebClient;
     @Value("UBS")
     private String owner;
