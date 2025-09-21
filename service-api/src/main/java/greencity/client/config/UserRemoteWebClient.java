@@ -26,7 +26,7 @@ public class UserRemoteWebClient {
      */
     public String uploadFile(UploadFileDto fileDto) {
         return webClient.post()
-            .uri("/files/single")
+            .uri("/files")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(multipartInserter(fileDto))
             .retrieve()
@@ -41,7 +41,7 @@ public class UserRemoteWebClient {
      */
     public void deleteFile(DeleteFileDto fileDto) {
         webClient.method(HttpMethod.DELETE)
-            .uri("/files/single")
+            .uri("/files")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(fileDto)
             .retrieve()

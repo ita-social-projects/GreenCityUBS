@@ -50,7 +50,7 @@ class UserRemoteWebClientTest {
     @Test
     void uploadFileTest() {
         String expectedUrl = "upload-file-url";
-        String expectedRequestPath = "/files/single";
+        String expectedRequestPath = "/files";
         String expectedRequestMethod = HttpMethod.POST.name();
 
         mockWebServer.enqueue(new MockResponse()
