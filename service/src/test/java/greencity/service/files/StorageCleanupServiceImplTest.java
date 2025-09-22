@@ -19,7 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(SpringExtension.class)
-public class StorageCleanupServiceImplTest {
+class StorageCleanupServiceImplTest {
     @Mock
     FileStorageFacade fileStorageFacade;
     @Mock

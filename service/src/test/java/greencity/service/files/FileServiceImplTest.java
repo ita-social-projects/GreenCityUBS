@@ -22,7 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
-public class FileServiceImplTest {
+class FileServiceImplTest {
     @Mock
     UserRemoteWebClient userRemoteWebClient;
     @InjectMocks
