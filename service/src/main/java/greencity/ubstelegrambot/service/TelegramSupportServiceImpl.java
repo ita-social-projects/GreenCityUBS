@@ -167,7 +167,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
             resetTelegramChatDataToInternalStatus(chat, telegramMessage);
             resultMessage = MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
         }
         return resultMessage;
     }
@@ -189,7 +189,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
         } else {
             fileInfo.setFileId(sticker.getFileId());
             fileInfo.setFileSize(sticker.getFileSize() != null ? sticker.getFileSize().longValue() : 0L);
@@ -210,7 +210,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
         } else {
             fileInfo.setFileId(animation.getFileId());
             fileInfo.setFileSize(animation.getFileSize() != null ? animation.getFileSize() : 0L);
@@ -255,7 +255,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
         } else {
             fileInfo.setFileId(document.getFileId());
             fileInfo.setFileSize(document.getFileSize());
@@ -275,7 +275,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (telegramFile == null || telegramFile.getFilePath() == null) {
                 log.warn("Telegram file not found for fileId: {}", fileInfo.getFileId());
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                    MessageProvider.get(lang, "manager.file.failed"));
+                    MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
             }
 
             if (message.hasPhoto()) {
@@ -322,7 +322,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             log.error("Error loading or saving file from Telegram (Filename: {}): {}", fileInfo.getOriginalFileName(),
                 e.getMessage(), e);
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
         }
 
         return null;
