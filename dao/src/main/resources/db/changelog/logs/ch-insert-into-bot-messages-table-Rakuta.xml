@@ -472,12 +472,24 @@ If you want to return to my functions after talking to a human, just click "End 
         <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_WANT_TO_SPEAK"/>
             <column name="lang" value="uk"/>
-            <column name="text" value="👨@%s хоче поговорити з людиною\n\n👉 %s\n\n💬 http://localhost:4200/chat/%s"/>
+            <column name="text"><![CDATA[
+👨 @%s хоче поговорити з людиною
+
+👉 %s
+
+💬 %s
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="CLIENT_WANT_TO_SPEAK"/>
             <column name="lang" value="en"/>
-            <column name="text" value="👨@%s wants to speak with a human\n\n👉 %s\n\n💬 http://localhost:4200/chat/%s"/>
+            <column name="text"><![CDATA[
+👨 @%s wants to speak with a human
+
+👉 %s
+
+💬 %s
+                ]]></column>
         </insert>
         <insert tableName="bot_messages">
             <column name="message_type" value="PREVIOUS_SESSION_EXPIRED"/>
