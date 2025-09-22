@@ -38,4 +38,15 @@ public interface TelegramMessageRepository extends JpaRepository<TelegramMessage
      *         this chat, otherwise empty
      */
     Optional<TelegramMessage> findFirstByChatOrderBySendAtDesc(TelegramChat chat);
+
+    /**
+     * Finds the most recent {@link TelegramMessage} in a given chat, ordered by
+     * send time descending.
+     *
+     * @param telegramChat the {@link TelegramChat} entity
+     * @param messageId    the {@link Integer} telegram message ID
+     * @return an {@link Optional} containing the latest {@link TelegramMessage} in
+     *         this chat, otherwise empty
+     */
+    Optional<TelegramMessage> findByChatAndTelegramMessageId(TelegramChat telegramChat, Integer messageId);
 }

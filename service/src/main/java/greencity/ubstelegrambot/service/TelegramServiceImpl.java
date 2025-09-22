@@ -704,9 +704,14 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     private TelegramUpdateProcessor handleDefaultUpdate(Update update) {
-        String chatId = update.hasCallbackQuery()
-            ? update.getCallbackQuery().getFrom().getId().toString()
-            : update.getMessage().getChatId().toString();
+        String chatId;
+        if (update.hasCallbackQuery()) {
+            chatId = update.getCallbackQuery().getFrom().getId().toString();
+        } else if (update.hasMessage()) {
+            chatId = update.getMessage().getChatId().toString();
+        } else {
+            chatId = update.getEditedMessage().getChatId().toString();
+        }
 
         telegramChatRepository.findByChatId(chatId).ifPresent(chat -> {
             Instant updatedAt = chat.getChatStateUpdatedAt();
