@@ -152,6 +152,7 @@ public class MessageFactory {
      * Method for creating user notification end support mode message.
      *
      * @param chatId   {@link String} is telegram chat id.
+     * @param username {@link String} is username in telegram.
      * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the user notification end support
      *         mode message.
