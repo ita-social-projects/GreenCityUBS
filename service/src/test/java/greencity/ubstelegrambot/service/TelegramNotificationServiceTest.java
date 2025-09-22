@@ -1,9 +1,7 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.ModelUtils;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.notification.NotificationDto;
-import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.User;
@@ -32,19 +30,6 @@ class TelegramNotificationServiceTest {
 
     @InjectMocks
     private TelegramNotificationService telegramNotificationService;
-
-    private final User user = User.builder().id(32L).recipientEmail("user@email.com")
-        .telegramBot(
-            new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
-                "last_name", 0, null, null, TelegramBotConstants.UK,
-                new ArrayList<>(), new ArrayList<>(), Instant.now()))
-        .build();
-//    private final UserVO userVO = UserVO.builder().languageVO(LanguageVO.builder().code("ua").build()).build();
-    private final UserNotification notification = new UserNotification()
-        .setNotificationType(NotificationType.LETS_STAY_CONNECTED)
-        .setId(42L)
-        .setUser(user);
-    private final NotificationTemplate template = ModelUtils.TEST_NOTIFICATION_TEMPLATE;
 
     @Test
     void testSendNotification() {
