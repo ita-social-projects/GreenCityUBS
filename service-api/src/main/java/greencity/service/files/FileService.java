@@ -17,9 +17,4 @@ public interface FileService {
      * @param path url of the file to delete.
      */
     void deleteFile(String path);
-
-    /**
-     * Method for scheduled Azure Blob Storage cleanup.
-     */
-    void cleanUp();
 }

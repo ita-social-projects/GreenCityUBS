@@ -13,7 +13,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FileServiceImpl implements FileService {
-    private final FileStorageFacade fileStorageFacade;
     private final UserRemoteWebClient userRemoteWebClient;
     @Value("UBS")
     private String owner;
@@ -36,16 +35,5 @@ public class FileServiceImpl implements FileService {
             .build();
 
         userRemoteWebClient.deleteFile(deleteFileDto);
-    }
-
-    @Override
-    public void cleanUp() {
-        List<String> filePaths = fileStorageFacade.getFilePaths();
-        CleanupFilesDto cleanupFilesDto = CleanupFilesDto.builder()
-            .paths(filePaths)
-            .owner(owner)
-            .build();
-
-        userRemoteWebClient.cleanUp(cleanupFilesDto);
     }
 }

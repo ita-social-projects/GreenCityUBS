@@ -1,6 +1,5 @@
 package greencity.service.files;
 
-import static greencity.ModelUtils.FILE_LIST;
 import static greencity.ModelUtils.TEST_FILE;
 import static greencity.ModelUtils.TEST_OWNER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.client.config.UserRemoteWebClient;
-import greencity.dto.files.CleanupFilesDto;
 import greencity.dto.files.DeleteFileDto;
 import greencity.dto.files.UploadFileDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 public class FileServiceImplTest {
-    @Mock
-    FileStorageFacade fileStorageFacade;
     @Mock
     UserRemoteWebClient userRemoteWebClient;
     @InjectMocks
@@ -69,21 +65,5 @@ public class FileServiceImplTest {
 
         assertEquals(TEST_FILE, deleteFileDto.getPath());
         assertEquals(TEST_OWNER, deleteFileDto.getOwner());
-    }
-
-    @Test
-    void cleanUpTest() {
-        ArgumentCaptor<CleanupFilesDto> captor = ArgumentCaptor.forClass(CleanupFilesDto.class);
-
-        doNothing().when(userRemoteWebClient).cleanUp(any(CleanupFilesDto.class));
-        when(fileStorageFacade.getFilePaths()).thenReturn(FILE_LIST);
-
-        fileService.cleanUp();
-
-        verify(userRemoteWebClient).cleanUp(captor.capture());
-        CleanupFilesDto cleanupFilesDto = captor.getValue();
-
-        assertEquals(FILE_LIST, cleanupFilesDto.getPaths());
-        assertEquals(TEST_OWNER, cleanupFilesDto.getOwner());
     }
 }
