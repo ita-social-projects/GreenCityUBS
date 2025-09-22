@@ -66,5 +66,4 @@ public class UserRemoteWebClient {
 
         return BodyInserters.fromMultipartData(multipartBodyBuilder.build());
     }
-
 }
