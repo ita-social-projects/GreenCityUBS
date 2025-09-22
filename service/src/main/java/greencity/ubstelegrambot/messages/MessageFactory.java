@@ -29,6 +29,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the forbidden manager messages.
      */
@@ -41,6 +42,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the list of available commands
      *         message.
@@ -56,6 +58,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the list of supported manager
      *         commands message.
@@ -70,6 +73,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the unknown command message.
      */
@@ -83,6 +87,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the login message.
      */
@@ -97,6 +102,7 @@ public class MessageFactory {
      * @param chatId       {@link String} is telegram chat id.
      * @param errorMessage {@link String} is error message.
      * @param lang         {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the fail login message with error
      *         message.
@@ -112,6 +118,7 @@ public class MessageFactory {
      * @param chatId   {@link String} is telegram chat id.
      * @param userName {@link String} is username.
      * @param lang     {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the success login message with
      *         username.
@@ -128,6 +135,7 @@ public class MessageFactory {
      * @param username       {@link String} is username in telegram.
      * @param messageText    {@link String} is message.
      * @param url            {@link String} is id for link.
+     * @param text           {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the manager notification message.
      */
@@ -145,6 +153,7 @@ public class MessageFactory {
      *
      * @param chatId   {@link String} is telegram chat id.
      * @param username {@link String} is username in telegram.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the user notification end support
      *         mode message.
      */
@@ -175,6 +184,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the support message with call
      *         back query.
      */
@@ -192,6 +202,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the support message.
      */
     public static SendMessage createSupportReplyMarkup(String chatId, String lang, String text) {
@@ -208,6 +219,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the work schedule message.
      */
     public static SendMessage createWorkScheduleMessage(String chatId, String lang, String text) {
@@ -222,6 +234,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the sorting prices message.
      */
     public static SendMessage createSortingPricesMessage(String chatId, String lang, String text) {
@@ -236,6 +249,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the admission rules message.
      */
     public static SendMessage createAdmissionRulesMessage(String chatId, String lang, String text) {
@@ -250,6 +264,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the green office message.
      */
     public static SendMessage createGreenOfficeMessage(String chatId, String lang, String text) {
@@ -263,6 +278,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the entering email message.
      */
     public static SendMessage createEnteringEmailMessage(String chatId, String lang, String text) {
@@ -275,6 +291,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the invalid email message.
      */
     public static SendMessage createInvalidEmailMessage(String chatId, String lang, String text) {
@@ -286,6 +303,7 @@ public class MessageFactory {
      * Method for creating green office thanks message.
      *
      * @param chatId {@link String} is telegram chat id.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the green office thanks message.
      */
     public static SendMessage createGreenOfficeThanksMessage(String chatId, String lang, String text) {
@@ -298,6 +316,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the feedback message.
      */
     public static SendMessage createFeedbackMessage(String chatId, String lang, String text) {
@@ -309,6 +328,7 @@ public class MessageFactory {
      * Method for creating great feedback message.
      *
      * @param chatId {@link String} is telegram chat id.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the great feedback message.
      */
     public static SendMessage createGreatFeedbackMessage(String chatId, String text) {
@@ -319,6 +339,7 @@ public class MessageFactory {
      * Method for creating bad feedback message.
      *
      * @param chatId {@link String} is telegram chat id.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the bad feedback message.
      */
     public static SendMessage createBadFeedbackMessage(String chatId, String text) {
@@ -330,6 +351,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the thanks feedback message.
      */
     public static SendMessage createFeedbackThanksMessage(String chatId, String lang, String text) {
@@ -342,6 +364,7 @@ public class MessageFactory {
      *
      * @param chatId {@link String} is telegram chat id.
      * @param lang   {@link String} is a language code of the telegram chat.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the unknown error occurred
      *         message.
      */
@@ -355,6 +378,7 @@ public class MessageFactory {
      * already open.
      *
      * @param chatId {@link String} is the Telegram chat ID.
+     * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the chat already open message.
      */
     public static SendMessage createChatAlreadyOpenMessage(String chatId, String text) {
@@ -445,6 +469,7 @@ public class MessageFactory {
      * </p>
      *
      * @param chatId the ID of the chat to send the message to
+     * @param text   {@link String} is the localized text content of the message.
      * @return a {@link SendMessage} object configured to remove the keyboard
      */
     public static SendMessage deleteEndSupportKeyboardMessage(String chatId, String text) {
