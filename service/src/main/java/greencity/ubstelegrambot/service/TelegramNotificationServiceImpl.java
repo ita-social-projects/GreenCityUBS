@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
 import java.util.List;
 
 @Service
@@ -46,8 +45,8 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
 
     private String buildUrl(String baseUrl, Long innerChatId) {
         return new StringBuilder(baseUrl)
-                .append("chat-page?chatId=")
-                .append(innerChatId.toString()).toString();
+            .append("chat-page?chatId=")
+            .append(innerChatId.toString()).toString();
     }
 
     @Override

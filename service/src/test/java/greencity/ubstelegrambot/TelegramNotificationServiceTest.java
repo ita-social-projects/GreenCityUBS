@@ -14,10 +14,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.List;
-
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +42,8 @@ class TelegramNotificationServiceTest {
     @Mock
     private TelegramBotResponseServiceImpl telegramBotResponseService;
 
+    private static final String BASE_URL = "http://localhost:8080/";
+
     @BeforeEach
     void setUp() {
         lenient().when(telegramLanguageService.getChatLanguage(anyString()))
@@ -48,6 +52,7 @@ class TelegramNotificationServiceTest {
 
     @Test
     void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
+        ReflectionTestUtils.setField(telegramNotificationService, "baseUrl", BASE_URL);
         String username = "username";
         String messageText = "message";
         Long chatId = 123L;
