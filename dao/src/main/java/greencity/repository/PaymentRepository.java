@@ -38,4 +38,12 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
         value = "SELECT p.payment_status FROM payment p WHERE p.order_id = :orderId AND p.id = :paymentId")
     Optional<PaymentStatus> getPaymentStatusByOrderIdAndPaymentId(@Param(value = "orderId") Long orderId,
         @Param(value = "paymentId") Long paymentId);
+
+    /**
+     * Returns all distinct non-null image paths.
+     *
+     * @return {@link List} of distinct image paths.
+     */
+    @Query("SELECT DISTINCT p.imagePath FROM Payment p WHERE p.imagePath IS NOT NULL")
+    List<String> findDistinctImagePaths();
 }

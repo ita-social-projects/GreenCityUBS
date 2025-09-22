@@ -122,4 +122,12 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.employeePosition WHERE e.email = :email")
     Optional<Employee> findByEmailWithPositions(@Param("email") String email);
+
+    /**
+     * Returns all distinct non-null image paths.
+     *
+     * @return {@link List} of distinct image paths.
+     */
+    @Query("SELECT DISTINCT e.imagePath FROM Employee e WHERE e.imagePath IS NOT NULL")
+    List<String> findDistinctImagePaths();
 }

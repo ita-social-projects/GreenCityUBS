@@ -275,4 +275,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @return the number of completed orders
      */
     Long countByUserIdAndOrderStatus(Long userId, OrderStatus status);
+
+    /**
+     * Returns all lists of image paths.
+     *
+     * @return {@link List} of lists of image paths.
+     */
+    @Query("SELECT o.imageReasonNotTakingBags FROM Order o")
+    List<List<String>> findImagePaths();
 }

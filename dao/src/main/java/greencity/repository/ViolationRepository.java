@@ -4,6 +4,7 @@ import greencity.entity.user.Violation;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 import java.util.Optional;
 
 public interface ViolationRepository extends CrudRepository<Violation, Long> {
@@ -64,4 +65,12 @@ public interface ViolationRepository extends CrudRepository<Violation, Long> {
      */
     @Query(value = "SELECT v FROM Violation v WHERE v.order.id = ?1 AND v.violationStatus = 'DELETED'")
     Optional<Violation> findCanceledViolationByOrderId(Long orderId);
+
+    /**
+     * Returns all distinct non-null image paths.
+     *
+     * @return {@link List} of distinct image paths.
+     */
+    @Query(value = "SELECT DISTINCT vi.image FROM violation_images vi WHERE vi.image IS NOT NULL", nativeQuery = true)
+    List<String> findDistinctImagePaths();
 }
