@@ -235,6 +235,8 @@ public class ModelUtils {
     public static final String TEST_AGREEMENT_TEXT_UK = "Текст угоди українською";
     public static final String TEST_AGREEMENT_TEXT_EN = "Agreement text in English";
     public static final Order TEST_ORDER = createOrder();
+    public static final String TEST_OWNER = "Test owner";
+    public static final String TEST_FILE = "test_image.png";
     public static final OrderAddressDtoResponse TEST_ORDER_ADDRESS_DTO_RESPONSE = createOrderAddressDtoResponse();
     public static final OrderAddressExportDetailsDtoUpdate TEST_ORDER_ADDRESS_DTO_UPDATE =
         createOrderAddressDtoUpdate();
@@ -307,6 +309,7 @@ public class ModelUtils {
 
     public static final String KYIV_REGION_EN = "Kyiv Oblast";
     public static final String KYIV_REGION_UK = "Київська область";
+    public static final List<String> FILE_LIST = getFileList();
 
     public static EmployeeFilterView getEmployeeFilterView() {
         return getEmployeeFilterViewWithPassedIds(1L, 5L, 10L);
@@ -5994,5 +5997,9 @@ public class ModelUtils {
             false,
             true,
             true);
+    }
+
+    public static List<String> getFileList() {
+        return List.of(TEST_FILE, "file.pdf", "test.txt");
     }
 }
