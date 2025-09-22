@@ -9,9 +9,11 @@ import greencity.service.ubs.TelegramLanguageService;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 import java.util.List;
 
 @Service
@@ -23,6 +25,9 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
     private final TelegramExecutor telegramExecutor;
     private final TelegramBotResponseService telegramBotResponseService;
 
+    @Value("${greencity.ubs.admin.base-url}")
+    private String baseUrl;
+
     @Override
     public void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId) {
         List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
@@ -30,12 +35,19 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
             String lang = telegramLanguageService.getChatLanguage(manager.getChatId());
             String text = telegramBotResponseService.getResponseByLangAndMessageType(
                 lang, MessageType.CLIENT_WANT_TO_SPEAK);
+            String url = buildUrl(baseUrl, innerChatId);
             SendMessage notification =
                 MessageFactory.createNotificationMessageForManager(manager.getChatId(), username, messageText,
-                    innerChatId, text);
+                    url, text);
 
             notifyManagerSafely(manager, notification);
         }
+    }
+
+    private String buildUrl(String baseUrl, Long innerChatId) {
+        return new StringBuilder(baseUrl)
+                .append("chat-page?chatId=")
+                .append(innerChatId.toString()).toString();
     }
 
     @Override

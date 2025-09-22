@@ -127,14 +127,14 @@ public class MessageFactory {
      * @param telegramChatId {@link String} is telegram chat id.
      * @param username       {@link String} is username in telegram.
      * @param messageText    {@link String} is message.
-     * @param innerChatId    {@link Long} is id for link.
+     * @param url            {@link String} is id for link.
      *
      * @return {@link SendMessage} configured with the manager notification message.
      */
     public static SendMessage createNotificationMessageForManager(String telegramChatId, String username,
-        String messageText, Long innerChatId, String text) {
+        String messageText, String url, String text) {
         SendMessage message = buildMessage(telegramChatId,
-            String.format(text, username, messageText, innerChatId));
+            String.format(text, username, messageText, url));
         message.enableHtml(true);
         message.setParseMode(ParseMode.HTML);
         return message;
