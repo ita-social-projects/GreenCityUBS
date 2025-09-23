@@ -146,7 +146,7 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
             if (chatOpt.isEmpty()) {
                 String text = telegramBotResponseService.getResponseByLangAndMessageType(
                     TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR);
-                return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK,  text);
+                return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK, text);
             }
 
             String lang = chatOpt.get().getLanguageCode();
