@@ -35,7 +35,6 @@ import greencity.repository.ViolationRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.OrderBagService;
 import greencity.service.ubs.TelegramBotResponseService;
-import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;

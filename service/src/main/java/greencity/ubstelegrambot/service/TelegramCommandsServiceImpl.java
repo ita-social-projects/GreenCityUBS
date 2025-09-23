@@ -27,7 +27,7 @@ public class TelegramCommandsServiceImpl implements TelegramCommandsService {
             String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
                 MessageType.UNKNOWN_COMMAND);
             return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                MessageFactory.createUnknownCommandMessage(chatId, TelegramBotConstants.UK, text));
+                MessageFactory.createUnknownCommandMessage(chatId, lang, text));
         }
         String content = message.getText().split(" ")[0];
 

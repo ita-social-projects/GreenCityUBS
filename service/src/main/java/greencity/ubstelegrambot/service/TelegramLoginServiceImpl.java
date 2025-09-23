@@ -71,7 +71,7 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
 
         if (!isManager) {
             String errorText = telegramBotResponseService.getResponseByLangAndMessageType(
-                lang, MessageType.ENTERING_EMAIL_MESSAGE);
+                lang, MessageType.EMPLOYEE_NOT_MANAGER);
             return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
                 errorText, lang, template);
         }

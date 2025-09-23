@@ -173,7 +173,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingTerriblyCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_TERRIBLY_CALLBACK);
-        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
+        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, "text");
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 1))
             .thenReturn(expected);
@@ -187,7 +187,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingBadlyCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_BADLY_CALLBACK);
-        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
+        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, "text");
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 2))
             .thenReturn(expected);
@@ -201,7 +201,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingSatisfactorilyCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_SATISFACTORILY_CALLBACK);
-        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
+        SendMessage expected = MessageFactory.createBadFeedbackMessage(CHAT_ID, "text");
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 3))
             .thenReturn(expected);
@@ -215,7 +215,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingGoodCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_GOOD_CALLBACK);
-        SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
+        SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID, "text");
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 4))
             .thenReturn(expected);
@@ -229,7 +229,7 @@ class UserUpdateProcessorTest {
     @Test
     void testProcess_HasRatingPerfectlyCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.RATING_PERFECTLY_CALLBACK);
-        SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID, TelegramBotConstants.UK);
+        SendMessage expected = MessageFactory.createGreatFeedbackMessage(CHAT_ID, "text");
 
         when(telegramFeedbackService.processRatingFeedbackRequest(CHAT_ID, 5))
             .thenReturn(expected);

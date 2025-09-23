@@ -187,7 +187,7 @@ class TelegramLoginServiceTest {
             eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR)))
             .thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.ENTERING_EMAIL_MESSAGE)))
+            eq(TelegramBotConstants.UK), eq(MessageType.EMPLOYEE_NOT_MANAGER)))
             .thenReturn("employee is not manager text");
 
         SendMessage result =
@@ -199,7 +199,7 @@ class TelegramLoginServiceTest {
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
             eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR));
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.ENTERING_EMAIL_MESSAGE));
+            eq(TelegramBotConstants.UK), eq(MessageType.EMPLOYEE_NOT_MANAGER));
     }
 
     @Test
