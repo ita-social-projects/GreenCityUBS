@@ -102,7 +102,8 @@ public class MessageFactory {
      * @param chatId       {@link String} is telegram chat id.
      * @param errorMessage {@link String} is error message.
      * @param lang         {@link String} is a language code of the telegram chat.
-     * @param text   {@link String} is the localized text content of the message.
+     * @param text         {@link String} is the localized text content of the
+     *                     message.
      *
      * @return {@link SendMessage} configured with the fail login message with error
      *         message.
@@ -118,7 +119,7 @@ public class MessageFactory {
      * @param chatId   {@link String} is telegram chat id.
      * @param userName {@link String} is username.
      * @param lang     {@link String} is a language code of the telegram chat.
-     * @param text   {@link String} is the localized text content of the message.
+     * @param text     {@link String} is the localized text content of the message.
      *
      * @return {@link SendMessage} configured with the success login message with
      *         username.
@@ -135,7 +136,8 @@ public class MessageFactory {
      * @param username       {@link String} is username in telegram.
      * @param messageText    {@link String} is message.
      * @param url            {@link String} is id for link.
-     * @param text           {@link String} is the localized text content of the message.
+     * @param text           {@link String} is the localized text content of the
+     *                       message.
      *
      * @return {@link SendMessage} configured with the manager notification message.
      */
@@ -153,7 +155,7 @@ public class MessageFactory {
      *
      * @param chatId   {@link String} is telegram chat id.
      * @param username {@link String} is username in telegram.
-     * @param text   {@link String} is the localized text content of the message.
+     * @param text     {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the user notification end support
      *         mode message.
      */

@@ -294,7 +294,7 @@ public class TelegramController {
      */
     @Operation(summary = "Update bot response")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
     })
