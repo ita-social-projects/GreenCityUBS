@@ -872,6 +872,8 @@ class TelegramSupportServiceTest {
         Message editedMessage = createMessage(12345L, 67890L, 98765, "Hello");
 
         when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.empty());
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+                MessageType.UNKNOWN_ERROR)).thenReturn("Unknown error");
         // When
         SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
 

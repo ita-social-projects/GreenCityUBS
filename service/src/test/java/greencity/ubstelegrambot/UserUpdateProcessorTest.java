@@ -436,9 +436,11 @@ class UserUpdateProcessorTest {
         SendMessage expectedError = new SendMessage(CHAT_ID, "Сталася невідома помилка, спробуйте, будь ласка, знову");
         try (MockedStatic<MessageFactory> mockedMessageFactory = mockStatic(MessageFactory.class)) {
             mockedMessageFactory
-                .when(() -> MessageFactory.createUnknownErrorOccurredMessage(anyString(), eq(TelegramBotConstants.UK)))
+                .when(() -> MessageFactory.createUnknownErrorOccurredMessage(anyString(), eq(TelegramBotConstants.UK), anyString()))
                 .thenReturn(expectedError);
         }
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+                MessageType.UNKNOWN_ERROR)).thenReturn("Сталася невідома помилка, спробуйте, будь ласка, знову");
         // When
         SendMessage actualError = updateProcessor.process(update);
 
@@ -453,6 +455,9 @@ class UserUpdateProcessorTest {
     void process_NoEditedMessage_ReturnsErrorMessage() {
         // Given
         Update update = createUpdateWithoutEditedMessage();
+
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+                MessageType.UNKNOWN_ERROR)).thenReturn("Сталася невідома помилка, спробуйте, будь ласка, знову");
 
         // When
         SendMessage result = updateProcessor.process(update);
