@@ -107,8 +107,10 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     public SendMessage processEditedSupportMessage(Message edited, String lang) {
         Optional<TelegramChat> optionalChat = findAndValidateChat(edited.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.UNKNOWN_ERROR);
             return MessageFactory.createUnknownErrorOccurredMessage(edited.getChatId().toString(),
-                TelegramBotConstants.UK);
+                TelegramBotConstants.UK, text);
         }
         TelegramChat chat = optionalChat.get();
 
