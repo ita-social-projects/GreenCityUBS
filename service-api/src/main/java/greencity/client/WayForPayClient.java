@@ -1,6 +1,7 @@
 package greencity.client;
 
 import greencity.client.config.WayForPayClientFallbackFactory;
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,4 +19,14 @@ public interface WayForPayClient {
      */
     @PostMapping
     String getCheckOutResponse(@RequestBody PaymentWayForPayRequestDto dto);
+
+    /**
+     * Sends a POST request to the WayForPay API to get a payment cancellation
+     * response.
+     *
+     * @param dto The payment cancellation request data.
+     * @return A string representing the response from the WayForPay API.
+     */
+    @PostMapping
+    String getCancellationResponse(@RequestBody PaymentCancellationWayForPayRequestDto dto);
 }

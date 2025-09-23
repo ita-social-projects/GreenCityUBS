@@ -38,6 +38,7 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
@@ -112,6 +113,7 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
+import greencity.scheduler.PaymentExpiryJob;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
@@ -121,9 +123,16 @@ import greencity.util.OrderUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -138,11 +147,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -155,7 +166,54 @@ import java.util.stream.LongStream;
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.AppConstant.UBS_EMPLOYEE_WITH_PREFIX;
 import static greencity.constant.AppConstant.USER_WITH_PREFIX;
-import static greencity.constant.ErrorMessage.*;
+import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CERTIFICATE_EXPIRED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.EMPLOYEE_DOESNT_EXIST;
+import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
+import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
+import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
+import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
+import static greencity.constant.ErrorMessage.ORDER_IN_ONGOING_PROCESSING;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_VALIDATION_ERROR;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_ORDER_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
+import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
+import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
+import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
+import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.UNABLE_TO_CANCEL_PAYMENT_INVOICE;
+import static greencity.constant.ErrorMessage.USER_DONT_HAVE_ENOUGH_POINTS;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS;
+import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
+import static greencity.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
+import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
+import static greencity.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
 import static greencity.util.OrderUtils.getLastPayment;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
@@ -203,6 +261,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
+    private final Scheduler quartzScheduler;
 
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
@@ -571,6 +630,8 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
 
+        validateOrderPaymentProcessingStatus(order);
+
         User currentUser = userRepository.findByUuid(uuid);
         checkIsOrderOfCurrentUser(currentUser, order);
 
@@ -612,6 +673,20 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (!checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
             throw new AddressNotWithinLocationAreaException(ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
         }
+    }
+
+    private void validateOrderPaymentProcessingStatus(Order order) {
+        if (isOrderInActivePaymentAttempt(order)) {
+            throw new BadRequestException(ORDER_IN_ONGOING_PROCESSING);
+        }
+    }
+
+    private boolean isOrderInActivePaymentAttempt(Order order) {
+        String paymentLink = order.getPaymentLink();
+        if (paymentLink == null) {
+            return false;
+        }
+        return !paymentLink.isBlank();
     }
 
     private void adjustPaymentDetails(OrderResponseDto dto) {
@@ -660,13 +735,17 @@ public class UBSClientServiceImpl implements UBSClientService {
 
     private PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins) {
         return switch (dto.getPaymentSystem()) {
-            case WAY_FOR_PAY -> processWayForPay(order, sumToPayInCoins);
+            case WAY_FOR_PAY -> processWayForPay(dto, order, sumToPayInCoins);
         };
     }
 
-    private PaymentSystemResponse processWayForPay(Order order, long sumToPayInCoins) {
+    private PaymentSystemResponse processWayForPay(
+        OrderResponseDto dto, Order order, long sumToPayInCoins) {
         PaymentWayForPayRequestDto requestDto = formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(requestDto));
+        schedulePaymentExpiryJob(
+            order, dto.getPointsToUse(),
+            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
         return getPaymentRequestDto(order, link);
     }
 
@@ -772,6 +851,160 @@ public class UBSClientServiceImpl implements UBSClientService {
     /**
      * {@inheritDoc}
      */
+    @Transactional
+    @Override
+    public void expirePaymentAttempt(Long orderId, int pointsUsed, Set<String> certificateCodes) {
+        Order order = unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
+        order.setPaymentLink("");
+        order.setPaymentLinkExpiry(null);
+        orderRepository.save(order);
+    }
+
+    private Order unlockSpecifiedPointsAndCertificatesFromOrder(
+        Long orderId, int pointsToUse, Set<String> certificateCodes) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+
+        if (!certificateCodes.isEmpty()) {
+            unlockSpecifiedCertificatesFromOrder(orderId, certificateCodes);
+        }
+
+        if (pointsToUse > 0) {
+            return unlockSpecifiedPointsFromOrder(order, pointsToUse);
+        }
+
+        return order;
+    }
+
+    private void unlockSpecifiedCertificatesFromOrder(Long orderId, Set<String> certificateCodes) {
+        Set<Certificate> certificates = certificateRepository.findAllByCodesAndOrderId(
+            certificateCodes.stream().toList(), orderId);
+        certificates.forEach((certificate -> certificate
+            .setOrder(null)
+            .setDateOfUse(null)
+            .setCertificateStatus(CertificateStatus.ACTIVE)
+            .setPoints(certificate.getInitialPointsValue())));
+        certificateRepository.saveAll(certificates);
+    }
+
+    private Order unlockSpecifiedPointsFromOrder(Order order, int pointsToUse) {
+        User user = order.getUser();
+
+        order.setPointsToUse(order.getPointsToUse() - pointsToUse);
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToUse);
+        user.getChangeOfPointsList()
+            .add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(pointsToUse)
+                .date(LocalDateTime.now())
+                .order(order)
+                .reason(BonusReason.RETURN_UNPAID_ORDER)
+                .build());
+
+        userRepository.save(user);
+        return order;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Transactional
+    @Override
+    public void cancelPaymentAttempt(String uuid, Long orderId) {
+        if (!checkExistsOrderExpiryJob(orderId)) {
+            throw new BadRequestException(NO_PAYMENT_ATTEMPT_FOR_ORDER);
+        }
+
+        User currentUser = userRepository.findByUuid(uuid);
+        Order order = orderRepository.findById(orderId).orElseThrow(
+            () -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+        checkIsOrderOfCurrentUser(currentUser, order);
+
+        JobDataMap jobDataMap = getPaymentExpiryJobData(orderId);
+        int pointsUsed = jobDataMap.getInt("pointsUsed");
+        @SuppressWarnings("unchecked")
+        HashSet<String> certificateCodes = (HashSet<String>) jobDataMap.get("certificateCodes");
+
+        expirePaymentAttempt(orderId, pointsUsed, certificateCodes);
+        cancelPaymentExpiryJob(orderId);
+        handleWayForPayPaymentCancellation(order);
+    }
+
+    private void schedulePaymentExpiryJob(
+        Order order, int pointsUsed, Set<String> certificateCodes, Long expirySeconds, String paymentLink) {
+        if (certificateCodes == null) {
+            certificateCodes = new HashSet<>();
+        }
+        Long orderId = order.getId();
+
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("orderId", orderId);
+        jobDataMap.put("pointsUsed", pointsUsed);
+        jobDataMap.put("certificateCodes", certificateCodes);
+
+        JobDetail job = JobBuilder.newJob(PaymentExpiryJob.class)
+            .withIdentity(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)
+            .usingJobData(jobDataMap)
+            .build();
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+            .withIdentity(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)
+            .startAt(Date.from(Instant.now().plus(expirySeconds, ChronoUnit.SECONDS)))
+            .build();
+
+        try {
+            quartzScheduler.scheduleJob(job, trigger);
+            order.setPaymentLink(paymentLink);
+            order.setPaymentLinkExpiry(LocalDateTime.now().plusSeconds(expirySeconds));
+            orderRepository.save(order);
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(PAYMENT_EXPIRY_SCHEDULE_EXCEPTION);
+        }
+    }
+
+    private void cancelPaymentExpiryJob(Long orderId) {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        try {
+            if (!quartzScheduler.deleteJob(jobKey)) {
+                throw new IllegalStateException(PAYMENT_EXPIRY_CANCEL_EXCEPTION);
+            }
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
+        }
+    }
+
+    private JobDataMap getPaymentExpiryJobData(Long orderId) {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+
+        try {
+            return quartzScheduler.getJobDetail(jobKey).getJobDataMap();
+        } catch (SchedulerException e) {
+            throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
+        }
+    }
+
+    private boolean checkExistsOrderExpiryJob(Long orderId) {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        try {
+            return quartzScheduler.checkExists(jobKey);
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
+        }
+    }
+
+    private void handleWayForPayPaymentCancellation(Order order) {
+        PaymentCancellationWayForPayRequestDto requestDto = formPaymentCancellationRequestForWayForPay(order);
+        String result = getResultFromWayForPayCancellationResponse(
+            wayForPayClient.getCancellationResponse(requestDto));
+
+        if (!result.equals("Removed")) {
+            throw new BadRequestException(UNABLE_TO_CANCEL_PAYMENT_INVOICE);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
         Page<Order> orderPages = nonNull(statuses)
@@ -855,6 +1088,8 @@ public class UBSClientServiceImpl implements UBSClientService {
             .address(addressInfoDtoBuilder(order))
             .paymentStatusUk(paymentStatusTranslation.getTranslationValueUk())
             .paymentStatusEn(paymentStatusTranslation.getTranslationsValueEn())
+            .paymentLink(order.getPaymentLink())
+            .paymentLinkExpiry(order.getPaymentLinkExpiry())
             .build();
     }
 
@@ -1077,10 +1312,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (sumToPay <= 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         } else {
-            order.setOrderPaymentStatus(
-                order.getPointsToUse() > 0 || CollectionUtils.isNotEmpty(order.getCertificates())
-                    ? OrderPaymentStatus.HALF_PAID
-                    : OrderPaymentStatus.UNPAID);
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         }
     }
 
@@ -1119,6 +1351,21 @@ public class UBSClientServiceImpl implements UBSClientService {
             .formRequestSignature(paymentWayForPayRequestDto, wayForPaySecret));
 
         return paymentWayForPayRequestDto;
+    }
+
+    private PaymentCancellationWayForPayRequestDto formPaymentCancellationRequestForWayForPay(Order order) {
+        PaymentCancellationWayForPayRequestDto paymentCancellationWayForPayRequestDto =
+            PaymentCancellationWayForPayRequestDto.builder()
+                .transactionType("REMOVE_INVOICE")
+                .apiVersion(1)
+                .merchantAccount(merchantAccount)
+                .orderReference(OrderUtils.generateEncodedOrderReference(order.getId(), order))
+                .build();
+
+        paymentCancellationWayForPayRequestDto.setSignature(
+            encryptionUtil.formRemoveInvoiceSignature(paymentCancellationWayForPayRequestDto, wayForPaySecret));
+
+        return paymentCancellationWayForPayRequestDto;
     }
 
     private Double convertCoinsIntoBills(Long coins) {
@@ -1467,6 +1714,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         order.getOrderBags().clear();
         orderRepository.saveAndFlush(order);
         orderRepository.delete(order);
+        cancelPaymentExpiryJob(id);
     }
 
     private Long convertBillsIntoCoins(Double bills) {
@@ -1479,6 +1727,11 @@ public class UBSClientServiceImpl implements UBSClientService {
     private String getLinkFromWayForPayCheckoutResponse(String wayForPayResponse) {
         JSONObject json = new JSONObject(wayForPayResponse);
         return json.getString("invoiceUrl");
+    }
+
+    private String getResultFromWayForPayCancellationResponse(String wayForPayResponse) {
+        JSONObject json = new JSONObject(wayForPayResponse);
+        return json.getString("reason");
     }
 
     private void checkResponseStatusFailure(PaymentResponseDto dto, Payment orderPayment, Order order) {
@@ -1501,12 +1754,13 @@ public class UBSClientServiceImpl implements UBSClientService {
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             orderPayment.setOrder(order);
-            removePaymentLinkForOrder(order);
+            removePaymentLinkAndNotificationForOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
                 OrderHistory.SYSTEM_UK, order);
+            cancelPaymentExpiryJob(order.getId());
             log.info("Payment approved: orderId={}, status={}",
                 order.getId(), orderPayment.getPaymentStatus());
         } else {
@@ -1658,6 +1912,7 @@ public class UBSClientServiceImpl implements UBSClientService {
         Order order = orderRepository.findById(dto.getOrderId())
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
         checkOrderIsPaid(order.getOrderPaymentStatus());
+        validateOrderPaymentProcessingStatus(order);
         User currentUser = userRepository.findUserByUuid(userUuid)
             .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid));
         checkForNullCounter(order);
@@ -1669,19 +1924,37 @@ public class UBSClientServiceImpl implements UBSClientService {
         if (sumToPayInCoins <= 0) {
             return getPaymentRequestDto(order, null);
         } else {
-            String link = formedLink(order, sumToPayInCoins);
+            String link = formedLink(order, sumToPayInCoins, dto);
             return getPaymentRequestDto(order, link);
         }
     }
 
     @Override
     public String formedLink(Order order, long sumToPayInCoins) {
+        validateOrderPaymentProcessingStatus(order);
         Order increment = incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
             .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
-        return getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        String link =
+            getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        schedulePaymentExpiryJob(order, 0, new HashSet<>(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
+        return link;
+    }
+
+    private String formedLink(Order order, long sumToPayInCoins, OrderWayForPayClientDto dto) {
+        Order increment = incrementCounter(order);
+        PaymentWayForPayRequestDto paymentWayForPayRequestDto =
+            formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
+        paymentWayForPayRequestDto
+            .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
+        String link =
+            getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        schedulePaymentExpiryJob(
+            order, dto.getPointsToUse(),
+            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
+        return link;
     }
 
     private Order incrementCounter(Order order) {
@@ -1866,7 +2139,17 @@ public class UBSClientServiceImpl implements UBSClientService {
             .toList();
     }
 
+    private void removePaymentLinkAndNotificationForOrder(Order order) {
+        removePaymentLinkForOrder(order);
+        removePaymentNotificationForOrder(order);
+    }
+
     private void removePaymentLinkForOrder(Order order) {
+        order.setPaymentLink("");
+        order.setPaymentLinkExpiry(null);
+    }
+
+    private void removePaymentNotificationForOrder(Order order) {
         List<UserNotification> userNotification = userNotificationRepository
             .findAllUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
         if (!userNotification.isEmpty()) {

@@ -34,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -865,4 +866,150 @@ class TelegramSupportServiceTest {
         verify(messageAssetRepository).save(argThat(asset -> asset.getFileName().equals("animation.mp4")));
     }
 
+    @Test
+    void processEditedSupportMessage_ChatNotFound_ReturnsError() {
+        // Given
+        Message editedMessage = createMessage(12345L, 67890L, 98765, "Hello");
+
+        when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.empty());
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNotNull(result);
+        assertEquals(String.valueOf(12345), result.getChatId());
+    }
+
+    @Test
+    void processEditedSupportMessage_StartCommandInSupport_ReturnsAlreadyInSupportMessage() {
+        // Given
+        Message editedMessage = createMessage(12345L, 67890L, 98765, "/start");
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(editedMessage.getFrom().getId()));
+        chat.setChatState(ChatState.IN_SUPPORT);
+        when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "en");
+
+        // Then
+        assertNotNull(result);
+        assertEquals(String.valueOf(67890), result.getChatId());
+    }
+
+    @Test
+    void processEditedSupportMessage_EditedMessageNotFound_ReturnsNull() {
+        // Given
+        Message editedMessage = createMessage(12345L, 67890L, 98765, "New edited text");
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(editedMessage.getFrom().getId()));
+
+        when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
+            .thenReturn(Optional.empty());
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        verify(telegramMessageRepository, never()).save(any());
+    }
+
+    @Test
+    void processEditedSupportMessage_HasText_UpdatesMessageAndSaves() {
+        // Given
+        Message editedMessage = createMessage(12345L, 67890L, 98765, "New edited text");
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(editedMessage.getFrom().getId()));
+        when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
+
+        TelegramMessage existingMessage = new TelegramMessage();
+        existingMessage.setTelegramMessageId(editedMessage.getMessageId());
+        existingMessage.setText("Old text");
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
+            .thenReturn(Optional.of(existingMessage));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        assertEquals("New edited text", existingMessage.getText());
+        verify(telegramMessageRepository).save(existingMessage);
+    }
+
+    @Test
+    void processEditedSupportMessage_HasCaption_UpdatesMessageAndSaves() {
+        // Given
+        Message editedMessage = new Message();
+        editedMessage.setMessageId(98765);
+        editedMessage.setCaption("New edited caption");
+
+        User user = new User();
+        user.setId(67890L);
+        editedMessage.setFrom(user);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(user.getId()));
+        when(telegramChatRepository.findByChatId(user.getId().toString())).thenReturn(Optional.of(chat));
+
+        TelegramMessage existingMessage = new TelegramMessage();
+        existingMessage.setTelegramMessageId(editedMessage.getMessageId());
+        existingMessage.setText("Old text");
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
+            .thenReturn(Optional.of(existingMessage));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        assertEquals("New edited caption", existingMessage.getText());
+        verify(telegramMessageRepository).save(existingMessage);
+    }
+
+    @Test
+    void processEditedSupportMessage_HasNone_UpdatesMessageAndSaves() {
+        // Given
+        Message editedMessage = new Message();
+        editedMessage.setMessageId(98765);
+
+        User user = new User();
+        user.setId(67890L);
+        editedMessage.setFrom(user);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(user.getId()));
+        when(telegramChatRepository.findByChatId(user.getId().toString())).thenReturn(Optional.of(chat));
+
+        TelegramMessage existingMessage = new TelegramMessage();
+        existingMessage.setTelegramMessageId(editedMessage.getMessageId());
+        existingMessage.setText("Old text");
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
+            .thenReturn(Optional.of(existingMessage));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        assertNull(existingMessage.getText());
+        verify(telegramMessageRepository).save(existingMessage);
+    }
+
+    private Message createMessage(Long id, Long chatId, Integer messageId, String text) {
+        Message message = new Message();
+        Chat chat = new Chat();
+        chat.setId(id);
+        message.setChat(chat);
+        message.setMessageId(messageId);
+        message.setText(text);
+
+        User user = new User();
+        user.setId(chatId);
+        message.setFrom(user);
+
+        return message;
+    }
 }

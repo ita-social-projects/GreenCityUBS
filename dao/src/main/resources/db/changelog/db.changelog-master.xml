@@ -307,4 +307,6 @@
     <include file="db/changelog/logs/2025-08-19-ch-add-telegram-message-id-column-to-message-asset.xml"/>
     <include file="db/changelog/logs/ch-add-table-bot-messages-Rakuta.xml"/>
     <include file="db/changelog/logs/ch-insert-into-bot-messages-table-Rakuta.xml"/>
+    <include file="db/changelog/logs/ch-add-quartz-tables-Ilnytskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-payment-link-columns-into-orders-table-Ilnytskyi.xml"/>
 </databaseChangeLog>
