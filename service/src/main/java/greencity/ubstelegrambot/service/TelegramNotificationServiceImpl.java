@@ -24,7 +24,7 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
     private final TelegramExecutor telegramExecutor;
     private final TelegramBotResponseService telegramBotResponseService;
 
-    @Value("${greencity.ubs.admin.base-url}")
+    @Value("${greencity.bots.ubs-bot-ui}")
     private String baseUrl;
 
     @Override
