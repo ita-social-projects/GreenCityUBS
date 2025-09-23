@@ -6,9 +6,9 @@
 
 ## 1. About the project
 
-The main aim of “GreenCity” project is to teach people in a playful and challenging way to have an eco-friendly lifestyle. A user can view on the map places that have some eco-initiatives or suggest discounts for being environmentally aware (for instance, coffee shops that give a discount if a customer comes with their own cup). А user can start doing an environment-friendly habit and track their progress with a habit tracker. "GreenCityUBS" is a microservice which contains garbage collection service.
+The main aim of the “GreenCity” project is to teach people in a playful and challenging way to have an eco-friendly lifestyle. A user can view on the map places that have some eco-initiatives or suggest discounts for being environmentally aware (for instance, coffee shops that give a discount if a customer comes with their own cup). А user can start doing an environment-friendly habit and track their progress with a habit tracker. "GreenCityUBS" is a microservice which contains garbage collection service.
 
-## 2. Where to find front-end part of the project
+## 2. Where to find the front-end part of the project
 
 Here is the front-end part of our project: https://github.com/ita-social-projects/GreenCityClient.
 
@@ -117,6 +117,7 @@ greencity.server.address = ${GREENCITY_SERVER_ADDRESS}
 
 
 There is no special configurations required. Just clone [GreenCityClient](https://github.com/ita-social-projects/GreenCityClient) and run it. If you want to sign in with Google account, it's mandatory to set `google.clientId`. Read more about how to obtain [Google client id](https://developers.google.com/adwords/api/docs/guides/authentication), it's free.
+
 
 ## 5. Setup Checkstyle
 

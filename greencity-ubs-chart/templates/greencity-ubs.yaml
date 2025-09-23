@@ -35,19 +35,6 @@ spec:
           periodSeconds: 10
           failureThreshold: 20
         env:
-
-        - name: AZURE_CONNECTION_STRING
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: AZURE-CONNECTION-STRING
-
-        - name: AZURE_CONTAINER_NAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: AZURE-CONTAINER-NAME
-
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -59,12 +46,6 @@ spec:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: DATABASE-USER
-
-        # - name: DIALECT
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: {{ .Values.externalSecret.secretName }}
-        #       key: DIALECT
 
         - name: DRIVER
           valueFrom:
@@ -114,12 +95,6 @@ spec:
               name: {{ .Values.externalSecret.secretName }}
               key: POOL-SIZE
 
-        - name: SHOW_SQL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: SHOW-SQL
-
         - name: SPRING_PROFILES_ACTIVE
           valueFrom:
             secretKeyRef:
@@ -131,12 +106,6 @@ spec:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: TOKEN-KEY
-
-        - name: MERCHANT_ID
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: MERCHANT-ID
 
         - name: TELEGRAM_BOT_TOKEN
           valueFrom:
