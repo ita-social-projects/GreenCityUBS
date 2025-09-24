@@ -103,6 +103,8 @@ public class UserServiceImpl implements UserService {
                     .build();
                 userRemoteClient.sendMessageOfActivation(notification);
             }
+            default -> {
+            }
         }
 
         targetUser.setStatus(status);

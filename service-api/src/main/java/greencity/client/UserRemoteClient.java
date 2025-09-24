@@ -171,7 +171,7 @@ public interface UserRemoteClient {
     void sendReasonOfDeactivation(@RequestBody UserDeactivationReasonDto notification);
 
     /**
-     * Sends an email
+     * Sends an email.
      *
      * @param notification {@link UserActivationDto} - notification details
      */
