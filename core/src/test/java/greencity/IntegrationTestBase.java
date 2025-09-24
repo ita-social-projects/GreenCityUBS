@@ -1,10 +1,11 @@
 package greencity;
 
 import greencity.initializer.PostgresInitializer;
+import jakarta.transaction.Transactional;
+import java.util.TimeZone;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import jakarta.transaction.Transactional;
 
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {
@@ -15,6 +16,7 @@ public abstract class IntegrationTestBase {
 
     @BeforeAll
     static void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Kyiv"));
         PostgresInitializer.postgreSQLContainer.start();
     }
 }
