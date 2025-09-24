@@ -30,6 +30,8 @@ public class EntityManagerUtils {
         String.format("(%s)", "[._$[\\P{Z}&&\\P{Cc}&&\\P{Cf}&&\\P{Punct}]]+");
     private static final Pattern STARTS_WITH_PAREN = Pattern.compile("^\\s*\\(");
     private static final Pattern PARENS_TO_REMOVE = Pattern.compile("(\\(.*\\bfrom\\b[^)]+\\))", 42);
+    private static final Pattern ORDER_BY_PATTERN = Pattern
+        .compile("(?iu)\\s+order\\s+by\\s+[\\s\\S]*\\z", 98);
     private static final Pattern COUNT_MATCH;
     private static final Pattern ALIAS_MATCH;
 
@@ -282,7 +284,7 @@ public class EntityManagerUtils {
             countQuery = matcher.replaceFirst(String.format("select count(%s) $5$6$7", countProjection));
         }
 
-        return countQuery.replaceFirst("(?iu)\\s+order\\s+by\\s+.*", "");
+        return ORDER_BY_PATTERN.matcher(countQuery).replaceFirst("");
     }
 
     private static String detectAlias(String jpqlQueryString) {
