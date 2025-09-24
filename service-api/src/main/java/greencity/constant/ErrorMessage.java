@@ -41,6 +41,8 @@ public class ErrorMessage {
     public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String EMPLOYEE_WITH_UUID_NOT_FOUND = "Employee with current uuid doesn't exist: ";
+    public static final String EMPLOYEE_WITH_ENABLED_CHAT_NOT_FOUND_BY_TARIFF_ID =
+        "No employees with enabled chat found for tariff id: ";
     public static final String ACTIVE_EMPLOYEE_WITH_CURRENT_EMAIL_ALREADY_EXISTS =
         "Active employee with this email already exists: ";
     public static final String PHONE_NUMBER_PARSING_FAIL = "Phone number parsing fail: ";
@@ -127,6 +129,8 @@ public class ErrorMessage {
     public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
+    public static final String COULD_NOT_RETRIEVE_CANCELLATION_RESPONSE =
+        "Could not retrieve invoice cancellation response";
     public static final String COULD_NOT_RETRIEVE_USER_DATA = "Could not retrieve user data";
     public static final String COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY = "Could not retrieve employee's authority";
     public static final String EMPLOYEE_AUTHORITY_WAS_NOT_EDITED = "Employee's authority was not edited";
@@ -174,6 +178,7 @@ public class ErrorMessage {
         "Predefined notification template cannot be deleted.";
     public static final String TARIFF_NOT_FOUND_BY_LOCATION_ID = "Tariff with location id: %d not found";
     public static final String USER_AGREEMENT_NOT_FOUND_BY_ID = "User Agreement with ID %d not found";
+    public static final String USER_NOT_FOUND_BY_UUID = "User not found by uuid: ";
     public static final String REFUND_CONFLICT_MONEY_AND_BONUSES =
         "A refund cannot be processed with both money and bonuses at the same time";
     public static final String TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST =
@@ -197,5 +202,28 @@ public class ErrorMessage {
     public static final String ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED =
         "Cannot update order: status must be FORMED and payment must be UNPAID";
     public static final String ORDER_NOT_FOUND_BY_ID = "Order not found with id: ";
+    public static final String UUID_NOT_FOUND_BY_EMAIL = "UUID not found by email: ";
     public static final String TELEGRAM_BOT_ERROR_BAD_CREDENTIALS = "Bad credentials";
+    public static final String TARIFF_VALIDATION_ERROR_MESSAGE = "Invalid tariff list.";
+    public static final String POSITION_VALIDATION_ERROR_MESSAGE = "Invalid position IDs.";
+    public static final String INVALID_POSITION_IDS = "Invalid position IDs: %s";
+    public static final String TARIFF_LIST_IS_NULL = "Tariffs cannot be null";
+    public static final String TARIFF_LIST_IS_EMPTY = "Tariffs cannot be empty";
+    public static final String TARIFF_IS_NULL = "Tariff cannot be null";
+    public static final String TARIFFID_IS_NULL = "Tariff id cannot be null";
+    public static final String TARIFFID_IS_NOT_POSITIVE = "Tariff Id must be greater than 0";
+    public static final String TARIFF_LIST_CONTAINS_DUPLICATES = "Tariffs cannot contain duplicates";
+    public static final String USER_APP_UNAVAILABLE = "the User service is unavailable";
+    public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
+    public static final String TELEGRAM_SEND_EXCEPTION = "Exception occurred while sending to telegram: %s";
+    public static final String TELEGRAM_RECEIVE_EXCEPTION = "Exception occurred while receiving from telegram: %s";
+    public static final String TELEGRAM_NULL_METHOD_EXCEPTION = "Execution method cannot be null";
+    public static final String TELEGRAM_INVALID_METHOD_EXCEPTION = "Invalid execution method type: %s";
+    public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
+    public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
+        "Template cannot be deleted while it is referenced by existing notifications";
+    public static final String ORDER_IN_ONGOING_PROCESSING =
+        "Order has an active payment attempt, complete it or cancel to start the new one";
+    public static final String UNABLE_TO_CANCEL_PAYMENT_INVOICE =
+        "Payment system refused to cancel payment invoice. Please try again later.";
 }

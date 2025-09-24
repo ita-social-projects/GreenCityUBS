@@ -7,6 +7,7 @@ import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.Geometry;
 import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
@@ -37,6 +38,7 @@ import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.AddEmployeeDto;
+import greencity.dto.employee.CreateUpdateEmployeeDto;
 import greencity.dto.employee.EmployeeDto;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.EmployeeNameIdDto;
@@ -55,17 +57,17 @@ import greencity.dto.location.LocationsDto;
 import greencity.dto.location.RegionTranslationDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.location.api.LocationDto;
-import greencity.dto.notification.NotificationFullDto;
-import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
-import greencity.dto.notification.NotificationTemplateMainInfoDto;
-import greencity.dto.notification.NotificationShortDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
-import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.AddNotificationPlatformDto;
-import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
-import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.NotificationFullDto;
+import greencity.dto.notification.NotificationPlatformDto;
+import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.NotificationTemplateDto;
+import greencity.dto.notification.NotificationTemplateMainInfoDto;
+import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.CounterOrderDetailsDto;
@@ -85,8 +87,8 @@ import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderDto;
 import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderResponseDto;
+import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.OtherPackages;
@@ -102,9 +104,6 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.PaymentInfoDto;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
-import greencity.dto.payment.monobank.CheckoutResponseFromMonoBank;
-import greencity.dto.payment.monobank.MonoBankPaymentResponseDto;
-import greencity.dto.payment.monobank.PaymentInfo;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.position.PositionWithTranslateDto;
@@ -170,23 +169,39 @@ import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.BaseAddress;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.*;
+import greencity.enums.AddressStatus;
+import greencity.enums.BagStatus;
+import greencity.enums.CancellationReason;
+import greencity.enums.CertificateStatus;
+import greencity.enums.ChatState;
+import greencity.enums.CourierLimit;
+import greencity.enums.CourierStatus;
+import greencity.enums.EmployeeStatus;
+import greencity.enums.LocationStatus;
+import greencity.enums.NotificationReceiverType;
+import greencity.enums.NotificationTime;
+import greencity.enums.NotificationTrigger;
+import greencity.enums.NotificationType;
+import greencity.enums.OrderPaymentStatus;
+import greencity.enums.OrderStatus;
+import greencity.enums.PaymentStatus;
+import greencity.enums.PaymentSystem;
+import greencity.enums.TariffStatus;
+import greencity.enums.UserCategory;
 import greencity.util.Bot;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -205,6 +220,7 @@ import static greencity.enums.NotificationReceiverType.SITE;
 import static greencity.enums.NotificationStatus.ACTIVE;
 import static greencity.enums.NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID;
 import static greencity.enums.NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
+import static greencity.enums.NotificationType.CUSTOM;
 import static greencity.enums.NotificationType.UNPAID_ORDER;
 import static greencity.enums.ViolationLevel.MAJOR;
 import static java.util.Collections.emptyList;
@@ -249,6 +265,7 @@ public class ModelUtils {
     public static final UserNotification TEST_USER_NOTIFICATION_7 = createUserNotificationForViolation7();
     public static final Violation TEST_VIOLATION = createTestViolation();
     public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE = createNotificationTemplate();
+    public static final NotificationTemplate TEST_NOTIFICATION_TEMPLATE_2 = createCustomNotificationTemplate();
     public static final NotificationTemplateDto TEST_NOTIFICATION_TEMPLATE_DTO = createNotificationTemplateDto();
 
     public static final NotificationTemplateWithPlatformsUpdateDto TEST_NOTIFICATION_TEMPLATE_UPDATE_DTO =
@@ -279,8 +296,11 @@ public class ModelUtils {
         Collections.singletonList(TEST_MAP_ADDITIONAL_BAG);
     public static final NotificationDto TEST_NOTIFICATION_DTO = createNotificationDto();
     public static final List<NotificationFullDto> TEST_NOTIFICATION_DTO_LIST = List.of(createNotificationFullDto());
+    public static final List<NotificationFullDto> TEST_NOTIFICATION_DTO_LIST_2 = createCustomNotificationsFullDtoList();
     public static final PageableAdvancedDto<NotificationFullDto> TEST_NOTIFICATION_FULL_DTO_PAGEABLE =
         createPageableAdvancedDtoForNotificationFullDto();
+    public static final PageableAdvancedDto<NotificationFullDto> TEST_NOTIFICATION_FULL_DTO_PAGEABLE_2 =
+        createPageableAdvancedDtoForCustomNotificationsFullDto();
     public static final UpdateOrderPageAdminDto UPDATE_ORDER_PAGE_ADMIN_DTO = updateOrderPageAdminDto();
     public static final CourierUpdateDto UPDATE_COURIER_DTO = getUpdateCourierDto();
     public static final List<Bag> TEST_BAG_LIST2 = Arrays.asList(createBag(1), createBag(2), createBag(3));
@@ -469,7 +489,7 @@ public class ModelUtils {
                 .phoneNumber("067894522")
                 .ubsUserId(1L)
                 .build())
-            .paymentSystem(PaymentSystem.MONOBANK)
+            .paymentSystem(PaymentSystem.WAY_FOR_PAY)
             .build();
     }
 
@@ -1419,18 +1439,14 @@ public class ModelUtils {
     public static EmployeeWithTariffsIdDto getEmployeeWithTariffsIdDto() {
         return EmployeeWithTariffsIdDto
             .builder()
-            .employeeDto(EmployeeDto.builder()
+            .employeeDto(CreateUpdateEmployeeDto.builder()
                 .id(1L)
                 .firstName("Петро")
                 .lastName("Петренко")
                 .phoneNumber("+380935577455")
                 .email("test@gmail.com")
                 .image("path")
-                .employeePositions(List.of(PositionDto.builder()
-                    .id(1L)
-                    .nameUk("Водій")
-                    .nameEn("Driver")
-                    .build()))
+                .employeePositionIds(Set.of(1L))
                 .build())
             .tariffs(null)
             .build();
@@ -1586,15 +1602,15 @@ public class ModelUtils {
     }
 
     public static TelegramChat getTelegramBotNotifyTrue() {
-        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), true, "username", "first_name",
-            "last_name", null,
-            new ArrayList<>(), new ArrayList<>());
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), true, "username", "first_name",
+            "last_name", 0, null, null, TelegramBotConstants.UK,
+            new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public static TelegramChat getTelegramBotNotifyFalse() {
-        return new TelegramChat(1L, "12345", ChatState.NORMAL, LocalDateTime.now(), false, "username", "first_name",
-            "last_name", null,
-            new ArrayList<>(), new ArrayList<>());
+        return new TelegramChat(1L, "12345", ChatState.NORMAL, Instant.now(), false, "username", "first_name",
+            "last_name", 0, null, null, TelegramBotConstants.UK,
+            new ArrayList<>(), new ArrayList<>(), null);
     }
 
     public static UserProfileUpdateDto getUserProfileUpdateDto() {
@@ -2040,12 +2056,12 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .violations(10)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
+            .changeOfPointsList(new ArrayList<>())
             .build();
     }
 
@@ -2056,9 +2072,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyTrue())
@@ -2072,9 +2087,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyTrue())
@@ -2088,9 +2102,8 @@ public class ModelUtils {
             .recipientEmail("someUser@gmail.com")
             .recipientPhone("962473289")
             .recipientSurname("Ivanov")
-            .uuid("87df9ad5-6393-441f-8423-8b2e770b01a8")
             .recipientName("Taras")
-            .uuid("uuid")
+            .uuid(TEST_UUID)
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .telegramBot(getTelegramBotNotifyFalse())
@@ -2116,6 +2129,18 @@ public class ModelUtils {
             .build();
     }
 
+    public static Payment getManualPaymentWithoutImage() {
+        return Payment.builder()
+            .settlementDate("02-08-2021")
+            .amount(500L)
+            .paymentStatus(PaymentStatus.PAID)
+            .paymentId("1l")
+            .receiptLink("somelink.com")
+            .currency("UAH")
+            .order(getOrder())
+            .build();
+    }
+
     public static ManualPaymentRequestDto getManualPaymentRequestDto() {
         return ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021")
@@ -2123,6 +2148,16 @@ public class ModelUtils {
             .receiptLink("link")
             .paymentId("1")
             .imagePath("fdhgh")
+            .build();
+    }
+
+    public static ManualPaymentRequestDto getManualPaymentRequestDtoWithoutImage() {
+        return ManualPaymentRequestDto.builder()
+            .settlementDate("02-08-2021")
+            .amount(500L)
+            .receiptLink("link")
+            .paymentId("1")
+            .imagePath("")
             .build();
     }
 
@@ -2218,12 +2253,12 @@ public class ModelUtils {
             .build();
     }
 
-    public static Order getAdjustmentPaidOrder() {
+    public static Order getConfirmedPaidOrder() {
         return Order.builder()
             .id(1L)
             .events(List.of(new Event(1L, LocalDateTime.now(),
                 "Roman", "Roman", "Roman", "Roman", new Order())))
-            .orderStatus(OrderStatus.ADJUSTMENT)
+            .orderStatus(OrderStatus.CONFIRMED)
             .payment(singletonList(Payment.builder()
                 .id(1L)
                 .amount(300000L)
@@ -2914,13 +2949,13 @@ public class ModelUtils {
 
     public static Set<NotificationParameter> getNotificationParameterSet() {
         Set<NotificationParameter> parameters = new HashSet<>();
-        parameters.add(NotificationParameter.builder().key("payButton").value("https://pay.monobank.ua/api").build());
+        parameters.add(NotificationParameter.builder().key("payButton").value("https://pay.wayforpay.ua/api").build());
         return parameters;
     }
 
     public static Optional<NotificationParameter> getNotificationPaymentLink() {
         return Optional
-            .ofNullable(NotificationParameter.builder().key("payButton").value("https://pay.monobank.ua/api").build());
+            .ofNullable(NotificationParameter.builder().key("payButton").value("https://pay.wayforpay.ua/api").build());
     }
 
     private static Set<NotificationParameter> createNotificationParameterSet2() {
@@ -3753,7 +3788,7 @@ public class ModelUtils {
             .builder()
             .statusId(1L)
             .id(1L)
-            .nameUk("ua")
+            .nameUk("uk")
             .build();
     }
 
@@ -3790,7 +3825,7 @@ public class ModelUtils {
 
     public static List<RegionTranslationDto> getRegionTranslationsDto() {
         return List.of(
-            RegionTranslationDto.builder().languageCode("ua").regionName("Київська область").build(),
+            RegionTranslationDto.builder().languageCode("uk").regionName("Київська область").build(),
             RegionTranslationDto.builder().regionName("Kyiv region").languageCode("en").build());
     }
 
@@ -3805,7 +3840,7 @@ public class ModelUtils {
 
     public static List<AddLocationTranslationDto> getAddLocationTranslationDtoList() {
         return List.of(
-            AddLocationTranslationDto.builder().locationName("Київ").languageCode("ua").build(),
+            AddLocationTranslationDto.builder().locationName("Київ").languageCode("uk").build(),
             AddLocationTranslationDto.builder().locationName("Kyiv").languageCode("en").build());
     }
 
@@ -3854,7 +3889,7 @@ public class ModelUtils {
     public static List<LocationTranslationDto> getLocationTranslationDto() {
         return List.of(LocationTranslationDto.builder()
             .locationName("Київ")
-            .languageCode("ua")
+            .languageCode("uk")
             .build(),
             LocationTranslationDto.builder()
                 .locationName("Kyiv")
@@ -5406,7 +5441,7 @@ public class ModelUtils {
 
     public static PositionWithTranslateDto getPositionWithTranslateDto(Long id) {
         Map<String, String> nameTranslations = new HashMap<>();
-        nameTranslations.put("ua", "Водій");
+        nameTranslations.put("uk", "Водій");
         nameTranslations.put("en", "Driver");
 
         return PositionWithTranslateDto.builder()
@@ -5445,6 +5480,7 @@ public class ModelUtils {
     public static NotificationTemplate getCustomNotificationTemplate() {
         return NotificationTemplate.builder()
             .id(1L)
+            .notificationType(CUSTOM)
             .isScheduleUpdateForbidden(false)
             .titleUk("Заголовок")
             .titleEn("Title")
@@ -5603,34 +5639,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static CheckoutResponseFromMonoBank getCheckoutResponseFromMonoBank() {
-        return CheckoutResponseFromMonoBank.builder()
-            .invoiceId("invoiceID")
-            .pageUrl("https://www.monobank/api")
-            .build();
-    }
-
-    public static MonoBankPaymentResponseDto getMonoBankPaymentResponseDto(String status) {
-        return MonoBankPaymentResponseDto.builder()
-            .invoiceId("testInvoiceId")
-            .status(status)
-            .failureReason("reason")
-            .errorCode("81")
-            .amount(1000)
-            .currency(980)
-            .createdDate("2019-08-24T14:15:22Z")
-            .modifiedDate("2019-08-24T14:17:22Z")
-            .orderReference("MV8xXzE=")
-            .paymentInfo(PaymentInfo.builder()
-                .cardNumber("444403******1902")
-                .terminal("MI001088")
-                .paymentSystem("visa")
-                .paymentMethod("pan")
-                .fee(0)
-                .build())
-            .build();
-    }
-
     public static Event getEvent1() {
         return Event.builder()
             .eventDate(LocalDateTime.now().minusDays(1))
@@ -5653,7 +5661,7 @@ public class ModelUtils {
 
     public static EventDto getDtoWithLanguage(String language, Event event) {
         return switch (language) {
-            case "ua" -> EventDto.builder()
+            case "uk" -> EventDto.builder()
                 .eventDate(event.getEventDate())
                 .eventName(event.getEventNameUk())
                 .authorName(event.getAuthorNameUk())
@@ -5945,5 +5953,46 @@ public class ModelUtils {
             .authorName("Автор 3")
             .id(1L)
             .build();
+    }
+
+    private static NotificationTemplate createCustomNotificationTemplate() {
+        NotificationTemplate notificationTemplate = getCustomNotificationTemplate();
+        notificationTemplate.getNotificationPlatforms().add(createNotificationPlatform(SITE));
+        notificationTemplate.setTitleEn("Title");
+        notificationTemplate.setTitleUk("TitleUk");
+
+        return notificationTemplate;
+    }
+
+    private static List<NotificationFullDto> createCustomNotificationsFullDtoList() {
+        return List.of(
+            NotificationFullDto.builder()
+                .id(1L)
+                .read(false)
+                .title("Title")
+                .body("BodyEng")
+                .images(List.of())
+
+                .build(),
+            NotificationFullDto.builder()
+                .id(2L)
+                .read(false)
+                .title("Title")
+                .body("BodyEng")
+                .images(List.of())
+                .build());
+    }
+
+    private static PageableAdvancedDto<NotificationFullDto> createPageableAdvancedDtoForCustomNotificationsFullDto() {
+        return new PageableAdvancedDto<>(
+            TEST_NOTIFICATION_DTO_LIST_2,
+            2L,
+            0,
+            1,
+            0,
+            false,
+            false,
+            true,
+            true);
     }
 }

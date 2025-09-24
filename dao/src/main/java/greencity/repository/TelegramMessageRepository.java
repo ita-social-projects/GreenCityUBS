@@ -9,14 +9,44 @@ import java.util.Optional;
 
 public interface TelegramMessageRepository extends JpaRepository<TelegramMessage, Long> {
     /**
-     * Retrieves all TelegramUserMessages by chatId.
+     * Retrieves all {@link TelegramMessage} entities for a given chat ID, with
+     * pagination support.
      *
-     * @param chatId the telegram chat ID
-     * @return a list of TelegramUserMessages associated with the specified chatId
+     * @param chatId   {@link Long} the Telegram chat ID
+     * @param pageable {@link Pageable} the pagination information
+     * @return a {@link Page} of {@link TelegramMessage} objects associated with the
+     *         specified chat
      */
     Page<TelegramMessage> findByChatId(Long chatId, Pageable pageable);
 
+    /**
+     * Retrieves a {@link TelegramMessage} by its media group ID. Telegram assigns
+     * the same mediaGroupId to multiple media messages sent as an album.
+     *
+     * @param mediaGroupId {@link String} the media group ID
+     * @return an {@link Optional} containing the {@link TelegramMessage} if found,
+     *         otherwise empty
+     */
     Optional<TelegramMessage> findByMediaGroupId(String mediaGroupId);
 
+    /**
+     * Finds the most recent {@link TelegramMessage} in a given chat, ordered by
+     * send time descending.
+     *
+     * @param chat the {@link TelegramChat} entity
+     * @return an {@link Optional} containing the latest {@link TelegramMessage} in
+     *         this chat, otherwise empty
+     */
     Optional<TelegramMessage> findFirstByChatOrderBySendAtDesc(TelegramChat chat);
+
+    /**
+     * Finds the most recent {@link TelegramMessage} in a given chat, ordered by
+     * send time descending.
+     *
+     * @param telegramChat the {@link TelegramChat} entity
+     * @param messageId    the {@link Integer} telegram message ID
+     * @return an {@link Optional} containing the latest {@link TelegramMessage} in
+     *         this chat, otherwise empty
+     */
+    Optional<TelegramMessage> findByChatAndTelegramMessageId(TelegramChat telegramChat, Integer messageId);
 }

@@ -4,17 +4,15 @@ import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.dto.SuccessSignInDto;
 import greencity.dto.TestersSignInRequest;
-import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.telegram.UserTelegramFeedbackDto;
 import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.user.User;
-import java.util.Optional;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -47,24 +45,6 @@ public interface UserRemoteClient {
     String findUuidByEmail(@RequestParam(EMAIL) String email);
 
     /**
-     * Finds {@link UserVO} that is not 'DEACTIVATED' by {@link UserVO}'s Email.
-     *
-     * @param email {@link UserVO}'s Email.
-     * @return {@link Optional} of {@link UserVO}.
-     */
-    @GetMapping("/user/findNotDeactivatedByEmail")
-    Optional<UserVO> findNotDeactivatedByEmail(@RequestParam(EMAIL) String email);
-
-    /**
-     * Finds {@link UbsCustomersDto} by {@link User}'s UUID.
-     *
-     * @param uuid {@link User}'s UUID.
-     * @return {@link Optional} of {@link UbsCustomersDto}.
-     */
-    @GetMapping("/user/findByUuId")
-    Optional<UbsCustomersDto> findByUuid(@RequestParam(UUID) String uuid);
-
-    /**
      * Method checks the existence of the user by uuid.
      *
      * @param uuid {@link User}'s UUID.
@@ -72,6 +52,15 @@ public interface UserRemoteClient {
      */
     @GetMapping("/user/checkByUuid")
     boolean checkIfUserExistsByUuid(@RequestParam(UUID) String uuid);
+
+    /**
+     * Method checks the existence of an active user by uuid.
+     *
+     * @param uuid {@link User}'s UUID.
+     * @return {@link Boolean}
+     */
+    @GetMapping("/user/checkActiveUserByUuid")
+    boolean checkIfActiveUserExistsByUuid(@RequestParam(UUID) String uuid);
 
     /**
      * Gets user's positions and all possible related authorities to these positions
@@ -148,7 +137,7 @@ public interface UserRemoteClient {
      * @param dto {@link EmployeeSignUpDto}
      */
     @PostMapping("/ownSecurity/sign-up-employee")
-    void signUpEmployee(@RequestBody EmployeeSignUpDto dto);
+    void signUpEmployee(@RequestBody EmployeeSignUpDto dto, @RequestParam String lang);
 
     /**
      * Update employee email.
@@ -185,4 +174,13 @@ public interface UserRemoteClient {
 
     @PostMapping("/api/testers/sign-in")
     ResponseEntity<SuccessSignInDto> signIn(@RequestBody TestersSignInRequest request);
+
+    /**
+     * Send a Telegram user feedback.
+     *
+     * @param dto {@link UserTelegramFeedbackDto} - feedback details from the
+     *            Telegram bot.
+     */
+    @PostMapping("/email/telegram-feedback")
+    void sendTelegramFeedback(@RequestBody UserTelegramFeedbackDto dto);
 }

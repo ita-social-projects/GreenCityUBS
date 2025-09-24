@@ -39,7 +39,7 @@ class UpdateAddressValidatorTest {
     private AddressResponseFromGoogleAPI addressResponseFromGoogleAPI;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         CoordinatesDto coordinatesDto = new CoordinatesDto(50.45, 30.523);
         orderAddressDtoRequest = OrderAddressDtoRequest.builder()
             .cityUk("Kyiv")

@@ -134,7 +134,7 @@ class ManagementOrderControllerTest {
     @Test
     void getOrderDetail() throws Exception {
         this.mockMvc.perform(get(ubsManagementLink + "/read-order-info" + "/{id}", 1L)
-            .param("language", "ua"))
+            .param("language", "uk"))
             .andExpect(status().isOk());
     }
 
@@ -302,11 +302,11 @@ class ManagementOrderControllerTest {
 
         String writeValueAsString = objectMapper.writeValueAsString(ecoNumberDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put(ubsManagementLink + "/update-eco-store{id}", 1L)
+        mockMvc.perform(MockMvcRequestBuilders.put(ubsManagementLink + "/update-eco-store/{id}", 1L)
             .content(writeValueAsString)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -404,9 +404,9 @@ class ManagementOrderControllerTest {
         mockMvc.perform(put(ubsManagementLink + "/all-order-page-admin-info")
             .content(jsonDto)
             .principal(principal)
-            .param("lang", "ua")
+            .param("lang", "uk")
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -447,7 +447,7 @@ class ManagementOrderControllerTest {
                 .param("language", "en")
                 .principal(principal)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
-            .andExpect(status().isCreated());
+            .andExpect(status().isOk());
     }
 
     @Test

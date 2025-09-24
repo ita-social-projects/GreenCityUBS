@@ -4,16 +4,19 @@ import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
+import greencity.dto.notification.UserCategoryDto;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationType;
 import greencity.enums.UserCategory;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.ForbiddenException;
 import greencity.exceptions.notification.IncorrectTemplateException;
 import greencity.exceptions.notification.TemplateDeleteException;
 import greencity.notificator.listener.NotificationPlanner;
 import greencity.repository.NotificationTemplateRepository;
+import greencity.repository.UserNotificationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,6 +40,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.any;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE;
+import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_2;
 import static greencity.ModelUtils.TEST_NOTIFICATION_PAGEABLE;
 import static greencity.ModelUtils.TEMPLATE_PAGE;
 import static greencity.ModelUtils.TEST_NOTIFICATION_TEMPLATE_WITH_PLATFORMS_DTO;
@@ -52,6 +56,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class NotificationTemplateServiceImplTest {
     @Mock
     NotificationTemplateRepository templateRepository;
+
+    @Mock
+    UserNotificationRepository userNotificationRepository;
 
     @Mock
     NotificationPlanner notificationPlanner;
@@ -212,6 +219,7 @@ class NotificationTemplateServiceImplTest {
             .forEach(platform -> assertEquals(INACTIVE, platform.getNotificationStatus()));
 
         verify(templateRepository).findById(id);
+        verify(notificationPlanner).restartNotificator(NotificationType.CUSTOM);
     }
 
     @Test
@@ -277,11 +285,8 @@ class NotificationTemplateServiceImplTest {
 
     @Test
     void removeNotificationTemplateTest() {
-        var template = createNotificationTemplate();
-        template.setNotificationType(NotificationType.CUSTOM);
-        template.setUserCategory(UserCategory.ALL_USERS);
-
-        when(templateRepository.findById(1L)).thenReturn(Optional.of(template));
+        when(templateRepository.findById(1L)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE_2));
+        when(userNotificationRepository.existsByTemplateId(1L)).thenReturn(false);
         doNothing().when(templateRepository).deleteById(1L);
         doNothing().when(notificationPlanner).restartNotificator(NotificationType.CUSTOM);
 
@@ -289,6 +294,16 @@ class NotificationTemplateServiceImplTest {
         verify(templateRepository).findById(anyLong());
         verify(templateRepository).deleteById(anyLong());
         verify(notificationPlanner).restartNotificator(any());
+    }
+
+    @Test
+    void removeNotificationTemplateThrowsForbiddenExceptionTest(){
+        when(templateRepository.findById(1L)).thenReturn(Optional.of(TEST_NOTIFICATION_TEMPLATE_2));
+        when(userNotificationRepository.existsByTemplateId(1L)).thenReturn(true);
+
+        assertThrows(ForbiddenException.class,() -> notificationService.removeNotificationTemplate(1L));
+
+        verify(templateRepository, never()).deleteById(1L);
     }
 
     @Test
@@ -308,6 +323,22 @@ class NotificationTemplateServiceImplTest {
 
         assertThrows(TemplateDeleteException.class, () -> notificationService.removeNotificationTemplate(1L));
         verify(templateRepository).findById(anyLong());
+    }
+
+    @Test
+    void getAllUserCategoriesTest() {
+        List<UserCategoryDto> userCategories = notificationService.getAllUserCategories();
+
+        assertEquals(UserCategory.values().length, userCategories.size());
+
+        for (int i = 0; i < UserCategory.values().length; i++) {
+            UserCategory enumVal = UserCategory.values()[i];
+            UserCategoryDto dto = userCategories.get(i);
+
+            assertEquals(enumVal, dto.getUserCategory());
+            assertEquals(enumVal.getDescriptionUk(), dto.getDescriptionUk());
+            assertEquals(enumVal.getDescriptionEn(), dto.getDescriptionEn());
+        }
     }
 
 }

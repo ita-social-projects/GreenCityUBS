@@ -1,79 +1,95 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.exceptions.bots.MessageWasNotSent;
+import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.ubstelegrambot.UBSTelegramBot;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import java.io.Serializable;
+import java.util.List;
+import static greencity.constant.ErrorMessage.TELEGRAM_INVALID_METHOD_EXCEPTION;
+import static greencity.constant.ErrorMessage.TELEGRAM_NULL_METHOD_EXCEPTION;
+import static greencity.constant.ErrorMessage.TELEGRAM_RECEIVE_EXCEPTION;
+import static greencity.constant.ErrorMessage.TELEGRAM_SEND_EXCEPTION;
 
+/**
+ * Wrapper class for executing telegram's bot methods.
+ */
 @Component
+@RequiredArgsConstructor
 public class TelegramExecutor {
+    private final UBSTelegramBot telegramBot;
+
     /**
      * Method sends message to telegram user.
      *
-     * @param bot    {@link TelegramLongPollingBot} is realisation of
-     *               TelegramLongPollingBot.
      * @param method {@link BotApiMethod} is method to send telegram messages.
      */
-    public void executeCommand(TelegramLongPollingBot bot, BotApiMethod<?> method) {
-        try {
-            bot.execute(method);
-        } catch (TelegramApiException e) {
-            throw new MessageWasNotSent(e.getMessage());
-        }
-    }
-
-    /**
-     * Method sends message to telegram user.
-     *
-     * @param bot            {@link TelegramLongPollingBot} is realisation of
-     *                       TelegramLongPollingBot.
-     * @param sendMediaGroup {@link SendMediaGroup} is group of sending telegram
-     *                       messages.
-     */
-    public void executeCommand(TelegramLongPollingBot bot, SendMediaGroup sendMediaGroup) {
-        try {
-            bot.execute(sendMediaGroup);
-        } catch (TelegramApiException e) {
-            throw new MessageWasNotSent(e.getMessage());
-        }
+    public void executeCommand(BotApiMethod<?> method) {
+        executeSafely(method, TELEGRAM_SEND_EXCEPTION);
     }
 
     /**
      * Executes a GetFile request to retrieve a file from Telegram.
      *
-     * @param bot    the Telegram bot instance
      * @param method the GetFile method to execute
      * @return the retrieved File object
-     * @throws MessageWasNotSent if the request fails
      */
-    public File executeGetFile(TelegramLongPollingBot bot, GetFile method) {
-        try {
-            return bot.execute(method);
-        } catch (TelegramApiException e) {
-            throw new MessageWasNotSent(e.getMessage());
-        }
+    public File executeGetFile(GetFile method) {
+        return executeSafely(method, TELEGRAM_RECEIVE_EXCEPTION);
     }
 
     /**
      * Sends a photo to a Telegram user.
      *
-     * @param bot     the Telegram bot instance
-     * @param message the SendPhoto method containing the photo and details
-     * @return the Message object returned by Telegram
-     * @throws MessageWasNotSent if the photo cannot be sent
+     * @param message method containing the photo and details
      */
-    public Message executeSendPhoto(UBSTelegramBot bot, SendPhoto message) {
-        try {
-            return bot.execute(message);
-        } catch (TelegramApiException e) {
-            throw new MessageWasNotSent(e.getMessage());
+    public Message executeSendPhoto(SendPhoto message) {
+        return executeSafely(message, TELEGRAM_SEND_EXCEPTION);
+    }
+
+    /**
+     * Sends a file to a Telegram user.
+     *
+     * @param message method containing the file and details
+     */
+    public Message executeSendFile(SendDocument message) {
+        return executeSafely(message, TELEGRAM_SEND_EXCEPTION);
+    }
+
+    private <T extends Serializable> T executeSafely(PartialBotApiMethod<T> method, String errorMessage) {
+        if (method == null) {
+            throw new TelegramBotExecutionException(TELEGRAM_NULL_METHOD_EXCEPTION);
         }
+
+        try {
+            return switch (method) {
+                case BotApiMethod<T> botApiMethod -> telegramBot.execute(botApiMethod);
+                case SendPhoto sendPhoto -> (T) telegramBot.execute(sendPhoto);
+                case SendDocument sendDocument -> (T) telegramBot.execute(sendDocument);
+                case SendMediaGroup sendMediaGroup -> (T) telegramBot.execute(sendMediaGroup);
+                default -> throw new TelegramBotExecutionException(TELEGRAM_INVALID_METHOD_EXCEPTION.formatted(
+                    method.getClass().getSimpleName()));
+            };
+        } catch (TelegramApiException e) {
+            throw new TelegramBotExecutionException(errorMessage.formatted(e.getMessage()), e);
+        }
+    }
+
+    public Message executeSendMessage(SendMessage message) {
+        return executeSafely(message, TELEGRAM_SEND_EXCEPTION);
+    }
+
+    public List<Message> executeSendMediaGroup(SendMediaGroup message) {
+        return executeSafely(message, TELEGRAM_SEND_EXCEPTION);
     }
 }

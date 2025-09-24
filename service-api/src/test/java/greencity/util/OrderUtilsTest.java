@@ -41,7 +41,7 @@ class OrderUtilsTest {
 
     @Test
     void decodeOrderReferenceTest() {
-        String encodedOrderId = Base64.getEncoder().encodeToString("123_2_456".getBytes());
+        String encodedOrderId = Base64.getEncoder().withoutPadding().encodeToString("123_2_456".getBytes());
         Payment payment = mock(Payment.class);
 
         when(order.getPayment()).thenReturn(Collections.singletonList(payment));

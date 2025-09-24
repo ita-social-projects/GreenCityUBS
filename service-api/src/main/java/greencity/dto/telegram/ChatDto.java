@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChatDto {
     private Long id;
-    private String chatId;
     private String firstName;
     private String lastName;
     private String username;
     private ChatUserDto user;
     private TelegramMessageDto lastMessage;
+    private Integer unreadMessagesCount;
 }

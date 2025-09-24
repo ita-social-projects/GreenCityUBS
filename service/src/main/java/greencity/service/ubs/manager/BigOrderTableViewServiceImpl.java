@@ -5,7 +5,6 @@ import java.util.List;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.order.OrderCountDto;
-import greencity.dto.user.UserVO;
 import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.exceptions.BadRequestException;
@@ -14,6 +13,7 @@ import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TableColumnWidthForEmployeeRepository;
+import greencity.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,16 +41,18 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     private final EmployeeRepository employeeRepository;
     private final UserRemoteClient userRemoteClient;
     private final TableColumnWidthForEmployeeRepository tableColumnWidthForEmployeeRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Page<BigOrderTableDTO> getOrders(OrderPage orderPage, OrderSearchCriteria searchCriteria, String email) {
-        UserVO userVO = userRemoteClient.findNotDeactivatedByEmail(email).orElseThrow(() -> new UserNotFoundException(
-            ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST));
+        String uuid = userRepository.findUuidByRecipientEmail(email)
+            .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
+        String languageCode = userRemoteClient.findUserLanguageByUuid(uuid);
         Long employeeId = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND)).getId();
         List<Long> tariffsInfoIds = employeeRepository.findTariffsInfoForEmployee(employeeId);
         var orders = bigOrderTableRepository.findAll(orderPage, searchCriteria, tariffsInfoIds,
-            userVO.getLanguageVO().getCode());
+            languageCode);
         var orderList = new ArrayList<BigOrderTableDTO>();
         orders.forEach(o -> orderList.add(modelMapper.map(o, BigOrderTableDTO.class)));
         return new PageImpl<>(orderList, orders.getPageable(), orders.getTotalElements());

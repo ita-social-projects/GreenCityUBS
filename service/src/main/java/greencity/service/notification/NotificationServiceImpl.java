@@ -4,7 +4,6 @@ import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
-import greencity.constant.TelegramBotConstants;
 import greencity.dto.notification.InactiveAccountDto;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationFullDto;
@@ -40,6 +39,7 @@ import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.OrderBagService;
+import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -472,6 +472,7 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * Notifies the user about a canceled violation associated with a specific
      * order.
+     *
      * <p>
      *
      * Retrieves the canceled violation for the given order identifier. If the
@@ -696,13 +697,15 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void fillAndSendCustomNotification(User user, Long templateId) {
-        UserNotification userNotification = new UserNotification();
-        userNotification.setNotificationType(NotificationType.CUSTOM);
-        userNotification.setTemplateId(templateId);
-        userNotification.setUser(user);
-        UserNotification created = userNotificationRepository.save(userNotification);
-        created.setParameters(new HashSet<>());
-        sendNotificationsForBotsAndEmail(created, 0L);
+        if (isUserActive(user)) {
+            UserNotification userNotification = new UserNotification();
+            userNotification.setNotificationType(NotificationType.CUSTOM);
+            userNotification.setTemplateId(templateId);
+            userNotification.setUser(user);
+            UserNotification created = userNotificationRepository.save(userNotification);
+            created.setParameters(new HashSet<>());
+            sendNotificationsForBotsAndEmail(created, 0L);
+        }
     }
 
     /**
@@ -841,7 +844,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyCreatedOrder(Order order) {
         fillAndSendNotification(
-            getNotificationParametersForNewOrder(order),
+            getNotificationParametersWithCustomerInfo(order),
             order,
             NotificationType.CREATE_NEW_ORDER);
     }
@@ -894,7 +897,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private Set<NotificationParameter> getNotificationParametersForNewOrder(Order order) {
+    private Set<NotificationParameter> getNotificationParametersWithCustomerInfo(Order order) {
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
@@ -951,11 +954,11 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username) {
+    public void notifyManagerWithNewGreenOfficeRequestFromTelegramBot(String userEmail, String username, String lang) {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(username)
-            .subject(TelegramBotConstants.GREEN_OFFICE_SUBJECT)
+            .subject(MessageProvider.get(lang, "green.office.subject"))
             .body(userEmail)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
@@ -963,12 +966,17 @@ public class NotificationServiceImpl implements NotificationService {
         userRemoteClient.sendGreenOfficeRequestNotification(notification);
     }
 
+    @Override
+    public void notifyCanceledOrder(Order order) {
+        fillAndSendNotification(
+            getNotificationParametersWithCustomerInfo(order),
+            order,
+            NotificationType.CANCELED_ORDER);
+    }
+
     private NotificationShortDto createNotificationShortDto(UserNotification notification, String language,
         Long monthsOfAccountInactivity) {
-        NotificationTemplate template = templateRepository
-            .findNotificationTemplateByNotificationTypeAndNotificationReceiverType(
-                notification.getNotificationType(), SITE)
-            .orElseThrow(() -> new NotFoundException("Template not found"));
+        NotificationTemplate template = getNotificationTemplate(notification, SITE, templateRepository);
 
         String templateBody = resolveTemplateBody(language, SITE, template);
         if (notification.getParameters() == null) {
@@ -984,7 +992,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationShortDto.builder()
             .id(notification.getId())
-            .title(language.equals("ua")
+            .title(language.equals("uk")
                 ? template.getTitleUk()
                 : template.getTitleEn())
             .notificationTime(notification.getNotificationTime())
@@ -1034,7 +1042,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         StringSubstitutor sub = new StringSubstitutor(valuesMap);
         String resultBody = sub.replace(String.format(templateBody, monthsOfAccountInactivity));
-        String title = language.equals("ua") ? template.getTitleUk() : template.getTitleEn();
+        String title = language.equals("uk") ? template.getTitleUk() : template.getTitleEn();
 
         return NotificationDto.builder()
             .title(title)
@@ -1058,7 +1066,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private static String resolveTemplateBody(String language, NotificationReceiverType receiverType,
         NotificationTemplate notification) {
-        return language.equals("ua")
+        return language.equals("uk")
             ? getNotificationPlatformByReceiverType(notification, receiverType).getBodyUk()
             : getNotificationPlatformByReceiverType(notification, receiverType).getBodyEn();
     }
@@ -1073,14 +1081,21 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void fillAndSendNotification(Set<NotificationParameter> parameters, Order order,
         NotificationType notificationType) {
-        UserNotification userNotification = new UserNotification();
-        userNotification.setNotificationType(notificationType);
-        userNotification.setUser(order.getUser());
-        userNotification.setOrder(order);
-        UserNotification created = userNotificationRepository.save(userNotification);
-        parameters.forEach(parameter -> parameter.setUserNotification(created));
-        List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
-        created.setParameters(new HashSet<>(notificationParameters));
-        sendNotificationsForBotsAndEmail(created, 0L);
+        User user = order.getUser();
+        if (isUserActive(user)) {
+            UserNotification userNotification = new UserNotification();
+            userNotification.setNotificationType(notificationType);
+            userNotification.setUser(user);
+            userNotification.setOrder(order);
+            UserNotification created = userNotificationRepository.save(userNotification);
+            parameters.forEach(parameter -> parameter.setUserNotification(created));
+            List<NotificationParameter> notificationParameters = notificationParameterRepository.saveAll(parameters);
+            created.setParameters(new HashSet<>(notificationParameters));
+            sendNotificationsForBotsAndEmail(created, 0L);
+        }
+    }
+
+    private boolean isUserActive(User user) {
+        return userRemoteClient.checkIfActiveUserExistsByUuid(user.getUuid());
     }
 }
