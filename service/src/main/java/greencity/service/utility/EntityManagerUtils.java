@@ -1,10 +1,8 @@
 package greencity.service.utility;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceUnitUtil;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.TypedQuery;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
@@ -28,8 +26,6 @@ import java.util.regex.Pattern;
 public class EntityManagerUtils {
     @PersistenceContext
     private EntityManager entityManager;
-
-    private static PersistenceUnitUtil persistenceUnitUtil;
 
     private static final String IDENTIFIER_GROUP =
         String.format("(%s)", "[._$[\\P{Z}&&\\P{Cc}&&\\P{Cf}&&\\P{Punct}]]+");
@@ -58,13 +54,22 @@ public class EntityManagerUtils {
     }
 
     public static final String ENTITY_GRAPH_ARGUMENT_EXCEPTION = "One or more specified attributes can't be applied";
-    private static final String INVALID_GETTER_EXCEPTION = "One or more specified attributes getter method can't be invoked";
 
-    @PostConstruct
-    private void init() {
-        persistenceUnitUtil = entityManager.getEntityManagerFactory().getPersistenceUnitUtil();
-    }
-
+    /**
+     * Methods creates EntityGraph which can be then set as fetchgraph or loadgraph
+     * query hint. This method is well-suited and proves effectiveness in fixing n+1
+     * via eager loading of chosen manyToOne or oneToOne relations, while only slows
+     * down a query in case of collection-type relations usage due to cartesian
+     * product emerging.
+     *
+     * @param entityClass class of Entity that entityGraph is built for;
+     * @param attributes  names of relation fields to be fetched, order is important
+     *                    in case of nested relations, you can't specify a.b.c
+     *                    before specifying a.b;
+     * @return {@link EntityGraph} ready-to-use EntityGraph object with all
+     *         attributes and subgraphs set.
+     * @author Oleksandr Ilnytskyi
+     */
     public <T> EntityGraph<T> createEntityGraph(Class<T> entityClass, List<String> attributes) {
         EntityGraph<T> entityGraph = entityManager.createEntityGraph(entityClass);
 
@@ -86,7 +91,7 @@ public class EntityManagerUtils {
                         subgraph.addAttributeNodes(subAttributes[length - 1]);
                         subgraphsMap.put(subAttributes[0], subgraph);
                     } else {
-                        String rootSubgraphPath = String.join(".", Arrays.copyOfRange(subAttributes, 0, length-2));
+                        String rootSubgraphPath = String.join(".", Arrays.copyOfRange(subAttributes, 0, length - 2));
                         Subgraph<?> rootSubgraph = subgraphsMap.get(rootSubgraphPath);
                         Subgraph<?> subgraph = rootSubgraph.addSubgraph(subAttributes[length - 2]);
                         subgraph.addAttributeNodes(subAttributes[length - 1]);
@@ -101,11 +106,48 @@ public class EntityManagerUtils {
         return entityGraph;
     }
 
+    /**
+     * Methods creates TypedQuery for given jpql query string with EntityGraph,
+     * setting it as loadgraph query hint. This method is well-suited and proves
+     * effectiveness in fixing n+1 via eager loading of chosen manyToOne or oneToOne
+     * relations, while only slows down a query in case of collection-type relations
+     * usage due to cartesian product emerging.
+     *
+     * @param entityClass     class of resulting Entity;
+     * @param jpqlQueryString jakarta persistence query language string, same as
+     *                        used in JPA repository @Query() methods;
+     * @param attributes      names of relation fields to be fetched, order is
+     *                        important in case of nested relations, you can't
+     *                        specify a.b.c before specifying a.b;
+     * @return {@link TypedQuery} query with loadgraph hint set. Parameters are to
+     *         be set manually and needs to be executed via one of getResults()
+     *         methods.
+     * @author Oleksandr Ilnytskyi
+     */
     public <T> TypedQuery<T> createTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString, List<String> attributes) {
         return createTypedQueryWithEntityGraph(entityClass, jpqlQueryString, attributes, EntityGraphType.LOAD);
     }
 
+    /**
+     * Methods creates TypedQuery for given jpql query string with EntityGraph,
+     * where type of hint can be chosen. This method is well-suited and proves
+     * effectiveness in fixing n+1 via eager loading of chosen manyToOne or oneToOne
+     * relations, while only slows down a query in case of collection-type relations
+     * usage due to cartesian product emerging.
+     *
+     * @param entityClass     class of resulting Entity;
+     * @param jpqlQueryString jakarta persistence query language string, same as
+     *                        used in JPA repository @Query() methods;
+     * @param attributes      names of relation fields to be fetched, order is
+     *                        important in case of nested relations, you can't
+     *                        specify a.b.c before specifying a.b;
+     * @param entityGraphType entity graph type to be applied in hint;
+     * @return {@link TypedQuery} query with loadgraph hint set. Parameters are to
+     *         be set manually and needs to be executed via one of getResults()
+     *         methods.
+     * @author Oleksandr Ilnytskyi
+     */
     public <T> TypedQuery<T> createTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString,
         List<String> attributes, EntityGraphType entityGraphType) {
@@ -119,6 +161,23 @@ public class EntityManagerUtils {
         return query;
     }
 
+    /**
+     * Methods creates TypedQuery for given jpql query string with EntityGraph,
+     * setting it as loadgraph query hint, applies paging to the query and runs both
+     * query and count query to populate all {@link PageImpl} fields. Useful in case
+     * query has no parameters and can be run immediately after creation.
+     *
+     * @param entityClass     class of Entity, with which resulting page content is
+     *                        populated;
+     * @param jpqlQueryString jakarta persistence query language string, same as
+     *                        used in JPA repository @Query() methods;
+     * @param attributes      names of relation fields to be fetched, order is
+     *                        important in case of nested relations, you can't
+     *                        specify a.b.c before specifying a.b;
+     * @param pageable        resulting page parameters;
+     * @return {@link Page} query result as a page.
+     * @author Oleksandr Ilnytskyi
+     */
     public <T> Page<T> createAndRunPageableTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString, List<String> attributes, Pageable pageable) {
         TypedQuery<T> query = createPageableTypedQueryWithEntityGraph(
@@ -126,6 +185,18 @@ public class EntityManagerUtils {
         return runPageableTypedQueryWithEntityGraph(query, jpqlQueryString, pageable);
     }
 
+    /**
+     * Methods runs TypedQuery, creates and runs count query to populate all
+     * {@link PageImpl} fields. Useful when query has parameters that need to be set
+     * manually before running.
+     *
+     * @param query           query to be run;
+     * @param jpqlQueryString jakarta persistence query language string, same as
+     *                        used in JPA repository @Query() methods;
+     * @param pageable        resulting page parameters;
+     * @return {@link Page} query result as a page.
+     * @author Oleksandr Ilnytskyi
+     */
     public <T> Page<T> runPageableTypedQueryWithEntityGraph(
         TypedQuery<T> query, String jpqlQueryString, Pageable pageable) {
         List<T> results = query.getResultList();
@@ -133,6 +204,24 @@ public class EntityManagerUtils {
         return new PageImpl<>(results, pageable, total);
     }
 
+    /**
+     * Methods creates TypedQuery for given jpql query string with EntityGraph,
+     * setting it as loadgraph query hint, applies paging to the query. If query
+     * contains any parameters, they need to be set manually before running.
+     *
+     * @param entityClass     class of Entity, with which resulting page content is
+     *                        populated;
+     * @param jpqlQueryString jakarta persistence query language string, same as
+     *                        used in JPA repository @Query() methods;
+     * @param attributes      names of relation fields to be fetched, order is
+     *                        important in case of nested relations, you can't
+     *                        specify a.b.c before specifying a.b;
+     * @param pageable        resulting page parameters;
+     * @return {@link TypedQuery} query with loadgraph hint set. Parameters are to
+     *         be set manually and query has to be run via
+     *         runPageableTypedQueryWithEntityGraph() method.
+     * @author Oleksandr Ilnytskyi
+     */
     public <T> TypedQuery<T> createPageableTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString,
         List<String> attributes, Pageable pageable) {
@@ -142,6 +231,17 @@ public class EntityManagerUtils {
         return query;
     }
 
+    /**
+     * Methods creates and runs count query based on jpqlQueryString, removing
+     * elements that are not allowed in count queries.
+     *
+     * @param query           original query from which parameters for count query
+     *                        will be parsed;
+     * @param jpqlQueryString jakarta persistence query language string, same as
+     *                        used in JPA repository @Query() methods;
+     * @return {@link Long} total amount of elements as query result.
+     * @author Oleksandr Ilnytskyi
+     */
     public <T> Long createAndRunCountQueryFor(TypedQuery<T> query, String jpqlQueryString) {
         String countQueryString = createCountQueryStringFor(jpqlQueryString);
         TypedQuery<Long> countQuery = entityManager.createQuery(countQueryString, Long.class);
