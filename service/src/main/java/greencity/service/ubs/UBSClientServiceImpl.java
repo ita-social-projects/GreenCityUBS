@@ -820,23 +820,18 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
-//        Page<Order> orderPages = nonNull(statuses)
-//            ? ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(page, uuid, statuses)
-//            : ordersForUserRepository.getAllByUserUuid(page, uuid);
+        String statusesLine = nonNull(statuses) ? "AND o.orderStatus IN (:statuses) " : "";
         String jpqlQueryString = "SELECT o FROM Order AS o WHERE o.user = "
             + "(SELECT u FROM User AS u WHERE u.uuid = :uuid) "
-            + "AND o.orderStatus IN (:statuses) "
+            + statusesLine
             + "ORDER BY o.orderDate DESC";
         TypedQuery<Order> jpqlQuery = entityManagerUtils
             .createPageableTypedQueryWithEntityGraph(
-                Order.class, jpqlQueryString,
-                List.of(
-                    "refund", "ubsUser", "ubsUser.orderAddress"), page);
+                Order.class, jpqlQueryString, List.of("refund", "ubsUser", "ubsUser.orderAddress"), page);
         jpqlQuery.setParameter("uuid", uuid);
         jpqlQuery.setParameter("statuses", statuses);
         Page<Order> orderPages = entityManagerUtils
-            .runPageableTypedQueryWithEntityGraph(
-                Order.class, jpqlQuery, jpqlQueryString, List.of("payment", "certificates", "orderBags"), page);
+            .runPageableTypedQueryWithEntityGraph(jpqlQuery, jpqlQueryString, page);
         List<Order> orders = orderPages.getContent();
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
         orders.forEach(order -> dtos.add(getOrdersData(order)));
