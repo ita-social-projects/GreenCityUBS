@@ -3841,7 +3841,13 @@ class UBSClientServiceImplTest {
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         Page<Order> page = new PageImpl<>(List.of(order), pageable, 1);
 
-        when(ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(pageable, uuid, statuses)).thenReturn(page);
+        TypedQuery<Order> query = mock(TypedQuery.class);
+
+        when(entityManagerUtils
+            .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
+            .thenReturn(query);
+        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), anyString(), any(Pageable.class)))
+            .thenReturn(page);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))
             .thenReturn(Optional.of(getOrderStatusTranslation()));
@@ -3851,7 +3857,6 @@ class UBSClientServiceImplTest {
 
         PageableDto<OrdersDataForUserDto> result = ubsService.getOrdersForUser(uuid, pageable, statuses);
 
-        verify(ordersForUserRepository).getAllByUserUuidAndOrderStatusIn(pageable, uuid, statuses);
         assertEquals(1, result.getTotalElements());
     }
 
