@@ -11,6 +11,7 @@ import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.tariff.TariffWithChatAccess;
+import greencity.enums.EmployeeStatus;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
@@ -18,6 +19,7 @@ import greencity.filters.EmployeePage;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import static greencity.ModelUtils.getPrincipal;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -83,7 +86,7 @@ class ManagementEmployeeControllerTest {
     @InjectMocks
     private ManagementEmployeeController controller;
 
-    private final Principal principal = getUuid();
+    private final Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {
@@ -169,25 +172,37 @@ class ManagementEmployeeControllerTest {
     }
 
     @Test
-    void deleteEmployeeTest() throws Exception {
-        doNothing().when(service).deactivateEmployee(1L);
+    void deactivateEmployeeTest() throws Exception {
+        String userUuid = "uuid";
+        Long employeeId = 1L;
+        EmployeeStatus employeeStatus = EmployeeStatus.INACTIVE;
 
-        mockMvc.perform(put(UBS_LINK + DELETE_LINK + "/" + 1)
+        doNothing().when(service).updateEmployeeStatus(userUuid, employeeId, employeeStatus);
+        when(userRepository.findUuidByRecipientEmail(principal.getName()))
+            .thenReturn(Optional.of(userUuid));
+
+        mockMvc.perform(put(UBS_LINK + DELETE_LINK + "/" + employeeId)
             .principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).deactivateEmployee(1L);
+        verify(service, times(1)).updateEmployeeStatus(userUuid, employeeId, employeeStatus);
     }
 
     @Test
     void activateEmployeeTest() throws Exception {
-        doNothing().when(service).activateEmployee(1L);
+        String userUuid = "uuid";
+        Long employeeId = 1L;
+        EmployeeStatus employeeStatus = EmployeeStatus.ACTIVE;
 
-        mockMvc.perform(put(UBS_LINK + ACTIVATE_LINK + "/" + 1)
+        doNothing().when(service).updateEmployeeStatus(userUuid, employeeId, employeeStatus);
+        when(userRepository.findUuidByRecipientEmail(principal.getName()))
+            .thenReturn(Optional.of(userUuid));
+
+        mockMvc.perform(put(UBS_LINK + ACTIVATE_LINK + "/" + employeeId)
             .principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).activateEmployee(1L);
+        verify(service, times(1)).updateEmployeeStatus(userUuid, employeeId, employeeStatus);
     }
 
     @Test
-    void deleteEmployeeImage() throws Exception {
+    void deactivateEmployeeImage() throws Exception {
         mockMvc.perform(delete(UBS_LINK + DELETE_IMAGE_LINK + 1)
             .principal(principal)).andExpect(status().isOk());
         verify(service, atLeastOnce()).deleteEmployeeImage(1L);

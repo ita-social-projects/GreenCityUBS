@@ -36,7 +36,6 @@ import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
@@ -73,6 +72,7 @@ import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentSystem;
 import greencity.enums.TariffStatus;
+import greencity.enums.UserStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -1575,28 +1575,6 @@ class UBSClientServiceImplTest {
     }
 
     @Test
-    void markUserAsDeactivatedByIdThrowsNotFoundException() {
-        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
-            .reason("test")
-            .build();
-        Exception thrown = assertThrows(NotFoundException.class,
-            () -> ubsService.markUserAsDeactivated("test", request));
-        assertEquals(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, thrown.getMessage());
-    }
-
-    @Test
-    void markUserAsDeactivatedById() {
-        User user = getUser();
-        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
-            .reason("test")
-            .build();
-        when(userRepository.findByUuid("test")).thenReturn(user);
-        ubsService.markUserAsDeactivated("test", request);
-        verify(userRepository).findByUuid("test");
-        verify(userRemoteClient).markUserDeactivated(user.getUuid(), request);
-    }
-
-    @Test
     void getsUserAndUserUbsAndViolationsInfoByValidOrderIdTest() {
         User user = getUser();
         UBSuser ubsUser = getUBSuser();
@@ -2941,6 +2919,7 @@ class UBSClientServiceImplTest {
             .recipientName(userProfileCreateDto.getName())
             .currentPoints(0)
             .violations(0)
+            .status(UserStatus.ACTIVATED)
             .dateOfRegistration(LocalDate.now()).build();
         User user = getUser();
         when(userRemoteClient.checkIfUserExistsByUuid(userProfileCreateDto.getUuid())).thenReturn(true);
