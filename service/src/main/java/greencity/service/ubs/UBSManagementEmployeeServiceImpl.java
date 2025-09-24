@@ -17,10 +17,12 @@ import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.entity.TariffsInfoRecievingEmployee;
 import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.EmployeeFilterView;
 import greencity.entity.user.employee.Position;
 import greencity.enums.EmployeeStatus;
+import greencity.enums.UserStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -35,6 +37,7 @@ import greencity.repository.UserRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
+import greencity.service.ubs.user.UserService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -69,6 +72,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     private final ModelMapper modelMapper;
     private final EmployeeCriteriaRepository employeeCriteriaRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
+    private final UserService userService;
     private String defaultImagePath = AppConstant.DEFAULT_IMAGE;
 
     /**
@@ -331,36 +335,21 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      */
     @Override
     @Transactional
-    public void deactivateEmployee(Long id) {
-        Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
-        if (employee.getEmployeeStatus().equals(EmployeeStatus.ACTIVE)) {
-            employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
-            try {
-                userRemoteClient.deactivateEmployee(employee.getUuid());
-            } catch (HystrixRuntimeException e) {
-                throw new BadRequestException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employee.getUuid());
-            }
-            employeeRepository.save(employee);
-        }
-    }
+    public void updateEmployeeStatus(String currentUserUuid, Long targetEmployeeId, EmployeeStatus employeeStatus) {
+        Employee employee = employeeRepository.findById(targetEmployeeId)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + targetEmployeeId));
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void activateEmployee(Long id) {
-        Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND + id));
-        if (employee.getEmployeeStatus() == EmployeeStatus.INACTIVE) {
-            employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-            try {
-                userRemoteClient.activateEmployee(employee.getUuid());
-            } catch (HystrixRuntimeException e) {
-                throw new BadRequestException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + employee.getUuid());
-            }
+        if (!employee.getEmployeeStatus().equals(employeeStatus)) {
+            User employeeUser = userRepository.findUserByUuid(employee.getUuid())
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID + employee.getUuid()));
+            UserStatus userStatus = switch (employeeStatus) {
+                case ACTIVE -> UserStatus.ACTIVATED;
+                case INACTIVE -> UserStatus.DEACTIVATED;
+            };
+
+            employee.setEmployeeStatus(employeeStatus);
             employeeRepository.save(employee);
+            userService.updateUserStatusById(currentUserUuid, employeeUser.getId(), userStatus);
         }
     }
 

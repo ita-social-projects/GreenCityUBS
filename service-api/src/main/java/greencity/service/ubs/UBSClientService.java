@@ -10,7 +10,6 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.certificate.CertificateDto;
@@ -209,15 +208,6 @@ public interface UBSClientService {
     OrderPaymentDetailDto getOrderPaymentDetail(Long orderId);
 
     /**
-     * Method that mark user as DEACTIVATED.
-     *
-     * @param uuid    {@link String} current user uuid.
-     * @param request {@link DeactivateUserRequestDto} information for deactivation.
-     * @author Liubomyr Bratakh
-     */
-    void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request);
-
-    /**
      * Method returns cancellation reason and comment.
      *
      * @param orderId {@link Long};
@@ -361,7 +351,7 @@ public interface UBSClientService {
      */
     List<LocationsDto> getAllLocationsByCourierId(Long courierId);
 
-    public OrdersDataForUserDto getOrdersData(Order order);
+    OrdersDataForUserDto getOrdersData(Order order);
 
-    public String formedLink(Order order, long sumToPayInCoins);
+    String formedLink(Order order, long sumToPayInCoins);
 }

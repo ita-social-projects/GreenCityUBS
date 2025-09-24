@@ -305,4 +305,6 @@
     <include file="db/changelog/logs/ch-update-notification_platforms-Zadyraichuk.xml"/>
     <include file="db/changelog/logs/2025-08-18-ch-add-column-telegrammessage-id-to-telegram-message-entity.xml"/>
     <include file="db/changelog/logs/2025-08-19-ch-add-telegram-message-id-column-to-message-asset.xml"/>
+    <include file="db/changelog/logs/ch-update-users-add-user-status-column-Zadyraichuk.xml"/>
+    <include file="db/changelog/logs/ch-add-reasons-for-user-deactivatiom-table-Pikhotskyi.xml"/>
 </databaseChangeLog>

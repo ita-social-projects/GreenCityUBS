@@ -43,7 +43,6 @@ import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.AllPointsUserDto;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.PointsForUbsUserDto;
 import greencity.dto.user.UserInfoDto;
@@ -83,6 +82,7 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.TariffStatus;
+import greencity.enums.UserStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -1025,7 +1025,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             .recipientName(userProfileCreateDto.getName())
             .currentPoints(0)
             .violations(0)
-            .dateOfRegistration(LocalDate.now()).build());
+            .dateOfRegistration(LocalDate.now())
+            .status(UserStatus.ACTIVATED)
+            .build());
         return user.getId();
     }
 
@@ -1407,15 +1409,6 @@ public class UBSClientServiceImpl implements UBSClientService {
             telegramBot.setIsNotify(telegramIsNotify);
             user.setTelegramBot(telegramBot);
         }
-    }
-
-    @Override
-    public void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request) {
-        User currentUser = userRepository.findByUuid(uuid);
-        if (currentUser == null) {
-            throw new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST);
-        }
-        userRemoteClient.markUserDeactivated(currentUser.getUuid(), request);
     }
 
     @Override

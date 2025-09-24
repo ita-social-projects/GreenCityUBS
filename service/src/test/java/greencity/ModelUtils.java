@@ -188,6 +188,7 @@ import greencity.enums.PaymentStatus;
 import greencity.enums.PaymentSystem;
 import greencity.enums.TariffStatus;
 import greencity.enums.UserCategory;
+import greencity.enums.UserStatus;
 import greencity.util.Bot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -282,7 +283,8 @@ public class ModelUtils {
     public static final PageableAdvancedDto<NotificationShortDto> TEST_PAGEABLE_ADVANCED_DTO =
         createPageableAdvancedDto();
     public static final Employee TEST_EMPLOYEE = createEmployee();
-    public static final User TEST_USER = createUser();
+    public static final User TEST_USER = createActivatedUser();
+    public static final User TEST_USER_DEACTIVATED = createDeactivatedUser();
     public static final List<UserNotification> TEST_USER_NOTIFICATION_LIST = createUserNotificationList();
     public static final Page<UserNotification> TEST_PAGE =
         new PageImpl<>(TEST_USER_NOTIFICATION_LIST, TEST_PAGEABLE, TEST_USER_NOTIFICATION_LIST.size());
@@ -631,6 +633,7 @@ public class ModelUtils {
                 .recipientName("Yuriy")
                 .recipientSurname("Gerasum")
                 .uuid("UUID")
+                .status(UserStatus.ACTIVATED)
                 .build())
             .certificates(Collections.emptySet())
             .pointsToUse(700)
@@ -2062,6 +2065,7 @@ public class ModelUtils {
             .ubsUsers(getUbsUsers())
             .currentPoints(100)
             .changeOfPointsList(new ArrayList<>())
+            .status(UserStatus.ACTIVATED)
             .build();
     }
 
@@ -2249,7 +2253,7 @@ public class ModelUtils {
             .confirmedQuantity(Map.of(1, 1))
             .exportedQuantity(Map.of(1, 1))
             .pointsToUse(100)
-            .user(User.builder().id(1L).currentPoints(100).build())
+            .user(User.builder().id(1L).currentPoints(100).status(UserStatus.ACTIVATED).build())
             .build();
     }
 
@@ -2624,11 +2628,21 @@ public class ModelUtils {
             .build();
     }
 
-    private static User createUser() {
+    private static User createActivatedUser() {
         return User.builder()
             .id(1L)
             .uuid("Test")
             .recipientEmail("test@mail.com")
+            .status(UserStatus.ACTIVATED)
+            .build();
+    }
+
+    private static User createDeactivatedUser() {
+        return User.builder()
+            .id(1L)
+            .uuid("Test")
+            .recipientEmail("test@mail.com")
+            .status(UserStatus.DEACTIVATED)
             .build();
     }
 
@@ -2816,13 +2830,13 @@ public class ModelUtils {
     }
 
     private static Order createTestOrder4() {
-        return Order.builder().id(46L).user(User.builder().id(42L).build())
+        return Order.builder().id(46L).user(User.builder().id(42L).status(UserStatus.ACTIVATED).build())
             .orderDate(LocalDateTime.now())
             .build();
     }
 
     private static Order createTestOrder5() {
-        return Order.builder().id(45L).user(User.builder().id(42L).build())
+        return Order.builder().id(45L).user(User.builder().id(42L).status(UserStatus.ACTIVATED).build())
             .orderDate(LocalDateTime.now()).pointsToUse(200)
             .build();
     }
@@ -2969,7 +2983,7 @@ public class ModelUtils {
     }
 
     private static Order createTestOrder3() {
-        return Order.builder().id(45L).user(User.builder().id(42L).build())
+        return Order.builder().id(45L).user(User.builder().id(42L).status(UserStatus.ACTIVATED).build())
             .confirmedQuantity(new HashMap<>())
             .exportedQuantity(new HashMap<>())
             .amountOfBagsOrdered(new HashMap<>())
@@ -2989,7 +3003,7 @@ public class ModelUtils {
     }
 
     private static Order createTestOrder2() {
-        return Order.builder().id(43L).user(User.builder().id(42L).uuid("1234").build())
+        return Order.builder().id(43L).user(User.builder().id(42L).uuid("1234").status(UserStatus.ACTIVATED).build())
             .orderPaymentStatus(OrderPaymentStatus.PAID).orderDate(LocalDateTime.now()).build();
     }
 
@@ -4238,7 +4252,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(List.of(Payment.builder().id(1L).build()))
-            .user(User.builder().id(1L).build())
+            .user(User.builder().id(1L).status(UserStatus.ACTIVATED).build())
             .imageReasonNotTakingBags(List.of("ss"))
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.BROUGHT_IT_HIMSELF)
@@ -4250,7 +4264,7 @@ public class ModelUtils {
         return Order.builder()
             .id(1L)
             .payment(List.of(Payment.builder().id(1L).build()))
-            .user(User.builder().id(1L).build())
+            .user(User.builder().id(1L).status(UserStatus.ACTIVATED).build())
             .imageReasonNotTakingBags(List.of("ss"))
             .reasonNotTakingBagDescription("aa")
             .orderStatus(OrderStatus.DONE)
@@ -5468,7 +5482,7 @@ public class ModelUtils {
     public static Order getNotifyInternallyFormedOrder() {
         return Order.builder()
             .id(1L)
-            .user(User.builder().id(1L).build())
+            .user(User.builder().id(1L).status(UserStatus.ACTIVATED).build())
             .deliverFrom(LocalDateTime.now(fixedClock).minusHours(3))
             .deliverTo(LocalDateTime.now(fixedClock).minusHours(2))
             .orderStatus(OrderStatus.ADJUSTMENT)
@@ -5773,7 +5787,9 @@ public class ModelUtils {
 
     public static Order createTestOrder() {
         Order order = new Order();
+        order.setId(1L);
         order.setOrderDate(LocalDateTime.now().minusDays(1));
+        order.setUser(User.builder().id(1L).status(UserStatus.ACTIVATED).build());
         return order;
     }
 
