@@ -1010,7 +1010,8 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
-        String statusesLine = nonNull(statuses) ? "AND o.orderStatus IN (:statuses) " : "";
+        boolean statusesIncluded = nonNull(statuses);
+        String statusesLine = statusesIncluded ? "AND o.orderStatus IN (:statuses) " : "";
         String jpqlQueryString = "SELECT o FROM Order AS o WHERE o.user = "
             + "(SELECT u FROM User AS u WHERE u.uuid = :uuid) "
             + statusesLine
@@ -1019,7 +1020,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             .createPageableTypedQueryWithEntityGraph(
                 Order.class, jpqlQueryString, List.of("refund", "ubsUser", "ubsUser.orderAddress"), page);
         jpqlQuery.setParameter("uuid", uuid);
-        jpqlQuery.setParameter("statuses", statuses);
+        if (statusesIncluded) {
+            jpqlQuery.setParameter("statuses", statuses);
+        }
         Page<Order> orderPages = entityManagerUtils
             .runPageableTypedQueryWithEntityGraph(jpqlQuery, jpqlQueryString, page);
         List<Order> orders = orderPages.getContent();
