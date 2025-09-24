@@ -1,17 +1,12 @@
 package greencity.service.utility;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnitUtil;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.metamodel.EntityType;
-import jakarta.persistence.metamodel.PluralAttribute;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,20 +16,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 public class EntityManagerUtils {
@@ -69,7 +57,7 @@ public class EntityManagerUtils {
         ALIAS_MATCH = Pattern.compile(builder.toString(), 2);
     }
 
-    private static final String INVALID_ARGUMENT_EXCEPTION = "One or more specified attributes can't be applied";
+    public static final String ENTITY_GRAPH_ARGUMENT_EXCEPTION = "One or more specified attributes can't be applied";
     private static final String INVALID_GETTER_EXCEPTION = "One or more specified attributes getter method can't be invoked";
 
     @PostConstruct
@@ -87,7 +75,7 @@ public class EntityManagerUtils {
                 try {
                     entityGraph.addAttributeNodes(attribute);
                 } catch (Exception exception) {
-                    throw new IllegalStateException(INVALID_ARGUMENT_EXCEPTION);
+                    throw new IllegalStateException(ENTITY_GRAPH_ARGUMENT_EXCEPTION);
                 }
             } else {
                 try {
@@ -105,7 +93,7 @@ public class EntityManagerUtils {
                         subgraphsMap.put(String.join(".", rootSubgraphPath, subAttributes[length - 2]), subgraph);
                     }
                 } catch (Exception exception) {
-                    throw new IllegalStateException(INVALID_ARGUMENT_EXCEPTION);
+                    throw new IllegalStateException(ENTITY_GRAPH_ARGUMENT_EXCEPTION);
                 }
             }
         }
@@ -132,15 +120,6 @@ public class EntityManagerUtils {
     }
 
     public <T> Page<T> createAndRunPageableTypedQueryWithEntityGraph(
-        Class<T> entityClass, String jpqlQueryString, List<String> attributes,
-        List<String> pluralAttributes, Pageable pageable) {
-        TypedQuery<T> query = createPageableTypedQueryWithEntityGraph(
-            entityClass, jpqlQueryString, attributes, pageable);
-        return runPageableTypedQueryWithEntityGraph(
-            entityClass, query, jpqlQueryString, pluralAttributes, pageable);
-    }
-
-    public <T> Page<T> createAndRunPageableTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString, List<String> attributes, Pageable pageable) {
         TypedQuery<T> query = createPageableTypedQueryWithEntityGraph(
             entityClass, jpqlQueryString, attributes, pageable);
@@ -154,56 +133,6 @@ public class EntityManagerUtils {
         return new PageImpl<>(results, pageable, total);
     }
 
-    public <T, C, ID> Page<T> runPageableTypedQueryWithEntityGraph(
-        Class<T> entityClass, TypedQuery<T> query, String jpqlQueryString,
-        List<String> pluralAttributes, Pageable pageable) {
-        Page<T> page = runPageableTypedQueryWithEntityGraph(query, jpqlQueryString, pageable);
-
-        if (!page.isEmpty()) {
-            @SuppressWarnings("unchecked")
-            List<ID> ids = page.getContent().stream()
-                .map(entity -> (ID) persistenceUnitUtil.getIdentifier(entity))
-                .toList();
-
-            EntityType<T> meta = entityManager.getMetamodel().entity(entityClass);
-            for (String pluralAttributeString : pluralAttributes) {
-                PluralAttribute<?, ?, ?> pluralAttribute = (PluralAttribute<?, ?, ?>) meta
-                    .getAttribute(pluralAttributeString);
-
-                Field collectionField;
-                try {
-                    collectionField = entityClass.getDeclaredField(pluralAttributeString);
-                } catch (NoSuchFieldException e) {
-                    throw new IllegalStateException(INVALID_ARGUMENT_EXCEPTION);
-                }
-
-                String childProperty;
-                if (collectionField.isAnnotationPresent(OneToMany.class)) {
-                    childProperty = collectionField.getAnnotation(OneToMany.class).mappedBy();
-                } else if (collectionField.isAnnotationPresent(ManyToMany.class)) {
-                    childProperty = collectionField.getAnnotation(ManyToMany.class).mappedBy();
-                } else if (collectionField.isAnnotationPresent(ElementCollection.class)){
-                    childProperty = collectionField.getName();
-                } else {
-                    throw new IllegalStateException(INVALID_ARGUMENT_EXCEPTION);
-                }
-
-                @SuppressWarnings("unchecked")
-                Class<C> bagEntityClass = (Class<C>) pluralAttribute.getElementType().getJavaType();
-
-                @SuppressWarnings("unchecked")
-                List<C> bag = (List<C>) batchFetchBag(
-                    pluralAttribute.getElementType().getJavaType(), childProperty, ids);
-
-                mapFetchedBagToEntity(
-                    page.getContent(), collectionField,
-                    bagEntityClass, bag, childProperty);
-            }
-        }
-
-        return page;
-    }
-
     public <T> TypedQuery<T> createPageableTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString,
         List<String> attributes, Pageable pageable) {
@@ -211,80 +140,6 @@ public class EntityManagerUtils {
         query.setFirstResult((int) pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
         return query;
-    }
-
-    public <C, ID> List<C> batchFetchBag(
-        Class<C> bagEntityClass, String foreignKeyProperty, List<ID> parentIds) {
-        String entityName = entityManager.getMetamodel().entity(bagEntityClass).getName();
-
-        String jpql = String.format(
-            "select distinct c from %s c where c.%s.id in :ids", entityName, foreignKeyProperty);
-
-        TypedQuery<C> query = entityManager.createQuery(jpql, bagEntityClass);
-        query.setParameter("ids", parentIds);
-
-        return query.getResultList();
-    }
-
-    public <T, C, ID> void mapFetchedBagToEntity(
-        List<T> parents, Field collectionField, Class<C> bagEntityClass,
-        List<C> bag, String foreignKeyProperty) {
-        Method getter;
-        try {
-            getter = bagEntityClass.getMethod("get" + Pattern.compile("^.")
-                .matcher(foreignKeyProperty)
-                .replaceFirst(matchResult -> matchResult.group().toUpperCase()));
-        } catch (NoSuchMethodException exception) {
-            throw new IllegalStateException(INVALID_GETTER_EXCEPTION);
-        }
-
-        @SuppressWarnings("unchecked")
-        Map<ID, List<C>> groupedByParent = bag.stream()
-            .collect(Collectors.groupingBy(bagEntity -> {
-                try {
-                    Object entity = getter.invoke(bagEntity);
-                    return (ID) persistenceUnitUtil.getIdentifier(entity);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new IllegalStateException(INVALID_GETTER_EXCEPTION);
-                }
-            }));
-
-        for (T parent : parents) {
-            @SuppressWarnings("unchecked")
-            ID id = (ID) persistenceUnitUtil.getIdentifier(parent);
-            List<C> children = groupedByParent.getOrDefault(id, List.of());
-            setCollection(parent, collectionField, children);
-        }
-    }
-
-    private <T, C> void setCollection(T parent, Field collectionField, List<C> children) {
-        Class<?> fieldType = collectionField.getType();
-
-        Collection<C> newCollection = switch (fieldType.getSimpleName()) {
-          case "List" -> new ArrayList<>(children);
-          case "Set" -> new HashSet<>(children);
-          case "SortedSet" -> new TreeSet<>(children);
-          default -> {
-                try {
-                    @SuppressWarnings("unchecked")
-                    Collection<C> instance = (Collection<C>) fieldType
-                        .getDeclaredConstructor()
-                        .newInstance();
-                    instance.addAll(children);
-                    yield instance;
-                } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
-                         InvocationTargetException exception) {
-                    throw new IllegalStateException(exception.getMessage());
-                }
-            }
-        };
-
-        collectionField.setAccessible(true);
-        try {
-            collectionField.set(parent, newCollection);
-        } catch (IllegalAccessException exception) {
-            throw new IllegalStateException(exception.getMessage());
-        }
     }
 
     public <T> Long createAndRunCountQueryFor(TypedQuery<T> query, String jpqlQueryString) {
