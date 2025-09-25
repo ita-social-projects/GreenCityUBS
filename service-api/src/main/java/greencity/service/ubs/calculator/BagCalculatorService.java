@@ -7,7 +7,6 @@ import greencity.entity.order.OrderBag;
 import greencity.entity.order.TariffsInfo;
 import java.util.List;
 
-//TODO add tests
 /**
  * Service for calculating order sums and preparing order bags.
  */

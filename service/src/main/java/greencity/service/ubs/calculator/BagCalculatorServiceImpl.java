@@ -125,25 +125,36 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
     }
 
     private void checkSumIfCourierLimitBySumOfOrder(TariffsInfo tariffsInfo, Long sumWithoutDiscountInCoins) {
-        if (CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(tariffsInfo.getCourierLimit())) {
-            if (sumWithoutDiscountInCoins < tariffsInfo.getMin() * AppConstant.CURRENCY_CONVERSION_RATE) {
-                throw new BadRequestException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + tariffsInfo.getMin());
-            }
-            if (tariffsInfo.getMax() != null
-                && sumWithoutDiscountInCoins > tariffsInfo.getMax() * AppConstant.CURRENCY_CONVERSION_RATE) {
-                throw new BadRequestException(PRICE_OF_ORDER_GREATER_THAN_LIMIT + tariffsInfo.getMax());
-            }
+        if (!CourierLimit.LIMIT_BY_SUM_OF_ORDER.equals(tariffsInfo.getCourierLimit())) {
+            return;
+        }
+
+        long sum = sumWithoutDiscountInCoins;
+        Long min = tariffsInfo.getMin() != null ? tariffsInfo.getMin() * AppConstant.CURRENCY_CONVERSION_RATE : null;
+        Long max = tariffsInfo.getMax() != null ? tariffsInfo.getMax() * AppConstant.CURRENCY_CONVERSION_RATE : null;
+
+        if (min != null && sum < min) {
+            throw new BadRequestException(PRICE_OF_ORDER_LOWER_THAN_LIMIT + tariffsInfo.getMin());
+        }
+        if (max != null && sum > max) {
+            throw new BadRequestException(PRICE_OF_ORDER_GREATER_THAN_LIMIT + tariffsInfo.getMax());
         }
     }
 
     private void checkAmountOfBagsIfCourierLimitByAmountOfBag(TariffsInfo courierLocation, Integer countOfBigBag) {
-        if (CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())) {
-            if (courierLocation.getMin() > countOfBigBag) {
-                throw new BadRequestException(NOT_ENOUGH_BAGS_EXCEPTION + courierLocation.getMin());
-            }
-            if (courierLocation.getMax() != null && courierLocation.getMax() < countOfBigBag) {
-                throw new BadRequestException(TOO_MANY_BAGS_EXCEPTION + courierLocation.getMax());
-            }
+        if (!CourierLimit.LIMIT_BY_AMOUNT_OF_BAG.equals(courierLocation.getCourierLimit())) {
+            return;
+        }
+
+        Long min = courierLocation.getMin();
+        Long max = courierLocation.getMax();
+
+        if (min != null && countOfBigBag < min) {
+            throw new BadRequestException(NOT_ENOUGH_BAGS_EXCEPTION + min);
+        }
+
+        if (max != null && countOfBigBag > max) {
+            throw new BadRequestException(TOO_MANY_BAGS_EXCEPTION + max);
         }
     }
 

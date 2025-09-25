@@ -1,5 +1,16 @@
 package greencity;
 
+import static greencity.enums.NotificationReceiverType.EMAIL;
+import static greencity.enums.NotificationReceiverType.MOBILE;
+import static greencity.enums.NotificationReceiverType.SITE;
+import static greencity.enums.NotificationStatus.ACTIVE;
+import static greencity.enums.NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID;
+import static greencity.enums.NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
+import static greencity.enums.NotificationType.CUSTOM;
+import static greencity.enums.NotificationType.UNPAID_ORDER;
+import static greencity.enums.ViolationLevel.MAJOR;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import com.google.common.collect.Lists;
 import com.google.maps.model.AddressComponent;
 import com.google.maps.model.AddressComponentType;
@@ -189,11 +200,6 @@ import greencity.enums.PaymentSystem;
 import greencity.enums.TariffStatus;
 import greencity.enums.UserCategory;
 import greencity.util.Bot;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -213,18 +219,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static greencity.enums.NotificationReceiverType.EMAIL;
-import static greencity.enums.NotificationReceiverType.MOBILE;
-import static greencity.enums.NotificationReceiverType.SITE;
-import static greencity.enums.NotificationStatus.ACTIVE;
-import static greencity.enums.NotificationTime.AT_6PM_3DAYS_AFTER_ORDER_FORMED_NOT_PAID;
-import static greencity.enums.NotificationTrigger.ORDER_NOT_PAID_FOR_3_DAYS;
-import static greencity.enums.NotificationType.CUSTOM;
-import static greencity.enums.NotificationType.UNPAID_ORDER;
-import static greencity.enums.ViolationLevel.MAJOR;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 public class ModelUtils {
     private static final Clock fixedClock =
@@ -3102,6 +3101,8 @@ public class ModelUtils {
             .editedBy(getEmployee())
             .limitIncluded(true)
             .tariffsInfo(getTariffInfo())
+            .nameUk("name")
+            .nameEn("name eng")
             .build();
     }
 
@@ -3473,6 +3474,7 @@ public class ModelUtils {
             .capacity(10)
             .commission(21_00L)
             .fullPrice(20_00L)
+                .limitIncluded(true)
             .build(),
             Bag.builder()
                 .status(BagStatus.ACTIVE)
@@ -3781,6 +3783,14 @@ public class ModelUtils {
             .createdBy(getEmployee())
             .editedBy(getEmployee())
             .build();
+    }
+
+    public static BagDto getBagDto() {
+        return BagDto.builder()
+            .id(1)
+            .amount(2)
+            .build();
+
     }
 
     public static OrderStatusTranslation getOrderStatusTranslation() {
