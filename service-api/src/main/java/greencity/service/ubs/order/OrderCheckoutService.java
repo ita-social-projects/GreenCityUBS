@@ -4,7 +4,6 @@ import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
 import greencity.entity.user.User;
 
-//TODO add tests
 public interface OrderCheckoutService {
     /**
      * Method returns all bags available for order.
