@@ -3,7 +3,6 @@ package greencity.service.ubs.point;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.entity.user.User;
 
-//TODO add test
 public interface PointService {
     /**
      * Method returns list all bonuses of user.
