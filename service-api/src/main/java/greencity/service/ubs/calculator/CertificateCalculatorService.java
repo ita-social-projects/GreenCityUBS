@@ -8,7 +8,6 @@ import greencity.entity.order.Order;
 import java.util.List;
 import java.util.Set;
 
-//TODO add tests
 /**
  * Service for calculating and applying certificate discounts to orders.
  * Provides methods to determine how certificates affect the final sum to pay.
