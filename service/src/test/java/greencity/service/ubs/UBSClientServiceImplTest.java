@@ -2587,7 +2587,7 @@ class UBSClientServiceImplTest {
         when(entityManagerUtils
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), anyString(), any(Pageable.class)))
+        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository
@@ -2635,7 +2635,7 @@ class UBSClientServiceImplTest {
         when(entityManagerUtils
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), anyString(), any(Pageable.class)))
+        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -2683,7 +2683,7 @@ class UBSClientServiceImplTest {
         when(entityManagerUtils
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), anyString(), any(Pageable.class)))
+        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository
@@ -2731,7 +2731,7 @@ class UBSClientServiceImplTest {
         when(entityManagerUtils
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), anyString(), any(Pageable.class)))
+        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -3058,7 +3058,7 @@ class UBSClientServiceImplTest {
         when(entityManagerUtils
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), anyString(), any(Pageable.class)))
+        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -3846,7 +3846,7 @@ class UBSClientServiceImplTest {
         when(entityManagerUtils
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), anyString(), any(Pageable.class)))
+        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))

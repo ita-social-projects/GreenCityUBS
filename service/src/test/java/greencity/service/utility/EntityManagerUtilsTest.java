@@ -4,6 +4,7 @@ import jakarta.persistence.EntityGraph;
 import jakarta.persistence.Parameter;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.TypedQuery;
+import org.hibernate.query.Query;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,6 +53,9 @@ class EntityManagerUtilsTest {
 
     @Mock
     private TypedQuery<Long> countQuery;
+
+    @Mock
+    private Query<?> unwrappedQuery;
 
     @InjectMocks
     private EntityManagerUtils entityManagerUtils;
@@ -175,12 +179,13 @@ class EntityManagerUtilsTest {
         List<DummyEntity> results = List.of(new DummyEntity(), new DummyEntity());
 
         when(typedQuery.getResultList()).thenReturn(results);
+        when(typedQuery.unwrap(Query.class)).thenReturn(unwrappedQuery);
+        when(unwrappedQuery.getQueryString()).thenReturn(jpql);
         when(entityManager.createQuery(anyString(), eq(Long.class))).thenReturn(countQuery);
         when(countQuery.getSingleResult()).thenReturn(123L);
         when(typedQuery.getParameters()).thenReturn(Collections.emptySet());
 
-        Page<DummyEntity> page = entityManagerUtils.runPageableTypedQueryWithEntityGraph(
-            typedQuery, jpql, pageable);
+        Page<DummyEntity> page = entityManagerUtils.runPageableTypedQueryWithEntityGraph(typedQuery, pageable);
 
         assertEquals(2, page.getContent().size());
         assertEquals(123L, page.getTotalElements());
@@ -196,6 +201,8 @@ class EntityManagerUtilsTest {
         when(entityManager.createQuery(jpql, DummyEntity.class)).thenReturn(typedQuery);
         when(entityManager.createEntityGraph(DummyEntity.class)).thenReturn(entityGraph);
         when(typedQuery.getResultList()).thenReturn(results);
+        when(typedQuery.unwrap(Query.class)).thenReturn(unwrappedQuery);
+        when(unwrappedQuery.getQueryString()).thenReturn(jpql);
         when(entityManager.createQuery(anyString(), eq(Long.class))).thenReturn(countQuery);
         when(countQuery.getSingleResult()).thenReturn(123L);
         when(typedQuery.getParameters()).thenReturn(Collections.emptySet());
@@ -216,13 +223,14 @@ class EntityManagerUtilsTest {
         Parameter<Object> parameter = mock(Parameter.class);
         when(parameter.getName()).thenReturn("p1");
 
+        when(typedQuery.unwrap(Query.class)).thenReturn(unwrappedQuery);
+        when(unwrappedQuery.getQueryString()).thenReturn(jpql);
         when(typedQuery.getParameters()).thenReturn(Set.of(parameter));
         when(typedQuery.getParameterValue(parameter)).thenReturn("VALUE");
-
         when(entityManager.createQuery(anyString(), eq(Long.class))).thenReturn(countQuery);
         when(countQuery.getSingleResult()).thenReturn(7L);
 
-        Long total = entityManagerUtils.createAndRunCountQueryFor(typedQuery, jpql);
+        Long total = entityManagerUtils.createAndRunCountQueryFor(typedQuery);
 
         assertEquals(7L, total);
         verify(countQuery).setParameter("p1", "VALUE");

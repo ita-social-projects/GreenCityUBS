@@ -2,9 +2,11 @@ package greencity.service.utility;
 
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Parameter;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.TypedQuery;
+import org.hibernate.query.Query;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -183,7 +185,7 @@ public class EntityManagerUtils {
         Class<T> entityClass, String jpqlQueryString, List<String> attributes, Pageable pageable) {
         TypedQuery<T> query = createPageableTypedQueryWithEntityGraph(
             entityClass, jpqlQueryString, attributes, pageable);
-        return runPageableTypedQueryWithEntityGraph(query, jpqlQueryString, pageable);
+        return runPageableTypedQueryWithEntityGraph(query, pageable);
     }
 
     /**
@@ -192,16 +194,14 @@ public class EntityManagerUtils {
      * manually before running.
      *
      * @param query           query to be run;
-     * @param jpqlQueryString jakarta persistence query language string, same as
-     *                        used in JPA repository @Query() methods;
      * @param pageable        resulting page parameters;
      * @return {@link Page} query result as a page.
      * @author Oleksandr Ilnytskyi
      */
     public <T> Page<T> runPageableTypedQueryWithEntityGraph(
-        TypedQuery<T> query, String jpqlQueryString, Pageable pageable) {
+        TypedQuery<T> query, Pageable pageable) {
         List<T> results = query.getResultList();
-        Long total = createAndRunCountQueryFor(query, jpqlQueryString);
+        Long total = createAndRunCountQueryFor(query);
         return new PageImpl<>(results, pageable, total);
     }
 
@@ -233,22 +233,30 @@ public class EntityManagerUtils {
     }
 
     /**
-     * Methods creates and runs count query based on jpqlQueryString, removing
+     * Methods creates and runs count query based on query created with jpqlQueryString, removing
      * elements that are not allowed in count queries.
      *
      * @param query           original query from which parameters for count query
      *                        will be parsed;
-     * @param jpqlQueryString jakarta persistence query language string, same as
-     *                        used in JPA repository @Query() methods;
      * @return {@link Long} total amount of elements as query result.
      * @author Oleksandr Ilnytskyi
      */
-    public <T> Long createAndRunCountQueryFor(TypedQuery<T> query, String jpqlQueryString) {
+    public <T> Long createAndRunCountQueryFor(TypedQuery<T> query) {
+        String jpqlQueryString = query.unwrap(Query.class).getQueryString();
         String countQueryString = createCountQueryStringFor(jpqlQueryString);
         TypedQuery<Long> countQuery = entityManager.createQuery(countQueryString, Long.class);
-        query.getParameters()
-            .forEach(parameter -> countQuery.setParameter(parameter.getName(), query.getParameterValue(parameter)));
+        query.getParameters().forEach(parameter -> setParameterFromQuery(query, countQuery, parameter));
+
         return countQuery.getSingleResult();
+    }
+
+    private static <T, C> void setParameterFromQuery(
+        TypedQuery<T> queryFrom, TypedQuery<C> queryTo, Parameter<?> parameter) {
+        if (parameter.getName() != null) {
+            queryTo.setParameter(parameter.getName(), queryFrom.getParameterValue(parameter));
+        } else {
+            queryTo.setParameter(parameter.getPosition(), queryFrom.getParameterValue(parameter));
+        }
     }
 
     private static String createCountQueryStringFor(String jpqlQueryString) {
