@@ -8,7 +8,6 @@ import greencity.entity.user.User;
 import greencity.enums.PaymentStatus;
 import java.util.List;
 
-//TODO add tests
 /**
  * Service for calculating payment-related information for orders.
  * Handles sums with/without discounts, and the amount already paid.
