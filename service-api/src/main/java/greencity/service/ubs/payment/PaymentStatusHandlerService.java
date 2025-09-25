@@ -3,7 +3,6 @@ package greencity.service.ubs.payment;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 
-//TODO add test
 /**
  * Service for handling payment status updates and synchronizing them
  * with the corresponding {@link Order} and {@link Payment} entities.
