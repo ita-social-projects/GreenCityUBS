@@ -205,8 +205,7 @@ class TelegramSupportServiceTest {
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(chat.getLanguageCode()), eq(MessageType.MESSAGE_SENT_TO_MANAGER))).thenReturn(responseText);
-
+            chat.getLanguageCode(), MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(responseText);
         SendMessage result = telegramSupportService.processSupportMessage(message, chat.getLanguageCode());
 
         assertTrue(result.getText().contains(responseText));

@@ -38,7 +38,6 @@ import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import greencity.service.ubs.TelegramBotResponseService;
-import greencity.ubstelegrambot.messages.MessageProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

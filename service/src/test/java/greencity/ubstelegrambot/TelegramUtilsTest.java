@@ -1,6 +1,5 @@
 package greencity.ubstelegrambot;
 
-import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
@@ -11,7 +10,6 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
-import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.ubstelegrambot.service.TelegramBotResponseServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.Test;

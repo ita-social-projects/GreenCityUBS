@@ -17,7 +17,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,17 +44,14 @@ class TelegramGreenOfficeServiceTest {
         message.setFrom(new User());
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.INVALID_EMAIL_MESSAGE)))
-            .thenReturn("text");
+            TelegramBotConstants.UK, MessageType.INVALID_EMAIL_MESSAGE)).thenReturn("text");
 
         SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message, TelegramBotConstants.UK);
 
         assertEquals("text", result.getText());
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.INVALID_EMAIL_MESSAGE));
+            TelegramBotConstants.UK, MessageType.INVALID_EMAIL_MESSAGE);
     }
 
     @Test
@@ -72,17 +68,14 @@ class TelegramGreenOfficeServiceTest {
         when(telegramChatRepository.findByChatId("12345")).thenReturn(Optional.empty());
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.UNKNOWN_ERROR)))
-            .thenReturn("text");
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR)).thenReturn("text");
 
         SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message, TelegramBotConstants.UK);
 
         assertEquals("text", result.getText());
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.UNKNOWN_ERROR));
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR);
     }
 
     @Test
@@ -106,9 +99,7 @@ class TelegramGreenOfficeServiceTest {
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.GREEN_OFFICE_THANK_YOU_MESSAGE)))
-            .thenReturn("text");
+            TelegramBotConstants.UK, MessageType.GREEN_OFFICE_THANK_YOU_MESSAGE)).thenReturn("text");
 
         SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message, TelegramBotConstants.UK);
 
@@ -120,8 +111,7 @@ class TelegramGreenOfficeServiceTest {
         assertEquals(ChatState.NORMAL, chat.getChatState());
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.GREEN_OFFICE_THANK_YOU_MESSAGE));
+            TelegramBotConstants.UK, MessageType.GREEN_OFFICE_THANK_YOU_MESSAGE);
     }
 
     @Test
@@ -142,9 +132,7 @@ class TelegramGreenOfficeServiceTest {
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.GREEN_OFFICE_THANK_YOU_MESSAGE)))
-            .thenReturn("text");
+            TelegramBotConstants.UK, MessageType.GREEN_OFFICE_THANK_YOU_MESSAGE)).thenReturn("text");
 
         SendMessage result = telegramGreenOfficeService.processGreenOfficeEmail(message, TelegramBotConstants.UK);
 
@@ -156,7 +144,6 @@ class TelegramGreenOfficeServiceTest {
         assertEquals(ChatState.NORMAL, chat.getChatState());
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.GREEN_OFFICE_THANK_YOU_MESSAGE));
+            TelegramBotConstants.UK, MessageType.GREEN_OFFICE_THANK_YOU_MESSAGE);
     }
 }

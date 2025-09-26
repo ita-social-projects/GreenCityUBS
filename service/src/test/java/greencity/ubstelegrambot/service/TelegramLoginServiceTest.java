@@ -95,13 +95,9 @@ class TelegramLoginServiceTest {
             .thenAnswer(invocation -> invocation.getArgument(0));
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.LOGIN_ERROR)))
-            .thenReturn("login error text");
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR)).thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.LOGIN_SUCCESS)))
-            .thenReturn("login success text");
+            TelegramBotConstants.UK, MessageType.LOGIN_SUCCESS)).thenReturn("login success text");
 
         SendMessage result =
             telegramLoginService.processInputManagerCredentialsRequest(message, TelegramBotConstants.UK);
@@ -110,11 +106,9 @@ class TelegramLoginServiceTest {
         assertEquals("login success text", result.getText());
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.LOGIN_ERROR));
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR);
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.LOGIN_SUCCESS));
+            TelegramBotConstants.UK, MessageType.LOGIN_SUCCESS);
         verify(telegramManagerRepository).save(any(TelegramManager.class));
         verify(userRemoteClient).signIn(any(TestersSignInRequest.class));
     }
@@ -126,13 +120,9 @@ class TelegramLoginServiceTest {
         when(message.getChatId()).thenReturn(123L);
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.LOGIN_ERROR)))
-            .thenReturn("login error text");
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR)).thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK),
-            eq(MessageType.INCORRECT_LOGIN_FORMAT)))
-            .thenReturn("incorrect login format text");
+            TelegramBotConstants.UK, MessageType.INCORRECT_LOGIN_FORMAT)).thenReturn("incorrect login format text");
 
         SendMessage result =
             telegramLoginService.processInputManagerCredentialsRequest(message, TelegramBotConstants.UK);
@@ -141,9 +131,9 @@ class TelegramLoginServiceTest {
         assertTrue(result.getText().contains("login error text"));
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR));
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR);
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.INCORRECT_LOGIN_FORMAT));
+            TelegramBotConstants.UK, MessageType.INCORRECT_LOGIN_FORMAT);
     }
 
     @Test
@@ -155,11 +145,9 @@ class TelegramLoginServiceTest {
         when(employeeRepository.findByEmailWithPositions("test@test.com")).thenReturn(Optional.empty());
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR)))
-            .thenReturn("login error text");
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR)).thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.USER_NOT_EMPLOYEE)))
-            .thenReturn("user is not employee text");
+            TelegramBotConstants.UK, MessageType.USER_NOT_EMPLOYEE)).thenReturn("user is not employee text");
 
         SendMessage result =
             telegramLoginService.processInputManagerCredentialsRequest(message, TelegramBotConstants.UK);
@@ -168,9 +156,9 @@ class TelegramLoginServiceTest {
         assertTrue(result.getText().contains("login error text"));
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR));
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR);
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.USER_NOT_EMPLOYEE));
+            TelegramBotConstants.UK, MessageType.USER_NOT_EMPLOYEE);
     }
 
     @Test
@@ -184,11 +172,9 @@ class TelegramLoginServiceTest {
         when(telegramUtils.checkIsEmployeeManager(employee)).thenReturn(false);
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR)))
-            .thenReturn("login error text");
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR)).thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.EMPLOYEE_NOT_MANAGER)))
-            .thenReturn("employee is not manager text");
+            TelegramBotConstants.UK, MessageType.EMPLOYEE_NOT_MANAGER)).thenReturn("employee is not manager text");
 
         SendMessage result =
             telegramLoginService.processInputManagerCredentialsRequest(message, TelegramBotConstants.UK);
@@ -197,9 +183,9 @@ class TelegramLoginServiceTest {
         assertTrue(result.getText().contains("login error text"));
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR));
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR);
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.EMPLOYEE_NOT_MANAGER));
+            TelegramBotConstants.UK, MessageType.EMPLOYEE_NOT_MANAGER);
     }
 
     @Test
@@ -216,11 +202,9 @@ class TelegramLoginServiceTest {
             .thenThrow(new BadRequestException("{\"name\":\"password\",\"message\":\"Bad password\"}"));
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR)))
-            .thenReturn("login error text");
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR)).thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_FAILED)))
-            .thenReturn("login failed text");
+            TelegramBotConstants.UK, MessageType.LOGIN_FAILED)).thenReturn("login failed text");
 
         SendMessage result =
             telegramLoginService.processInputManagerCredentialsRequest(message, TelegramBotConstants.UK);
@@ -229,9 +213,9 @@ class TelegramLoginServiceTest {
         assertTrue(result.getText().contains("login error text"));
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR));
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR);
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_FAILED));
+            TelegramBotConstants.UK, MessageType.LOGIN_FAILED);
     }
 
     @Test
@@ -248,11 +232,9 @@ class TelegramLoginServiceTest {
             .thenThrow(new RemoteServerUnavailableException("Server is down"));
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR)))
-            .thenReturn("login error text");
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR)).thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.SOMETHING_WENT_WRONG)))
-            .thenReturn("something went wrong text");
+            TelegramBotConstants.UK, MessageType.SOMETHING_WENT_WRONG)).thenReturn("something went wrong text");
 
         SendMessage result =
             telegramLoginService.processInputManagerCredentialsRequest(message, TelegramBotConstants.UK);
@@ -261,9 +243,9 @@ class TelegramLoginServiceTest {
         assertTrue(result.getText().contains("login error text"));
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR));
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR);
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.SOMETHING_WENT_WRONG));
+            TelegramBotConstants.UK, MessageType.SOMETHING_WENT_WRONG);
     }
 
     @Test
@@ -284,11 +266,9 @@ class TelegramLoginServiceTest {
         when(userRemoteClient.signIn(any())).thenReturn(responseEntity);
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR)))
-            .thenReturn("login error text");
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR)).thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_SUCCESS)))
-            .thenReturn("username");
+            TelegramBotConstants.UK, MessageType.LOGIN_SUCCESS)).thenReturn("username");
 
         SendMessage result =
             telegramLoginService.processInputManagerCredentialsRequest(message, TelegramBotConstants.UK);
@@ -298,7 +278,7 @@ class TelegramLoginServiceTest {
 
         verify(telegramManagerRepository).save(any(TelegramManager.class));
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_SUCCESS));
+            TelegramBotConstants.UK, MessageType.LOGIN_SUCCESS);
     }
 
     @Test
@@ -326,11 +306,9 @@ class TelegramLoginServiceTest {
         when(userRemoteClient.signIn(any())).thenReturn(responseEntity);
 
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_ERROR)))
-            .thenReturn("login error text");
+            TelegramBotConstants.UK, MessageType.LOGIN_ERROR)).thenReturn("login error text");
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_SUCCESS)))
-            .thenReturn("username");
+            TelegramBotConstants.UK, MessageType.LOGIN_SUCCESS)).thenReturn("username");
 
         SendMessage result =
             telegramLoginService.processInputManagerCredentialsRequest(message, TelegramBotConstants.UK);
@@ -340,6 +318,6 @@ class TelegramLoginServiceTest {
 
         verify(telegramManagerRepository).save(any(TelegramManager.class));
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_SUCCESS));
+            TelegramBotConstants.UK, MessageType.LOGIN_SUCCESS);
     }
 }

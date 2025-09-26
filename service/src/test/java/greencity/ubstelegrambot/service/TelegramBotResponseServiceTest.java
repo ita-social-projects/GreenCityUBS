@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TelegramBotResponseServiceTest {
+class TelegramBotResponseServiceTest {
     @InjectMocks
     private TelegramBotResponseServiceImpl telegramBotResponseServiceImpl;
 
@@ -51,7 +51,7 @@ public class TelegramBotResponseServiceTest {
 
         assertThat(result.getPage()).hasSize(2);
         assertThat(result.getTotalElements()).isEqualTo(2);
-        assertThat(result.getCurrentPage()).isEqualTo(0);
+        assertThat(result.getCurrentPage()).isZero();
         assertThat(result.getTotalPages()).isEqualTo(1);
     }
 
@@ -65,8 +65,8 @@ public class TelegramBotResponseServiceTest {
         PageableDto<BotResponseProjection> result = telegramBotResponseServiceImpl.getAllBotResponses(pageable);
 
         assertThat(result.getPage()).isEmpty();
-        assertThat(result.getCurrentPage()).isEqualTo(0);
-        assertThat(result.getTotalPages()).isEqualTo(0);
+        assertThat(result.getCurrentPage()).isZero();
+        assertThat(result.getTotalPages()).isZero();
     }
 
     @Test

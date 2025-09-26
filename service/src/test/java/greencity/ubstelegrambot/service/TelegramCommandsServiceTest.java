@@ -46,7 +46,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UK);
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.UNKNOWN_COMMAND));
+            TelegramBotConstants.UK, MessageType.UNKNOWN_COMMAND);
 
         assertEquals("123", result.getChatId());
         assertEquals(expectedText, result.getText());
@@ -71,7 +71,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UK);
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.SUPPORTED_COMMANDS));
+            TelegramBotConstants.UK, MessageType.SUPPORTED_COMMANDS);
 
         assertEquals("123", result.getChatId());
         assertEquals(expectedText, result.getText());
@@ -96,7 +96,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UK);
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.SUPPORTED_COMMANDS));
+            TelegramBotConstants.UK, MessageType.SUPPORTED_COMMANDS);
 
         assertEquals("123", result.getChatId());
         assertEquals(expectedText, result.getText());
@@ -121,7 +121,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UK);
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.CLIENT_SUPPORT_MESSAGE_CALLBACK_QUERY));
+            TelegramBotConstants.UK, MessageType.CLIENT_SUPPORT_MESSAGE_CALLBACK_QUERY);
 
         assertEquals("123", result.getChatId());
         assertEquals(expectedText, result.getText());
@@ -147,7 +147,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UK);
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.LOGIN_MESSAGE));
+            TelegramBotConstants.UK, MessageType.LOGIN_MESSAGE);
 
         assertEquals("123", result.getChatId());
         assertEquals(expectedText, result.getText());
@@ -163,8 +163,7 @@ class TelegramCommandsServiceTest {
 
         String expectedText = "text";
         when(telegramBotResponseService.getResponseByLangAndMessageType(
-            TelegramBotConstants.UK, MessageType.UNKNOWN_COMMAND))
-            .thenReturn(expectedText);
+            TelegramBotConstants.UK, MessageType.UNKNOWN_COMMAND)).thenReturn(expectedText);
 
         when(telegramUtils.updateChatStateAndRespond(eq("123"), eq(ChatState.NORMAL), any(SendMessage.class)))
             .thenAnswer(inv -> inv.getArgument(2));
@@ -172,7 +171,7 @@ class TelegramCommandsServiceTest {
         SendMessage result = telegramCommandsService.processCommand(message, TelegramBotConstants.UK);
 
         verify(telegramBotResponseService).getResponseByLangAndMessageType(
-            eq(TelegramBotConstants.UK), eq(MessageType.UNKNOWN_COMMAND));
+            TelegramBotConstants.UK, MessageType.UNKNOWN_COMMAND);
 
         assertEquals("123", result.getChatId());
         assertEquals(expectedText, result.getText());
