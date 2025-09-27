@@ -173,7 +173,7 @@ class UserRemoteWebClientConfigTest {
             .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
         String response = webClient.get()
-            .uri("/search?query=java+spring+boot&category=tutorial+guide")
+            .uri("/search?email=java+spring+boot&categoryEmail=tutorial+guide")
             .retrieve()
             .bodyToMono(String.class)
             .block();
