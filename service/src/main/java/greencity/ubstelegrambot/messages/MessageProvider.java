@@ -13,6 +13,7 @@ public class MessageProvider {
     /**
      * Retrieves a localized message for the specified language code and message
      * key.
+     *
      * <p>
      * This method first checks the internal cache for messages corresponding to the
      * provided {@code langCode}. If the messages for the given language are not
@@ -20,6 +21,7 @@ public class MessageProvider {
      * {@link MessageProvider#loadMessages(String)} and stored in the cache. Then,
      * it returns the message mapped to the given {@code key}.
      * </p>
+     *
      * <p>
      * If the message key is not found in the loaded messages, a default string in
      * the format {@code "Message not found: <key>"} is returned.

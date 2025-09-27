@@ -194,6 +194,12 @@ public class Order {
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Refund refund;
 
+    @Column(name = "payment_link")
+    private String paymentLink;
+
+    @Column(name = "payment_link_expiry")
+    private LocalDateTime paymentLinkExpiry;
+
     /**
      * Updates the list of order bags associated with this order. This method
      * replaces all current items with new ones. It also sets the order reference

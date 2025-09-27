@@ -272,6 +272,7 @@ public class SecurityConfig {
                     UBS_LINK + "/order/**",
                     UBS_LINK + "/processOrder",
                     UBS_LINK + "/processOrder/{id}",
+                    UBS_LINK + "/cancelPaymentAttempt/{id}",
                     UBS_LINK + "/save-order-address",
                     UBS_CLIENT_LINK + "/**",
                     "/notifications/**")

@@ -124,6 +124,18 @@ public interface UBSClientService {
     PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId);
 
     /**
+     * Method removes payment link data and returns specified certificates/points to
+     * user with proper change of points reason.
+     *
+     * @param orderId          {@link Long} id of order to modify;
+     * @param pointsToUse      {@link Integer} amount of points to be returned;
+     * @param certificateCodes {@link List} of certificate {@link String} codes to
+     *                         be refunded;
+     * @author Oleksandr Ilnytskyi
+     */
+    void expirePaymentAttempt(Long orderId, int pointsToUse, Set<String> certificateCodes);
+
+    /**
      * Method that returns info about all orders for specified userID.
      *
      * @param uuid current {@link User}'s uuid;
@@ -354,4 +366,15 @@ public interface UBSClientService {
     OrdersDataForUserDto getOrdersData(Order order);
 
     String formedLink(Order order, long sumToPayInCoins);
+
+    /**
+     * This method cancels invoice, sets payment link empty and fires payment expiry
+     * job after, which returns points/certificates from that attempt to user
+     * account.
+     *
+     * @param uuid    current {@link User}'s uuid.
+     * @param orderId id of the order that belongs to user.
+     * @author Oleksandr Ilnytskyi
+     */
+    void cancelPaymentAttempt(String uuid, Long orderId);
 }

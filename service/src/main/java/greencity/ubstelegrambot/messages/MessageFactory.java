@@ -11,8 +11,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessages;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -76,7 +74,7 @@ public class MessageFactory {
     public static SendMessage createForbiddenCommandsManagerMessage(String chatId, String lang) {
         return buildReplyMarkUpMessage(chatId,
             MessageProvider.get(lang, "forbidden.commands.manager") + "\n"
-                + MessageProvider.get(lang, "supported.commands"),
+                + MessageProvider.get(lang, TelegramBotConstants.SUPPORTED_COMMANDS),
             KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
@@ -90,7 +88,7 @@ public class MessageFactory {
      *         message.
      */
     public static SendMessage createAvailableCommandsMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "supported.commands"),
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, TelegramBotConstants.SUPPORTED_COMMANDS),
             KeyboardFactory.createHelpKeyboard(lang));
     }
 
@@ -105,7 +103,7 @@ public class MessageFactory {
      *         commands message.
      */
     public static SendMessage createAvailableForManagerCommandsMessage(String chatId, String lang) {
-        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, "supported.commands"),
+        return buildReplyMarkUpMessage(chatId, MessageProvider.get(lang, TelegramBotConstants.SUPPORTED_COMMANDS),
             KeyboardFactory.createHelpKeyboardForManager(lang));
     }
 
@@ -584,40 +582,6 @@ public class MessageFactory {
             .chatId(chatId)
             .messageId(telegramMessageId)
             .caption(text)
-            .build();
-    }
-
-    /**
-     * Builds a DeleteMessage object with the specified chat ID and text to delete
-     * message.
-     *
-     * @param chatId            {@link String} the telegram chat ID
-     * @param telegramMessageId {@link Integer} the ID from telegram API
-     * @return a DeleteMessage object configured with the specified chat ID and
-     *         telegram message ID
-     */
-    public static DeleteMessage buildDeleteMessage(String chatId, Integer telegramMessageId) {
-        validationChatId(chatId);
-        return DeleteMessage.builder()
-            .chatId(chatId)
-            .messageId(telegramMessageId)
-            .build();
-    }
-
-    /**
-     * Builds a DeleteMessages object with the specified chat ID and text to delete
-     * message.
-     *
-     * @param chatId             {@link String} the telegram chat ID
-     * @param telegramMessagesId {@link List} the List of IDs from telegram API
-     * @return a DeleteMessages object configured with the specified chat ID and
-     *         telegram message IDs
-     */
-    public static DeleteMessages buildDeleteMessages(String chatId, List<Integer> telegramMessagesId) {
-        validationChatId(chatId);
-        return DeleteMessages.builder()
-            .chatId(chatId)
-            .messageIds(telegramMessagesId)
             .build();
     }
 

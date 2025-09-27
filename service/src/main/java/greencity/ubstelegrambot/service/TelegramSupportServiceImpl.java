@@ -12,6 +12,7 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
 import greencity.repository.TelegramChatRepository;
@@ -36,6 +37,8 @@ import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.games.Animation;
+import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -62,11 +65,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
      */
     @Override
     @Transactional
-
     public SendMessage processSupportMessage(Message message, String lang) {
-        Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
+        Optional<TelegramChat> optionalChat = findAndValidateChat(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
-            log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
             return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
                 TelegramBotConstants.UK);
         }
@@ -94,6 +95,50 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         return processMessageContent(chat, message);
     }
 
+    @Override
+    @Transactional
+    public SendMessage processEditedSupportMessage(Message edited, String lang) {
+        Optional<TelegramChat> optionalChat = findAndValidateChat(edited.getFrom().getId().toString());
+        if (optionalChat.isEmpty()) {
+            return MessageFactory.createUnknownErrorOccurredMessage(edited.getChatId().toString(),
+                TelegramBotConstants.UK);
+        }
+        TelegramChat chat = optionalChat.get();
+
+        if (edited.hasText()
+            && edited.getText().startsWith("/start")
+            && chat.getChatState() == ChatState.IN_SUPPORT) {
+            log.info("User is already in support chat {}. Filtering system /start edited", chat.getChatId());
+            return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), lang);
+        }
+
+        TelegramMessage telegramMessage =
+            telegramMessageRepository.findByChatAndTelegramMessageId(chat, edited.getMessageId()).orElse(null);
+
+        if (telegramMessage == null) {
+            log.warn("Edited message {} not found in DB", edited.getMessageId());
+            return null;
+        }
+        if (edited.hasText()) {
+            telegramMessage.setText(edited.getText());
+        } else if (edited.getCaption() != null) {
+            telegramMessage.setText(edited.getCaption());
+        } else {
+            telegramMessage.setText(null);
+        }
+
+        telegramMessageRepository.save(telegramMessage);
+        return null;
+    }
+
+    private Optional<TelegramChat> findAndValidateChat(String chatId) {
+        Optional<TelegramChat> optionalChat = telegramChatRepository.findByChatId(chatId);
+        if (optionalChat.isEmpty()) {
+            log.warn("Telegram chat not found by ID: {}", chatId);
+        }
+        return optionalChat;
+    }
+
     private SendMessage processMessageContent(TelegramChat chat, Message message) {
         String mediaGroupId = message.getMediaGroupId();
         Optional<TelegramMessage> previouslySavedMessage = mediaGroupId == null
@@ -111,9 +156,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private TelegramMessage getOrSaveTelegramMessage(TelegramChat chat,
         Message message,
         String mediaGroupId,
-        Optional<TelegramMessage> telegramMessageOpt) {
-        if (telegramMessageOpt.isPresent()) {
-            return telegramMessageOpt.get();
+        Optional<TelegramMessage> previouslySavedMessage) {
+        if (previouslySavedMessage.isPresent()) {
+            return previouslySavedMessage.get();
         }
 
         String messageText = Optional.ofNullable(message.getText())
@@ -127,6 +172,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .sendAt(Instant.now())
             .text(messageText)
             .messageViewingStatus(MessageViewingStatus.UNREAD)
+            .telegramMessageId(message.getMessageId())
             .build();
 
         telegramMessageRepository.save(telegramMessage);
@@ -140,30 +186,89 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private SendMessage processMessageFiles(TelegramChat chat,
         Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         String lang) {
         SendMessage resultMessage = null;
         FileInfo fileInfo = new FileInfo();
 
         if (message.hasPhoto()) {
-            resultMessage = setPhotoInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+            resultMessage = setPhotoInfo(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
         } else if (message.hasDocument()) {
-            resultMessage = setDocumentInfo(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
+            resultMessage = setDocumentInfo(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
+        } else if (message.hasSticker()) {
+            resultMessage = setStickerInfo(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
+        } else if (message.hasAnimation()) {
+            resultMessage = setAnimationInfo(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
         }
 
         if (fileInfo.getFileId() != null) {
-            return setFileAsMessageAsset(message, telegramMessage, telegramMessageOpt, fileInfo, lang);
-        } else if (!message.hasText() && !message.hasPhoto() && !message.hasDocument()) {
+            return setFileAsMessageAsset(message, telegramMessage, previouslySavedMessage, fileInfo, lang);
+        } else if (!message.hasText()
+            && !message.hasPhoto()
+            && !message.hasDocument()
+            && !message.hasSticker()
+            && !message.hasAnimation()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
+            resetTelegramChatDataToInternalStatus(chat, telegramMessage);
             resultMessage = MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
         }
         return resultMessage;
     }
 
+    private void resetTelegramChatDataToInternalStatus(TelegramChat chat, TelegramMessage telegramMessage) {
+        telegramMessageRepository.delete(telegramMessage);
+        var lastMessage = telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat).orElse(null);
+        var messageCount = chat.getUnreadMessagesCount() - 1;
+        chat.setLastMessage(lastMessage);
+        chat.setUnreadMessagesCount(messageCount);
+        telegramChatRepository.save(chat);
+    }
+
+    private SendMessage setStickerInfo(Message message, TelegramMessage telegramMessage,
+        Optional<TelegramMessage> previouslySavedMessage, FileInfo fileInfo, String lang) {
+        Sticker sticker = message.getSticker();
+        if (sticker == null) {
+            if (previouslySavedMessage.isEmpty()) {
+                telegramMessageRepository.delete(telegramMessage);
+            }
+            return MessageFactory.buildMessage(message.getChatId().toString(),
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
+        } else {
+            fileInfo.setFileId(sticker.getFileId());
+            fileInfo.setFileSize(sticker.getFileSize() != null ? sticker.getFileSize().longValue() : 0L);
+            fileInfo.setContentType("image/webp");
+            fileInfo.setOriginalFileName("sticker.webp");
+            return null;
+        }
+    }
+
+    private SendMessage setAnimationInfo(Message message,
+        TelegramMessage telegramMessage,
+        Optional<TelegramMessage> previouslySavedMessage,
+        FileInfo fileInfo,
+        String lang) {
+        Animation animation = message.getAnimation();
+        if (animation == null) {
+            if (previouslySavedMessage.isEmpty()) {
+                telegramMessageRepository.delete(telegramMessage);
+            }
+            return MessageFactory.buildMessage(message.getChatId().toString(),
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
+        } else {
+            fileInfo.setFileId(animation.getFileId());
+            fileInfo.setFileSize(animation.getFileSize() != null ? animation.getFileSize() : 0L);
+            fileInfo.setContentType(animation.getMimetype());
+            fileInfo.setOriginalFileName(animation.getFileName() != null
+                ? animation.getFileName()
+                : "animation.mp4");
+            return null;
+        }
+    }
+
     private SendMessage setPhotoInfo(Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         FileInfo fileInfo,
         String lang) {
         PhotoSize largestPhoto = message.getPhoto().stream()
@@ -171,7 +276,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .orElse(null);
 
         if (largestPhoto == null) {
-            if (telegramMessageOpt.isEmpty()) {
+            if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
@@ -185,16 +290,16 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
     private SendMessage setDocumentInfo(Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         FileInfo fileInfo,
         String lang) {
         Document document = message.getDocument();
         if (document == null) {
-            if (telegramMessageOpt.isEmpty()) {
+            if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
         } else {
             fileInfo.setFileId(document.getFileId());
             fileInfo.setFileSize(document.getFileSize());
@@ -206,7 +311,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
     private SendMessage setFileAsMessageAsset(Message message,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt,
+        Optional<TelegramMessage> previouslySavedMessage,
         FileInfo fileInfo,
         String lang) {
         try {
@@ -214,7 +319,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (telegramFile == null || telegramFile.getFilePath() == null) {
                 log.warn("Telegram file not found for fileId: {}", fileInfo.getFileId());
                 return MessageFactory.buildMessage(message.getChatId().toString(),
-                    MessageProvider.get(lang, "manager.file.failed"));
+                    MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
             }
 
             if (message.hasPhoto()) {
@@ -248,20 +353,21 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 .message(telegramMessage)
                 .build();
 
-            if (telegramMessageOpt.isPresent()) {
-                List<MessageAsset> existingAssets = new ArrayList<>(telegramMessage.getAssets());
-                existingAssets.add(asset);
-                telegramMessage.setAssets(existingAssets);
+            if (previouslySavedMessage.isPresent()) {
+                if (telegramMessage.getAssets() == null) {
+                    telegramMessage.setAssets(new ArrayList<>());
+                }
+                telegramMessage.getAssets().add(asset);
             } else {
-                telegramMessage.setAssets(List.of(asset));
+                telegramMessage.setAssets((new ArrayList<>(List.of(asset))));
             }
 
             messageAssetRepository.save(asset);
-        } catch (TelegramBotExecutionException | IOException e) {
+        } catch (TelegramBotExecutionException | UnsupportedTelegramAssetException | IOException e) {
             log.error("Error loading or saving file from Telegram (Filename: {}): {}", fileInfo.getOriginalFileName(),
                 e.getMessage(), e);
             return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.file.failed"));
+                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
         }
 
         return null;
@@ -271,7 +377,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         Message message,
         String mediaGroupId,
         TelegramMessage telegramMessage,
-        Optional<TelegramMessage> telegramMessageOpt) {
+        Optional<TelegramMessage> previouslySavedMessage) {
         List<MessageAssetDto> assetDtos = Optional.ofNullable(telegramMessage.getAssets())
             .orElse(Collections.emptyList())
             .stream()
@@ -295,7 +401,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .assets(assetDtos)
             .build();
 
-        if (telegramMessageOpt.isEmpty()) {
+        if (previouslySavedMessage.isEmpty()) {
             telegramChatProducer.notifyNewMessage(telegramMessageDto, chat.getId());
 
             String contentForNotification = buildContentForNotification(telegramMessage);

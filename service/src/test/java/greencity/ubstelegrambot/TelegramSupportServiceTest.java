@@ -18,6 +18,7 @@ import greencity.ubstelegrambot.messages.MessageProvider;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramSupportServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,11 +32,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.games.Animation;
+import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -60,6 +65,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class TelegramSupportServiceTest {
 
     @InjectMocks
@@ -634,5 +640,309 @@ class TelegramSupportServiceTest {
             .contains(MessageProvider.get(lang, "manager.chat.already.open.message")));
 
         verify(telegramChatRepository).findByChatId(chatId);
+    }
+
+    @Test
+    void testProcessSupportMessage_WithSticker_ShouldSaveFileAsset() throws Exception {
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("111");
+        chat.setChatState(ChatState.IN_SUPPORT);
+        chat.setLanguageCode("en");
+
+        Sticker sticker = mock(Sticker.class);
+        Message message = mock(Message.class);
+
+        User from = new User();
+        from.setId(111L);
+        when(message.getFrom()).thenReturn(from);
+        when(telegramChatRepository.findByChatId("111")).thenReturn(Optional.of(chat));
+        when(message.hasSticker()).thenReturn(true);
+        when(message.getSticker()).thenReturn(sticker);
+        when(sticker.getFileId()).thenReturn("sticker-file-id");
+        when(sticker.getFileSize()).thenReturn(100);
+
+        File tgFile = new File();
+        tgFile.setFilePath("files/sticker.webp");
+        when(telegramExecutor.executeGetFile(any())).thenReturn(tgFile);
+        when(telegramUtils.fileToByteArray(any())).thenReturn("bytes".getBytes());
+        when(userRemoteWebClient.uploadFile(any())).thenReturn("http://cdn/sticker.webp");
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, "en");
+
+        assertNotNull(result);
+        assertEquals(MessageProvider.get("en", "message.sent.to.manager"), result.getText());
+        verify(messageAssetRepository).save(any(MessageAsset.class));
+    }
+
+    @Test
+    void testProcessSupportMessage_WithNullSticker_ShouldReturnErrorMessage() {
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("111");
+        chat.setChatState(ChatState.IN_SUPPORT);
+        chat.setLanguageCode("en");
+
+        Message message = mock(Message.class);
+
+        User from = new User();
+        from.setId(111L);
+        when(message.getFrom()).thenReturn(from);
+        when(telegramChatRepository.findByChatId("111")).thenReturn(Optional.of(chat));
+        when(message.hasSticker()).thenReturn(true);
+        when(message.getSticker()).thenReturn(null);
+        when(message.getChatId()).thenReturn(111L);
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, "en");
+
+        assertNotNull(result);
+        assertEquals(MessageProvider.get("en", "manager.file.failed"), result.getText());
+
+        verify(telegramMessageRepository).delete(any());
+    }
+
+    @Test
+    void testProcessSupportMessage_WithAnimation_ShouldSaveFileAsset() throws Exception {
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("111");
+        chat.setChatState(ChatState.IN_SUPPORT);
+        chat.setLanguageCode("en");
+
+        Message message = mock(Message.class);
+
+        User from = new User();
+        from.setId(111L);
+        when(message.getFrom()).thenReturn(from);
+        when(telegramChatRepository.findByChatId("111")).thenReturn(Optional.of(chat));
+
+        Animation animation = mock(Animation.class);
+        when(message.hasAnimation()).thenReturn(true);
+        when(message.getAnimation()).thenReturn(animation);
+        when(animation.getFileId()).thenReturn("anim-file-id");
+        when(animation.getFileSize()).thenReturn(200L);
+        when(animation.getMimetype()).thenReturn("video/mp4");
+        when(animation.getFileName()).thenReturn("clip.mp4");
+
+        File tgFile = new File();
+        tgFile.setFilePath("files/clip.mp4");
+        when(telegramExecutor.executeGetFile(any())).thenReturn(tgFile);
+        when(telegramUtils.fileToByteArray(any())).thenReturn("video".getBytes());
+        when(userRemoteWebClient.uploadFile(any())).thenReturn("http://cdn/clip.mp4");
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, "en");
+
+        assertNotNull(result);
+        assertTrue(result.getText().contains(MessageProvider.get("en", "message.sent.to.manager")));
+        verify(messageAssetRepository).save(any(MessageAsset.class));
+    }
+
+    @Test
+    void testProcessSupportMessage_WithNullAnimation_ShouldReturnErrorMessage() {
+        TelegramChat chat = new TelegramChat();
+        chat.setId(1L);
+        chat.setChatId("111");
+        chat.setChatState(ChatState.IN_SUPPORT);
+        chat.setLanguageCode("en");
+
+        Message message = mock(Message.class);
+
+        User from = new User();
+        from.setId(111L);
+        when(telegramChatRepository.findByChatId("111")).thenReturn(Optional.of(chat));
+
+        when(message.getFrom()).thenReturn(from);
+        when(message.hasAnimation()).thenReturn(true);
+        when(message.getAnimation()).thenReturn(null);
+        when(message.getChatId()).thenReturn(111L);
+
+        SendMessage result = telegramSupportService.processSupportMessage(message, "en");
+
+        assertNotNull(result);
+        assertEquals((MessageProvider.get("en", "manager.file.failed")), result.getText());
+        verify(telegramMessageRepository).delete(any());
+    }
+
+    @Test
+    void testProcessSupportMessage_AnimationWithoutFileName_DefaultFileNameUsed() throws IOException {
+        // given
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123");
+        chat.setChatState(ChatState.IN_SUPPORT);
+        chat.setLanguageCode("en");
+
+        when(telegramChatRepository.findByChatId(anyString())).thenReturn(Optional.of(chat));
+
+        Animation animation = mock(Animation.class);
+        when(animation.getFileId()).thenReturn("file123");
+        when(animation.getFileSize()).thenReturn(1024L);
+        when(animation.getMimetype()).thenReturn("video/mp4");
+        when(animation.getFileName()).thenReturn(null);
+
+        Message message = mock(Message.class);
+        when(message.getFrom()).thenReturn(mock(User.class));
+        when(message.hasAnimation()).thenReturn(true);
+        when(message.getAnimation()).thenReturn(animation);
+
+        // file download
+        File telegramFile = new File();
+        telegramFile.setFilePath("video/file.mp4");
+        when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(telegramFile);
+        when(telegramUtils.fileToByteArray(any(File.class))).thenReturn(new byte[] {1, 2, 3});
+        when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("http://file-url");
+
+        // when
+        SendMessage result = telegramSupportService.processSupportMessage(message, "en");
+
+        // then
+        assertNotNull(result);
+        verify(messageAssetRepository).save(argThat(asset -> asset.getFileName().equals("animation.mp4")));
+    }
+
+    @Test
+    void processEditedSupportMessage_ChatNotFound_ReturnsError() {
+        // Given
+        Message editedMessage = createMessage(12345L, 67890L, 98765, "Hello");
+
+        when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.empty());
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNotNull(result);
+        assertEquals(String.valueOf(12345), result.getChatId());
+    }
+
+    @Test
+    void processEditedSupportMessage_StartCommandInSupport_ReturnsAlreadyInSupportMessage() {
+        // Given
+        Message editedMessage = createMessage(12345L, 67890L, 98765, "/start");
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(editedMessage.getFrom().getId()));
+        chat.setChatState(ChatState.IN_SUPPORT);
+        when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "en");
+
+        // Then
+        assertNotNull(result);
+        assertEquals(String.valueOf(67890), result.getChatId());
+    }
+
+    @Test
+    void processEditedSupportMessage_EditedMessageNotFound_ReturnsNull() {
+        // Given
+        Message editedMessage = createMessage(12345L, 67890L, 98765, "New edited text");
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(editedMessage.getFrom().getId()));
+
+        when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
+            .thenReturn(Optional.empty());
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        verify(telegramMessageRepository, never()).save(any());
+    }
+
+    @Test
+    void processEditedSupportMessage_HasText_UpdatesMessageAndSaves() {
+        // Given
+        Message editedMessage = createMessage(12345L, 67890L, 98765, "New edited text");
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(editedMessage.getFrom().getId()));
+        when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.of(chat));
+
+        TelegramMessage existingMessage = new TelegramMessage();
+        existingMessage.setTelegramMessageId(editedMessage.getMessageId());
+        existingMessage.setText("Old text");
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
+            .thenReturn(Optional.of(existingMessage));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        assertEquals("New edited text", existingMessage.getText());
+        verify(telegramMessageRepository).save(existingMessage);
+    }
+
+    @Test
+    void processEditedSupportMessage_HasCaption_UpdatesMessageAndSaves() {
+        // Given
+        Message editedMessage = new Message();
+        editedMessage.setMessageId(98765);
+        editedMessage.setCaption("New edited caption");
+
+        User user = new User();
+        user.setId(67890L);
+        editedMessage.setFrom(user);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(user.getId()));
+        when(telegramChatRepository.findByChatId(user.getId().toString())).thenReturn(Optional.of(chat));
+
+        TelegramMessage existingMessage = new TelegramMessage();
+        existingMessage.setTelegramMessageId(editedMessage.getMessageId());
+        existingMessage.setText("Old text");
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
+            .thenReturn(Optional.of(existingMessage));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        assertEquals("New edited caption", existingMessage.getText());
+        verify(telegramMessageRepository).save(existingMessage);
+    }
+
+    @Test
+    void processEditedSupportMessage_HasNone_UpdatesMessageAndSaves() {
+        // Given
+        Message editedMessage = new Message();
+        editedMessage.setMessageId(98765);
+
+        User user = new User();
+        user.setId(67890L);
+        editedMessage.setFrom(user);
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId(String.valueOf(user.getId()));
+        when(telegramChatRepository.findByChatId(user.getId().toString())).thenReturn(Optional.of(chat));
+
+        TelegramMessage existingMessage = new TelegramMessage();
+        existingMessage.setTelegramMessageId(editedMessage.getMessageId());
+        existingMessage.setText("Old text");
+        when(telegramMessageRepository.findByChatAndTelegramMessageId(chat, editedMessage.getMessageId()))
+            .thenReturn(Optional.of(existingMessage));
+
+        // When
+        SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
+
+        // Then
+        assertNull(result);
+        assertNull(existingMessage.getText());
+        verify(telegramMessageRepository).save(existingMessage);
+    }
+
+    private Message createMessage(Long id, Long chatId, Integer messageId, String text) {
+        Message message = new Message();
+        Chat chat = new Chat();
+        chat.setId(id);
+        message.setChat(chat);
+        message.setMessageId(messageId);
+        message.setText(text);
+
+        User user = new User();
+        user.setId(chatId);
+        message.setFrom(user);
+
+        return message;
     }
 }

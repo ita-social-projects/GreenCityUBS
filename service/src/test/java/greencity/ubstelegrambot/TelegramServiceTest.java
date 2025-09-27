@@ -23,6 +23,7 @@ import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.MessageAssetRepository;
@@ -57,8 +58,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessages;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -87,9 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -98,7 +95,6 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -202,17 +198,15 @@ class TelegramServiceTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123456");
 
-        when(executor.executeSendFile(any(SendDocument.class))).thenReturn(mockTelegramResponse(10));
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
-        when(file.getOriginalFilename()).thenReturn("image.svg");
-        when(file.getSize()).thenReturn(2048L);
         when(file.getContentType()).thenReturn(null);
-        when(userRemoteWebClient.uploadFile(file)).thenReturn("http://image");
 
-        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+        assertThrows(UnsupportedTelegramAssetException.class,
+            () -> telegramService.sendMessageToUser(request, new MultipartFile[] {file}));
 
-        verify(userRemoteWebClient).uploadFile(file);
-        verify(executor).executeSendFile(any(SendDocument.class));
+        verify(telegramChatRepository).findById(1L);
+        verifyNoInteractions(userRemoteWebClient);
+        verifyNoInteractions(executor);
     }
 
     @Test
@@ -1200,6 +1194,7 @@ class TelegramServiceTest {
         chat.setChatId("123456");
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.of(chat));
+        when(file.getContentType()).thenReturn("application/pdf");
         when(file.getName()).thenReturn("large_file.pdf");
         when(file.getSize()).thenReturn(51L * 1024 * 1024);
 
@@ -1247,6 +1242,7 @@ class TelegramServiceTest {
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
         MultipartFile badFile = mock(MultipartFile.class);
+        when(badFile.getContentType()).thenReturn("application/pdf");
         when(badFile.getInputStream()).thenThrow(new IOException("fake IO fail"));
 
         MultipartFile[] files = new MultipartFile[] {badFile};
@@ -1298,241 +1294,12 @@ class TelegramServiceTest {
     }
 
     @Test
-    void deleteMessage_shouldDeleteAndUpdateLastMessage() {
-        var chat = new TelegramChat();
-        chat.setId(1L);
-        chat.setChatId("12345");
-
-        var message = new TelegramMessage();
-        message.setId(100L);
-        message.setTelegramMessageId(42);
-        message.setFromManager(true);
-        message.setChat(chat);
-
-        chat.setLastMessage(message);
-
-        when(telegramChatRepository.findById(anyLong())).thenReturn(Optional.of(chat));
-        when(telegramMessageRepository.findById(anyLong()))
-            .thenReturn(Optional.of(message));
-
-        telegramService.deleteManagerMessage(message.getId(), chat.getId());
-
-        verify(executor).executeCommand(any(DeleteMessage.class));
-        verify(telegramMessageRepository).delete(message);
-        verify(telegramChatRepository).save(chat);
-    }
-
-    @Test
-    void deleteAsset_shouldDeleteParentIfNoAssetsLeft() {
-        var chat = new TelegramChat();
-        chat.setId(2L);
-        chat.setChatId("123456");
-
-        var parent = new TelegramMessage();
-        parent.setId(200L);
-        parent.setTelegramMessageId(55);
-        parent.setFromManager(true);
-        parent.setChat(chat);
-
-        var asset = new MessageAsset();
-        asset.setId(300L);
-        asset.setTelegramMessageId(56);
-        asset.setMessage(parent);
-
-        parent.getAssets().add(asset);
-        chat.setLastMessage(parent);
-
-        when(messageAssetRepository.findById(asset.getId())).thenReturn(Optional.of(asset));
-
-        telegramService.deleteManagerAsset(asset.getId(), chat.getId());
-
-        verify(executor).executeCommand(any(DeleteMessage.class));
-        verify(telegramMessageRepository).delete(parent);
-        verify(messageAssetRepository).delete(asset);
-    }
-
-    @Test
-    void deleteAsset_shouldEditCaptionIfTextPresentAndAssetsRemain() {
-        var chat = new TelegramChat();
-        chat.setId(3L);
-        chat.setChatId("123456");
-
-        var parent = new TelegramMessage();
-        parent.setId(201L);
-        parent.setTelegramMessageId(66);
-        parent.setFromManager(true);
-        parent.setChat(chat);
-        parent.setText("hello");
-
-        var asset1 = new MessageAsset();
-        asset1.setId(301L);
-        asset1.setTelegramMessageId(67);
-        asset1.setMessage(parent);
-
-        var asset2 = new MessageAsset();
-        asset2.setId(302L);
-        asset2.setTelegramMessageId(68);
-        asset2.setMessage(parent);
-
-        parent.getAssets().add(asset1);
-        parent.getAssets().add(asset2);
-
-        when(messageAssetRepository.findById(asset1.getId())).thenReturn(Optional.of(asset1));
-
-        telegramService.deleteManagerAsset(asset1.getId(), chat.getId());
-
-        verify(messageAssetRepository).delete(asset1);
-        verify(executor).executeCommand(any(EditMessageCaption.class));
-        verifyNoMoreInteractions(telegramMessageRepository);
-    }
-
-    @Test
-    void deleteAsset_whenFromManagerIsFalse_shouldReturnNoting() {
-        TelegramMessage mess = TelegramMessage.builder()
-            .fromManager(false)
-            .chat(TelegramChat.builder().chatId("123").build())
-            .build();
-
-        MessageAsset asset = MessageAsset.builder()
-            .message(mess)
-            .telegramMessageId(1)
-            .build();
-        when(messageAssetRepository.findById(1L)).thenReturn(Optional.of(asset));
-
-        telegramService.deleteManagerAsset(1L, 1L);
-
-        verify(messageAssetRepository, never()).delete(any());
-        verify(executor, never()).executeCommand(any(DeleteMessage.class));
-    }
-
-    @Test
-    void deleteManagerMessage_shouldThrowNotFoundException_whenMessageIdIsNull() {
-        when(telegramChatRepository.findById(anyLong())).thenReturn(Optional.of(new TelegramChat()));
-        assertThrows(NotFoundException.class, () -> telegramService.deleteManagerMessage(null, 1L));
-    }
-
-    @Test
-    void deleteManagerMessage_WhenHasAssets_ShouldDeleteAllAssets() {
-        Long chatId = 1L;
-        Long messageId = 10L;
-
-        TelegramChat chat = new TelegramChat();
-        chat.setId(1L);
-        chat.setChatId("123");
-
-        MessageAsset asset1 = new MessageAsset();
-        asset1.setTelegramMessageId(111);
-        MessageAsset asset2 = new MessageAsset();
-        asset2.setTelegramMessageId(222);
-
-        TelegramMessage message = new TelegramMessage();
-        message.setFromManager(true);
-        message.setAssets(List.of(asset1, asset2));
-        message.setChat(chat);
-
-        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-        when(telegramMessageRepository.findById(messageId)).thenReturn(Optional.of(message));
-
-        telegramService.deleteManagerMessage(messageId, chatId);
-
-        verify(executor).executeCommand(
-            argThat(cmd -> cmd instanceof DeleteMessages &&
-                ((DeleteMessages) cmd).getMessageIds().containsAll(List.of(111, 222))));
-        verify(telegramMessageRepository).delete(message);
-        verify(telegramChatRepository).save(chat);
-    }
-
-    @Test
-    void deleteManagerMessage_WhenNoAssets_ShouldDeleteSingleMessage() {
-        Long chatId = 1L;
-        Long messageId = 20L;
-
-        TelegramChat chat = new TelegramChat();
-        chat.setId(1L);
-        chat.setChatId("456");
-
-        TelegramMessage message = new TelegramMessage();
-        message.setFromManager(true);
-        message.setTelegramMessageId(999);
-        message.setChat(chat);
-
-        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-        when(telegramMessageRepository.findById(messageId)).thenReturn(Optional.of(message));
-
-        telegramService.deleteManagerMessage(messageId, chatId);
-
-        verify(executor).executeCommand(
-            argThat(cmd -> cmd instanceof DeleteMessage &&
-                ((DeleteMessage) cmd).getMessageId() == 999));
-        verify(telegramMessageRepository).delete(message);
-        verify(telegramChatRepository).save(chat);
-    }
-
-    @Test
-    void deleteManagerMessage_WhenMessageIdIsNull_ShouldThrowNotFoundException() {
-        Long chatId = 1L;
-
-        TelegramChat chat = new TelegramChat();
-        chat.setId(chatId);
-        chat.setChatId("123");
-        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-
-        assertThrows(NotFoundException.class,
-            () -> telegramService.deleteManagerMessage(null, chatId));
-
-        verifyNoInteractions(telegramMessageRepository);
-        verifyNoInteractions(executor);
-    }
-
-    @Test
     void editManagerMessage_shouldThrowNotFoundException_whenChatNotFound() {
         EditTelegramMessageRequest request = new EditTelegramMessageRequest(1L, 100L, "new text");
 
         when(telegramChatRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> telegramService.editManagerMessage(request));
-    }
-
-    @Test
-    void deleteManagerMessage_WhenMessageIdIsZero_ShouldThrowNotFoundException() {
-        Long chatId = 1L;
-
-        TelegramChat chat = new TelegramChat();
-        chat.setId(chatId);
-        chat.setChatId("123");
-        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-
-        assertThrows(NotFoundException.class,
-            () -> telegramService.deleteManagerMessage(0L, chatId));
-
-        verifyNoInteractions(telegramMessageRepository);
-        verifyNoInteractions(executor);
-    }
-
-    @Test
-    void deleteManagerMessage_WhenMessageDoesNotBelongToChat_ShouldThrowNotFoundException() {
-        Long chatId = 1L;
-        Long messageId = 10L;
-
-        TelegramChat chat = new TelegramChat();
-        chat.setId(chatId);
-        chat.setChatId("123");
-
-        TelegramChat otherChat = new TelegramChat();
-        otherChat.setId(99L);
-
-        TelegramMessage message = new TelegramMessage();
-        message.setFromManager(true);
-        message.setChat(otherChat);
-
-        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-        when(telegramMessageRepository.findById(messageId)).thenReturn(Optional.of(message));
-
-        assertThrows(NotFoundException.class,
-            () -> telegramService.deleteManagerMessage(messageId, chatId));
-
-        verifyNoInteractions(executor);
-        verify(telegramMessageRepository, never()).delete(any());
     }
 
     @Test
@@ -1545,28 +1312,6 @@ class TelegramServiceTest {
         when(telegramMessageRepository.findById(100L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> telegramService.editManagerMessage(request));
-    }
-
-    @Test
-    void deleteManagerMessage_WhenFromManagerIsFalse_ShouldDoNothing() {
-        Long chatId = 1L;
-        Long messageId = 10L;
-
-        TelegramChat chat = new TelegramChat();
-        chat.setId(chatId);
-        chat.setChatId("123");
-
-        TelegramMessage message = new TelegramMessage();
-        message.setFromManager(false);
-        message.setChat(chat);
-
-        when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-        when(telegramMessageRepository.findById(messageId)).thenReturn(Optional.of(message));
-
-        telegramService.deleteManagerMessage(messageId, chatId);
-
-        verifyNoInteractions(executor);
-        verify(telegramMessageRepository, never()).delete(any());
     }
 
     @Test
@@ -1683,8 +1428,6 @@ class TelegramServiceTest {
         TelegramChat chat = new TelegramChat();
         chat.setChatId("123");
         when(telegramChatRepository.findById(any())).thenReturn(Optional.of(chat));
-
-        when(file.getSize()).thenReturn(1024L);
 
         CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
         request.setChatId(1L);

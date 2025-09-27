@@ -6,11 +6,14 @@ import greencity.dto.notification.AddNotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.UserCategoryDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.service.notification.NotificationTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.constraints.Positive;
@@ -30,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/notification")
@@ -157,5 +161,20 @@ public class ManagementNotificationController {
     public ResponseEntity<HttpStatus> removeNotificationTemplate(@Positive @PathVariable Long id) {
         notificationTemplateService.removeNotificationTemplate(id);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Controller that returns a list of all user categories.
+     */
+    @Operation(summary = "Get all user categories")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserCategoryDto.class)))),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
+    @GetMapping("/get-all-user-categories")
+    public ResponseEntity<List<UserCategoryDto>> getAllUserCategories() {
+        return ResponseEntity.status(HttpStatus.OK).body(notificationTemplateService.getAllUserCategories());
     }
 }
