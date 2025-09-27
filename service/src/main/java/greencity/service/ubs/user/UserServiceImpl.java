@@ -16,6 +16,7 @@ import greencity.repository.UserDeactivationRepo;
 import greencity.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -116,17 +117,16 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<String> getDeactivationReasons(Long id, String currentUserUuid) {
-        List<UserDeactivationReason> userReasons = userDeactivationRepo.getLastDeactivationReasons(id);
-        if (userReasons.isEmpty()) {
+        Optional<UserDeactivationReason> userReason = userDeactivationRepo.getLastDeactivationReason(id);
+        if (userReason.isEmpty()) {
             throw new NotFoundException(ErrorMessage.USER_DEACTIVATION_REASON_IS_EMPTY);
         }
 
-        UserDeactivationReason lastReason = userReasons.getFirst();
         String userLang = userRemoteClient.findUserLanguageByUuid(currentUserUuid);
         if (userLang.equals("uk")) {
             userLang = "uk";
         }
-        return filterReasons(userLang, lastReason.getReason());
+        return filterReasons(userLang, userReason.get().getReason());
     }
 
     /**

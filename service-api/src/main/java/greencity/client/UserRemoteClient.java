@@ -159,7 +159,7 @@ public interface UserRemoteClient {
      * @param uuid {@link User}'s uuid.
      * @return {@link UserExternalDto}.
      */
-    @GetMapping("/user/findByUuid")
+    @GetMapping("/user/findByUuid/external")
     UserExternalDto findByUuid(@RequestParam String uuid);
 
     /**

@@ -1097,6 +1097,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private boolean isUserActive(User user) {
-        return user.getStatus().equals(UserStatus.ACTIVATED);
+        return user.getStatus() == UserStatus.ACTIVATED;
     }
 }

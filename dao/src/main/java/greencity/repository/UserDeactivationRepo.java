@@ -1,7 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.user.UserDeactivationReason;
-import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,5 +12,5 @@ public interface UserDeactivationRepo extends JpaRepository<UserDeactivationReas
             SELECT * FROM reasons_for_user_deactivation where id_user = :id \
             ORDER BY date_of_deactivation DESC LIMIT 1
         """)
-    List<UserDeactivationReason> getLastDeactivationReasons(Long id);
+    Optional<UserDeactivationReason> getLastDeactivationReason(Long id);
 }

@@ -32,7 +32,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -284,8 +283,8 @@ class UserServiceImplTest {
             .dateTimeOfDeactivation(LocalDateTime.now())
             .build();
 
-        when(userDeactivationRepo.getLastDeactivationReasons(userId))
-            .thenReturn(Collections.singletonList(deactivationReason));
+        when(userDeactivationRepo.getLastDeactivationReason(userId))
+            .thenReturn(Optional.of(deactivationReason));
         when(userRemoteClient.findUserLanguageByUuid(currentUserUuid)).thenReturn("en");
 
         List<String> result = userService.getDeactivationReasons(userId, currentUserUuid);
@@ -307,8 +306,8 @@ class UserServiceImplTest {
             .dateTimeOfDeactivation(LocalDateTime.now())
             .build();
 
-        when(userDeactivationRepo.getLastDeactivationReasons(userId))
-            .thenReturn(Collections.singletonList(deactivationReason));
+        when(userDeactivationRepo.getLastDeactivationReason(userId))
+            .thenReturn(Optional.of(deactivationReason));
         when(userRemoteClient.findUserLanguageByUuid(currentUserUuid)).thenReturn("uk");
 
         List<String> result = userService.getDeactivationReasons(userId, currentUserUuid);
@@ -325,8 +324,8 @@ class UserServiceImplTest {
         Long userId = 1L;
         String currentUserUuid = "current-user-uuid";
 
-        when(userDeactivationRepo.getLastDeactivationReasons(userId))
-            .thenReturn(Collections.emptyList());
+        when(userDeactivationRepo.getLastDeactivationReason(userId))
+            .thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> userService.getDeactivationReasons(userId, currentUserUuid));
@@ -344,8 +343,8 @@ class UserServiceImplTest {
             .dateTimeOfDeactivation(LocalDateTime.now())
             .build();
 
-        when(userDeactivationRepo.getLastDeactivationReasons(userId))
-            .thenReturn(Collections.singletonList(deactivationReason));
+        when(userDeactivationRepo.getLastDeactivationReason(userId))
+            .thenReturn(Optional.of(deactivationReason));
         when(userRemoteClient.findUserLanguageByUuid(currentUserUuid)).thenReturn("uk");
 
         List<String> result = userService.getDeactivationReasons(userId, currentUserUuid);
@@ -385,8 +384,8 @@ class UserServiceImplTest {
             .dateTimeOfDeactivation(LocalDateTime.now())
             .build();
 
-        when(userDeactivationRepo.getLastDeactivationReasons(userId))
-            .thenReturn(Collections.singletonList(deactivationReason));
+        when(userDeactivationRepo.getLastDeactivationReason(userId))
+            .thenReturn(Optional.of(deactivationReason));
         when(userRemoteClient.findUserLanguageByUuid(currentUserUuid)).thenReturn("en");
 
         List<String> result = userService.getDeactivationReasons(userId, currentUserUuid);
@@ -405,8 +404,8 @@ class UserServiceImplTest {
             .dateTimeOfDeactivation(LocalDateTime.now())
             .build();
 
-        when(userDeactivationRepo.getLastDeactivationReasons(userId))
-            .thenReturn(Collections.singletonList(deactivationReason));
+        when(userDeactivationRepo.getLastDeactivationReason(userId))
+            .thenReturn(Optional.of(deactivationReason));
         when(userRemoteClient.findUserLanguageByUuid(currentUserUuid)).thenReturn("en");
 
         List<String> result = userService.getDeactivationReasons(userId, currentUserUuid);

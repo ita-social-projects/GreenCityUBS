@@ -199,7 +199,7 @@ public class ErrorMessage {
     public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
     public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
         "Template cannot be deleted while it is referenced by existing notifications";
-    public static final String FORBIDDEN_USER_DELETION = "Blocker or deactivated user cannot be deleted";
+    public static final String FORBIDDEN_USER_DELETION = "Blocked or deactivated user cannot be deleted";
     public static final String USER_CANNOT_DEACTIVATE_YOURSELF = "You cannot deactivate yourself if you are not a USER";
     public static final String ADMIN_CANNOT_DEACTIVATE_OTHER_ADMIN = "ADMIN cannot deactivate other ADMIN users";
     public static final String USER_DEACTIVATION_REASON_IS_EMPTY = "The User deactivation reasons list is empty";

@@ -334,7 +334,6 @@ public class SecurityConfig {
                 .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.DELETE,
                     "/notifications/{notificationId}",
-                    UBS_LINK_USERPROFILE + "/user/exists",
                     UBS_LINK_USERPROFILE + "/user/delete")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.TRACE,
