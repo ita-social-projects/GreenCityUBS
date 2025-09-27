@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class UserRemoteWebClientConfigTest {
@@ -73,12 +74,10 @@ class UserRemoteWebClientConfigTest {
             .setBody("{\"message\": \"Not Found error from API\"}")
             .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
-        NotFoundException ex = assertThrows(
-            NotFoundException.class,
-            () -> webClient.get().uri("/")
-                .retrieve()
-                .bodyToMono(String.class)
-                .block());
+        Mono<String> body = webClient.get().uri("/")
+            .retrieve()
+            .bodyToMono(String.class);
+        NotFoundException ex = assertThrows(NotFoundException.class, body::block);
         RecordedRequest request = mockWebServer.takeRequest();
 
         assertTrue(ex.getMessage().contains("Not Found error from API"));
@@ -93,12 +92,10 @@ class UserRemoteWebClientConfigTest {
             .setBody("{\"message\": \"Bad Request error from API\"}")
             .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
-        BadRequestException ex = assertThrows(
-            BadRequestException.class,
-            () -> webClient.get().uri("/")
-                .retrieve()
-                .bodyToMono(String.class)
-                .block());
+        Mono<String> body = webClient.get().uri("/")
+            .retrieve()
+            .bodyToMono(String.class);
+        BadRequestException ex = assertThrows(BadRequestException.class, body::block);
         RecordedRequest request = mockWebServer.takeRequest();
 
         assertTrue(ex.getMessage().contains("Bad Request error from API"));
@@ -113,12 +110,10 @@ class UserRemoteWebClientConfigTest {
             .setBody("{\"message\": \"Internal Server Error from API\"}")
             .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
-        GreenCityUserServiceException ex = assertThrows(
-            GreenCityUserServiceException.class,
-            () -> webClient.get().uri("/")
-                .retrieve()
-                .bodyToMono(String.class)
-                .block());
+        Mono<String> body = webClient.get().uri("/")
+            .retrieve()
+            .bodyToMono(String.class);
+        GreenCityUserServiceException ex = assertThrows(GreenCityUserServiceException.class, body::block);
         RecordedRequest request = mockWebServer.takeRequest();
 
         assertTrue(ex.getMessage().contains("Internal Server Error from API"));
@@ -133,12 +128,10 @@ class UserRemoteWebClientConfigTest {
             .setBody("{\"message\": \"Internal Server Error from API\"}")
             .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
-        IllegalStateException ex = assertThrows(
-            IllegalStateException.class,
-            () -> webClient.get().uri("/")
-                .retrieve()
-                .bodyToMono(String.class)
-                .block());
+        Mono<String> body = webClient.get().uri("/")
+            .retrieve()
+            .bodyToMono(String.class);
+        IllegalStateException ex = assertThrows(IllegalStateException.class, body::block);
         RecordedRequest request = mockWebServer.takeRequest();
 
         assertTrue(ex.getMessage().contains("Internal Server Error from API"));

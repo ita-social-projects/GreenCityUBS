@@ -81,11 +81,9 @@ class UserProfileControllerTest {
         UserProfileDto userProfileDto = ModelUtils.userProfileDto();
         List<AddressDto> addressDto = ModelUtils.addressDto();
         userProfileDto.setAddressDto(addressDto);
-
-        ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(userProfileDto);
-
         String uuid = "uuid";
+
         when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
         mockMvc.perform(put(AppConstant.UBS_LINK_USERPROFILE + "/user/update")
@@ -124,7 +122,6 @@ class UserProfileControllerTest {
 
     @Test
     void createUserProfileTest() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
         String content = objectMapper.writeValueAsString(getUserProfileCreateDto());
         mockMvc.perform(post(AppConstant.UBS_LINK_USERPROFILE + "/user/create")
             .content(content)
