@@ -2,6 +2,8 @@ package greencity.service;
 
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.admin.SettingsTextDto;
+import greencity.dto.admin.UpdateSectionTextsDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CourierUpdateDto;
@@ -21,6 +23,7 @@ import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
 import greencity.enums.LocationStatus;
+import greencity.enums.MainPageTextSection;
 import greencity.filters.TariffsInfoFilterCriteria;
 import java.util.List;
 
@@ -254,7 +257,6 @@ public interface SuperAdminService {
      *
      * @param tariffId        {@link Long} tariff id
      * @param setTariffLimits {@link SetTariffLimitsDto} dto
-     *
      * @author Julia Seti
      */
     void setTariffLimits(Long tariffId, SetTariffLimitsDto setTariffLimits);
@@ -264,7 +266,6 @@ public interface SuperAdminService {
      *
      * @param tariffId {@link Long} tariff id
      * @return {@link GetTariffLimitsDto} dto
-     *
      * @author Julia Seti
      */
     GetTariffLimitsDto getTariffLimits(Long tariffId);
@@ -274,7 +275,6 @@ public interface SuperAdminService {
      *
      * @param tariffId     {@link Long} tariff id
      * @param tariffStatus {@link String} tariff status
-     *
      * @author Julia Seti
      */
     void switchTariffStatus(Long tariffId, String tariffStatus);
@@ -297,4 +297,25 @@ public interface SuperAdminService {
      *                                      and activation status.
      */
     void switchActivationStatusByChosenParams(DetailsOfDeactivateTariffsDto detailsOfDeactivateTariffsDto);
+
+    /**
+     * Method for retrieving text fields for main page.
+     *
+     * @param filter {@link String} - string for filtering text fields for specific
+     *               sections
+     * @return {@link SettingsTextDto}
+     * @author Bohdan Lys
+     */
+    SettingsTextDto getAllTextsFields(MainPageTextSection filter);
+
+    /**
+     * Method for retrieving text fields for main page.
+     *
+     * @param updateSectionTextsDto {@link List} dto for updating text fields for
+     *                              specific sections
+     * @param section               {@link MainPageTextSection} enum for specific
+     *                              section
+     * @author Bohdan Lys
+     */
+    void updateSectionTextFields(List<UpdateSectionTextsDto> updateSectionTextsDto, MainPageTextSection section);
 }
