@@ -69,4 +69,7 @@ public class TelegramMessage {
 
     @Column(name = "text", length = 1000)
     private String text;
+
+    @Column(name = "isUpdated", nullable = false)
+    private Boolean isUpdated;
 }

@@ -156,6 +156,7 @@ public class TelegramServiceImpl implements TelegramService {
             .sendAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
             .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
+            .isUpdated(false)
             .build();
 
         telegramMessageRepository.save(textMessage);
@@ -172,6 +173,7 @@ public class TelegramServiceImpl implements TelegramService {
             .status(MessageDeliveryStatus.SENT)
             .sendAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
+            .isUpdated(false)
             .build();
 
         List<MessageAsset> imageAssets = createImageAssets(images, imageMessage);
@@ -250,6 +252,7 @@ public class TelegramServiceImpl implements TelegramService {
                 .status(MessageDeliveryStatus.SENT)
                 .sendAt(Instant.now())
                 .messageViewingStatus(MessageViewingStatus.READ)
+                .isUpdated(false)
                 .build();
 
             String url = uploadFile(file);
@@ -344,12 +347,13 @@ public class TelegramServiceImpl implements TelegramService {
 
                 return new TelegramMessageDto(
                     message.getId(),
-                    message.getSendAt(),
+                    message.getIsUpdated() == false ? message.getSendAt() : message.getUpdatedAt(),
                     message.getText(),
                     message.getFromManager(),
                     message.getStatus(),
                     assetDtos,
-                    message.getMessageViewingStatus());
+                    message.getMessageViewingStatus(),
+                    message.getIsUpdated());
             }).toList();
 
         return new PageableDto<>(
@@ -433,11 +437,12 @@ public class TelegramServiceImpl implements TelegramService {
             TelegramMessageDto lastMessage = TelegramMessageDto.builder()
                 .id(message.getId())
                 .text(message.getText())
-                .sendAt(message.getSendAt())
+                .sendAt(message.getIsUpdated() == false ? message.getSendAt() : message.getUpdatedAt())
                 .fromManager(message.getFromManager())
                 .deliveryStatus(message.getStatus())
                 .assets(assetDtos)
                 .messageViewingStatus(message.getMessageViewingStatus())
+                .isUpdated(message.getIsUpdated())
                 .build();
 
             chatDtoBuilder.lastMessage(lastMessage);
@@ -582,6 +587,7 @@ public class TelegramServiceImpl implements TelegramService {
                 .orElseThrow(NotFoundException::new);
             if (Boolean.TRUE.equals(message.getFromManager())) {
                 message.setUpdatedAt(Instant.now());
+                message.setIsUpdated(true);
                 message.setText(request.newText());
                 if (!message.getAssets().isEmpty()) {
                     MessageAsset firstAsset = message.getAssets().getFirst();

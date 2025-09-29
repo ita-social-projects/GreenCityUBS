@@ -293,6 +293,7 @@ class TelegramServiceTest {
             .sendAt(Instant.now())
             .fromManager(false)
             .status(MessageDeliveryStatus.SENT)
+            .isUpdated(false)
             .assets(List.of(MessageAsset.builder()
                 .id(1L)
                 .url("http://example.com/file.png")
@@ -367,6 +368,7 @@ class TelegramServiceTest {
             .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
+            .isUpdated(false)
             .assets(List.of(asset))
             .build();
 
@@ -487,6 +489,7 @@ class TelegramServiceTest {
             .sendAt(Instant.now())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
+            .isUpdated(false)
             .assets(null)
             .build();
 
