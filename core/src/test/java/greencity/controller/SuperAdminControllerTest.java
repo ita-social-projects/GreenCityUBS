@@ -8,6 +8,7 @@ import greencity.constant.ErrorMessage;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.admin.SettingsTextDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
@@ -21,6 +22,7 @@ import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.enums.LocationStatus;
+import greencity.enums.MainPageTextSection;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -51,10 +53,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -69,6 +73,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -1071,5 +1076,60 @@ class SuperAdminControllerTest {
     void deactivateCourier() throws Exception {
         mockMvc.perform(patch(ubsLink + "/deactivateCourier/{id}", 1L)).andExpect(status().isOk());
         verify(superAdminService).deactivateCourier(1L);
+    }
+
+    @Test
+    void getAllSettingsTextForMainPageWithoutFilterTest() throws Exception {
+        Map<String, Map<String, String>> uk = Map.of(
+            MainPageTextSection.HEADER.toString(), Map.of("caption", "Головна сторінка"),
+            MainPageTextSection.PRICE.toString(), Map.of("content", "Тест"));
+
+        Map<String, Map<String, String>> en = Map.of(
+            MainPageTextSection.HEADER.toString(), Map.of("caption", "Home page"),
+            MainPageTextSection.PRICE.toString(), Map.of("content", "Test"));
+
+        SettingsTextDto dto = SettingsTextDto.builder()
+            .uk(uk)
+            .en(en)
+            .section(List.of(MainPageTextSection.values()))
+            .build();
+
+        Mockito.when(superAdminService.getAllTextsFields(null)).thenReturn(dto);
+
+        mockMvc.perform(get(ubsLink + "/settingsText")
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.uk.HEADER.caption").value("Головна сторінка"))
+            .andExpect(jsonPath("$.en.HEADER.caption").value("Home page"))
+            .andExpect(jsonPath("$.uk.PRICE.content").value("Тест"))
+            .andExpect(jsonPath("$.en.PRICE.content").value("Test"))
+            .andExpect(jsonPath("$.section").isArray());
+    }
+
+    @Test
+    void getAllSettingsTextForMainPageWithFilterTest() throws Exception {
+        Map<String, Map<String, String>> uk = Map.of(
+            MainPageTextSection.HEADER.toString(), Map.of("caption", "Головна сторінка"),
+            MainPageTextSection.PRICE.toString(), Map.of("content", "Тест"));
+
+        Map<String, Map<String, String>> en = Map.of(
+            MainPageTextSection.HEADER.toString(), Map.of("caption", "Home page"),
+            MainPageTextSection.PRICE.toString(), Map.of("content", "Test"));
+
+        SettingsTextDto dto = SettingsTextDto.builder()
+            .uk(uk)
+            .en(en)
+            .section(List.of(MainPageTextSection.values()))
+            .build();
+
+        Mockito.when(superAdminService.getAllTextsFields(eq(MainPageTextSection.HEADER))).thenReturn(dto);
+
+        mockMvc.perform(get(ubsLink + "/settingsText")
+            .param("filter", String.valueOf(MainPageTextSection.HEADER))
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.uk.HEADER.caption").value("Головна сторінка"))
+            .andExpect(jsonPath("$.en.HEADER.caption").value("Home page"))
+            .andExpect(jsonPath("$.section").isArray());
     }
 }
