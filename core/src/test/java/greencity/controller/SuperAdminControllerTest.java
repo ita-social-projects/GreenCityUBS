@@ -59,6 +59,7 @@ import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -1105,6 +1106,7 @@ class SuperAdminControllerTest {
             .andExpect(jsonPath("$.uk.PRICE.content").value("Тест"))
             .andExpect(jsonPath("$.en.PRICE.content").value("Test"))
             .andExpect(jsonPath("$.section").isArray());
+        verify(superAdminService).getAllTextsFields(null);
     }
 
     @Test
@@ -1150,6 +1152,6 @@ class SuperAdminControllerTest {
             .andExpect(status().isOk());
 
         Mockito.verify(superAdminService)
-            .updateSectionTextFields(any(List.class), eq(MainPageTextSection.HEADER));
+            .updateSectionTextFields(anyList(), eq(MainPageTextSection.HEADER));
     }
 }
