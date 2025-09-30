@@ -935,7 +935,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         MainPageTextSection section) {
         for (UpdateSectionTextsDto dto : updateSectionTextsDto) {
             SettingsText existing = settingsTextRepository
-                .findBySectionAndFieldIgnoreCase(section.toString(), dto.getField())
+                .findBySectionAndFieldIgnoreCase(section.toString().toLowerCase(), dto.getField())
                 .orElseThrow(() -> new NotFoundException(
                     "SettingsText not found for section: " + section
                         + ", field: " + dto.getField()));
