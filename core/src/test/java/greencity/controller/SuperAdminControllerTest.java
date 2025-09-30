@@ -1143,11 +1143,10 @@ class SuperAdminControllerTest {
             .build();
         String requestJSON = new ObjectMapper().writeValueAsString(List.of(dto));
 
-
         mockMvc.perform(put(ubsLink + "/settingsText/section")
-                .param("section", MainPageTextSection.HEADER.name())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJSON))
+            .param("section", MainPageTextSection.HEADER.name())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestJSON))
             .andExpect(status().isOk());
 
         Mockito.verify(superAdminService)
