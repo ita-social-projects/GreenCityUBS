@@ -2819,7 +2819,7 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void getAllTextsFieldsWhenFilterIsNullShouldReturnAll(){
+    void getAllTextsFieldsWhenFilterIsNullShouldReturnAll() {
         SettingsText text1 = new SettingsText(1L, "header", "caption", "Заголовок", "Caption", null);
         SettingsText text2 = new SettingsText(2L, "price", "caption", "Заголовок", "Caption", null);
         when(settingsTextRepository.findAll()).thenReturn(List.of(text1, text2));
