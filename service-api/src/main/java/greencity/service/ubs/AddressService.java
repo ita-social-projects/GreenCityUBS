@@ -137,7 +137,6 @@ public interface AddressService {
      */
     ReadAddressByOrderDto getAddressByOrderId(Long orderId);
 
-    //TODO add test
     /**
      * Checks if the given address belongs to the specified location area.
      * - For Kyiv tariff: verifies if the address city is part of Kyiv.

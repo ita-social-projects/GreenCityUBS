@@ -25,6 +25,7 @@ import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.OptionForColumnDTO;
 import greencity.dto.RegionDto;
+import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffInfoDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.address.AddressDto;
@@ -3887,6 +3888,16 @@ public class ModelUtils {
             .locationsDto(getLocationsDto()).build();
     }
 
+    //TODO change this move Location Dto to the Service-api
+    public static greencity.dto.LocationsDto getLocationDtoFromDao(){
+        return greencity.dto.LocationsDto.builder()
+            .id(1L)
+            .locationStatus("ACTIVE")
+            .longitude(3.34d)
+            .latitude(1.32d)
+            .build();
+    }
+
     public static List<LocationsDto> getLocationsDto() {
         return List.of(LocationsDto.builder()
             .locationTranslationDtoList(getLocationTranslationDto())
@@ -5055,6 +5066,13 @@ public class ModelUtils {
 
     public static TariffsForLocationDto getTariffsForLocationDto() {
         return TariffsForLocationDto.builder().build();
+    }
+
+    public static TariffInfoByLocationDto getTariffInfoByLocationDto() {
+        return TariffInfoByLocationDto.builder()
+            .tariffsForLocationDto(getTariffsForLocationDto())
+            .orderIsPresent(true)
+            .build();
     }
 
     public static CertificateDto createCertificateDto() {

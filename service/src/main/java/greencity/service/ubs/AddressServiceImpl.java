@@ -88,10 +88,10 @@ public class AddressServiceImpl implements AddressService {
     private final CourierRepository courierRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final GoogleApiService googleApiService;
+    private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
     private final EventService eventService;
     private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
     private final ModelMapper modelMapper;
-    private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
     private static final Integer MAXIMUM_NUMBER_OF_ADDRESSES = 4;
 
     /**
@@ -169,74 +169,6 @@ public class AddressServiceImpl implements AddressService {
         OrderAddress orderAddress = orderAddressRepository.findByOrderId(orderId)
             .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ORDER_ID + orderId));
         return modelMapper.map(orderAddress, ReadAddressByOrderDto.class);
-    }
-
-    @Override
-    @Transactional
-    public boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
-        Address address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new NotFoundException(AppConstant.ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
-
-        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
-
-        if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
-            return isKyivTariff;
-        } else if (locationId == TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId()) {
-            checkAndCalculateAddressCoordinatesIfEmpty(address);
-
-            double addressLatitude = address.getCoordinates().getLatitude();
-            double addressLongitude = address.getCoordinates().getLongitude();
-
-            double distanceInKm =
-                DistanceCalculationUtils.calculateDistanceInKmByHaversineFormula(AppConstant.KYIV_LATITUDE,
-                    AppConstant.KYIV_LONGITUDE,
-                    addressLatitude, addressLongitude);
-
-            return distanceInKm <= AppConstant.LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
-        } else {
-            return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
-        }
-    }
-
-    @Override
-    @Transactional
-    public OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser) {
-        return orderAddressRepository.save(formOrderAddress(addressId, locationId, currentUser));
-    }
-
-    @Override
-    @Transactional
-    public OrderAddress getOrUpdateOrderAddress(OrderAddress currentOrderAddress, Long newAddressId, Long newLocationId,
-                                                User currentUser) {
-        OrderAddress newOrderAddress = formOrderAddress(
-            newAddressId, newLocationId, currentUser);
-        newOrderAddress.setId(currentOrderAddress.getId());
-
-        if (currentOrderAddress.equals(newOrderAddress)) {
-            return currentOrderAddress;
-        }
-        return orderAddressRepository.save(newOrderAddress);
-    }
-
-    @Override
-    public List<LocationsDto> getAllLocations() {
-        List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
-        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).toList();
-    }
-
-    @Override
-    public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
-        if (!courierRepository.existsCourierById(courierId)) {
-            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
-        }
-        List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
-        return locations.stream()
-            .map(locationToLocationsDtoMapper::convert)
-            .map(locationsDto -> locationsDto.setTariffsId(
-                tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
-                    .orElseThrow(() -> new NotFoundException(
-                        String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, locationsDto.getId(), courierId)))))
-            .toList();
     }
 
     /**
@@ -395,6 +327,74 @@ public class AddressServiceImpl implements AddressService {
             .map(u -> modelMapper.map(u, AddressDto.class))
             .toList();
         return new OrderWithAddressesResponseDto(addressDtoList);
+    }
+
+    @Override
+    @Transactional
+    public boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
+        Address address = addressRepo.findById(addressId)
+            .orElseThrow(() -> new NotFoundException(AppConstant.ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
+
+        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
+
+        if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
+            return isKyivTariff;
+        } else if (locationId == TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId()) {
+            checkAndCalculateAddressCoordinatesIfEmpty(address);
+
+            double addressLatitude = address.getCoordinates().getLatitude();
+            double addressLongitude = address.getCoordinates().getLongitude();
+
+            double distanceInKm =
+                DistanceCalculationUtils.calculateDistanceInKmByHaversineFormula(AppConstant.KYIV_LATITUDE,
+                    AppConstant.KYIV_LONGITUDE,
+                    addressLatitude, addressLongitude);
+
+            return distanceInKm <= AppConstant.LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
+        } else {
+            return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
+        }
+    }
+
+    @Override
+    @Transactional
+    public OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser) {
+        return orderAddressRepository.save(formOrderAddress(addressId, locationId, currentUser));
+    }
+
+    @Override
+    @Transactional
+    public OrderAddress getOrUpdateOrderAddress(OrderAddress currentOrderAddress, Long newAddressId, Long newLocationId,
+                                                User currentUser) {
+        OrderAddress newOrderAddress = formOrderAddress(
+            newAddressId, newLocationId, currentUser);
+        newOrderAddress.setId(currentOrderAddress.getId());
+
+        if (currentOrderAddress.equals(newOrderAddress)) {
+            return currentOrderAddress;
+        }
+        return orderAddressRepository.save(newOrderAddress);
+    }
+
+    @Override
+    public List<LocationsDto> getAllLocations() {
+        List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
+        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).toList();
+    }
+
+    @Override
+    public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
+        if (!courierRepository.existsCourierById(courierId)) {
+            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
+        }
+        List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
+        return locations.stream()
+            .map(locationToLocationsDtoMapper::convert)
+            .map(locationsDto -> locationsDto.setTariffsId(
+                tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
+                    .orElseThrow(() -> new NotFoundException(
+                        String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, locationsDto.getId(), courierId)))))
+            .toList();
     }
 
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
