@@ -794,12 +794,14 @@ class SuperAdminController {
     /**
      * Controller to retrieve all text fields for main page.
      *
-     * @param filter {@link String} - string for filtering fields by sections.
+     * @param filter {@link MainPageTextSection} (optional) - string for filtering
+     *               fields by sections.
      * @author Bohdan Lys.
      */
     @Operation(summary = "Get all texts for main page.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = SettingsTextDto.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),

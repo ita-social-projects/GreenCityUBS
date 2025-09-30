@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface SettingsTextRepository extends JpaRepository<SettingsText, Long> {
     List<SettingsText> findAllBySectionIgnoreCase(String section);
 
-    Optional<SettingsText> findBySectionAndField(String section, String field);
+    Optional<SettingsText> findBySectionAndFieldIgnoreCase(String section, String field);
 }

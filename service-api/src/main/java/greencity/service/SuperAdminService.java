@@ -24,6 +24,7 @@ import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.order.Courier;
 import greencity.enums.LocationStatus;
 import greencity.enums.MainPageTextSection;
+import greencity.exceptions.NotFoundException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import java.util.List;
 
@@ -301,20 +302,21 @@ public interface SuperAdminService {
     /**
      * Method for retrieving text fields for main page.
      *
-     * @param filter {@link String} - string for filtering text fields for specific
-     *               sections
+     * @param filter {@link MainPageTextSection} - enum for filtering text fields
+     *               for specific sections
      * @return {@link SettingsTextDto}
      * @author Bohdan Lys
      */
     SettingsTextDto getAllTextsFields(MainPageTextSection filter);
 
     /**
-     * Method for retrieving text fields for main page.
+     * Method for updating existing text fields for main page.
      *
      * @param updateSectionTextsDto {@link List} dto for updating text fields for
      *                              specific sections
      * @param section               {@link MainPageTextSection} enum for specific
      *                              section
+     * @throws NotFoundException when a section–field entry isn’t found
      * @author Bohdan Lys
      */
     void updateSectionTextFields(List<UpdateSectionTextsDto> updateSectionTextsDto, MainPageTextSection section);

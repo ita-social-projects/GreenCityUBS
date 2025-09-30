@@ -64,7 +64,6 @@ import greencity.repository.UserRepository;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.SettingsTextRepository;
 import greencity.service.SuperAdminService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
@@ -936,9 +935,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         MainPageTextSection section) {
         for (UpdateSectionTextsDto dto : updateSectionTextsDto) {
             SettingsText existing = settingsTextRepository
-                .findBySectionAndField(section.toString().toLowerCase(), dto.getField())
-                .orElseThrow(() -> new EntityNotFoundException(
-                    "SettingsText not found for section: " + section.toString().toLowerCase()
+                .findBySectionAndFieldIgnoreCase(section.toString(), dto.getField())
+                .orElseThrow(() -> new NotFoundException(
+                    "SettingsText not found for section: " + section
                         + ", field: " + dto.getField()));
             existing.setValueUK(dto.getValueUK());
             existing.setValueEN(dto.getValueEN());
