@@ -2850,11 +2850,12 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void updateSectionTextFields_shouldUpdateExistingTexts() {
+    void updateSectionTextFieldsShouldUpdateExistingTexts() {
         UpdateSectionTextsDto updateDto = new UpdateSectionTextsDto("caption", "Новий текст", "New text");
         SettingsText existing = new SettingsText(1L, "header", "caption", "Старий текст", "Old text", null);
 
-        when(settingsTextRepository.findBySectionAndFieldIgnoreCase("HEADER", "caption"))
+        when(settingsTextRepository.findBySectionAndFieldIgnoreCase(MainPageTextSection.HEADER.toString().toLowerCase(),
+            "caption"))
             .thenReturn(Optional.of(existing));
 
         superAdminService.updateSectionTextFields(List.of(updateDto), MainPageTextSection.HEADER);
@@ -2865,9 +2866,10 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
-    void updateSectionTextFields_whenTextNotFound_shouldThrowException() {
+    void updateSectionTextFieldsWhenTextNotFoundShouldThrowException() {
         UpdateSectionTextsDto updateDto = new UpdateSectionTextsDto("missing", "текст", "text");
-        when(settingsTextRepository.findBySectionAndFieldIgnoreCase("HEADER", "missing"))
+        when(settingsTextRepository.findBySectionAndFieldIgnoreCase(MainPageTextSection.HEADER.toString().toLowerCase(),
+            "missing"))
             .thenReturn(Optional.empty());
 
         List<UpdateSectionTextsDto> dtos = List.of(updateDto);
