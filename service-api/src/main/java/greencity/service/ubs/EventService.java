@@ -34,7 +34,6 @@ public interface EventService {
      */
     void saveEvent(String name, String email, Order order);
 
-    //TODO add test
     /**
      * Methods for finding all events for Order.
      *

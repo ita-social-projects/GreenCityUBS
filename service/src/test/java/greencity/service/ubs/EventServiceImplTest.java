@@ -1,24 +1,38 @@
 package greencity.service.ubs;
 
+import static greencity.ModelUtils.getEvent1;
+import static greencity.ModelUtils.getEvent2;
+import static greencity.ModelUtils.getEventDto;
+import static greencity.ModelUtils.getOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
 import greencity.constant.OrderHistory;
+import greencity.dto.order.EventDto;
+import greencity.entity.order.Event;
 import greencity.entity.order.Order;
+import greencity.exceptions.BadRequestException;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
+import greencity.repository.OrderRepository;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.Arrays;
-import java.util.Optional;
-import static greencity.ModelUtils.getOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.anyString;
+import org.modelmapper.ModelMapper;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceImplTest {
@@ -26,6 +40,10 @@ class EventServiceImplTest {
     private EventRepository eventRepository;
     @Mock
     private EmployeeRepository employeeRepository;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    ModelMapper modelMapper;
 
     @InjectMocks
     private EventServiceImpl eventService;
@@ -157,5 +175,85 @@ class EventServiceImplTest {
         assertEquals("Встановлено деталі вивезення.", OrderHistory.SET_EXPORT_DETAILS_UK);
 
         verify(eventRepository, times(1)).save(any());
+    }
+
+    @Test
+    void getAllEventsForOrder_orderNotFound_throwsException() {
+        Long orderId = 1L;
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> eventService.getAllEventsForOrder(orderId, "test@email.com", "uk"));
+    }
+
+    @Test
+    void getAllEventsForOrder_noEventsFound_throwsException() {
+        Long orderId = 1L;
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(new Order()));
+        when(eventRepository.findAllEventsByOrderId(orderId)).thenReturn(List.of());
+
+        assertThrows(NotFoundException.class,
+            () -> eventService.getAllEventsForOrder(orderId, "test@email.com", "uk"));
+    }
+
+    @Test
+    void getAllEventsForOrder_withEventsUkLanguage_returnsSortedDtos() {
+        Long orderId = 1L;
+        Order order = getOrder();
+        Event event1 = getEvent1();
+        event1.setEventDate(LocalDateTime.now().minusDays(1));
+        Event event2 = getEvent2();
+        event2.setEventDate(LocalDateTime.now());
+        List<Event> events = List.of(event1, event2);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(eventRepository.findAllEventsByOrderId(orderId)).thenReturn(events);
+        when(modelMapper.map(any(Event.class), eq(EventDto.class)))
+            .thenAnswer(inv -> {
+                Event e = inv.getArgument(0);
+                EventDto dto = getEventDto();
+                dto.setEventDate(e.getEventDate());
+                return dto;
+            });
+
+        List<EventDto> result = eventService.getAllEventsForOrder(orderId, "email", "uk");
+
+        assertEquals(2, result.size());
+        assertTrue(result.get(0).getEventDate().isAfter(result.get(1).getEventDate()));
+    }
+
+    @Test
+    void getAllEventsForOrder_withEventsEnLanguage_localizesAndReturnsDtos() {
+        Long orderId = 1L;
+        Order order = getOrder();
+        Event event = getEvent1();
+        event.setEventDate(LocalDateTime.now());
+        event.setEventNameEn("EnglishName");
+        event.setAuthorNameEn("EnglishAuthor");
+        List<Event> events = List.of(event);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(eventRepository.findAllEventsByOrderId(orderId)).thenReturn(events);
+        when(modelMapper.map(any(Event.class), eq(EventDto.class)))
+            .thenReturn(new EventDto());
+
+        List<EventDto> result = eventService.getAllEventsForOrder(orderId, "email", "en");
+
+        assertEquals(1, result.size());
+        assertEquals("EnglishName", events.get(0).getEventNameUk());
+        assertEquals("EnglishAuthor", events.get(0).getAuthorNameUk());
+    }
+
+    @Test
+    void getAllEventsForOrder_withInvalidLanguage_throwsBadRequest() {
+        Long orderId = 1L;
+        Order order = getOrder();
+        Event event = getEvent1();
+        event.setEventDate(LocalDateTime.now());
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(eventRepository.findAllEventsByOrderId(orderId)).thenReturn(List.of(event));
+
+        assertThrows(BadRequestException.class,
+            () -> eventService.getAllEventsForOrder(orderId, "email", "pl"));
     }
 }
