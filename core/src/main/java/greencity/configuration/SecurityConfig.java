@@ -197,7 +197,8 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
                     SUPER_ADMIN_LINK + "/editTariffInfo/{id}",
                     SUPER_ADMIN_LINK + "/activate-employee/{id}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    SUPER_ADMIN_LINK + "/settingsText/section")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ADMIN_EMPL_LINK + "/**",
