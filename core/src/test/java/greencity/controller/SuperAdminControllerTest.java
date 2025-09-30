@@ -1123,7 +1123,7 @@ class SuperAdminControllerTest {
             .section(List.of(MainPageTextSection.values()))
             .build();
 
-        Mockito.when(superAdminService.getAllTextsFields(eq(MainPageTextSection.HEADER))).thenReturn(dto);
+        Mockito.when(superAdminService.getAllTextsFields(MainPageTextSection.HEADER)).thenReturn(dto);
 
         mockMvc.perform(get(ubsLink + "/settingsText")
             .param("filter", String.valueOf(MainPageTextSection.HEADER))

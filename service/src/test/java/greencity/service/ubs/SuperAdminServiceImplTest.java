@@ -2865,7 +2865,9 @@ class SuperAdminServiceImplTest {
         when(settingsTextRepository.findBySectionAndFieldIgnoreCase("HEADER", "missing"))
             .thenReturn(Optional.empty());
 
+        List<UpdateSectionTextsDto> dtos = List.of(updateDto);
+
         assertThrows(NotFoundException.class,
-            () -> superAdminService.updateSectionTextFields(List.of(updateDto), MainPageTextSection.HEADER));
+            () -> superAdminService.updateSectionTextFields(dtos, MainPageTextSection.HEADER));
     }
 }
