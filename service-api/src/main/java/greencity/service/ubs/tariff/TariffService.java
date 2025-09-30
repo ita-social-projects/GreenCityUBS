@@ -4,7 +4,6 @@ import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import java.util.List;
 
-//TODO add test
 public interface TariffService {
     /**
      * Method for getting info about tariff by courier ID and location ID.
