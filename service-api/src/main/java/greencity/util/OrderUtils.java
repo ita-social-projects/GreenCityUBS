@@ -66,7 +66,6 @@ public class OrderUtils {
             .orElseThrow(() -> new IllegalStateException("No payment found"));
     }
 
-    //TODO add tests
     /**
      * Extracts a numeric ID from a Base64-encoded order reference string.
      * The reference is expected in format: orderId_counterOrderPaymentId_paymentId.
