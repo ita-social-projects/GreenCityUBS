@@ -34,7 +34,6 @@ public class CourierServiceImpl implements CourierService {
     private final LocationRepository locationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final ModelMapper modelMapper;
-    //TODO make class more readable
 
     @Override
     public OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc,

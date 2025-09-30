@@ -5,7 +5,6 @@ import greencity.dto.courier.CourierDto;
 import java.util.List;
 import java.util.Optional;
 
-//TODO add test
 public interface CourierService {
     /**
      * Method for getting info about all active locations by courier ID or if user
