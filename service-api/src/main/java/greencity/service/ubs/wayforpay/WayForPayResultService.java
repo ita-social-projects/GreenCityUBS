@@ -3,7 +3,6 @@ package greencity.service.ubs.wayforpay;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import java.util.Map;
 
-//TODO add test
 public interface WayForPayResultService {
     /**
      * Processes the form parameters received from WayForPay and converts them into
@@ -14,6 +13,7 @@ public interface WayForPayResultService {
      * the payment status.
      *
      * @param formParams the form parameters received from the WayForPay callback
+     *                   (WayForPay send all json in key for some reason and value is empty)
      * @return a PaymentResponseWayForPay representing the processed payment;
      *         returns an error response if parameters are empty, invalid, or the
      *         signature check fails
