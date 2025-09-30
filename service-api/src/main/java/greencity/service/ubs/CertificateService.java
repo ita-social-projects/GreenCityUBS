@@ -31,7 +31,6 @@ public interface CertificateService {
     PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
         CertificateFilterCriteria certificateFilterCriteria);
 
-    //TODO add test
     /**
      * Methods return status of entered certificate, empty string if absent.
      *
