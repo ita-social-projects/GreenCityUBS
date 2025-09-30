@@ -106,7 +106,7 @@ class UserUpdateProcessorTest {
     void testProcess_HasSortingProcessCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.SORTING_PRICES_CALLBACK);
         when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), any())).thenReturn("text");
-        SendMessage expected = MessageFactory.createSortingPricesMessage(CHAT_ID, TelegramBotConstants.UK, "text");
+        SendMessage expected = MessageFactory.createMessageWithBackBtn(CHAT_ID, TelegramBotConstants.UK, "text");
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);
@@ -121,7 +121,7 @@ class UserUpdateProcessorTest {
     void testProcess_HasWorkScheduleCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.WORK_SCHEDULE_CALLBACK);
         when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), any())).thenReturn("text");
-        SendMessage expected = MessageFactory.createWorkScheduleMessage(CHAT_ID, TelegramBotConstants.UK, "text");
+        SendMessage expected = MessageFactory.createMessageWithBackBtn(CHAT_ID, TelegramBotConstants.UK, "text");
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);
@@ -136,7 +136,7 @@ class UserUpdateProcessorTest {
     void testProcess_HasAdmissionRulesCallback_MessageReturned() {
         Update update = createUpdateWithCallback(TelegramBotConstants.ADMISSION_RULES_CALLBACK);
         when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), any())).thenReturn("text");
-        SendMessage expected = MessageFactory.createAdmissionRulesMessage(CHAT_ID, TelegramBotConstants.UK, "text");
+        SendMessage expected = MessageFactory.createMessageWithBackBtn(CHAT_ID, TelegramBotConstants.UK, "text");
 
         when(telegramUtils.updateChatStateAndRespond(eq(CHAT_ID), eq(ChatState.NORMAL), any()))
             .thenReturn(expected);

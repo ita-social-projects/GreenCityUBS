@@ -49,19 +49,19 @@ public class UserUpdateProcessor implements TelegramUpdateProcessor {
                     String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
                         MessageType.SORTING_RULES_PRICING_MESSAGE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createSortingPricesMessage(chatId, lang, text));
+                        MessageFactory.createMessageWithBackBtn(chatId, lang, text));
                 }
                 case TelegramBotConstants.WORK_SCHEDULE_CALLBACK -> {
                     String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
                         MessageType.WORK_SCHEDULE_MESSAGE);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createWorkScheduleMessage(chatId, lang, text));
+                        MessageFactory.createMessageWithBackBtn(chatId, lang, text));
                 }
                 case TelegramBotConstants.ADMISSION_RULES_CALLBACK -> {
                     String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
                         MessageType.ADMISSION_RULES_TEXT);
                     return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-                        MessageFactory.createAdmissionRulesMessage(chatId, lang, text));
+                        MessageFactory.createMessageWithBackBtn(chatId, lang, text));
                 }
                 case TelegramBotConstants.GREEN_OFFICE_CALLBACK -> {
                     String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,

@@ -224,37 +224,7 @@ public class MessageFactory {
      * @param text   {@link String} is the localized text content of the message.
      * @return {@link SendMessage} configured with the work schedule message.
      */
-    public static SendMessage createWorkScheduleMessage(String chatId, String lang, String text) {
-        var message = buildReplyMarkUpMessage(chatId, text,
-            KeyboardFactory.createBackToMainMenuKeyboard(lang));
-        message.setParseMode(ParseMode.HTML);
-        return message;
-    }
-
-    /**
-     * Method for creating sorting prices message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     * @param lang   {@link String} is a language code of the telegram chat.
-     * @param text   {@link String} is the localized text content of the message.
-     * @return {@link SendMessage} configured with the sorting prices message.
-     */
-    public static SendMessage createSortingPricesMessage(String chatId, String lang, String text) {
-        var message = buildReplyMarkUpMessage(chatId, text,
-            KeyboardFactory.createBackToMainMenuKeyboard(lang));
-        message.setParseMode(ParseMode.HTML);
-        return message;
-    }
-
-    /**
-     * Method for creating admission rules message.
-     *
-     * @param chatId {@link String} is telegram chat id.
-     * @param lang   {@link String} is a language code of the telegram chat.
-     * @param text   {@link String} is the localized text content of the message.
-     * @return {@link SendMessage} configured with the admission rules message.
-     */
-    public static SendMessage createAdmissionRulesMessage(String chatId, String lang, String text) {
+    public static SendMessage createMessageWithBackBtn(String chatId, String lang, String text) {
         var message = buildReplyMarkUpMessage(chatId, text,
             KeyboardFactory.createBackToMainMenuKeyboard(lang));
         message.setParseMode(ParseMode.HTML);
