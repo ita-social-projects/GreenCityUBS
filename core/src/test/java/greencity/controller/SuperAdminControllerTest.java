@@ -9,6 +9,7 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
 import greencity.dto.admin.SettingsTextDto;
+import greencity.dto.admin.UpdateSectionTextsDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
@@ -1131,5 +1132,25 @@ class SuperAdminControllerTest {
             .andExpect(jsonPath("$.uk.HEADER.caption").value("Головна сторінка"))
             .andExpect(jsonPath("$.en.HEADER.caption").value("Home page"))
             .andExpect(jsonPath("$.section").isArray());
+    }
+
+    @Test
+    void updateSectionTextsFieldsValidRequestTest() throws Exception {
+        UpdateSectionTextsDto dto = UpdateSectionTextsDto.builder()
+            .field("caption")
+            .valueUK("Головна сторінка 1")
+            .valueEN("Home page 1")
+            .build();
+        String requestJSON = new ObjectMapper().writeValueAsString(List.of(dto));
+
+
+        mockMvc.perform(put(ubsLink + "/settingsText/section")
+                .param("section", MainPageTextSection.HEADER.name())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJSON))
+            .andExpect(status().isOk());
+
+        Mockito.verify(superAdminService)
+            .updateSectionTextFields(any(List.class), eq(MainPageTextSection.HEADER));
     }
 }
