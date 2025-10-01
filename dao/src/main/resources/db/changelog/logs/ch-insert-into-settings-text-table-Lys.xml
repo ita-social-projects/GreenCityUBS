@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="insert-into-settings-text-table" author="BohdanLys">
+        <insert tableName="settings_text">
+            <column name="section" value="header"/>
+            <column name="field" value="caption"/>
+            <column name="value_uk" value="Зручний pick up сервіс від УБС надає швидку сміттєву допомогу"/>
+            <column name="value_en" value="NO WASTE — NO STRESS!"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="header"/>
+            <column name="field" value="content"/>
+            <column name="value_uk" value="Ви сортуєте — ми переробляємо!"/>
+            <column name="value_en" value="You sort - we recycle!"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="preparing"/>
+            <column name="field" value="caption"/>
+            <column name="value_uk" value="Як підготуватися?"/>
+            <column name="value_en" value="How to prepare?"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="preparing"/>
+            <column name="field" value="step_01"/>
+            <column name="value_uk" value="Ознайомтеся зі списком того, що ми приймаємо"/>
+            <column name="value_en" value="Check out the list of what we accept"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="preparing"/>
+            <column name="field" value="step_02"/>
+            <column name="value_uk" value="Зберіть мікс чистих і сухих відходів в пакети"/>
+            <column name="value_en" value="Collect a mix of clean and dry waste in bags"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="preparing"/>
+            <column name="field" value="step_03"/>
+            <column name="value_uk" value="Текстильні відходи зберіть в окремий пакет"/>
+            <column name="value_en" value="Collect textile waste in a separate bag"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="preparing"/>
+            <column name="field" value="step_04"/>
+            <column name="value_uk" value="Замовте та сплатіть послугу"/>
+            <column name="value_en" value="Order and pay for the service"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="preparing"/>
+            <column name="field" value="step_05"/>
+            <column name="value_uk" value="Чекайте на зворотній зв’язок та зустріч з кур’єром"/>
+            <column name="value_en" value="Wait for feedback and a meeting with the courier"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="rules"/>
+            <column name="field" value="caption"/>
+            <column name="value_uk" value="Умови"/>
+            <column name="value_en" value="Rules"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="rules"/>
+            <column name="field" value="content"/>
+            <column name="value_uk"><![CDATA[
+Мінімальне замовлення в межах Києва — 240 л
+Мінімальне замовлення в радіусі 20 км від Києва (2400 л)
+Лайфхак: об’єднуйтеся з сусідами☝️
+Один пакет не повинен бути важче 5 кг
+            ]]></column>
+            <column name="value_en"><![CDATA[
+Minimum order within Kyiv - 240 l
+Minimum order within a radius of 20 km from Kyiv (2400 l)
+Lifehack: team up with your neighbors☝️
+One package should not weigh more than 5 kg
+            ]]></column>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="bonuses"/>
+            <column name="field" value="caption"/>
+            <column name="value_uk" value="Бонус"/>
+            <column name="value_en" value="Bonus"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="bonuses"/>
+            <column name="field" value="content"/>
+            <column name="value_uk"><![CDATA[
+Разом з оплаченими пакетами, курʼєр може безкоштовно забрати деякі екстрапозиції сировини на переробку
+Обов’язкова умова: вони мають бути чисті, сухі та складені в окремі пакети
+Інструкція з підготовки екстрапозицій
+            ]]></column>
+            <column name="value_en"><![CDATA[
+Along with paid packages, the courier can pick up some extra items of raw materials for processing for free
+Mandatory condition: they must be clean, dry and packed in a frame bag
+See the list here
+            ]]></column>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="caption_steps"/>
+            <column name="value_uk" value="Щоб замовити PICK UP сервіс:"/>
+            <column name="value_en" value="To order PICK UP service:"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="steps_title_01"/>
+            <column name="value_uk" value="Зареєструйтеся"/>
+            <column name="value_en" value="Register"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="steps_title_02"/>
+            <column name="value_uk" value="Замовте і оплатіть послугу"/>
+            <column name="value_en" value="Order and pay for the service"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="steps_title_03"/>
+            <column name="value_uk" value="Звільніть балкон"/>
+            <column name="value_en" value="Free balcony"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="steps_title_04"/>
+            <column name="value_uk" value="Переглядайте свою статистику"/>
+            <column name="value_en" value="View your statistics"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="steps_content_01"/>
+            <column name="value_uk" value="Створіть свій особистий кабінет, де зберігатиметься історія ваших замовлень"/>
+            <column name="value_en" value="Create your personal account, where the history of your orders will be stored"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="steps_content_02"/>
+            <column name="value_uk" value="Підготовка маршруту займає від 2 до 5 робочих дні"/>
+            <column name="value_en" value="Preparation of the route will take from 2 to 5 days"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="steps_content_03"/>
+            <column name="value_uk" value="Якщо не можете бути на місці в домовлений час, то залиште пакети в консьєржа, але обов'язково попередьте Кур'єра"/>
+            <column name="value_en" value="If you can’t be there at the agreed time, then leave the packages at the concierge but be sure to notify the Courier"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="price"/>
+            <column name="field" value="steps_content_04"/>
+            <column name="value_uk" value="Слідкуйте за своєю історією замовлень"/>
+            <column name="value_en" value="Keep track of your order history"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="how_works"/>
+            <column name="field" value="working_hours_caption"/>
+            <column name="value_uk" value="Час роботи"/>
+            <column name="value_en" value="Working hours"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="how_works"/>
+            <column name="field" value="route_caption"/>
+            <column name="value_uk" value="Формування маршруту"/>
+            <column name="value_en" value="Route forming time"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="how_works"/>
+            <column name="field" value="working_hours"/>
+            <column name="value_uk" value="Понеділок-п'ятниця з 09:30 до 17:30"/>
+            <column name="value_en" value="Monday-Friday from 09:30 to 17:30"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="how_works"/>
+            <column name="field" value="route"/>
+            <column name="value_uk"><![CDATA[
+Від 2 до 5 робочих днів
+Для передмістя - від 10 робочих днів
+            ]]></column>
+            <column name="value_en"><![CDATA[
+From 2 to 5 business days
+For suburbs - from 10 working days
+            ]]></column>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="how_works"/>
+            <column name="field" value="content"/>
+            <column name="value_uk" value="Отримайте безкоштовну доставку товарів"/>
+            <column name="value_en" value="Get free products shipping"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
