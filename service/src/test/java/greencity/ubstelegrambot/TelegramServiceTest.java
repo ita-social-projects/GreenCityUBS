@@ -328,6 +328,52 @@ class TelegramServiceTest {
     }
 
     @Test
+    void testFindUserMessageByChatId_EditedMessagesFound_PageableDtoReturned() {
+        Long chatId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+
+        TelegramMessage message = TelegramMessage.builder()
+            .id(100L)
+            .text("Hello")
+            .sendAt(Instant.now())
+            .fromManager(false)
+            .status(MessageDeliveryStatus.SENT)
+            .updatedAt(Instant.now().plus(10, ChronoUnit.MINUTES))
+            .assets(List.of(MessageAsset.builder()
+                .id(1L)
+                .url("http://example.com/file.png")
+                .type(AssetType.IMAGE)
+                .fileName("file.png")
+                .size(1024L)
+                .contentType("image/png")
+                .build()))
+            .build();
+
+        Page<TelegramMessage> messagePage = new PageImpl<>(List.of(message), pageable, 1);
+
+        when(telegramMessageRepository.findByChatId(chatId, pageable)).thenReturn(messagePage);
+
+        PageableDto<TelegramMessageDto> result = telegramService.findUserMessageByChatId(chatId, pageable);
+
+        assertEquals(0, result.getCurrentPage());
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+
+        TelegramMessageDto dto = result.getPage().getFirst();
+        assertEquals("Hello", dto.getText());
+        Assertions.assertFalse(dto.getFromManager());
+        assertEquals(MessageDeliveryStatus.SENT, dto.getDeliveryStatus());
+        assertEquals(1, dto.getAssets().size());
+        assertTrue(dto.getIsUpdated());
+
+        MessageAssetDto assetDto = dto.getAssets().getFirst();
+        assertEquals("http://example.com/file.png", assetDto.getUrl());
+        assertEquals("file.png", assetDto.getFileName());
+        assertEquals(AssetType.IMAGE, assetDto.getType());
+        assertEquals(Optional.of(1024L).get(), assetDto.getSize());
+    }
+
+    @Test
     void testFindUserMessageByChatId_ChatNotFound_NotFoundExceptionThrown() {
         Long chatId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
@@ -402,6 +448,69 @@ class TelegramServiceTest {
         assertEquals("Hello", lastMessage.getText());
         assertEquals(1, lastMessage.getAssets().size());
         assertEquals("http://image.png", lastMessage.getAssets().getFirst().getUrl());
+    }
+
+    @Test
+    void testGetChats_WithUserAndLastEditedMessage_ChatsReturned() {
+        String searchTerm = "test";
+        Pageable pageable = PageRequest.of(0, 10);
+
+        User user = User.builder()
+            .recipientName("Іван")
+            .recipientSurname("Петренко")
+            .recipientEmail("ivan@example.com")
+            .build();
+
+        MessageAsset asset = MessageAsset.builder()
+            .id(10L)
+            .url("http://image.png")
+            .type(AssetType.IMAGE)
+            .fileName("image.png")
+            .size(1234L)
+            .contentType("image/png")
+            .build();
+
+        TelegramMessage message = TelegramMessage.builder()
+            .id(100L)
+            .text("Hello")
+            .sendAt(Instant.now())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .updatedAt(Instant.now().plus(10, ChronoUnit.MINUTES))
+            .assets(List.of(asset))
+            .build();
+
+        TelegramChat chat = TelegramChat.builder()
+            .id(1L)
+            .chatId("123456789")
+            .firstName("Test")
+            .lastName("User")
+            .username("testuser")
+            .user(user)
+            .lastMessage(message)
+            .build();
+
+        Page<TelegramChat> chatPage = new PageImpl<>(List.of(chat), pageable, 1);
+
+        when(telegramChatRepository.findAll((ArgumentMatchers.<Specification<TelegramChat>>any()), eq(pageable)))
+            .thenReturn(chatPage);
+
+        PageableDto<ChatDto> result = telegramService.getChats(searchTerm, pageable);
+
+        assertEquals(0, result.getCurrentPage());
+        assertEquals(1, result.getTotalElements());
+
+        ChatDto chatDto = result.getPage().getFirst();
+        assertEquals("Test", chatDto.getFirstName());
+        assertNotNull(chatDto.getUser());
+        assertEquals("ivan@example.com", chatDto.getUser().getEmail());
+
+        TelegramMessageDto lastMessage = chatDto.getLastMessage();
+        assertNotNull(lastMessage);
+        assertEquals("Hello", lastMessage.getText());
+        assertEquals(1, lastMessage.getAssets().size());
+        assertEquals("http://image.png", lastMessage.getAssets().getFirst().getUrl());
+        assertTrue(lastMessage.getIsUpdated());
     }
 
     @Test
