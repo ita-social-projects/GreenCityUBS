@@ -372,18 +372,18 @@ class TelegramServiceTest {
         when(telegramChatRepository.findById(1L))
             .thenReturn(Optional.of(chat));
 
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.getOriginalFilename()).thenReturn("photo.png");
-        when(file.getContentType()).thenReturn("image/png");
-        when(file.getSize()).thenReturn(1000L);
-        when(file.getInputStream()).thenReturn(new ByteArrayInputStream("img".getBytes()));
+        MultipartFile mocked = mock(MultipartFile.class);
+        when(mocked.getOriginalFilename()).thenReturn("photo.png");
+        when(mocked.getContentType()).thenReturn("image/png");
+        when(mocked.getSize()).thenReturn(1000L);
+        when(mocked.getInputStream()).thenReturn(new ByteArrayInputStream("img".getBytes()));
 
         lenient().when(executor.executeSendPhoto(any(SendPhoto.class))).thenReturn(null);
         Message emptyMessage = new Message();
         when(executor.executeSendFile(any(SendDocument.class))).thenReturn(emptyMessage);
 
         // when
-        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+        telegramService.sendMessageToUser(request, new MultipartFile[] {mocked});
 
         // then
         ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
