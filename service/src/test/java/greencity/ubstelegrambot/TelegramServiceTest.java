@@ -39,7 +39,6 @@ import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,6 +69,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -81,7 +81,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -90,6 +92,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -153,6 +156,7 @@ class TelegramServiceTest {
     void setUp() {
         telegramUpdateProcessorMap = new HashMap<>();
         telegramUpdateProcessorMap.put("userUpdateProcessor", updateProcessor);
+        telegramUpdateProcessorMap.put("languageSwitcherProcessor", updateProcessor);
 
         telegramService = new TelegramServiceImpl(
             telegramMessageRepository,
@@ -316,7 +320,7 @@ class TelegramServiceTest {
 
         TelegramMessageDto dto = result.getPage().getFirst();
         assertEquals("Hello", dto.getText());
-        Assertions.assertFalse(dto.getFromManager());
+        assertFalse(dto.getFromManager());
         assertEquals(MessageDeliveryStatus.SENT, dto.getDeliveryStatus());
         assertEquals(1, dto.getAssets().size());
 
@@ -325,6 +329,104 @@ class TelegramServiceTest {
         assertEquals("file.png", assetDto.getFileName());
         assertEquals(AssetType.IMAGE, assetDto.getType());
         assertEquals(Optional.of(1024L).get(), assetDto.getSize());
+    }
+
+    @Test
+    void testSendMessageToUser_WhenSentMessageNotNull_ShouldUpdateIds() {
+        // given
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(123L);
+        request.setText("Hello!");
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123L");
+
+        when(telegramChatRepository.findById(123L)).thenReturn(Optional.of(chat));
+
+        Message mockedMessage = new Message();
+        mockedMessage.setMessageId(99);
+
+        when(executor.executeSendMessage(any(SendMessage.class)))
+            .thenReturn(mockedMessage);
+        // when
+        telegramService.sendMessageToUser(request, null);
+
+        // then
+        ArgumentCaptor<TelegramMessage> captor = ArgumentCaptor.forClass(TelegramMessage.class);
+        verify(telegramMessageRepository).save(captor.capture());
+
+        TelegramMessage saved = captor.getValue();
+        assertEquals(99, saved.getTelegramMessageId());
+    }
+
+    @Test
+    void testSendMessageToUser_WhenSentMessageIsNull_ShouldNotUpdateIds() throws Exception {
+        // given
+        CreateTelegramMessageRequest request = new CreateTelegramMessageRequest();
+        request.setChatId(1L);
+        request.setText("Hello image");
+
+        TelegramChat chat = new TelegramChat();
+        chat.setChatId("123");
+
+        when(telegramChatRepository.findById(1L))
+            .thenReturn(Optional.of(chat));
+
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getOriginalFilename()).thenReturn("photo.png");
+        when(file.getContentType()).thenReturn("image/png");
+        when(file.getSize()).thenReturn(1000L);
+        when(file.getInputStream()).thenReturn(new ByteArrayInputStream("img".getBytes()));
+
+        lenient().when(executor.executeSendPhoto(any(SendPhoto.class))).thenReturn(null);
+        Message emptyMessage = new Message();
+        when(executor.executeSendFile(any(SendDocument.class))).thenReturn(emptyMessage);
+
+        // when
+        telegramService.sendMessageToUser(request, new MultipartFile[] {file});
+
+        // then
+        ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
+        verify(telegramMessageRepository).save(messageCaptor.capture());
+        TelegramMessage savedMessage = messageCaptor.getValue();
+
+        assertNull(savedMessage.getTelegramMessageId(), "telegramMessageId have to be null");
+        assertNull(savedMessage.getMediaGroupId(), "mediaGroupId have to be null");
+
+        ArgumentCaptor<MessageAsset> assetCaptor = ArgumentCaptor.forClass(MessageAsset.class);
+        verify(messageAssetRepository).save(assetCaptor.capture());
+
+        MessageAsset savedAsset = assetCaptor.getValue();
+        assertNull(savedAsset.getTelegramMessageId(), "asset telegramMessageId have to be null");
+        assertNotNull(savedAsset);
+    }
+
+    @Test
+    void handleDefaultUpdate_CallbackStartsWithSetLanguage_ReturnsLanguageSwitcherProcessor() throws Exception {
+        // Arrange
+        Update update = mock(Update.class);
+        CallbackQuery callbackQuery = mock(CallbackQuery.class);
+        org.telegram.telegrambots.meta.api.objects.User mocked =
+            mock(org.telegram.telegrambots.meta.api.objects.User.class);
+
+        when(update.hasCallbackQuery()).thenReturn(true);
+        when(update.getCallbackQuery()).thenReturn(callbackQuery);
+        when(callbackQuery.getData()).thenReturn("set_language_en");
+        when(callbackQuery.getFrom()).thenReturn(mocked);
+        when(mocked.getId()).thenReturn(123L);
+
+        when(telegramChatRepository.findByChatId("123")).thenReturn(Optional.of(TelegramChat.builder()
+            .chatStateUpdatedAt(Instant.now())
+            .build()));
+
+        Method method = TelegramServiceImpl.class.getDeclaredMethod("handleDefaultUpdate", Update.class);
+        method.setAccessible(true);
+
+        // Act
+        TelegramUpdateProcessor result = (TelegramUpdateProcessor) method.invoke(telegramService, update);
+
+        // Assert
+        assertEquals(updateProcessor, result);
     }
 
     @Test
@@ -361,7 +463,7 @@ class TelegramServiceTest {
 
         TelegramMessageDto dto = result.getPage().getFirst();
         assertEquals("Hello", dto.getText());
-        Assertions.assertFalse(dto.getFromManager());
+        assertFalse(dto.getFromManager());
         assertEquals(MessageDeliveryStatus.SENT, dto.getDeliveryStatus());
         assertEquals(1, dto.getAssets().size());
         assertTrue(dto.getIsUpdated());
@@ -539,8 +641,8 @@ class TelegramServiceTest {
         assertEquals(1, result.getTotalElements());
 
         ChatDto chatDto = result.getPage().getFirst();
-        Assertions.assertNull(chatDto.getUser());
-        Assertions.assertNull(chatDto.getLastMessage());
+        assertNull(chatDto.getUser());
+        assertNull(chatDto.getLastMessage());
     }
 
     @Test
@@ -1030,7 +1132,7 @@ class TelegramServiceTest {
         assertEquals(chatId.toString(), savedChat.getChatId());
         assertEquals("TestFirst", savedChat.getFirstName());
         assertEquals("TestLast", savedChat.getLastName());
-        Assertions.assertNull(savedChat.getUser());
+        assertNull(savedChat.getUser());
     }
 
     @Test
