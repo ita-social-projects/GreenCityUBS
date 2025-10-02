@@ -550,6 +550,7 @@ class TelegramServiceTest {
         assertEquals("Hello", lastMessage.getText());
         assertEquals(1, lastMessage.getAssets().size());
         assertEquals("http://image.png", lastMessage.getAssets().getFirst().getUrl());
+        assertEquals(false, lastMessage.getIsUpdated());
     }
 
     @Test
