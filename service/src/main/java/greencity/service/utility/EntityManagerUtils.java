@@ -6,7 +6,10 @@ import jakarta.persistence.Parameter;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.TypedQuery;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,9 +35,12 @@ public class EntityManagerUtils {
     private static final String IDENTIFIER_GROUP =
         String.format("(%s)", "[._$[\\P{Z}&&\\P{Cc}&&\\P{Cf}&&\\P{Punct}]]+");
     private static final Pattern STARTS_WITH_PAREN = Pattern.compile("^\\s*\\(");
-    private static final Pattern PARENS_TO_REMOVE = Pattern.compile("(\\(.*\\bfrom\\b[^)]+\\))", 42);
+    private static final Pattern PARENS_TO_REMOVE = Pattern
+        .compile("(\\(.*\\bfrom\\b[^)]+\\))",
+            Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
     private static final Pattern ORDER_BY_PATTERN = Pattern
-        .compile("(?iu)\\s+order\\s+by\\s+[\\s\\S]*\\z", 98);
+        .compile("\\s+order\\s+by\\s+.*\\z",
+            Pattern.UNICODE_CASE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern COUNT_MATCH;
     private static final Pattern ALIAS_MATCH;
 
@@ -45,7 +52,7 @@ public class EntityManagerUtils {
         builder.append("(?:\\s+as)?\\s+)");
         builder.append(IDENTIFIER_GROUP);
         builder.append("(.*)");
-        COUNT_MATCH = Pattern.compile(builder.toString(), 34);
+        COUNT_MATCH = Pattern.compile(builder.toString(), Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
         builder = new StringBuilder();
         builder.append("(?<=\\bfrom)");
         builder.append("(?:\\s)+");
@@ -53,10 +60,21 @@ public class EntityManagerUtils {
         builder.append("(?:\\sas)*");
         builder.append("(?:\\s)+");
         builder.append("(?!(?:where|group\\s*by|order\\s*by))(\\w+)");
-        ALIAS_MATCH = Pattern.compile(builder.toString(), 2);
+        ALIAS_MATCH = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
     }
 
     public static final String ENTITY_GRAPH_ARGUMENT_EXCEPTION = "One or more specified attributes can't be applied";
+
+    private record Key(String queryString, String countProjection, boolean nativeQuery) {}
+
+    private final LoadingCache<Key, String> countQueryStringCache;
+
+    public EntityManagerUtils(@Value("${greencity.cache.lifetime}") long cacheLifeDuration) {
+        countQueryStringCache = Caffeine.newBuilder()
+            .maximumSize(100)
+            .expireAfterWrite(cacheLifeDuration, TimeUnit.MINUTES)
+            .build(key -> createCountQueryStringForInternal(key.queryString(), key.countProjection(), key.nativeQuery()));
+    }
 
     /**
      * Methods creates EntityGraph which can be then set as fetchgraph or loadgraph
@@ -259,49 +277,77 @@ public class EntityManagerUtils {
         }
     }
 
-    private static String createCountQueryStringFor(String jpqlQueryString) {
+    public String createCountQueryStringFor(String jpqlQueryString) {
         return createCountQueryStringFor(jpqlQueryString, null);
     }
 
-    private static String createCountQueryStringFor(String jpqlQueryString, @Nullable String countProjection) {
+    public String createCountQueryStringFor(String jpqlQueryString, @Nullable String countProjection) {
         return createCountQueryStringFor(jpqlQueryString, countProjection, false);
     }
 
-    private static String createCountQueryStringFor(
-        String jpqlQueryString, @Nullable String countProjection, boolean nativeQuery) {
-        Assert.hasText(jpqlQueryString, "OriginalQuery must not be null or empty");
-        Matcher matcher = COUNT_MATCH.matcher(jpqlQueryString);
+    public String createCountQueryStringFor(
+        String queryString, @Nullable String countProjection, boolean nativeQuery) {
+        Key key = new Key(queryString, countProjection, nativeQuery);
+        return countQueryStringCache.get(key);
+    }
+
+    private static String createCountQueryStringForInternal(
+        String queryString, @Nullable String countProjection, boolean nativeQuery) {
+        Assert.hasText(queryString, "OriginalQuery must not be null or empty");
+        Matcher matcher = COUNT_MATCH.matcher(queryString);
         String countQuery;
         if (countProjection == null) {
-            String variable = matcher.matches() ? matcher.group(4) : null;
-            boolean useVariable = StringUtils.hasText(variable) && !variable.startsWith("new")
-                && !variable.startsWith(" new") && !variable.startsWith("count(") && !variable.contains(",");
-            String complexCountValue = matcher.matches() && StringUtils.hasText(matcher.group(3)) ? "$3 $6" : "$6";
-            String replacement = useVariable ? "$2" : complexCountValue;
-            if (variable != null && nativeQuery && (variable.contains(",") || "*".equals(variable))) {
-                replacement = "1";
-            } else {
-                String alias = detectAlias(jpqlQueryString);
-                if ("*".equals(variable) && alias != null) {
-                    replacement = alias;
-                }
-            }
-
-            countQuery = matcher.replaceFirst(String.format("select count(%s) $5$6$7", replacement));
+            String variable = determineVariable(matcher);
+            String replacement = determineReplacement(matcher, variable, queryString, nativeQuery);
+            countQuery = buildCountQueryString(matcher, replacement);
         } else {
-            countQuery = matcher.replaceFirst(String.format("select count(%s) $5$6$7", countProjection));
+            countQuery = buildCountQueryString(matcher, countProjection);
         }
 
         return ORDER_BY_PATTERN.matcher(countQuery).replaceFirst("");
     }
 
-    private static String detectAlias(String jpqlQueryString) {
-        String alias = null;
+    private static String buildCountQueryString(Matcher matcher, String replacement) {
+        return matcher.replaceFirst(String.format("select count(%s) $5$6$7", replacement));
+    }
 
-        for (Matcher matcher = ALIAS_MATCH.matcher(removeSubqueries(jpqlQueryString)); matcher.find(); alias =
-            matcher.group(2)) {
+    private static String determineVariable(Matcher matcher) {
+        return matcher.matches() ? matcher.group(4) : null;
+    }
+
+    private static String determineReplacement(Matcher matcher, String variable, String jpqlQueryString, boolean nativeQuery) {
+        boolean hasComplexCount = matcher.matches() && StringUtils.hasText(matcher.group(3));
+        String complexCountValue = hasComplexCount ? "$3 $6" : "$6";
+
+        boolean useVariable = StringUtils.hasText(variable)
+            && !variable.startsWith("new")
+            && !variable.startsWith(" new")
+            && !variable.startsWith("count(")
+            && !variable.contains(",");
+        String replacement = useVariable ? "$2" : complexCountValue;
+
+        if (variable != null && nativeQuery && (variable.contains(",") || "*".equals(variable))) {
+            return "1";
         }
 
+        if ("*".equals(variable)) {
+            String alias = detectAlias(jpqlQueryString);
+            if (alias != null) {
+                return alias;
+            }
+        }
+
+        return replacement;
+    }
+
+    private static String detectAlias(String queryString) {
+        String refinedQueryString = removeSubqueries(queryString);
+        Matcher matcher = ALIAS_MATCH.matcher(refinedQueryString);
+        String alias = null;
+
+        while (matcher.find()) {
+            alias = matcher.group(2);
+        }
         return alias;
     }
 
@@ -312,40 +358,48 @@ public class EntityManagerUtils {
             List<Integer> opens = new ArrayList<>();
             List<Integer> closes = new ArrayList<>();
             List<Boolean> closeMatches = new ArrayList<>();
-
-            for (int i = 0; i < query.length(); ++i) {
-                char c = query.charAt(i);
-                if (c == '(') {
-                    opens.add(i);
-                } else if (c == ')') {
-                    closes.add(i);
-                    closeMatches.add(Boolean.FALSE);
-                }
-            }
-
-            StringBuilder sb = new StringBuilder(query);
-            boolean startsWithParen = STARTS_WITH_PAREN.matcher(query).find();
-
-            for (int i = opens.size() - 1; i >= (startsWithParen ? 1 : 0); --i) {
-                Integer open = opens.get(i);
-                int close = findClose(open, closes, closeMatches) + 1;
-                if (close > open) {
-                    String subquery = sb.substring(open, close);
-                    Matcher matcher = PARENS_TO_REMOVE.matcher(subquery);
-                    if (matcher.find()) {
-                        sb.replace(open, close, (new String(new char[close - open])).replace('\u0000', ' '));
-                    }
-                }
-            }
-
-            return sb.toString();
+            findParens(query, opens, closes, closeMatches);
+            return clearEligibleParens(query, opens, closes, closeMatches);
         }
+    }
+
+    private static void findParens(
+        String query, List<Integer> opens, List<Integer> closes, List<Boolean> closeMatches) {
+        for (int i = 0; i < query.length(); ++i) {
+            char c = query.charAt(i);
+            if (c == '(') {
+                opens.add(i);
+            } else if (c == ')') {
+                closes.add(i);
+                closeMatches.add(Boolean.FALSE);
+            }
+        }
+    }
+
+    private static String clearEligibleParens(
+        String query, List<Integer> opens, List<Integer> closes, List<Boolean> closeMatches) {
+        StringBuilder sb = new StringBuilder(query);
+        boolean startsWithParen = STARTS_WITH_PAREN.matcher(query).find();
+
+        for (int i = opens.size() - 1; i >= (startsWithParen ? 1 : 0); --i) {
+            Integer open = opens.get(i);
+            int close = findClose(open, closes, closeMatches) + 1;
+            if (close > open) {
+                String subquery = sb.substring(open, close);
+                Matcher matcher = PARENS_TO_REMOVE.matcher(subquery);
+                if (matcher.find()) {
+                    sb.replace(open, close, (new String(new char[close - open])).replace('\u0000', ' '));
+                }
+            }
+        }
+
+        return sb.toString();
     }
 
     private static Integer findClose(final Integer open, final List<Integer> closes, final List<Boolean> closeMatches) {
         for (int i = 0; i < closes.size(); ++i) {
             int close = closes.get(i);
-            if (close > open && !(Boolean) closeMatches.get(i)) {
+            if (close > open && Boolean.TRUE.equals(!(Boolean) closeMatches.get(i))) {
                 closeMatches.set(i, Boolean.TRUE);
                 return close;
             }
