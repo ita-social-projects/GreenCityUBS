@@ -84,6 +84,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.OrderHistory;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
@@ -127,7 +128,10 @@ import greencity.enums.SortingOrder;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
+import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CertificateRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
@@ -217,6 +221,8 @@ class UBSManagementServiceImplTest {
     @Mock
     private EventService eventService;
     @Mock
+    private OrdersAdminsPageService ordersAdminsPageService;
+    @Mock
     private OrderStatusTranslationRepository orderStatusTranslationRepository;
     @Mock
     private OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
@@ -240,6 +246,14 @@ class UBSManagementServiceImplTest {
     private NotificationParameterRepository notificationParameterRepository;
     @Mock
     private UserService userService;
+    @Mock
+    private CityRepository cityRepository;
+    @Mock
+    private DistrictRepository districtRepository;
+    @Mock
+    private BigOrderTableRepository bigOrderTableRepository;
+    @Mock
+    private UserRemoteWebClient userRemoteWebClient;
 
     @InjectMocks
     private UBSManagementServiceImpl ubsManagementService;
