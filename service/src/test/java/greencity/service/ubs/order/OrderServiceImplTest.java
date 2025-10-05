@@ -1,13 +1,21 @@
 package greencity.service.ubs.order;
 
+import static greencity.ModelUtils.bagDto;
+import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
+import static greencity.ModelUtils.getOrderStatusTranslation;
+import static greencity.ModelUtils.getOrderTest;
+import static greencity.ModelUtils.getTestUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
@@ -16,6 +24,7 @@ import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
+import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
@@ -44,7 +53,10 @@ import greencity.util.PointsUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,8 +103,7 @@ class OrderServiceImplTest {
     private Order order;
     private TariffsInfo tariffsInfo;
     private OrderAddress orderAddress;
-
-    //TODO fix, refactor and cover all code
+    //TODO fix tests use ModelUtils
 
     @BeforeEach
     void setUp() {
@@ -113,7 +124,7 @@ class OrderServiceImplTest {
         order.setCertificates(new HashSet<>());
         order.setOrderStatus(OrderStatus.FORMED);
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-        order.setSumTotalAmountWithoutDiscounts(1000L); // щоб не було NPE
+        order.setSumTotalAmountWithoutDiscounts(1000L);
         order.setPayment(new ArrayList<>());
         order.setCounterOrderPaymentId(0L);
 
@@ -146,21 +157,88 @@ class OrderServiceImplTest {
     }
 
     @Test
+    void formAndSaveOrderRequest_orderPaymentIsNull_shouldAddPayment() {
+        OrderResponseDto dto = new OrderResponseDto();
+        dto.setBags(Collections.emptyList());
+        dto.setPointsToUse(0);
+        dto.setLocationId(1L);
+        order.setPayment(null);
+
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(bagCalculatorService.prepareBagsAndCalculateTotal(anyList(), anyList(), any()))
+            .thenReturn(100L);
+        when(pointCalculatorService.reduceOrderSumDueToUsedPoints(anyLong(), anyInt()))
+            .thenReturn(100L);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        Order result = orderService.formAndSaveOrderRequest(dto, order, user, ubsUser);
+
+        assertThat(order.getPointsToUse()).isZero();
+        assertThat(dto.getPointsToUse()).isZero();
+        assertThat(result.getPayment()).isNotNull();
+    }
+
+    @Test
+    void formAndSaveOrderRequest_OrderPaymentStatusIsHalfPaid() {
+        OrderResponseDto dto = new OrderResponseDto();
+        dto.setBags(Collections.emptyList());
+        dto.setPointsToUse(0);
+        dto.setLocationId(1L);
+
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(bagCalculatorService.prepareBagsAndCalculateTotal(anyList(), anyList(), any()))
+            .thenReturn(100L);
+        when(pointCalculatorService.reduceOrderSumDueToUsedPoints(anyLong(), anyInt()))
+            .thenReturn(100L);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        orderService.formAndSaveOrderRequest(dto, order, user, ubsUser);
+
+        assertThat(order.getPointsToUse()).isZero();
+        assertThat(dto.getPointsToUse()).isZero();
+    }
+
+    @Test
+    void formAndSaveOrderRequest_pointsNotUsed_setsPointsToZero() {
+        OrderResponseDto dto = new OrderResponseDto();
+        dto.setBags(Collections.emptyList());
+        dto.setPointsToUse(0);
+        dto.setLocationId(1L);
+        order.setPointsToUse(300);
+        order.setCertificates(Set.of(ModelUtils.getCertificate()));
+
+        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+            .thenReturn(Optional.of(tariffsInfo));
+        when(bagCalculatorService.prepareBagsAndCalculateTotal(anyList(), anyList(), any()))
+            .thenReturn(200L);
+        when(pointCalculatorService.reduceOrderSumDueToUsedPoints(anyLong(), anyInt()))
+            .thenReturn(100L);
+        when(certificateCalculatorService.applyCertificatesToOrder(any(), any(), any(), anyLong()))
+            .thenReturn(100L);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        Order result = orderService.formAndSaveOrderRequest(dto, order, user, ubsUser);
+
+        assertEquals(result.getOrderPaymentStatus(), OrderPaymentStatus.HALF_PAID);
+    }
+
+    @Test
     void transferUserPointsToOrder_success() {
         order.setPointsToUse(0);
-        user.setCurrentPoints(100); // достатньо балів
-        user.setChangeOfPointsList(new ArrayList<>()); // ⚡ додано
+        user.setCurrentPoints(100);
+        user.setChangeOfPointsList(new ArrayList<>());
 
         doNothing().when(pointsUtils).checkIfUserHaveEnoughPoints(anyInt(), anyInt());
         when(orderRepository.save(any())).thenReturn(order);
 
-        orderService.transferUserPointsToOrder(order, 10); // ⚡ використовуємо 50 балів
+        orderService.transferUserPointsToOrder(order, 10);
 
         assertThat(order.getPointsToUse()).isEqualTo(10);
         assertThat(user.getCurrentPoints()).isEqualTo(90);
         assertThat(user.getChangeOfPointsList()).hasSize(1);
     }
-
 
     @Test
     void transferUserPointsToOrder_tooManyPoints() {
@@ -168,18 +246,53 @@ class OrderServiceImplTest {
         user.setCurrentPoints(100);
 
         doNothing().when(pointsUtils).checkIfUserHaveEnoughPoints(anyInt(), anyInt());
-        // simulate maxPointsToTransfer < pointsToUse
-        order.setSumTotalAmountWithoutDiscounts(2000L); // coins
+        order.setSumTotalAmountWithoutDiscounts(2000L);
         assertThatThrownBy(() -> orderService.transferUserPointsToOrder(order, 1000))
             .isInstanceOf(BadRequestException.class);
     }
 
     @Test
-    void getOrderForUser_notFound() {
-        when(ordersForUserRepository.getAllByUserUuidAndId("uuid", 1L)).thenReturn(null);
+    void getOrderForUserTest() {
+        OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
+        OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
+        Order order = getOrderTest();
+        User user = getTestUser();
+        Bag bag = bagDto();
+        List<Order> orderList = new ArrayList<>();
 
-        assertThatThrownBy(() -> orderService.getOrderForUser("uuid", 1L))
-            .isInstanceOf(NotFoundException.class);
+        bag.setCapacity(120);
+        bag.setFullPrice(1200_00L);
+        order.setAmountOfBagsOrdered(Map.of(1, 10));
+        order.setUser(user);
+        order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
+        order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        orderList.add(order);
+        when(ordersForUserRepository.getAllByUserUuidAndId(user.getUuid(), order.getId()))
+            .thenReturn(order);
+        when(orderStatusTranslationRepository
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
+            .thenReturn(Optional.of(orderStatusTranslation));
+        when(orderPaymentStatusTranslationRepository.getById(
+            (long) order.getOrderPaymentStatus().getStatusValue()))
+            .thenReturn(orderPaymentStatusTranslation);
+
+        orderService.getOrderForUser(user.getUuid(), 1L);
+
+        verify(orderStatusTranslationRepository, times(orderList.size()))
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue());
+        verify(orderPaymentStatusTranslationRepository, times(orderList.size()))
+            .getById(
+                (long) order.getOrderPaymentStatus().getStatusValue());
+    }
+
+    @Test
+    void getOrderForUserFail() {
+        Order order = getOrderTest();
+
+        when(ordersForUserRepository.getAllByUserUuidAndId("UUID", order.getId()))
+            .thenReturn(null);
+
+        assertThrows(NotFoundException.class, () -> orderService.getOrderForUser("UUID", 1L));
     }
 
     @Test
@@ -297,7 +410,6 @@ class OrderServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
-        // Для тесту користувач повинен бути власником замовлення
         order.setUser(user);
         order.setCancellationReason(CancellationReason.OTHER);
         order.setCancellationComment("comment");
@@ -316,27 +428,6 @@ class OrderServiceImplTest {
 
         assertThatThrownBy(() -> orderService.getOrderCancellationReason(1L, "uuid"))
             .isInstanceOf(AccessDeniedException.class);
-    }
-
-    @Test
-    void formAndSaveOrderRequest_pointsNotUsed_setsPointsToZero() {
-        OrderResponseDto dto = new OrderResponseDto();
-        dto.setBags(Collections.emptyList());
-        dto.setPointsToUse(0); // points не використані
-        dto.setLocationId(1L);
-
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
-        when(bagCalculatorService.prepareBagsAndCalculateTotal(anyList(), anyList(), any()))
-            .thenReturn(100L);
-        when(pointCalculatorService.reduceOrderSumDueToUsedPoints(anyLong(), anyInt()))
-            .thenReturn(100L); // sumToPayInCoins == sumToPayInCoinsWithoutDiscount
-        when(orderRepository.save(any())).thenReturn(order);
-
-        orderService.formAndSaveOrderRequest(dto, order, user, ubsUser);
-
-        assertThat(order.getPointsToUse()).isZero();
-        assertThat(dto.getPointsToUse()).isZero();
     }
 
     @Test

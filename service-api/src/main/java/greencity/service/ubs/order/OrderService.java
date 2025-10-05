@@ -14,8 +14,6 @@ import greencity.exceptions.NotFoundException;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 
-//TODO add test
-
 /**
  * Service for creating and updating {@link Order} entities,
  * including applying points and forming full order details.
