@@ -154,6 +154,7 @@ public class TelegramServiceImpl implements TelegramService {
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .sendAt(Instant.now())
+            .updatedAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
             .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
             .build();
@@ -171,6 +172,7 @@ public class TelegramServiceImpl implements TelegramService {
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .sendAt(Instant.now())
+            .updatedAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
@@ -249,6 +251,7 @@ public class TelegramServiceImpl implements TelegramService {
                 .text(caption)
                 .status(MessageDeliveryStatus.SENT)
                 .sendAt(Instant.now())
+                .updatedAt(Instant.now())
                 .messageViewingStatus(MessageViewingStatus.READ)
                 .build();
 

@@ -126,7 +126,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         } else {
             telegramMessage.setText(null);
         }
-
+        telegramMessage.setUpdatedAt(Instant.now());
         telegramMessageRepository.save(telegramMessage);
         return null;
     }
@@ -170,6 +170,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .mediaGroupId(mediaGroupId)
             .status(MessageDeliveryStatus.SENT)
             .sendAt(Instant.now())
+            .updatedAt(Instant.now())
             .text(messageText)
             .messageViewingStatus(MessageViewingStatus.UNREAD)
             .telegramMessageId(message.getMessageId())
@@ -399,6 +400,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .deliveryStatus(telegramMessage.getStatus())
             .messageViewingStatus(telegramMessage.getMessageViewingStatus())
             .assets(assetDtos)
+            .isUpdated(false)
             .build();
 
         if (previouslySavedMessage.isEmpty()) {
