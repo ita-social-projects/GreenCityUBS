@@ -546,7 +546,6 @@ class TelegramServiceTest {
         assertEquals("ivan@example.com", chatDto.getUser().getEmail());
 
         TelegramMessageDto lastMessage = chatDto.getLastMessage();
-        System.out.println(lastMessage);
         assertNotNull(lastMessage);
         assertEquals("Hello", lastMessage.getText());
         assertEquals(1, lastMessage.getAssets().size());
