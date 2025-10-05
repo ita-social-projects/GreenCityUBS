@@ -7,7 +7,6 @@ import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 
-//TODO add test
 public interface ProcessPaymentService {
     /**
      * Methods creates and adjusts new order and generates payment link for the
