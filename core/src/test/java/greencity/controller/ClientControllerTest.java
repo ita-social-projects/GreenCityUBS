@@ -16,7 +16,9 @@ import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.order.OrderService;
+import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.point.PointService;
+import greencity.service.ubs.user.UserService;
 import java.security.Principal;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +49,12 @@ class ClientControllerTest {
 
     @Mock
     private PointService pointService;
+
+    @Mock
+    UserService userService;
+
+    @Mock
+    private ProcessPaymentService processPaymentService;
 
     @InjectMocks
     ClientController clientController;

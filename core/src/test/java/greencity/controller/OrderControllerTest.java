@@ -36,6 +36,8 @@ import greencity.service.ubs.order.OrderCheckoutService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import greencity.service.ubs.tariff.TariffService;
+import greencity.service.ubs.user.CourierService;
+import greencity.service.ubs.user.UserService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
 import greencity.service.ubs.wayforpay.WayForPayResultService;
 import java.security.Principal;
@@ -94,6 +96,12 @@ class OrderControllerTest {
 
     @Mock
     private CertificateService certificateService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private CourierService courierService;
 
     @InjectMocks
     OrderController orderController;
