@@ -104,6 +104,7 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.order.OtherPackages;
+import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.order.SenderLocation;
@@ -6022,5 +6023,22 @@ public class ModelUtils {
             false,
             true,
             true);
+    }
+
+    public static UbsCustomersDtoUpdate getUbsCustomer() {
+        return UbsCustomersDtoUpdate.builder()
+            .customerId(1L)
+            .customerName("Anatolii")
+            .customerSurname("Anatolii")
+            .customerEmail("anatolii.andr@gmail.com")
+            .customerPhoneNumber("095123456").build();
+    }
+
+    public static PaymentSystemResponse getPaymentSystemResponse () {
+        return PaymentSystemResponse
+            .builder()
+            .orderId(1L)
+            .link("WayForPay_link")
+            .build();
     }
 }

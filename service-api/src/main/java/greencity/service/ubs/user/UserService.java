@@ -13,7 +13,6 @@ import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
 import java.util.Set;
 
-//TODO Add Test
 public interface UserService {
     /**
      * Method returns info about user, ubsUser and user violations by order orderId.
