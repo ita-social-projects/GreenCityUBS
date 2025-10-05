@@ -79,9 +79,7 @@ class BagCalculatorServiceImplTest {
         when(orderBagService.getActualBagsAmountForOrder(order.getOrderBags()))
             .thenReturn(Map.of(
                 orderBag1.getBag().getId(), 1,
-                orderBag2.getBag().getId(), 2
-            ));
-
+                orderBag2.getBag().getId(), 2));
 
         when(modelMapper.map(orderBag1, BagForUserDto.class))
             .thenReturn(bagDto);
@@ -126,8 +124,7 @@ class BagCalculatorServiceImplTest {
     void calculateBagsSum_shouldSumAll() {
         List<BagForUserDto> dtos = List.of(
             BagForUserDto.builder().totalPrice(10.0).build(),
-            BagForUserDto.builder().totalPrice(5.0).build()
-        );
+            BagForUserDto.builder().totalPrice(5.0).build());
         when(moneyConverterUtil.convertBillsIntoCoins(10.0)).thenReturn(1000L);
         when(moneyConverterUtil.convertBillsIntoCoins(5.0)).thenReturn(500L);
 
@@ -250,8 +247,8 @@ class BagCalculatorServiceImplTest {
 
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
-        assertThrows(BadRequestException.class, () ->
-            bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo));
+        assertThrows(BadRequestException.class,
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo));
     }
 
     @Test
@@ -269,7 +266,8 @@ class BagCalculatorServiceImplTest {
 
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
-        assertDoesNotThrow(() -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo));
+        assertDoesNotThrow(
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo));
     }
 
     @Test
@@ -288,7 +286,8 @@ class BagCalculatorServiceImplTest {
 
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
-        assertDoesNotThrow(() -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo));
+        assertDoesNotThrow(
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo));
     }
 
     @Test
@@ -307,7 +306,8 @@ class BagCalculatorServiceImplTest {
 
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
-        assertDoesNotThrow(() -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo));
+        assertDoesNotThrow(
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo));
     }
 
     @Test

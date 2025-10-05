@@ -74,8 +74,6 @@ class PointCalculatorServiceImplTest {
         doThrow(new BadRequestException("User doesn't have enough points"))
             .when(pointsUtils).checkIfUserHaveEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
 
-        assertThrows(BadRequestException.class, () ->
-            pointCalculatorService.getPointSumToPayInCoins(dto, user, 100L)
-        );
+        assertThrows(BadRequestException.class, () -> pointCalculatorService.getPointSumToPayInCoins(dto, user, 100L));
     }
 }

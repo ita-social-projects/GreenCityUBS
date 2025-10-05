@@ -33,7 +33,6 @@ public interface UserService {
      */
     UbsCustomersDto updateUbsUserInfoInOrder(UbsCustomersDtoUpdate dtoUpdate, String userUuid);
 
-
     /**
      * Method creates ubs user profile if it does not exist.
      *

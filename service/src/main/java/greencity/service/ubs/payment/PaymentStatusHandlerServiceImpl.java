@@ -30,10 +30,9 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
 
     @Override
     public void checkOrderStatusApproved(Payment orderPayment, Order order,
-                                         String decodedOrderReference, String status) {
+        String decodedOrderReference, String status) {
         if (status.equals(AppConstant.APPROVED_STATUS)) {
-            orderPayment.setPaymentId(decodedOrderReference.split("_")
-                [AppConstant.COUNTER_ORDER_PAYMENT_ID_INDEX]);
+            orderPayment.setPaymentId(decodedOrderReference.split("_")[AppConstant.COUNTER_ORDER_PAYMENT_ID_INDEX]);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
 

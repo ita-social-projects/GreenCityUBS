@@ -50,14 +50,14 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
     @Override
     @Transactional
     public long applyCertificatesForClientOrder(OrderWayForPayClientDto dto,
-                                                Order order,
-                                                long sumToPayInCoins) {
+        Order order,
+        long sumToPayInCoins) {
         if (sumToPayInCoins == 0 || dto.getCertificates() == null) {
             return sumToPayInCoins;
         }
 
         Set<Certificate> certificates = certificateRepository.findByCodeInAndCertificateStatus(
-                new ArrayList<>(dto.getCertificates()), CertificateStatus.ACTIVE);
+            new ArrayList<>(dto.getCertificates()), CertificateStatus.ACTIVE);
 
         if (certificates.isEmpty()) {
             throw new NotFoundException(CERTIFICATE_NOT_FOUND);
@@ -74,9 +74,9 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
     @Override
     @Transactional
     public long applyCertificatesToOrder(OrderResponseDto dto,
-                                         Set<Certificate> orderCertificates,
-                                         Order order,
-                                         long sumToPayInCoins) {
+        Set<Certificate> orderCertificates,
+        Order order,
+        long sumToPayInCoins) {
         if (sumToPayInCoins == 0 || dto.getCertificates() == null) {
             return sumToPayInCoins;
         }
@@ -124,10 +124,9 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
         }
     }
 
-
     private long applyCertificate(Order order,
-                                  long sumToPayInCoins,
-                                  Certificate certificate) {
+        long sumToPayInCoins,
+        Certificate certificate) {
         certificate.setOrder(order);
         certificate.setCertificateStatus(CertificateStatus.USED);
         certificate.setDateOfUse(LocalDate.now());
@@ -145,7 +144,7 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
         certificate.setCertificateStatus(CertificateStatus.USED);
         certificate.setPoints(certificate.getPoints()
             + BigDecimal.valueOf(sumToPayInCoins)
-            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(0, RoundingMode.UP).intValue());
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(0, RoundingMode.UP).intValue());
     }
 }

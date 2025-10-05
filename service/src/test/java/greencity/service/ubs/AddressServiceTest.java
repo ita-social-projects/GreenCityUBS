@@ -213,7 +213,8 @@ class AddressServiceTest {
         ReadAddressByOrderDto readAddressByOrderDto = ModelUtils.getReadAddressByOrderDto();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(Optional.of(getOrderAddress()));
-        when(modelMapper.map(any(OrderAddress.class), eq(ReadAddressByOrderDto.class))).thenReturn(readAddressByOrderDto);
+        when(modelMapper.map(any(OrderAddress.class), eq(ReadAddressByOrderDto.class)))
+            .thenReturn(readAddressByOrderDto);
         ReadAddressByOrderDto result = addressService.getAddressByOrderId(order.getId());
         verify(orderRepository, times(1)).findById(anyLong());
         verify(orderAddressRepository, times(1)).findByOrderId(anyLong());
@@ -312,7 +313,8 @@ class AddressServiceTest {
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.of(region));
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(modelMapper.map(any(Address.class), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
+        when(modelMapper.map(any(Address.class), eq(CreateAddressRequestDto.class)))
+            .thenReturn(createAddressRequestDto);
         when(modelMapper.map(createAddressRequestDto, CreateAddressRequestDto.class))
             .thenReturn(createAddressRequestDto);
         Method method = AddressServiceImpl.class.getDeclaredMethod("checkIfAddressExist", Long.class,
@@ -1410,10 +1412,12 @@ class AddressServiceTest {
         when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
         when(googleApiService.getGeocodingResultByCityAndCountryAndLocale(
             anyString(), eq("KyivRegion"), anyString()))
-            .thenReturn(new GeocodingResult() {{
-                geometry = new Geometry();
-                geometry.location = latLng;
-            }});
+            .thenReturn(new GeocodingResult() {
+                {
+                    geometry = new Geometry();
+                    geometry.location = latLng;
+                }
+            });
 
         boolean result = addressService.checkIfAddressMatchLocationArea(
             TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId(), 1L);

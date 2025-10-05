@@ -67,19 +67,18 @@ public class OrderUtils {
     }
 
     /**
-     * Extracts a numeric ID from a Base64-encoded order reference string.
-     * The reference is expected in format: orderId_counterOrderPaymentId_paymentId.
-     * After decoding and splitting by "_", this method returns the part at the given index.
-     * Index mapping:
-     * 0 → orderId
-     * 1 → counterOrderPaymentId
-     * 2 → paymentId
+     * Extracts a numeric ID from a Base64-encoded order reference string. The
+     * reference is expected in format: orderId_counterOrderPaymentId_paymentId.
+     * After decoding and splitting by "_", this method returns the part at the
+     * given index. Index mapping: 0 → orderId 1 → counterOrderPaymentId 2 →
+     * paymentId
      *
      * @param orderReference the Base64-encoded order reference
      * @param index          index of the part to extract
      * @return the extracted ID as Long
-     * @throws InvalidPaymentResponseException if the format is invalid, index is out of bounds,
-     *                                         or the extracted part is not a number
+     * @throws InvalidPaymentResponseException if the format is invalid, index is
+     *                                         out of bounds, or the extracted part
+     *                                         is not a number
      */
     public static Long getIdByOrderReference(String orderReference, int index) {
         try {

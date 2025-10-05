@@ -123,7 +123,7 @@ public class OrderCheckoutServiceImpl implements OrderCheckoutService {
     }
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(Long tariffId,
-                                                                                      Integer userPoints) {
+        Integer userPoints) {
         List<BagTranslationDto> bagTranslationDtoList =
             bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
                 .map(bag -> modelMapper.map(bag, BagTranslationDto.class))
@@ -146,8 +146,8 @@ public class OrderCheckoutServiceImpl implements OrderCheckoutService {
     }
 
     private UserPointsAndAllBagsDto getUserPointsAndAllBagsDtoByTariffIdAndOrderIdAndUserPoints(Long tariffId,
-                                                                                                Integer userPoints,
-                                                                                                Long orderId) {
+        Integer userPoints,
+        Long orderId) {
         List<BagTranslationDto> bagTranslationDtoList =
             bagRepository.findAllActiveBagsByTariffsInfoId(tariffId).stream()
                 .map(bag -> buildBagTranslationDto(orderId, bag))

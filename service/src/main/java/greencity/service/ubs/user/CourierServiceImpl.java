@@ -37,7 +37,7 @@ public class CourierServiceImpl implements CourierService {
 
     @Override
     public OrderCourierPopUpDto getInfoForCourierOrderingByCourierId(String uuid, Optional<String> changeLoc,
-                                                                     Long courierId) {
+        Long courierId) {
         if (!courierRepository.existsCourierById(courierId)) {
             throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
         }

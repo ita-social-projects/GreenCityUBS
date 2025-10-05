@@ -8,7 +8,7 @@ public class PointsUtils {
     /**
      * Checks if a user has enough points to perform an action.
      *
-     * @param userPoints the current number of points the user has
+     * @param userPoints     the current number of points the user has
      * @param requiredPoints the number of points required to perform the action
      * @throws BadRequestException if the user does not have enough points
      */

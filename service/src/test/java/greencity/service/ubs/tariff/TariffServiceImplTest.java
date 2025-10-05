@@ -49,7 +49,8 @@ class TariffServiceImplTest {
         when(locationRepository.existsById(locationId)).thenReturn(true);
         when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(courierId, locationId))
             .thenReturn(Optional.ofNullable(tariffsInfo));
-        when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class)).thenReturn(tariffInfoByLocationDto.getTariffsForLocationDto());
+        when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class))
+            .thenReturn(tariffInfoByLocationDto.getTariffsForLocationDto());
 
         TariffInfoByLocationDto result = tariffService.getTariffInfoForLocation(courierId, locationId);
 

@@ -18,13 +18,13 @@ class MoneyConverterUtilTest {
     void convertCoinsIntoBills() {
         Double bills = converter.convertCoinsIntoBills(COINS);
         Double expectedBills = 1.26;
-        Assertions.assertEquals(expectedBills , bills);
+        Assertions.assertEquals(expectedBills, bills);
     }
 
     @Test
     void convertBillsIntoCoins() {
         Long coins = converter.convertBillsIntoCoins(BILLS);
         Long expectedCoins = 10045L;
-        Assertions.assertEquals(expectedCoins , coins);
+        Assertions.assertEquals(expectedCoins, coins);
     }
 }

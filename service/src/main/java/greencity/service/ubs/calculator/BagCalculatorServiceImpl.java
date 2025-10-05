@@ -36,7 +36,7 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
 
     @Override
     public long prepareBagsAndCalculateTotal(List<OrderBag> orderBagList, List<BagDto> bags,
-                                             TariffsInfo tariffsInfo) {
+        TariffsInfo tariffsInfo) {
         CalculationContext context = calculateOrderedBags(orderBagList, bags);
 
         validateLimits(tariffsInfo, context);
@@ -174,6 +174,6 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
         long totalSumToPayInCoins,
         long limitedSumToPayInCoins,
         int limitedBags,
-        List<Integer> bagIds
-    ) {}
+        List<Integer> bagIds) {
+    }
 }

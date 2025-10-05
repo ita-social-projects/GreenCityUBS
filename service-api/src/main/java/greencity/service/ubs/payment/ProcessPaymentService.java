@@ -40,15 +40,18 @@ public interface ProcessPaymentService {
     PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
 
     /**
-     * Forms a payment link for redirecting the user to WayForPay checkout.
-     * - Increments the order’s counter for payment attempts. <br>
-     * - Creates a {@link PaymentWayForPayRequestDto} request with encoded order reference. <br>
+     * Forms a payment link for redirecting the user to WayForPay checkout. -
+     * Increments the order’s counter for payment attempts. <br>
+     * - Creates a {@link PaymentWayForPayRequestDto} request with encoded order
+     * reference. <br>
      * - Sends the request to WayForPay checkout client. <br>
      * - Extracts and returns the redirect URL from the WayForPay response.
      *
-     * @param order           the {@link Order} for which the payment link is generated
+     * @param order           the {@link Order} for which the payment link is
+     *                        generated
      * @param sumToPayInCoins the amount to be paid in coins
-     * @return the checkout URL where the client should be redirected to complete payment
+     * @return the checkout URL where the client should be redirected to complete
+     *         payment
      */
     String formedLink(Order order, long sumToPayInCoins);
 }

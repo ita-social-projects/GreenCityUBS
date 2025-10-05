@@ -365,7 +365,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional
     public OrderAddress getOrUpdateOrderAddress(OrderAddress currentOrderAddress, Long newAddressId, Long newLocationId,
-                                                User currentUser) {
+        User currentUser) {
         OrderAddress newOrderAddress = formOrderAddress(
             newAddressId, newLocationId, currentUser);
         newOrderAddress.setId(currentOrderAddress.getId());
@@ -440,7 +440,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     private <T extends CreateAddressRequestDto> Optional<Address> checkIfAddressExist(Long userId,
-                                                                                      T addressRequestDto) {
+        T addressRequestDto) {
         List<Address> addresses = addressRepo.findAllByUserId(userId);
         boolean exist = addresses.stream()
             .filter(address -> !AddressStatus.DELETED.equals(address.getBaseAddress().getAddressStatus()))

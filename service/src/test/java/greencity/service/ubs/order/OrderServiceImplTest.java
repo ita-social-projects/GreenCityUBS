@@ -103,7 +103,7 @@ class OrderServiceImplTest {
     private Order order;
     private TariffsInfo tariffsInfo;
     private OrderAddress orderAddress;
-    //TODO fix tests use ModelUtils
+    // TODO fix tests use ModelUtils
 
     @BeforeEach
     void setUp() {
@@ -351,8 +351,7 @@ class OrderServiceImplTest {
         Page<Order> orderPage = new PageImpl<>(
             Collections.singletonList(order),
             PageRequest.of(0, 10),
-            1
-        );
+            1);
         when(ordersForUserRepository.getAllByUserUuid(any(Pageable.class), anyString()))
             .thenReturn(orderPage);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))
@@ -380,8 +379,7 @@ class OrderServiceImplTest {
         Page<Order> orderPage = new PageImpl<>(
             Collections.singletonList(order),
             PageRequest.of(0, 10),
-            1
-        );
+            1);
         when(ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(any(Pageable.class), anyString(), anyList()))
             .thenReturn(orderPage);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))

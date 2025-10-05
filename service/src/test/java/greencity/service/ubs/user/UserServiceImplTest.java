@@ -131,7 +131,6 @@ class UserServiceImplTest {
         mockedContextHolder.close();
     }
 
-
     @Test
     void getsUserAndUserUbsAndViolationsInfoByValidOrderIdTest() {
         User user = getUser();
@@ -517,6 +516,7 @@ class UserServiceImplTest {
             () -> userService.getProfileData(uuid));
         verify(userRepository).findUserByUuid(uuid);
     }
+
     @Test
     void markUserAsDeactivatedByIdThrowsNotFoundException() {
         DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
@@ -547,6 +547,7 @@ class UserServiceImplTest {
 
         verify(userRepository).findByUuid("uuid");
     }
+
     @Test
     void getPositionsAndRelatedAuthoritiesTest() {
         when(employeeRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.ofNullable(getEmployee()));

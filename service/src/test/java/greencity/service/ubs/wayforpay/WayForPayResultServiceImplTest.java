@@ -51,10 +51,10 @@ class WayForPayResultServiceImplTest {
         ReflectionTestUtils.setField(wayForPayResultService, "wayForPaySecret", "secret");
     }
 
-
     @Test
     void testConvertMapIntoPaymentResponseDto_emptyFormParams() {
-        PaymentResponseWayForPay result = wayForPayResultService.convertMapIntoPaymentResponseDto(Collections.emptyMap());
+        PaymentResponseWayForPay result =
+            wayForPayResultService.convertMapIntoPaymentResponseDto(Collections.emptyMap());
         assertEquals("ERROR", result.getStatus());
         assertNull(result.getOrderReference());
     }
@@ -80,7 +80,7 @@ class WayForPayResultServiceImplTest {
         dto.setOrderReference("ref123");
         dto.setMerchantSignature("bad-sign");
 
-        //Because WayForPay send only to key all json
+        // Because WayForPay send only to key all json
         String jsonKey = new ObjectMapper().writeValueAsString(dto);
         Map<String, String> form = Map.of(jsonKey, "");
 
@@ -107,7 +107,7 @@ class WayForPayResultServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setId(1L);
 
-        //Because WayForPay send only to key all json
+        // Because WayForPay send only to key all json
         String jsonKey = new ObjectMapper().writeValueAsString(dto);
         Map<String, String> form = Map.of(jsonKey, "");
 

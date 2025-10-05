@@ -87,7 +87,8 @@ class ProcessPaymentServiceImplTest {
     @Mock
     private ModelMapper modelMapper;
 
-    @Mock private WayForPayStrategy wayForPayStrategy;
+    @Mock
+    private WayForPayStrategy wayForPayStrategy;
 
     @InjectMocks
     private ProcessPaymentServiceImpl service;
@@ -110,7 +111,8 @@ class ProcessPaymentServiceImplTest {
         when(addressService.checkIfAddressMatchLocationArea(dto.getAddressId(), dto.getLocationId())).thenReturn(true);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(ubsUserRepository.save(any(UBSuser.class))).thenReturn(ubsUser);
-        when(orderService.formAndSaveOrderRequest(eq(dto), any(Order.class), eq(user), any(UBSuser.class))).thenReturn(order);
+        when(orderService.formAndSaveOrderRequest(eq(dto), any(Order.class), eq(user), any(UBSuser.class)))
+            .thenReturn(order);
         try (MockedStatic<OrderUtils> mocked = Mockito.mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.getLastPayment(any())).thenReturn(payment);
         }
@@ -203,12 +205,14 @@ class ProcessPaymentServiceImplTest {
         when(paymentStrategyFactory.getPaymentStrategy(PaymentSystem.WAY_FOR_PAY)).thenReturn(wayForPayStrategy);
 
         when(wayForPayStrategy.processPayment(any(Order.class), anyLong())).thenReturn(paymentSystemResponse);
-        doNothing().when(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(), any(PaymentSystemResponse.class));
+        doNothing().when(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(),
+            any(PaymentSystemResponse.class));
 
         PaymentSystemResponse result = service.processExistingOrder(dto, "uuid", order.getId());
 
         assertThat(result).isEqualTo(paymentSystemResponse);
-        verify(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(), any(PaymentSystemResponse.class));
+        verify(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(),
+            any(PaymentSystemResponse.class));
     }
 
     @Test

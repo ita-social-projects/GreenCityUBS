@@ -12,8 +12,8 @@ import java.util.List;
  */
 public interface BagCalculatorService {
     /**
-     * Prepares {@link OrderBag} objects, validates tariff limits,
-     * and calculates the total sum to pay.
+     * Prepares {@link OrderBag} objects, validates tariff limits, and calculates
+     * the total sum to pay.
      *
      * @param orderBagList list to store created order bags
      * @param bags         customer's selected bags
@@ -21,7 +21,7 @@ public interface BagCalculatorService {
      * @return total sum to pay in coins
      */
     long prepareBagsAndCalculateTotal(List<OrderBag> orderBagList, List<BagDto> bags,
-                                      TariffsInfo tariffsInfo);
+        TariffsInfo tariffsInfo);
 
     /**
      * Calculates total sum of bags in the order (in coins).

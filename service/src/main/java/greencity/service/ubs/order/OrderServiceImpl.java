@@ -196,7 +196,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.delete(order);
     }
 
-    //TODO make it more readable
+    // TODO make it more readable
     @Override
     public OrdersDataForUserDto getOrdersData(Order order) {
         List<Payment> payments = order.getPayment();
@@ -215,7 +215,7 @@ public class OrderServiceImpl implements OrderService {
 
         Long amountWithDiscountInCoins = fullPriceInCoins
             - (long) AppConstant.CURRENCY_CONVERSION_RATE * (order.getPointsToUse()
-            + certificateCalculatorService.countCertificatesBonuses(certificateDtos));
+                + certificateCalculatorService.countCertificatesBonuses(certificateDtos));
 
         Long paidAmountInCoins = paymentCalculatorService.countPaidAmount(payments);
 
@@ -271,8 +271,7 @@ public class OrderServiceImpl implements OrderService {
 
     private Order formAndSaveOrder(
         Order order, Set<Certificate> orderCertificates, List<OrderBag> bagsOrdered,
-        UBSuser userData, User currentUser, long sumToPayInCoins, TariffsInfo tariffsInfo
-    ) {
+        UBSuser userData, User currentUser, long sumToPayInCoins, TariffsInfo tariffsInfo) {
         order.setTariffsInfo(tariffsInfo);
         order.setCertificates(orderCertificates);
         order.setOrderBags(bagsOrdered);
@@ -312,13 +311,13 @@ public class OrderServiceImpl implements OrderService {
     private int countAmountToPayForOrder(Order order) {
         int certificatesAmount = nonNull(order.getCertificates())
             ? order.getCertificates().stream()
-            .map(Certificate::getPoints)
-            .reduce(0, Integer::sum)
+                .map(Certificate::getPoints)
+                .reduce(0, Integer::sum)
             : 0;
         return -order.getPointsToUse() - certificatesAmount
             + BigDecimal.valueOf(order.getSumTotalAmountWithoutDiscounts())
-            .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
-            .setScale(0, RoundingMode.UP).intValue();
+                .movePointLeft(AppConstant.TWO_DECIMALS_AFTER_POINT_IN_CURRENCY)
+                .setScale(0, RoundingMode.UP).intValue();
     }
 
     private OrderPaymentDetailDto buildOrderPaymentDetailDto(Order order) {

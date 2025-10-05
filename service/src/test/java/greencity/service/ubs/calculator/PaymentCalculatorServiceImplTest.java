@@ -42,7 +42,8 @@ class PaymentCalculatorServiceImplTest {
         when(bagCalculatorService.getBagsSumToPayInCoins(order)).thenReturn(bagsSum);
         when(certificateCalculatorService.getCertificateSumToPayInCoins(order, bagsSum)).thenReturn(afterCertificates);
         when(pointCalculatorService.getPointSumToPayInCoins(dto, user, afterCertificates)).thenReturn(afterPoints);
-        when(certificateCalculatorService.applyCertificatesForClientOrder(dto, order, afterPoints)).thenReturn(afterClientCertificates);
+        when(certificateCalculatorService.applyCertificatesForClientOrder(dto, order, afterPoints))
+            .thenReturn(afterClientCertificates);
 
         Payment paidPayment = new Payment();
         paidPayment.setPaymentStatus(PaymentStatus.PAID);

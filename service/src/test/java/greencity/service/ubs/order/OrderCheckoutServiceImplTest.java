@@ -165,8 +165,7 @@ class OrderCheckoutServiceImplTest {
         when(userRepository.findUserByUuid("uuid-123")).thenReturn(Optional.of(user));
         when(orderRepository.findById(200L)).thenReturn(Optional.of(order));
 
-        assertThatThrownBy(() ->
-            orderCheckoutService.getFirstPageDataByOrderId("uuid-123", 200L))
+        assertThatThrownBy(() -> orderCheckoutService.getFirstPageDataByOrderId("uuid-123", 200L))
             .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -223,13 +222,13 @@ class OrderCheckoutServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationId_tariffOrLocationDeactivated() {
-        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED); // або location.setLocationStatus(LocationStatus.DEACTIVATED)
+        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED); // або
+                                                               // location.setLocationStatus(LocationStatus.DEACTIVATED)
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
 
-        assertThatThrownBy(() ->
-            orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L))
+        assertThatThrownBy(() -> orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L))
             .isInstanceOf(BadRequestException.class)
             .hasMessageContaining(TARIFF_OR_LOCATION_IS_DEACTIVATED);
     }
@@ -308,8 +307,7 @@ class OrderCheckoutServiceImplTest {
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
 
-        assertThatThrownBy(() ->
-            orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L))
+        assertThatThrownBy(() -> orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L))
             .isInstanceOf(BadRequestException.class)
             .hasMessageContaining(TARIFF_OR_LOCATION_IS_DEACTIVATED);
     }

@@ -201,7 +201,8 @@ class CertificateCalculatorServiceImplTest {
         assertEquals(0L, result); // sumToPayInCoins <= 0 → 0
         assertEquals(CertificateStatus.USED, cert.getCertificateStatus());
         assertEquals(order, cert.getOrder());
-        // очікуємо, що points скориговані через adjustCertificateBalance, може бути менше 5
+        // очікуємо, що points скориговані через adjustCertificateBalance, може бути
+        // менше 5
         assertEquals(4, cert.getPoints()); // тут конкретне очікуване значення
     }
 

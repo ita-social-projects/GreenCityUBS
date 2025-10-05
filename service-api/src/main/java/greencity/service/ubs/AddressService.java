@@ -138,11 +138,11 @@ public interface AddressService {
     ReadAddressByOrderDto getAddressByOrderId(Long orderId);
 
     /**
-     * Checks if the given address belongs to the specified location area.
-     * - For Kyiv tariff: verifies if the address city is part of Kyiv.
-     * - For Kyiv region 20 km tariff: calculates the distance from Kyiv
-     *   and ensures the address lies within the allowed radius.
-     * - For other tariffs: verifies by database match of location and address IDs.
+     * Checks if the given address belongs to the specified location area. - For
+     * Kyiv tariff: verifies if the address city is part of Kyiv. - For Kyiv region
+     * 20 km tariff: calculates the distance from Kyiv and ensures the address lies
+     * within the allowed radius. - For other tariffs: verifies by database match of
+     * location and address IDs.
      *
      * @param locationId the location ID to validate against
      * @param addressId  the ID of the address to check
@@ -158,8 +158,8 @@ public interface AddressService {
      * @param locationId  the ID of the location
      * @param currentUser the current authenticated user who owns the address
      * @return the saved {@link OrderAddress} entity
-     * @throws NotFoundException if address or location does not exist,
-     *                           or if the address does not belong to the user
+     * @throws NotFoundException if address or location does not exist, or if the
+     *                           address does not belong to the user
      */
     OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser);
 
@@ -172,12 +172,13 @@ public interface AddressService {
      * @param newLocationId       the ID of the new location
      * @param currentUser         the current authenticated user
      * @return the updated or existing {@link OrderAddress}
-     * @throws NotFoundException if the new address or location is invalid or not owned by the user
+     * @throws NotFoundException if the new address or location is invalid or not
+     *                           owned by the user
      */
     OrderAddress getOrUpdateOrderAddress(OrderAddress currentOrderAddress,
-                                         Long newAddressId,
-                                         Long newLocationId,
-                                         User currentUser);
+        Long newAddressId,
+        Long newLocationId,
+        User currentUser);
 
     /**
      * Retrieves all locations.

@@ -3476,7 +3476,7 @@ public class ModelUtils {
             .capacity(10)
             .commission(21_00L)
             .fullPrice(20_00L)
-                .limitIncluded(true)
+            .limitIncluded(true)
             .build(),
             Bag.builder()
                 .status(BagStatus.ACTIVE)
@@ -3889,8 +3889,8 @@ public class ModelUtils {
             .locationsDto(getLocationsDto()).build();
     }
 
-    //TODO change this move Location Dto to the Service-api
-    public static greencity.dto.LocationsDto getLocationDtoFromDao(){
+    // TODO change this move Location Dto to the Service-api
+    public static greencity.dto.LocationsDto getLocationDtoFromDao() {
         return greencity.dto.LocationsDto.builder()
             .id(1L)
             .locationStatus("ACTIVE")
@@ -6034,7 +6034,7 @@ public class ModelUtils {
             .customerPhoneNumber("095123456").build();
     }
 
-    public static PaymentSystemResponse getPaymentSystemResponse () {
+    public static PaymentSystemResponse getPaymentSystemResponse() {
         return PaymentSystemResponse
             .builder()
             .orderId(1L)

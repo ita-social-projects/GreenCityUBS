@@ -29,8 +29,7 @@ class PointsUtilsTest {
 
         BadRequestException exception = assertThrows(
             BadRequestException.class,
-            () -> pointsUtils.checkIfUserHaveEnoughPoints(userPoints, requiredPoints)
-        );
+            () -> pointsUtils.checkIfUserHaveEnoughPoints(userPoints, requiredPoints));
 
         assertEquals("User doesn't have enough points", exception.getMessage());
     }
