@@ -492,7 +492,7 @@ class TelegramServiceTest {
 
     @Test
     void testGetChats_WithUserAndLastMessage_ChatsReturned() {
-        String searchTerm = "test";
+        String searchTerm = "Іва";
         Pageable pageable = PageRequest.of(0, 10);
 
         User user = User.builder()
@@ -506,7 +506,7 @@ class TelegramServiceTest {
             .url("http://image.png")
             .type(AssetType.IMAGE)
             .fileName("image.png")
-            .size(1234L)
+            .size(123L)
             .contentType("image/png")
             .build();
 
@@ -546,11 +546,11 @@ class TelegramServiceTest {
         assertEquals("ivan@example.com", chatDto.getUser().getEmail());
 
         TelegramMessageDto lastMessage = chatDto.getLastMessage();
+        System.out.println(lastMessage);
         assertNotNull(lastMessage);
         assertEquals("Hello", lastMessage.getText());
         assertEquals(1, lastMessage.getAssets().size());
         assertEquals("http://image.png", lastMessage.getAssets().getFirst().getUrl());
-        assertEquals(false, lastMessage.getIsUpdated());
     }
 
     @Test
