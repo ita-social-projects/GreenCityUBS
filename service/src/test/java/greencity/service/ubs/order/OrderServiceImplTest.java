@@ -103,20 +103,14 @@ class OrderServiceImplTest {
     private Order order;
     private TariffsInfo tariffsInfo;
     private OrderAddress orderAddress;
-    // TODO fix tests use ModelUtils
 
     @BeforeEach
     void setUp() {
         orderAddress = ModelUtils.getOrderAddress();
-
-        user = new User();
-        user.setId(1L);
-        user.setCurrentPoints(100);
-        user.setChangeOfPointsList(new ArrayList<>());
-
-        ubsUser = new UBSuser();
+        user = ModelUtils.getUser();
+        ubsUser = ModelUtils.getUBSuser();
         ubsUser.setOrderAddress(orderAddress);
-        order = new Order();
+        order = ModelUtils.getOrder();
         order.setId(1L);
         order.setUser(user);
         order.setUbsUser(ubsUser);
@@ -127,9 +121,7 @@ class OrderServiceImplTest {
         order.setSumTotalAmountWithoutDiscounts(1000L);
         order.setPayment(new ArrayList<>());
         order.setCounterOrderPaymentId(0L);
-
-        tariffsInfo = new TariffsInfo();
-        tariffsInfo.setId(1L);
+        tariffsInfo = ModelUtils.getTariffsInfo();
     }
 
     @Test

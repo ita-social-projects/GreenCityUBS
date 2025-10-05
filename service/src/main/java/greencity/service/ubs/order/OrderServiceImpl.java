@@ -86,24 +86,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order formAndSaveOrderRequest(OrderResponseDto dto, Order order, User currentUser, UBSuser userData) {
-        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(
-            getBagIds(dto.getBags()), dto.getLocationId());
-        List<OrderBag> bagsOrdered = new ArrayList<>();
-        long sumToPayInCoinsWithoutDiscount = bagCalculatorService
-            .prepareBagsAndCalculateTotal(bagsOrdered, dto.getBags(), tariffsInfo);
-
-        pointsUtils.checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
-        long sumToPayInCoins = pointCalculatorService
-            .reduceOrderSumDueToUsedPoints(sumToPayInCoinsWithoutDiscount, dto.getPointsToUse());
-        if (sumToPayInCoinsWithoutDiscount == sumToPayInCoins) {
-            order.setPointsToUse(0);
-            dto.setPointsToUse(0);
-        }
-
+        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
+        List<OrderBag> bagsOrdered = prepareBags(dto, tariffsInfo);
         Set<Certificate> orderCertificates = new HashSet<>();
-        sumToPayInCoins =
-            certificateCalculatorService.applyCertificatesToOrder(
-                dto, orderCertificates, order, sumToPayInCoins);
+
+        long sumToPayInCoinsWithoutDiscount = calculateTotal(bagsOrdered);
+        pointsUtils.checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+
+        long sumToPayInCoins =
+            applyBonusesAndCertificates(dto, order, sumToPayInCoinsWithoutDiscount, orderCertificates);
+
         if (sumToPayInCoins <= 0) {
             dto.setShouldBePaid(false);
         }
@@ -196,65 +188,54 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.delete(order);
     }
 
-    // TODO make it more readable
     @Override
     public OrdersDataForUserDto getOrdersData(Order order) {
-        List<Payment> payments = order.getPayment();
-        List<BagForUserDto> bagForUserDtos = bagCalculatorService.bagForUserDtosBuilder(order);
-        OrderStatusTranslation orderStatusTranslation = orderStatusTranslationRepository
-            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
-            .orElse(orderStatusTranslationRepository.getReferenceById(1L));
-        OrderPaymentStatusTranslation paymentStatusTranslation = orderPaymentStatusTranslationRepository
-            .getById((long) order.getOrderPaymentStatus().getStatusValue());
+        List<BagForUserDto> bags = bagCalculatorService.bagForUserDtosBuilder(order);
+        List<CertificateDto> certificates = mapCertificates(order);
 
-        Long fullPriceInCoins = bagCalculatorService.calculateBugsSum(bagForUserDtos);
+        Long fullPrice = bagCalculatorService.calculateBugsSum(bags);
+        Long amountWithDiscount = calculateDiscountedAmount(order, fullPrice, certificates);
+        Long paidAmount = paymentCalculatorService.countPaidAmount(order.getPayment());
 
-        List<CertificateDto> certificateDtos = order.getCertificates().stream()
-            .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
-            .toList();
+        Double remainingToPay = moneyConverterUtil
+            .convertCoinsIntoBills(amountWithDiscount - paidAmount);
+        double refundedBonuses = calculateRefundedBonuses(order);
+        Double refundedMoney = calculateRefundedMoney(order);
 
-        Long amountWithDiscountInCoins = fullPriceInCoins
-            - (long) AppConstant.CURRENCY_CONVERSION_RATE * (order.getPointsToUse()
-                + certificateCalculatorService.countCertificatesBonuses(certificateDtos));
+        OrderStatusTranslation orderStatusTranslation = getOrderStatus(order);
+        OrderPaymentStatusTranslation paymentStatusTranslation = getPaymentStatus(order);
 
-        Long paidAmountInCoins = paymentCalculatorService.countPaidAmount(payments);
+        OrderDataBuilderContext context = new OrderDataBuilderContext(
+            order, orderStatusTranslation, bags, remainingToPay, refundedBonuses,
+            refundedMoney, paidAmount, fullPrice, certificates, paymentStatusTranslation
+        );
 
-        Double amountBeforePayment = moneyConverterUtil
-            .convertCoinsIntoBills(amountWithDiscountInCoins - paidAmountInCoins);
+        return buildOrdersDataForUserDto(context);
+    }
 
-        double refundedBonuses = order.getPayment().stream()
-            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN.equals(payment.getReceiptLink()))
-            .map(payment -> payment.getAmount().doubleValue())
-            .reduce(0.0, Double::sum);
+    private long applyBonusesAndCertificates(OrderResponseDto dto, Order order, long sumToPayInCoinsWithoutDiscount,
+        Set<Certificate> orderCertificates) {
+        long sumToPayInCoins = pointCalculatorService
+            .reduceOrderSumDueToUsedPoints(sumToPayInCoinsWithoutDiscount, dto.getPointsToUse());
+        if (sumToPayInCoinsWithoutDiscount == sumToPayInCoins) {
+            order.setPointsToUse(0);
+            dto.setPointsToUse(0);
+        }
 
-        refundedBonuses /= -AppConstant.CURRENCY_CONVERSION_RATE;
+        sumToPayInCoins =
+            certificateCalculatorService.applyCertificatesToOrder(
+                dto, orderCertificates, order, sumToPayInCoins);
+        return sumToPayInCoins;
+    }
 
-        Double refundedMoney =
-            order.getRefund() == null
-                ? 0.0
-                : order.getRefund().getAmount().doubleValue() / AppConstant.CURRENCY_CONVERSION_RATE;
+    private List<OrderBag> prepareBags(OrderResponseDto dto, TariffsInfo tariffsInfo) {
+        List<OrderBag> bags = new ArrayList<>();
+        bagCalculatorService.prepareBagsAndCalculateTotal(bags, dto.getBags(), tariffsInfo);
+        return bags;
+    }
 
-        return OrdersDataForUserDto.builder()
-            .id(order.getId())
-            .dateForm(order.getOrderDate())
-            .datePaid(order.getOrderDate())
-            .orderStatusUk(orderStatusTranslation.getNameUk())
-            .orderStatusEn(orderStatusTranslation.getNameEn())
-            .orderComment(order.getComment())
-            .bags(bagForUserDtos)
-            .additionalOrders(order.getAdditionalOrders())
-            .amountBeforePayment(amountBeforePayment)
-            .refundedBonuses(refundedBonuses)
-            .refundedMoney(refundedMoney)
-            .paidAmount(moneyConverterUtil.convertCoinsIntoBills(paidAmountInCoins))
-            .orderFullPrice(moneyConverterUtil.convertCoinsIntoBills(fullPriceInCoins))
-            .certificate(certificateDtos)
-            .bonuses(order.getPointsToUse().doubleValue())
-            .sender(senderInfoDtoBuilder(order))
-            .address(addressInfoDtoBuilder(order))
-            .paymentStatusUk(paymentStatusTranslation.getTranslationValueUk())
-            .paymentStatusEn(paymentStatusTranslation.getTranslationsValueEn())
-            .build();
+    private long calculateTotal(List<OrderBag> bagsOrdered) {
+        return bagsOrdered.stream().mapToLong(OrderBag::getPrice).sum();
     }
 
     private TariffsInfo findTariffsInfoByBagIdsWithinLocation(List<Integer> bagIds, Long locationId) {
@@ -338,6 +319,45 @@ public class OrderServiceImpl implements OrderService {
             .build();
     }
 
+    private List<CertificateDto> mapCertificates(Order order) {
+        return order.getCertificates().stream()
+            .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
+            .toList();
+    }
+
+    private long calculateDiscountedAmount(Order order, Long fullPriceInCoins, List<CertificateDto> certificates) {
+        return fullPriceInCoins
+            - (long) AppConstant.CURRENCY_CONVERSION_RATE * (order.getPointsToUse()
+                + certificateCalculatorService.countCertificatesBonuses(certificates));
+    }
+
+    private double calculateRefundedBonuses(Order order) {
+        double refundedBonuses = order.getPayment().stream()
+            .filter(payment -> ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN.equals(payment.getReceiptLink()))
+            .map(payment -> payment.getAmount().doubleValue())
+            .reduce(0.0, Double::sum);
+
+        refundedBonuses /= -AppConstant.CURRENCY_CONVERSION_RATE;
+        return refundedBonuses;
+    }
+
+    private double calculateRefundedMoney(Order order) {
+        return order.getRefund() == null
+            ? 0.0
+            : order.getRefund().getAmount().doubleValue() / AppConstant.CURRENCY_CONVERSION_RATE;
+    }
+
+    private OrderPaymentStatusTranslation getPaymentStatus(Order order) {
+        return orderPaymentStatusTranslationRepository
+            .getById((long) order.getOrderPaymentStatus().getStatusValue());
+    }
+
+    private OrderStatusTranslation getOrderStatus(Order order) {
+        return orderStatusTranslationRepository
+            .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue())
+            .orElse(orderStatusTranslationRepository.getReferenceById(1L));
+    }
+
     private SenderInfoDto senderInfoDtoBuilder(Order order) {
         UBSuser sender = order.getUbsUser();
         if (sender.getSenderFirstName() != null && !sender.getSenderFirstName().isEmpty()
@@ -376,4 +396,41 @@ public class OrderServiceImpl implements OrderService {
             .entranceNumber(address.getBaseAddress().getEntranceNumber())
             .build();
     }
+
+    private OrdersDataForUserDto buildOrdersDataForUserDto(OrderDataBuilderContext ctx) {
+        return OrdersDataForUserDto.builder()
+            .id(ctx.order().getId())
+            .dateForm(ctx.order().getOrderDate())
+            .datePaid(ctx.order().getOrderDate())
+            .orderStatusUk(ctx.orderStatus().getNameUk())
+            .orderStatusEn(ctx.orderStatus().getNameEn())
+            .orderComment(ctx.order().getComment())
+            .bags(ctx.bags())
+            .additionalOrders(ctx.order().getAdditionalOrders())
+            .amountBeforePayment(ctx.amountBeforePayment())
+            .refundedBonuses(ctx.refundedBonuses())
+            .refundedMoney(ctx.refundedMoney())
+            .paidAmount(moneyConverterUtil.convertCoinsIntoBills(ctx.paidAmountInCoins()))
+            .orderFullPrice(moneyConverterUtil.convertCoinsIntoBills(ctx.fullPriceInCoins()))
+            .certificate(ctx.certificates())
+            .bonuses(ctx.order().getPointsToUse().doubleValue())
+            .sender(senderInfoDtoBuilder(ctx.order()))
+            .address(addressInfoDtoBuilder(ctx.order()))
+            .paymentStatusUk(ctx.paymentStatus().getTranslationValueUk())
+            .paymentStatusEn(ctx.paymentStatus().getTranslationsValueEn())
+            .build();
+    }
+
+    private record OrderDataBuilderContext(
+        Order order,
+        OrderStatusTranslation orderStatus,
+        List<BagForUserDto> bags,
+        Double amountBeforePayment,
+        double refundedBonuses,
+        Double refundedMoney,
+        Long paidAmountInCoins,
+        Long fullPriceInCoins,
+        List<CertificateDto> certificates,
+        OrderPaymentStatusTranslation paymentStatus
+    ) {}
 }
