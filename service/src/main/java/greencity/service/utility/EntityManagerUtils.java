@@ -1,13 +1,13 @@
 package greencity.service.utility;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Parameter;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.TypedQuery;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;

@@ -292,6 +292,15 @@ class EntityManagerUtilsTest {
     }
 
     @Test
+    void createCountQueryStringForQueryWithStarAndNoAlias() {
+        String jpql = "select * from DummyEntity";
+        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+
+        assertTrue(result.toLowerCase().startsWith("select count("));
+        assertFalse(result.toLowerCase().contains("count(d)"));
+    }
+
+    @Test
     void createCountQueryStringForQueryWithDistinctWithOrderBy() {
         String jpql = "select distinct d.id, d.name from DummyEntity d where d.x = :p order by d.name";
         String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
@@ -319,6 +328,15 @@ class EntityManagerUtilsTest {
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertFalse(result.toLowerCase().contains("count(new"));
         assertFalse(result.toLowerCase().contains("new"));
+    }
+
+    @Test
+    void createCountQueryStringForQueryWithCount() {
+        String jpql = "select count(d) from DummyEntity d";
+        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+
+        assertTrue(result.toLowerCase().startsWith("select count("));
+        assertTrue(result.toLowerCase().contains("count(count(d))"));
     }
 
     @Test
@@ -363,6 +381,19 @@ class EntityManagerUtilsTest {
     }
 
     @Test
+    void removeSubqueriesWithNoFrom() throws Exception {
+        Method removeSubqueries = EntityManagerUtils.class
+            .getDeclaredMethod("removeSubqueries", String.class);
+        removeSubqueries.setAccessible(true);
+
+        String jpql = "select d from DummyEntity d where d.x in (select x where o.flag = true)";
+        String result = (String) removeSubqueries.invoke(null, jpql);
+
+        assertTrue(result.contains("select x where o.flag = true)"), "subquery contents must be removed");
+        assertTrue(result.contains("from DummyEntity"), "outer query must remain intact");
+    }
+
+    @Test
     void removeSubqueriesWithNestedSubqueries() throws Exception {
         Method removeSubqueries = EntityManagerUtils.class
             .getDeclaredMethod("removeSubqueries", String.class);
@@ -379,6 +410,18 @@ class EntityManagerUtilsTest {
         assertFalse(result.contains("select y from ThirdEntity"));
         assertTrue(result.contains("select d from DummyEntity"));
         assertTrue(result.contains("d.active = true"));
+    }
+
+    @Test
+    void removeSubqueriesWithMismatchedParens() throws Exception {
+        Method removeSubqueries = EntityManagerUtils.class
+            .getDeclaredMethod("removeSubqueries", String.class);
+        removeSubqueries.setAccessible(true);
+
+        String jpql = "select d from DummyEntity d where d.x in (select x from OtherEntity o where o.flag = true";
+        String result = (String) removeSubqueries.invoke(null, jpql);
+
+        assertFalse(result.contains("select x from OtherEntity"), "subquery contents must be removed");
     }
 
     @Test
