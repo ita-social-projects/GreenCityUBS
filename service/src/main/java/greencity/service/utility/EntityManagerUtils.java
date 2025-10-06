@@ -65,7 +65,8 @@ public class EntityManagerUtils {
 
     public static final String ENTITY_GRAPH_ARGUMENT_EXCEPTION = "One or more specified attributes can't be applied";
 
-    private record Key(String queryString, String countProjection, boolean nativeQuery) {}
+    private record Key(String queryString, String countProjection, boolean nativeQuery) {
+    }
 
     private final LoadingCache<Key, String> countQueryStringCache;
 
@@ -73,7 +74,8 @@ public class EntityManagerUtils {
         countQueryStringCache = Caffeine.newBuilder()
             .maximumSize(100)
             .expireAfterWrite(cacheLifeDuration, TimeUnit.MINUTES)
-            .build(key -> createCountQueryStringForInternal(key.queryString(), key.countProjection(), key.nativeQuery()));
+            .build(
+                key -> createCountQueryStringForInternal(key.queryString(), key.countProjection(), key.nativeQuery()));
     }
 
     /**
@@ -211,8 +213,8 @@ public class EntityManagerUtils {
      * {@link PageImpl} fields. Useful when query has parameters that need to be set
      * manually before running.
      *
-     * @param query           query to be run;
-     * @param pageable        resulting page parameters;
+     * @param query    query to be run;
+     * @param pageable resulting page parameters;
      * @return {@link Page} query result as a page.
      * @author Oleksandr Ilnytskyi
      */
@@ -251,11 +253,11 @@ public class EntityManagerUtils {
     }
 
     /**
-     * Methods creates and runs count query based on query created with jpqlQueryString, removing
-     * elements that are not allowed in count queries.
+     * Methods creates and runs count query based on query created with
+     * jpqlQueryString, removing elements that are not allowed in count queries.
      *
-     * @param query           original query from which parameters for count query
-     *                        will be parsed;
+     * @param query original query from which parameters for count query will be
+     *              parsed;
      * @return {@link Long} total amount of elements as query result.
      * @author Oleksandr Ilnytskyi
      */
@@ -315,7 +317,8 @@ public class EntityManagerUtils {
         return matcher.matches() ? matcher.group(4) : null;
     }
 
-    private static String determineReplacement(Matcher matcher, String variable, String jpqlQueryString, boolean nativeQuery) {
+    private static String determineReplacement(Matcher matcher, String variable, String jpqlQueryString,
+        boolean nativeQuery) {
         boolean hasComplexCount = matcher.matches() && StringUtils.hasText(matcher.group(3));
         String complexCountValue = hasComplexCount ? "$3 $6" : "$6";
 

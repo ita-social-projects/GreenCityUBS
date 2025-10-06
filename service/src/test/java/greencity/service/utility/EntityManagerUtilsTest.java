@@ -387,7 +387,7 @@ class EntityManagerUtilsTest {
             .getDeclaredMethod("removeSubqueries", String.class);
         removeSubqueries.setAccessible(true);
 
-        String result = (String) removeSubqueries.invoke(null, new Object[] { null });
+        String result = (String) removeSubqueries.invoke(null, new Object[] {null});
         assertNull(result);
     }
 
