@@ -3186,6 +3186,7 @@ class UBSClientServiceImplTest {
         when(notificationParameterRepository
             .findNotificationParameterByUserNotificationAndKey(any(UserNotification.class), anyString()))
             .thenReturn(getNotificationPaymentLink());
+        when(quartzScheduler.checkExists(any(JobKey.class))).thenReturn(true);
         doThrow(SchedulerException.class).when(quartzScheduler).deleteJob(any(JobKey.class));
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
