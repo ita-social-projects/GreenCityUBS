@@ -20,6 +20,7 @@ import greencity.repository.OrderRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.service.ubs.EventService;
+import greencity.service.ubs.order.OrderService;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +45,8 @@ class PaymentStatusHandlerServiceImplTest {
     private NotificationParameterRepository notificationParameterRepository;
     @Mock
     private EventService eventService;
+    @Mock
+    private OrderService orderService;
 
     private Payment payment;
     private Order order;

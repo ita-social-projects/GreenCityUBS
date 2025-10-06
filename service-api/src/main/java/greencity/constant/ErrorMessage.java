@@ -129,6 +129,8 @@ public class ErrorMessage {
     public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
+    public static final String COULD_NOT_RETRIEVE_CANCELLATION_RESPONSE =
+        "Could not retrieve invoice cancellation response";
     public static final String COULD_NOT_RETRIEVE_USER_DATA = "Could not retrieve user data";
     public static final String COULD_NOT_RETRIEVE_EMPLOYEE_AUTHORITY = "Could not retrieve employee's authority";
     public static final String EMPLOYEE_AUTHORITY_WAS_NOT_EDITED = "Employee's authority was not edited";
@@ -220,4 +222,8 @@ public class ErrorMessage {
     public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
     public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
         "Template cannot be deleted while it is referenced by existing notifications";
+    public static final String ORDER_IN_ONGOING_PROCESSING =
+        "Order has an active payment attempt, complete it or cancel to start the new one";
+    public static final String UNABLE_TO_CANCEL_PAYMENT_INVOICE =
+        "Payment system refused to cancel payment invoice. Please try again later.";
 }

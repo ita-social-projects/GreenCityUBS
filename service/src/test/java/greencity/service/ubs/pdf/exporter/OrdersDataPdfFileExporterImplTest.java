@@ -42,6 +42,7 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportValidEnPdf() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDto();
+        orderData.setPaymentLink("");
         when(orderRepository.findById(anyLong()))
             .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
         byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.ENGLISH);
@@ -66,6 +67,7 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportValidUaPdf() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDto();
+        orderData.setPaymentLink(" ");
         when(orderRepository.findById(anyLong()))
             .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
         byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UK_NAME));
@@ -90,6 +92,7 @@ class OrdersDataPdfFileExporterImplTest {
     @Test
     void exportPdfWithEmptyComment() throws IOException {
         OrdersDataForUserDto orderData = ModelUtils.getOrdersDataForUserDtoWithNullComment();
+        orderData.setPaymentLink("https://pay.example.com/invoice/TEST123");
         when(orderRepository.findById(anyLong()))
             .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
         byte[] pdfBytes = pdfFileExporter.export(orderData, Locale.of(AppConstant.LOCALE_UK_NAME));

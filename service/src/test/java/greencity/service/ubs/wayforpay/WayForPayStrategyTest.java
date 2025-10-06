@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
+import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.entity.order.Order;
 import greencity.enums.PaymentSystem;
@@ -34,15 +35,16 @@ class WayForPayStrategyTest {
         Order order = ModelUtils.getOrder();
         long sumToPayInCoins = 100L;
         PaymentSystemResponse expectedResponse = ModelUtils.getPaymentSystemResponse();
+        OrderResponseDto orderResponseDto = ModelUtils.getOrderResponseDto();
 
-        when(wayForPayService.processWayForPay(order, sumToPayInCoins))
+        when(wayForPayService.processWayForPay(orderResponseDto, order, sumToPayInCoins))
             .thenReturn(expectedResponse);
 
         PaymentSystemResponse actualResponse =
-            wayForPayStrategy.processPayment(order, sumToPayInCoins);
+            wayForPayStrategy.processPayment(orderResponseDto, order, sumToPayInCoins);
 
         assertEquals(expectedResponse, actualResponse);
-        verify(wayForPayService).processWayForPay(order, sumToPayInCoins);
+        verify(wayForPayService).processWayForPay(orderResponseDto, order, sumToPayInCoins);
         verifyNoMoreInteractions(wayForPayService);
     }
 }

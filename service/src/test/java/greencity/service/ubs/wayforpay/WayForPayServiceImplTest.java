@@ -1,15 +1,22 @@
 package greencity.service.ubs.wayforpay;
 
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
 import greencity.client.WayForPayClient;
+import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
@@ -17,14 +24,20 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.OrderRepository;
 import greencity.util.EncryptionUtil;
 import greencity.util.MoneyConverterUtil;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +50,8 @@ class WayForPayServiceImplTest {
     private EncryptionUtil encryptionUtil;
     @Mock
     private WayForPayClient wayForPayClient;
+    @Mock
+    private Scheduler quartzScheduler;
 
     @InjectMocks
     private WayForPayServiceImpl wayForPayService;
@@ -55,13 +70,14 @@ class WayForPayServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setId(1L);
         order.setOrderBags(List.of());
+        OrderResponseDto orderResponseDto = ModelUtils.getOrderResponseDto();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(moneyConverterUtil.convertCoinsIntoBills(anyLong())).thenReturn(Double.valueOf(100));
         when(encryptionUtil.formRequestSignature(any(), anyString())).thenReturn("signed");
         when(wayForPayClient.getCheckOutResponse(any())).thenReturn("{\"invoiceUrl\":\"http://pay-link\"}");
 
-        PaymentSystemResponse response = wayForPayService.processWayForPay(order, 500L);
+        PaymentSystemResponse response = wayForPayService.processWayForPay(orderResponseDto, order, 500L);
 
         assertNotNull(response);
         assertEquals(1L, response.orderId());
@@ -130,5 +146,67 @@ class WayForPayServiceImplTest {
         String link = wayForPayService.getLinkFromWayForPayCheckoutResponse(jsonResponse);
 
         assertEquals("http://invoice-test", link);
+    }
+
+    @Test
+    void formPaymentCancellationRequestForWayForPay_createsValidRequest() {
+        Order order = ModelUtils.getOrder();
+
+        String expectedSignature = "signed123";
+        when(encryptionUtil.formRemoveInvoiceSignature(any(), eq("secret")))
+            .thenReturn(expectedSignature);
+
+        PaymentCancellationWayForPayRequestDto result =
+            wayForPayService.formPaymentCancellationRequestForWayForPay(order);
+
+        assertEquals("REMOVE_INVOICE", result.getTransactionType());
+        assertEquals(1, result.getApiVersion());
+        assertEquals("testAccount", result.getMerchantAccount());
+        assertNotNull(result.getOrderReference());
+        assertEquals(expectedSignature, result.getSignature());
+
+        verify(encryptionUtil).formRemoveInvoiceSignature(result, "secret");
+    }
+
+    @Test
+    void getResultFromWayForPayCancellationResponse_returnsReason() {
+        String jsonResponse = "{\"reason\": \"Transaction cancelled successfully\", \"status\": \"ok\"}";
+
+        String result = wayForPayService.getResultFromWayForPayCancellationResponse(jsonResponse);
+
+        assertEquals("Transaction cancelled successfully", result);
+    }
+
+    @Test
+    void schedulePaymentExpiryJob_schedulesJobSuccessfully() throws SchedulerException {
+        Order order = new Order();
+        order.setId(1L);
+        int pointsUsed = 100;
+        Set<String> certificates = Set.of("CERT123");
+        Long expirySeconds = 60L;
+        String paymentLink = "http://payment.com/123";
+
+        wayForPayService.schedulePaymentExpiryJob(order, pointsUsed, certificates, expirySeconds, paymentLink);
+
+        verify(quartzScheduler).scheduleJob(any(JobDetail.class), any(Trigger.class));
+        verify(orderRepository).save(order);
+
+        assertEquals(paymentLink, order.getPaymentLink());
+        assertNotNull(order.getPaymentLinkExpiry());
+        assertTrue(order.getPaymentLinkExpiry().isAfter(LocalDateTime.now()));
+    }
+
+    @Test
+    void schedulePaymentExpiryJob_whenSchedulerThrows_throwsIllegalStateException() throws SchedulerException {
+        Order order = new Order();
+        order.setId(1L);
+
+        doThrow(new SchedulerException("fail")).when(quartzScheduler)
+            .scheduleJob(any(JobDetail.class), any(Trigger.class));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> wayForPayService.schedulePaymentExpiryJob(order, 0, null, 30L, "http://x"));
+
+        assertEquals(PAYMENT_EXPIRY_SCHEDULE_EXCEPTION, exception.getMessage());
     }
 }

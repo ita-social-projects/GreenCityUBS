@@ -150,6 +150,7 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/{tariffId}/getService",
                     SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}",
                     SUPER_ADMIN_LINK + "/**",
+                    SUPER_ADMIN_LINK + "/settingsText",
                     USER_AGREEMENT_LINK,
                     USER_AGREEMENT_LINK + "/{id}",
                     UBS_MANAG_LINK + "/locations-details",
@@ -196,7 +197,8 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
                     SUPER_ADMIN_LINK + "/editTariffInfo/{id}",
                     SUPER_ADMIN_LINK + "/activate-employee/{id}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    SUPER_ADMIN_LINK + "/settingsText/section")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ADMIN_EMPL_LINK + "/**",
@@ -271,6 +273,7 @@ public class SecurityConfig {
                     UBS_LINK + "/order/**",
                     UBS_LINK + "/processOrder",
                     UBS_LINK + "/processOrder/{id}",
+                    UBS_LINK + "/cancelPaymentAttempt/{id}",
                     UBS_LINK + "/save-order-address",
                     UBS_CLIENT_LINK + "/**",
                     "/notifications/**")

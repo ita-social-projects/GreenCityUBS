@@ -79,26 +79,16 @@ class OrderCheckoutServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        tariffsInfo = new TariffsInfo();
-        tariffsInfo.setId(1L);
+        tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
-
-        location = new Location();
-        location.setId(10L);
-        location.setLocationStatus(LocationStatus.ACTIVE);
-
-        user = new User();
-        user.setId(100L);
-        user.setUuid("uuid-123");
-        user.setCurrentPoints(100);
-
-        order = new Order();
+        location = ModelUtils.getLocation();
+        user = ModelUtils.getUser();
+        order = ModelUtils.getOrder();
         order.setId(200L);
         order.setUser(user);
         order.setTariffsInfo(tariffsInfo);
-
-        UBSuser ubsUser = new UBSuser();
-        OrderAddress orderAddress = new OrderAddress();
+        UBSuser ubsUser = ModelUtils.getUBSuser();
+        OrderAddress orderAddress = ModelUtils.getOrderAddress();
         orderAddress.setLocation(location);
         ubsUser.setOrderAddress(orderAddress);
         order.setUbsUser(ubsUser);
@@ -222,8 +212,7 @@ class OrderCheckoutServiceImplTest {
 
     @Test
     void getFirstPageDataByTariffAndLocationId_tariffOrLocationDeactivated() {
-        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED); // або
-                                                               // location.setLocationStatus(LocationStatus.DEACTIVATED)
+        tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
@@ -242,10 +231,9 @@ class OrderCheckoutServiceImplTest {
                 .id(1L)
                 .location(location)
                 .tariffsInfo(tariffsInfo)
-                .locationStatus(LocationStatus.ACTIVE) // доступний обʼєкт
+                .locationStatus(LocationStatus.ACTIVE)
                 .build()));
 
-        // А тепер примусово кажемо false для isAvailable
         location.setLocationStatus(LocationStatus.ACTIVE);
         tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
         when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
@@ -253,7 +241,7 @@ class OrderCheckoutServiceImplTest {
                 .id(1L)
                 .location(location)
                 .tariffsInfo(tariffsInfo)
-                .locationStatus(LocationStatus.DEACTIVATED) // робимо невалідний
+                .locationStatus(LocationStatus.DEACTIVATED)
                 .build()));
 
         assertThatThrownBy(() ->
@@ -275,7 +263,7 @@ class OrderCheckoutServiceImplTest {
 
         PersonalDataDto result = orderCheckoutService.getSecondPageData("uuid-123");
 
-        assertThat(result.getEmail()).isNull(); // alternateEmail не використовується
+        assertThat(result.getEmail()).isNull();
     }
 
     @Test
@@ -285,10 +273,9 @@ class OrderCheckoutServiceImplTest {
                 .id(1L)
                 .tariffsInfo(tariffsInfo)
                 .location(location)
-                .locationStatus(LocationStatus.ACTIVE) // не DEACTIVATED
+                .locationStatus(LocationStatus.ACTIVE)
                 .build()));
 
-        // Виклик відбувається всередині getFirstPageDataByTariffAndLocationId
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(ModelUtils.getBag()));

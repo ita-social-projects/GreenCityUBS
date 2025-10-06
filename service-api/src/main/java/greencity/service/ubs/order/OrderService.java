@@ -110,4 +110,14 @@ public interface OrderService {
      * @return aggregated {@link OrdersDataForUserDto}
      */
     public OrdersDataForUserDto getOrdersData(Order order);
+
+    /**
+     * Cancels the scheduled job that should expire the payment for a given order.
+     * If the job cannot be deleted or the scheduler fails, an exception is thrown.
+     *
+     * @param orderId ID of the order whose payment expiry job needs to be cancelled
+     * @throws IllegalStateException if the job cannot be deleted or a scheduler
+     *                               error occurs
+     */
+    public void cancelPaymentExpiryJob(Long orderId);
 }

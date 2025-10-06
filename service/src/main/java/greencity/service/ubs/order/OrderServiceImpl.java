@@ -5,6 +5,10 @@ import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_R
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
 import static java.util.Objects.nonNull;
 import greencity.constant.AppConstant;
 import greencity.dto.address.AddressInfoDto;
@@ -62,6 +66,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -83,6 +90,7 @@ public class OrderServiceImpl implements OrderService {
     private final PointsUtils pointsUtils;
     private final MoneyConverterUtil moneyConverterUtil;
     private final ModelMapper modelMapper;
+    private final Scheduler quartzScheduler;
 
     @Override
     public Order formAndSaveOrderRequest(OrderResponseDto dto, Order order, User currentUser, UBSuser userData) {
@@ -210,6 +218,18 @@ public class OrderServiceImpl implements OrderService {
             refundedMoney, paidAmount, fullPrice, certificates, paymentStatusTranslation);
 
         return buildOrdersDataForUserDto(context);
+    }
+
+    @Override
+    public void cancelPaymentExpiryJob(Long orderId) {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
+        try {
+            if (!quartzScheduler.deleteJob(jobKey)) {
+                throw new IllegalStateException(PAYMENT_EXPIRY_CANCEL_EXCEPTION);
+            }
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
+        }
     }
 
     private long applyBonusesAndCertificates(OrderResponseDto dto, Order order, long sumToPayInCoinsWithoutDiscount,
@@ -417,6 +437,8 @@ public class OrderServiceImpl implements OrderService {
             .address(addressInfoDtoBuilder(ctx.order()))
             .paymentStatusUk(ctx.paymentStatus().getTranslationValueUk())
             .paymentStatusEn(ctx.paymentStatus().getTranslationsValueEn())
+            .paymentLink(ctx.order.getPaymentLink())
+            .paymentLinkExpiry(ctx.order.getPaymentLinkExpiry())
             .build();
     }
 

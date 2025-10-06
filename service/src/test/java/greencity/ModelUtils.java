@@ -3889,7 +3889,6 @@ public class ModelUtils {
             .locationsDto(getLocationsDto()).build();
     }
 
-    // TODO change this move Location Dto to the Service-api
     public static greencity.dto.LocationsDto getLocationDtoFromDao() {
         return greencity.dto.LocationsDto.builder()
             .id(1L)

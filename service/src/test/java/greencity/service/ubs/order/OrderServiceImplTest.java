@@ -5,8 +5,13 @@ import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
 import static greencity.ModelUtils.getOrderStatusTranslation;
 import static greencity.ModelUtils.getOrderTest;
 import static greencity.ModelUtils.getTestUser;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,6 +68,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -97,12 +105,15 @@ class OrderServiceImplTest {
     private MoneyConverterUtil moneyConverterUtil;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private Scheduler quartzScheduler;
 
     private User user;
     private UBSuser ubsUser;
     private Order order;
     private TariffsInfo tariffsInfo;
     private OrderAddress orderAddress;
+    private static final Long ORDER_ID = 1L;
 
     @BeforeEach
     void setUp() {
@@ -426,5 +437,39 @@ class OrderServiceImplTest {
         orderService.transferUserPointsToOrder(order, 0);
         assertThat(order.getPointsToUse()).isZero();
         assertThat(user.getCurrentPoints()).isEqualTo(100);
+    }
+
+    @Test
+    void cancelPaymentExpiryJob_successfullyDeletesJob() throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
+        when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(true);
+
+        assertDoesNotThrow(() -> orderService.cancelPaymentExpiryJob(ORDER_ID));
+
+        verify(quartzScheduler, times(1)).deleteJob(jobKey);
+    }
+
+    @Test
+    void cancelPaymentExpiryJob_whenDeleteReturnsFalse_throwsIllegalStateException() throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
+        when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(false);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> orderService.cancelPaymentExpiryJob(ORDER_ID));
+
+        assertEquals(PAYMENT_EXPIRY_CANCEL_EXCEPTION, exception.getMessage());
+        verify(quartzScheduler).deleteJob(jobKey);
+    }
+
+    @Test
+    void cancelPaymentExpiryJob_whenSchedulerThrowsException_throwsIllegalStateException() throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
+        when(quartzScheduler.deleteJob(any(JobKey.class))).thenThrow(new SchedulerException("Test exception"));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> orderService.cancelPaymentExpiryJob(ORDER_ID));
+
+        assertEquals(QUARTZ_SCHEDULER_EXCEPTION, exception.getMessage());
+        verify(quartzScheduler).deleteJob(jobKey);
     }
 }

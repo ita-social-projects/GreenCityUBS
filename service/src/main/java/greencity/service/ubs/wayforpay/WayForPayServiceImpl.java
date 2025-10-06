@@ -1,23 +1,43 @@
 package greencity.service.ubs.wayforpay;
 
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
+import static greencity.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
 import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;
+import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.OrderRepository;
+import greencity.scheduler.PaymentExpiryJob;
 import greencity.util.EncryptionUtil;
 import greencity.util.MoneyConverterUtil;
 import greencity.util.OrderUtils;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +49,7 @@ public class WayForPayServiceImpl implements WayForPayService {
     private final MoneyConverterUtil moneyConverterUtil;
     private final EncryptionUtil encryptionUtil;
     private final WayForPayClient wayForPayClient;
+    private final Scheduler quartzScheduler;
 
     @Value("${greencity.redirect.result-way-for-pay-url}")
     private String resultWayForPayUrl;
@@ -43,9 +64,12 @@ public class WayForPayServiceImpl implements WayForPayService {
 
     @Override
     @Transactional
-    public PaymentSystemResponse processWayForPay(Order order, long sumToPayInCoins) {
+    public PaymentSystemResponse processWayForPay(OrderResponseDto dto, Order order, long sumToPayInCoins) {
         PaymentWayForPayRequestDto requestDto = formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(requestDto));
+        schedulePaymentExpiryJob(
+            order, dto.getPointsToUse(),
+            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
         return getPaymentRequestDto(order, link);
     }
 
@@ -100,5 +124,60 @@ public class WayForPayServiceImpl implements WayForPayService {
     public String getLinkFromWayForPayCheckoutResponse(String wayForPayResponse) {
         JSONObject json = new JSONObject(wayForPayResponse);
         return json.getString("invoiceUrl");
+    }
+
+    @Override
+    public PaymentCancellationWayForPayRequestDto formPaymentCancellationRequestForWayForPay(Order order) {
+        PaymentCancellationWayForPayRequestDto paymentCancellationWayForPayRequestDto =
+            PaymentCancellationWayForPayRequestDto.builder()
+                .transactionType("REMOVE_INVOICE")
+                .apiVersion(1)
+                .merchantAccount(merchantAccount)
+                .orderReference(OrderUtils.generateEncodedOrderReference(order.getId(), order))
+                .build();
+
+        paymentCancellationWayForPayRequestDto.setSignature(
+            encryptionUtil.formRemoveInvoiceSignature(paymentCancellationWayForPayRequestDto, wayForPaySecret));
+
+        return paymentCancellationWayForPayRequestDto;
+    }
+
+    @Override
+    public String getResultFromWayForPayCancellationResponse(String wayForPayResponse) {
+        JSONObject json = new JSONObject(wayForPayResponse);
+        return json.getString("reason");
+    }
+
+    @Override
+    public void schedulePaymentExpiryJob(
+        Order order, int pointsUsed, Set<String> certificateCodes, Long expirySeconds, String paymentLink) {
+        if (certificateCodes == null) {
+            certificateCodes = new HashSet<>();
+        }
+        Long orderId = order.getId();
+
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("orderId", orderId);
+        jobDataMap.put("pointsUsed", pointsUsed);
+        jobDataMap.put("certificateCodes", certificateCodes);
+
+        JobDetail job = JobBuilder.newJob(PaymentExpiryJob.class)
+            .withIdentity(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)
+            .usingJobData(jobDataMap)
+            .build();
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+            .withIdentity(PAYMENT_EXPIRY_TRIGGER_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP)
+            .startAt(Date.from(Instant.now().plus(expirySeconds, ChronoUnit.SECONDS)))
+            .build();
+
+        try {
+            quartzScheduler.scheduleJob(job, trigger);
+            order.setPaymentLink(paymentLink);
+            order.setPaymentLinkExpiry(LocalDateTime.now().plusSeconds(expirySeconds));
+            orderRepository.save(order);
+        } catch (SchedulerException exception) {
+            throw new IllegalStateException(PAYMENT_EXPIRY_SCHEDULE_EXCEPTION);
+        }
     }
 }

@@ -278,7 +278,11 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
                 return;
             }
 
-            String paymentLink = processPaymentService.formedLink(order, sumInCoins);
+            String paymentLink = order.getPaymentLink();
+            if (paymentLink == null || paymentLink.isBlank()) {
+                paymentLink = processPaymentService.formedLink(order, sumInCoins);
+            }
+
             if (paymentLink == null || paymentLink.isBlank()) {
                 addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);
                 return;

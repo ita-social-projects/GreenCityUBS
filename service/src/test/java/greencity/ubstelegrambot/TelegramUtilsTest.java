@@ -7,6 +7,7 @@ import greencity.entity.user.employee.Position;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.ubstelegrambot.messages.MessageProvider;
@@ -77,11 +78,16 @@ class TelegramUtilsTest {
     }
 
     @Test
-    void detectAssetTypeMultipartFile_WithNull_ShouldReturnFile() {
-        when(multipartFile.getContentType()).thenReturn(null);
-        AssetType result = TelegramUtils.detectAssetType(multipartFile);
+    void detectAssetTypeMultipartFile_WithFile_ShouldReturnFile() {
+        assertEquals(AssetType.FILE, TelegramUtils.detectAssetType("application/file"));
+        assertEquals(AssetType.FILE, TelegramUtils.detectAssetType("text/format-file"));
+        assertEquals(AssetType.FILE, TelegramUtils.detectAssetType("image/svg"));
+    }
 
-        assertEquals(AssetType.FILE, result);
+    @Test
+    void detectAssetTypeMultipartFile_WithSticker_ShouldReturnSticker() {
+        assertEquals(AssetType.STICKER, TelegramUtils.detectAssetType("application/x-tgsticker"));
+        assertEquals(AssetType.STICKER, TelegramUtils.detectAssetType("image/webp"));
     }
 
     @Test
@@ -100,13 +106,16 @@ class TelegramUtilsTest {
     }
 
     @Test
-    void detectAssetType_WithUnknownContentType_ShouldReturnFile() {
-        assertEquals(AssetType.FILE, TelegramUtils.detectAssetType("application/pdf"));
+    void detectAssetTypeMultipartFile_WithNull_ShouldThrowException() {
+        when(multipartFile.getContentType()).thenReturn(null);
+
+        assertThrows(UnsupportedTelegramAssetException.class, () -> TelegramUtils.detectAssetType(multipartFile));
     }
 
     @Test
-    void detectAssetType_WithNull_ShouldReturnFile() {
-        assertEquals(AssetType.FILE, TelegramUtils.detectAssetType((String) null));
+    void detectAssetType_WithUnknownContentType_ShouldThrowException() {
+        assertThrows(UnsupportedTelegramAssetException.class,
+            () -> TelegramUtils.detectAssetType("some/unknown content type"));
     }
 
     @Test

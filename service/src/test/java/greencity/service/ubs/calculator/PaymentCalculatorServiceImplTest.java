@@ -61,7 +61,6 @@ class PaymentCalculatorServiceImplTest {
 
     @Test
     void countPaidAmount_ShouldReturnSumOfPaidPayments() {
-        // given
         Payment p1 = new Payment();
         p1.setPaymentStatus(PaymentStatus.PAID);
         p1.setAmount(30L);

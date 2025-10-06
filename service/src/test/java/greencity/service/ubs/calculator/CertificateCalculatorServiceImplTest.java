@@ -55,7 +55,6 @@ class CertificateCalculatorServiceImplTest {
 
         long result = service.getCertificateSumToPayInCoins(order, 1000L);
 
-        // 1000 - (2+3)*100 = 1000 - 500 = 500
         assertEquals(500L, result);
     }
 
@@ -117,7 +116,7 @@ class CertificateCalculatorServiceImplTest {
 
         long result = service.applyCertificatesForClientOrder(dto, order, 500L);
 
-        assertEquals(300L, result); // 500 - 200
+        assertEquals(300L, result);
         assertEquals(CertificateStatus.USED, cert.getCertificateStatus());
         assertEquals(order, cert.getOrder());
     }
@@ -125,7 +124,7 @@ class CertificateCalculatorServiceImplTest {
     @Test
     void applyCertificatesToOrder_ShouldThrowNotFoundException_WhenTooManyCertificates() {
         OrderResponseDto dto = new OrderResponseDto();
-        dto.setCertificates(Set.of("A", "B", "C", "D")); // > MAX
+        dto.setCertificates(Set.of("A", "B", "C", "D"));
         Order order = new Order();
 
         assertThrows(NotFoundException.class,
@@ -196,14 +195,12 @@ class CertificateCalculatorServiceImplTest {
         when(certificateRepository.findByCodeInAndCertificateStatus(anyList(), any()))
             .thenReturn(Set.of(cert));
 
-        long result = service.applyCertificatesForClientOrder(dto, order, 400L); // 5*100=500 > 400
+        long result = service.applyCertificatesForClientOrder(dto, order, 400L);
 
-        assertEquals(0L, result); // sumToPayInCoins <= 0 → 0
+        assertEquals(0L, result);
         assertEquals(CertificateStatus.USED, cert.getCertificateStatus());
         assertEquals(order, cert.getOrder());
-        // очікуємо, що points скориговані через adjustCertificateBalance, може бути
-        // менше 5
-        assertEquals(4, cert.getPoints()); // тут конкретне очікуване значення
+        assertEquals(4, cert.getPoints());
     }
 
     @Test
@@ -222,8 +219,8 @@ class CertificateCalculatorServiceImplTest {
         BadRequestException ex = assertThrows(BadRequestException.class,
             () -> service.applyCertificatesToOrder(dto, new HashSet<>(), order, 100L));
 
-        assertTrue(ex.getMessage().contains(cert.getCode())); // перевіряємо, що код сертифіката є в повідомленні
-        assertTrue(ex.getMessage().contains("expired")); // або перевіряємо частину тексту
+        assertTrue(ex.getMessage().contains(cert.getCode()));
+        assertTrue(ex.getMessage().contains("expired"));
     }
 
     @Test
@@ -242,8 +239,8 @@ class CertificateCalculatorServiceImplTest {
         BadRequestException ex = assertThrows(BadRequestException.class,
             () -> service.applyCertificatesToOrder(dto, new HashSet<>(), order, 100L));
 
-        assertTrue(ex.getMessage().contains(cert.getCode())); // перевіряємо, що код сертифіката є
-        assertTrue(ex.getMessage().contains("used")); // перевіряємо частину тексту
+        assertTrue(ex.getMessage().contains(cert.getCode()));
+        assertTrue(ex.getMessage().contains("used"));
     }
 
     @Test
@@ -254,7 +251,7 @@ class CertificateCalculatorServiceImplTest {
 
         long result = service.applyCertificatesToOrder(dto, new HashSet<>(), order, 0L);
 
-        assertEquals(0L, result); // sumToPayInCoins == 0, повертаємо без змін
+        assertEquals(0L, result);
     }
 
     @Test
@@ -265,13 +262,12 @@ class CertificateCalculatorServiceImplTest {
 
         long result = service.applyCertificatesToOrder(dto, new HashSet<>(), order, 100L);
 
-        assertEquals(100L, result); // dto.getCertificates() == null, повертаємо sumToPayInCoins без змін
+        assertEquals(100L, result);
     }
 
     @Test
     void applyCertificatesToOrder_ShouldThrowBadRequestException_WhenTooManyCertificates() {
         OrderResponseDto dto = new OrderResponseDto();
-        // створюємо кількість сертифікатів > MAX_CERTIFICATES_PER_ORDER
         Set<String> certs = new HashSet<>();
         for (int i = 0; i < AppConstant.MAX_CERTIFICATES_PER_ORDER + 1; i++) {
             certs.add("CERT" + i);

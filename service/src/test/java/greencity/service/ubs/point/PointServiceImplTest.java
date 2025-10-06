@@ -58,7 +58,7 @@ class PointServiceImplTest {
         AllPointsUserDto result = pointService.findAllCurrentPointsForUser("uuid-123");
 
         assertThat(result.getUserBonuses()).isEqualTo(50);
-        assertThat(result.getUbsUserBonuses()).containsExactly(dto2, dto1); // сортування по даті (новіші спочатку)
+        assertThat(result.getUbsUserBonuses()).containsExactly(dto2, dto1);
     }
 
     @Test

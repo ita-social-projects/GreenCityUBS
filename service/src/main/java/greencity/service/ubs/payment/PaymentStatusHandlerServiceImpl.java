@@ -13,6 +13,7 @@ import greencity.repository.OrderRepository;
 import greencity.repository.PaymentRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.service.ubs.EventService;
+import greencity.service.ubs.order.OrderService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
     private final EventService eventService;
+    private final OrderService orderService;
 
     @Override
     public void checkOrderStatusApproved(Payment orderPayment, Order order,
@@ -35,16 +37,14 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
             orderPayment.setPaymentId(decodedOrderReference.split("_")[AppConstant.COUNTER_ORDER_PAYMENT_ID_INDEX]);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-
             orderPayment.setOrder(order);
-
-            removePaymentLinkForOrder(order);
-
+            removePaymentLinkAndNotificationForOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
             eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
                 OrderHistory.SYSTEM_UK, order);
+            orderService.cancelPaymentExpiryJob(order.getId());
 
             log.info("Payment approved: orderId={}, status={}",
                 order.getId(), orderPayment.getPaymentStatus());
@@ -68,7 +68,17 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
         }
     }
 
+    private void removePaymentLinkAndNotificationForOrder(Order order) {
+        removePaymentLinkForOrder(order);
+        removePaymentNotificationForOrder(order);
+    }
+
     private void removePaymentLinkForOrder(Order order) {
+        order.setPaymentLink("");
+        order.setPaymentLinkExpiry(null);
+    }
+
+    private void removePaymentNotificationForOrder(Order order) {
         List<UserNotification> userNotification = userNotificationRepository
             .findAllUserNotificationByOrderAndNotificationType(order, NotificationType.UNPAID_ORDER);
 

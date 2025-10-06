@@ -409,4 +409,20 @@ class OrderControllerTest {
 
         verify(addressService).getAllLocationsByCourierId(id);
     }
+
+    @Test
+    void cancelPaymentAttemptTest() throws Exception {
+        Long orderId = 1L;
+        String uuid = "35467585763t4sfgchjfuyetf";
+
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(
+            Optional.of("35467585763t4sfgchjfuyetf"));
+
+        mockMvc.perform(post(ubsLink + "/cancelPaymentAttempt/{id}", orderId)
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(processPaymentService).cancelPaymentAttempt(uuid, orderId);
+    }
 }
