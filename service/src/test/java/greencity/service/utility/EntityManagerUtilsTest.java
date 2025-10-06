@@ -64,7 +64,7 @@ class EntityManagerUtilsTest {
     private static class DummyEntity {
     }
 
-    private static final String BASIC_ATTRIBURE_NAME = "relatedEntity";
+    private static final String BASIC_ATTRIBUTE_NAME = "relatedEntity";
     private static final String WRONG_ATTRIBUTE_NAME = "unrelatedEntity";
 
     static final String ATTRIBUTE_ERROR_MESSAGE = "Attribute doesn't exist";
@@ -73,10 +73,10 @@ class EntityManagerUtilsTest {
     void createEntityGraphWithSingleAttribute() {
         when(entityManager.createEntityGraph(DummyEntity.class)).thenReturn(entityGraph);
 
-        EntityGraph<DummyEntity> result = entityManagerUtils.createEntityGraph(DummyEntity.class, List.of(BASIC_ATTRIBURE_NAME));
+        EntityGraph<DummyEntity> result = entityManagerUtils.createEntityGraph(DummyEntity.class, List.of(BASIC_ATTRIBUTE_NAME));
 
         assertSame(entityGraph, result);
-        verify(entityGraph).addAttributeNodes(BASIC_ATTRIBURE_NAME);
+        verify(entityGraph).addAttributeNodes(BASIC_ATTRIBUTE_NAME);
         verifyNoMoreInteractions(entityGraph);
     }
 
@@ -156,7 +156,7 @@ class EntityManagerUtilsTest {
         when(entityManager.createEntityGraph(DummyEntity.class)).thenReturn(entityGraph);
 
         TypedQuery<DummyEntity> result = entityManagerUtils.createTypedQueryWithEntityGraph(
-            DummyEntity.class, jpql, List.of(BASIC_ATTRIBURE_NAME), EntityGraphType.FETCH);
+            DummyEntity.class, jpql, List.of(BASIC_ATTRIBUTE_NAME), EntityGraphType.FETCH);
 
         assertSame(typedQuery, result);
         verify(typedQuery).setHint("jakarta.persistence.fetchgraph", entityGraph);
@@ -214,7 +214,7 @@ class EntityManagerUtilsTest {
         when(typedQuery.getParameters()).thenReturn(Collections.emptySet());
 
         Page<DummyEntity> page = entityManagerUtils.createAndRunPageableTypedQueryWithEntityGraph(
-            DummyEntity.class, jpql, List.of(BASIC_ATTRIBURE_NAME), pageable);
+            DummyEntity.class, jpql, List.of(BASIC_ATTRIBUTE_NAME), pageable);
 
         assertEquals(2, page.getContent().size());
         assertEquals(123L, page.getTotalElements());
@@ -380,7 +380,7 @@ class EntityManagerUtilsTest {
         String jpql = "select d from DummyEntity d where d.x in (select x where o.flag = true)";
         String result = (String) removeSubqueries.invoke(null, jpql);
 
-        assertTrue(result.contains("select x where o.flag = true)"), "subquery contents must be removed");
+        assertTrue(result.contains("select x where o.flag = true)"), "subquery contents are not removed");
         assertTrue(result.contains("from DummyEntity"), "outer query must remain intact");
     }
 
