@@ -22,6 +22,7 @@ import java.util.Set;
 import static greencity.service.utility.EntityManagerUtils.ENTITY_GRAPH_ARGUMENT_EXCEPTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -265,18 +266,39 @@ class EntityManagerUtilsTest {
 
     @Test
     void createCountQueryStringForNativeQueryWithStar() {
-        String jpql = "select * from DummyEntity d";
-        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, true);
+        String queryString = "select * from DummyEntity d";
+        String result = entityManagerUtils.createCountQueryStringFor(queryString, null, true);
+
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertTrue(result.contains("count(1)"), "native query with '*' must use count(1)");
     }
 
     @Test
     void createCountQueryStringForNativeQueryWithComma() {
-        String jpql = "select a, b from DummyEntity d";
-        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, true);
+        String queryString = "select a, b from DummyEntity d";
+        String result = entityManagerUtils.createCountQueryStringFor(queryString, null, true);
+
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertTrue(result.contains("count(1)"), "native query with comma must use count(1)");
+    }
+
+    @Test
+    void createCountQueryStringForQueryWithStarUsesAlias() {
+        String jpql = "select * from DummyEntity d";
+        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+
+        assertTrue(result.toLowerCase().startsWith("select count("));
+        assertTrue(result.contains("count(d)"), "jpql query with '*' must use count(d)");
+    }
+
+    @Test
+    void createCountQueryStringForQueryWithDistinctWithOrderBy() {
+        String jpql = "select distinct d.id, d.name from DummyEntity d where d.x = :p order by d.name";
+        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+
+        assertTrue(result.toLowerCase().startsWith("select count("));
+        assertTrue(result.toLowerCase().contains("distinct"));
+        assertFalse(result.toLowerCase().contains("order by"));
     }
 
     @Test
@@ -287,6 +309,22 @@ class EntityManagerUtilsTest {
 
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertTrue(result.contains("count(distinct d.id)"), "should use provided count projection");
+    }
+
+    @Test
+    void createCountQueryStringForQueryWithConstructorExpression() {
+        String jpql = "select new com.example.Dto(d.x) from DummyEntity d where d.x = 1";
+        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+
+        assertTrue(result.toLowerCase().startsWith("select count("));
+        assertFalse(result.toLowerCase().contains("count(new"));
+        assertFalse(result.toLowerCase().contains("new"));
+    }
+
+    @Test
+    void createCountQueryStringForEmptyQuery() {
+        assertThrows(IllegalArgumentException.class,
+            () -> entityManagerUtils.createCountQueryStringFor("", null, false));
     }
 
     @Test
@@ -301,6 +339,17 @@ class EntityManagerUtilsTest {
     }
 
     @Test
+    void detectAliasWhenNoAliasPresent() throws Exception {
+        Method detectAlias = EntityManagerUtils.class.getDeclaredMethod("detectAlias", String.class);
+        detectAlias.setAccessible(true);
+
+        String jpql = "select * from DummyEntity";
+        String alias = (String) detectAlias.invoke(null, jpql);
+
+        assertNull(alias);
+    }
+
+    @Test
     void removeSubqueries() throws Exception {
         Method removeSubqueries = EntityManagerUtils.class
             .getDeclaredMethod("removeSubqueries", String.class);
@@ -311,5 +360,44 @@ class EntityManagerUtilsTest {
 
         assertFalse(result.contains("select x from OtherEntity"), "subquery contents must be removed");
         assertTrue(result.contains("from DummyEntity"), "outer query must remain intact");
+    }
+
+    @Test
+    void removeSubqueriesWithNestedSubqueries() throws Exception {
+        Method removeSubqueries = EntityManagerUtils.class
+            .getDeclaredMethod("removeSubqueries", String.class);
+        removeSubqueries.setAccessible(true);
+
+        String jpql = "select d from DummyEntity d where d.x in (" +
+            " select x from SecondEntity s where s.y in (" +
+            "   select y from ThirdEntity t where t.flag = true" +
+            " )" +
+            ") and d.active = true";
+        String result = (String) removeSubqueries.invoke(null, jpql);
+
+        assertFalse(result.contains("select x from SecondEntity"));
+        assertFalse(result.contains("select y from ThirdEntity"));
+        assertTrue(result.contains("select d from DummyEntity"));
+        assertTrue(result.contains("d.active = true"));
+    }
+
+    @Test
+    void removeSubqueriesWhenQueryIsNull() throws Exception {
+        Method removeSubqueries = EntityManagerUtils.class
+            .getDeclaredMethod("removeSubqueries", String.class);
+        removeSubqueries.setAccessible(true);
+
+        String result = (String) removeSubqueries.invoke(null, new Object[] { null });
+        assertNull(result);
+    }
+
+    @Test
+    void removeSubqueriesWhenQueryIsBlank() throws Exception {
+        Method removeSubqueries = EntityManagerUtils.class
+            .getDeclaredMethod("removeSubqueries", String.class);
+        removeSubqueries.setAccessible(true);
+
+        String result = (String) removeSubqueries.invoke(null, "");
+        assertEquals("", result);
     }
 }
