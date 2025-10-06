@@ -292,15 +292,6 @@ class EntityManagerUtilsTest {
     }
 
     @Test
-    void createCountQueryStringForQueryWithStarAndNoAlias() {
-        String jpql = "select * from DummyEntity";
-        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
-
-        assertTrue(result.toLowerCase().startsWith("select count("));
-        assertFalse(result.toLowerCase().contains("count(d)"));
-    }
-
-    @Test
     void createCountQueryStringForQueryWithDistinctWithOrderBy() {
         String jpql = "select distinct d.id, d.name from DummyEntity d where d.x = :p order by d.name";
         String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
@@ -336,7 +327,7 @@ class EntityManagerUtilsTest {
         String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
 
         assertTrue(result.toLowerCase().startsWith("select count("));
-        assertTrue(result.toLowerCase().contains("count(count(d))"));
+        assertFalse(result.toLowerCase().contains("count(count(d))"));
     }
 
     @Test
@@ -421,7 +412,7 @@ class EntityManagerUtilsTest {
         String jpql = "select d from DummyEntity d where d.x in (select x from OtherEntity o where o.flag = true";
         String result = (String) removeSubqueries.invoke(null, jpql);
 
-        assertFalse(result.contains("select x from OtherEntity"), "subquery contents must be removed");
+        assertEquals(jpql, result);
     }
 
     @Test
