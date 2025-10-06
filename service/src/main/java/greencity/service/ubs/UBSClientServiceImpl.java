@@ -1712,6 +1712,9 @@ public class UBSClientServiceImpl implements UBSClientService {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
         order.getOrderBags().clear();
+        for (Certificate certificate : order.getCertificates()) {
+            certificate.setOrder(null);
+        }
         orderRepository.saveAndFlush(order);
         orderRepository.delete(order);
         cancelPaymentExpiryJob(id);
