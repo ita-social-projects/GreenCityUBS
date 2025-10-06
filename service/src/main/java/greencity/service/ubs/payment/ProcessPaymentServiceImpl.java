@@ -173,7 +173,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         return order;
     }
 
-
     private void updateOrderFromDto(OrderResponseDto dto, Order order) {
         order.setPointsToUse(dto.getPointsToUse());
         order.setAdditionalOrders(dto.getAdditionalOrders());

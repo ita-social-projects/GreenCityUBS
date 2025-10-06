@@ -207,8 +207,7 @@ public class OrderServiceImpl implements OrderService {
 
         OrderDataBuilderContext context = new OrderDataBuilderContext(
             order, orderStatusTranslation, bags, remainingToPay, refundedBonuses,
-            refundedMoney, paidAmount, fullPrice, certificates, paymentStatusTranslation
-        );
+            refundedMoney, paidAmount, fullPrice, certificates, paymentStatusTranslation);
 
         return buildOrdersDataForUserDto(context);
     }
@@ -431,6 +430,6 @@ public class OrderServiceImpl implements OrderService {
         Long paidAmountInCoins,
         Long fullPriceInCoins,
         List<CertificateDto> certificates,
-        OrderPaymentStatusTranslation paymentStatus
-    ) {}
+        OrderPaymentStatusTranslation paymentStatus) {
+    }
 }
