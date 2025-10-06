@@ -965,8 +965,10 @@ public class UBSClientServiceImpl implements UBSClientService {
     private void cancelPaymentExpiryJob(Long orderId) {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
         try {
-            if (!quartzScheduler.deleteJob(jobKey)) {
-                throw new IllegalStateException(PAYMENT_EXPIRY_CANCEL_EXCEPTION);
+            if (quartzScheduler.checkExists(jobKey)) {
+                if (!quartzScheduler.deleteJob(jobKey)) {
+                    throw new IllegalStateException(PAYMENT_EXPIRY_CANCEL_EXCEPTION);
+                }
             }
         } catch (SchedulerException exception) {
             throw new IllegalStateException(QUARTZ_SCHEDULER_EXCEPTION);
