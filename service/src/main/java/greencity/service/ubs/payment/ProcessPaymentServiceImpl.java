@@ -1,7 +1,6 @@
 package greencity.service.ubs.payment;
 
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
-import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
@@ -63,31 +62,20 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     private final WayForPayClient wayForPayClient;
     private final ModelMapper modelMapper;
 
-    // TODO make code more readable
     @Override
     @Transactional
     public PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid) {
         validateOrderRequestAddress(dto);
-
         adjustPaymentDetails(dto);
 
-        Order order = modelMapper.map(dto, Order.class);
-        order.setOrderDate(LocalDateTime.now());
-        order.setOrderStatus(OrderStatus.FORMED);
-        order.setCounterOrderPaymentId(0L);
-
+        Order order = mapOrder(dto);
         User currentUser = userRepository.findByUuid(uuid);
+        UBSuser userData = createOrUpdateUbsUser(dto, currentUser, null);
 
-        OrderAddress orderAddress = addressService.formAndSaveOrderAddress(
-            dto.getAddressId(), dto.getLocationId(), currentUser);
-
-        UBSuser userData = formAndSaveUbsUser(
-            dto.getPersonalData(), null, orderAddress, currentUser);
         order = orderService.formAndSaveOrderRequest(dto, order, currentUser, userData);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
-
         saveOrderEvent(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
 
         PaymentSystemResponse paymentSystemResponse =
@@ -102,35 +90,20 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     @Transactional
     public PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId) {
         validateOrderRequestAddress(dto);
-
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
-
         User currentUser = userRepository.findByUuid(uuid);
-        checkIsOrderOfCurrentUser(currentUser, order);
 
-        if (order.getOrderStatus() != OrderStatus.FORMED
-            || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
-            throw new BadRequestException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
-        }
+        Order order = getOrder(orderId);
 
+        validateExistingOrder(order, currentUser);
         adjustPaymentDetails(dto);
+        updateOrderFromDto(dto, order);
 
-        order.setPointsToUse(dto.getPointsToUse());
-        order.setAdditionalOrders(dto.getAdditionalOrders());
-        order.setComment(dto.getOrderComment());
-
-        OrderAddress orderAddress = addressService.getOrUpdateOrderAddress(
-            order.getUbsUser().getOrderAddress(), dto.getAddressId(), dto.getLocationId(), currentUser);
-
-        UBSuser userData = formAndSaveUbsUser(
-            dto.getPersonalData(), order.getUbsUser().getId(), orderAddress, currentUser);
+        UBSuser userData = createOrUpdateUbsUser(dto, currentUser, order);
 
         order = orderService.formAndSaveOrderRequest(dto, order, currentUser, userData);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
-
         saveOrderEvent(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
 
         PaymentSystemResponse paymentSystemResponse =
@@ -146,12 +119,12 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     @Override
     @Transactional
     public PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto) {
-        Order order = orderRepository.findById(dto.getOrderId())
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + dto.getOrderId()));
+        Order order = getOrder(dto.getOrderId());
         checkOrderIsPaid(order.getOrderPaymentStatus());
-        User currentUser = userRepository.findUserByUuid(userUuid)
-            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid));
+
+        User currentUser = getUserByUuid(userUuid);
         checkForNullCounter(order);
+
         long sumToPayInCoins = paymentCalculatorService.calculateSumToPay(dto, order, currentUser);
 
         orderService.transferUserPointsToOrder(order, dto.getPointsToUse());
@@ -175,6 +148,57 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
             .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
         return wayForPayService.getLinkFromWayForPayCheckoutResponse(
             wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+    }
+
+    private UBSuser createOrUpdateUbsUser(OrderResponseDto dto, User currentUser, Order existingOrder) {
+        OrderAddress orderAddress;
+
+        if (existingOrder == null) {
+            orderAddress = addressService.formAndSaveOrderAddress(
+                dto.getAddressId(), dto.getLocationId(), currentUser);
+            return formAndSaveUbsUser(dto.getPersonalData(), null, orderAddress, currentUser);
+        } else {
+            orderAddress = addressService.getOrUpdateOrderAddress(
+                existingOrder.getUbsUser().getOrderAddress(), dto.getAddressId(), dto.getLocationId(), currentUser);
+            return formAndSaveUbsUser(dto.getPersonalData(), existingOrder.getUbsUser().getId(), orderAddress,
+                currentUser);
+        }
+    }
+
+    private Order mapOrder(OrderResponseDto dto) {
+        Order order = modelMapper.map(dto, Order.class);
+        order.setOrderDate(LocalDateTime.now());
+        order.setOrderStatus(OrderStatus.FORMED);
+        order.setCounterOrderPaymentId(0L);
+        return order;
+    }
+
+
+    private void updateOrderFromDto(OrderResponseDto dto, Order order) {
+        order.setPointsToUse(dto.getPointsToUse());
+        order.setAdditionalOrders(dto.getAdditionalOrders());
+        order.setComment(dto.getOrderComment());
+    }
+
+    private void validateExistingOrder(Order order, User currentUser) {
+        if (!order.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException(ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER);
+        }
+
+        if (order.getOrderStatus() != OrderStatus.FORMED
+            || order.getOrderPaymentStatus() != OrderPaymentStatus.UNPAID) {
+            throw new BadRequestException(ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED);
+        }
+    }
+
+    private User getUserByUuid(String userUuid) {
+        return userRepository.findUserByUuid(userUuid)
+            .orElseThrow(() -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST + userUuid));
+    }
+
+    private Order getOrder(Long orderId) {
+        return orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
     }
 
     private void validateOrderRequestAddress(OrderResponseDto dto) {
@@ -235,12 +259,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
                 .processPayment(order, sumToPayInCoins);
         } else {
             return wayForPayService.getPaymentRequestDto(order, "");
-        }
-    }
-
-    private void checkIsOrderOfCurrentUser(User user, Order order) {
-        if (!order.getUser().getId().equals(user.getId())) {
-            throw new AccessDeniedException(ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER);
         }
     }
 
