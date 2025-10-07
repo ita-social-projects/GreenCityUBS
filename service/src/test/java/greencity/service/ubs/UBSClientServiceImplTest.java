@@ -2193,11 +2193,17 @@ class UBSClientServiceImplTest {
     @Test
     void deleteOrder() throws SchedulerException {
         Order order = getOrder();
+        Certificate certificate = getUsedCertificateWith600Points();
+        order.setCertificates(Set.of(certificate));
+        certificate.setOrder(order);
+
         when(ordersForUserRepository.getAllByUserUuidAndId(order.getUser().getUuid(), order.getId()))
             .thenReturn(order);
         when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(true);
 
         ubsService.deleteOrder(order.getUser().getUuid(), 1L);
+
+        assertNull(certificate.getOrder());
 
         verify(orderRepository).saveAndFlush(order);
         verify(ordersForUserRepository).getAllByUserUuidAndId(order.getUser().getUuid(), order.getId());
