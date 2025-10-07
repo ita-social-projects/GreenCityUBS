@@ -730,7 +730,6 @@ class ProcessPaymentServiceImplTest {
 
     @Test
     void expirePaymentAttemptWhenOrderNotExists() {
-        Long orderId = 1L;
         HashSet<String> certificateCodes = new HashSet<>(List.of("7777-7777", "1111-1111"));
 
         NotFoundException exception = assertThrows(NotFoundException.class,
