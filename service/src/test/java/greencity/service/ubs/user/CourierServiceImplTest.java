@@ -52,9 +52,10 @@ class CourierServiceImplTest {
     void getInfoForCourierOrderingByCourierId_CourierNotFound() {
         Long courierId = 1L;
         when(courierRepository.existsCourierById(courierId)).thenReturn(false);
+        Optional<String> changeLoc = Optional.empty();
 
         assertThrows(NotFoundException.class,
-            () -> courierService.getInfoForCourierOrderingByCourierId("uuid", Optional.empty(), courierId));
+            () -> courierService.getInfoForCourierOrderingByCourierId("uuid", changeLoc, courierId));
     }
 
     @Test

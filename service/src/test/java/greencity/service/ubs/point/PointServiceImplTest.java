@@ -70,7 +70,7 @@ class PointServiceImplTest {
 
         AllPointsUserDto result = pointService.findAllCurrentPointsForUser("uuid-123");
 
-        assertThat(result.getUserBonuses()).isEqualTo(0);
+        assertThat(result.getUserBonuses()).isZero();
     }
 
     @Test

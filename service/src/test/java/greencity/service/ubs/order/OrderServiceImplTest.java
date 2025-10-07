@@ -3,8 +3,6 @@ package greencity.service.ubs.order;
 import static greencity.ModelUtils.bagDto;
 import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
 import static greencity.ModelUtils.getOrderStatusTranslation;
-import static greencity.ModelUtils.getOrderTest;
-import static greencity.ModelUtils.getTestUser;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
@@ -224,12 +222,11 @@ class OrderServiceImplTest {
 
         Order result = orderService.formAndSaveOrderRequest(dto, order, user, ubsUser);
 
-        assertEquals(result.getOrderPaymentStatus(), OrderPaymentStatus.HALF_PAID);
+        assertEquals(OrderPaymentStatus.HALF_PAID, result.getOrderPaymentStatus());
     }
 
     @Test
     void transferUserPointsToOrder_success() {
-        order.setPointsToUse(0);
         user.setCurrentPoints(100);
         user.setChangeOfPointsList(new ArrayList<>());
 
@@ -245,7 +242,6 @@ class OrderServiceImplTest {
 
     @Test
     void transferUserPointsToOrder_tooManyPoints() {
-        order.setPointsToUse(0);
         user.setCurrentPoints(100);
 
         doNothing().when(pointsUtils).checkIfUserHaveEnoughPoints(anyInt(), anyInt());
@@ -258,15 +254,12 @@ class OrderServiceImplTest {
     void getOrderForUserTest() {
         OrderStatusTranslation orderStatusTranslation = getOrderStatusTranslation();
         OrderPaymentStatusTranslation orderPaymentStatusTranslation = getOrderPaymentStatusTranslation();
-        Order order = getOrderTest();
-        User user = getTestUser();
         Bag bag = bagDto();
         List<Order> orderList = new ArrayList<>();
 
         bag.setCapacity(120);
         bag.setFullPrice(1200_00L);
         order.setAmountOfBagsOrdered(Map.of(1, 10));
-        order.setUser(user);
         order.setOrderBags(Collections.singletonList(ModelUtils.getOrderBag()));
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
         orderList.add(order);
@@ -290,8 +283,6 @@ class OrderServiceImplTest {
 
     @Test
     void getOrderForUserFail() {
-        Order order = getOrderTest();
-
         when(ordersForUserRepository.getAllByUserUuidAndId("UUID", order.getId()))
             .thenReturn(null);
 
@@ -433,7 +424,6 @@ class OrderServiceImplTest {
 
     @Test
     void transferUserPointsToOrder_pointsZero_doesNothing() {
-        order.setPointsToUse(0);
         orderService.transferUserPointsToOrder(order, 0);
         assertThat(order.getPointsToUse()).isZero();
         assertThat(user.getCurrentPoints()).isEqualTo(100);

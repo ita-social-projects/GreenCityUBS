@@ -268,7 +268,7 @@ class ProcessPaymentServiceImplTest {
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
         assertThrows(AccessDeniedException.class,
-            () -> service.processExistingOrder(dto, "uuid", order.getId()));
+            () -> service.processExistingOrder(dto, "uuid", orderId));
     }
 
     @Test
@@ -286,7 +286,7 @@ class ProcessPaymentServiceImplTest {
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
         assertThrows(BadRequestException.class,
-            () -> service.processExistingOrder(dto, "uuid", order.getId()));
+            () -> service.processExistingOrder(dto, "uuid", orderId));
     }
 
     @Test
@@ -304,7 +304,7 @@ class ProcessPaymentServiceImplTest {
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
         assertThrows(BadRequestException.class,
-            () -> service.processExistingOrder(dto, "uuid", order.getId()));
+            () -> service.processExistingOrder(dto, "uuid", orderId));
     }
 
     @Test
@@ -420,7 +420,6 @@ class ProcessPaymentServiceImplTest {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -453,7 +452,6 @@ class ProcessPaymentServiceImplTest {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -469,7 +467,6 @@ class ProcessPaymentServiceImplTest {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -487,7 +484,6 @@ class ProcessPaymentServiceImplTest {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -509,7 +505,6 @@ class ProcessPaymentServiceImplTest {
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
         order.setUser(getUserWithInitializedFields().setId(2L));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -531,7 +526,6 @@ class ProcessPaymentServiceImplTest {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -554,7 +548,6 @@ class ProcessPaymentServiceImplTest {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -585,7 +578,6 @@ class ProcessPaymentServiceImplTest {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -616,7 +608,6 @@ class ProcessPaymentServiceImplTest {
         Order order = getOrder();
         order.setPaymentLink("testInvoice");
         order.setPaymentLinkExpiry(LocalDateTime.now().plusDays(10));
-        Long orderId = order.getId();
 
         User user = getUserWithInitializedFields();
         String uuid = user.getUuid();
@@ -658,7 +649,6 @@ class ProcessPaymentServiceImplTest {
         order.setCertificates(certificates);
         HashSet<String> certificateCodes = new HashSet<>(List.of("7777-7777", "1111-1111"));
         List<String> certificateCodesList = certificateCodes.stream().toList();
-        Long orderId = order.getId();
         int pointsUsed = order.getPointsToUse();
 
         User user = getUserWithInitializedFields();
@@ -710,7 +700,6 @@ class ProcessPaymentServiceImplTest {
             getCertificate().setCode("1111-1111").setCertificateStatus(CertificateStatus.USED)
                 .setInitialPointsValue(120).setPoints(100)));
         order.setCertificates(certificates);
-        Long orderId = order.getId();
         int orderPointsBefore = order.getPointsToUse();
 
         User user = getUserWithInitializedFields();

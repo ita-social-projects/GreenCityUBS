@@ -126,9 +126,10 @@ class CertificateCalculatorServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setCertificates(Set.of("A", "B", "C", "D"));
         Order order = new Order();
+        Set<Certificate> certificates = new HashSet<>();
 
         assertThrows(NotFoundException.class,
-            () -> service.applyCertificatesToOrder(dto, new HashSet<>(), order, 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, order, 100L));
     }
 
     @Test
@@ -142,9 +143,10 @@ class CertificateCalculatorServiceImplTest {
         cert.setCertificateStatus(CertificateStatus.NEW);
 
         when(certificateRepository.findById("A")).thenReturn(Optional.of(cert));
+        Set<Certificate> certificates = new HashSet<>();
 
         assertThrows(CertificateIsNotActivated.class,
-            () -> service.applyCertificatesToOrder(dto, new HashSet<>(), order, 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, order, 100L));
     }
 
     @Test
@@ -213,11 +215,12 @@ class CertificateCalculatorServiceImplTest {
         cert.setCode("A");
         cert.setCertificateStatus(CertificateStatus.ACTIVE);
         cert.setExpirationDate(LocalDate.now().minusDays(1));
+        Set<Certificate> certificates = new HashSet<>();
 
         when(certificateRepository.findById("A")).thenReturn(Optional.of(cert));
 
         BadRequestException ex = assertThrows(BadRequestException.class,
-            () -> service.applyCertificatesToOrder(dto, new HashSet<>(), order, 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, order, 100L));
 
         assertTrue(ex.getMessage().contains(cert.getCode()));
         assertTrue(ex.getMessage().contains("expired"));
@@ -233,11 +236,12 @@ class CertificateCalculatorServiceImplTest {
         cert.setCode("A");
         cert.setCertificateStatus(CertificateStatus.USED);
         cert.setExpirationDate(LocalDate.now().plusDays(1));
+        Set<Certificate> certificates = new HashSet<>();
 
         when(certificateRepository.findById("A")).thenReturn(Optional.of(cert));
 
         BadRequestException ex = assertThrows(BadRequestException.class,
-            () -> service.applyCertificatesToOrder(dto, new HashSet<>(), order, 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, order, 100L));
 
         assertTrue(ex.getMessage().contains(cert.getCode()));
         assertTrue(ex.getMessage().contains("used"));
@@ -248,8 +252,9 @@ class CertificateCalculatorServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setCertificates(Set.of("A"));
         Order order = new Order();
+        Set<Certificate> certificates = new HashSet<>();
 
-        long result = service.applyCertificatesToOrder(dto, new HashSet<>(), order, 0L);
+        long result = service.applyCertificatesToOrder(dto, certificates, order, 0L);
 
         assertEquals(0L, result);
     }
@@ -274,9 +279,10 @@ class CertificateCalculatorServiceImplTest {
         }
         dto.setCertificates(certs);
         Order order = new Order();
+        Set<Certificate> certificates = new HashSet<>();
 
         BadRequestException ex = assertThrows(BadRequestException.class,
-            () -> service.applyCertificatesToOrder(dto, new HashSet<>(), order, 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, order, 100L));
 
         assertTrue(ex.getMessage().contains(ErrorMessage.TOO_MANY_CERTIFICATES));
     }

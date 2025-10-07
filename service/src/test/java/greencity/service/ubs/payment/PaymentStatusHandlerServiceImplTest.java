@@ -107,11 +107,11 @@ class PaymentStatusHandlerServiceImplTest {
         UserNotification notification = new UserNotification();
         NotificationParameter parameter = new NotificationParameter();
 
-        when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(
-            eq(order), eq(NotificationType.UNPAID_ORDER)))
+        when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(order,
+            NotificationType.UNPAID_ORDER))
             .thenReturn(List.of(notification));
         when(notificationParameterRepository.findNotificationParameterByUserNotificationAndKey(
-            eq(notification), eq(AppConstant.PAY_BUTTON)))
+            notification, AppConstant.PAY_BUTTON))
             .thenReturn(Optional.of(parameter));
 
         paymentStatusHandlerService.checkOrderStatusApproved(payment, order, "ORD_123_0", AppConstant.APPROVED_STATUS);
