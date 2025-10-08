@@ -34,7 +34,7 @@ public interface CertificateService {
     /**
      * Method returns the status of the entered certificate.
      *
-     * @param code {@link String} code of certificate.
+     * @param code     {@link String} code of certificate.
      * @param userUuid {@link String} uuid of the user.
      * @return {@link CertificateDto} which contains status.
      * @author Oleh Bilonizhka

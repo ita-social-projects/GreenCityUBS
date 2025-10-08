@@ -54,7 +54,7 @@ public interface ProcessPaymentService {
      *                        generated
      * @param sumToPayInCoins the amount to be paid in coins
      * @return the checkout URL where the client should be redirected to complete
-     * payment
+     *         payment
      */
     String formedLink(Order order, long sumToPayInCoins);
 
@@ -72,7 +72,7 @@ public interface ProcessPaymentService {
      * @param dto             additional payment data such as used points and
      *                        certificates
      * @return the checkout URL where the client should be redirected to complete
-     * payment
+     *         payment
      */
     String formedLink(Order order, long sumToPayInCoins, OrderWayForPayClientDto dto);
 
