@@ -38,10 +38,20 @@ import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
 import greencity.service.ubs.TelegramUpdateProcessor;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.order.OrderService;
 import greencity.specification.ChatSpecifications;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import jakarta.transaction.Transactional;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -58,16 +68,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCa
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -81,7 +81,7 @@ public class TelegramServiceImpl implements TelegramService {
     private final TelegramChatRepository telegramChatRepository;
     private final UserRemoteWebClient userRemoteWebClient;
     private final UserRemoteClient userRemoteClient;
-    private final UBSClientService ubsClientService;
+    private final OrderService orderService;
     private final TelegramExecutor executor;
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
@@ -461,7 +461,7 @@ public class TelegramServiceImpl implements TelegramService {
 
         Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId())
             .orElseThrow(() -> new NotFoundException("Order not found"));
-        OrdersDataForUserDto dto = ubsClientService.getOrdersData(order);
+        OrdersDataForUserDto dto = orderService.getOrdersData(order);
         Long completedCount = orderRepository.countByUserIdAndOrderStatus(
             telegramChat.getUser().getId(),
             OrderStatus.DONE);
