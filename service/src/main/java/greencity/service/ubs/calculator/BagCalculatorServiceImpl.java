@@ -49,7 +49,7 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
     @Override
     public long getBagsSumToPayInCoins(Order order) {
         List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
-        return calculateBugsSum(bagForUserDtos);
+        return calculateBagsSum(bagForUserDtos);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
     }
 
     @Override
-    public Long calculateBugsSum(List<BagForUserDto> bagForUserDtos) {
+    public Long calculateBagsSum(List<BagForUserDto> bagForUserDtos) {
         return bagForUserDtos.stream()
             .map(b -> moneyConverterUtil.convertBillsIntoCoins(b.getTotalPrice()))
             .reduce(0L, Long::sum);

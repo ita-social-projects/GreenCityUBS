@@ -17,6 +17,10 @@ public class PaymentStrategyFactory {
     }
 
     public PaymentStrategy getPaymentStrategy(PaymentSystem paymentSystem) {
-        return strategies.get(paymentSystem);
+        PaymentStrategy strategy = strategies.get(paymentSystem);
+        if (strategy == null) {
+            throw new IllegalArgumentException("No payment strategy found for: " + paymentSystem);
+        }
+        return strategy;
     }
 }

@@ -121,11 +121,12 @@ class WayForPayResultServiceImplTest {
         try (MockedStatic<OrderUtils> mocked = Mockito.mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.decodeOrderReference("MV8xXzE")).thenReturn("1_2_3");
             mocked.when(() -> OrderUtils.getIdByOrderReference("MV8xXzE", AppConstant.ORDER_ID_INDEX)).thenReturn(1L);
-        }
-        PaymentResponseWayForPay result = wayForPayResultService.convertMapIntoPaymentResponseDto(form);
 
-        assertEquals("accept", result.getStatus());
-        assertEquals("MV8xXzE", result.getOrderReference());
-        assertEquals("resp-sig", result.getSignature());
+            PaymentResponseWayForPay result = wayForPayResultService.convertMapIntoPaymentResponseDto(form);
+
+            assertEquals("accept", result.getStatus());
+            assertEquals("MV8xXzE", result.getOrderReference());
+            assertEquals("resp-sig", result.getSignature());
+        }
     }
 }

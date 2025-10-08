@@ -91,6 +91,8 @@ import org.quartz.SchedulerException;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessPaymentServiceImplTest {
+    private final String userUuid = "user-123";
+    private final Long orderId = 1L;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -121,15 +123,10 @@ class ProcessPaymentServiceImplTest {
     private Scheduler quartzScheduler;
     @Mock
     private CertificateRepository certificateRepository;
-
     @Mock
     private WayForPayStrategy wayForPayStrategy;
-
     @InjectMocks
     private ProcessPaymentServiceImpl service;
-
-    private final String userUuid = "user-123";
-    private final Long orderId = 1L;
 
     @Test
     void processNewOrder_shouldReturnStrategyResponse_whenShouldBePaidTrue() {
@@ -150,19 +147,18 @@ class ProcessPaymentServiceImplTest {
             .thenReturn(order);
         try (MockedStatic<OrderUtils> mocked = Mockito.mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.getLastPayment(any())).thenReturn(payment);
+            when(userRepository.save(any(User.class))).thenReturn(user);
+            doNothing().when(eventService).save(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
+            when(paymentStrategyFactory.getPaymentStrategy(PaymentSystem.WAY_FOR_PAY)).thenReturn(wayForPayStrategy);
+            when(wayForPayStrategy.processPayment(any(OrderResponseDto.class), any(Order.class), anyLong()))
+                .thenReturn(paymentSystemResponse);
+            doNothing().when(notificationService).notifyCreatedOrder(order);
+
+            PaymentSystemResponse result = service.processNewOrder(dto, "uuid");
+
+            assertThat(result).isEqualTo(paymentSystemResponse);
+            verify(notificationService).notifyCreatedOrder(order);
         }
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        doNothing().when(eventService).save(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
-        when(paymentStrategyFactory.getPaymentStrategy(PaymentSystem.WAY_FOR_PAY)).thenReturn(wayForPayStrategy);
-
-        when(wayForPayStrategy.processPayment(any(OrderResponseDto.class), any(Order.class), anyLong()))
-            .thenReturn(paymentSystemResponse);
-        doNothing().when(notificationService).notifyCreatedOrder(order);
-
-        PaymentSystemResponse result = service.processNewOrder(dto, "uuid");
-
-        assertThat(result).isEqualTo(paymentSystemResponse);
-        verify(notificationService).notifyCreatedOrder(order);
     }
 
     @Test
@@ -235,21 +231,20 @@ class ProcessPaymentServiceImplTest {
             .thenReturn(order);
         try (MockedStatic<OrderUtils> mocked = Mockito.mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.getLastPayment(any())).thenReturn(payment);
+            when(userRepository.save(any(User.class))).thenReturn(user);
+            doNothing().when(eventService).save(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
+            when(paymentStrategyFactory.getPaymentStrategy(PaymentSystem.WAY_FOR_PAY)).thenReturn(wayForPayStrategy);
+            when(wayForPayStrategy.processPayment(any(OrderResponseDto.class), any(Order.class), anyLong()))
+                .thenReturn(paymentSystemResponse);
+            doNothing().when(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(),
+                any(PaymentSystemResponse.class));
+
+            PaymentSystemResponse result = service.processExistingOrder(dto, "uuid", order.getId());
+
+            assertThat(result).isEqualTo(paymentSystemResponse);
+            verify(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(),
+                any(PaymentSystemResponse.class));
         }
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        doNothing().when(eventService).save(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
-        when(paymentStrategyFactory.getPaymentStrategy(PaymentSystem.WAY_FOR_PAY)).thenReturn(wayForPayStrategy);
-
-        when(wayForPayStrategy.processPayment(any(OrderResponseDto.class), any(Order.class), anyLong()))
-            .thenReturn(paymentSystemResponse);
-        doNothing().when(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(),
-            any(PaymentSystemResponse.class));
-
-        PaymentSystemResponse result = service.processExistingOrder(dto, "uuid", order.getId());
-
-        assertThat(result).isEqualTo(paymentSystemResponse);
-        verify(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(),
-            any(PaymentSystemResponse.class));
     }
 
     @Test

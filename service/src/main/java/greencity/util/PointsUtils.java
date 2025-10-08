@@ -12,7 +12,7 @@ public class PointsUtils {
      * @param requiredPoints the number of points required to perform the action
      * @throws BadRequestException if the user does not have enough points
      */
-    public void checkIfUserHaveEnoughPoints(Integer userPoints, Integer requiredPoints) {
+    public void checkIfUserHasEnoughPoints(Integer userPoints, Integer requiredPoints) {
         if (userPoints < requiredPoints) {
             throw new BadRequestException("User doesn't have enough points");
         }

@@ -147,7 +147,7 @@ class OrderServiceImplTest {
         when(pointCalculatorService.reduceOrderSumDueToUsedPoints(anyLong(), anyInt())).thenReturn(90L);
         when(certificateCalculatorService.applyCertificatesToOrder(any(), any(), any(), anyLong())).thenReturn(90L);
         when(orderRepository.save(any())).thenReturn(order);
-        doNothing().when(pointsUtils).checkIfUserHaveEnoughPoints(anyInt(), anyInt());
+        doNothing().when(pointsUtils).checkIfUserHasEnoughPoints(anyInt(), anyInt());
         when(paymentCalculatorService.calculateOrderSumWithoutDiscounts(anyList())).thenReturn(100L);
 
         Order result = orderService.formAndSaveOrderRequest(dto, order, user, ubsUser);
@@ -230,7 +230,7 @@ class OrderServiceImplTest {
         user.setCurrentPoints(100);
         user.setChangeOfPointsList(new ArrayList<>());
 
-        doNothing().when(pointsUtils).checkIfUserHaveEnoughPoints(anyInt(), anyInt());
+        doNothing().when(pointsUtils).checkIfUserHasEnoughPoints(anyInt(), anyInt());
         when(orderRepository.save(any())).thenReturn(order);
 
         orderService.transferUserPointsToOrder(order, 10);
@@ -244,7 +244,7 @@ class OrderServiceImplTest {
     void transferUserPointsToOrder_tooManyPoints() {
         user.setCurrentPoints(100);
 
-        doNothing().when(pointsUtils).checkIfUserHaveEnoughPoints(anyInt(), anyInt());
+        doNothing().when(pointsUtils).checkIfUserHasEnoughPoints(anyInt(), anyInt());
         order.setSumTotalAmountWithoutDiscounts(2000L);
         assertThatThrownBy(() -> orderService.transferUserPointsToOrder(order, 1000))
             .isInstanceOf(BadRequestException.class);

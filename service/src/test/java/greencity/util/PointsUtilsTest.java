@@ -19,7 +19,7 @@ class PointsUtilsTest {
         Integer userPoints = 10;
         Integer requiredPoints = 5;
 
-        assertDoesNotThrow(() -> pointsUtils.checkIfUserHaveEnoughPoints(userPoints, requiredPoints));
+        assertDoesNotThrow(() -> pointsUtils.checkIfUserHasEnoughPoints(userPoints, requiredPoints));
     }
 
     @Test
@@ -29,7 +29,7 @@ class PointsUtilsTest {
 
         BadRequestException exception = assertThrows(
             BadRequestException.class,
-            () -> pointsUtils.checkIfUserHaveEnoughPoints(userPoints, requiredPoints));
+            () -> pointsUtils.checkIfUserHasEnoughPoints(userPoints, requiredPoints));
 
         assertEquals("User doesn't have enough points", exception.getMessage());
     }

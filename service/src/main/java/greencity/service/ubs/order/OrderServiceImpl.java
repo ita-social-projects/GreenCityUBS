@@ -99,7 +99,7 @@ public class OrderServiceImpl implements OrderService {
         Set<Certificate> orderCertificates = new HashSet<>();
 
         long sumToPayInCoinsWithoutDiscount = calculateTotal(bagsOrdered);
-        pointsUtils.checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        pointsUtils.checkIfUserHasEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
 
         long sumToPayInCoins =
             applyBonusesAndCertificates(dto, order, sumToPayInCoinsWithoutDiscount, orderCertificates);
@@ -118,7 +118,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         User user = order.getUser();
-        pointsUtils.checkIfUserHaveEnoughPoints(user.getCurrentPoints(), pointsToUse);
+        pointsUtils.checkIfUserHasEnoughPoints(user.getCurrentPoints(), pointsToUse);
 
         int maxPointsToTransfer = countAmountToPayForOrder(order);
         if (pointsToUse > maxPointsToTransfer) {
@@ -201,7 +201,7 @@ public class OrderServiceImpl implements OrderService {
         List<BagForUserDto> bags = bagCalculatorService.bagForUserDtosBuilder(order);
         List<CertificateDto> certificates = mapCertificates(order);
 
-        Long fullPrice = bagCalculatorService.calculateBugsSum(bags);
+        Long fullPrice = bagCalculatorService.calculateBagsSum(bags);
         Long amountWithDiscount = calculateDiscountedAmount(order, fullPrice, certificates);
         Long paidAmount = paymentCalculatorService.countPaidAmount(order.getPayment());
 
@@ -437,8 +437,8 @@ public class OrderServiceImpl implements OrderService {
             .address(addressInfoDtoBuilder(ctx.order()))
             .paymentStatusUk(ctx.paymentStatus().getTranslationValueUk())
             .paymentStatusEn(ctx.paymentStatus().getTranslationsValueEn())
-            .paymentLink(ctx.order.getPaymentLink())
-            .paymentLinkExpiry(ctx.order.getPaymentLinkExpiry())
+            .paymentLink(ctx.order().getPaymentLink())
+            .paymentLinkExpiry(ctx.order().getPaymentLinkExpiry())
             .build();
     }
 

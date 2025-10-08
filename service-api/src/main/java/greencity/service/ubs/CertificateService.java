@@ -32,9 +32,10 @@ public interface CertificateService {
         CertificateFilterCriteria certificateFilterCriteria);
 
     /**
-     * Methods return status of entered certificate, empty string if absent.
+     * Method returns the status of the entered certificate.
      *
      * @param code {@link String} code of certificate.
+     * @param userUuid {@link String} uuid of the user.
      * @return {@link CertificateDto} which contains status.
      * @author Oleh Bilonizhka
      */

@@ -45,5 +45,5 @@ public interface BagCalculatorService {
      * @param bagForUserDtos list of user bag DTOs
      * @return sum in coins
      */
-    Long calculateBugsSum(List<BagForUserDto> bagForUserDtos);
+    Long calculateBagsSum(List<BagForUserDto> bagForUserDtos);
 }

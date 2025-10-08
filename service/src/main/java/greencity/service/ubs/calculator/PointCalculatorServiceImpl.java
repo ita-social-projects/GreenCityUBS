@@ -22,7 +22,7 @@ public class PointCalculatorServiceImpl implements PointCalculatorService {
 
     @Override
     public long getPointSumToPayInCoins(OrderWayForPayClientDto dto, User currentUser, long sumToPayInCoins) {
-        pointsUtils.checkIfUserHaveEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+        pointsUtils.checkIfUserHasEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
         sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayInCoins, dto.getPointsToUse());
         return sumToPayInCoins;
     }

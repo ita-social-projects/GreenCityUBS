@@ -18,6 +18,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +32,10 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
     private final OrderService orderService;
 
     @Override
+    @Transactional
     public void checkOrderStatusApproved(Payment orderPayment, Order order,
         String decodedOrderReference, String status) {
-        if (status.equals(AppConstant.APPROVED_STATUS)) {
+        if (AppConstant.APPROVED_STATUS.equals(status)) {
             orderPayment.setPaymentId(decodedOrderReference.split("_")[AppConstant.COUNTER_ORDER_PAYMENT_ID_INDEX]);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
@@ -55,8 +57,9 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
     }
 
     @Override
+    @Transactional
     public void checkResponseStatusFailure(Payment orderPayment, Order order, String status) {
-        if (status.equals(AppConstant.FAILED_STATUS)) {
+        if (AppConstant.FAILED_STATUS.equals(status)) {
             orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
 
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);

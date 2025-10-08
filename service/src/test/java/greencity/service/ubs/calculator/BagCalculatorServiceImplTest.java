@@ -128,7 +128,7 @@ class BagCalculatorServiceImplTest {
         when(moneyConverterUtil.convertBillsIntoCoins(10.0)).thenReturn(1000L);
         when(moneyConverterUtil.convertBillsIntoCoins(5.0)).thenReturn(500L);
 
-        Long sum = bagCalculatorService.calculateBugsSum(dtos);
+        Long sum = bagCalculatorService.calculateBagsSum(dtos);
 
         assertEquals(1500L, sum);
     }

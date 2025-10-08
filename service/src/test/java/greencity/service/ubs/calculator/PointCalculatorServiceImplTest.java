@@ -55,12 +55,12 @@ class PointCalculatorServiceImplTest {
         long sumToPay = 200L;
 
         doNothing().when(pointsUtils)
-            .checkIfUserHaveEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
+            .checkIfUserHasEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
 
         long result = pointCalculatorService.getPointSumToPayInCoins(dto, user, sumToPay);
 
         assertEquals(200L, result);
-        verify(pointsUtils).checkIfUserHaveEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
+        verify(pointsUtils).checkIfUserHasEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
     }
 
     @Test
@@ -72,7 +72,7 @@ class PointCalculatorServiceImplTest {
         user.setCurrentPoints(5);
 
         doThrow(new BadRequestException("User doesn't have enough points"))
-            .when(pointsUtils).checkIfUserHaveEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
+            .when(pointsUtils).checkIfUserHasEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
 
         assertThrows(BadRequestException.class, () -> pointCalculatorService.getPointSumToPayInCoins(dto, user, 100L));
     }

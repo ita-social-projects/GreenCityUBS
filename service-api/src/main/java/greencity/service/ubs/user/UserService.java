@@ -27,7 +27,8 @@ public interface UserService {
     /**
      * Method updates ubs_user information order in order.
      *
-     * @param dtoUpdate of {@link UbsCustomersDtoUpdate} ubs_user_id;
+     * @param dtoUpdate {@link UbsCustomersDtoUpdate} update payload;
+     * @param userUuid  current {@link User}'s uuid;
      * @return {@link UbsCustomersDto};
      * @author Rusanovscaia Nadejda
      */
@@ -44,12 +45,11 @@ public interface UserService {
     Long createUserProfile(UserProfileCreateDto userProfileCreateDto);
 
     /**
-     * Method that update user.
+     * Method that updates user profile data.
      *
-     * @param uuid current {@link String} user`s uuid;
-     * @param dto  user`s date {@link UserProfileDto} user;
-     * @return {@link UserProfileDto} contains all information needed for updating
-     *         user;
+     * @param uuid current user’s uuid;
+     * @param dto  {@link UserProfileUpdateDto} payload;
+     * @return {@link UserProfileUpdateDto} updated profile data;
      * @author Liubomyr Bratakh.
      */
     UserProfileUpdateDto updateProfileData(String uuid, UserProfileUpdateDto dto);

@@ -1205,7 +1205,7 @@ class AddressServiceTest {
     }
 
     @Test
-    void checkIfAddressMatchLocationArea_kyivRegion_distanceLessThanLimit() {
+    void checkIfAddressMatchLocationArea_kyivRegion_distanceExceedsLimit() {
         Address address = new Address();
         BaseAddress base = new BaseAddress();
         base.setCityEn("OtherCity");

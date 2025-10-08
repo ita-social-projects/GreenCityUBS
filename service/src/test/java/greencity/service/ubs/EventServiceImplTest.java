@@ -37,14 +37,13 @@ import org.modelmapper.ModelMapper;
 @ExtendWith(MockitoExtension.class)
 class EventServiceImplTest {
     @Mock
+    ModelMapper modelMapper;
+    @Mock
     private EventRepository eventRepository;
     @Mock
     private EmployeeRepository employeeRepository;
     @Mock
     private OrderRepository orderRepository;
-    @Mock
-    ModelMapper modelMapper;
-
     @InjectMocks
     private EventServiceImpl eventService;
 
@@ -235,13 +234,20 @@ class EventServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(eventRepository.findAllEventsByOrderId(orderId)).thenReturn(events);
         when(modelMapper.map(any(Event.class), eq(EventDto.class)))
-            .thenReturn(new EventDto());
+            .thenAnswer(inv -> {
+                Event e = inv.getArgument(0);
+                EventDto dto = new EventDto();
+                dto.setEventDate(e.getEventDate());
+                dto.setEventName(e.getEventNameEn());
+                dto.setAuthorName(e.getAuthorNameEn());
+                return dto;
+            });
 
         List<EventDto> result = eventService.getAllEventsForOrder(orderId, "email", "en");
 
         assertEquals(1, result.size());
-        assertEquals("EnglishName", events.get(0).getEventNameUk());
-        assertEquals("EnglishAuthor", events.get(0).getAuthorNameUk());
+        assertEquals("EnglishName", result.get(0).getEventName());
+        assertEquals("EnglishAuthor", result.get(0).getAuthorName());
     }
 
     @Test
