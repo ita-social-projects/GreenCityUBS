@@ -1,5 +1,7 @@
 package greencity.service.ubs;
 
+import greencity.dto.location.api.CityInfoDto;
+import greencity.dto.location.api.DistrictInfoDto;
 import greencity.dto.location.api.RegionInfoDto;
 import greencity.dto.order.BlockedOrderDto;
 import greencity.dto.order.ChangeOrderResponseDTO;

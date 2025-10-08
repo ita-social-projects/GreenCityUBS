@@ -1,5 +1,21 @@
 package greencity.controller;
 
+import static greencity.ModelUtils.getUuid;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
@@ -16,8 +32,13 @@ import greencity.exceptions.NotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
+import greencity.service.ubs.user.UserService;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,27 +56,6 @@ import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequ
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import static greencity.ModelUtils.getUuid;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -74,7 +74,7 @@ class ManagementEmployeeControllerTest {
     @Mock
     private UBSManagementEmployeeService service;
     @Mock
-    private UBSClientService ubsClientService;
+    private UserService userService;
     @Mock
     UserRepository userRepository;
     @Mock
@@ -204,10 +204,10 @@ class ManagementEmployeeControllerTest {
     void getAllAuthorities() throws Exception {
         Set<String> authorities = new HashSet<>();
         authorities.add("ADMIN");
-        when(ubsClientService.getAllAuthorities(anyString())).thenReturn(authorities);
+        when(userService.getAllAuthorities(anyString())).thenReturn(authorities);
         mockMvc.perform(get(UBS_LINK + "/get-all-authorities" + "?email=test@mail.com"))
             .andExpect(status().isOk());
-        verify(ubsClientService).getAllAuthorities("test@mail.com");
+        verify(userService).getAllAuthorities("test@mail.com");
     }
 
     @Test
@@ -220,7 +220,7 @@ class ManagementEmployeeControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).getPositionsAndRelatedAuthorities(mockPrincipal.getName());
+        verify(userService).getPositionsAndRelatedAuthorities(mockPrincipal.getName());
     }
 
     @Test
@@ -235,7 +235,7 @@ class ManagementEmployeeControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).updateEmployeesAuthorities(dto);
+        verify(userService).updateEmployeesAuthorities(dto);
     }
 
     @Test
