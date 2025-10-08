@@ -6,6 +6,7 @@ import greencity.enums.PaymentSystem;
 import greencity.service.ubs.wayforpay.WayForPayStrategy;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +36,9 @@ class PaymentStrategyFactoryTest {
     }
 
     @Test
-    void shouldReturnNull_WhenPaymentSystemNotRegistered() {
-        PaymentStrategy result = paymentStrategyFactory.getPaymentStrategy(null);
-
-        assertThat(result).isNull();
+    void shouldThrowException_WhenPaymentSystemNotRegistered() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+            () -> paymentStrategyFactory.getPaymentStrategy(null));
     }
 
     @Test
