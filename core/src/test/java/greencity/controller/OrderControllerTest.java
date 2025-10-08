@@ -29,8 +29,17 @@ import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.AddressService;
+import greencity.service.ubs.CertificateService;
+import greencity.service.ubs.EventService;
+import greencity.service.ubs.order.OrderCheckoutService;
+import greencity.service.ubs.order.OrderService;
+import greencity.service.ubs.payment.ProcessPaymentService;
+import greencity.service.ubs.tariff.TariffService;
+import greencity.service.ubs.user.CourierService;
+import greencity.service.ubs.user.UserService;
 import greencity.service.ubs.wayforpay.WayForPayRedirectService;
+import greencity.service.ubs.wayforpay.WayForPayResultService;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
@@ -57,14 +66,42 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class OrderControllerTest {
     private static final String ubsLink = "/ubs";
     private final Principal principal = getPrincipal();
-    @Mock
-    UBSClientService ubsClientService;
 
     @Mock
     UserRepository userRepository;
 
     @Mock
     private WayForPayRedirectService wayForPayRedirectService;
+
+    @Mock
+    private WayForPayResultService wayForPayResultService;
+
+    @Mock
+    private ProcessPaymentService processPaymentService;
+
+    @Mock
+    private OrderCheckoutService orderCheckoutService;
+
+    @Mock
+    private OrderService orderService;
+
+    @Mock
+    private TariffService tariffService;
+
+    @Mock
+    private AddressService addressService;
+
+    @Mock
+    private EventService eventService;
+
+    @Mock
+    private CertificateService certificateService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private CourierService courierService;
 
     @InjectMocks
     OrderController orderController;
@@ -91,7 +128,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).getFirstPageDataByTariffAndLocationId(1L, 1L);
+        verify(orderCheckoutService).getFirstPageDataByTariffAndLocationId(1L, 1L);
     }
 
     @Test
@@ -105,7 +142,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
-        verify(ubsClientService).getFirstPageDataByOrderId("35467585763t4sfgchjfuyetf", 1L);
+        verify(orderCheckoutService).getFirstPageDataByOrderId("35467585763t4sfgchjfuyetf", 1L);
     }
 
     @Test
@@ -117,7 +154,7 @@ class OrderControllerTest {
         mockMvc.perform(get(ubsLink + "/certificate/{code}", certificateCode)
                 .principal(principal))
             .andExpect(status().isOk());
-        verify(ubsClientService).checkCertificate(certificateCode, "35467585763t4sfgchjfuyetf");
+        verify(certificateService).checkCertificate(certificateCode, "35467585763t4sfgchjfuyetf");
     }
 
     @Test
@@ -130,7 +167,7 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
-        verify(ubsClientService).getSecondPageData("35467585763t4sfgchjfuyetf");
+        verify(orderCheckoutService).getSecondPageData("35467585763t4sfgchjfuyetf");
     }
 
     @Test
@@ -148,7 +185,7 @@ class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
         verify(userRepository).findUuidByRecipientEmail("test@gmail.com");
-        verify(ubsClientService).processNewOrder(any(), eq("35467585763t4sfgchjfuyetf"));
+        verify(processPaymentService).processNewOrder(any(), eq("35467585763t4sfgchjfuyetf"));
 
     }
 
@@ -167,7 +204,7 @@ class OrderControllerTest {
         String resultJson = objectMapper.writeValueAsString(resultObject);
 
         when(userRepository.findUuidByRecipientEmail(anyString())).thenReturn(Optional.of(uuid));
-        when(ubsClientService.processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong()))
+        when(processPaymentService.processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong()))
             .thenReturn(resultObject);
 
         mockMvc.perform(post(ubsLink + "/processOrder/{id}", orderId)
@@ -179,7 +216,7 @@ class OrderControllerTest {
             .andExpect(content().json(resultJson));
 
         verify(userRepository).findUuidByRecipientEmail(anyString());
-        verify(ubsClientService).processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong());
+        verify(processPaymentService).processExistingOrder(any(OrderResponseDto.class), anyString(), anyLong());
     }
 
     @Test
@@ -223,12 +260,12 @@ class OrderControllerTest {
         OrderCancellationReasonDto dto = ModelUtils.getCancellationDto();
         when(userRepository.findUuidByRecipientEmail((anyString())))
             .thenReturn(Optional.of("35467585763t4sfgchjfuyetf"));
-        when(ubsClientService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
+        when(orderService.getOrderCancellationReason(anyLong(), anyString())).thenReturn(dto);
 
         mockMvc.perform(get(ubsLink + "/order/{id}/cancellation", 1L)
             .principal(principal))
             .andExpect(status().isOk());
-        verify(ubsClientService).getOrderCancellationReason(1L, "35467585763t4sfgchjfuyetf");
+        verify(orderService).getOrderCancellationReason(1L, "35467585763t4sfgchjfuyetf");
     }
 
     @Test
@@ -237,7 +274,7 @@ class OrderControllerTest {
             .principal(principal))
             .andExpect(status().isOk());
 
-        verify(ubsClientService, times(1))
+        verify(eventService, times(1))
             .getAllEventsForOrder(1L, "test@gmail.com", "en");
     }
 
@@ -248,7 +285,7 @@ class OrderControllerTest {
         mockResponse.setStatus("approved");
         mockResponse.setOrderReference(dto.getOrderReference());
 
-        when(ubsClientService.convertMapIntoPaymentResponseDto(anyMap()))
+        when(wayForPayResultService.convertMapIntoPaymentResponseDto(anyMap()))
             .thenReturn(mockResponse);
 
         mockMvc.perform(post(ubsLink + "/receivePayment")
@@ -309,68 +346,68 @@ class OrderControllerTest {
     @Test
     void checkIfTariffExistsById_Returns200_WhenTariffExists() throws Exception {
         Long tariffId = 1L;
-        when(ubsClientService.checkIfTariffExistsById(tariffId)).thenReturn(true);
+        when(tariffService.checkIfTariffExistsById(tariffId)).thenReturn(true);
 
         mockMvc.perform(get(ubsLink + "/check-if-tariff-exists/{id}", tariffId)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(""));
 
-        verify(ubsClientService).checkIfTariffExistsById(tariffId);
+        verify(tariffService).checkIfTariffExistsById(tariffId);
     }
 
     @Test
     void checkIfTariffExistsById_Returns404_WhenTariffDoesNotExist() throws Exception {
         Long tariffId = 999999L;
-        when(ubsClientService.checkIfTariffExistsById(tariffId)).thenReturn(false);
+        when(tariffService.checkIfTariffExistsById(tariffId)).thenReturn(false);
 
         mockMvc.perform(get(ubsLink + "/check-if-tariff-exists/{id}", tariffId)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
             .andExpect(content().string(""));
 
-        verify(ubsClientService).checkIfTariffExistsById(tariffId);
+        verify(tariffService).checkIfTariffExistsById(tariffId);
     }
 
     @Test
     void getAllLocationsTest() throws Exception {
         List<LocationsDto> locationsDtoList = Arrays.asList(new LocationsDto(), new LocationsDto());
-        when(ubsClientService.getAllLocations()).thenReturn(locationsDtoList);
+        when(addressService.getAllLocations()).thenReturn(locationsDtoList);
 
         mockMvc.perform(get(ubsLink + "/locations")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
-        verify(ubsClientService).getAllLocations();
+        verify(addressService).getAllLocations();
     }
 
     @Test
     void getTariffIdByLocationIdTest() throws Exception {
         Long locationId = 1L;
         List<Long> tariffId = List.of(2L);
-        when(ubsClientService.getTariffIdByLocationId(locationId)).thenReturn(tariffId);
+        when(tariffService.getTariffIdByLocationId(locationId)).thenReturn(tariffId);
 
         mockMvc.perform(get(ubsLink + "/tariffs/{locationId}", locationId)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().string(String.valueOf(tariffId)));
 
-        verify(ubsClientService).getTariffIdByLocationId(locationId);
+        verify(tariffService).getTariffIdByLocationId(locationId);
     }
 
     @Test
     void getAllLocationsByCourierIdTest() throws Exception {
         Long id = 1L;
         List<LocationsDto> locationsDtoList = Arrays.asList(new LocationsDto(), new LocationsDto());
-        when(ubsClientService.getAllLocationsByCourierId(id)).thenReturn(locationsDtoList);
+        when(addressService.getAllLocationsByCourierId(id)).thenReturn(locationsDtoList);
 
         mockMvc.perform(get(ubsLink + "/locationsByCourier/" + id)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
 
-        verify(ubsClientService).getAllLocationsByCourierId(id);
+        verify(addressService).getAllLocationsByCourierId(id);
     }
 
     @Test
@@ -386,6 +423,6 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).cancelPaymentAttempt(uuid, orderId);
+        verify(processPaymentService).cancelPaymentAttempt(uuid, orderId);
     }
 }
