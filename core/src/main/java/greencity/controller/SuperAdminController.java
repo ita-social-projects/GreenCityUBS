@@ -831,7 +831,8 @@ class SuperAdminController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PutMapping("/settingsText/section")
-    //@PreAuthorize("@preAuthorizer.hasAuthority('SETTINGS_MANAGEMENT', authentication)")
+    // @PreAuthorize("@preAuthorizer.hasAuthority('SETTINGS_MANAGEMENT',
+    // authentication)")
     public ResponseEntity<HttpStatus> updateSectionTextsFields(@Valid @RequestBody List<UpdateSectionTextsDto> dto,
         @RequestParam MainPageTextSection section) {
         superAdminService.updateSectionTextFields(dto, section);
