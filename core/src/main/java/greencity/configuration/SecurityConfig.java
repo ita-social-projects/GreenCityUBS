@@ -119,7 +119,8 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-resources/**",
                     "/springwolf/**",
-                    "/webjars/**")
+                    "/webjars/**",
+                    SUPER_ADMIN_LINK + "/settingsText")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/getAllCertificates",
@@ -150,7 +151,6 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/{tariffId}/getService",
                     SUPER_ADMIN_LINK + "/getTariffLimits/{tariffId}",
                     SUPER_ADMIN_LINK + "/**",
-                    SUPER_ADMIN_LINK + "/settingsText",
                     USER_AGREEMENT_LINK,
                     USER_AGREEMENT_LINK + "/{id}",
                     UBS_MANAG_LINK + "/locations-details",
