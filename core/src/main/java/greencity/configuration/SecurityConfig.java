@@ -110,7 +110,8 @@ public class SecurityConfig {
                     USER_AGREEMENT_LINK + "/latest",
                     UBS_LINK + "/districts-for-kyiv",
                     UBS_LINK + "/order-details-for-tariff",
-                    COMMIT_INFO)
+                    COMMIT_INFO,
+                    SUPER_ADMIN_LINK + "/settingsText")
                 .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
@@ -119,8 +120,7 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-resources/**",
                     "/springwolf/**",
-                    "/webjars/**",
-                    SUPER_ADMIN_LINK + "/settingsText")
+                    "/webjars/**")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/getAllCertificates",
