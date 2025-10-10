@@ -67,7 +67,7 @@ public class EntityManagerUtils {
         ALIAS_MATCH = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
     }
 
-    public static final String ENTITY_GRAPH_ARGUMENT_EXCEPTION = "One or more specified attributes can't be applied";
+    public static final String ENTITY_GRAPH_ARGUMENT_EXCEPTION = "One or more specified attributes can't be applied: ";
 
     private record Key(String queryString, String countProjection, boolean nativeQuery) {
     }
@@ -109,7 +109,8 @@ public class EntityManagerUtils {
                 try {
                     entityGraph.addAttributeNodes(attribute);
                 } catch (Exception exception) {
-                    throw new IllegalStateException(ENTITY_GRAPH_ARGUMENT_EXCEPTION);
+                    throw new IllegalStateException(ENTITY_GRAPH_ARGUMENT_EXCEPTION + exception.getMessage(),
+                        exception.getCause());
                 }
             } else {
                 try {
@@ -129,7 +130,8 @@ public class EntityManagerUtils {
                             subgraph);
                     }
                 } catch (Exception exception) {
-                    throw new IllegalStateException(ENTITY_GRAPH_ARGUMENT_EXCEPTION);
+                    throw new IllegalStateException(ENTITY_GRAPH_ARGUMENT_EXCEPTION + exception.getMessage(),
+                        exception.getCause());
                 }
             }
         }
