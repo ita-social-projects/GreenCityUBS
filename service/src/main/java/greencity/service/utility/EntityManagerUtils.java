@@ -44,6 +44,8 @@ public class EntityManagerUtils {
     private static final Pattern COUNT_MATCH;
     private static final Pattern ALIAS_MATCH;
 
+    private static final String ATTRIBUTE_DELIMITER = ".";
+
     static {
         StringBuilder builder = new StringBuilder();
         builder.append("\\s*");
@@ -99,7 +101,7 @@ public class EntityManagerUtils {
         Map<String, Subgraph<?>> subgraphsMap = new HashMap<>();
 
         for (String attribute : attributes) {
-            if (!attribute.contains(".")) {
+            if (!attribute.contains(ATTRIBUTE_DELIMITER)) {
                 try {
                     entityGraph.addAttributeNodes(attribute);
                 } catch (Exception exception) {
@@ -107,18 +109,18 @@ public class EntityManagerUtils {
                 }
             } else {
                 try {
-                    String[] subAttributes = attribute.split("\\.");
+                    String[] subAttributes = attribute.split("\\" + ATTRIBUTE_DELIMITER);
                     int length = subAttributes.length;
                     if (length == 2) {
                         Subgraph<?> subgraph = entityGraph.addSubgraph(subAttributes[length - 2]);
                         subgraph.addAttributeNodes(subAttributes[length - 1]);
                         subgraphsMap.put(subAttributes[0], subgraph);
                     } else {
-                        String rootSubgraphPath = String.join(".", Arrays.copyOfRange(subAttributes, 0, length - 2));
+                        String rootSubgraphPath = String.join(ATTRIBUTE_DELIMITER, Arrays.copyOfRange(subAttributes, 0, length - 2));
                         Subgraph<?> rootSubgraph = subgraphsMap.get(rootSubgraphPath);
                         Subgraph<?> subgraph = rootSubgraph.addSubgraph(subAttributes[length - 2]);
                         subgraph.addAttributeNodes(subAttributes[length - 1]);
-                        subgraphsMap.put(String.join(".", rootSubgraphPath, subAttributes[length - 2]), subgraph);
+                        subgraphsMap.put(String.join(ATTRIBUTE_DELIMITER, rootSubgraphPath, subAttributes[length - 2]), subgraph);
                     }
                 } catch (Exception exception) {
                     throw new IllegalStateException(ENTITY_GRAPH_ARGUMENT_EXCEPTION);
