@@ -7,11 +7,13 @@ import static greencity.ModelUtils.getEmployeeDtoWithoutPositionsAndTariffsForGe
 import static greencity.ModelUtils.getEmployeeFilterViewListForOneEmployeeWithDifferentPositions;
 import static greencity.ModelUtils.getEmployeeForUpdateEmailCheck;
 import static greencity.ModelUtils.getEmployeeListForGetAllMethod;
+import static greencity.ModelUtils.getEmployeeWithTariffsDto;
 import static greencity.ModelUtils.getEmployeeWithTariffsIdDto;
 import static greencity.ModelUtils.getPosition;
 import static greencity.ModelUtils.getPositionDto;
 import static greencity.ModelUtils.getTariffInfo;
 import static greencity.ModelUtils.getTariffsInfo;
+import static greencity.ModelUtils.getUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,9 +42,11 @@ import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.dto.tariff.TariffWithChatAccess;
 import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.enums.EmployeeStatus;
+import greencity.enums.UserStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -53,6 +57,8 @@ import greencity.repository.EmployeeCriteriaRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.PositionRepository;
 import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
+import greencity.service.ubs.user.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +66,7 @@ import java.util.Set;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -89,6 +96,10 @@ class UBSManagementEmployeeServiceImplTest {
     private EmployeeCriteriaRepository employeeCriteriaRepository;
     @Mock
     private WebClientRequestException webClientRequestException;
+    @Mock
+    private UserService userService;
+    @Mock
+    private UserRepository userRepository;
 
     @Test
     void saveEmployeeTest() {
@@ -153,6 +164,8 @@ class UBSManagementEmployeeServiceImplTest {
     void saveEmployeeTestWithInactiveStatus() {
         Employee employee = getEmployee();
         EmployeeWithTariffsIdDto dto = getEmployeeWithTariffsIdDto();
+        EmployeeWithTariffsDto dtoWithTariffs = getEmployeeWithTariffsDto();
+        PositionDto positionDto = getPositionDto(1L);
         MockMultipartFile file = new MockMultipartFile("employeeDto",
             "", "application/json", "random Bytes".getBytes());
 
@@ -168,6 +181,9 @@ class UBSManagementEmployeeServiceImplTest {
         when(repository.save(any())).thenReturn(employee);
         when(positionRepository.findByIdIn(any())).thenReturn(Set.of(getPosition()));
         when(positionRepository.existsById(any())).thenReturn(true);
+        when(modelMapper.map(employee, EmployeeWithTariffsDto.class)).thenReturn(dtoWithTariffs);
+        when(modelMapper.map(getPosition(), PositionDto.class)).thenReturn(positionDto);
+
         employeeService.save(dto, file);
 
         verify(repository, times(1))
@@ -398,85 +414,65 @@ class UBSManagementEmployeeServiceImplTest {
     }
 
     @Test
-    void deactivateEmployeeTest() {
+    void updateEmployeeStatusTest() {
         Employee employee = getEmployee();
-        employee.setImagePath("Pass");
-        when(repository.findById(1L)).thenReturn(Optional.of(employee));
-        employeeService.deactivateEmployee(1L);
-        verify(repository).findById(1L);
-        assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
-        Exception thrown = assertThrows(NotFoundException.class,
-            () -> employeeService.deactivateEmployee(2L));
-        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND + 2L, thrown.getMessage());
+        String userUuid = employee.getUuid();
+        Long employeeId = employee.getId();
+        EmployeeStatus employeeStatus = EmployeeStatus.INACTIVE;
+        User user = getUser();
+
+        when(repository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(userRepository.findUserByUuid(userUuid)).thenReturn(Optional.of(user));
+
+        employeeService.updateEmployeeStatus(userUuid, employeeId, employeeStatus);
+
+        ArgumentCaptor<Employee> employeeCaptor = ArgumentCaptor.forClass(Employee.class);
+        verify(repository).save(employeeCaptor.capture());
+        Employee employeeCaptorValue = employeeCaptor.getValue();
+        assertEquals(employeeStatus, employeeCaptorValue.getEmployeeStatus());
+        verify(userService).updateUserStatusById(userUuid, user.getId(), UserStatus.DEACTIVATED);
     }
 
     @Test
-    void activateEmployeeTestNotFound() {
+    void updateEmployeeStatusWhenStatusNotChangedTest() {
         Employee employee = getEmployee();
-        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
-        employee.setImagePath("Pass");
-        when(repository.findById(1L)).thenReturn(Optional.of(employee));
-        employeeService.activateEmployee(1L);
-        verify(repository).findById(1L);
-        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
-        Exception thrown = assertThrows(NotFoundException.class,
-            () -> employeeService.deactivateEmployee(2L));
-        assertEquals(ErrorMessage.EMPLOYEE_NOT_FOUND + 2L, thrown.getMessage());
+        String userUuid = employee.getUuid();
+        Long employeeId = employee.getId();
+        EmployeeStatus employeeStatus = EmployeeStatus.ACTIVE;
+
+        when(repository.findById(employeeId)).thenReturn(Optional.of(employee));
+
+        employeeService.updateEmployeeStatus(userUuid, employeeId, employeeStatus);
+
+        verify(userService, never()).updateUserStatusById(anyString(), anyLong(), any(UserStatus.class));
     }
 
     @Test
-    void activateEmployeeActiveTest() {
-        Employee employee = getEmployee();
-        employee.setImagePath("Pass");
-        employee.setEmployeeStatus(EmployeeStatus.ACTIVE);
-        when(repository.findById(1L)).thenReturn(Optional.of(employee));
-        employeeService.activateEmployee(employee.getId());
-        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
+    void updateEmployeeStatusWhenEmployeeNotFoundTest() {
+        String userUuid = "uuid";
+        Long employeeId = 1L;
+        EmployeeStatus employeeStatus = EmployeeStatus.INACTIVE;
+
+        when(repository.findById(employeeId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> employeeService.updateEmployeeStatus(userUuid, employeeId, employeeStatus));
+        verify(userService, never()).updateUserStatusById(anyString(), anyLong(), any(UserStatus.class));
     }
 
     @Test
-    void activateEmployeeTest() {
+    void updateEmployeeStatusWhenUserNotFoundTest() {
         Employee employee = getEmployee();
-        employee.setImagePath("Pass");
-        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
-        when(repository.findById(1L)).thenReturn(Optional.of(employee));
-        employeeService.activateEmployee(employee.getId());
-        assertEquals(EmployeeStatus.ACTIVE, employee.getEmployeeStatus());
-    }
+        String userUuid = employee.getUuid();
+        Long employeeId = employee.getId();
+        EmployeeStatus employeeStatus = EmployeeStatus.INACTIVE;
 
-    @Test
-    void deactivateEmployeeInactiveTest() {
-        Employee employee = getEmployee();
-        employee.setImagePath("Pass");
-        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
-        assertEquals(EmployeeStatus.INACTIVE, employee.getEmployeeStatus());
-    }
+        when(repository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(userRepository.findUserByUuid(userUuid)).thenReturn(Optional.empty());
 
-    @Test
-    void deactivateEmployeeHystrixRuntimeExceptionTest() {
-        Employee employee = getEmployee();
-        long employeeId = employee.getId();
-        employee.setImagePath("Pass");
-        when(repository.findById(1L)).thenReturn(Optional.of(employee));
-
-        doThrow(HystrixRuntimeException.class).when(userRemoteClient).deactivateEmployee("Test");
-        assertThrows(BadRequestException.class, () -> employeeService.deactivateEmployee(employeeId));
-
-        verify(repository).findById(1L);
-    }
-
-    @Test
-    void activateEmployeeHystrixRuntimeExceptionTest() {
-        Employee employee = getEmployee();
-        employee.setEmployeeStatus(EmployeeStatus.INACTIVE);
-        long employeeId = employee.getId();
-        employee.setImagePath("Pass");
-        when(repository.findById(1L)).thenReturn(Optional.of(employee));
-
-        doThrow(HystrixRuntimeException.class).when(userRemoteClient).activateEmployee("Test");
-        assertThrows(BadRequestException.class, () -> employeeService.activateEmployee(employeeId));
-
-        verify(repository).findById(1L);
+        assertThrows(NotFoundException.class,
+            () -> employeeService.updateEmployeeStatus(userUuid, employeeId, employeeStatus));
+        verify(userService, never()).updateUserStatusById(anyString(), anyLong(), any(UserStatus.class));
     }
 
     @Test

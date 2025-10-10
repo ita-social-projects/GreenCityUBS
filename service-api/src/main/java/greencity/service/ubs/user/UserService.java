@@ -4,7 +4,6 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserProfileCreateDto;
@@ -12,6 +11,8 @@ import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.entity.user.User;
 import java.util.Set;
+import greencity.enums.UserStatus;
+import java.util.List;
 
 public interface UserService {
     /**
@@ -64,15 +65,6 @@ public interface UserService {
     UserProfileDto getProfileData(String uuid);
 
     /**
-     * Method that mark user as DEACTIVATED.
-     *
-     * @param uuid    {@link String} current user uuid.
-     * @param request {@link DeactivateUserRequestDto} information for deactivation.
-     * @author Liubomyr Bratakh
-     */
-    void markUserAsDeactivated(String uuid, DeactivateUserRequestDto request);
-
-    /**
      * Methods returns current user's bonus points.
      *
      * @param uuid current {@link User}'s uuid.
@@ -105,4 +97,45 @@ public interface UserService {
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
      */
     void updateEmployeesAuthorities(UserEmployeeAuthorityDto dto);
+
+    /**
+     * Method to find user's status by uuid.
+     *
+     * @param uuid user's uuid.
+     * @return user's status.
+     */
+    UserStatus getUserStatusByUuid(String uuid);
+
+    /**
+     * Method to delete a user by uuid, setting their status to DELETED.
+     *
+     * @param uuid {@link String} user's uuid.
+     */
+    void deleteUserByUuid(String uuid);
+
+    /**
+     * Method that change user status.
+     *
+     * @param currentUserUuid {@link String} current user uuid.
+     * @param targetUserId    {@link Long} user uuid that is deactivated.
+     * @param status          {@link UserStatus} user status.
+     */
+    void updateUserStatusById(String currentUserUuid, Long targetUserId, UserStatus status);
+
+    /**
+     * Method for getting a {@link List} of {@link String} - reasons for
+     * deactivation of the current user.
+     *
+     * @param id              {@link Long} - user's id.
+     * @param currentUserUuid {@link String} - user's uuid.
+     * @return {@link List} of {@link String}.
+     */
+    List<String> getDeactivationReasons(Long id, String currentUserUuid);
+
+    /**
+     * Counts all users by user {@link UserStatus} ACTIVATED.
+     *
+     * @return amount of users with {@link UserStatus} ACTIVATED.
+     */
+    long getActivatedUsersAmount();
 }

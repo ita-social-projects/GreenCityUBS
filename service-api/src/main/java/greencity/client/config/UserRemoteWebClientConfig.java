@@ -10,6 +10,7 @@ import greencity.exceptions.JsonParsingException;
 import greencity.exceptions.NotFoundException;
 import greencity.security.JwtTool;
 import io.netty.channel.ChannelOption;
+import java.net.URI;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,15 +21,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
 @Configuration
 @RequiredArgsConstructor
 public class UserRemoteWebClientConfig {
+    private static final String EMAIL_QUERY_PARAMETER = "email";
+    private static final String PLUS_SYMBOL = "+";
+    private static final String ENCODED_PLUS_SYMBOL = "%2B";
+
     @Value("${greencity.redirect.user-server-address}")
     private String greenCityUserBaseUrl;
 
@@ -49,6 +56,7 @@ public class UserRemoteWebClientConfig {
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .filter(authorizationHeaderFilter())
             .filter(handlingWebClientExceptions())
+            .filter(encodePlusInQuery())
             .clientConnector(
                 new ReactorClientHttpConnector(
                     HttpClient.create()
@@ -101,5 +109,51 @@ public class UserRemoteWebClientConfig {
         } catch (JsonProcessingException e) {
             throw new JsonParsingException();
         }
+    }
+
+    private ExchangeFilterFunction encodePlusInQuery() {
+        return ExchangeFilterFunction.ofRequestProcessor(request -> {
+            URI original = request.url();
+            String originalQuery = original.getRawQuery();
+
+            if (originalQuery != null
+                && originalQuery.contains(PLUS_SYMBOL)
+                && originalQuery.toLowerCase().contains(EMAIL_QUERY_PARAMETER)) {
+                URI encodedUri = encodeEmailParameter(original);
+
+                if (!encodedUri.equals(original)) {
+                    ClientRequest mutated = ClientRequest.from(request)
+                        .url(encodedUri)
+                        .build();
+
+                    return Mono.just(mutated);
+                }
+            }
+
+            return Mono.just(request);
+        });
+    }
+
+    private static URI encodeEmailParameter(URI uri) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uri);
+        MultiValueMap<String, String> queryParams = builder.build().getQueryParams();
+        builder.replaceQuery(null);
+
+        for (var entry : queryParams.entrySet()) {
+            String paramKey = entry.getKey();
+
+            if (paramKey.toLowerCase().contains(EMAIL_QUERY_PARAMETER)) {
+                for (String value : entry.getValue()) {
+                    String encodedValue = value.replace(PLUS_SYMBOL, ENCODED_PLUS_SYMBOL);
+                    builder.queryParam(paramKey, encodedValue);
+                }
+            } else {
+                for (String value : entry.getValue()) {
+                    builder.queryParam(paramKey, value);
+                }
+            }
+        }
+
+        return builder.build(true).toUri();
     }
 }

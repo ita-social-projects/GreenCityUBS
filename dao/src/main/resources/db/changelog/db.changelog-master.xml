@@ -309,4 +309,6 @@
     <include file="db/changelog/logs/ch-add-payment-link-columns-into-orders-table-Ilnytskyi.xml"/>
     <include file="db/changelog/logs/ch-create-settings-text-table-Lys.xml"/>
     <include file="db/changelog/logs/ch-insert-into-settings-text-table-Lys.xml"/>
+    <include file="db/changelog/logs/ch-update-users-add-user-status-column-Zadyraichuk.xml"/>
+    <include file="db/changelog/logs/ch-add-reasons-for-user-deactivatiom-table-Pikhotskyi.xml"/>
 </databaseChangeLog>
