@@ -33,6 +33,7 @@ import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.enums.BonusReason;
+import greencity.enums.CertificateStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
@@ -191,6 +192,7 @@ public class OrderServiceImpl implements OrderService {
         if (order == null) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
+        unlockPointsAndCertificatesFromOrder(order);
         order.getOrderBags().clear();
         orderRepository.saveAndFlush(order);
         orderRepository.delete(order);
@@ -453,5 +455,29 @@ public class OrderServiceImpl implements OrderService {
         Long fullPriceInCoins,
         List<CertificateDto> certificates,
         OrderPaymentStatusTranslation paymentStatus) {
+    }
+
+    private void unlockPointsAndCertificatesFromOrder(Order order) {
+        User user = order.getUser();
+        int pointsToUse = order.getPointsToUse();
+
+        if (pointsToUse > 0) {
+            user.setCurrentPoints(user.getCurrentPoints() + pointsToUse);
+            user.getChangeOfPointsList().add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(pointsToUse)
+                .date(LocalDateTime.now())
+                .reason(BonusReason.RETURN_CANCELED_DRAFT_ORDER)
+                .build());
+        }
+
+        order.getCertificates().forEach(this::unlockCertificate);
+    }
+
+    private void unlockCertificate(Certificate certificate) {
+        certificate.setOrder(null);
+        certificate.setCertificateStatus(CertificateStatus.ACTIVE);
+        certificate.setDateOfUse(null);
+        certificate.setPoints(certificate.getInitialPointsValue());
     }
 }
