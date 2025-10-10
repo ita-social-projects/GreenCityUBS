@@ -433,6 +433,7 @@ class OrderServiceImplTest {
     void cancelPaymentExpiryJob_successfullyDeletesJob() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
         when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(true);
+        when(quartzScheduler.checkExists(any(JobKey.class))).thenReturn(true);
 
         assertDoesNotThrow(() -> orderService.cancelPaymentExpiryJob(ORDER_ID));
 
@@ -443,6 +444,7 @@ class OrderServiceImplTest {
     void cancelPaymentExpiryJob_whenDeleteReturnsFalse_throwsIllegalStateException() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
         when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(false);
+        when(quartzScheduler.checkExists(any(JobKey.class))).thenReturn(true);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> orderService.cancelPaymentExpiryJob(ORDER_ID));
@@ -455,6 +457,7 @@ class OrderServiceImplTest {
     void cancelPaymentExpiryJob_whenSchedulerThrowsException_throwsIllegalStateException() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
         when(quartzScheduler.deleteJob(any(JobKey.class))).thenThrow(new SchedulerException("Test exception"));
+        when(quartzScheduler.checkExists(any(JobKey.class))).thenReturn(true);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> orderService.cancelPaymentExpiryJob(ORDER_ID));
