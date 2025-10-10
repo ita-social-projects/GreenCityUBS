@@ -27,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.hibernate.jpa.QueryHints.JAKARTA_HINT_FETCHGRAPH;
+import static org.hibernate.jpa.QueryHints.JAKARTA_HINT_LOADGRAPH;
+
 @Service
 public class EntityManagerUtils {
     @PersistenceContext
@@ -179,8 +182,8 @@ public class EntityManagerUtils {
         TypedQuery<T> query = entityManager.createQuery(jpqlQueryString, entityClass);
 
         String hintKey = entityGraphType == EntityGraphType.FETCH
-            ? "jakarta.persistence.fetchgraph"
-            : "jakarta.persistence.loadgraph";
+            ? JAKARTA_HINT_FETCHGRAPH
+            : JAKARTA_HINT_LOADGRAPH;
         query.setHint(hintKey, createEntityGraph(entityClass, attributes));
 
         return query;
