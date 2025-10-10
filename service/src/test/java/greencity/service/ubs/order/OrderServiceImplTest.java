@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,6 +29,7 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
@@ -290,10 +292,36 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void deleteOrder_success() {
+    void deleteOrder_success_noPointsAndCertificates() {
+        User orderUser = order.getUser();
+
         when(ordersForUserRepository.getAllByUserUuidAndId("uuid", 1L)).thenReturn(order);
 
         orderService.deleteOrder("uuid", 1L);
+
+        assertThat(orderUser.getChangeOfPointsList()).isEmpty();
+
+        verify(orderRepository).saveAndFlush(order);
+        verify(orderRepository).delete(order);
+    }
+
+    @Test
+    void deleteOrder_success_returnPointsAndCertificates() {
+        Certificate certificate = ModelUtils.getCertificate();
+        User orderUser = order.getUser();
+        certificate.setOrder(order);
+        order.getCertificates().add(certificate);
+        order.setPointsToUse(100);
+
+        int finalPoints = user.getCurrentPoints() + orderUser.getCurrentPoints();
+
+        when(ordersForUserRepository.getAllByUserUuidAndId("uuid", 1L)).thenReturn(order);
+
+        orderService.deleteOrder("uuid", 1L);
+
+        assertNull(certificate.getOrder());
+        assertEquals(1, user.getChangeOfPointsList().size());
+        assertEquals(finalPoints, user.getCurrentPoints());
 
         verify(orderRepository).saveAndFlush(order);
         verify(orderRepository).delete(order);
