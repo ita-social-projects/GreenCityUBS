@@ -1,5 +1,6 @@
-package greencity.service.utility;
+package greencity.persistence;
 
+import greencity.persistence.JpqlQueryHelperImpl;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.Parameter;
 import jakarta.persistence.Subgraph;
@@ -19,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static greencity.service.utility.EntityManagerUtils.ENTITY_GRAPH_ARGUMENT_EXCEPTION;
+import static greencity.persistence.JpqlQueryHelperImpl.ENTITY_GRAPH_ARGUMENT_EXCEPTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class EntityManagerUtilsTest {
+class JpqlQueryHelperImplTest {
 
     @Mock
     private jakarta.persistence.EntityManager entityManager;
@@ -59,7 +60,7 @@ class EntityManagerUtilsTest {
     private Query<?> unwrappedQuery;
 
     @InjectMocks
-    private EntityManagerUtils entityManagerUtils = new EntityManagerUtils(100, 10);
+    private JpqlQueryHelperImpl jpqlQueryHelperImpl = new JpqlQueryHelperImpl(100, 10);
 
     private static class DummyEntity {
     }
@@ -73,7 +74,7 @@ class EntityManagerUtilsTest {
     void createEntityGraphWithSingleAttribute() {
         when(entityManager.createEntityGraph(DummyEntity.class)).thenReturn(entityGraph);
 
-        EntityGraph<DummyEntity> result = entityManagerUtils.createEntityGraph(DummyEntity.class, List.of(BASIC_ATTRIBUTE_NAME));
+        EntityGraph<DummyEntity> result = jpqlQueryHelperImpl.createEntityGraph(DummyEntity.class, List.of(BASIC_ATTRIBUTE_NAME));
 
         assertSame(entityGraph, result);
         verify(entityGraph).addAttributeNodes(BASIC_ATTRIBUTE_NAME);
@@ -85,7 +86,7 @@ class EntityManagerUtilsTest {
         when(entityManager.createEntityGraph(DummyEntity.class)).thenReturn(entityGraph);
         when(entityGraph.addSubgraph("parent")).thenReturn((Subgraph<Object>) subgraphLevel1);
 
-        EntityGraph<DummyEntity> result = entityManagerUtils.createEntityGraph(DummyEntity.class, List.of("parent.child"));
+        EntityGraph<DummyEntity> result = jpqlQueryHelperImpl.createEntityGraph(DummyEntity.class, List.of("parent.child"));
 
         assertSame(entityGraph, result);
         verify(entityGraph).addSubgraph("parent");
@@ -99,7 +100,7 @@ class EntityManagerUtilsTest {
         when(entityGraph.addSubgraph("a")).thenReturn((Subgraph<Object>) subgraphLevel1);
         when(subgraphLevel1.addSubgraph("b")).thenReturn((Subgraph<Object>) subgraphLevel2);
 
-        EntityGraph<DummyEntity> result = entityManagerUtils.createEntityGraph(DummyEntity.class, List.of("a.b", "a.b.c"));
+        EntityGraph<DummyEntity> result = jpqlQueryHelperImpl.createEntityGraph(DummyEntity.class, List.of("a.b", "a.b.c"));
 
         assertSame(entityGraph, result);
         verify(entityGraph).addSubgraph("a");
@@ -117,7 +118,7 @@ class EntityManagerUtilsTest {
             .addAttributeNodes(WRONG_ATTRIBUTE_NAME);
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-            () -> entityManagerUtils.createEntityGraph(DummyEntity.class, attributeNames));
+            () -> jpqlQueryHelperImpl.createEntityGraph(DummyEntity.class, attributeNames));
 
         assertTrue(ex.getMessage().contains(ENTITY_GRAPH_ARGUMENT_EXCEPTION));
     }
@@ -131,7 +132,7 @@ class EntityManagerUtilsTest {
         doThrow(new RuntimeException(ATTRIBUTE_ERROR_MESSAGE)).when(subgraphLevel1).addAttributeNodes("child");
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-            () -> entityManagerUtils.createEntityGraph(DummyEntity.class, attributeNames));
+            () -> jpqlQueryHelperImpl.createEntityGraph(DummyEntity.class, attributeNames));
 
         assertTrue(ex.getMessage().contains(ENTITY_GRAPH_ARGUMENT_EXCEPTION));
     }
@@ -143,7 +144,7 @@ class EntityManagerUtilsTest {
         when(entityManager.createEntityGraph(DummyEntity.class)).thenReturn(entityGraph);
 
         TypedQuery<DummyEntity> result =
-            entityManagerUtils.createTypedQueryWithEntityGraph(DummyEntity.class, jpql, List.of("relatedEntity"));
+            jpqlQueryHelperImpl.createTypedQueryWithEntityGraph(DummyEntity.class, jpql, List.of("relatedEntity"));
 
         assertSame(typedQuery, result);
         verify(typedQuery).setHint("jakarta.persistence.loadgraph", entityGraph);
@@ -155,7 +156,7 @@ class EntityManagerUtilsTest {
         when(entityManager.createQuery(jpql, DummyEntity.class)).thenReturn(typedQuery);
         when(entityManager.createEntityGraph(DummyEntity.class)).thenReturn(entityGraph);
 
-        TypedQuery<DummyEntity> result = entityManagerUtils.createTypedQueryWithEntityGraph(
+        TypedQuery<DummyEntity> result = jpqlQueryHelperImpl.createTypedQueryWithEntityGraph(
             DummyEntity.class, jpql, List.of(BASIC_ATTRIBUTE_NAME), EntityGraphType.FETCH);
 
         assertSame(typedQuery, result);
@@ -169,7 +170,7 @@ class EntityManagerUtilsTest {
         when(entityManager.createQuery(jpql, DummyEntity.class)).thenReturn(typedQuery);
         when(entityManager.createEntityGraph(DummyEntity.class)).thenReturn(entityGraph);
 
-        TypedQuery<DummyEntity> q = entityManagerUtils.createPageableTypedQueryWithEntityGraph(
+        TypedQuery<DummyEntity> q = jpqlQueryHelperImpl.createPageableTypedQueryWithEntityGraph(
             DummyEntity.class, jpql, List.of(), pageable);
 
         assertSame(typedQuery, q);
@@ -191,7 +192,7 @@ class EntityManagerUtilsTest {
         when(countQuery.getSingleResult()).thenReturn(123L);
         when(typedQuery.getParameters()).thenReturn(Collections.emptySet());
 
-        Page<DummyEntity> page = entityManagerUtils.runPageableTypedQueryWithEntityGraph(typedQuery, pageable);
+        Page<DummyEntity> page = jpqlQueryHelperImpl.runPageableTypedQueryWithEntityGraph(typedQuery, pageable);
 
         assertEquals(2, page.getContent().size());
         assertEquals(123L, page.getTotalElements());
@@ -213,7 +214,7 @@ class EntityManagerUtilsTest {
         when(countQuery.getSingleResult()).thenReturn(123L);
         when(typedQuery.getParameters()).thenReturn(Collections.emptySet());
 
-        Page<DummyEntity> page = entityManagerUtils.createAndRunPageableTypedQueryWithEntityGraph(
+        Page<DummyEntity> page = jpqlQueryHelperImpl.createAndRunPageableTypedQueryWithEntityGraph(
             DummyEntity.class, jpql, List.of(BASIC_ATTRIBUTE_NAME), pageable);
 
         assertEquals(2, page.getContent().size());
@@ -236,7 +237,7 @@ class EntityManagerUtilsTest {
         when(entityManager.createQuery(anyString(), eq(Long.class))).thenReturn(countQuery);
         when(countQuery.getSingleResult()).thenReturn(7L);
 
-        Long total = entityManagerUtils.createAndRunCountQueryFor(typedQuery);
+        Long total = jpqlQueryHelperImpl.createAndRunCountQueryFor(typedQuery);
 
         assertEquals(7L, total);
         verify(countQuery).setParameter("p1", "VALUE");
@@ -258,7 +259,7 @@ class EntityManagerUtilsTest {
         when(entityManager.createQuery(anyString(), eq(Long.class))).thenReturn(countQuery);
         when(countQuery.getSingleResult()).thenReturn(7L);
 
-        Long total = entityManagerUtils.createAndRunCountQueryFor(typedQuery);
+        Long total = jpqlQueryHelperImpl.createAndRunCountQueryFor(typedQuery);
 
         assertEquals(7L, total);
         verify(countQuery).setParameter(1, "VALUE");
@@ -267,7 +268,7 @@ class EntityManagerUtilsTest {
     @Test
     void createCountQueryStringForNativeQueryWithStar() {
         String queryString = "select * from DummyEntity d";
-        String result = entityManagerUtils.createCountQueryStringFor(queryString, null, true);
+        String result = jpqlQueryHelperImpl.createCountQueryStringFor(queryString, null, true);
 
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertTrue(result.contains("count(1)"), "native query with '*' must use count(1)");
@@ -276,7 +277,7 @@ class EntityManagerUtilsTest {
     @Test
     void createCountQueryStringForNativeQueryWithComma() {
         String queryString = "select a, b from DummyEntity d";
-        String result = entityManagerUtils.createCountQueryStringFor(queryString, null, true);
+        String result = jpqlQueryHelperImpl.createCountQueryStringFor(queryString, null, true);
 
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertTrue(result.contains("count(1)"), "native query with comma must use count(1)");
@@ -285,7 +286,7 @@ class EntityManagerUtilsTest {
     @Test
     void createCountQueryStringForQueryWithStarUsesAlias() {
         String jpql = "select * from DummyEntity d";
-        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+        String result = jpqlQueryHelperImpl.createCountQueryStringFor(jpql, null, false);
 
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertTrue(result.contains("count(d)"), "jpql query with '*' must use count(d)");
@@ -294,7 +295,7 @@ class EntityManagerUtilsTest {
     @Test
     void createCountQueryStringForQueryWithDistinctWithOrderBy() {
         String jpql = "select distinct d.id, d.name from DummyEntity d where d.x = :p order by d.name";
-        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+        String result = jpqlQueryHelperImpl.createCountQueryStringFor(jpql, null, false);
 
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertTrue(result.toLowerCase().contains("distinct"));
@@ -305,7 +306,7 @@ class EntityManagerUtilsTest {
     void createCountQueryStringWithCountProjection() {
         String jpql = "select d from DummyEntity d where d.x = :p";
         String projection = "distinct d.id";
-        String result = entityManagerUtils.createCountQueryStringFor(jpql, projection, false);
+        String result = jpqlQueryHelperImpl.createCountQueryStringFor(jpql, projection, false);
 
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertTrue(result.contains("count(distinct d.id)"), "should use provided count projection");
@@ -314,7 +315,7 @@ class EntityManagerUtilsTest {
     @Test
     void createCountQueryStringForQueryWithConstructorExpression() {
         String jpql = "select new com.example.Dto(d.x) from DummyEntity d where d.x = 1";
-        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+        String result = jpqlQueryHelperImpl.createCountQueryStringFor(jpql, null, false);
 
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertFalse(result.toLowerCase().contains("count(new"));
@@ -324,7 +325,7 @@ class EntityManagerUtilsTest {
     @Test
     void createCountQueryStringForQueryWithCount() {
         String jpql = "select count(d) from DummyEntity d";
-        String result = entityManagerUtils.createCountQueryStringFor(jpql, null, false);
+        String result = jpqlQueryHelperImpl.createCountQueryStringFor(jpql, null, false);
 
         assertTrue(result.toLowerCase().startsWith("select count("));
         assertFalse(result.toLowerCase().contains("count(count(d))"));
@@ -333,12 +334,12 @@ class EntityManagerUtilsTest {
     @Test
     void createCountQueryStringForEmptyQuery() {
         assertThrows(IllegalArgumentException.class,
-            () -> entityManagerUtils.createCountQueryStringFor("", null, false));
+            () -> jpqlQueryHelperImpl.createCountQueryStringFor("", null, false));
     }
 
     @Test
     void detectAlias() throws Exception {
-        Method detectAlias = EntityManagerUtils.class.getDeclaredMethod("detectAlias", String.class);
+        Method detectAlias = JpqlQueryHelperImpl.class.getDeclaredMethod("detectAlias", String.class);
         detectAlias.setAccessible(true);
 
         String jpql = "select d from DummyEntity d where d.x = 1 order by d.x";
@@ -349,7 +350,7 @@ class EntityManagerUtilsTest {
 
     @Test
     void detectAliasWhenNoAliasPresent() throws Exception {
-        Method detectAlias = EntityManagerUtils.class.getDeclaredMethod("detectAlias", String.class);
+        Method detectAlias = JpqlQueryHelperImpl.class.getDeclaredMethod("detectAlias", String.class);
         detectAlias.setAccessible(true);
 
         String jpql = "select * from DummyEntity";
@@ -360,7 +361,7 @@ class EntityManagerUtilsTest {
 
     @Test
     void removeSubqueries() throws Exception {
-        Method removeSubqueries = EntityManagerUtils.class
+        Method removeSubqueries = JpqlQueryHelperImpl.class
             .getDeclaredMethod("removeSubqueries", String.class);
         removeSubqueries.setAccessible(true);
 
@@ -373,7 +374,7 @@ class EntityManagerUtilsTest {
 
     @Test
     void removeSubqueriesWithNoFrom() throws Exception {
-        Method removeSubqueries = EntityManagerUtils.class
+        Method removeSubqueries = JpqlQueryHelperImpl.class
             .getDeclaredMethod("removeSubqueries", String.class);
         removeSubqueries.setAccessible(true);
 
@@ -386,7 +387,7 @@ class EntityManagerUtilsTest {
 
     @Test
     void removeSubqueriesWithNestedSubqueries() throws Exception {
-        Method removeSubqueries = EntityManagerUtils.class
+        Method removeSubqueries = JpqlQueryHelperImpl.class
             .getDeclaredMethod("removeSubqueries", String.class);
         removeSubqueries.setAccessible(true);
 
@@ -405,7 +406,7 @@ class EntityManagerUtilsTest {
 
     @Test
     void removeSubqueriesWithMismatchedParens() throws Exception {
-        Method removeSubqueries = EntityManagerUtils.class
+        Method removeSubqueries = JpqlQueryHelperImpl.class
             .getDeclaredMethod("removeSubqueries", String.class);
         removeSubqueries.setAccessible(true);
 
@@ -417,7 +418,7 @@ class EntityManagerUtilsTest {
 
     @Test
     void removeSubqueriesWhenQueryIsNull() throws Exception {
-        Method removeSubqueries = EntityManagerUtils.class
+        Method removeSubqueries = JpqlQueryHelperImpl.class
             .getDeclaredMethod("removeSubqueries", String.class);
         removeSubqueries.setAccessible(true);
 
@@ -427,7 +428,7 @@ class EntityManagerUtilsTest {
 
     @Test
     void removeSubqueriesWhenQueryIsBlank() throws Exception {
-        Method removeSubqueries = EntityManagerUtils.class
+        Method removeSubqueries = JpqlQueryHelperImpl.class
             .getDeclaredMethod("removeSubqueries", String.class);
         removeSubqueries.setAccessible(true);
 

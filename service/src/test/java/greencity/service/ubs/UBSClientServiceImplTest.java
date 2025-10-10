@@ -105,7 +105,7 @@ import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
 import greencity.service.google.GoogleApiService;
 import greencity.service.notification.NotificationServiceImpl;
-import greencity.service.utility.EntityManagerUtils;
+import greencity.persistence.JpqlQueryHelperImpl;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import java.lang.reflect.Field;
@@ -394,7 +394,7 @@ class UBSClientServiceImplTest {
     private String wayForPaySecret;
 
     @Mock
-    private EntityManagerUtils entityManagerUtils;
+    private JpqlQueryHelperImpl jpqlQueryHelperImpl;
 
     @Mock
     private NotificationServiceImpl notificationServiceImpl;
@@ -2584,10 +2584,10 @@ class UBSClientServiceImplTest {
 
         TypedQuery<Order> query = mock(TypedQuery.class);
 
-        when(entityManagerUtils
+        when(jpqlQueryHelperImpl
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
+        when(jpqlQueryHelperImpl.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository
@@ -2632,10 +2632,10 @@ class UBSClientServiceImplTest {
 
         TypedQuery<Order> query = mock(TypedQuery.class);
 
-        when(entityManagerUtils
+        when(jpqlQueryHelperImpl
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
+        when(jpqlQueryHelperImpl.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -2680,10 +2680,10 @@ class UBSClientServiceImplTest {
 
         TypedQuery<Order> query = mock(TypedQuery.class);
 
-        when(entityManagerUtils
+        when(jpqlQueryHelperImpl
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
+        when(jpqlQueryHelperImpl.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository
@@ -2728,10 +2728,10 @@ class UBSClientServiceImplTest {
 
         TypedQuery<Order> query = mock(TypedQuery.class);
 
-        when(entityManagerUtils
+        when(jpqlQueryHelperImpl
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
+        when(jpqlQueryHelperImpl.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -3055,10 +3055,10 @@ class UBSClientServiceImplTest {
 
         TypedQuery<Order> query = mock(TypedQuery.class);
 
-        when(entityManagerUtils
+        when(jpqlQueryHelperImpl
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
+        when(jpqlQueryHelperImpl.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(orderStatusTranslationRepository
             .getOrderStatusTranslationById((long) order.getOrderStatus().getNumValue()))
@@ -3843,10 +3843,10 @@ class UBSClientServiceImplTest {
 
         TypedQuery<Order> query = mock(TypedQuery.class);
 
-        when(entityManagerUtils
+        when(jpqlQueryHelperImpl
             .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
             .thenReturn(query);
-        when(entityManagerUtils.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
+        when(jpqlQueryHelperImpl.runPageableTypedQueryWithEntityGraph(eq(query), any(Pageable.class)))
             .thenReturn(page);
         when(modelMapper.map(any(OrderBag.class), eq(BagForUserDto.class))).thenReturn(TEST_BAG_FOR_USER_DTO);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))

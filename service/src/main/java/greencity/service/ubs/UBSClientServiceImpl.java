@@ -92,6 +92,7 @@ import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.mapping.location.LocationToLocationsDtoMapper;
+import greencity.persistence.JpqlQueryHelper;
 import greencity.repository.AddressRepository;
 import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
@@ -117,7 +118,6 @@ import greencity.scheduler.PaymentExpiryJob;
 import greencity.service.DistanceCalculationUtils;
 import greencity.service.google.GoogleApiService;
 import greencity.service.phone.UAPhoneNumberUtil;
-import greencity.service.utility.EntityManagerUtils;
 import greencity.util.Bot;
 import greencity.util.EncryptionUtil;
 import greencity.util.OrderUtils;
@@ -264,7 +264,7 @@ public class UBSClientServiceImpl implements UBSClientService {
     private final NotificationParameterRepository notificationParameterRepository;
     private final AddressService addressService;
     private final Scheduler quartzScheduler;
-    private final EntityManagerUtils entityManagerUtils;
+    private final JpqlQueryHelper jpqlQueryHelper;
 
     @Value("${greencity.bots.ubs-bot-name}")
     private String telegramBotName;
@@ -1010,20 +1010,20 @@ public class UBSClientServiceImpl implements UBSClientService {
      */
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
-        boolean statusesIncluded = nonNull(statuses);
+        boolean statusesIncluded = nonNull(statuses) && !statuses.isEmpty();
         String statusesLine = statusesIncluded ? "AND o.orderStatus IN (:statuses) " : "";
         String jpqlQueryString = "SELECT o FROM Order AS o WHERE o.user = "
             + "(SELECT u FROM User AS u WHERE u.uuid = :uuid) "
             + statusesLine
             + "ORDER BY o.orderDate DESC";
-        TypedQuery<Order> jpqlQuery = entityManagerUtils
+        TypedQuery<Order> jpqlQuery = jpqlQueryHelper
             .createPageableTypedQueryWithEntityGraph(
                 Order.class, jpqlQueryString, List.of("refund", "ubsUser", "ubsUser.orderAddress"), page);
         jpqlQuery.setParameter("uuid", uuid);
         if (statusesIncluded) {
             jpqlQuery.setParameter("statuses", statuses);
         }
-        Page<Order> orderPages = entityManagerUtils.runPageableTypedQueryWithEntityGraph(jpqlQuery, page);
+        Page<Order> orderPages = jpqlQueryHelper.runPageableTypedQueryWithEntityGraph(jpqlQuery, page);
         List<Order> orders = orderPages.getContent();
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
         orders.forEach(order -> dtos.add(getOrdersData(order)));
