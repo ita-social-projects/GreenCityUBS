@@ -110,7 +110,8 @@ public class SecurityConfig {
                     USER_AGREEMENT_LINK + "/latest",
                     UBS_LINK + "/districts-for-kyiv",
                     UBS_LINK + "/order-details-for-tariff",
-                    COMMIT_INFO)
+                    COMMIT_INFO,
+                    SUPER_ADMIN_LINK + "/settingsText")
                 .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
@@ -198,6 +199,7 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/editTariffInfo/{id}",
                     SUPER_ADMIN_LINK + "/activate-employee/{id}",
                     SUPER_ADMIN_LINK + "/**",
+                    SUPER_ADMIN_LINK + "/settingsText/section",
                     UBS_LINK_USERPROFILE + "/status/{userId}")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,

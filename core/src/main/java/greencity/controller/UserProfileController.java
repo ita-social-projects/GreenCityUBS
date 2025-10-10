@@ -6,7 +6,6 @@ import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
 import greencity.enums.UserStatus;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/ubs/userProfile")
 @RequiredArgsConstructor
 public class UserProfileController {
-    private final UBSClientService ubsClientService;
     private final UserService userService;
 
     /**
@@ -59,7 +57,7 @@ public class UserProfileController {
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody UserProfileUpdateDto userProfileUpdateDto) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.updateProfileData(userUuid, userProfileUpdateDto));
+            .body(userService.updateProfileData(userUuid, userProfileUpdateDto));
     }
 
     /**
@@ -78,7 +76,7 @@ public class UserProfileController {
     @GetMapping("/user/getUserProfile")
     public ResponseEntity<UserProfileDto> getUserData(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getProfileData(userUuid));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getProfileData(userUuid));
     }
 
     /**
@@ -99,7 +97,7 @@ public class UserProfileController {
     @PostMapping("/user/create")
     public ResponseEntity<Long> createUserProfile(
         @Valid @RequestBody UserProfileCreateDto userProfileCreateDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ubsClientService.createUserProfile(userProfileCreateDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUserProfile(userProfileCreateDto));
     }
 
     /**

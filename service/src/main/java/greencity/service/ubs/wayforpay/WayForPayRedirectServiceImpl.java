@@ -1,13 +1,12 @@
 package greencity.service.ubs.wayforpay;
 
 import greencity.config.GreenCityRedirectionConfigProp;
+import greencity.constant.AppConstant;
 import greencity.enums.PaymentStatus;
-import greencity.exceptions.DecodeOrderReferenceException;
 import greencity.exceptions.payment.InvalidPaymentResponseException;
 import greencity.exceptions.payment.PaymentNotFoundException;
 import greencity.repository.PaymentRepository;
 import greencity.util.OrderUtils;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +20,6 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
     private static final String APPROVED_STATUS = "Approved";
     private final PaymentRepository paymentRepository;
     private final GreenCityRedirectionConfigProp redirectProp;
-    private static final int ORDER_ID_INDEX = 0;
-    private static final int PAYMENT_ID_INDEX = 2;
 
     @Override
     public String redirectUser(Map<String, String> formParams) {
@@ -30,8 +27,8 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
         String transactionStatus = formParams.get("transactionStatus");
         validateParams(orderReference, transactionStatus);
 
-        Long orderId = getOrderIdByOrderReference(orderReference, ORDER_ID_INDEX);
-        Long paymentId = getOrderIdByOrderReference(orderReference, PAYMENT_ID_INDEX);
+        Long orderId = OrderUtils.getIdByOrderReference(orderReference, AppConstant.ORDER_ID_INDEX);
+        Long paymentId = OrderUtils.getIdByOrderReference(orderReference, AppConstant.PAYMENT_ID_INDEX);
 
         PaymentStatus paymentStatus = paymentRepository
             .getPaymentStatusByOrderIdAndPaymentId(orderId, paymentId)
@@ -65,19 +62,5 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
             && APPROVED_STATUS.equalsIgnoreCase(transactionStatus)
                 ? PaymentStatus.PAID.name().toLowerCase()
                 : PaymentStatus.UNPAID.name().toLowerCase();
-    }
-
-    private Long getOrderIdByOrderReference(String orderReference, int index) {
-        try {
-            String decoded = OrderUtils.decodeOrderReference(orderReference);
-            String[] parts = decoded.split("_");
-            if (index >= parts.length) {
-                throw new InvalidPaymentResponseException("Invalid payment response");
-            }
-            return Long.parseLong(parts[index]);
-        } catch (DecodeOrderReferenceException | NumberFormatException ex) {
-            log.error("Invalid orderReference format: {}", orderReference, ex);
-            throw new InvalidPaymentResponseException("Invalid payment response");
-        }
     }
 }

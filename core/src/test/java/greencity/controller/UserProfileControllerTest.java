@@ -1,5 +1,15 @@
 package greencity.controller;
 
+import static greencity.ModelUtils.getPrincipal;
+import static greencity.ModelUtils.getUserProfileCreateDto;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
@@ -10,8 +20,10 @@ import greencity.dto.user.UserProfileDto;
 import greencity.enums.UserStatus;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.user.UserService;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,28 +38,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
-
-import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getUserProfileCreateDto;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class UserProfileControllerTest {
     private MockMvc mockMvc;
-
-    @Mock
-    UBSClientService ubsClientService;
 
     @InjectMocks
     UserProfileController userProfileController;
@@ -127,7 +122,7 @@ class UserProfileControllerTest {
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
-        verify(ubsClientService).createUserProfile(getUserProfileCreateDto());
+        verify(userService).createUserProfile(getUserProfileCreateDto());
     }
 
     @Test

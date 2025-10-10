@@ -81,6 +81,8 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CertificateRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
@@ -97,9 +99,8 @@ import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.CityRepository;
-import greencity.repository.DistrictRepository;
 import greencity.service.notification.NotificationServiceImpl;
+import greencity.service.ubs.user.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -161,6 +162,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderLockService orderLockService;
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
+    private final UserService userService;
     private final EventRepository eventRepository;
     private final BigOrderTableRepository bigOrderTableRepository;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
@@ -170,7 +172,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
     static final String FORMAT_DATE = "dd-MM-yyyy";
-    private final UBSClientService ubsClientService;
     private final OrderBagRepository orderBagRepository;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
@@ -273,7 +274,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         var orderAddress = order.getUbsUser().getOrderAddress();
 
         UserInfoDto userInfoDto =
-            ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
+            userService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(Optional.of(order));
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(orderAddress);
@@ -1205,7 +1206,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void updateOrderPageFields(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String email) {
         if (nonNull(updateOrderPageDto.getUserInfoDto())) {
-            ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
+            userService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
         }
         if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
             addressService.updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), order, email);
