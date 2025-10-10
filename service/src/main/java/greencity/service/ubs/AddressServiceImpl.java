@@ -1,18 +1,41 @@
 package greencity.service.ubs;
 
+import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ID;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
+import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.constant.KyivTariffLocation;
 import greencity.constant.OrderHistory;
+import greencity.constant.TariffLocation;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.ReadAddressByOrderDto;
+import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
+import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.locations.City;
@@ -24,25 +47,29 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
+import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.DistrictRepository;
-import greencity.repository.RegionRepository;
 import greencity.repository.CityRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.DistrictRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
+import greencity.service.DistanceCalculationUtils;
+import greencity.service.google.GoogleApiService;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import static greencity.constant.ErrorMessage.*;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Service
@@ -57,6 +84,11 @@ public class AddressServiceImpl implements AddressService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepo;
     private final OrderRepository orderRepository;
+    private final LocationRepository locationRepository;
+    private final CourierRepository courierRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
+    private final GoogleApiService googleApiService;
+    private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
     private final EventService eventService;
     private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
     private final ModelMapper modelMapper;
@@ -282,6 +314,89 @@ public class AddressServiceImpl implements AddressService {
         return findAllAddressesForCurrentOrder(uuid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
+        Long id = userRepository.findUserByUuid(uuid).orElseThrow(
+            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getId();
+        List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
+            .stream()
+            .sorted(Comparator.comparing(Address::getId))
+            .map(u -> modelMapper.map(u, AddressDto.class))
+            .toList();
+        return new OrderWithAddressesResponseDto(addressDtoList);
+    }
+
+    @Override
+    @Transactional
+    public boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
+        Address address = addressRepo.findById(addressId)
+            .orElseThrow(() -> new NotFoundException(AppConstant.ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
+
+        boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
+
+        if (locationId == TariffLocation.KYIV_TARIFF.getLocationId()) {
+            return isKyivTariff;
+        } else if (locationId == TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId()) {
+            checkAndCalculateAddressCoordinatesIfEmpty(address);
+
+            double addressLatitude = address.getCoordinates().getLatitude();
+            double addressLongitude = address.getCoordinates().getLongitude();
+
+            double distanceInKm =
+                DistanceCalculationUtils.calculateDistanceInKmByHaversineFormula(AppConstant.KYIV_LATITUDE,
+                    AppConstant.KYIV_LONGITUDE,
+                    addressLatitude, addressLongitude);
+
+            return distanceInKm <= AppConstant.LOCATION_40_KM_ZONE_VALUE && !isKyivTariff;
+        } else {
+            return locationRepository.findAddressAndLocationNamesMatch(locationId, addressId).isPresent();
+        }
+    }
+
+    @Override
+    @Transactional
+    public OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser) {
+        return orderAddressRepository.save(formOrderAddress(addressId, locationId, currentUser));
+    }
+
+    @Override
+    @Transactional
+    public OrderAddress getOrUpdateOrderAddress(OrderAddress currentOrderAddress, Long newAddressId, Long newLocationId,
+        User currentUser) {
+        OrderAddress newOrderAddress = formOrderAddress(
+            newAddressId, newLocationId, currentUser);
+        newOrderAddress.setId(currentOrderAddress.getId());
+
+        if (currentOrderAddress.equals(newOrderAddress)) {
+            return currentOrderAddress;
+        }
+        return orderAddressRepository.save(newOrderAddress);
+    }
+
+    @Override
+    public List<LocationsDto> getAllLocations() {
+        List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
+        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).toList();
+    }
+
+    @Override
+    public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
+        if (!courierRepository.existsCourierById(courierId)) {
+            throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
+        }
+        List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
+        return locations.stream()
+            .map(locationToLocationsDtoMapper::convert)
+            .map(locationsDto -> locationsDto.setTariffsId(
+                tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
+                    .orElseThrow(() -> new NotFoundException(
+                        String.format(TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST, locationsDto.getId(), courierId)))))
+            .toList();
+    }
+
     private void setLocations(CreateAddressRequestDto addressRequestDto, Address address) {
         Optional<Region> optionalRegion =
             regionRepository.findRegionByNameEnOrNameUk(address.getBaseAddress().getRegionEn(),
@@ -344,21 +459,6 @@ public class AddressServiceImpl implements AddressService {
             .findFirst();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public OrderWithAddressesResponseDto findAllAddressesForCurrentOrder(String uuid) {
-        Long id = userRepository.findUserByUuid(uuid).orElseThrow(
-            () -> new NotFoundException(USER_WITH_CURRENT_UUID_DOES_NOT_EXIST)).getId();
-        List<AddressDto> addressDtoList = addressRepo.findAllNonDeletedAddressesByUserId(id)
-            .stream()
-            .sorted(Comparator.comparing(Address::getId))
-            .map(u -> modelMapper.map(u, AddressDto.class))
-            .toList();
-        return new OrderWithAddressesResponseDto(addressDtoList);
-    }
-
     private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress,
         String comment) {
         updatedOrderAddress.setLocation(orderAddress.getLocation());
@@ -367,5 +467,51 @@ public class AddressServiceImpl implements AddressService {
         updatedOrderAddress.getBaseAddress().setAddressComment(comment);
         updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
         updatedOrderAddress.getBaseAddress().setAddressStatus(orderAddress.getBaseAddress().getAddressStatus());
+    }
+
+    private boolean checkIfCityBelongsToKyivTariff(String cityName) {
+        return Arrays.stream(KyivTariffLocation.values())
+            .anyMatch(kyivTariffLocation -> kyivTariffLocation.getLocationName().equalsIgnoreCase(cityName));
+    }
+
+    private void checkAndCalculateAddressCoordinatesIfEmpty(Address address) {
+        if (address.getCoordinates().getLatitude() == 0.0 && address.getCoordinates().getLongitude() == 0.0) {
+            LatLng latLng = googleApiService
+                .getGeocodingResultByCityAndCountryAndLocale(AppConstant.UKRAINE_EN,
+                    address.getBaseAddress().getCityEn(),
+                    AppConstant.LANG_EN).geometry.location;
+            Coordinates addressCoordinates = Coordinates.builder().latitude(latLng.lat).longitude(latLng.lng).build();
+            address.setCoordinates(addressCoordinates);
+            addressRepo.save(address);
+        }
+    }
+
+    private OrderAddress formOrderAddress(Long addressId, Long locationId, User currentUser) {
+        Address address = addressRepo.findById(addressId)
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + addressId));
+        Location location = locationRepository.findById(locationId)
+            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
+
+        checkIfAddressHasBeenDeleted(address);
+        checkAddressUser(address, currentUser);
+
+        OrderAddress orderAddress = modelMapper.map(address, OrderAddress.class);
+        orderAddress.setLocation(location);
+
+        return orderAddress;
+    }
+
+    private void checkIfAddressHasBeenDeleted(Address address) {
+        if (address.getBaseAddress().getAddressStatus().equals(AddressStatus.DELETED)) {
+            throw new NotFoundException(
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+        }
+    }
+
+    private void checkAddressUser(Address address, User user) {
+        if (!address.getUser().equals(user)) {
+            throw new NotFoundException(
+                NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER + address.getId());
+        }
     }
 }

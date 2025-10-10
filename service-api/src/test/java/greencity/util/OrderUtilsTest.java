@@ -1,19 +1,19 @@
 package greencity.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
-
+import greencity.exceptions.payment.InvalidPaymentResponseException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class OrderUtilsTest {
     private Order order;
@@ -65,5 +65,34 @@ class OrderUtilsTest {
         Payment payment = OrderUtils.getLastPayment(order);
 
         assertEquals(5L, payment.getId());
+    }
+
+    @Test
+    void getIdByOrderReference_validBase64_returnsCorrectId() {
+        String encoded = Base64.getEncoder().encodeToString("123_456_789".getBytes(StandardCharsets.UTF_8));
+
+        Long result0 = OrderUtils.getIdByOrderReference(encoded, 0);
+        Long result1 = OrderUtils.getIdByOrderReference(encoded, 1);
+        Long result2 = OrderUtils.getIdByOrderReference(encoded, 2);
+
+        assertEquals(123L, result0);
+        assertEquals(456L, result1);
+        assertEquals(789L, result2);
+    }
+
+    @Test
+    void getIdByOrderReference_indexOutOfBounds_throwsException() {
+        String encoded = Base64.getEncoder().encodeToString("123_456_789".getBytes(StandardCharsets.UTF_8));
+
+        assertThrows(InvalidPaymentResponseException.class,
+            () -> OrderUtils.getIdByOrderReference(encoded, 3));
+    }
+
+    @Test
+    void getIdByOrderReference_nonNumericPart_throwsException() {
+        String encoded = Base64.getEncoder().encodeToString("123_abc_789".getBytes(StandardCharsets.UTF_8));
+
+        assertThrows(InvalidPaymentResponseException.class,
+            () -> OrderUtils.getIdByOrderReference(encoded, 1));
     }
 }
