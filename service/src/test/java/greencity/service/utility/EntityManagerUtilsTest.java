@@ -59,7 +59,7 @@ class EntityManagerUtilsTest {
     private Query<?> unwrappedQuery;
 
     @InjectMocks
-    private EntityManagerUtils entityManagerUtils = new EntityManagerUtils(1);
+    private EntityManagerUtils entityManagerUtils = new EntityManagerUtils(100, 10);
 
     private static class DummyEntity {
     }

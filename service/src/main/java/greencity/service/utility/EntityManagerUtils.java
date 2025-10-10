@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import static org.hibernate.jpa.QueryHints.JAKARTA_HINT_FETCHGRAPH;
 import static org.hibernate.jpa.QueryHints.JAKARTA_HINT_LOADGRAPH;
 
@@ -75,9 +74,11 @@ public class EntityManagerUtils {
 
     private final LoadingCache<Key, String> countQueryStringCache;
 
-    public EntityManagerUtils(@Value("${greencity.cache.lifetime}") long cacheLifeDuration) {
+    public EntityManagerUtils(
+        @Value("${greencity.cache.countQueryCacheMaximumEntries}") long cacheMaximumEntries,
+        @Value("${greencity.cache.countQueryCacheLifetime}") long cacheLifeDuration) {
         countQueryStringCache = Caffeine.newBuilder()
-            .maximumSize(100)
+            .maximumSize(cacheMaximumEntries)
             .expireAfterWrite(cacheLifeDuration, TimeUnit.MINUTES)
             .build(
                 key -> createCountQueryStringForInternal(key.queryString(), key.countProjection(), key.nativeQuery()));
@@ -119,11 +120,13 @@ public class EntityManagerUtils {
                         subgraph.addAttributeNodes(subAttributes[length - 1]);
                         subgraphsMap.put(subAttributes[0], subgraph);
                     } else {
-                        String rootSubgraphPath = String.join(ATTRIBUTE_DELIMITER, Arrays.copyOfRange(subAttributes, 0, length - 2));
+                        String rootSubgraphPath =
+                            String.join(ATTRIBUTE_DELIMITER, Arrays.copyOfRange(subAttributes, 0, length - 2));
                         Subgraph<?> rootSubgraph = subgraphsMap.get(rootSubgraphPath);
                         Subgraph<?> subgraph = rootSubgraph.addSubgraph(subAttributes[length - 2]);
                         subgraph.addAttributeNodes(subAttributes[length - 1]);
-                        subgraphsMap.put(String.join(ATTRIBUTE_DELIMITER, rootSubgraphPath, subAttributes[length - 2]), subgraph);
+                        subgraphsMap.put(String.join(ATTRIBUTE_DELIMITER, rootSubgraphPath, subAttributes[length - 2]),
+                            subgraph);
                     }
                 } catch (Exception exception) {
                     throw new IllegalStateException(ENTITY_GRAPH_ARGUMENT_EXCEPTION);
