@@ -371,6 +371,7 @@ class UserServiceImplTest {
             .uuid(userProfileCreateDto.getUuid())
             .recipientEmail(userProfileCreateDto.getEmail())
             .recipientName(userProfileCreateDto.getName())
+            .status(UserStatus.ACTIVATED)
             .currentPoints(0)
             .violations(0)
             .dateOfRegistration(LocalDate.now()).build();
