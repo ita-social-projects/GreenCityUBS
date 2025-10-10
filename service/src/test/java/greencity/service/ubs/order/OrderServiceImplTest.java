@@ -313,7 +313,7 @@ class OrderServiceImplTest {
         order.getCertificates().add(certificate);
         order.setPointsToUse(100);
 
-        int finalPoints = user.getCurrentPoints() + orderUser.getCurrentPoints();
+        int expectedFinalPoints = user.getCurrentPoints() + orderUser.getCurrentPoints();
 
         when(ordersForUserRepository.getAllByUserUuidAndId("uuid", 1L)).thenReturn(order);
 
@@ -321,7 +321,7 @@ class OrderServiceImplTest {
 
         assertNull(certificate.getOrder());
         assertEquals(1, user.getChangeOfPointsList().size());
-        assertEquals(finalPoints, user.getCurrentPoints());
+        assertEquals(expectedFinalPoints, user.getCurrentPoints());
 
         verify(orderRepository).saveAndFlush(order);
         verify(orderRepository).delete(order);
