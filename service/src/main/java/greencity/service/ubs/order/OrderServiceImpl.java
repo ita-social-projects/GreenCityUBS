@@ -224,7 +224,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelPaymentExpiryJob(Long orderId) {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
         try {
-            if (!quartzScheduler.deleteJob(jobKey)) {
+            if (quartzScheduler.checkExists(jobKey) && !quartzScheduler.deleteJob(jobKey)) {
                 throw new IllegalStateException(PAYMENT_EXPIRY_CANCEL_EXCEPTION);
             }
         } catch (SchedulerException exception) {
