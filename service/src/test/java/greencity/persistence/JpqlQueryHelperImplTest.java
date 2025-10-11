@@ -1,6 +1,5 @@
 package greencity.persistence;
 
-import greencity.persistence.JpqlQueryHelperImpl;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.Parameter;
 import jakarta.persistence.Subgraph;
