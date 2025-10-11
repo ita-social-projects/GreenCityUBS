@@ -18,7 +18,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +45,7 @@ import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
+import greencity.persistence.JpqlQueryHelper;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -62,6 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,7 +112,11 @@ class OrderServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private Scheduler quartzScheduler;
+    @Mock
+    private JpqlQueryHelper jpqlQueryHelper;
 
+    @Mock
+    private TypedQuery<Order> orderQuery;
     private User user;
     private UBSuser ubsUser;
     private Order order;
@@ -374,7 +383,11 @@ class OrderServiceImplTest {
             Collections.singletonList(order),
             PageRequest.of(0, 10),
             1);
-        when(ordersForUserRepository.getAllByUserUuid(any(Pageable.class), anyString()))
+
+        when(jpqlQueryHelper
+            .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
+            .thenReturn(orderQuery);
+        when(jpqlQueryHelper.runPageableTypedQueryWithEntityGraph(eq(orderQuery), any(Pageable.class)))
             .thenReturn(orderPage);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))
             .thenReturn(Optional.of(statusTranslation));
@@ -402,7 +415,11 @@ class OrderServiceImplTest {
             Collections.singletonList(order),
             PageRequest.of(0, 10),
             1);
-        when(ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(any(Pageable.class), anyString(), anyList()))
+
+        when(jpqlQueryHelper
+            .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
+            .thenReturn(orderQuery);
+        when(jpqlQueryHelper.runPageableTypedQueryWithEntityGraph(eq(orderQuery), any(Pageable.class)))
             .thenReturn(orderPage);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))
             .thenReturn(Optional.of(statusTranslation));
