@@ -25,7 +25,7 @@ public interface JpqlQueryHelper {
      *         attributes and subgraphs set.
      * @author Oleksandr Ilnytskyi
      */
-    public <T> EntityGraph<T> createEntityGraph(Class<T> entityClass, List<String> attributes);
+    <T> EntityGraph<T> createEntityGraph(Class<T> entityClass, List<String> attributes);
 
     /**
      * Method creates TypedQuery for given jpql query string with EntityGraph,
@@ -45,7 +45,7 @@ public interface JpqlQueryHelper {
      *         methods.
      * @author Oleksandr Ilnytskyi
      */
-    public <T> TypedQuery<T> createTypedQueryWithEntityGraph(
+    <T> TypedQuery<T> createTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString, List<String> attributes);
 
     /**
@@ -67,7 +67,7 @@ public interface JpqlQueryHelper {
      *         methods.
      * @author Oleksandr Ilnytskyi
      */
-    public <T> TypedQuery<T> createTypedQueryWithEntityGraph(
+    <T> TypedQuery<T> createTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString,
         List<String> attributes, EntityGraphType entityGraphType);
 
@@ -88,7 +88,7 @@ public interface JpqlQueryHelper {
      * @return {@link Page} query result as a page.
      * @author Oleksandr Ilnytskyi
      */
-    public <T> Page<T> createAndRunPageableTypedQueryWithEntityGraph(
+    <T> Page<T> createAndRunPageableTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString, List<String> attributes, Pageable pageable);
 
     /**
@@ -101,7 +101,7 @@ public interface JpqlQueryHelper {
      * @return {@link Page} query result as a page.
      * @author Oleksandr Ilnytskyi
      */
-    public <T> Page<T> runPageableTypedQueryWithEntityGraph(TypedQuery<T> query, Pageable pageable);
+    <T> Page<T> runPageableTypedQueryWithEntityGraph(TypedQuery<T> query, Pageable pageable);
 
     /**
      * Method creates TypedQuery for given jpql query string with EntityGraph,
@@ -121,7 +121,7 @@ public interface JpqlQueryHelper {
      *         runPageableTypedQueryWithEntityGraph() method.
      * @author Oleksandr Ilnytskyi
      */
-    public <T> TypedQuery<T> createPageableTypedQueryWithEntityGraph(
+    <T> TypedQuery<T> createPageableTypedQueryWithEntityGraph(
         Class<T> entityClass, String jpqlQueryString,
         List<String> attributes, Pageable pageable);
 
@@ -134,7 +134,7 @@ public interface JpqlQueryHelper {
      * @return {@link Long} total amount of elements as query result.
      * @author Oleksandr Ilnytskyi
      */
-    public <T> Long createAndRunCountQueryFor(TypedQuery<T> query);
+    <T> Long createAndRunCountQueryFor(TypedQuery<T> query);
 
     /**
      * Method creates count query string for jpqlQueryString, if that query string
@@ -146,7 +146,7 @@ public interface JpqlQueryHelper {
      *         removed or replaced.
      * @author Oleksandr Ilnytskyi
      */
-    public String createCountQueryStringFor(String jpqlQueryString);
+    String createCountQueryStringFor(String jpqlQueryString);
 
     /**
      * Method creates count query string for jpqlQueryString and applies count
@@ -160,5 +160,5 @@ public interface JpqlQueryHelper {
      *         removed or replaced.
      * @author Oleksandr Ilnytskyi
      */
-    public String createCountQueryStringFor(String jpqlQueryString, @Nullable String countProjection);
+    String createCountQueryStringFor(String jpqlQueryString, @Nullable String countProjection);
 }

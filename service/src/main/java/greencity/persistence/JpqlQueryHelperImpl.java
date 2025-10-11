@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
 import static org.hibernate.jpa.QueryHints.JAKARTA_HINT_FETCHGRAPH;
 import static org.hibernate.jpa.QueryHints.JAKARTA_HINT_LOADGRAPH;
 
+/**
+ * Implementation of {@link JpqlQueryHelper}.
+ */
 @Service
 public class JpqlQueryHelperImpl implements JpqlQueryHelper {
     @PersistenceContext
