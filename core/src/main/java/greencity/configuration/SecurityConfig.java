@@ -110,7 +110,8 @@ public class SecurityConfig {
                     USER_AGREEMENT_LINK + "/latest",
                     UBS_LINK + "/districts-for-kyiv",
                     UBS_LINK + "/order-details-for-tariff",
-                    COMMIT_INFO)
+                    COMMIT_INFO,
+                    SUPER_ADMIN_LINK + "/settingsText")
                 .permitAll()
                 .requestMatchers("/v2/api-docs/**",
                     "/v3/api-docs/**",
@@ -153,7 +154,8 @@ public class SecurityConfig {
                     USER_AGREEMENT_LINK,
                     USER_AGREEMENT_LINK + "/{id}",
                     UBS_MANAG_LINK + "/locations-details",
-                    UBS_LINK + "/get-address-for-order/{orderId}")
+                    UBS_LINK + "/get-address-for-order/{orderId}",
+                    UBS_LINK_USERPROFILE + "/reasons")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     UBS_MANAG_LINK + "/addCertificate",
@@ -196,7 +198,9 @@ public class SecurityConfig {
                     SUPER_ADMIN_LINK + "/setTariffLimits/{tariffId}",
                     SUPER_ADMIN_LINK + "/editTariffInfo/{id}",
                     SUPER_ADMIN_LINK + "/activate-employee/{id}",
-                    SUPER_ADMIN_LINK + "/**")
+                    SUPER_ADMIN_LINK + "/**",
+                    SUPER_ADMIN_LINK + "/settingsText/section",
+                    UBS_LINK_USERPROFILE + "/status/{userId}")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ADMIN_EMPL_LINK + "/**",
@@ -226,9 +230,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/**",
                     SUPER_ADMIN_LINK + "/**",
-                    ADMIN_LINK + "/notification/get-all",
-                    ADMIN_LINK + "/notification/{id}",
-                    ADMIN_LINK + "/**")
+                    ADMIN_LINK + "/**",
+                    UBS_LINK_USERPROFILE + "/user/status")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.DELETE,
                     ADMIN_LINK + "/notification/remove-custom-template/{id}")
@@ -317,9 +320,6 @@ public class SecurityConfig {
                     UBS_LINK_USERPROFILE + "/**",
                     UBS_LINK + "/update-order-address")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
-                .requestMatchers(HttpMethod.PUT,
-                    "/user/markUserAsDeactivated")
-                .hasAnyRole(USER)
                 .requestMatchers(HttpMethod.GET,
                     UBS_LINK_USERPROFILE + "/**",
                     UBS_LINK + "/get-all-districts",
@@ -336,7 +336,8 @@ public class SecurityConfig {
                     UBS_CLIENT_LINK + "/delete-order/{id}")
                 .hasAnyRole(USER, ADMIN)
                 .requestMatchers(HttpMethod.DELETE,
-                    "/notifications/{notificationId}")
+                    "/notifications/{notificationId}",
+                    UBS_LINK_USERPROFILE + "/user/delete")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.TRACE,
                     UBS_LINK_USERPROFILE + "/**")

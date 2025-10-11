@@ -2,14 +2,18 @@ package greencity.util;
 
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
+import greencity.exceptions.DecodeOrderReferenceException;
+import greencity.exceptions.payment.InvalidPaymentResponseException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Comparator;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
 @ToString
+@Slf4j
 public class OrderUtils {
     private OrderUtils() {
     }
@@ -60,5 +64,33 @@ public class OrderUtils {
             .filter(payment -> payment.getId() != null)
             .max(Comparator.comparing(Payment::getId))
             .orElseThrow(() -> new IllegalStateException("No payment found"));
+    }
+
+    /**
+     * Extracts a numeric ID from a Base64-encoded order reference string. The
+     * reference is expected in format: orderId_counterOrderPaymentId_paymentId.
+     * After decoding and splitting by "_", this method returns the part at the
+     * given index. Index mapping: 0 → orderId 1 → counterOrderPaymentId 2 →
+     * paymentId
+     *
+     * @param orderReference the Base64-encoded order reference
+     * @param index          index of the part to extract
+     * @return the extracted ID as Long
+     * @throws InvalidPaymentResponseException if the format is invalid, index is
+     *                                         out of bounds, or the extracted part
+     *                                         is not a number
+     */
+    public static Long getIdByOrderReference(String orderReference, int index) {
+        try {
+            String decoded = decodeOrderReference(orderReference);
+            String[] parts = decoded.split("_");
+            if (index >= parts.length) {
+                throw new InvalidPaymentResponseException("Invalid payment response");
+            }
+            return Long.parseLong(parts[index]);
+        } catch (DecodeOrderReferenceException | NumberFormatException ex) {
+            log.error("Invalid orderReference format: {}", orderReference, ex);
+            throw new InvalidPaymentResponseException("Invalid payment response");
+        }
     }
 }

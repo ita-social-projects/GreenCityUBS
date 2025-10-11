@@ -1,5 +1,20 @@
 package greencity.controller;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
@@ -11,13 +26,20 @@ import greencity.dto.employee.EmployeeWithTariffsDto;
 import greencity.dto.employee.EmployeeWithTariffsIdDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.tariff.TariffWithChatAccess;
+import greencity.enums.EmployeeStatus;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.NotFoundException;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
+import greencity.service.ubs.user.UserService;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,27 +57,7 @@ import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequ
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import static greencity.ModelUtils.getUuid;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static greencity.ModelUtils.getPrincipal;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -74,7 +76,7 @@ class ManagementEmployeeControllerTest {
     @Mock
     private UBSManagementEmployeeService service;
     @Mock
-    private UBSClientService ubsClientService;
+    private UserService userService;
     @Mock
     UserRepository userRepository;
     @Mock
@@ -83,7 +85,7 @@ class ManagementEmployeeControllerTest {
     @InjectMocks
     private ManagementEmployeeController controller;
 
-    private final Principal principal = getUuid();
+    private final Principal principal = getPrincipal();
 
     @BeforeEach
     void setup() {
@@ -169,25 +171,37 @@ class ManagementEmployeeControllerTest {
     }
 
     @Test
-    void deleteEmployeeTest() throws Exception {
-        doNothing().when(service).deactivateEmployee(1L);
+    void deactivateEmployeeTest() throws Exception {
+        String userUuid = "uuid";
+        Long employeeId = 1L;
+        EmployeeStatus employeeStatus = EmployeeStatus.INACTIVE;
 
-        mockMvc.perform(put(UBS_LINK + DELETE_LINK + "/" + 1)
+        doNothing().when(service).updateEmployeeStatus(userUuid, employeeId, employeeStatus);
+        when(userRepository.findUuidByRecipientEmail(principal.getName()))
+            .thenReturn(Optional.of(userUuid));
+
+        mockMvc.perform(put(UBS_LINK + DELETE_LINK + "/" + employeeId)
             .principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).deactivateEmployee(1L);
+        verify(service, times(1)).updateEmployeeStatus(userUuid, employeeId, employeeStatus);
     }
 
     @Test
     void activateEmployeeTest() throws Exception {
-        doNothing().when(service).activateEmployee(1L);
+        String userUuid = "uuid";
+        Long employeeId = 1L;
+        EmployeeStatus employeeStatus = EmployeeStatus.ACTIVE;
 
-        mockMvc.perform(put(UBS_LINK + ACTIVATE_LINK + "/" + 1)
+        doNothing().when(service).updateEmployeeStatus(userUuid, employeeId, employeeStatus);
+        when(userRepository.findUuidByRecipientEmail(principal.getName()))
+            .thenReturn(Optional.of(userUuid));
+
+        mockMvc.perform(put(UBS_LINK + ACTIVATE_LINK + "/" + employeeId)
             .principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).activateEmployee(1L);
+        verify(service, times(1)).updateEmployeeStatus(userUuid, employeeId, employeeStatus);
     }
 
     @Test
-    void deleteEmployeeImage() throws Exception {
+    void deactivateEmployeeImage() throws Exception {
         mockMvc.perform(delete(UBS_LINK + DELETE_IMAGE_LINK + 1)
             .principal(principal)).andExpect(status().isOk());
         verify(service, atLeastOnce()).deleteEmployeeImage(1L);
@@ -204,10 +218,10 @@ class ManagementEmployeeControllerTest {
     void getAllAuthorities() throws Exception {
         Set<String> authorities = new HashSet<>();
         authorities.add("ADMIN");
-        when(ubsClientService.getAllAuthorities(anyString())).thenReturn(authorities);
+        when(userService.getAllAuthorities(anyString())).thenReturn(authorities);
         mockMvc.perform(get(UBS_LINK + "/get-all-authorities" + "?email=test@mail.com"))
             .andExpect(status().isOk());
-        verify(ubsClientService).getAllAuthorities("test@mail.com");
+        verify(userService).getAllAuthorities("test@mail.com");
     }
 
     @Test
@@ -220,7 +234,7 @@ class ManagementEmployeeControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).getPositionsAndRelatedAuthorities(mockPrincipal.getName());
+        verify(userService).getPositionsAndRelatedAuthorities(mockPrincipal.getName());
     }
 
     @Test
@@ -235,7 +249,7 @@ class ManagementEmployeeControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).updateEmployeesAuthorities(dto);
+        verify(userService).updateEmployeesAuthorities(dto);
     }
 
     @Test

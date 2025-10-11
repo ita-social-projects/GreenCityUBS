@@ -10,8 +10,10 @@ import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.telegram.UserTelegramFeedbackDto;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.user.PasswordStatusDto;
+import greencity.dto.user.UserActivationDto;
+import greencity.dto.user.UserDeactivationReasonDto;
+import greencity.dto.user.UserExternalDto;
 import greencity.entity.user.User;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -54,15 +56,6 @@ public interface UserRemoteClient {
     boolean checkIfUserExistsByUuid(@RequestParam(UUID) String uuid);
 
     /**
-     * Method checks the existence of an active user by uuid.
-     *
-     * @param uuid {@link User}'s UUID.
-     * @return {@link Boolean}
-     */
-    @GetMapping("/user/checkActiveUserByUuid")
-    boolean checkIfActiveUserExistsByUuid(@RequestParam(UUID) String uuid);
-
-    /**
      * Gets user's positions and all possible related authorities to these positions
      * by user's email.
      *
@@ -72,14 +65,6 @@ public interface UserRemoteClient {
      */
     @GetMapping("/user/get-positions-authorities")
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(@RequestParam String email);
-
-    /**
-     * Changes userStatus to "DEACTIVATED" by UUID.
-     *
-     * @param uuid {@link User}'s uuid.
-     */
-    @PutMapping("/user/deactivate")
-    void markUserDeactivated(@RequestParam(UUID) String uuid, @RequestBody DeactivateUserRequestDto request);
 
     /**
      * Gets current user's password status.
@@ -156,22 +141,6 @@ public interface UserRemoteClient {
     @PutMapping("/user/authorities")
     void updateAuthoritiesToRelatedPositions(@RequestBody EmployeePositionsDto dto);
 
-    /**
-     * Deactivate employee by uuid.
-     *
-     * @param uuid - uuid of employee.
-     */
-    @PutMapping("/user/deactivate-employee")
-    void deactivateEmployee(@RequestParam String uuid);
-
-    /**
-     * Activate employee by uuid.
-     *
-     * @param uuid - uuid of employee.
-     */
-    @PutMapping("/user/markUserAsActivated")
-    void activateEmployee(@RequestParam String uuid);
-
     @PostMapping("/api/testers/sign-in")
     ResponseEntity<SuccessSignInDto> signIn(@RequestBody TestersSignInRequest request);
 
@@ -183,4 +152,29 @@ public interface UserRemoteClient {
      */
     @PostMapping("/email/telegram-feedback")
     void sendTelegramFeedback(@RequestBody UserTelegramFeedbackDto dto);
+
+    /**
+     * Find {@link UserExternalDto} by uuid.
+     *
+     * @param uuid {@link User}'s uuid.
+     * @return {@link UserExternalDto}.
+     */
+    @GetMapping("/user/findByUuid/external")
+    UserExternalDto findByUuid(@RequestParam String uuid);
+
+    /**
+     * Sends an email about reason of deactivation.
+     *
+     * @param notification {@link UserDeactivationReasonDto} - notification details
+     */
+    @PostMapping("/email/sendReasonOfDeactivation")
+    void sendReasonOfDeactivation(@RequestBody UserDeactivationReasonDto notification);
+
+    /**
+     * Sends an email.
+     *
+     * @param notification {@link UserActivationDto} - notification details
+     */
+    @PostMapping("/email/sendMessageOfActivation")
+    void sendMessageOfActivation(@RequestBody UserActivationDto notification);
 }

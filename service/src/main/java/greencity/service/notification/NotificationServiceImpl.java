@@ -28,6 +28,7 @@ import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.enums.UserCategory;
+import greencity.enums.UserStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.filters.UserSpecification;
@@ -1096,6 +1097,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private boolean isUserActive(User user) {
-        return userRemoteClient.checkIfActiveUserExistsByUuid(user.getUuid());
+        return user.getStatus() == UserStatus.ACTIVATED;
     }
 }
