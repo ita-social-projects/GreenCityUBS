@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import greencity.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -39,5 +40,8 @@ public class UserWithSomeOrderDetailAndChatIdDto {
     private int violation;
     @JsonProperty("currentPoints")
     private String userBonuses;
+    @JsonProperty("chatId")
     private Long chatId;
+    @JsonProperty("userStatus")
+    private UserStatus status;
 }

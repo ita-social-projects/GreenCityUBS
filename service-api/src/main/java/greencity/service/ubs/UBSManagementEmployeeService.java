@@ -7,6 +7,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.enums.EmployeeStatus;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,20 +51,13 @@ public interface UBSManagementEmployeeService {
     PositionDto update(PositionDto dto);
 
     /**
-     * Method deletes employee by id.
+     * Method that change employee status.
      *
-     * @param id {@link Long}
-     * @author Mykola Danylko
+     * @param currentUserUuid  {@link String} current user uuid.
+     * @param targetEmployeeId {@link Long} employee uuid that is deactivated.
+     * @param status           {@link EmployeeStatus} employee status.
      */
-    void deactivateEmployee(Long id);
-
-    /**
-     * Method activate employee by id.
-     *
-     * @param id {@link Long}
-     * @author Oksana Spodaryk
-     */
-    void activateEmployee(Long id);
+    void updateEmployeeStatus(String currentUserUuid, Long targetEmployeeId, EmployeeStatus status);
 
     /**
      * Method creates new employee position.

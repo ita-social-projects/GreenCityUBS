@@ -11,12 +11,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,6 +30,7 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.order.Bag;
+import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderPaymentStatusTranslation;
 import greencity.entity.order.OrderStatusTranslation;
@@ -41,6 +44,7 @@ import greencity.enums.OrderStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
+import greencity.persistence.JpqlQueryHelper;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -60,6 +64,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -105,7 +111,11 @@ class OrderServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private Scheduler quartzScheduler;
+    @Mock
+    private JpqlQueryHelper jpqlQueryHelper;
 
+    @Mock
+    private TypedQuery<Order> orderQuery;
     private User user;
     private UBSuser ubsUser;
     private Order order;
@@ -290,10 +300,36 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void deleteOrder_success() {
+    void deleteOrder_success_noPointsAndCertificates() {
+        User orderUser = order.getUser();
+
         when(ordersForUserRepository.getAllByUserUuidAndId("uuid", 1L)).thenReturn(order);
 
         orderService.deleteOrder("uuid", 1L);
+
+        assertThat(orderUser.getChangeOfPointsList()).isEmpty();
+
+        verify(orderRepository).saveAndFlush(order);
+        verify(orderRepository).delete(order);
+    }
+
+    @Test
+    void deleteOrder_success_returnPointsAndCertificates() {
+        Certificate certificate = ModelUtils.getCertificate();
+        User orderUser = order.getUser();
+        certificate.setOrder(order);
+        order.getCertificates().add(certificate);
+        order.setPointsToUse(100);
+
+        int expectedFinalPoints = user.getCurrentPoints() + orderUser.getCurrentPoints();
+
+        when(ordersForUserRepository.getAllByUserUuidAndId("uuid", 1L)).thenReturn(order);
+
+        orderService.deleteOrder("uuid", 1L);
+
+        assertNull(certificate.getOrder());
+        assertEquals(1, user.getChangeOfPointsList().size());
+        assertEquals(expectedFinalPoints, user.getCurrentPoints());
 
         verify(orderRepository).saveAndFlush(order);
         verify(orderRepository).delete(order);
@@ -346,7 +382,11 @@ class OrderServiceImplTest {
             Collections.singletonList(order),
             PageRequest.of(0, 10),
             1);
-        when(ordersForUserRepository.getAllByUserUuid(any(Pageable.class), anyString()))
+
+        when(jpqlQueryHelper
+            .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
+            .thenReturn(orderQuery);
+        when(jpqlQueryHelper.runPageableTypedQueryWithEntityGraph(eq(orderQuery), any(Pageable.class)))
             .thenReturn(orderPage);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))
             .thenReturn(Optional.of(statusTranslation));
@@ -374,7 +414,11 @@ class OrderServiceImplTest {
             Collections.singletonList(order),
             PageRequest.of(0, 10),
             1);
-        when(ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(any(Pageable.class), anyString(), anyList()))
+
+        when(jpqlQueryHelper
+            .createPageableTypedQueryWithEntityGraph(eq(Order.class), anyString(), anyList(), any(Pageable.class)))
+            .thenReturn(orderQuery);
+        when(jpqlQueryHelper.runPageableTypedQueryWithEntityGraph(eq(orderQuery), any(Pageable.class)))
             .thenReturn(orderPage);
         when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))
             .thenReturn(Optional.of(statusTranslation));
@@ -433,6 +477,7 @@ class OrderServiceImplTest {
     void cancelPaymentExpiryJob_successfullyDeletesJob() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
         when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(true);
+        when(quartzScheduler.checkExists(any(JobKey.class))).thenReturn(true);
 
         assertDoesNotThrow(() -> orderService.cancelPaymentExpiryJob(ORDER_ID));
 
@@ -443,6 +488,7 @@ class OrderServiceImplTest {
     void cancelPaymentExpiryJob_whenDeleteReturnsFalse_throwsIllegalStateException() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
         when(quartzScheduler.deleteJob(any(JobKey.class))).thenReturn(false);
+        when(quartzScheduler.checkExists(any(JobKey.class))).thenReturn(true);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> orderService.cancelPaymentExpiryJob(ORDER_ID));
@@ -455,6 +501,7 @@ class OrderServiceImplTest {
     void cancelPaymentExpiryJob_whenSchedulerThrowsException_throwsIllegalStateException() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + ORDER_ID, PAYMENT_EXPIRY_JOB_GROUP);
         when(quartzScheduler.deleteJob(any(JobKey.class))).thenThrow(new SchedulerException("Test exception"));
+        when(quartzScheduler.checkExists(any(JobKey.class))).thenReturn(true);
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> orderService.cancelPaymentExpiryJob(ORDER_ID));

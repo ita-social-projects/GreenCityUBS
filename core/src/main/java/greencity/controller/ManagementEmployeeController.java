@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidImage;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
@@ -11,6 +12,7 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.enums.EmployeeStatus;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
 import greencity.service.ubs.UBSManagementEmployeeService;
@@ -144,8 +146,10 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/deactivate-employee/{id}")
-    public ResponseEntity<HttpStatus> deleteEmployee(@Positive @PathVariable Long id) {
-        employeeService.deactivateEmployee(id);
+    public ResponseEntity<HttpStatus> deactivateEmployee(
+        @Parameter(hidden = true) @CurrentUserUuid String uuid,
+        @Positive @PathVariable Long id) {
+        employeeService.updateEmployeeStatus(uuid, id, EmployeeStatus.INACTIVE);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -165,8 +169,10 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/activate-employee/{id}")
-    public ResponseEntity<HttpStatus> activateEmployee(@Positive @PathVariable Long id) {
-        employeeService.activateEmployee(id);
+    public ResponseEntity<HttpStatus> activateEmployee(
+        @Parameter(hidden = true) @CurrentUserUuid String uuid,
+        @Positive @PathVariable Long id) {
+        employeeService.updateEmployeeStatus(uuid, id, EmployeeStatus.ACTIVE);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

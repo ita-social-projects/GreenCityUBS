@@ -33,12 +33,14 @@ import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.enums.BonusReason;
+import greencity.enums.CertificateStatus;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
+import greencity.persistence.JpqlQueryHelper;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
@@ -62,6 +64,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -91,6 +94,7 @@ public class OrderServiceImpl implements OrderService {
     private final MoneyConverterUtil moneyConverterUtil;
     private final ModelMapper modelMapper;
     private final Scheduler quartzScheduler;
+    private final JpqlQueryHelper jpqlQueryHelper;
 
     @Override
     public Order formAndSaveOrderRequest(OrderResponseDto dto, Order order, User currentUser, UBSuser userData) {
@@ -141,9 +145,20 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageableDto<OrdersDataForUserDto> getOrdersForUser(String uuid, Pageable page, List<OrderStatus> statuses) {
-        Page<Order> orderPages = nonNull(statuses)
-            ? ordersForUserRepository.getAllByUserUuidAndOrderStatusIn(page, uuid, statuses)
-            : ordersForUserRepository.getAllByUserUuid(page, uuid);
+        boolean statusesIncluded = nonNull(statuses) && !statuses.isEmpty();
+        String statusesLine = statusesIncluded ? "AND o.orderStatus IN (:statuses) " : "";
+        String jpqlQueryString = "SELECT o FROM Order AS o WHERE o.user = "
+            + "(SELECT u FROM User AS u WHERE u.uuid = :uuid) "
+            + statusesLine
+            + "ORDER BY o.orderDate DESC";
+        TypedQuery<Order> jpqlQuery = jpqlQueryHelper
+            .createPageableTypedQueryWithEntityGraph(
+                Order.class, jpqlQueryString, List.of("refund", "ubsUser", "ubsUser.orderAddress"), page);
+        jpqlQuery.setParameter("uuid", uuid);
+        if (statusesIncluded) {
+            jpqlQuery.setParameter("statuses", statuses);
+        }
+        Page<Order> orderPages = jpqlQueryHelper.runPageableTypedQueryWithEntityGraph(jpqlQuery, page);
         List<Order> orders = orderPages.getContent();
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
         orders.forEach(order -> dtos.add(getOrdersData(order)));
@@ -191,6 +206,7 @@ public class OrderServiceImpl implements OrderService {
         if (order == null) {
             throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
         }
+        unlockPointsAndCertificatesFromOrder(order);
         order.getOrderBags().clear();
         orderRepository.saveAndFlush(order);
         orderRepository.delete(order);
@@ -224,7 +240,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelPaymentExpiryJob(Long orderId) {
         JobKey jobKey = JobKey.jobKey(PAYMENT_EXPIRY_JOB_KEY + orderId, PAYMENT_EXPIRY_JOB_GROUP);
         try {
-            if (!quartzScheduler.deleteJob(jobKey)) {
+            if (quartzScheduler.checkExists(jobKey) && !quartzScheduler.deleteJob(jobKey)) {
                 throw new IllegalStateException(PAYMENT_EXPIRY_CANCEL_EXCEPTION);
             }
         } catch (SchedulerException exception) {
@@ -453,5 +469,29 @@ public class OrderServiceImpl implements OrderService {
         Long fullPriceInCoins,
         List<CertificateDto> certificates,
         OrderPaymentStatusTranslation paymentStatus) {
+    }
+
+    private void unlockPointsAndCertificatesFromOrder(Order order) {
+        User user = order.getUser();
+        int pointsToUse = order.getPointsToUse();
+
+        if (pointsToUse > 0) {
+            user.setCurrentPoints(user.getCurrentPoints() + pointsToUse);
+            user.getChangeOfPointsList().add(ChangeOfPoints.builder()
+                .user(user)
+                .amount(pointsToUse)
+                .date(LocalDateTime.now())
+                .reason(BonusReason.RETURN_CANCELED_DRAFT_ORDER)
+                .build());
+        }
+
+        order.getCertificates().forEach(this::unlockCertificate);
+    }
+
+    private void unlockCertificate(Certificate certificate) {
+        certificate.setOrder(null);
+        certificate.setCertificateStatus(CertificateStatus.ACTIVE);
+        certificate.setDateOfUse(null);
+        certificate.setPoints(certificate.getInitialPointsValue());
     }
 }
