@@ -29,7 +29,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
     UserTableRepo userTableRepo;
     private final EmployeeRepository employeeRepository;
     private final TelegramChatRepository telegramChatRepository;
-    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     @Override
     public PageableDto<UserWithSomeOrderDetailAndChatIdDto> getAllFields(CustomerPage page, String columnName,
