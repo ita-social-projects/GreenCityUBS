@@ -2,6 +2,8 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
+import greencity.dto.user.UserDeactivationReasonDto;
+import greencity.dto.user.UserDeletionReasonDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
@@ -168,8 +170,9 @@ public class UserProfileController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @DeleteMapping("/user/delete")
-    public ResponseEntity<Object> deleteUser(@Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        userService.deleteUserByUuid(uuid);
+    public ResponseEntity<Object> deleteUser(@Parameter(hidden = true) @CurrentUserUuid String uuid,
+        @RequestBody UserDeletionReasonDto dto) {
+        userService.deleteUserByUuid(uuid, dto);
         return ResponseEntity.ok().build();
     }
 

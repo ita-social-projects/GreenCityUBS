@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class UserDeactivationReasonDto {
-    private String email;
-    private String name;
+public class UserDeletionReasonDto {
     private String reason;
-    private String lang;
 }
