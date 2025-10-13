@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
-import greencity.dto.user.UserDeactivationReasonDto;
 import greencity.dto.user.UserDeletionReasonDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
@@ -171,8 +170,8 @@ public class UserProfileController {
     })
     @DeleteMapping("/user/delete")
     public ResponseEntity<Object> deleteUser(@Parameter(hidden = true) @CurrentUserUuid String uuid,
-        @RequestBody UserDeletionReasonDto dto) {
-        userService.deleteUserByUuid(uuid, dto);
+        @RequestBody UserDeletionReasonDto reason) {
+        userService.deleteUserByUuid(uuid, reason);
         return ResponseEntity.ok().build();
     }
 

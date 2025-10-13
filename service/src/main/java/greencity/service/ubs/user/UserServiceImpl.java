@@ -305,7 +305,7 @@ public class UserServiceImpl implements UserService {
      */
     @org.springframework.transaction.annotation.Transactional
     @Override
-    public void deleteUserByUuid(String uuid, UserDeletionReasonDto dto) {
+    public void deleteUserByUuid(String uuid, UserDeletionReasonDto reason) {
         User user = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid));
 
@@ -315,7 +315,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String lang = userRemoteClient.findUserLanguageByUuid(user.getUuid());
-        saveAndSendDeactivationReason(user, dto.getReason(), lang);
+        saveAndSendDeactivationReason(user, reason.getReason(), lang);
 
         user.setStatus(UserStatus.DELETED);
         userRepository.save(user);
