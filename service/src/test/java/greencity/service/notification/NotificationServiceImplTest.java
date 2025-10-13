@@ -21,14 +21,7 @@ import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.enums.NotificationReceiverType;
-import greencity.enums.NotificationTrigger;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
-import greencity.enums.UserCategory;
-import greencity.enums.UserStatus;
+import greencity.enums.*;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.filters.UserSpecification;
@@ -43,7 +36,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
-import greencity.ubstelegrambot.messages.MessageProvider;
+
+import greencity.service.ubs.TelegramBotResponseService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -199,6 +193,9 @@ class NotificationServiceImplTest {
     ExecutorService mockExecutor = MoreExecutors.newDirectExecutorService();
     @Mock
     private OrderBagService orderBagService;
+
+    @Mock
+    private TelegramBotResponseService telegramBotResponseService;
 
     @BeforeEach
     void setUp() {
@@ -971,6 +968,7 @@ class NotificationServiceImplTest {
                 violationRepository,
                 notificationParameterRepository,
                 userRemoteClient,
+                telegramBotResponseService,
                 clock,
                 List.of(abstractNotificationProvider),
                 templateRepository,
@@ -1765,7 +1763,8 @@ class NotificationServiceImplTest {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(USERNAME)
-            .subject(MessageProvider.get(TelegramBotConstants.UK, "green.office.subject"))
+            .subject(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+                MessageType.GREEN_OFFICE_SUBJECT))
             .body(USER_EMAIL)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)

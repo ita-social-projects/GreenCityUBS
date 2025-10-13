@@ -9,8 +9,10 @@ import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
 import greencity.enums.FeedbackState;
+import greencity.enums.MessageType;
 import greencity.repository.ChatFeedbackRepository;
 import greencity.repository.TelegramChatRepository;
+import greencity.service.ubs.TelegramBotResponseService;
 import greencity.service.ubs.TelegramFeedbackService;
 import greencity.service.ubs.TelegramLanguageService;
 import greencity.ubstelegrambot.messages.MessageFactory;
@@ -33,6 +35,7 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
     private final ChatFeedbackRepository chatFeedbackRepository;
     private final TelegramLanguageService telegramLanguageService;
     private final UserRemoteClient userRemoteClient;
+    private final TelegramBotResponseService telegramBotResponseService;
 
     /**
      * {@inheritDoc}
@@ -42,8 +45,10 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(message.getChatId().toString());
 
         if (telegramChat.isEmpty()) {
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(
+                TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR);
             return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
-                TelegramBotConstants.UK);
+                TelegramBotConstants.UK, text);
         }
 
         Optional<ChatFeedback> chatFeedback = chatFeedbackRepository
@@ -52,7 +57,8 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
                 FeedbackState.IN_PROGRESS);
 
         if (chatFeedback.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), lang);
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.UNKNOWN_ERROR);
+            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(), lang, text);
         }
 
         ChatFeedback feedback = chatFeedback.get();
@@ -78,7 +84,9 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         } catch (RuntimeException ex) {
             log.warn("Failed to send Telegram feedback email for chatId={}, continuing", chat.getChatId(), ex);
         }
-        return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString(), lang);
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(
+            lang, MessageType.FEEDBACK_THANK_YOU_MESSAGE);
+        return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString(), lang, text);
     }
 
     /**
@@ -89,7 +97,9 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
 
         if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK);
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(
+                TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR);
+            return MessageFactory.createUnknownErrorOccurredMessage(chatId, TelegramBotConstants.UK, text);
         }
 
         chat.get().setChatState(ChatState.MAKING_FEEDBACK);
@@ -113,10 +123,14 @@ public class TelegramFeedbackServiceImpl implements TelegramFeedbackService {
         chatFeedbackRepository.save(chatFeedback);
         String lang = telegramLanguageService.getChatLanguage(chat.get().getChatId());
         if (rating >= 4) {
-            return MessageFactory.createGreatFeedbackMessage(chatId, lang);
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.GREAT_FEEDBACK_MESSAGE);
+            return MessageFactory.createGreatFeedbackMessage(chatId, text);
         }
 
-        return MessageFactory.createBadFeedbackMessage(chatId, lang);
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(
+            lang, MessageType.BAD_FEEDBACK_MESSAGE);
+        return MessageFactory.createBadFeedbackMessage(chatId, text);
     }
 
     /**

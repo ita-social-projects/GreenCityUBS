@@ -22,13 +22,7 @@ import greencity.entity.notifications.NotificationTemplate;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.user.User;
 import greencity.entity.user.Violation;
-import greencity.enums.NotificationReceiverType;
-import greencity.enums.NotificationType;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentStatus;
-import greencity.enums.UserCategory;
-import greencity.enums.UserStatus;
+import greencity.enums.*;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.filters.UserSpecification;
@@ -40,7 +34,7 @@ import greencity.repository.UserRepository;
 import greencity.repository.ViolationRepository;
 import greencity.service.ubs.NotificationService;
 import greencity.service.ubs.OrderBagService;
-import greencity.ubstelegrambot.messages.MessageProvider;
+import greencity.service.ubs.TelegramBotResponseService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -98,6 +92,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final ViolationRepository violationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
     private final UserRemoteClient userRemoteClient;
+    private final TelegramBotResponseService telegramBotResponseService;
     @Autowired
     @Qualifier("kyivZonedClock")
     private Clock clock;
@@ -959,7 +954,7 @@ public class NotificationServiceImpl implements NotificationService {
         ScheduledEmailMessage notification = ScheduledEmailMessage
             .builder()
             .username(username)
-            .subject(MessageProvider.get(lang, "green.office.subject"))
+            .subject(telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.GREEN_OFFICE_SUBJECT))
             .body(userEmail)
             .language(AppConstant.LOCALE_UK_NAME)
             .isUbs(true)
