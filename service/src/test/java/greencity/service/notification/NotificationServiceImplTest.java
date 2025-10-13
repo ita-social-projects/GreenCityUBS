@@ -69,6 +69,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import static greencity.ModelUtils.TEST_USER_DEACTIVATED;
+import static greencity.ModelUtils.createTestOrder;
 import static greencity.constant.OrderHistory.ADD_VIOLATION_UK;
 import static greencity.constant.OrderHistory.CHANGES_VIOLATION_UK;
 import static greencity.constant.OrderHistory.DELETE_VIOLATION_UK;
@@ -255,7 +257,6 @@ class NotificationServiceImplTest {
             created.setId(1L);
             created.setOrder(orders.getFirst());
 
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(any())).thenReturn(created);
 
             Set<NotificationParameter> notificationParameters = Set.of(
@@ -344,7 +345,6 @@ class NotificationServiceImplTest {
                 .value(order.getId().toString())
                 .build();
             when(notificationParameterRepository.saveAll(Set.of(orderNumber))).thenReturn(List.of(orderNumber));
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(any())).thenReturn(TEST_USER_NOTIFICATION);
 
             notificationService.notifyPaidOrder(order);
@@ -362,7 +362,6 @@ class NotificationServiceImplTest {
             when(mockOrder.getOrderPaymentStatus()).thenReturn(OrderPaymentStatus.UNPAID);
             when(mockUserNotification.getOrder()).thenReturn(mockOrder);
             when(mockOrder.getUser()).thenReturn(user);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(any(UserNotification.class))).thenReturn(mockUserNotification);
             when(notificationParameterRepository.saveAll(any())).thenAnswer(
                 invocation -> new ArrayList<>(invocation.getArgument(0)));
@@ -397,7 +396,6 @@ class NotificationServiceImplTest {
             UserNotification userNotification = getInternallyFormedOrderUserNotification(order);
 
             List<NotificationParameter> parameters = courierInternallyFormedParameters(order);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(any())).thenReturn(userNotification);
 
             parameters.forEach(parameter -> parameter.setUserNotification(userNotification));
@@ -420,7 +418,6 @@ class NotificationServiceImplTest {
             when(orderRepository.findAllByOrderStatusAndOrderPaymentStatus(
                 OrderStatus.ADJUSTMENT, OrderPaymentStatus.PAID)).thenReturn(orders);
 
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(any())).thenReturn(userNotification);
 
             parameters.forEach(parameter -> parameter.setUserNotification(userNotification));
@@ -465,7 +462,6 @@ class NotificationServiceImplTest {
             TEST_NOTIFICATION_PARAMETER_SET
                 .forEach(parameter -> parameter.setUserNotification(TEST_USER_NOTIFICATION_2));
 
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(notificationParameterRepository.saveAll(TEST_NOTIFICATION_PARAMETER_SET))
                 .thenReturn(new LinkedList<>(TEST_NOTIFICATION_PARAMETER_SET));
 
@@ -492,7 +488,6 @@ class NotificationServiceImplTest {
             TEST_NOTIFICATION_PARAMETER_SET2
                 .forEach(parameter -> parameter.setUserNotification(TEST_USER_NOTIFICATION_5));
 
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(notificationParameterRepository.saveAll(TEST_NOTIFICATION_PARAMETER_SET2))
                 .thenReturn(new LinkedList<>(TEST_NOTIFICATION_PARAMETER_SET2));
 
@@ -530,7 +525,6 @@ class NotificationServiceImplTest {
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
             when(violationRepository.findActiveViolationByOrderId(TEST_ORDER_4.getId()))
                 .thenReturn(Optional.of(violation));
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_3)).thenReturn(TEST_USER_NOTIFICATION_3);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_3));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
@@ -549,7 +543,6 @@ class NotificationServiceImplTest {
                 .value("46")
                 .build());
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_6)).thenReturn(TEST_USER_NOTIFICATION_6);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_6));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
@@ -570,7 +563,6 @@ class NotificationServiceImplTest {
             Violation violation = TEST_VIOLATION.setOrder(TEST_ORDER_4);
             when(violationRepository.findCanceledViolationByOrderId(TEST_ORDER_4.getId()))
                 .thenReturn(Optional.of(violation));
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(TEST_USER_NOTIFICATION_7)).thenReturn(TEST_USER_NOTIFICATION_7);
             parameters.forEach(p -> p.setUserNotification(TEST_USER_NOTIFICATION_7));
             when(notificationParameterRepository.saveAll(parameters)).thenReturn(new LinkedList<>(parameters));
@@ -594,7 +586,6 @@ class NotificationServiceImplTest {
                 .thenReturn(orders);
             when(violationRepository.findActiveViolationByOrderId(anyLong())).thenReturn(Optional.of(violation));
             mockFillAndSendNotification(parameters, order, NotificationType.VIOLATION_THE_RULES);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             notificationService.notifyAllAddedViolations();
 
@@ -647,7 +638,6 @@ class NotificationServiceImplTest {
             when(orderRepository.findAllWithEventsByEventNames(CHANGES_VIOLATION_UK, DELETE_VIOLATION_UK))
                 .thenReturn(orders);
             mockFillAndSendNotification(parameters, order, NotificationType.CHANGED_IN_RULE_VIOLATION_STATUS);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             notificationService.notifyAllChangedViolations();
 
@@ -681,7 +671,6 @@ class NotificationServiceImplTest {
             when(orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION_UK)).thenReturn(orders);
             mockFillAndSendNotification(parameters, order,
                 NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             notificationService.notifyAllCanceledViolations();
 
@@ -692,12 +681,12 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyAllCanceledViolationsForInactiveUser() {
-            Order order = TEST_ORDER_4;
+            Order order = createTestOrder();
+            order.getUser().setStatus(UserStatus.DEACTIVATED);
             List<Order> orders = Collections.singletonList(order);
             setEventsToOrder(order, DELETE_VIOLATION_UK);
             mockUserNeedNotificationCheck(order, NotificationType.CANCELED_VIOLATION_THE_RULES_BY_THE_MANAGER);
             when(orderRepository.findAllWithEventsByEventNames(DELETE_VIOLATION_UK)).thenReturn(orders);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(false);
 
             notificationService.notifyAllCanceledViolations();
 
@@ -726,7 +715,6 @@ class NotificationServiceImplTest {
                 List.of(OrderStatus.DONE, OrderStatus.CANCELED))).thenReturn(orders);
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
             mockFillAndSendNotification(parameters, order, NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             notificationService.notifyAllDoneOrCanceledUnpaidOrders();
 
@@ -762,7 +750,6 @@ class NotificationServiceImplTest {
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
             mockFillAndSendNotification(parameters, order,
                 NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             notificationService.notifyAllHalfPaidOrdersWithStatusBroughtByHimself();
 
@@ -782,7 +769,6 @@ class NotificationServiceImplTest {
             mockUserNeedNotificationCheck(order, NotificationType.ORDER_STATUS_CHANGED);
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
             mockFillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             notificationService.notifyAllChangedOrderStatuses();
 
@@ -818,7 +804,6 @@ class NotificationServiceImplTest {
             mockUserNeedNotificationCheck(order, NotificationType.UNPAID_PACKAGE);
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
             mockFillAndSendNotification(parameters, order, NotificationType.UNPAID_PACKAGE);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             notificationService.notifyUnpaidPackages();
 
@@ -860,7 +845,6 @@ class NotificationServiceImplTest {
             when(orderRepository.findAllUnpaidOrdersWithUsersByBagId(anyInt())).thenReturn(orders);
             when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
             mockFillAndSendNotification(parameters, order, NotificationType.TARIFF_PRICE_WAS_CHANGED);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             notificationService.notifyAllOrdersWithIncreasedTariffPrice(anyInt());
             verify(orderRepository).findAllUnpaidOrdersWithUsersByBagId(any());
@@ -953,7 +937,6 @@ class NotificationServiceImplTest {
             userNotification.setTemplateId(templateId);
 
             when(userRepository.findAll(any(UserSpecification.class))).thenReturn(Collections.singletonList(user));
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
             when(userNotificationRepository.save(any())).thenReturn(userNotification);
 
             notificationService.notifyCustom(templateId, UserCategory.USERS_WITH_ORDERS_MADE_LESS_THAN_3_MONTHS);
@@ -964,11 +947,9 @@ class NotificationServiceImplTest {
 
         @Test
         void testNotifyCustomForInactiveUser() {
-            User user = TEST_USER;
-            List<User> userList = List.of(user);
+            List<User> userList = List.of(TEST_USER_DEACTIVATED);
 
             when(userRepository.findAll(any(UserSpecification.class))).thenReturn(userList);
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(user.getUuid())).thenReturn(false);
 
             notificationService.notifyCustom(1L, UserCategory.USERS_WITH_ORDERS_MADE_LESS_THAN_3_MONTHS);
 
@@ -1085,8 +1066,6 @@ class NotificationServiceImplTest {
             notification.setUser(user);
             notification.setOrder(orders.getFirst());
             notification.setNotificationTime(LocalDateTime.now(fixedClock).minusWeeks(2));
-
-            when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
 
             when(userNotificationRepository.findFirstByOrderIdAndNotificationTypeInOrderByNotificationTimeDesc(
                 orders.get(0).getId(),
@@ -1526,7 +1505,6 @@ class NotificationServiceImplTest {
         notification.setOrder(order);
 
         when(userNotificationRepository.save(any())).thenReturn(notification);
-        when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
         notificationService.notifyUnpaidOrder(order, PAYMENT_LINK);
@@ -1555,7 +1533,6 @@ class NotificationServiceImplTest {
         notification.setUser(user);
         notification.setOrder(order);
 
-        when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
@@ -1586,7 +1563,6 @@ class NotificationServiceImplTest {
         notification.setUser(user);
         notification.setOrder(order);
 
-        when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
@@ -1617,7 +1593,6 @@ class NotificationServiceImplTest {
         notification.setUser(user);
         notification.setOrder(order);
 
-        when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
@@ -1644,7 +1619,6 @@ class NotificationServiceImplTest {
         notification.setUser(user);
         notification.setOrder(order);
 
-        when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
         when(orderBagService.findAllBagsByOrderId(any())).thenReturn(getBag4list());
@@ -1724,7 +1698,6 @@ class NotificationServiceImplTest {
             .userNotification(notification)
             .build());
 
-        when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
 
@@ -1776,7 +1749,6 @@ class NotificationServiceImplTest {
                 .value(newOrder.getUser().getRecipientName())
                 .build());
 
-        when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(parameters));
 
@@ -1818,7 +1790,6 @@ class NotificationServiceImplTest {
         notification.setUser(user);
         notification.setOrder(order);
 
-        when(userRemoteClient.checkIfActiveUserExistsByUuid(any())).thenReturn(true);
         when(userNotificationRepository.save(any())).thenReturn(notification);
         when(notificationParameterRepository.saveAll(any())).thenReturn(new ArrayList<>(new HashSet<>()));
 

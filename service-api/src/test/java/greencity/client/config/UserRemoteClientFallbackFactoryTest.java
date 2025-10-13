@@ -2,7 +2,6 @@ package greencity.client.config;
 
 import greencity.client.UserRemoteClient;
 import greencity.dto.notification.ScheduledEmailMessage;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -42,19 +41,6 @@ class UserRemoteClientFallbackFactoryTest {
     @Test
     void checkIfUserExistsByUuid() {
         assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfUserExistsByUuid(USER_UUID));
-    }
-
-    @Test
-    void checkIfActiveUserExistsByUuid() {
-        assertThrows(RemoteServerUnavailableException.class, () -> client.checkIfActiveUserExistsByUuid(USER_UUID));
-    }
-
-    @Test
-    void markUserDeactivated() {
-        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
-            .reason("test")
-            .build();
-        assertThrows(RemoteServerUnavailableException.class, () -> client.markUserDeactivated(USER_UUID, request));
     }
 
     @Test
@@ -119,17 +105,5 @@ class UserRemoteClientFallbackFactoryTest {
     void updateAuthoritiesToRelatedPositionsTest() {
         EmployeePositionsDto dto = EmployeePositionsDto.builder().build();
         assertThrows(RemoteServerUnavailableException.class, () -> client.updateAuthoritiesToRelatedPositions(dto));
-    }
-
-    @Test
-    void deactivateEmployee() {
-        String uuid = "87df9ad5-6393-441f-8423-8b2e770b01a8";
-        assertThrows(RemoteServerUnavailableException.class, () -> client.deactivateEmployee(uuid));
-    }
-
-    @Test
-    void activateEmployee() {
-        String uuid = "87df9ad5-6393-441f-8423-8b2e770b01a8";
-        assertThrows(RemoteServerUnavailableException.class, () -> client.activateEmployee(uuid));
     }
 }

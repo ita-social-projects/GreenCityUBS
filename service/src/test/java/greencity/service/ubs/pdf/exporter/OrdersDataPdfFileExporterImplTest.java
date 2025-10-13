@@ -1,25 +1,28 @@
 package greencity.service.ubs.pdf.exporter;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import greencity.ModelUtils;
 import greencity.constant.AppConstant;
 import greencity.constant.pdf.PdfQrCodeText;
 import greencity.dto.order.OrdersDataForUserDto;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.*;
-
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.repository.OrderRepository;
-import greencity.service.ubs.UBSClientServiceImpl;
-import java.util.Optional;
-import org.junit.jupiter.api.Test;
-
+import greencity.service.ubs.payment.ProcessPaymentService;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class OrdersDataPdfFileExporterImplTest {
     @Mock
-    private UBSClientServiceImpl ubsClientService;
+    private ProcessPaymentService processPaymentService;
 
     @Mock
     private OrderRepository orderRepository;
@@ -126,7 +129,7 @@ class OrdersDataPdfFileExporterImplTest {
         dto.setAmountBeforePayment(10.0);
         when(orderRepository.findById(anyLong()))
             .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
-        when(ubsClientService.formedLink(any(), anyLong())).thenReturn("   ");
+        when(processPaymentService.formedLink(any(), anyLong())).thenReturn("   ");
 
         byte[] pdf = pdfFileExporter.export(dto, Locale.ENGLISH);
         var text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
@@ -141,12 +144,12 @@ class OrdersDataPdfFileExporterImplTest {
         when(orderRepository.findById(anyLong()))
             .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
         String url = "https://pay.example.com/invoice/TEST123";
-        when(ubsClientService.formedLink(any(), anyLong())).thenReturn(url);
+        when(processPaymentService.formedLink(any(), anyLong())).thenReturn(url);
         Locale locale = Locale.ENGLISH;
         byte[] pdf = pdfFileExporter.export(dto, locale);
         String pageText = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
         String expectedHint = PdfQrCodeText.getByLocale(PdfQrCodeText.QR_CODE_HINT, locale);
         assertTrue(pageText.contains(expectedHint));
-        verify(ubsClientService).formedLink(any(), anyLong());
+        verify(processPaymentService).formedLink(any(), anyLong());
     }
 }

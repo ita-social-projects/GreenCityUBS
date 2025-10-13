@@ -112,7 +112,7 @@ public class ViolationServiceImpl implements ViolationService {
         if (violationRepository.findActiveViolationByOrderId(order.getId()).isEmpty()) {
             User user = order.getUser();
             Violation violation = violationBuilder(add, order, user);
-            if (multipartFiles.length > 0) {
+            if (multipartFiles != null && multipartFiles.length > 0) {
                 List<String> images = new LinkedList<>();
                 setImages(multipartFiles, images);
                 violation.setImages(images);

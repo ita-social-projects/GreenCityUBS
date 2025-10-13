@@ -1092,6 +1092,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private boolean isUserActive(User user) {
-        return userRemoteClient.checkIfActiveUserExistsByUuid(user.getUuid());
+        return user.getStatus() == UserStatus.ACTIVATED;
     }
 }
