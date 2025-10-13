@@ -6,18 +6,22 @@ import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
+import greencity.dto.notification.UserCategoryDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.notifications.NotificationTemplate;
 import greencity.enums.NotificationReceiverType;
 import greencity.enums.NotificationStatus;
 import greencity.enums.NotificationType;
+import greencity.enums.UserCategory;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
+import greencity.exceptions.ForbiddenException;
 import greencity.exceptions.notification.IncorrectTemplateException;
 import greencity.exceptions.notification.TemplateDeleteException;
 import greencity.notificator.listener.NotificationPlanner;
 import greencity.repository.NotificationTemplateRepository;
+import greencity.repository.UserNotificationRepository;
 import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,16 +33,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class NotificationTemplateServiceImpl implements NotificationTemplateService {
     private final NotificationTemplateRepository notificationTemplateRepository;
+    private final UserNotificationRepository userNotificationRepository;
     private final NotificationPlanner notificationPlanner;
     private final ModelMapper modelMapper;
-    private final NotificationPlanner planner;
+
+    private static final List<UserCategoryDto> USER_CATEGORIES = Arrays.stream(UserCategory.values())
+        .map(userCategory -> new UserCategoryDto(
+            userCategory,
+            userCategory.getDescriptionUk(),
+            userCategory.getDescriptionEn()))
+        .toList();
 
     /**
      * {@inheritDoc}
@@ -84,9 +94,9 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     }
 
     private void updateNotificationTemplatePlatforms(List<NotificationPlatform> platforms,
-        List<NotificationPlatformDto> platformDtos) {
+        List<NotificationPlatformDto> platformDTOs) {
         for (NotificationPlatform platform : platforms) {
-            NotificationPlatformDto platformDto = platformDtos.stream()
+            NotificationPlatformDto platformDto = platformDTOs.stream()
                 .filter(dto -> dto.getId().equals(platform.getId()))
                 .findAny()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_PLATFORM_NOT_FOUND));
@@ -110,7 +120,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         Page<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findAll(pageRequest);
         List<NotificationTemplateDto> templateDtoList = notificationTemplates.stream()
             .map(notificationTemplate -> modelMapper.map(notificationTemplate, NotificationTemplateDto.class))
-            .collect(Collectors.toList());
+            .toList();
         return new PageableDto<>(
             templateDtoList,
             notificationTemplates.getTotalElements(),
@@ -129,11 +139,13 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Override
     @Transactional
     public void changeNotificationStatusById(Long id, String status) {
-        var newStatus = getValidNotificationStatusByNameOrThrow(status);
-        var notificationTemplate = getById(id);
+        NotificationStatus newStatus = getValidNotificationStatusByNameOrThrow(status);
+        NotificationTemplate notificationTemplate = getById(id);
         notificationTemplate.setNotificationStatus(newStatus);
         notificationTemplate.getNotificationPlatforms()
             .forEach(platform -> platform.setNotificationStatus(newStatus));
+
+        restartNotificationSchedule(NotificationType.CUSTOM);
     }
 
     private NotificationStatus getValidNotificationStatusByNameOrThrow(String status) {
@@ -150,7 +162,7 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
             modelMapper.map(notificationTemplateDto, NotificationTemplate.class);
         checkTemplateContainsMessagesForAllPlatforms(notificationTemplate.getNotificationPlatforms());
         notificationTemplateRepository.save(notificationTemplate);
-        restartCustomNotificator();
+        restartNotificationSchedule(NotificationType.CUSTOM);
     }
 
     private void checkTemplateContainsMessagesForAllPlatforms(List<NotificationPlatform> notificationPlatforms) {
@@ -183,8 +195,18 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Transactional
     public void removeNotificationTemplate(Long id) {
         checkTemplateIsCustom(id);
+
+        if (userNotificationRepository.existsByTemplateId(id)) {
+            throw new ForbiddenException(ErrorMessage.TEMPLATE_IN_USE_CANNOT_BE_DELETED);
+        }
+
         removeTemplate(id);
-        restartCustomNotificator();
+        restartNotificationSchedule(NotificationType.CUSTOM);
+    }
+
+    @Override
+    public List<UserCategoryDto> getAllUserCategories() {
+        return USER_CATEGORIES;
     }
 
     private void checkTemplateIsCustom(Long id) {
@@ -198,13 +220,6 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
         notificationTemplateRepository.deleteById(id);
     }
 
-    private void restartCustomNotificator() {
-        planner.restartNotificator(NotificationType.CUSTOM);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     private NotificationTemplate getById(Long id) {
         return notificationTemplateRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_TEMPLATE_NOT_FOUND_BY_ID + id));

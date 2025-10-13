@@ -1,7 +1,9 @@
 package greencity.converters;
 
 import greencity.annotations.CurrentUserUuid;
-import greencity.client.UserRemoteClient;
+import greencity.constant.ErrorMessage;
+import greencity.exceptions.NotFoundException;
+import greencity.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,7 @@ import java.security.Principal;
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     @Lazy
     @Autowired
-    private UserRemoteClient userRemoteClient;
+    private UserRepository userRepository;
 
     /**
      * Method checks if parameter is {@link Long} and is annotated with
@@ -39,6 +41,8 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Principal principal = webRequest.getUserPrincipal();
-        return principal != null ? userRemoteClient.findUuidByEmail(principal.getName()) : null;
+        return principal != null ? userRepository.findUuidByRecipientEmail(principal.getName())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.UUID_NOT_FOUND_BY_EMAIL + principal.getName()))
+            : null;
     }
 }

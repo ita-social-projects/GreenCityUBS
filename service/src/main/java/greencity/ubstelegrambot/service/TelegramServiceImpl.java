@@ -1,129 +1,320 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
+import greencity.constant.ErrorMessage;
 import greencity.constant.TelegramBotConstants;
-import greencity.dto.TestersSignInRequest;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.*;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.ChatUserDto;
+import greencity.dto.telegram.CreateTelegramMessageRequest;
+import greencity.dto.telegram.EditTelegramMessageRequest;
+import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
+import greencity.dto.telegram.MessageAssetDto;
+import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.ToggleNotificationsRequestDto;
 import greencity.entity.order.Order;
-import greencity.entity.telegram.*;
+import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
+import greencity.entity.telegram.TelegramManager;
+import greencity.entity.telegram.TelegramMessage;
 import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
-import greencity.entity.user.employee.Position;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
-import greencity.enums.FeedbackState;
 import greencity.enums.MessageDeliveryStatus;
+import greencity.enums.MessageViewingStatus;
+import greencity.enums.OrderStatus;
 import greencity.exceptions.NotFoundException;
-import greencity.repository.*;
-import greencity.service.ubs.*;
+import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.producers.TelegramChatProducer;
+import greencity.repository.EmployeeRepository;
+import greencity.repository.MessageAssetRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.TelegramChatRepository;
+import greencity.repository.TelegramManagerRepository;
+import greencity.repository.TelegramMessageRepository;
+import greencity.repository.UserRepository;
+import greencity.service.ubs.TelegramService;
+import greencity.service.ubs.TelegramUpdateProcessor;
+import greencity.service.ubs.order.OrderService;
 import greencity.specification.ChatSpecifications;
-import greencity.ubstelegrambot.UBSTelegramBot;
 import greencity.ubstelegrambot.messages.MessageFactory;
+import jakarta.transaction.Transactional;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.File;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import java.io.InputStream;
-import java.net.URI;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND;
-import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class TelegramServiceImpl implements TelegramService {
-    private final UserRemoteClient userRemoteClient;
+    private static final String USER_PROCESSOR_NAME = "userUpdateProcessor";
+    private static final String MANAGER_PROCESSOR_NAME = "managerUpdateProcessor";
+
     private final TelegramMessageRepository telegramMessageRepository;
-    private final MessageAssetRepository messageAssetRepository;
     private final TelegramManagerRepository telegramManagerRepository;
-    private final ApplicationContext applicationContext;
     private final TelegramChatRepository telegramChatRepository;
-    private final AzureCloudStorageService azureCloudStorageService;
-    private final UBSClientService ubsClientService;
+    private final UserRemoteWebClient userRemoteWebClient;
+    private final UserRemoteClient userRemoteClient;
+    private final OrderService orderService;
     private final TelegramExecutor executor;
-    private final ChatFeedbackRepository chatFeedbackRepository;
-    private final PositionRepository positionRepository;
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final SimpMessagingTemplate messagingTemplate;
-    private final NotificationService notificationService;
-    @Value("${greencity.sing-in.secret-token}")
-    private String secretToken;
-    @Value("${greencity.bots.ubs-bot-token}")
-    private String telegramBotToken;
-    private static final String USERNAME = "username";
+    private final TelegramChatProducer telegramChatProducer;
+    private final TelegramUtils telegramUtils;
+    private final MessageAssetRepository messageAssetRepository;
+    private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
 
+    /**
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void sendMessageToUser(CreateTelegramMessageRequest request, MultipartFile[] files) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
+        TelegramChat chat = findChatOrThrow(request.getChatId());
 
-        TelegramChat chat = telegramChatRepository.findById(request.getChatId())
+        List<MultipartFile> images = new ArrayList<>();
+        List<MultipartFile> others = new ArrayList<>();
+        splitFiles(files, images, others);
+
+        if (shouldSendTextOnly(request, files, images, others)) {
+            handleTextMessageOnly(chat, request);
+            return;
+        }
+
+        if (!images.isEmpty()) {
+            handleImageMessages(chat, request, images);
+        }
+
+        if (!others.isEmpty()) {
+            handleOtherFiles(chat, request, images, others);
+        }
+
+        telegramChatRepository.save(chat);
+    }
+
+    private TelegramChat findChatOrThrow(Long chatId) {
+        return telegramChatRepository.findById(chatId)
             .orElseThrow(() -> new NotFoundException("Chat not found"));
+    }
 
-        TelegramMessage message = TelegramMessage.builder()
+    private void splitFiles(MultipartFile[] files, List<MultipartFile> images, List<MultipartFile> others) {
+        if (files == null) {
+            return;
+        }
+
+        for (MultipartFile file : files) {
+            AssetType type = TelegramUtils.detectAssetType(file);
+            if (type == AssetType.IMAGE && canSendAsPhoto(file)) {
+                images.add(file);
+            } else {
+                others.add(file);
+            }
+        }
+    }
+
+    private boolean shouldSendTextOnly(CreateTelegramMessageRequest request, MultipartFile[] files,
+        List<MultipartFile> images, List<MultipartFile> others) {
+        return (files == null || (images.isEmpty() && others.isEmpty())) && request.getText() != null;
+    }
+
+    private void handleTextMessageOnly(TelegramChat chat, CreateTelegramMessageRequest request) {
+        SendMessage sendMessage = MessageFactory.buildMessage(chat.getChatId(), request.getText());
+        Message sentMessage = executor.executeSendMessage(sendMessage);
+
+        TelegramMessage textMessage = TelegramMessage.builder()
             .chat(chat)
             .text(request.getText())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
-            .sendAt(LocalDateTime.now())
+            .sendAt(Instant.now())
+            .messageViewingStatus(MessageViewingStatus.READ)
+            .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
             .build();
 
-        List<MessageAsset> assets = new ArrayList<>();
+        telegramMessageRepository.save(textMessage);
+        chat.setLastMessage(textMessage);
+        telegramChatRepository.save(chat);
+    }
 
-        if (request.getText() != null) {
-            var sendTextMessage = MessageFactory.buildMessage(chat.getChatId(), message.getText());
-            executor.executeCommand(bot, sendTextMessage);
+    private void handleImageMessages(TelegramChat chat, CreateTelegramMessageRequest request,
+        List<MultipartFile> images) {
+        TelegramMessage imageMessage = TelegramMessage.builder()
+            .chat(chat)
+            .text(request.getText())
+            .fromManager(true)
+            .status(MessageDeliveryStatus.SENT)
+            .sendAt(Instant.now())
+            .messageViewingStatus(MessageViewingStatus.READ)
+            .build();
+
+        List<MessageAsset> imageAssets = createImageAssets(images, imageMessage);
+
+        if (imageAssets.size() > 1) {
+            sendAsMediaGroup(chat, request, images, imageMessage, imageAssets);
+        } else {
+            sendAsSinglePhoto(chat, request, images, imageMessage, imageAssets);
         }
 
-        if (files != null) {
-            for (MultipartFile file : files) {
-                log.info(file.toString());
-                String url = azureCloudStorageService.upload(file);
-                AssetType assetType = detectAssetType(file);
-                MessageAsset asset = MessageAsset.builder()
-                    .url(url)
-                    .fileName(file.getOriginalFilename())
-                    .size(file.getSize())
-                    .contentType(file.getContentType())
-                    .type(assetType)
-                    .message(message)
-                    .build();
-                assets.add(asset);
+        telegramMessageRepository.save(imageMessage);
+        messageAssetRepository.saveAll(imageAssets);
+        chat.setLastMessage(imageMessage);
+    }
 
-                if (assetType == AssetType.IMAGE) {
-                    var sendPhotoMessage = MessageFactory.createPhotoSender(chat.getChatId(), url, "");
-                    executor.executeSendPhoto(bot, sendPhotoMessage);
-                }
+    private List<MessageAsset> createImageAssets(List<MultipartFile> images, TelegramMessage imageMessage) {
+        List<MessageAsset> assets = new ArrayList<>();
+        for (MultipartFile img : images) {
+            validateFileSize(img);
+            String url = userRemoteWebClient.uploadFile(img);
+            assets.add(MessageAsset.builder()
+                .url(url)
+                .fileName(img.getOriginalFilename())
+                .size(img.getSize())
+                .contentType(img.getContentType())
+                .type(AssetType.IMAGE)
+                .message(imageMessage)
+                .build());
+        }
+        imageMessage.setAssets(assets);
+        return assets;
+    }
+
+    private void sendAsMediaGroup(TelegramChat chat, CreateTelegramMessageRequest request,
+        List<MultipartFile> images, TelegramMessage imageMessage,
+        List<MessageAsset> imageAssets) {
+        SendMediaGroup sendMediaGroup = MessageFactory.buildSendMediaGroup(chat.getChatId(), images, request.getText());
+        List<Message> sentMessages = executor.executeSendMediaGroup(sendMediaGroup);
+
+        if (!sentMessages.isEmpty()) {
+            imageMessage.setTelegramMessageId(sentMessages.getFirst().getMessageId());
+            imageMessage.setMediaGroupId(sentMessages.getFirst().getMediaGroupId());
+            for (int i = 0; i < imageAssets.size() && i < sentMessages.size(); i++) {
+                imageAssets.get(i).setTelegramMessageId(sentMessages.get(i).getMessageId());
             }
         }
+    }
 
-        message.setAssets(assets);
-        telegramMessageRepository.save(message);
+    private void sendAsSinglePhoto(TelegramChat chat, CreateTelegramMessageRequest request,
+        List<MultipartFile> images, TelegramMessage imageMessage,
+        List<MessageAsset> imageAssets) {
+        try {
+            SendPhoto sendPhoto =
+                MessageFactory.createSendPhoto(chat.getChatId(), images.getFirst(), request.getText());
+            Message sentMessage = executor.executeSendPhoto(sendPhoto);
+            if (sentMessage != null) {
+                imageMessage.setTelegramMessageId(sentMessage.getMessageId());
+                imageMessage.setMediaGroupId(null);
+                imageAssets.getFirst().setTelegramMessageId(sentMessage.getMessageId());
+            }
+        } catch (IOException e) {
+            throw new TelegramBotExecutionException("Unable to send file to Telegram", e);
+        }
+    }
+
+    private void handleOtherFiles(TelegramChat chat, CreateTelegramMessageRequest request,
+        List<MultipartFile> images, List<MultipartFile> others) {
+        for (MultipartFile file : others) {
+            validateFileSize(file);
+
+            String caption = images.isEmpty() ? request.getText() : null;
+            TelegramMessage fileMessage = TelegramMessage.builder()
+                .chat(chat)
+                .fromManager(true)
+                .text(caption)
+                .status(MessageDeliveryStatus.SENT)
+                .sendAt(Instant.now())
+                .messageViewingStatus(MessageViewingStatus.READ)
+                .build();
+
+            String url = uploadFile(file);
+            AssetType type = TelegramUtils.detectAssetType(file);
+
+            MessageAsset asset = MessageAsset.builder()
+                .url(url)
+                .fileName(file.getOriginalFilename())
+                .size(file.getSize())
+                .contentType(file.getContentType())
+                .type(type)
+                .message(fileMessage)
+                .build();
+
+            fileMessage.setAssets(List.of(asset));
+
+            Message sentMessage = sendAsDocument(chat, caption, file);
+            fileMessage.setTelegramMessageId(sentMessage.getMessageId());
+            asset.setTelegramMessageId(sentMessage.getMessageId());
+
+            telegramMessageRepository.save(fileMessage);
+            messageAssetRepository.save(asset);
+            chat.setLastMessage(fileMessage);
+        }
+    }
+
+    private void validateFileSize(MultipartFile file) {
+        if (file.getSize() > 50 * 1024 * 1024) {
+            log.warn("File \"{}\" size exceeds 50MB", file.getName());
+            throw new IllegalArgumentException("File size exceeds Telegram bot limit (50MB)");
+        }
+    }
+
+    private Message sendAsDocument(TelegramChat chat, String caption, MultipartFile file) {
+        log.info("Sending document: {} filename: {} to chat ID: {}",
+            file.getContentType(), file.getOriginalFilename(), chat.getChatId());
+        try {
+            var sendFile = MessageFactory.createSendDocument(chat.getChatId(), caption, file);
+            return executor.executeSendFile(sendFile);
+        } catch (IOException e) {
+            log.error("Failed to send file to Telegram", e);
+            throw new TelegramBotExecutionException("Unable to send file to Telegram", e);
+        }
+    }
+
+    private boolean canSendAsPhoto(MultipartFile file) {
+        BufferedImage image = null;
+        try (var stream = file.getInputStream()) {
+            image = ImageIO.read(stream);
+        } catch (IOException e) {
+            throw new TelegramBotExecutionException("Failed to read image data", e);
+        }
+        if (image == null) {
+            return false;
+        }
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+        long fileSize = file.getSize();
+
+        boolean sizeOk = fileSize <= 10 * 1024 * 1024;
+        boolean dimensionsOk = (width + height <= 10000);
+        boolean aspectOk = ((double) Math.max(width, height) / Math.min(width, height) <= 20.0);
+
+        return sizeOk && dimensionsOk && aspectOk;
     }
 
     /**
@@ -134,7 +325,7 @@ public class TelegramServiceImpl implements TelegramService {
     public PageableDto<TelegramMessageDto> findUserMessageByChatId(Long chatId, Pageable pageable) {
         Page<TelegramMessage> messages = telegramMessageRepository.findByChatId(chatId, pageable);
         if (messages.isEmpty()) {
-            throw new NotFoundException(String.format(TelegramBotConstants.MESSAGES_NOT_FOUND_FOR_CHAT, chatId));
+            throw new NotFoundException(String.format("There are no messages in chat %s", chatId));
         }
 
         List<TelegramMessageDto> messageDtoList = messages.stream()
@@ -157,7 +348,8 @@ public class TelegramServiceImpl implements TelegramService {
                     message.getText(),
                     message.getFromManager(),
                     message.getStatus(),
-                    assetDtos);
+                    assetDtos,
+                    message.getMessageViewingStatus());
             }).toList();
 
         return new PageableDto<>(
@@ -173,58 +365,27 @@ public class TelegramServiceImpl implements TelegramService {
      */
     @Override
     public PageableDto<ChatDto> getChats(String searchTerm, Pageable pageable) {
-        Specification<TelegramChat> spec = ChatSpecifications.hasNameLike(searchTerm);
+        Specification<TelegramChat> spec;
+        if (isNumeric(searchTerm)) {
+            Long userId = Long.parseLong(searchTerm);
+            Optional<TelegramChat> chatOpt = telegramChatRepository.findByUserId(userId);
+
+            if (chatOpt.isPresent()) {
+                String chatId = chatOpt.get().getChatId();
+                spec = ChatSpecifications.withSearchAndSort(chatId);
+            } else {
+                return new PageableDto<>(Collections.emptyList(), 0, pageable.getPageNumber(), 0);
+            }
+        } else {
+            spec = ChatSpecifications.withSearchAndSort(searchTerm);
+        }
 
         Page<TelegramChat> chats = telegramChatRepository.findAll(spec, pageable);
+
         List<ChatDto> chatDtos = chats
             .getContent()
             .stream()
-            .map(chat -> {
-                ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
-                    .id(chat.getId())
-                    .chatId(chat.getChatId())
-                    .firstName(chat.getFirstName())
-                    .lastName(chat.getLastName())
-                    .username(chat.getUsername());
-
-                if (chat.getUser() != null) {
-                    ChatUserDto chatUserDto = ChatUserDto
-                        .builder()
-                        .firstName(chat.getUser().getRecipientName())
-                        .lastName(chat.getUser().getRecipientSurname())
-                        .email(chat.getUser().getRecipientEmail())
-                        .build();
-
-                    chatDtoBuilder
-                        .user(chatUserDto);
-                }
-
-                telegramMessageRepository.findFirstByChatOrderBySendAtDesc(chat).ifPresent(message -> {
-                    List<MessageAssetDto> assetDtos = Optional.ofNullable(message.getAssets())
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(asset -> new MessageAssetDto(
-                            asset.getId(),
-                            asset.getUrl(),
-                            asset.getType(),
-                            asset.getFileName(),
-                            asset.getSize(),
-                            asset.getContentType()))
-                        .toList();
-
-                    TelegramMessageDto lastMessage = TelegramMessageDto.builder()
-                        .id(message.getId())
-                        .text(message.getText())
-                        .sendAt(message.getSendAt())
-                        .fromManager(message.getFromManager())
-                        .deliveryStatus(message.getStatus())
-                        .assets(assetDtos)
-                        .build();
-
-                    chatDtoBuilder.lastMessage(lastMessage);
-                });
-                return chatDtoBuilder.build();
-            })
+            .map(TelegramServiceImpl::mapTelegramChatToChatDto)
             .toList();
 
         return new PageableDto<>(
@@ -234,52 +395,55 @@ public class TelegramServiceImpl implements TelegramService {
             chats.getTotalPages());
     }
 
-    /**
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public PageableDto<FeedbackDto> getAllFeedbacks(Pageable pageable) {
-        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findAll(pageable);
-        List<FeedbackDto> feedbackDtos = chatFeedbacks
-            .getContent()
-            .stream()
-            .map(feedback -> new FeedbackDto(
-                feedback.getId(),
-                feedback.getChat().getId().toString(),
-                feedback.getRating(),
-                feedback.getComment()))
-            .toList();
+    private static ChatDto mapTelegramChatToChatDto(TelegramChat chat) {
+        ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
+            .id(chat.getId())
+            .unreadMessagesCount(chat.getUnreadMessagesCount())
+            .firstName(chat.getFirstName())
+            .lastName(chat.getLastName())
+            .username(chat.getUsername());
 
-        return new PageableDto<>(
-            feedbackDtos,
-            chatFeedbacks.getTotalElements(),
-            chatFeedbacks.getNumber(),
-            chatFeedbacks.getTotalPages());
-    }
+        if (chat.getUser() != null) {
+            ChatUserDto chatUserDto = ChatUserDto
+                .builder()
+                .firstName(chat.getUser().getRecipientName())
+                .lastName(chat.getUser().getRecipientSurname())
+                .email(chat.getUser().getRecipientEmail())
+                .build();
 
-    /**
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public PageableDto<FeedbackDto> getAllFeedbacksByChatId(String chatId, Pageable pageable) {
-        Page<ChatFeedback> chatFeedbacks = chatFeedbackRepository.findByChatIdPageable(chatId, pageable);
-        List<FeedbackDto> feedbackDtos = chatFeedbacks
-            .getContent()
-            .stream()
-            .map(feedback -> new FeedbackDto(
-                feedback.getId(),
-                feedback.getChat().getChatId(),
-                feedback.getRating(),
-                feedback.getComment()))
-            .toList();
+            chatDtoBuilder
+                .user(chatUserDto);
+        }
 
-        return new PageableDto<>(
-            feedbackDtos,
-            chatFeedbacks.getTotalElements(),
-            chatFeedbacks.getNumber(),
-            chatFeedbacks.getTotalPages());
+        if (chat.getLastMessage() != null) {
+            TelegramMessage message = chat.getLastMessage();
+
+            List<MessageAssetDto> assetDtos = Optional.ofNullable(message.getAssets())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(asset -> new MessageAssetDto(
+                    asset.getId(),
+                    asset.getUrl(),
+                    asset.getType(),
+                    asset.getFileName(),
+                    asset.getSize(),
+                    asset.getContentType()))
+                .toList();
+
+            TelegramMessageDto lastMessage = TelegramMessageDto.builder()
+                .id(message.getId())
+                .text(message.getText())
+                .sendAt(message.getSendAt())
+                .fromManager(message.getFromManager())
+                .deliveryStatus(message.getStatus())
+                .assets(assetDtos)
+                .messageViewingStatus(message.getMessageViewingStatus())
+                .build();
+
+            chatDtoBuilder.lastMessage(lastMessage);
+        }
+
+        return chatDtoBuilder.build();
     }
 
     /**
@@ -297,7 +461,13 @@ public class TelegramServiceImpl implements TelegramService {
 
         Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId())
             .orElseThrow(() -> new NotFoundException("Order not found"));
-        return ubsClientService.getOrdersData(order);
+        OrdersDataForUserDto dto = orderService.getOrdersData(order);
+        Long completedCount = orderRepository.countByUserIdAndOrderStatus(
+            telegramChat.getUser().getId(),
+            OrderStatus.DONE);
+        dto.setCompletedOrdersCount(completedCount);
+
+        return dto;
     }
 
     /**
@@ -310,7 +480,7 @@ public class TelegramServiceImpl implements TelegramService {
             .orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
         return ChatDto.builder()
             .id(chat.getId())
-            .chatId(chat.getChatId())
+            .unreadMessagesCount(chat.getUnreadMessagesCount())
             .firstName(chat.getFirstName())
             .lastName(chat.getLastName())
             .username(chat.getUsername())
@@ -322,640 +492,266 @@ public class TelegramServiceImpl implements TelegramService {
      * {@inheritDoc}
      */
     @Override
-    public void processUpdate(Update update) {
-        String chatId = getChatId(update);
-        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
+    @Transactional
+    public void markMessagesAsRead(MarkMessagesAsReadRequestDto request) {
+        List<TelegramMessage> messages = telegramMessageRepository.findAllById(request.getMessagesIds());
 
-        chat.ifPresent(ch -> {
-            Instant updatedAt = ch.getChatStateUpdatedAt().atZone(ZoneId.systemDefault()).toInstant();
+        for (TelegramMessage message : messages) {
+            if (message.getMessageViewingStatus() == MessageViewingStatus.UNREAD) {
+                message.setMessageViewingStatus(MessageViewingStatus.READ);
+
+                TelegramChat chat = message.getChat();
+                int currentUnread = chat.getUnreadMessagesCount();
+                if (currentUnread > 0) {
+                    chat.setUnreadMessagesCount(currentUnread - 1);
+                }
+            }
+        }
+
+        telegramMessageRepository.saveAll(messages);
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public void toggleNotifications(String uuid, ToggleNotificationsRequestDto request) {
+        User user = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
+
+        if (user.getTelegramBot() == null) {
+            throw new NotFoundException(ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT);
+        }
+
+        TelegramChat telegramChat = user.getTelegramBot();
+        telegramChat.setIsNotify(request.isNotify());
+        telegramChatRepository.save(telegramChat);
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean getIsNotificationsEnabled(String uuid) {
+        User user = userRepository.findUserByUuid(uuid)
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
+
+        if (user.getTelegramBot() == null) {
+            throw new NotFoundException(ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT);
+        }
+
+        return user.getTelegramBot().getIsNotify();
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public void processUpdate(Update update) {
+        Message message = update.getMessage();
+        TelegramUpdateProcessor updateProcessor;
+
+        if (isStartCommand(message)) {
+            String uuid = extractUuid(message);
+            Long chatId = message.getFrom().getId();
+            Optional<TelegramChat> chatOpt = telegramChatRepository.findByChatId(chatId.toString());
+
+            if (chatOpt.isEmpty()) {
+                updateProcessor = handleNewChat(uuid, message, chatId);
+            } else {
+                updateProcessor = handleExistingChat(uuid, chatOpt.get(), chatId);
+            }
+        } else {
+            updateProcessor = handleDefaultUpdate(update);
+        }
+
+        SendMessage sendMessage = updateProcessor.process(update);
+        if (sendMessage != null) {
+            executor.executeCommand(sendMessage);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void editManagerMessage(EditTelegramMessageRequest request) {
+        telegramChatRepository.findById(request.chatId()).ifPresentOrElse(ch -> {
+            TelegramMessage message = telegramMessageRepository.findById(request.messageId())
+                .orElseThrow(NotFoundException::new);
+            if (Boolean.TRUE.equals(message.getFromManager())) {
+                message.setUpdatedAt(Instant.now());
+                message.setText(request.newText());
+                if (!message.getAssets().isEmpty()) {
+                    MessageAsset firstAsset = message.getAssets().getFirst();
+                    EditMessageCaption editMessageCaption = MessageFactory
+                        .buildEditMessageCaption(ch.getChatId(), firstAsset.getTelegramMessageId(), request.newText());
+                    executor.executeCommand(editMessageCaption);
+                } else {
+                    EditMessageText editMessageText = MessageFactory
+                        .buildEditMessageText(ch.getChatId(), message.getTelegramMessageId(), request.newText());
+                    executor.executeCommand(editMessageText);
+                }
+
+                telegramMessageRepository.save(message);
+
+                if (ch.getLastMessage() != null && ch.getLastMessage().getId().equals(message.getId())) {
+                    ch.setLastMessage(message);
+                    telegramChatRepository.save(ch);
+                }
+            }
+        }, () -> {
+            throw new NotFoundException();
+        });
+    }
+
+    private boolean isStartCommand(Message message) {
+        return message != null
+            &&
+            message.getText() != null
+            &&
+            message.getText().contains(TelegramBotConstants.START_COMMAND);
+    }
+
+    private String extractUuid(Message message) {
+        return message.getText()
+            .replace(TelegramBotConstants.START_COMMAND, "")
+            .trim();
+    }
+
+    private TelegramUpdateProcessor handleNewChat(String uuid, Message message, Long chatId) {
+        TelegramChat.TelegramChatBuilder newChatBuilder = TelegramChat.builder()
+            .chatId(chatId.toString())
+            .username(message.getFrom().getUserName())
+            .firstName(message.getFrom().getFirstName())
+            .lastName(message.getFrom().getLastName())
+            .isNotify(true)
+            .chatState(ChatState.NORMAL)
+            .chatStateUpdatedAt(Instant.now())
+            .languageCode("uk");
+
+        if (!uuid.isEmpty()) {
+            userRepository.findUserByUuid(uuid).ifPresent(user -> {
+                newChatBuilder.user(user);
+
+                String langCode = "uk";
+                try {
+                    langCode = userRemoteClient.findUserLanguageByUuid(user.getUuid());
+                } catch (Exception e) {
+                    log.warn("Failed to get user language from UBS for uuid {}. Using default 'uk'", user.getUuid(), e);
+                }
+                newChatBuilder.languageCode(langCode);
+            });
+        }
+
+        TelegramChat createdChat = newChatBuilder.build();
+
+        telegramChatRepository.save(createdChat);
+
+        ChatDto chatDto = ChatDto.builder()
+            .id(createdChat.getId())
+            .firstName(createdChat.getFirstName())
+            .lastName(createdChat.getLastName())
+            .unreadMessagesCount(0)
+            .username(createdChat.getUsername()).build();
+
+        telegramChatProducer.notifyNewChat(chatDto);
+
+        return resolveProcessorByUuid(uuid, chatId);
+    }
+
+    private TelegramUpdateProcessor handleExistingChat(String uuid, TelegramChat chat, Long chatId) {
+        if (!uuid.isEmpty()) {
+            userRepository.findUserByUuid(uuid).ifPresent(user -> {
+                chat.setUser(user);
+
+                String langCode = "uk";
+                try {
+                    langCode = userRemoteClient.findUserLanguageByUuid(user.getUuid());
+                } catch (Exception e) {
+                    log.warn("Failed to get user language from UBS for uuid {}. Using default 'uk'", user.getUuid(), e);
+                }
+                chat.setLanguageCode(langCode);
+            });
+            telegramChatRepository.save(chat);
+        }
+
+        return resolveProcessorByUuid(uuid, chatId);
+    }
+
+    private TelegramUpdateProcessor resolveProcessorByUuid(String uuid, Long chatId) {
+        if (uuid.isEmpty()) {
+            log.info("No user found with uuid: {}", uuid);
+            return telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME);
+        }
+
+        Optional<Employee> employeeOpt = employeeRepository.findByUuid(uuid);
+
+        if (employeeOpt.isPresent()) {
+            Employee employee = employeeOpt.get();
+            if (telegramUtils.checkIsEmployeeManager(employee)) {
+                telegramManagerRepository.save(
+                    TelegramManager.builder()
+                        .chatId(chatId.toString())
+                        .employee(employee)
+                        .build());
+                return telegramUpdateProcessorMap.get(MANAGER_PROCESSOR_NAME);
+            }
+        }
+
+        return telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME);
+    }
+
+    private TelegramUpdateProcessor handleDefaultUpdate(Update update) {
+        String chatId;
+        if (update.hasCallbackQuery()) {
+            chatId = update.getCallbackQuery().getFrom().getId().toString();
+        } else if (update.hasMessage()) {
+            chatId = update.getMessage().getChatId().toString();
+        } else {
+            chatId = update.getEditedMessage().getChatId().toString();
+        }
+
+        telegramChatRepository.findByChatId(chatId).ifPresent(chat -> {
+            Instant updatedAt = chat.getChatStateUpdatedAt();
             if (Duration.between(updatedAt, Instant.now()).toMinutes() > 10) {
-                ch.setChatState(ChatState.NORMAL);
-                telegramChatRepository.save(ch);
+                chat.setChatState(ChatState.NORMAL);
+                telegramChatRepository.save(chat);
             }
         });
 
-        if (isManager(chatId)) {
-            processUpdateManager(update, chatId);
-        } else {
-            processUpdateUser(update, chat, chatId);
-        }
-    }
-
-    /**
-     * Processes an incoming update from Telegram for Manager(e.g., message,
-     * callback query)
-     *
-     * @param update {@link Update}
-     * @param chatId {@link String}
-     */
-    private void processUpdateManager(Update update, String chatId) {
-        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
-
         if (update.hasCallbackQuery()) {
-            CallbackQuery callBackQuery = update.getCallbackQuery();
-            switch (callBackQuery.getData()) {
-                case TelegramBotConstants.LOGOUT_MANAGER_CALLBACK -> {
-                    logoutManager(chatId);
-                    executor.executeCommand(ubsTelegramBot, processLogoutManagerRequest(chatId));
-                    executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
-                }
-                default ->
-                    executor.executeCommand(ubsTelegramBot, processManagerMenuRequest(chatId));
-            }
-        } else if (update.hasMessage()) {
-            executor.executeCommand(ubsTelegramBot, processManagerMessageRequest(chatId));
-        }
-    }
-
-    private void logoutManager(String chatId) {
-        telegramManagerRepository.findByChatId(chatId)
-            .ifPresent(telegramManagerRepository::delete);
-    }
-
-    /**
-     * Processes an incoming update from Telegram for User(e.g., message, callback
-     * query)
-     *
-     * @param update  {@link Update}
-     * @param chatOpt {@link TelegramChat}
-     * @param chatId  {@link String}
-     */
-    private void processUpdateUser(Update update, Optional<TelegramChat> chatOpt, String chatId) {
-        UBSTelegramBot ubsTelegramBot = applicationContext.getBean(UBSTelegramBot.class);
-
-        if (update.hasCallbackQuery()) {
-            CallbackQuery callBackQuery = update.getCallbackQuery();
-            switch (callBackQuery.getData()) {
-                case TelegramBotConstants.CLIENT_SUPPORT_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processSupportRequest(chatId));
-                case TelegramBotConstants.SORTING_PRICES_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processSortingPricesRequest(chatId));
-                case TelegramBotConstants.WORK_SCHEDULE_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processWorkScheduleRequest(chatId));
-                case TelegramBotConstants.ADMISSION_RULES_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processAdmissionRulesRequest(chatId));
-                case TelegramBotConstants.GREEN_OFFICE_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processGreenOfficeRequest(chatId));
-                case TelegramBotConstants.GREEN_OFFICE_PROCESS_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processGreenOfficeAgreeRequest(chatId));
-                case TelegramBotConstants.FEEDBACK_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processFeedbackRequest(chatId));
-                case TelegramBotConstants.RATING_TERRIBLY_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 1));
-                case TelegramBotConstants.RATING_BADLY_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 2));
-                case TelegramBotConstants.RATING_SATISFACTORILY_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 3));
-                case TelegramBotConstants.RATING_GOOD_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 4));
-                case TelegramBotConstants.RATING_PERFECTLY_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processRatingFeedbackRequest(chatId, 5));
-                case TelegramBotConstants.LOGIN_CALLBACK ->
-                    executor.executeCommand(ubsTelegramBot, processLoginRequest(chatId));
-                default ->
-                    executor.executeCommand(ubsTelegramBot, processMainMenuRequest(chatId));
-            }
-        } else {
-            var message = update.getMessage();
-            var text = message.getText();
-
-            if (chatOpt.isEmpty()) {
-                if (text.contains(TelegramBotConstants.START_COMMAND)) {
-                    executor.executeCommand(ubsTelegramBot, processStartBotRequest(message));
-                }
-                return;
-            }
-
-            TelegramChat chat = chatOpt.get();
-            switch (chat.getChatState()) {
-                case IN_SUPPORT ->
-                    executor.executeCommand(ubsTelegramBot, processSupportMessage(message));
-                case ENTERING_GREEN_OFFICE_EMAIL ->
-                    executor.executeCommand(ubsTelegramBot, processGreenOfficeEmail(message));
-                case MAKING_FEEDBACK ->
-                    executor.executeCommand(ubsTelegramBot, processInputCommentRequest(message));
-                case LOGGING_AS_MANAGER ->
-                    executor.executeCommand(ubsTelegramBot, processInputManagerCredentialsRequest(message));
-                default ->
-                    executor.executeCommand(ubsTelegramBot, processNormalMessageRequest(message));
-            }
-        }
-    }
-
-    private boolean isManager(String chatId) {
-        // maybe some improvement here
-        return telegramManagerRepository.existsByChatId(chatId);
-    }
-
-    private static String getChatId(Update update) {
-        if (update.hasCallbackQuery()) {
-            return update.getCallbackQuery().getFrom().getId().toString();
-        } else if (update.hasMessage()) {
-            return update.getMessage().getFrom().getId().toString();
-        }
-        throw new IllegalArgumentException("Bad type update");
-    }
-
-    private SendMessage updateChatStateAndRespond(
-        String chatId,
-        ChatState newState,
-        Function<String, SendMessage> messageSupplier) {
-        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
-        if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId);
-        }
-        chat.get().setChatState(newState);
-        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
-        telegramChatRepository.save(chat.get());
-        return messageSupplier.apply(chatId);
-    }
-
-    private SendMessage processStartBotRequest(Message message) {
-        final String uuId = message.getText().replace(TelegramBotConstants.START_COMMAND, "").trim();
-        final String chatId = message.getFrom().getId().toString();
-
-        Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(chatId);
-
-        if (telegramChat.isEmpty()) {
-            TelegramChat.TelegramChatBuilder newChatBuilder = TelegramChat
-                .builder()
-                .chatId(chatId)
-                .username(message.getFrom().getUserName())
-                .firstName(message.getFrom().getFirstName())
-                .lastName(message.getFrom().getLastName())
-                .isNotify(true)
-                .chatState(ChatState.NORMAL)
-                .chatStateUpdatedAt(LocalDateTime.now());
-
-            if (!uuId.isEmpty()) {
-                Optional<User> user = userRepository.findUserByUuid(uuId);
-                user.ifPresent(newChatBuilder::user);
-            }
-
-            TelegramChat createdChat = newChatBuilder.build();
-
-            telegramChatRepository.save(createdChat);
-
-            ChatDto chatDto = ChatDto.builder()
-                .id(createdChat.getId())
-                .chatId(createdChat.getChatId())
-                .firstName(createdChat.getFirstName())
-                .lastName(createdChat.getLastName())
-                .username(createdChat.getUsername()).build();
-
-            notifyNewChat(chatDto);
-        } else {
-            if (!uuId.isEmpty()) {
-                Optional<User> user = userRepository.findUserByUuid(uuId);
-                user.ifPresent(value -> telegramChat.get().setUser(value));
-                telegramChatRepository.save(telegramChat.get());
+            String callback = update.getCallbackQuery().getData();
+            if (callback.startsWith("set_language_")) {
+                return telegramUpdateProcessorMap.get("languageSwitcherProcessor");
             }
         }
 
-        return MessageFactory.createWelcomeMessage(chatId);
+        return telegramManagerRepository.findByChatId(chatId)
+            .map(m -> telegramUpdateProcessorMap.get(MANAGER_PROCESSOR_NAME))
+            .orElseGet(() -> telegramUpdateProcessorMap.get(USER_PROCESSOR_NAME));
     }
 
-    private SendMessage processSupportRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.IN_SUPPORT,
-            MessageFactory::createSupportMessageCallBackQuery);
-    }
-
-    private SendMessage processWorkScheduleRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createWorkScheduleMessage);
-    }
-
-    private SendMessage processSortingPricesRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createSortingPricesMessage);
-    }
-
-    private SendMessage processAdmissionRulesRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createAdmissionRulesMessage);
-    }
-
-    private SendMessage processGreenOfficeRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createGreenOfficeMessage);
-    }
-
-    private SendMessage processGreenOfficeAgreeRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.ENTERING_GREEN_OFFICE_EMAIL,
-            MessageFactory::createEnteringEmailMessage);
-    }
-
-    private SendMessage processFeedbackRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createFeedbackMessage);
-    }
-
-    private SendMessage processMainMenuRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createAvailableCommandsMessage);
-    }
-
-    private SendMessage processManagerMenuRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createAvailableForManagerCommandsMessage);
-    }
-
-    private SendMessage processUnknownRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createUnknownCommandMessage);
-    }
-
-    private SendMessage processLogoutManagerRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createLogoutManagerMessage);
-    }
-
-    private SendMessage processManagerMessageRequest(String chatId) {
-        return updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory::createForbiddenCommandsManagerMessage);
-    }
-
-    private SendMessage processLoginRequest(String chatId) {
-        Optional<TelegramManager> telegramManager = telegramManagerRepository.findByChatId(chatId);
-
-        // maybe this condition will never happen
-        if (telegramManager.isPresent()) {
-            return MessageFactory.createSuccessLoginMessage(
-                chatId,
-                telegramManager.get().getEmployee().getFirstName() + " "
-                    + telegramManager.get().getEmployee().getLastName());
+    private String uploadFile(MultipartFile file) {
+        String url = "";
+        try {
+            url = userRemoteWebClient.uploadFile(file);
+        } catch (WebClientRequestException | WebClientResponseException e) {
+            log.warn("User service is unavailable: {}", e.getMessage());
         }
-        return updateChatStateAndRespond(chatId, ChatState.LOGGING_AS_MANAGER,
-            MessageFactory::createLoginMessage);
+        return url;
     }
 
-    private SendMessage processRatingFeedbackRequest(String chatId, int rating) {
-        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(chatId);
-
-        if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(chatId);
-        }
-
-        chat.get().setChatState(ChatState.MAKING_FEEDBACK);
-        chat.get().setChatStateUpdatedAt(LocalDateTime.now());
-        telegramChatRepository.save(chat.get());
-
-        Optional<ChatFeedback> inProgressFeedback = chatFeedbackRepository
-            .findByChatIdAndFeedbackState(chat.get().getId(), FeedbackState.IN_PROGRESS);
-
-        if (inProgressFeedback.isPresent()) {
-            inProgressFeedback.get().setFeedbackState(FeedbackState.CLOSED);
-            chatFeedbackRepository.save(inProgressFeedback.get());
-        }
-
-        ChatFeedback chatFeedback = ChatFeedback.builder()
-            .rating(rating)
-            .feedbackState(FeedbackState.IN_PROGRESS)
-            .chat(chat.get())
-            .build();
-
-        chatFeedbackRepository.save(chatFeedback);
-
-        if (rating >= 4) {
-            return MessageFactory.createGreatFeedbackMessage(chatId);
-        }
-
-        return MessageFactory.createBadFeedbackMessage(chatId);
-    }
-
-    private SendMessage processInputManagerCredentialsRequest(Message message) {
-        String[] parts = message.getText().split(":");
-
-        if (parts.length < 2) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.INCORRECT_LOGIN_FORMAT);
-        }
-
-        String login = parts[0];
-        String password = parts[1];
-
-        Optional<Employee> employee = employeeRepository.findByEmailWithPositions(login);
-
-        if (employee.isEmpty()) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.USER_IS_NOT_EMPLOYEE);
-        }
-
-        boolean isManager = checkIsEmployeeManager(employee.get());
-
-        if (!isManager) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.EMPLOYEE_IS_NOT_MANAGER);
-        }
-
-        var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, secretToken));
-
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            return MessageFactory.createFailLoginMessage(message.getChatId().toString(),
-                TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-        }
-
-        var responseBody = response.getBody();
-        String name = (responseBody != null && responseBody.name() != null) ? responseBody.name() : USERNAME;
-
-        telegramManagerRepository.save(
-            TelegramManager
-                .builder()
-                .chatId(message.getChatId().toString())
-                .employee(employee.get())
-                .build());
-
-        return MessageFactory.createSuccessLoginMessage(
-            message.getChatId().toString(),
-            name);
-    }
-
-    private SendMessage processNormalMessageRequest(Message message) {
-        if (message.getText() == null) {
-            return processUnknownRequest(message.getChatId().toString());
-        }
-
-        String text = message.getText().split(" ")[0];
-
-        if (text == null) {
-            return processUnknownRequest(message.getChatId().toString());
-        }
-
-        switch (text) {
-            case TelegramBotConstants.START_COMMAND -> {
-                return processStartBotRequest(message);
-            }
-            case TelegramBotConstants.SUPPORT_COMMAND -> {
-                return processSupportRequest(message.getChatId().toString());
-            }
-            case TelegramBotConstants.LOGIN_COMMAND -> {
-                return processLoginRequest(message.getChatId().toString());
-            }
-            case TelegramBotConstants.HELP_COMMAND -> {
-                return processMainMenuRequest(message.getChatId().toString());
-            }
-            default -> {
-                return processUnknownRequest(message.getChatId().toString());
-            }
-        }
-    }
-
-    private SendMessage processGreenOfficeEmail(Message message) {
-        String email = message.getText();
-        if (!isValidEmail(email)) {
-            return MessageFactory.createInvalidEmailMessage(message.getChatId().toString());
-        }
-
-        Optional<TelegramChat> optChat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
-
-        if (optChat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
-        }
-
-        TelegramChat chat = optChat.get();
-
-        String username =
-            chat.getUser() != null ? chat.getUser().getRecipientName() + " " + chat.getUser().getRecipientSurname()
-                : message.getFrom().getUserName();
-
-        notificationService.notifyManagerWithNewGreenOfficeRequestFromTelegramBot(email, username);
-        chat.setChatState(ChatState.NORMAL);
-        chat.setChatStateUpdatedAt(LocalDateTime.now());
-        telegramChatRepository.save(chat);
-        return MessageFactory.createGreenOfficeThanksMessage(message.getChatId().toString());
-    }
-
-    private SendMessage processSupportMessage(Message message) {
-        var bot = applicationContext.getBean(UBSTelegramBot.class);
-
-        Optional<TelegramChat> chat = telegramChatRepository.findByChatId(message.getFrom().getId().toString());
-
-        if (chat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
-        }
-
-        if (message.hasText() && message.getText().contains(TelegramBotConstants.CLIENT_END_SUPPORT_MODE)) {
-            chat.get().setChatState(ChatState.NORMAL);
-            chat.get().setChatStateUpdatedAt(LocalDateTime.now());
-            telegramChatRepository.save(chat.get());
-            notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
-            return MessageFactory.createEndSupportMessage(chat.get().getChatId());
-        }
-
-        TelegramMessage telegramMessage = TelegramMessage.builder()
-            .chat(chat.get())
-            .fromManager(false)
-            .mediaGroupId(message.getMediaGroupId())
-            .status(MessageDeliveryStatus.SENT)
-            .sendAt(LocalDateTime.now())
-            .build();
-
-        if (message.hasPhoto()) {
-            if (message.getMediaGroupId() != null) {
-                telegramMessage =
-                    telegramMessageRepository.findByMediaGroupId(message.getMediaGroupId()).orElse(telegramMessage);
-            }
-
-            telegramMessageRepository.save(telegramMessage);
-
-            PhotoSize largestPhoto = message.getPhoto().stream()
-                .max(Comparator.comparing(PhotoSize::getFileSize))
-                .orElse(null);
-
-            if (largestPhoto == null) {
-                log.warn("No photo found in media group message");
-                return MessageFactory.buildMessage(message.getChatId().toString(),
-                    TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-            }
-
-            try {
-                File telegramFile = executor.executeGetFile(bot, new GetFile(largestPhoto.getFileId()));
-                if (telegramFile == null || telegramFile.getFilePath() == null) {
-                    return MessageFactory.buildMessage(message.getChatId().toString(),
-                        TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-                }
-
-                URI uri = URI.create(telegramFile.getFileUrl(telegramBotToken));
-
-                try (InputStream inputStream = uri.toURL().openStream()) {
-                    String azureFileUrl = azureCloudStorageService.upload(
-                        inputStream, telegramFile.getFilePath(), telegramFile.getFileSize());
-
-                    AssetType assetType = detectAssetType(getFileContentType(telegramFile.getFilePath()));
-
-                    MessageAsset asset = MessageAsset.builder()
-                        .url(azureFileUrl)
-                        .fileName(getFileNameFromPath(telegramFile.getFilePath()))
-                        .size(largestPhoto.getFileSize().longValue())
-                        .contentType(getFileContentType(telegramFile.getFilePath()))
-                        .type(assetType)
-                        .message(telegramMessage)
-                        .build();
-
-                    messageAssetRepository.save(asset);
-                }
-            } catch (Exception e) {
-                log.error("Error loading photo: {}", e.getMessage());
-                return MessageFactory.buildMessage(message.getChatId().toString(),
-                    TelegramBotConstants.SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN);
-            }
-        }
-
-        String messageText = message.hasText() ? message.getText() : message.getCaption();
-        telegramMessage.setText(messageText);
-        telegramMessageRepository.save(telegramMessage);
-
-        List<MessageAssetDto> assetDtos = Optional.ofNullable(telegramMessage.getAssets())
-            .orElse(Collections.emptyList())
-            .stream()
-            .map(asset -> MessageAssetDto.builder()
-                .id(asset.getId())
-                .url(asset.getUrl())
-                .type(asset.getType())
-                .fileName(asset.getFileName())
-                .size(asset.getSize())
-                .contentType(asset.getContentType())
-                .build())
-            .toList();
-
-        TelegramMessageDto telegramMessageDto = TelegramMessageDto
-            .builder()
-            .id(telegramMessage.getId())
-            .sendAt(telegramMessage.getSendAt())
-            .text(telegramMessage.getText())
-            .fromManager(telegramMessage.getFromManager())
-            .deliveryStatus(telegramMessage.getStatus())
-            .assets(assetDtos)
-            .build();
-
-        notifyNewMessage(telegramMessageDto, chat.get().getId());
-        notifyManagerAboutNewMessagesFromUser(
-            message.getFrom().getUserName() == null ? message.getFrom().getFirstName()
-                : message.getFrom().getUserName(),
-            messageText, chat.get().getId());
-        return MessageFactory.buildMessage(chat.get().getChatId(),
-            TelegramBotConstants.MESSAGE_SENT_TO_MANAGER_WAIT_FOR_RESPONSE);
-    }
-
-    private SendMessage processInputCommentRequest(Message message) {
-        Optional<TelegramChat> telegramChat = telegramChatRepository.findByChatId(message.getChatId().toString());
-
-        if (telegramChat.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
-        }
-
-        Optional<ChatFeedback> chatFeedback = chatFeedbackRepository
-            .findByChatIdAndFeedbackState(
-                telegramChat.get().getId(),
-                FeedbackState.IN_PROGRESS);
-
-        if (chatFeedback.isEmpty()) {
-            return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString());
-        }
-
-        chatFeedback.get().setComment(message.getText());
-        chatFeedback.get().setFeedbackState(FeedbackState.CLOSED);
-        chatFeedbackRepository.save(chatFeedback.get());
-        telegramChat.get().setChatState(ChatState.NORMAL);
-        telegramChat.get().setChatStateUpdatedAt(LocalDateTime.now());
-        telegramChatRepository.save(telegramChat.get());
-        return MessageFactory.createFeedbackThanksMessage(message.getChatId().toString());
-    }
-
-    private void notifyNewChat(ChatDto chatDto) {
-        messagingTemplate.convertAndSend("/topic/chats", chatDto);
-    }
-
-    private void notifyNewMessage(TelegramMessageDto messageDto, Long chatId) {
-        messagingTemplate.convertAndSend("/topic/messages/" + chatId, messageDto);
-    }
-
-    private boolean isValidEmail(String email) {
-        if (email == null) {
+    private boolean isNumeric(String str) {
+        if (str == null) {
             return false;
         }
-        Pattern emailPattern = Pattern.compile(EMAIL_REGEXP);
-        Matcher matcher = emailPattern.matcher(email);
-        return matcher.matches();
-    }
-
-    private boolean checkIsEmployeeManager(Employee employee) {
-        var employeePositions = employee.getEmployeePosition();
-
-        Position serviceManager = positionRepository.findById(1L)
-            .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
-
-        Position manager = positionRepository.findById(2L)
-            .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND));
-
-        return employeePositions.contains(manager) || employeePositions.contains(serviceManager);
-    }
-
-    private String getFileNameFromPath(String filePath) {
-        if (filePath == null || filePath.isEmpty()) {
-            return null;
-        }
-        int lastSlash = filePath.lastIndexOf('/');
-        if (lastSlash != -1) {
-            return filePath.substring(lastSlash + 1);
-        }
-        return filePath;
-    }
-
-    private String getFileContentType(String filePath) {
-        if (filePath == null) {
-            return "application/octet-stream";
-        }
-        if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg")) {
-            return "image/jpeg";
-        } else if (filePath.endsWith(".png")) {
-            return "image/png";
-        } else if (filePath.endsWith(".gif")) {
-            return "image/gif";
-        }
-        return "application/octet-stream";
-    }
-
-    private AssetType detectAssetType(MultipartFile file) {
-        String contentType = file.getContentType();
-        return detectAssetType(contentType);
-    }
-
-    private AssetType detectAssetType(String file) {
-        if (file == null) {
-            return AssetType.FILE;
-        }
-
-        if (file.startsWith("image/")) {
-            return AssetType.IMAGE;
-        }
-        if (file.startsWith("video/")) {
-            return AssetType.VIDEO;
-        }
-        if (file.startsWith("audio/")) {
-            return AssetType.AUDIO;
-        }
-
-        return AssetType.FILE;
-    }
-
-    private void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId) {
-        var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
-        List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
-        for (TelegramManager manager : telegramManagers) {
-            SendMessage notification =
-                MessageFactory.createNotificationMessageForManager(manager.getChatId(), username, messageText,
-                    innerChatId);
-            executor.executeCommand(telegramBot, notification);
-        }
-    }
-
-    private void notifyManagerAboutEndSupportModeFromUser(String username) {
-        var telegramBot = applicationContext.getBean(UBSTelegramBot.class);
-        List<TelegramManager> telegramManagers = telegramManagerRepository.findAll();
-        for (TelegramManager manager : telegramManagers) {
-            var notification = MessageFactory.createEndSupportModeNotification(manager.getChatId(), username);
-            executor.executeCommand(telegramBot, notification);
+        try {
+            Long.parseLong(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }

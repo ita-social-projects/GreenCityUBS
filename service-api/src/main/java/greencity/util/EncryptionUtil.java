@@ -1,7 +1,11 @@
 package greencity.util;
 
+import greencity.dto.payment.PaymentResponseDto;
+import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
+import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 import lombok.ToString;
 import org.apache.commons.codec.digest.HmacUtils;
@@ -33,6 +37,36 @@ public class EncryptionUtil {
     }
 
     /**
+     * Generates a HMAC-MD5 signature for a WayForPay payment response. The
+     * signature is calculated based on the payment response fields in the specific
+     * order required by WayForPay: merchantAccount, orderReference, amount,
+     * currency, authCode, cardPan, transactionStatus, reasonCode.
+     *
+     * @param dto       The {@link PaymentResponseDto} received from WayForPay
+     *                  callback.
+     * @param secretKey The secret key (merchant password) used for HMAC generation.
+     * @return The generated HMAC-MD5 signature as a hexadecimal string.
+     */
+    public String generateResponseSignature(PaymentResponseDto dto, String secretKey) {
+        List<String> requiredFields = List.of(
+            dto.getMerchantAccount(),
+            dto.getOrderReference(),
+            dto.getAmount(),
+            dto.getCurrency(),
+            dto.getAuthCode(),
+            dto.getCardPan(),
+            dto.getTransactionStatus(),
+            dto.getReasonCode());
+
+        if (requiredFields.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("Missing required fields for WayForPay signature generation.");
+        }
+
+        String signatureData = String.join(";", requiredFields);
+        return new HmacUtils("HmacMD5", secretKey).hmacHex(signatureData);
+    }
+
+    /**
      * Forms an encrypted signature based on the response from Way For Pay. This
      * method uses the HMAC-MD5 algorithm to create a hash-based message
      * authentication code (HMAC). The HMAC is created from a string that is built
@@ -50,6 +84,13 @@ public class EncryptionUtil {
         stringJoiner.add(dto.getOrderReference())
             .add((dto.getStatus()))
             .add(dto.getTime());
+        return new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
+    }
+
+    public String formRemoveInvoiceSignature(PaymentCancellationWayForPayRequestDto dto, String password) {
+        StringJoiner stringJoiner = new StringJoiner(";");
+        stringJoiner.add(dto.getMerchantAccount())
+            .add(dto.getOrderReference());
         return new HmacUtils("HmacMD5", password).hmacHex(stringJoiner.toString());
     }
 }

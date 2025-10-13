@@ -4,6 +4,8 @@ import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.admin.SettingsTextDto;
+import greencity.dto.admin.UpdateSectionTextsDto;
 import greencity.dto.bag.BagLimitDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierDto;
@@ -24,6 +26,7 @@ import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.entity.TariffsInfoRecievingEmployee;
+import greencity.entity.admin.SettingsText;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
@@ -36,13 +39,7 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
-import greencity.enums.BagStatus;
-import greencity.enums.CourierLimit;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.CourierStatus;
-import greencity.enums.LocationStatus;
-import greencity.enums.StationStatus;
-import greencity.enums.TariffStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -65,6 +62,7 @@ import greencity.repository.TariffLocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.OrderAddressRepository;
+import greencity.repository.SettingsTextRepository;
 import greencity.service.SuperAdminService;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -73,15 +71,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -96,6 +87,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final RegionRepository regionRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
+    private final SettingsTextRepository settingsTextRepository;
     private final ModelMapper modelMapper;
     private final TariffLocationRepository tariffsLocationRepository;
     private final DeactivateChosenEntityRepository deactivateTariffsForChosenParamRepository;
@@ -395,7 +387,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .nameEn(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("en")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName())
-            .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("ua")).findFirst()
+            .nameUk(dto.getAddLocationDtoList().stream().filter(x -> x.getLanguageCode().equals("uk")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName())
             .region(region)
@@ -404,7 +396,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private void checkIfLocationAlreadyCreated(List<AddLocationTranslationDto> dto, Long regionId) {
         Optional<Location> location = locationRepository.findLocationByNameAndRegionId(
-            dto.stream().filter(translation -> translation.getLanguageCode().equals("ua")).findFirst()
+            dto.stream().filter(translation -> translation.getLanguageCode().equals("uk")).findFirst()
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
                 .getLocationName(),
             dto.stream().filter(translation -> translation.getLanguageCode().equals("en")).findFirst()
@@ -424,7 +416,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
         String ukName = dto.getRegionTranslationDtos().stream()
-            .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("ua")).findAny()
+            .filter(regionTranslationDto -> regionTranslationDto.getLanguageCode().equals("uk")).findAny()
             .orElseThrow(() -> new NotFoundException(ErrorMessage.LANGUAGE_ERROR))
             .getRegionName();
 
@@ -521,7 +513,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     private Region createRegionWithTranslation(LocationCreateDto dto) {
         String enName = getRegionTranslation(dto, "en");
-        String uaName = getRegionTranslation(dto, "ua");
+        String uaName = getRegionTranslation(dto, "uk");
         return Region.builder()
             .nameEn(enName)
             .nameUk(uaName)
@@ -910,6 +902,47 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             deactivateTariffForChosenParam(details);
         } else {
             throw new BadRequestException(ErrorMessage.UNRESOLVABLE_ACTIVATION_STATUS);
+        }
+    }
+
+    @Override
+    public SettingsTextDto getAllTextsFields(MainPageTextSection filter) {
+        List<SettingsText> all;
+        if (filter == null) {
+            all = settingsTextRepository.findAll();
+        } else {
+            all = settingsTextRepository.findAllBySectionIgnoreCase(filter.toString());
+        }
+        Map<String, Map<String, String>> uk = new LinkedHashMap<>();
+        Map<String, Map<String, String>> en = new LinkedHashMap<>();
+
+        for (SettingsText text : all) {
+            uk.computeIfAbsent(text.getSection(), k -> new LinkedHashMap<>())
+                .put(text.getField(), text.getValueUK());
+            en.computeIfAbsent(text.getSection(), k -> new LinkedHashMap<>())
+                .put(text.getField(), text.getValueEN());
+        }
+        SettingsTextDto dto = new SettingsTextDto();
+        dto.setUk(uk);
+        dto.setEn(en);
+        dto.setSection(List.of(MainPageTextSection.values()));
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public void updateSectionTextFields(List<UpdateSectionTextsDto> updateSectionTextsDto,
+        MainPageTextSection section) {
+        for (UpdateSectionTextsDto dto : updateSectionTextsDto) {
+            SettingsText existing = settingsTextRepository
+                .findBySectionAndFieldIgnoreCase(section.toString().toLowerCase(), dto.getField())
+                .orElseThrow(() -> new NotFoundException(
+                    "SettingsText not found for section: " + section
+                        + ", field: " + dto.getField()));
+            existing.setValueUK(dto.getValueUK());
+            existing.setValueEN(dto.getValueEN());
+            existing.setUpdatedAt(LocalDateTime.now());
+            settingsTextRepository.save(existing);
         }
     }
 

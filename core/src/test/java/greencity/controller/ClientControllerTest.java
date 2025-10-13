@@ -1,12 +1,26 @@
 package greencity.controller;
 
+import static greencity.ModelUtils.getUuid;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.service.ubs.UBSClientService;
+import greencity.repository.UserRepository;
+import greencity.service.ubs.order.OrderService;
+import greencity.service.ubs.payment.ProcessPaymentService;
+import greencity.service.ubs.point.PointService;
+import greencity.service.ubs.user.UserService;
+import java.security.Principal;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,11 +32,6 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.security.Principal;
-import static greencity.ModelUtils.getUuid;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -33,10 +42,19 @@ class ClientControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    UBSClientService ubsClientService;
+    UserRepository userRepository;
 
     @Mock
-    UserRemoteClient userRemoteClient;
+    private OrderService orderService;
+
+    @Mock
+    private PointService pointService;
+
+    @Mock
+    UserService userService;
+
+    @Mock
+    private ProcessPaymentService processPaymentService;
 
     @InjectMocks
     ClientController clientController;
@@ -46,7 +64,7 @@ class ClientControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(clientController)
-            .setCustomArgumentResolvers(new UserArgumentResolver(userRemoteClient))
+            .setCustomArgumentResolvers(new UserArgumentResolver(userRepository))
             .build();
     }
 
@@ -57,17 +75,19 @@ class ClientControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService, times(1)).getOrderPaymentDetail(1L);
+        verify(orderService, times(1)).getOrderPaymentDetail(1L);
     }
 
     @Test
     void getAllPointsForUserTest() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         this.mockMvc.perform(get(ubsLink + getAllPointsForUser)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).findAllCurrentPointsForUser(any());
+        verify(pointService).findAllCurrentPointsForUser(any());
     }
 
     @Test
@@ -84,6 +104,8 @@ class ClientControllerTest {
 
     @Test
     void getDataForOrderTest() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         this.mockMvc.perform(get(ubsLink + "/user-order/{id}", 1)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON))
@@ -92,6 +114,8 @@ class ClientControllerTest {
 
     @Test
     void deleteOrderTest() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         this.mockMvc.perform(delete(ubsLink + "/delete-order/{id}", 1)
             .principal(principal)
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
@@ -102,6 +126,8 @@ class ClientControllerTest {
         OrderWayForPayClientDto dto = ModelUtils.getOrderWayForPayClientDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String dtoJson = objectMapper.writeValueAsString(dto);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
         this.mockMvc.perform(post(ubsLink + "/processOrder")
             .contentType(MediaType.APPLICATION_JSON)
@@ -112,6 +138,8 @@ class ClientControllerTest {
 
     @Test
     void getUserBonusesTest() throws Exception {
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         this.mockMvc.perform(get(ubsLink + "/user-bonuses")
             .principal(principal)).andExpect(status().isOk());
     }

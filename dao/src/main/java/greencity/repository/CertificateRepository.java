@@ -1,6 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.Certificate;
+import greencity.entity.order.Order;
 import greencity.enums.CertificateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +62,18 @@ public interface CertificateRepository extends JpaRepository<Certificate, String
     @Query("SELECT c FROM Certificate c WHERE c.code IN :codes AND c.certificateStatus = :status")
     Set<Certificate> findByCodeInAndCertificateStatus(@Param("codes") List<String> codes,
         @Param("status") CertificateStatus status);
+
+    /**
+     * Method to get all certificates by codes that belong to specific
+     * {@link Order}.
+     *
+     * @param codes   - certificate codes.
+     * @param orderId - id of {@link Order} which certificates should belong to.
+     * @return set of {@link Certificate} that belong to order.
+     * @author Oleksandr Ilnytskyi
+     */
+    @Query("SELECT c FROM Certificate c WHERE c.code IN :codes AND c.order.id = :orderId")
+    Set<Certificate> findAllByCodesAndOrderId(@Param("codes") List<String> codes, @Param("orderId") Long orderId);
 
     /**
      * Method to check if certificate is already exist by code.

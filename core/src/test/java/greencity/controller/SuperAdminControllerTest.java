@@ -3,12 +3,13 @@ package greencity.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.ModelUtils;
-import greencity.client.UserRemoteClient;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.ErrorMessage;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.admin.SettingsTextDto;
+import greencity.dto.admin.UpdateSectionTextsDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierUpdateDto;
 import greencity.dto.courier.CreateCourierDto;
@@ -22,6 +23,7 @@ import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.enums.LocationStatus;
+import greencity.enums.MainPageTextSection;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
@@ -29,6 +31,7 @@ import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
 import greencity.filters.TariffsInfoFilterCriteria;
+import greencity.repository.UserRepository;
 import greencity.service.SuperAdminService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,10 +54,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
 import static greencity.ModelUtils.getReceivingStationDto;
 import static greencity.ModelUtils.getUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -69,6 +75,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +84,7 @@ class SuperAdminControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    UserRemoteClient userRemoteClient;
+    UserRepository userRepository;
 
     @Mock
     SuperAdminService superAdminService;
@@ -99,7 +106,7 @@ class SuperAdminControllerTest {
         this.mockMvc = MockMvcBuilders.standaloneSetup(superAdminController)
             .setCustomArgumentResolvers(
                 new PageableHandlerMethodArgumentResolver(),
-                new UserArgumentResolver(userRemoteClient))
+                new UserArgumentResolver(userRepository))
             .setControllerAdvice(new CustomExceptionHandler(errorAttributes))
             .setValidator(mockValidator)
             .build();
@@ -112,7 +119,7 @@ class SuperAdminControllerTest {
         String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.addTariffService(1L, dto, uuid)).thenReturn(responseDto);
 
         mockMvc.perform(post(ubsLink + "/{tariffId}/createTariffService", 1L)
@@ -124,7 +131,7 @@ class SuperAdminControllerTest {
             .andExpect(status().isCreated())
             .andReturn();
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).addTariffService(anyLong(), any(TariffServiceDto.class), anyString());
     }
 
@@ -134,7 +141,7 @@ class SuperAdminControllerTest {
         String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.addTariffService(anyLong(), any(TariffServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
 
@@ -149,9 +156,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).addTariffService(anyLong(), any(TariffServiceDto.class), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -213,7 +220,7 @@ class SuperAdminControllerTest {
         String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.editTariffService(dto, 1, uuid)).thenReturn(responseDto);
 
         mockMvc.perform(put(ubsLink + "/editTariffService/" + 1L)
@@ -224,9 +231,9 @@ class SuperAdminControllerTest {
             .andExpect(status().isOk())
             .andReturn();
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).editTariffService(any(TariffServiceDto.class), anyInt(), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -235,7 +242,7 @@ class SuperAdminControllerTest {
         String requestDtoJSON = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.editTariffService(dto, 1, uuid))
             .thenThrow(new NotFoundException(ErrorMessage.BAG_NOT_FOUND));
 
@@ -249,9 +256,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.BAG_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).editTariffService(any(TariffServiceDto.class), anyInt(), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -260,7 +267,7 @@ class SuperAdminControllerTest {
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
         mockMvc.perform(post(ubsLink + "/{tariffId}/createService", 1L)
             .principal(principal)
@@ -270,8 +277,8 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verifyNoMoreInteractions(userRemoteClient);
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
+        verifyNoMoreInteractions(userRepository);
     }
 
     @Test
@@ -280,7 +287,7 @@ class SuperAdminControllerTest {
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.addService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new ServiceAlreadyExistsException(ErrorMessage.SERVICE_ALREADY_EXISTS));
 
@@ -295,9 +302,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.SERVICE_ALREADY_EXISTS,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).addService(anyLong(), any(ServiceDto.class), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -306,7 +313,7 @@ class SuperAdminControllerTest {
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.addService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
 
@@ -321,9 +328,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).addService(anyLong(), any(ServiceDto.class), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -332,7 +339,7 @@ class SuperAdminControllerTest {
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.addService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.TARIFF_NOT_FOUND));
 
@@ -347,9 +354,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).addService(anyLong(), any(ServiceDto.class), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -407,7 +414,7 @@ class SuperAdminControllerTest {
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
         mockMvc.perform(put(ubsLink + "/editService/{id}", 1L)
             .principal(principal)
@@ -417,8 +424,8 @@ class SuperAdminControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
-        verifyNoMoreInteractions(userRemoteClient);
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
+        verifyNoMoreInteractions(userRepository);
     }
 
     @Test
@@ -428,7 +435,7 @@ class SuperAdminControllerTest {
         String uuid = UUID.randomUUID().toString();
         long id = 1L;
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.editService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id));
 
@@ -443,9 +450,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.SERVICE_IS_NOT_FOUND_BY_ID + id,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).editService(anyLong(), any(ServiceDto.class), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -454,7 +461,7 @@ class SuperAdminControllerTest {
         String requestedJson = new ObjectMapper().writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         when(superAdminService.editService(anyLong(), any(ServiceDto.class), anyString()))
             .thenThrow(new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND));
 
@@ -469,9 +476,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND,
                 Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
-        verify(userRemoteClient).findUuidByEmail(principal.getName());
+        verify(userRepository).findUuidByRecipientEmail(principal.getName());
         verify(superAdminService).editService(anyLong(), any(ServiceDto.class), anyString());
-        verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -611,6 +618,8 @@ class SuperAdminControllerTest {
         CreateCourierDto dto = ModelUtils.getCreateCourierDto();
         ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
         mockMvc.perform(post(ubsLink + "/createCourier")
             .principal(principal)
@@ -626,7 +635,7 @@ class SuperAdminControllerTest {
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito.when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         Mockito.when(superAdminService.createCourier(dto, uuid))
             .thenThrow(new CourierAlreadyExists(ErrorMessage.COURIER_ALREADY_EXISTS));
 
@@ -639,9 +648,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.COURIER_ALREADY_EXISTS,
                 result.getResolvedException().getMessage()));
 
-        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(userRepository).findUuidByRecipientEmail(principal.getName());
         Mockito.verify(superAdminService).createCourier(dto, uuid);
-        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        Mockito.verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -651,7 +660,7 @@ class SuperAdminControllerTest {
         String requestedJson = objectMapper.writeValueAsString(dto);
         String uuid = UUID.randomUUID().toString();
 
-        Mockito.when(userRemoteClient.findUuidByEmail(principal.getName())).thenReturn(uuid);
+        Mockito.when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         Mockito.when(superAdminService.addNewTariff(dto, uuid))
             .thenThrow(new TariffAlreadyExistsException(ErrorMessage.TARIFF_IS_ALREADY_EXISTS));
 
@@ -664,9 +673,9 @@ class SuperAdminControllerTest {
             .andExpect(result -> assertEquals(ErrorMessage.TARIFF_IS_ALREADY_EXISTS,
                 result.getResolvedException().getMessage()));
 
-        Mockito.verify(userRemoteClient).findUuidByEmail(principal.getName());
+        Mockito.verify(userRepository).findUuidByRecipientEmail(principal.getName());
         Mockito.verify(superAdminService).addNewTariff(dto, uuid);
-        Mockito.verifyNoMoreInteractions(superAdminService, userRemoteClient);
+        Mockito.verifyNoMoreInteractions(superAdminService, userRepository);
     }
 
     @Test
@@ -674,6 +683,8 @@ class SuperAdminControllerTest {
         AddingReceivingStationDto dto = AddingReceivingStationDto.builder().name("Qqq-qqq").build();
         ObjectMapper objectMapper = new ObjectMapper();
         String requestedJson = objectMapper.writeValueAsString(dto);
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         mockMvc.perform(post(ubsLink + "/create-receiving-station")
             .principal(principal)
             .content(requestedJson)
@@ -785,7 +796,9 @@ class SuperAdminControllerTest {
     void addNewTariffTest() {
         var dto = ModelUtils.getAddNewTariffDto();
         ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(post(ubsLink + "/add-new-tariff")
+        String uuid = "uuid";
+        when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
+        mockMvc.perform(post("/ubs/superAdmin/add-new-tariff")
             .content(objectMapper.writeValueAsString(dto))
             .contentType(MediaType.APPLICATION_JSON)
             .principal(principal))
@@ -1065,5 +1078,80 @@ class SuperAdminControllerTest {
     void deactivateCourier() throws Exception {
         mockMvc.perform(patch(ubsLink + "/deactivateCourier/{id}", 1L)).andExpect(status().isOk());
         verify(superAdminService).deactivateCourier(1L);
+    }
+
+    @Test
+    void getAllSettingsTextForMainPageWithoutFilterTest() throws Exception {
+        Map<String, Map<String, String>> uk = Map.of(
+            MainPageTextSection.HEADER.toString(), Map.of("caption", "Головна сторінка"),
+            MainPageTextSection.PRICE.toString(), Map.of("content", "Тест"));
+
+        Map<String, Map<String, String>> en = Map.of(
+            MainPageTextSection.HEADER.toString(), Map.of("caption", "Home page"),
+            MainPageTextSection.PRICE.toString(), Map.of("content", "Test"));
+
+        SettingsTextDto dto = SettingsTextDto.builder()
+            .uk(uk)
+            .en(en)
+            .section(List.of(MainPageTextSection.values()))
+            .build();
+
+        Mockito.when(superAdminService.getAllTextsFields(null)).thenReturn(dto);
+
+        mockMvc.perform(get(ubsLink + "/settingsText")
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.uk.HEADER.caption").value("Головна сторінка"))
+            .andExpect(jsonPath("$.en.HEADER.caption").value("Home page"))
+            .andExpect(jsonPath("$.uk.PRICE.content").value("Тест"))
+            .andExpect(jsonPath("$.en.PRICE.content").value("Test"))
+            .andExpect(jsonPath("$.section").isArray());
+        verify(superAdminService).getAllTextsFields(null);
+    }
+
+    @Test
+    void getAllSettingsTextForMainPageWithFilterTest() throws Exception {
+        Map<String, Map<String, String>> uk = Map.of(
+            MainPageTextSection.HEADER.toString(), Map.of("caption", "Головна сторінка"),
+            MainPageTextSection.PRICE.toString(), Map.of("content", "Тест"));
+
+        Map<String, Map<String, String>> en = Map.of(
+            MainPageTextSection.HEADER.toString(), Map.of("caption", "Home page"),
+            MainPageTextSection.PRICE.toString(), Map.of("content", "Test"));
+
+        SettingsTextDto dto = SettingsTextDto.builder()
+            .uk(uk)
+            .en(en)
+            .section(List.of(MainPageTextSection.values()))
+            .build();
+
+        Mockito.when(superAdminService.getAllTextsFields(MainPageTextSection.HEADER)).thenReturn(dto);
+
+        mockMvc.perform(get(ubsLink + "/settingsText")
+            .param("filter", String.valueOf(MainPageTextSection.HEADER))
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.uk.HEADER.caption").value("Головна сторінка"))
+            .andExpect(jsonPath("$.en.HEADER.caption").value("Home page"))
+            .andExpect(jsonPath("$.section").isArray());
+    }
+
+    @Test
+    void updateSectionTextsFieldsValidRequestTest() throws Exception {
+        UpdateSectionTextsDto dto = UpdateSectionTextsDto.builder()
+            .field("caption")
+            .valueUK("Головна сторінка 1")
+            .valueEN("Home page 1")
+            .build();
+        String requestJSON = new ObjectMapper().writeValueAsString(List.of(dto));
+
+        mockMvc.perform(put(ubsLink + "/settingsText/section")
+            .param("section", MainPageTextSection.HEADER.name())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestJSON))
+            .andExpect(status().isOk());
+
+        Mockito.verify(superAdminService)
+            .updateSectionTextFields(anyList(), eq(MainPageTextSection.HEADER));
     }
 }

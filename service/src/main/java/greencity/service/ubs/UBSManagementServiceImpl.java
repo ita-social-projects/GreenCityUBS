@@ -1,7 +1,19 @@
 package greencity.service.ubs;
 
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_PAYMENT_ID;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
+import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.client.UserRemoteClient;
+import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
@@ -69,11 +81,12 @@ import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CertificateRepository;
+import greencity.repository.CityRepository;
+import greencity.repository.DistrictRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
 import greencity.repository.NotificationParameterRepository;
-import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderDetailRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -86,22 +99,9 @@ import greencity.repository.ServiceRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserNotificationRepository;
 import greencity.repository.UserRepository;
-import greencity.repository.CityRepository;
-import greencity.repository.DistrictRepository;
 import greencity.service.notification.NotificationServiceImpl;
+import greencity.service.ubs.user.UserService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -119,17 +119,20 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.INCORRECT_ECO_NUMBER;
-import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_PAYMENT_ID;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
-import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND;
-import static greencity.constant.ErrorMessage.RECEIVING_STATION_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toList;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 @RequiredArgsConstructor
@@ -137,7 +140,6 @@ import static java.util.stream.Collectors.toList;
 public class UBSManagementServiceImpl implements UBSManagementService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final OrderRepository orderRepository;
-    private final OrderAddressRepository orderAddressRepository;
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
     private final UserRemoteClient userRemoteClient;
@@ -149,7 +151,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final EmployeeRepository employeeRepository;
     private final ReceivingStationRepository receivingStationRepository;
     private final NotificationServiceImpl notificationService;
-    private final FileService fileService;
+    private final UserRemoteWebClient userRemoteWebClient;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final PositionRepository positionRepository;
     private final EmployeeOrderPositionRepository employeeOrderPositionRepository;
@@ -160,6 +162,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final OrderLockService orderLockService;
     private final OrderBagService orderBagService;
     private final PaymentService paymentService;
+    private final UserService userService;
     private final EventRepository eventRepository;
     private final BigOrderTableRepository bigOrderTableRepository;
     private static final String DEFAULT_IMAGE_PATH = AppConstant.DEFAULT_IMAGE;
@@ -169,7 +172,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     private final Set<OrderStatus> orderStatusesAfterConfirmation =
         EnumSet.of(OrderStatus.ON_THE_ROUTE, OrderStatus.DONE, OrderStatus.BROUGHT_IT_HIMSELF, OrderStatus.CANCELED);
     static final String FORMAT_DATE = "dd-MM-yyyy";
-    private final UBSClientService ubsClientService;
     private final OrderBagRepository orderBagRepository;
     private final UserNotificationRepository userNotificationRepository;
     private final NotificationParameterRepository notificationParameterRepository;
@@ -272,7 +274,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         var orderAddress = order.getUbsUser().getOrderAddress();
 
         UserInfoDto userInfoDto =
-            ubsClientService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
+            userService.getUserAndUserUbsAndViolationsInfoByOrderId(orderId, order.getUser().getUuid());
         GeneralOrderInfo infoAboutStatusesAndDateFormed =
             getInfoAboutStatusesAndDateFormed(Optional.of(order));
         AddressExportDetailsDto addressDtoForAdminPage = getAddressDtoForAdminPage(orderAddress);
@@ -344,11 +346,11 @@ public class UBSManagementServiceImpl implements UBSManagementService {
         return dto.getSumAmount();
     }
 
-    private Boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
+    private boolean isContainsConfirmedBags(CounterOrderDetailsDto dto) {
         return dto.getSumConfirmed() != 0;
     }
 
-    private Boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
+    private boolean isContainsExportedBags(CounterOrderDetailsDto dto) {
         return dto.getSumExported() != 0;
     }
 
@@ -743,16 +745,17 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void setOrderPaymentStatusForConfirmedBags(Order currentOrder, long paymentsForCurrentOrder,
         long totalSumAmount, long totalConfirmed) {
-        boolean paidCondition = paymentsForCurrentOrder > 0 && paymentsForCurrentOrder >= totalSumAmount
+        boolean paidCondition = paymentsForCurrentOrder > 0
+            && paymentsForCurrentOrder >= totalSumAmount
             && paymentsForCurrentOrder >= totalConfirmed;
-        boolean halfPaidCondition = paymentsForCurrentOrder > 0 && totalSumAmount > paymentsForCurrentOrder
-            || totalConfirmed > paymentsForCurrentOrder;
+        boolean halfPaidCondition = paymentsForCurrentOrder > 0
+            && (totalSumAmount > paymentsForCurrentOrder || totalConfirmed > paymentsForCurrentOrder);
 
         if (paidCondition) {
             currentOrder.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             notificationService.notifyPaidOrder(currentOrder);
 
-            if (currentOrder.getOrderStatus() == OrderStatus.ADJUSTMENT) {
+            if (currentOrder.getOrderStatus() == OrderStatus.CONFIRMED) {
                 notificationService.notifyCourierItineraryFormed(currentOrder);
             }
         } else if (halfPaidCondition) {
@@ -818,9 +821,9 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             order.setOrderStatus(OrderStatus.valueOf(dto.getOrderStatus()));
 
             if (order.getOrderStatus() == OrderStatus.ADJUSTMENT) {
-                notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_ADJUSTMENT_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.CONFIRMED) {
+                notificationService.notifyCourierItineraryFormed(order);
                 eventService.saveEvent(OrderHistory.ORDER_CONFIRMED_UK, email, order);
             } else if (order.getOrderStatus() == OrderStatus.FORMED) {
                 eventService.saveEvent(OrderHistory.ORDER_FORMED_UK, email, order);
@@ -871,9 +874,10 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private void setOrderCancellation(Order order, String cancellationReason, String cancellationComment) {
+        notificationService.notifyCanceledOrder(order);
         if (order.getPointsToUse() != 0 || !order.getCertificates().isEmpty()) {
             notificationService.notifyBonusesFromCanceledOrder(order);
-            returnAllPointsFromOrder(order);
+            paymentService.processPointsRefundForOrder(order);
         }
         order.setCancellationComment(cancellationComment);
         order.setCancellationReason(CancellationReason.valueOf(cancellationReason));
@@ -904,29 +908,6 @@ public class UBSManagementServiceImpl implements UBSManagementService {
             .collect(Collectors.toList()));
 
         dto.setOrderId(order.getId());
-    }
-
-    private void returnAllPointsFromOrder(Order order) {
-        Integer pointsToReturn = order.getPointsToUse();
-        if (isNull(pointsToReturn) || pointsToReturn == 0) {
-            return;
-        }
-        User user = order.getUser();
-        if (isNull(user.getCurrentPoints())) {
-            user.setCurrentPoints(0);
-        }
-        user.setCurrentPoints(user.getCurrentPoints() + pointsToReturn);
-        ChangeOfPoints changeOfPoints = ChangeOfPoints.builder()
-            .amount(pointsToReturn)
-            .date(LocalDateTime.now())
-            .user(user)
-            .order(order)
-            .build();
-        if (isNull(user.getChangeOfPointsList())) {
-            user.setChangeOfPointsList(new ArrayList<>());
-        }
-        user.getChangeOfPointsList().add(changeOfPoints);
-        userRepository.save(user);
     }
 
     /**
@@ -1158,7 +1139,14 @@ public class UBSManagementServiceImpl implements UBSManagementService {
     }
 
     private String processImage(MultipartFile image) {
-        return (image != null) ? fileService.upload(image) : DEFAULT_IMAGE_PATH;
+        if (image != null) {
+            try {
+                return userRemoteWebClient.uploadFile(image);
+            } catch (WebClientRequestException | WebClientResponseException e) {
+                log.warn("User service is unavailable: {}", e.getMessage());
+            }
+        }
+        return DEFAULT_IMAGE_PATH;
     }
 
     /**
@@ -1218,7 +1206,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
 
     private void updateOrderPageFields(UpdateOrderPageAdminDto updateOrderPageDto, Order order, String email) {
         if (nonNull(updateOrderPageDto.getUserInfoDto())) {
-            ubsClientService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
+            userService.updateUbsUserInfoInOrder(updateOrderPageDto.getUserInfoDto(), email);
         }
         if (nonNull(updateOrderPageDto.getAddressExportDetailsDto())) {
             addressService.updateAddress(updateOrderPageDto.getAddressExportDetailsDto(), order, email);

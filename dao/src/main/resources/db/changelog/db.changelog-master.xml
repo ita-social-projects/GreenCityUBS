@@ -289,4 +289,26 @@
     <include file="db/changelog/logs/2025-07-07-ch-add-chat-state-updated-at-column.xml"/>
     <include file="db/changelog/logs/2025-07-09-ch-drop-telegram-old-tables-and-columns.xml"/>
     <include file="db/changelog/logs/ch-drop-viber-bot-table-Popovych.xml"/>
+    <include file="db/changelog/logs/ch-change-email-column-types-Popovych.xml"/>
+    <include file="db/changelog/logs/2025-08-05-ch-add-unread-count-and-viewing-status-to-chat-and-message.xml"/>
+    <include file="db/changelog/logs/2025-08-05-ch-add-last-message-in-telegram-chat.xml"/>
+    <include file="db/changelog/logs/2025-08-07-ch-update-localdatetime-to-instant-in-telegram-entities.xml"/>
+    <include file="db/changelog/logs/2025-08-08-ch-update-chat-state-updated-at-field-in-telegram-chat.xml"/>
+    <include file="db/changelog/logs/2025-08-07-ch-add-created-at-to-telegram-chat.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-users-Pohranychnyi.xml"/>
+    <include file="db/changelog/logs/2025-08-11-ch-insert-into-users-Pohranychnyi.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-user-Lys.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-cities-Kyiv-Lys.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-districts-for-Kyiv-Lys.xml"/>
+    <include file="db/changelog/logs/2025-08-11-ch-add-column-language-code-in-telegram-chat.xml"/>
+    <include file="db/changelog/logs/ch-add-canceled-notification-Zadyraichuk.xml"/>
+    <include file="db/changelog/logs/ch-update-notification_platforms-Zadyraichuk.xml"/>
+    <include file="db/changelog/logs/2025-08-18-ch-add-column-telegrammessage-id-to-telegram-message-entity.xml"/>
+    <include file="db/changelog/logs/2025-08-19-ch-add-telegram-message-id-column-to-message-asset.xml"/>
+    <include file="db/changelog/logs/ch-add-quartz-tables-Ilnytskyi.xml"/>
+    <include file="db/changelog/logs/ch-add-payment-link-columns-into-orders-table-Ilnytskyi.xml"/>
+    <include file="db/changelog/logs/ch-create-settings-text-table-Lys.xml"/>
+    <include file="db/changelog/logs/ch-insert-into-settings-text-table-Lys.xml"/>
+    <include file="db/changelog/logs/ch-update-users-add-user-status-column-Zadyraichuk.xml"/>
+    <include file="db/changelog/logs/ch-add-reasons-for-user-deactivatiom-table-Pikhotskyi.xml"/>
 </databaseChangeLog>

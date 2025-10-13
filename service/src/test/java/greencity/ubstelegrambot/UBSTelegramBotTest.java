@@ -1,7 +1,6 @@
 package greencity.ubstelegrambot;
 
 import greencity.service.ubs.TelegramService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,8 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,23 +23,26 @@ class UBSTelegramBotTest {
     @InjectMocks
     private UBSTelegramBot ubsTelegramBot;
 
-    private final String botName = "testBot";
-
-    @BeforeEach
-    void setUp() {
-        String botToken = "testToken";
-        ubsTelegramBot = new UBSTelegramBot(botToken, botName, telegramService);
-    }
-
     @Test
-    void testGetBotUsername() {
-        assertEquals(botName, ubsTelegramBot.getBotUsername());
-    }
-
-    @Test
-    void testOnUpdateReceived_withTextMessage() {
+    void onUpdateReceivedTest() {
         Update update = mock(Update.class);
+
+        doNothing().when(telegramService).processUpdate(update);
+
         ubsTelegramBot.onUpdateReceived(update);
-        verify(telegramService, times(1)).processUpdate(update);
+
+        verify(telegramService).processUpdate(update);
+    }
+
+    @Test
+    void getBotUsernameTest() {
+        String botName = "testBotName";
+        String botToken = "testBotToken";
+        ubsTelegramBot = new UBSTelegramBot(botToken, botName, telegramService);
+        assertNotNull(ubsTelegramBot, "Instance UBSTelegramBot don't have to be null after creating.");
+
+        String returnedBotName = ubsTelegramBot.getBotUsername();
+
+        assertEquals(botName, returnedBotName, "The getBotUsername() should return the botName provided.");
     }
 }

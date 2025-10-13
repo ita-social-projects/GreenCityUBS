@@ -4,6 +4,8 @@ import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.admin.SettingsTextDto;
+import greencity.dto.admin.UpdateSectionTextsDto;
 import greencity.dto.courier.*;
 import greencity.dto.location.LocationCreateDto;
 import greencity.dto.location.LocationInfoDto;
@@ -14,6 +16,7 @@ import greencity.dto.service.TariffServiceDto;
 import greencity.dto.tariff.*;
 import greencity.entity.order.Courier;
 import greencity.enums.LocationStatus;
+import greencity.enums.MainPageTextSection;
 import greencity.exceptions.BadRequestException;
 import greencity.filters.TariffsInfoFilterCriteria;
 import greencity.service.SuperAdminService;
@@ -207,7 +210,7 @@ class SuperAdminController {
     }
 
     /**
-     * Controller for delete service by Id.
+     * Controller for delete service by id.
      *
      * @param id {@link Long} - service id.
      * @author Vadym Makitra
@@ -786,5 +789,53 @@ class SuperAdminController {
         } else {
             throw new BadRequestException("You should enter at least one parameter");
         }
+    }
+
+    /**
+     * Controller to retrieve all text fields for main page.
+     *
+     * @param filter {@link MainPageTextSection} (optional) - string for filtering
+     *               fields by sections.
+     * @author Bohdan Lys.
+     */
+    @Operation(summary = "Get all texts for main page.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = SettingsTextDto.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @GetMapping("/settingsText")
+    public ResponseEntity<SettingsTextDto> getAllSettingsTextForMainPage(
+        @RequestParam(required = false) MainPageTextSection filter) {
+        return ResponseEntity.status(HttpStatus.OK).body(superAdminService.getAllTextsFields(filter));
+    }
+
+    /**
+     * Controller to update text fields for specific section.
+     *
+     * @param dto     {@link UpdateSectionTextsDto} - dto for updating fields value
+     *                UK and EN.
+     * @param section {@link MainPageTextSection} - enum for updating specific
+     *                section.
+     * @author Bohdan Lys.
+     */
+    @Operation(summary = "Update texts fields for specific section.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @PutMapping("/settingsText/section")
+    // @PreAuthorize("@preAuthorizer.hasAuthority('SETTINGS_MANAGEMENT',
+    // authentication)")
+    public ResponseEntity<HttpStatus> updateSectionTextsFields(@Valid @RequestBody List<UpdateSectionTextsDto> dto,
+        @RequestParam MainPageTextSection section) {
+        superAdminService.updateSectionTextFields(dto, section);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

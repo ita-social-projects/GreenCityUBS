@@ -1,17 +1,71 @@
 package greencity.service.ubs;
 
+import static greencity.ModelUtils.KYIV_REGION_EN;
+import static greencity.ModelUtils.KYIV_REGION_UK;
+import static greencity.ModelUtils.TEST_CREATE_ADDRESS_DTO;
+import static greencity.ModelUtils.TEST_ORDER_ADDRESS_DTO_UPDATE;
+import static greencity.ModelUtils.addressDto;
+import static greencity.ModelUtils.addressWithKyivRegionDto;
+import static greencity.ModelUtils.getAddress;
+import static greencity.ModelUtils.getAddressDtoResponse;
+import static greencity.ModelUtils.getAddressRequestDto;
+import static greencity.ModelUtils.getAddressRequestDto2;
+import static greencity.ModelUtils.getAddressRequestToSaveDto;
+import static greencity.ModelUtils.getAddressWithKyivRegionToSaveRequestDto;
+import static greencity.ModelUtils.getCity;
+import static greencity.ModelUtils.getDistrict;
+import static greencity.ModelUtils.getLocationList;
+import static greencity.ModelUtils.getMaximumAmountOfAddresses;
+import static greencity.ModelUtils.getOrder;
+import static greencity.ModelUtils.getOrderAddress;
+import static greencity.ModelUtils.getRegion;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequest;
+import static greencity.ModelUtils.getTestOrderAddressDtoRequest2;
+import static greencity.ModelUtils.getTestOrderAddressLocationDto;
+import static greencity.ModelUtils.getUpdateAddressDto;
+import static greencity.ModelUtils.getUser;
+import static greencity.ModelUtils.getUserForCreate;
+import static greencity.constant.ErrorMessage.ACTUAL_ADDRESS_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ADDRESS_ALREADY_EXISTS;
+import static greencity.constant.ErrorMessage.CANNOT_ACCESS_PERSONAL_INFO;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ADDRESS;
+import static greencity.constant.ErrorMessage.CANNOT_DELETE_ALREADY_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.CANNOT_MAKE_ACTUAL_DELETED_ADDRESS;
+import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import com.google.maps.model.GeocodingResult;
+import com.google.maps.model.Geometry;
+import com.google.maps.model.LatLng;
 import greencity.ModelUtils;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
+import greencity.constant.TariffLocation;
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.entity.coords.Coordinates;
 import greencity.entity.order.Order;
 import greencity.entity.user.Location;
@@ -27,19 +81,24 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
+import greencity.mapping.location.LocationToLocationsDtoMapper;
 import greencity.repository.AddressRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.DistrictRepository;
-import greencity.repository.RegionRepository;
 import greencity.repository.CityRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.CourierRepository;
+import greencity.repository.DistrictRepository;
+import greencity.repository.LocationRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderRepository;
+import greencity.repository.RegionRepository;
+import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UserRepository;
+import greencity.service.google.GoogleApiService;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,14 +111,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.modelmapper.ModelMapper;
 
-import static greencity.ModelUtils.*;
-import static greencity.constant.ErrorMessage.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
-
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AddressServiceTest {
@@ -67,7 +118,7 @@ class AddressServiceTest {
     @Mock
     private OrderAddressRepository orderAddressRepository;
     @Mock
-    private ModelMapper mapper;
+    private ModelMapper modelMapper;
     @Mock
     private AddressRequestDtoToBaseEntityMapper addressMapper;
     @Mock
@@ -86,6 +137,16 @@ class AddressServiceTest {
     private AddressRequestDtoToBaseEntityMapper baseEntityMapper;
     @Mock
     private AddressRepository addressRepository;
+    @Mock
+    private LocationRepository locationRepository;
+    @Mock
+    private CourierRepository courierRepository;
+    @Mock
+    private TariffsInfoRepository tariffsInfoRepository;
+    @Mock
+    private GoogleApiService googleApiService;
+    @Mock
+    private LocationToLocationsDtoMapper locationToLocationsDtoMapper;
     @InjectMocks
     private AddressServiceImpl addressService;
 
@@ -100,7 +161,7 @@ class AddressServiceTest {
         OrderAddress orderAddress = ModelUtils.getOrderAddress1();
 
         when(orderAddressRepository.findByOrderId(orderId)).thenReturn(Optional.of(orderAddress));
-        when(mapper.map(orderAddress, UpdateAddressDto.class)).thenReturn(ModelUtils.getUpdateAddressDto());
+        when(modelMapper.map(orderAddress, UpdateAddressDto.class)).thenReturn(ModelUtils.getUpdateAddressDto());
 
         var result = addressService.getAddressForOrder(orderId);
 
@@ -131,12 +192,12 @@ class AddressServiceTest {
             DistrictDto.builder().nameEn("District 2").build());
         when(cityRepository.findIdByNameUkOrNameEn(cityName)).thenReturn(cityId);
         when(districtRepository.findAllByCityId(cityId)).thenReturn(districts);
-        when(mapper.map(districts.get(0), DistrictDto.class)).thenReturn(expectedDtos.get(0));
-        when(mapper.map(districts.get(1), DistrictDto.class)).thenReturn(expectedDtos.get(1));
+        when(modelMapper.map(districts.get(0), DistrictDto.class)).thenReturn(expectedDtos.get(0));
+        when(modelMapper.map(districts.get(1), DistrictDto.class)).thenReturn(expectedDtos.get(1));
         List<DistrictDto> result = addressService.getAllDistricts(region, cityName);
         verify(cityRepository).findIdByNameUkOrNameEn(cityName);
         verify(districtRepository).findAllByCityId(cityId);
-        verify(mapper, times(2)).map(any(District.class), eq(DistrictDto.class));
+        verify(modelMapper, times(2)).map(any(District.class), eq(DistrictDto.class));
         assertEquals(expectedDtos, result);
     }
 
@@ -152,11 +213,12 @@ class AddressServiceTest {
         ReadAddressByOrderDto readAddressByOrderDto = ModelUtils.getReadAddressByOrderDto();
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
         when(orderAddressRepository.findByOrderId(anyLong())).thenReturn(Optional.of(getOrderAddress()));
-        when(mapper.map(any(OrderAddress.class), eq(ReadAddressByOrderDto.class))).thenReturn(readAddressByOrderDto);
+        when(modelMapper.map(any(OrderAddress.class), eq(ReadAddressByOrderDto.class)))
+            .thenReturn(readAddressByOrderDto);
         ReadAddressByOrderDto result = addressService.getAddressByOrderId(order.getId());
         verify(orderRepository, times(1)).findById(anyLong());
         verify(orderAddressRepository, times(1)).findByOrderId(anyLong());
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         Assertions.assertEquals(readAddressByOrderDto, result);
     }
 
@@ -171,18 +233,18 @@ class AddressServiceTest {
 
     @Test
     void updateOrderAddressForValidOrderTest() {
-        OrderAddress expected = ModelUtils.getOrderAddress();
+        OrderAddress expected = getOrderAddress();
         OrderAddressExportDetailsDtoUpdate orderAddressExportDetailsDtoUpdate =
             ModelUtils.getOrderAddressExportDetailsDtoUpdate();
         CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
-        Address address = ModelUtils.getAddress();
+        Address address = getAddress();
         Region region = ModelUtils.getRegion();
         District district = ModelUtils.getDistrict();
         City city = ModelUtils.getCity();
-        when(mapper.map(orderAddressExportDetailsDtoUpdate, CreateAddressRequestDto.class))
+        when(modelMapper.map(orderAddressExportDetailsDtoUpdate, CreateAddressRequestDto.class))
             .thenReturn(createAddressRequestDto);
-        when(mapper.map(any(OrderAddressExportDetailsDtoUpdate.class), eq(Address.class))).thenReturn(address);
-        when(mapper.map(address, OrderAddress.class)).thenReturn(expected);
+        when(modelMapper.map(any(OrderAddressExportDetailsDtoUpdate.class), eq(Address.class))).thenReturn(address);
+        when(modelMapper.map(address, OrderAddress.class)).thenReturn(expected);
         when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.of(region));
         when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(city));
@@ -199,12 +261,12 @@ class AddressServiceTest {
     @Test
     void updateOrderAddressIfNoRegionFoundTest() {
         CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
-        Address address = ModelUtils.getAddress();
+        Address address = getAddress();
         OrderAddressExportDetailsDtoUpdate orderAddressExportDetailsDtoUpdate =
             ModelUtils.getOrderAddressExportDetailsDtoUpdate();
-        when(mapper.map(orderAddressExportDetailsDtoUpdate, CreateAddressRequestDto.class))
+        when(modelMapper.map(orderAddressExportDetailsDtoUpdate, CreateAddressRequestDto.class))
             .thenReturn(createAddressRequestDto);
-        when(mapper.map(any(OrderAddressExportDetailsDtoUpdate.class), eq(Address.class))).thenReturn(address);
+        when(modelMapper.map(any(OrderAddressExportDetailsDtoUpdate.class), eq(Address.class))).thenReturn(address);
         when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.empty());
         assertThrows(BadRequestException.class,
             () -> addressService.updateOrderAddress(orderAddressExportDetailsDtoUpdate));
@@ -214,15 +276,15 @@ class AddressServiceTest {
     void saveCurrentAddressForOrderTest() {
         CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
         String uuid = "a-b-c";
-        User user = ModelUtils.getUser();
-        Address address = ModelUtils.getAddress();
+        User user = getUser();
+        Address address = getAddress();
         List<Address> addresses = List.of(address);
         Region region = ModelUtils.getRegion();
         City city = ModelUtils.getCity();
         District district = ModelUtils.getDistrict();
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(user));
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(mapper.map(createAddressRequestDto, Address.class)).thenReturn(addresses.getFirst());
+        when(modelMapper.map(createAddressRequestDto, Address.class)).thenReturn(addresses.getFirst());
         when(regionRepository.findRegionByNameEnOrNameUk(address.getBaseAddress().getRegionEn(),
             address.getBaseAddress().getRegionUk())).thenReturn(Optional.of(region));
         when(cityRepository
@@ -243,7 +305,7 @@ class AddressServiceTest {
 
     @Test
     void saveCurrentAddressForOrderIfAddressExistsTest() throws Exception {
-        User user = ModelUtils.getUser();
+        User user = getUser();
         CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
         List<Address> addresses = ModelUtils.addressList();
         Region region = ModelUtils.getRegion();
@@ -251,8 +313,9 @@ class AddressServiceTest {
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.of(region));
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
-        when(mapper.map(any(Address.class), eq(CreateAddressRequestDto.class))).thenReturn(createAddressRequestDto);
-        when(mapper.map(createAddressRequestDto, CreateAddressRequestDto.class))
+        when(modelMapper.map(any(Address.class), eq(CreateAddressRequestDto.class)))
+            .thenReturn(createAddressRequestDto);
+        when(modelMapper.map(createAddressRequestDto, CreateAddressRequestDto.class))
             .thenReturn(createAddressRequestDto);
         Method method = AddressServiceImpl.class.getDeclaredMethod("checkIfAddressExist", Long.class,
             CreateAddressRequestDto.class);
@@ -289,7 +352,7 @@ class AddressServiceTest {
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository, times(0)).findByUserIdAndBaseAddress_ActualTrue(anyLong());
-        verify(mapper, times(0)).map(any(), any());
+        verify(modelMapper, times(0)).map(any(), any());
     }
 
     @Test
@@ -314,7 +377,7 @@ class AddressServiceTest {
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository, times(0)).findByUserIdAndBaseAddress_ActualTrue(anyLong());
-        verify(mapper, times(0)).map(any(), any());
+        verify(modelMapper, times(0)).map(any(), any());
     }
 
     @Test
@@ -369,14 +432,14 @@ class AddressServiceTest {
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
         when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
-        when(mapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
 
         addressService.updateCurrentAddressForOrder(dtoRequest, USER_UUID);
 
         verify(userRepository, times(2)).findUserByUuid(anyString());
         verify(addressRepository).findById(anyLong());
         verify(addressRepository).findAllByUserId(anyLong());
-        verify(mapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
         verify(addressRepository, times(2)).save(any());
     }
 
@@ -392,8 +455,8 @@ class AddressServiceTest {
         when(userRepository.findUserByUuid(anyString())).thenReturn(Optional.of(user));
         when(addressRepository.findById(anyLong())).thenReturn(Optional.of(address));
         when(addressRepository.findAllByUserId(anyLong())).thenReturn(List.of(address));
-        when(mapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
-        when(mapper.map(any(), eq(Address.class))).thenReturn(getAddress());
+        when(modelMapper.map(any(), eq(CreateAddressRequestDto.class))).thenReturn(dto);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(getAddress());
         when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString()))
             .thenReturn(Optional.empty());
 
@@ -403,8 +466,8 @@ class AddressServiceTest {
         verify(userRepository).findUserByUuid(anyString());
         verify(addressRepository).findById(anyLong());
         verify(addressRepository).findAllByUserId(anyLong());
-        verify(mapper).map(any(), eq(CreateAddressRequestDto.class));
-        verify(mapper).map(any(), eq(Address.class));
+        verify(modelMapper).map(any(), eq(CreateAddressRequestDto.class));
+        verify(modelMapper).map(any(), eq(Address.class));
         verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
     }
 
@@ -422,8 +485,8 @@ class AddressServiceTest {
         List<Address> addresses = getTestAddresses(user);
 
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(mapper.map(addresses.get(0), AddressDto.class)).thenReturn(testAddressesDto.get(0));
-        when(mapper.map(addresses.get(1), AddressDto.class)).thenReturn(testAddressesDto.get(1));
+        when(modelMapper.map(addresses.get(0), AddressDto.class)).thenReturn(testAddressesDto.get(0));
+        when(modelMapper.map(addresses.get(1), AddressDto.class)).thenReturn(testAddressesDto.get(1));
 
         OrderWithAddressesResponseDto actual = addressService.findAllAddressesForCurrentOrder(uuid);
 
@@ -480,7 +543,7 @@ class AddressServiceTest {
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
 
-        when(mapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
         when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
         when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(getCity()));
@@ -490,7 +553,7 @@ class AddressServiceTest {
         var addressDto = addressDto();
         addressDto.setDistrictUk("Район");
         addressDto.setDistrictEn("District");
-        when(mapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressDto);
+        when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressDto);
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             addressService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
@@ -509,9 +572,9 @@ class AddressServiceTest {
         verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
         verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
 
-        verify(mapper, times(1)).map(any(), eq(Address.class));
-        verify(mapper).map(any(), eq(Address.class));
-        verify(mapper).map(addresses.getFirst(), AddressDto.class);
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
+        verify(modelMapper).map(any(), eq(Address.class));
+        verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
     }
 
     @Test
@@ -569,7 +632,7 @@ class AddressServiceTest {
 
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
-        when(mapper.map(any(),
+        when(modelMapper.map(any(),
             eq(CreateAddressRequestDto.class)))
             .thenReturn(dtoRequest);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
@@ -583,7 +646,7 @@ class AddressServiceTest {
 
         verify(userRepository).findUserByUuid(user.getUuid());
         verify(addressRepository).findAllNonDeletedAddressesByUserId(user.getId());
-        verify(mapper, times(2)).map(any(), eq(CreateAddressRequestDto.class));
+        verify(modelMapper, times(2)).map(any(), eq(CreateAddressRequestDto.class));
     }
 
     @Test
@@ -603,7 +666,7 @@ class AddressServiceTest {
         when(addressRepository.findAllNonDeletedAddressesByUserId(user.getId())).thenReturn(addresses);
         when(addressRepository.findById(updateAddressRequestDto.getId()))
             .thenReturn(Optional.ofNullable(addresses.getFirst()));
-        when(mapper.map(any(),
+        when(modelMapper.map(any(),
             eq(Address.class))).thenReturn(addresses.getFirst());
         when(addressRepository.save(addresses.getFirst())).thenReturn(addresses.getFirst());
         when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
@@ -616,7 +679,7 @@ class AddressServiceTest {
         addressDto.setDistrictUk("Район");
         addressDto.setDistrictEn("District");
 
-        when(mapper.map(addresses.getFirst(),
+        when(modelMapper.map(addresses.getFirst(),
             AddressDto.class))
             .thenReturn(addressDto);
 
@@ -655,7 +718,7 @@ class AddressServiceTest {
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository, times(0)).findByUserIdAndBaseAddress_ActualTrue(anyLong());
-        verify(mapper, times(0)).map(any(), any());
+        verify(modelMapper, times(0)).map(any(), any());
     }
 
     @Test
@@ -677,7 +740,7 @@ class AddressServiceTest {
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository).findByUserIdAndBaseAddress_ActualTrue(user.getId());
-        verify(mapper, times(0)).map(any(), any());
+        verify(modelMapper, times(0)).map(any(), any());
     }
 
     @Test
@@ -702,7 +765,7 @@ class AddressServiceTest {
             .thenReturn(Optional.of(getCity()));
         when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(getDistrict()));
-        when(mapper.map(any(),
+        when(modelMapper.map(any(),
             eq(Address.class))).thenReturn(addresses.getFirst());
 
         when(addressRepository.save(addresses.getFirst())).thenReturn(addresses.getFirst());
@@ -715,7 +778,7 @@ class AddressServiceTest {
 
         verify(addressRepository, times(1)).save(addresses.getFirst());
         verify(addressRepository, times(1)).findById(anyLong());
-        verify(mapper, times(1)).map(any(), eq(Address.class));
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
     }
 
     @Test
@@ -735,7 +798,7 @@ class AddressServiceTest {
         when(userRepository.findUserByUuid(user.getUuid())).thenReturn(Optional.of(user));
         when(addressRepository.findById(updateAddressRequestDto.getId()))
             .thenReturn(Optional.ofNullable(addresses.getFirst()));
-        when(mapper.map(any(),
+        when(modelMapper.map(any(),
             eq(CreateAddressRequestDto.class)))
             .thenReturn(dtoRequest);
         when(addressRepository.findAllByUserId(user.getId())).thenReturn(addresses);
@@ -938,7 +1001,7 @@ class AddressServiceTest {
 
         verify(addressRepository).findById(firstAddressId);
         verify(addressRepository).findByUserIdAndBaseAddress_ActualTrue(user.getId());
-        verify(mapper).map(firstAddress, AddressDto.class);
+        verify(modelMapper).map(firstAddress, AddressDto.class);
     }
 
     @Test
@@ -980,7 +1043,7 @@ class AddressServiceTest {
                 .build())
             .coordinates(location.getCoordinates())
             .build();
-        OrderAddress expected = ModelUtils.getOrderAddress();
+        OrderAddress expected = getOrderAddress();
         mapUpdatedOrderAddressFieldsMethod.invoke(addressService, expected, actual, comment);
         assertEquals(expected.getLocation(), actual.getLocation());
         assertEquals(expected.getId(), actual.getId());
@@ -995,9 +1058,9 @@ class AddressServiceTest {
         Order order = ModelUtils.getOrder();
         UpdateAddressDto addressDto = ModelUtils.getUpdateAddressDto();
         addressDto.setOrderId(order.getId());
-        OrderAddress orderAddress = ModelUtils.getOrderAddress();
+        OrderAddress orderAddress = getOrderAddress();
         Region region = ModelUtils.getRegion();
-        Address address = ModelUtils.getAddress();
+        Address address = getAddress();
         City city = ModelUtils.getCity();
         District district = ModelUtils.getDistrict();
         OrderAddressDtoResponse orderAddressDtoResponse = new OrderAddressDtoResponse();
@@ -1008,13 +1071,13 @@ class AddressServiceTest {
             .thenReturn(Optional.empty());
         when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.empty());
-        when(mapper.map(any(OrderAddressExportDetailsDtoUpdate.class), eq(Address.class))).thenReturn(address);
+        when(modelMapper.map(any(OrderAddressExportDetailsDtoUpdate.class), eq(Address.class))).thenReturn(address);
         when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(city));
         when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(district));
-        when(mapper.map(any(Address.class), eq(OrderAddress.class))).thenReturn(orderAddress);
-        when(mapper.map(any(OrderAddress.class), eq(OrderAddressDtoResponse.class)))
+        when(modelMapper.map(any(Address.class), eq(OrderAddress.class))).thenReturn(orderAddress);
+        when(modelMapper.map(any(OrderAddress.class), eq(OrderAddressDtoResponse.class)))
             .thenReturn(orderAddressDtoResponse);
         addressService.addressUpdate(addressDto, "email@gmail.com");
         verify(orderRepository, times(1)).findById(order.getId());
@@ -1040,8 +1103,8 @@ class AddressServiceTest {
         when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(getDistrict()));
 
-        when(mapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
-        when(mapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
+        when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             addressService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
@@ -1051,9 +1114,9 @@ class AddressServiceTest {
         verify(userRepository, times(2)).findUserByUuid(user.getUuid());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
 
-        verify(mapper, times(1)).map(any(), eq(Address.class));
-        verify(mapper).map(any(), eq(Address.class));
-        verify(mapper).map(addresses.getFirst(), AddressDto.class);
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
+        verify(modelMapper).map(any(), eq(Address.class));
+        verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
         verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
         verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
         verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
@@ -1078,8 +1141,8 @@ class AddressServiceTest {
             .thenReturn(Optional.of(getCity()));
         when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(getDistrict()));
-        when(mapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
-        when(mapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
+        when(modelMapper.map(addresses.getFirst(), AddressDto.class)).thenReturn(addressWithKyivRegionDto());
 
         OrderWithAddressesResponseDto actualWithSearchAddress =
             addressService.saveCurrentAddressForOrder(createAddressRequestToSaveDto, uuid);
@@ -1089,9 +1152,9 @@ class AddressServiceTest {
         verify(userRepository, times(2)).findUserByUuid(user.getUuid());
         verify(addressRepository, times(2)).findAllNonDeletedAddressesByUserId(user.getId());
 
-        verify(mapper, times(1)).map(any(), eq(Address.class));
-        verify(mapper).map(any(), eq(Address.class));
-        verify(mapper).map(addresses.getFirst(), AddressDto.class);
+        verify(modelMapper, times(1)).map(any(), eq(Address.class));
+        verify(modelMapper).map(any(), eq(Address.class));
+        verify(modelMapper).map(addresses.getFirst(), AddressDto.class);
         verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
         verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
         verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
@@ -1102,9 +1165,9 @@ class AddressServiceTest {
     void updateOrderAddressTest() {
         Address addressToSave = getAddress();
 
-        when(mapper.map(TEST_ORDER_ADDRESS_DTO_UPDATE, CreateAddressRequestDto.class))
+        when(modelMapper.map(TEST_ORDER_ADDRESS_DTO_UPDATE, CreateAddressRequestDto.class))
             .thenReturn(TEST_CREATE_ADDRESS_DTO);
-        when(mapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
+        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
         when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
         when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
             .thenReturn(Optional.of(getCity()));
@@ -1125,5 +1188,255 @@ class AddressServiceTest {
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> addressService.saveCurrentAddressForOrder(mock, uuid));
         verify(userRepository, times(1)).findUserByUuid(uuid);
+    }
+
+    @Test
+    void checkIfAddressMatchLocationArea_kyivTariff_true() {
+        Address address = new Address();
+        BaseAddress base = new BaseAddress();
+        base.setCityEn("Kyiv");
+        address.setBaseAddress(base);
+
+        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+
+        boolean result = addressService.checkIfAddressMatchLocationArea(TariffLocation.KYIV_TARIFF.getLocationId(), 1L);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void checkIfAddressMatchLocationArea_kyivRegion_distanceExceedsLimit() {
+        Address address = new Address();
+        BaseAddress base = new BaseAddress();
+        base.setCityEn("OtherCity");
+        address.setBaseAddress(base);
+
+        Coordinates coords = new Coordinates();
+        coords.setLatitude(AppConstant.KYIV_LATITUDE + 1.0);
+        coords.setLongitude(AppConstant.KYIV_LONGITUDE + 1.0);
+        address.setCoordinates(coords);
+
+        when(addressRepository.findById(2L)).thenReturn(Optional.of(address));
+
+        boolean result = addressService.checkIfAddressMatchLocationArea(
+            TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId(), 2L);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void checkIfAddressMatchLocationArea_otherLocation_exists() {
+        Address address = new Address();
+        BaseAddress base = new BaseAddress();
+        base.setCityEn("OtherCity");
+        address.setBaseAddress(base);
+        address.setCoordinates(new Coordinates(0, 0));
+
+        when(addressRepository.findById(3L)).thenReturn(Optional.of(address));
+        when(locationRepository.findAddressAndLocationNamesMatch(5L, 3L)).thenReturn(Optional.of("OtherCity"));
+
+        boolean result = addressService.checkIfAddressMatchLocationArea(5L, 3L);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void formAndSaveOrderAddress_success() {
+        User user = getUser();
+        Address address = getAddress();
+        address.setUser(user);
+        BaseAddress base = getAddress().getBaseAddress();
+        base.setAddressStatus(AddressStatus.NEW);
+        address.setBaseAddress(base);
+
+        Location location = ModelUtils.getLocation();
+        OrderAddress orderAddress = getOrderAddress();
+
+        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(locationRepository.findById(2L)).thenReturn(Optional.of(location));
+        when(orderAddressRepository.save(any(OrderAddress.class))).thenReturn(orderAddress);
+        when(modelMapper.map(address, OrderAddress.class)).thenReturn(orderAddress);
+
+        OrderAddress result = addressService.formAndSaveOrderAddress(1L, 2L, user);
+
+        assertEquals(orderAddress, result);
+    }
+
+    @Test
+    void getOrUpdateOrderAddress_sameAsCurrent_returnsCurrent() {
+        User user = new User();
+        Address address = new Address();
+        address.setUser(user);
+        BaseAddress base = new BaseAddress();
+        base.setAddressStatus(AddressStatus.NEW);
+        address.setBaseAddress(base);
+
+        Location location = new Location();
+        OrderAddress current = new OrderAddress();
+        OrderAddress newAddress = new OrderAddress();
+        newAddress.setLocation(location);
+
+        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(locationRepository.findById(2L)).thenReturn(Optional.of(location));
+        when(modelMapper.map(address, OrderAddress.class)).thenReturn(newAddress);
+
+        OrderAddress result = addressService.getOrUpdateOrderAddress(current, 1L, 2L, user);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void getAllLocations_returnsMappedList() {
+        List<Location> locations = getLocationList();
+        LocationsDto locationsDto = ModelUtils.getLocationDtoFromDao();
+        when(locationRepository.findAllActiveLocations()).thenReturn(locations);
+        when(locationToLocationsDtoMapper.convert(any(Location.class))).thenReturn(locationsDto);
+
+        List<LocationsDto> result = addressService.getAllLocations();
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getAllLocationsByCourierId_throwsIfCourierNotExist() {
+        when(courierRepository.existsCourierById(10L)).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> addressService.getAllLocationsByCourierId(10L));
+    }
+
+    @Test
+    void getAllLocationsByCourierId_returnsMappedList() {
+        when(courierRepository.existsCourierById(1L)).thenReturn(true);
+        Location loc = new Location();
+        loc.setId(1L);
+        when(locationRepository.findAllActiveLocationsByCourierId(1L)).thenReturn(List.of(loc));
+        when(locationToLocationsDtoMapper.convert(loc)).thenReturn(new LocationsDto().setId(1L));
+        when(tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(1L, 1L)).thenReturn(Optional.of(100L));
+
+        List<LocationsDto> result = addressService.getAllLocationsByCourierId(1L);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getOrUpdateOrderAddress_differentFromCurrent_savesNewOrderAddress() {
+        User user = getUser();
+        Address address = getAddress();
+        address.setUser(user);
+        BaseAddress base = getAddress().getBaseAddress();
+        base.setAddressStatus(AddressStatus.NEW);
+        address.setBaseAddress(base);
+
+        Location location = ModelUtils.getLocation();
+
+        OrderAddress current = getOrderAddress();
+        current.setId(10L);
+        current.setLocation(new Location());
+
+        OrderAddress mapped = getOrderAddress();
+        mapped.setId(10L);
+        mapped.setLocation(location);
+
+        OrderAddress saved = getOrderAddress();
+        saved.setId(99L);
+
+        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(locationRepository.findById(2L)).thenReturn(Optional.of(location));
+        when(modelMapper.map(address, OrderAddress.class)).thenReturn(mapped);
+        when(orderAddressRepository.save(mapped)).thenReturn(saved);
+
+        OrderAddress result = addressService.getOrUpdateOrderAddress(current, 1L, 2L, user);
+
+        assertEquals(saved, result);
+        verify(orderAddressRepository).save(mapped);
+    }
+
+    @Test
+    void getAllLocationsByCourierId_throwsIfTariffNotFound() {
+        when(courierRepository.existsCourierById(1L)).thenReturn(true);
+
+        Location loc = new Location();
+        loc.setId(5L);
+
+        when(locationRepository.findAllActiveLocationsByCourierId(1L))
+            .thenReturn(List.of(loc));
+        when(locationToLocationsDtoMapper.convert(loc))
+            .thenReturn(new LocationsDto().setId(5L));
+        when(tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(5L, 1L))
+            .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> addressService.getAllLocationsByCourierId(1L));
+    }
+
+    @Test
+    void formAndSaveOrderAddress_deletedAddress_throwsNotFoundException() {
+        User user = ModelUtils.getUser();
+        Address address = ModelUtils.getAddress();
+        address.setId(5L);
+        address.setUser(user);
+        address.getBaseAddress().setAddressStatus(AddressStatus.DELETED);
+
+        when(addressRepository.findById(5L)).thenReturn(Optional.of(address));
+        when(locationRepository.findById(2L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+
+        assertThrows(NotFoundException.class,
+            () -> addressService.formAndSaveOrderAddress(5L, 2L, user));
+    }
+
+    @Test
+    void formAndSaveOrderAddress_wrongUser_throwsNotFoundException() {
+        User realUser = ModelUtils.getUser();
+        User otherUser = new User();
+        otherUser.setId(99L);
+
+        Address address = ModelUtils.getAddress();
+        address.setId(6L);
+        address.setUser(otherUser);
+        address.getBaseAddress().setAddressStatus(AddressStatus.NEW);
+
+        when(addressRepository.findById(6L)).thenReturn(Optional.of(address));
+        when(locationRepository.findById(2L)).thenReturn(Optional.of(ModelUtils.getLocation()));
+
+        assertThrows(NotFoundException.class,
+            () -> addressService.formAndSaveOrderAddress(6L, 2L, realUser));
+    }
+
+    @Test
+    void checkIfAddressMatchLocationArea_coordinatesEmpty_fetchesFromGoogle() {
+        Address address = ModelUtils.getAddress();
+        address.setCoordinates(new Coordinates(0.0, 0.0));
+        address.getBaseAddress().setCityEn("KyivRegion");
+        LatLng latLng = new LatLng(49.0, 31.0);
+
+        when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
+        when(googleApiService.getGeocodingResultByCityAndCountryAndLocale(
+            anyString(), eq("KyivRegion"), anyString()))
+            .thenReturn(new GeocodingResult() {
+                {
+                    geometry = new Geometry();
+                    geometry.location = latLng;
+                }
+            });
+
+        boolean result = addressService.checkIfAddressMatchLocationArea(
+            TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId(), 1L);
+
+        assertFalse(result);
+        verify(addressRepository).save(address);
+    }
+
+    @Test
+    void checkIfAddressMatchLocationArea_coordinatesNotEmpty_doesNotCallGoogle() {
+        Address address = ModelUtils.getAddress();
+        address.setCoordinates(new Coordinates(50.5, 30.5));
+        address.getBaseAddress().setCityEn("OtherCity");
+
+        when(addressRepository.findById(2L)).thenReturn(Optional.of(address));
+
+        addressService.checkIfAddressMatchLocationArea(
+            TariffLocation.KYIV_REGION_20_KM_TARIFF.getLocationId(), 2L);
+
+        verifyNoInteractions(googleApiService);
     }
 }

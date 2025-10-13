@@ -4,16 +4,18 @@ import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.notification.SenderInfoDto;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,6 +29,8 @@ public class OrdersDataForUserDto {
     private String orderStatusEn;
     private String paymentStatusUk;
     private String paymentStatusEn;
+    private String paymentLink;
+    private LocalDateTime paymentLinkExpiry;
     private Double paidAmount;
     private Double orderFullPrice;
     private Double amountBeforePayment;
@@ -39,4 +43,5 @@ public class OrdersDataForUserDto {
     private Set<String> additionalOrders;
     private SenderInfoDto sender;
     private AddressInfoDto address;
+    private Long completedOrdersCount;
 }

@@ -1,10 +1,8 @@
 package greencity.mapping.notification;
 
-import greencity.dto.notification.NotificationPlatformDto;
 import greencity.dto.notification.NotificationTemplateUpdateInfoDto;
 import greencity.dto.notification.NotificationTemplateWithPlatformsUpdateDto;
 import greencity.entity.notifications.NotificationTemplate;
-import java.util.stream.Collectors;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -24,17 +22,8 @@ public class NotificationTemplateWithPlatformsUpdateDtoMapper
                 .userCategory(notificationTemplate.getUserCategory())
                 .build())
             .platforms(notificationTemplate.getNotificationPlatforms().stream()
-                .map(platform -> NotificationPlatformDto.builder()
-                    .id(platform.getId())
-                    .receiverType(platform.getNotificationReceiverType())
-                    .nameEn(platform
-                        .getNotificationReceiverType()
-                        .getName())
-                    .bodyUk(platform.getBodyUk())
-                    .bodyEn(platform.getBodyEn())
-                    .status(platform.getNotificationStatus())
-                    .build())
-                .collect(Collectors.toList()))
+                .map(NotificationMappers::toNotificationPlatformDto)
+                .toList())
             .build();
     }
 }

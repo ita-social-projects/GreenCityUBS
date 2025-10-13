@@ -1,10 +1,12 @@
 package greencity.repository;
 
 import greencity.entity.user.User;
+import greencity.enums.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
@@ -110,4 +112,20 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Query(nativeQuery = true,
         value = "UPDATE users SET current_points = current_points + :returnPoints WHERE id = :userId")
     void updateUserCurrentPoints(Long userId, int returnPoints);
+
+    /**
+     * Finds the UUID of a user by their recipient email.
+     *
+     * @param email the recipient email of the user
+     * @return an {@link Optional} containing the user's UUID, or empty if not found
+     */
+    @Query("SELECT u.uuid FROM User u WHERE u.recipientEmail = :email AND u.status = 'ACTIVATED'")
+    Optional<String> findUuidByRecipientEmail(@Param("email") String email);
+
+    /**
+     * Counts all users by user {@link UserStatus}.
+     *
+     * @return amount of user with given {@link UserStatus}.
+     */
+    long countAllByStatus(UserStatus userStatus);
 }

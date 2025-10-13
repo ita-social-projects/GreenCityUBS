@@ -4,17 +4,17 @@ import greencity.client.config.UserRemoteClientFallbackFactory;
 import greencity.client.config.UserRemoteClientInterceptor;
 import greencity.dto.SuccessSignInDto;
 import greencity.dto.TestersSignInRequest;
-import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.DeactivateUserRequestDto;
+import greencity.dto.telegram.UserTelegramFeedbackDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.UserVO;
+import greencity.dto.user.UserActivationDto;
+import greencity.dto.user.UserDeactivationReasonDto;
+import greencity.dto.user.UserExternalDto;
 import greencity.entity.user.User;
-import java.util.Optional;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -47,24 +47,6 @@ public interface UserRemoteClient {
     String findUuidByEmail(@RequestParam(EMAIL) String email);
 
     /**
-     * Finds {@link UserVO} that is not 'DEACTIVATED' by {@link UserVO}'s Email.
-     *
-     * @param email {@link UserVO}'s Email.
-     * @return {@link Optional} of {@link UserVO}.
-     */
-    @GetMapping("/user/findNotDeactivatedByEmail")
-    Optional<UserVO> findNotDeactivatedByEmail(@RequestParam(EMAIL) String email);
-
-    /**
-     * Finds {@link UbsCustomersDto} by {@link User}'s UUID.
-     *
-     * @param uuid {@link User}'s UUID.
-     * @return {@link Optional} of {@link UbsCustomersDto}.
-     */
-    @GetMapping("/user/findByUuId")
-    Optional<UbsCustomersDto> findByUuid(@RequestParam(UUID) String uuid);
-
-    /**
      * Method checks the existence of the user by uuid.
      *
      * @param uuid {@link User}'s UUID.
@@ -83,14 +65,6 @@ public interface UserRemoteClient {
      */
     @GetMapping("/user/get-positions-authorities")
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(@RequestParam String email);
-
-    /**
-     * Changes userStatus to "DEACTIVATED" by UUID.
-     *
-     * @param uuid {@link User}'s uuid.
-     */
-    @PutMapping("/user/deactivate")
-    void markUserDeactivated(@RequestParam(UUID) String uuid, @RequestBody DeactivateUserRequestDto request);
 
     /**
      * Gets current user's password status.
@@ -148,7 +122,7 @@ public interface UserRemoteClient {
      * @param dto {@link EmployeeSignUpDto}
      */
     @PostMapping("/ownSecurity/sign-up-employee")
-    void signUpEmployee(@RequestBody EmployeeSignUpDto dto);
+    void signUpEmployee(@RequestBody EmployeeSignUpDto dto, @RequestParam String lang);
 
     /**
      * Update employee email.
@@ -167,22 +141,40 @@ public interface UserRemoteClient {
     @PutMapping("/user/authorities")
     void updateAuthoritiesToRelatedPositions(@RequestBody EmployeePositionsDto dto);
 
-    /**
-     * Deactivate employee by uuid.
-     *
-     * @param uuid - uuid of employee.
-     */
-    @PutMapping("/user/deactivate-employee")
-    void deactivateEmployee(@RequestParam String uuid);
-
-    /**
-     * Activate employee by uuid.
-     *
-     * @param uuid - uuid of employee.
-     */
-    @PutMapping("/user/markUserAsActivated")
-    void activateEmployee(@RequestParam String uuid);
-
     @PostMapping("/api/testers/sign-in")
     ResponseEntity<SuccessSignInDto> signIn(@RequestBody TestersSignInRequest request);
+
+    /**
+     * Send a Telegram user feedback.
+     *
+     * @param dto {@link UserTelegramFeedbackDto} - feedback details from the
+     *            Telegram bot.
+     */
+    @PostMapping("/email/telegram-feedback")
+    void sendTelegramFeedback(@RequestBody UserTelegramFeedbackDto dto);
+
+    /**
+     * Find {@link UserExternalDto} by uuid.
+     *
+     * @param uuid {@link User}'s uuid.
+     * @return {@link UserExternalDto}.
+     */
+    @GetMapping("/user/findByUuid/external")
+    UserExternalDto findByUuid(@RequestParam String uuid);
+
+    /**
+     * Sends an email about reason of deactivation.
+     *
+     * @param notification {@link UserDeactivationReasonDto} - notification details
+     */
+    @PostMapping("/email/sendReasonOfDeactivation")
+    void sendReasonOfDeactivation(@RequestBody UserDeactivationReasonDto notification);
+
+    /**
+     * Sends an email.
+     *
+     * @param notification {@link UserActivationDto} - notification details
+     */
+    @PostMapping("/email/sendMessageOfActivation")
+    void sendMessageOfActivation(@RequestBody UserActivationDto notification);
 }

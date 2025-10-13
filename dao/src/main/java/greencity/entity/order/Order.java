@@ -120,7 +120,7 @@ public class Order {
     @Column(name = "points_to_use", columnDefinition = "int default 0")
     private Integer pointsToUse;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order")
     private Set<Certificate> certificates;
 
     @Column(nullable = false, name = "order_status", length = 15)
@@ -193,6 +193,12 @@ public class Order {
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Refund refund;
+
+    @Column(name = "payment_link")
+    private String paymentLink;
+
+    @Column(name = "payment_link_expiry")
+    private LocalDateTime paymentLinkExpiry;
 
     /**
      * Updates the list of order bags associated with this order. This method

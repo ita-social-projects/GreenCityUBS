@@ -5,18 +5,18 @@ import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.dto.SuccessSignInDto;
 import greencity.dto.TestersSignInRequest;
-import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.employee.EmployeePositionsDto;
 import greencity.dto.employee.EmployeeSignUpDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.position.PositionAuthoritiesDto;
-import greencity.dto.user.DeactivateUserRequestDto;
+import greencity.dto.telegram.UserTelegramFeedbackDto;
 import greencity.dto.user.PasswordStatusDto;
-import greencity.dto.user.UserVO;
+import greencity.dto.user.UserActivationDto;
+import greencity.dto.user.UserDeactivationReasonDto;
+import greencity.dto.user.UserExternalDto;
 import greencity.exceptions.http.RemoteServerUnavailableException;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -34,25 +34,8 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public Optional<UserVO> findNotDeactivatedByEmail(String email) {
-                log.error(ErrorMessage.USER_WITH_THIS_EMAIL_DOES_NOT_EXIST + "{}", email, throwable);
-                return Optional.empty();
-            }
-
-            @Override
-            public Optional<UbsCustomersDto> findByUuid(String uuid) {
-                log.error(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST, throwable);
-                return Optional.empty();
-            }
-
-            @Override
             public boolean checkIfUserExistsByUuid(String uuid) {
                 throw new RemoteServerUnavailableException(ErrorMessage.COULD_NOT_RETRIEVE_USER_DATA, throwable);
-            }
-
-            @Override
-            public void markUserDeactivated(String uuid, DeactivateUserRequestDto request) {
-                throw new RemoteServerUnavailableException(ErrorMessage.USER_HAS_NOT_BEEN_DEACTIVATED, throwable);
             }
 
             @Override
@@ -95,7 +78,7 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void signUpEmployee(EmployeeSignUpDto dto) {
+            public void signUpEmployee(EmployeeSignUpDto dto, String language) {
                 log.error(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED, throwable);
             }
@@ -113,23 +96,30 @@ public class UserRemoteClientFallbackFactory implements FallbackFactory<UserRemo
             }
 
             @Override
-            public void deactivateEmployee(String uuid) {
-                log.error(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED);
-                throw new RemoteServerUnavailableException(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED,
-                    throwable);
-            }
-
-            @Override
-            public void activateEmployee(String uuid) {
-                log.error(String.format(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED, uuid));
-                throw new RemoteServerUnavailableException(
-                    String.format(ErrorMessage.EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED, uuid));
-            }
-
-            @Override
             public ResponseEntity<SuccessSignInDto> signIn(TestersSignInRequest request) {
                 log.error(ErrorMessage.TELEGRAM_BOT_ERROR_BAD_CREDENTIALS, throwable);
                 throw new RemoteServerUnavailableException(ErrorMessage.TELEGRAM_BOT_ERROR_BAD_CREDENTIALS);
+            }
+
+            @Override
+            public void sendTelegramFeedback(UserTelegramFeedbackDto dto) {
+                log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
+            }
+
+            @Override
+            public UserExternalDto findByUuid(String uuid) {
+                log.error(ErrorMessage.USER_NOT_FOUND_BY_UUID, uuid);
+                throw new RemoteServerUnavailableException(ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid);
+            }
+
+            @Override
+            public void sendReasonOfDeactivation(UserDeactivationReasonDto notification) {
+                log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
+            }
+
+            @Override
+            public void sendMessageOfActivation(UserActivationDto notification) {
+                log.error(ErrorMessage.THE_MESSAGE_WAS_NOT_SENT, throwable);
             }
         };
     }

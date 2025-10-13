@@ -5,9 +5,12 @@ import greencity.entity.order.Order;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.ubs.Address;
 import greencity.entity.user.ubs.UBSuser;
+import greencity.enums.UserStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
@@ -63,6 +66,10 @@ public class User {
 
     @Column(name = "recipient_phone")
     private String recipientPhone;
+
+    @Column(name = "user_status", nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private UserStatus status;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private List<ChangeOfPoints> changeOfPointsList;

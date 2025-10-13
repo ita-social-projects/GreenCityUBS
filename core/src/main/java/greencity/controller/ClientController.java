@@ -10,9 +10,11 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AllPointsUserDto;
 import greencity.dto.user.UserPointDto;
-import greencity.dto.user.UserVO;
 import greencity.enums.OrderStatus;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.order.OrderService;
+import greencity.service.ubs.payment.ProcessPaymentService;
+import greencity.service.ubs.point.PointService;
+import greencity.service.ubs.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,25 +23,30 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import java.util.List;
 
 @RestController
 @RequestMapping("/ubs/client")
 @RequiredArgsConstructor
+@Validated
 public class ClientController {
-    private final UBSClientService ubsClientService;
+    private final ProcessPaymentService processPaymentService;
+    private final OrderService orderService;
+    private final PointService pointService;
+    private final UserService userService;
 
     /**
      * Controller for getting all user orders.
@@ -59,7 +66,7 @@ public class ClientController {
     public ResponseEntity<PageableDto<OrdersDataForUserDto>> getAllDataForOrder(
         @Parameter(hidden = true) @CurrentUserUuid String uuid, @Parameter(hidden = true) Pageable page,
         @RequestParam(value = "status", required = false) List<OrderStatus> statuses) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrdersForUser(uuid, page, statuses));
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrdersForUser(uuid, page, statuses));
     }
 
     /**
@@ -79,7 +86,7 @@ public class ClientController {
     @GetMapping("/user-order/{id}")
     public ResponseEntity<OrdersDataForUserDto> getAllDataForOneOrder(
         @Parameter(hidden = true) @CurrentUserUuid String uuid, @Positive @PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderForUser(uuid, id));
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrderForUser(uuid, id));
     }
 
     /**
@@ -99,12 +106,12 @@ public class ClientController {
     public ResponseEntity<HttpStatus> deleteOrder(
         @Parameter(hidden = true) @CurrentUserUuid String uuid,
         @Positive @PathVariable Long id) {
-        ubsClientService.deleteOrder(uuid, id);
+        orderService.deleteOrder(uuid, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
-     * Controller returns all bonuses of user..
+     * Controller returns all bonuses of user.
      *
      * @param uuid {@link String} id.
      * @return list of {@link AllPointsUserDto}.
@@ -120,7 +127,7 @@ public class ClientController {
     @GetMapping("/users-pointsToUse")
     public ResponseEntity<AllPointsUserDto> getAllPointsForUser(
         @Parameter(hidden = true) @CurrentUserUuid String uuid) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.findAllCurrentPointsForUser(uuid));
+        return ResponseEntity.status(HttpStatus.OK).body(pointService.findAllCurrentPointsForUser(uuid));
     }
 
     /**
@@ -139,11 +146,11 @@ public class ClientController {
     })
     @GetMapping("/order-payment-detail/{orderId}")
     public ResponseEntity<OrderPaymentDetailDto> getOrderPaymentDetail(@Positive @PathVariable Long orderId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getOrderPaymentDetail(orderId));
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrderPaymentDetail(orderId));
     }
 
     /**
-     * Controller returns bonus points of current user. {@link UserVO}.
+     * Controller returns bonus points of current user.
      *
      * @param userUuid {@link String} uuid.
      * @return {@link UserPointDto}.
@@ -160,7 +167,7 @@ public class ClientController {
     public ResponseEntity<UserPointDto> getUserBonuses(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsClientService.getUserPoint(userUuid));
+            .body(userService.getUserPoint(userUuid));
     }
 
     /**
@@ -183,6 +190,6 @@ public class ClientController {
     public ResponseEntity<PaymentSystemResponse> processOrder(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid,
         @Valid @RequestBody OrderWayForPayClientDto dto) {
-        return ResponseEntity.ok(ubsClientService.processOrder(userUuid, dto));
+        return ResponseEntity.ok(processPaymentService.processOrder(userUuid, dto));
     }
 }

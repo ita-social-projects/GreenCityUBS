@@ -4,17 +4,13 @@ import greencity.annotations.ApiPageable;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
 import greencity.dto.location.api.RegionInfoDto;
-import greencity.dto.order.BlockedOrderDto;
-import greencity.dto.order.ChangeOrderResponseDTO;
-import greencity.dto.order.RequestToChangeOrdersDataDto;
-import greencity.dto.order.UserWithSomeOrderDetailDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.dto.user.ChatLinkDto;
 import greencity.dto.violation.UserViolationsWithUserName;
 import greencity.enums.SortingOrder;
-import greencity.dto.order.UserWithOrdersDto;
 import greencity.filters.CustomerPage;
 import greencity.filters.UserFilterCriteria;
 import greencity.service.ubs.OrdersForUserService;
@@ -37,6 +33,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
@@ -44,6 +41,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/ubs/management")
 @RequiredArgsConstructor
+@Validated
 public class AdminUbsController {
     private final OrdersAdminsPageService ordersAdminsPageService;
     private final ValuesForUserTableService valuesForUserTable;
@@ -67,7 +65,7 @@ public class AdminUbsController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_CLIENTS_PAGE', authentication)")
     @GetMapping("/usersAll")
-    public ResponseEntity<PageableDto<UserWithSomeOrderDetailDto>> getAllValuesForUserTable(CustomerPage page,
+    public ResponseEntity<PageableDto<UserWithSomeOrderDetailAndChatIdDto>> getAllValuesForUserTable(CustomerPage page,
         String columnName, Principal principal,
         @RequestParam SortingOrder sortingOrder,
         UserFilterCriteria userFilterCriteria) {

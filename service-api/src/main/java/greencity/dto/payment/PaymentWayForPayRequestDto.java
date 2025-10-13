@@ -44,4 +44,6 @@ public class PaymentWayForPayRequestDto {
     private String signature;
     @JsonProperty("orderTimeout")
     private Integer orderTimeout;
+    @JsonProperty("returnUrl")
+    private String returnUrl;
 }
