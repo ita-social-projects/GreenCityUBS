@@ -201,6 +201,9 @@ public class ErrorMessage {
     public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
     public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
         "Template cannot be deleted while it is referenced by existing notifications";
+    public static final String BOT_RESPONSE_NOT_FOUND = "Bot response with ID %d not found";
+    public static final String BOT_MESSAGE_WITH_TYPE_AND_LANG_NOT_FOUND =
+        "Bot message with %s type and %s language not found";
     public static final String ORDER_IN_ONGOING_PROCESSING =
         "Order has an active payment attempt, complete it or cancel to start the new one";
     public static final String UNABLE_TO_CANCEL_PAYMENT_INVOICE =

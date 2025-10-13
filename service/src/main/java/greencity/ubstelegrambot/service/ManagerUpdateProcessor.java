@@ -2,6 +2,8 @@ package greencity.ubstelegrambot.service;
 
 import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
+import greencity.enums.MessageType;
+import greencity.service.ubs.TelegramBotResponseService;
 import greencity.service.ubs.TelegramLanguageService;
 import greencity.service.ubs.TelegramLoginService;
 import greencity.service.ubs.TelegramUpdateProcessor;
@@ -17,6 +19,7 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
     private final TelegramLoginService telegramLoginService;
     private final TelegramUtils telegramUtils;
     private final TelegramLanguageService telegramLanguageService;
+    private final TelegramBotResponseService telegramBotResponseService;
 
     /**
      * Handles incoming updates related to manager interactions in Telegram.
@@ -39,17 +42,23 @@ public class ManagerUpdateProcessor implements TelegramUpdateProcessor {
     }
 
     private SendMessage processMainMenuRequest(String chatId, String lang) {
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+            MessageType.SUPPORTED_COMMANDS);
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory.createAvailableCommandsMessage(chatId, lang));
+            MessageFactory.createAvailableCommandsMessage(chatId, lang, text));
     }
 
     private SendMessage processManagerMessageRequest(String chatId, String lang) {
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+            MessageType.SUPPORTED_COMMANDS);
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang));
+            MessageFactory.createAvailableForManagerCommandsMessage(chatId, lang, text));
     }
 
     private SendMessage processManagerCallBackQueryRequest(String chatId, String lang) {
+        String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+            MessageType.FORBIDDEN_COMMANDS_MANAGER);
         return telegramUtils.updateChatStateAndRespond(chatId, ChatState.NORMAL,
-            MessageFactory.createForbiddenCommandsManagerMessage(chatId, lang));
+            MessageFactory.createForbiddenCommandsManagerMessage(chatId, lang, text));
     }
 }

@@ -9,10 +9,10 @@ import greencity.entity.telegram.ChatFeedback;
 import greencity.entity.telegram.TelegramChat;
 import greencity.enums.ChatState;
 import greencity.enums.FeedbackState;
+import greencity.enums.MessageType;
 import greencity.repository.ChatFeedbackRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.service.ubs.TelegramLanguageService;
-import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +64,9 @@ class TelegramFeedbackServiceTest {
     @Mock
     private UserRemoteClient userRemoteClient;
 
+    @Mock
+    private TelegramBotResponseServiceImpl telegramBotResponseService;
+
     @BeforeEach
     void setUp() {
         lenient().when(telegramLanguageService.getChatLanguage(anyString()))
@@ -97,6 +100,9 @@ class TelegramFeedbackServiceTest {
         chatFeedback.setFeedbackState(FeedbackState.IN_PROGRESS);
         chatFeedback.setRating(rating);
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.FEEDBACK_THANK_YOU_MESSAGE)).thenReturn("text");
+
         when(telegramChatRepository.findByChatId(chatId.toString()))
             .thenReturn(Optional.of(telegramChat));
         when(chatFeedbackRepository.findByChatIdAndFeedbackState(chatDbId, FeedbackState.IN_PROGRESS))
@@ -117,7 +123,10 @@ class TelegramFeedbackServiceTest {
         verify(telegramChatRepository).save(telegramChat);
 
         assertEquals(chatId.toString(), result.getChatId());
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "feedback.thank.you.message"), result.getText());
+        assertEquals("text", result.getText());
+
+        verify(telegramBotResponseService).getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.FEEDBACK_THANK_YOU_MESSAGE);
 
         verify(userRemoteClient).sendTelegramFeedback(feedbackDtoCaptor.capture());
         UserTelegramFeedbackDto capturedDto = feedbackDtoCaptor.getValue();
@@ -135,6 +144,9 @@ class TelegramFeedbackServiceTest {
         message.setChat(new Chat(chatId, "private"));
         message.setText("Some comment");
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR)).thenReturn("text");
+
         when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.empty());
 
         // when
@@ -142,7 +154,10 @@ class TelegramFeedbackServiceTest {
 
         // then
         assertEquals(chatId.toString(), result.getChatId());
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "unknown.error"), result.getText());
+        assertEquals("text", result.getText());
+
+        verify(telegramBotResponseService).getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR);
     }
 
     @Test
@@ -162,6 +177,9 @@ class TelegramFeedbackServiceTest {
             .isNotify(true)
             .build();
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR)).thenReturn("text");
+
         when(telegramChatRepository.findByChatId(chatId.toString())).thenReturn(Optional.of(telegramChat));
         when(chatFeedbackRepository.findByChatIdAndFeedbackState(chatDbId, FeedbackState.IN_PROGRESS))
             .thenReturn(Optional.empty());
@@ -171,7 +189,10 @@ class TelegramFeedbackServiceTest {
 
         // then
         assertEquals(chatId.toString(), result.getChatId());
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "unknown.error"), result.getText());
+        assertEquals("text", result.getText());
+
+        verify(telegramBotResponseService).getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR);
     }
 
     @Test
@@ -196,6 +217,9 @@ class TelegramFeedbackServiceTest {
         chatFeedback.setChat(telegramChat);
         chatFeedback.setFeedbackState(FeedbackState.IN_PROGRESS);
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.FEEDBACK_THANK_YOU_MESSAGE)).thenReturn("text");
+
         when(telegramChatRepository.findByChatId(chatId.toString()))
             .thenReturn(Optional.of(telegramChat));
         when(chatFeedbackRepository.findByChatIdAndFeedbackState(chatDbId, FeedbackState.IN_PROGRESS))
@@ -205,8 +229,11 @@ class TelegramFeedbackServiceTest {
         SendMessage result = telegramFeedbackService.processInputCommentRequest(message, TelegramBotConstants.UK);
 
         // then
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "feedback.thank.you.message"), result.getText());
+        assertEquals("text", result.getText());
         assertNull(chatFeedback.getComment());
+
+        verify(telegramBotResponseService).getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.FEEDBACK_THANK_YOU_MESSAGE);
     }
 
     @Test
@@ -247,6 +274,9 @@ class TelegramFeedbackServiceTest {
         // given
         String chatId = "12345";
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR)).thenReturn("text");
+
         when(telegramChatRepository.findByChatId(chatId))
             .thenReturn(Optional.empty());
 
@@ -255,7 +285,10 @@ class TelegramFeedbackServiceTest {
 
         // then
         assertEquals(chatId, result.getChatId());
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "unknown.error"), result.getText());
+        assertEquals("text", result.getText());
+
+        verify(telegramBotResponseService).getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.UNKNOWN_ERROR);
     }
 
     @Test
@@ -278,6 +311,9 @@ class TelegramFeedbackServiceTest {
         existingFeedback.setFeedbackState(FeedbackState.IN_PROGRESS);
         existingFeedback.setChat(chat);
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.BAD_FEEDBACK_MESSAGE)).thenReturn("text");
+
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(chatFeedbackRepository.findByChatIdAndFeedbackState(chatDbId, FeedbackState.IN_PROGRESS))
             .thenReturn(Optional.of(existingFeedback));
@@ -286,12 +322,14 @@ class TelegramFeedbackServiceTest {
         SendMessage result = telegramFeedbackService.processRatingFeedbackRequest(chatId, rating);
 
         // then
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "bad.feedback.message"), result.getText());
+        assertEquals("text", result.getText());
         assertEquals(FeedbackState.CLOSED, existingFeedback.getFeedbackState());
 
         verify(chatFeedbackRepository).save(existingFeedback);
         verify(chatFeedbackRepository)
             .save(argThat(fb -> fb.getRating() == rating && fb.getFeedbackState() == FeedbackState.IN_PROGRESS));
+        verify(telegramBotResponseService).getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.BAD_FEEDBACK_MESSAGE);
     }
 
     @Test
@@ -309,6 +347,9 @@ class TelegramFeedbackServiceTest {
             .isNotify(true)
             .build();
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.GREAT_FEEDBACK_MESSAGE)).thenReturn("text");
+
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(chatFeedbackRepository.findByChatIdAndFeedbackState(chatDbId, FeedbackState.IN_PROGRESS))
             .thenReturn(Optional.empty());
@@ -317,11 +358,13 @@ class TelegramFeedbackServiceTest {
         SendMessage result = telegramFeedbackService.processRatingFeedbackRequest(chatId, rating);
 
         // then
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "great.feedback.message"), result.getText());
+        assertEquals("text", result.getText());
 
         verify(chatFeedbackRepository).save(argThat(fb -> fb.getRating() == rating &&
             fb.getFeedbackState() == FeedbackState.IN_PROGRESS &&
             fb.getChat() == chat));
+        verify(telegramBotResponseService).getResponseByLangAndMessageType(
+            TelegramBotConstants.UK, MessageType.GREAT_FEEDBACK_MESSAGE);
     }
 
     @Test
@@ -337,6 +380,8 @@ class TelegramFeedbackServiceTest {
             .chatStateUpdatedAt(Instant.now().minus(1, ChronoUnit.HOURS))
             .isNotify(true)
             .build();
+
+        when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), any())).thenReturn("text");
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(chatFeedbackRepository.findByChatIdAndFeedbackState(chatDbId, FeedbackState.IN_PROGRESS))

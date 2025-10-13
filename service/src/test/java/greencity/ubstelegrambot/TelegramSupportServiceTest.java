@@ -7,6 +7,7 @@ import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
 import greencity.enums.ChatState;
+import greencity.enums.MessageType;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
@@ -15,6 +16,7 @@ import greencity.repository.TelegramMessageRepository;
 import greencity.service.ubs.TelegramNotificationService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.messages.MessageProvider;
+import greencity.ubstelegrambot.service.TelegramBotResponseServiceImpl;
 import greencity.ubstelegrambot.service.TelegramExecutor;
 import greencity.ubstelegrambot.service.TelegramSupportServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
@@ -93,6 +95,9 @@ class TelegramSupportServiceTest {
     private MessageAssetRepository messageAssetRepository;
 
     @Mock
+    private TelegramBotResponseServiceImpl telegramBotResponseService;
+
+    @Mock
     private TelegramUtils telegramUtils;
 
     private static MockedStatic<MessageProvider> messageProviderMock;
@@ -113,15 +118,17 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_UnknownChat_ShouldReturnUnknownErrorOccurredMessage() {
         Message message = mock(Message.class);
         User user = mock(User.class);
+        String expectedText = "Unknown error occurred";
 
         when(message.getFrom()).thenReturn(user);
         when(user.getId()).thenReturn(1L);
         when(telegramChatRepository.findByChatId(anyString())).thenReturn(Optional.empty());
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.UNKNOWN_ERROR)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "unknown.error"),
-            result.getText());
+        assertEquals(expectedText, result.getText());
     }
 
     @Test
@@ -148,10 +155,13 @@ class TelegramSupportServiceTest {
 
             SendMessage feedbackMessage = new SendMessage(chatId, "feedback");
             SendMessage deleteKeyboardMessage = new SendMessage(chatId, "delete_keyboard");
-            mfMock.when(() -> MessageFactory.createFeedbackMessage(chatId, lang))
+            mfMock.when(() -> MessageFactory.createFeedbackMessage(chatId, lang, feedbackMessage.getText()))
                 .thenReturn(feedbackMessage);
             mfMock.when(() -> MessageFactory.deleteEndSupportKeyboardMessage(chatId, lang))
                 .thenReturn(deleteKeyboardMessage);
+
+            when(telegramBotResponseService.getResponseByLangAndMessageType(chatEntity.getLanguageCode(),
+                MessageType.FEEDBACK_MESSAGE)).thenReturn(feedbackMessage.getText());
 
             when(telegramUtils.updateChatStateAndRespond(eq(chatId), eq(ChatState.NORMAL), eq(feedbackMessage)))
                 .thenReturn(feedbackMessage);
@@ -172,6 +182,7 @@ class TelegramSupportServiceTest {
         String chatId = "1";
         String username = "tg_user";
         String messageText = "Hello";
+        String responseText = "Message sent to manager";
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -188,14 +199,16 @@ class TelegramSupportServiceTest {
             .builder()
             .id(id)
             .chatId(chatId)
+            .languageCode(TelegramBotConstants.UK)
             .unreadMessagesCount(0)
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            chat.getLanguageCode(), MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(responseText);
+        SendMessage result = telegramSupportService.processSupportMessage(message, chat.getLanguageCode());
 
-        SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
-
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager")));
+        assertTrue(result.getText().contains(responseText));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, messageText, id);
@@ -207,6 +220,7 @@ class TelegramSupportServiceTest {
         String chatId = "1";
         String username = "tg_user";
         String mediaGroupId = "12345";
+        String messageText = "Hello";
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -234,10 +248,12 @@ class TelegramSupportServiceTest {
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(null);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(messageText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
+        assertTrue(result.getText().contains(messageText));
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
@@ -250,6 +266,7 @@ class TelegramSupportServiceTest {
         String chatId = "1";
         String username = "tg_user";
         String mediaGroupId = "12345";
+        String expectedText = "Hello";
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -276,10 +293,12 @@ class TelegramSupportServiceTest {
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenThrow(new TelegramBotExecutionException());
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
+        assertTrue(result.getText().contains(expectedText));
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
             MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
@@ -291,6 +310,7 @@ class TelegramSupportServiceTest {
         String chatId = "1";
         String username = "tg_user";
         String mediaGroupId = "12345";
+        String expectedText = "Hello";
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -320,10 +340,12 @@ class TelegramSupportServiceTest {
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramMessageRepository.findByMediaGroupId(mediaGroupId)).thenReturn(Optional.of(telegramMessage));
         when(telegramExecutor.executeGetFile(any(GetFile.class))).thenReturn(file);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed")));
+        assertTrue(result.getText().contains(expectedText));
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
@@ -385,6 +407,7 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_HasDocumentButNullDocument_ShouldReturnRetryMessage() {
         Message message = mock(Message.class);
         User user = mock(User.class);
+        String expectedText = "Text";
 
         when(user.getId()).thenReturn(1L);
         when(message.getFrom()).thenReturn(user);
@@ -400,10 +423,12 @@ class TelegramSupportServiceTest {
             .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed"), result.getText());
+        assertEquals(expectedText, result.getText());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
@@ -415,6 +440,7 @@ class TelegramSupportServiceTest {
         Message message = mock(Message.class);
         User user = mock(User.class);
         String chatId = "1";
+        String expectedText = "Text";
 
         when(user.getId()).thenReturn(1L);
         when(message.getFrom()).thenReturn(user);
@@ -430,10 +456,12 @@ class TelegramSupportServiceTest {
             .build();
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.file.failed"), result.getText());
+        assertEquals(expectedText, result.getText());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
     }
@@ -444,6 +472,7 @@ class TelegramSupportServiceTest {
         User user = mock(User.class);
         Document document = mock(Document.class);
         File file = mock(File.class);
+        String expectedText = "Message sent to manager";
 
         when(user.getId()).thenReturn(1L);
         when(message.getFrom()).thenReturn(user);
@@ -461,6 +490,8 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn("/path/to/file.pdf");
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(userRemoteWebClient.uploadFile(any())).thenReturn("https://azure.com/file");
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
 
         TelegramChat chat = TelegramChat.builder()
             .id(1L)
@@ -472,7 +503,7 @@ class TelegramSupportServiceTest {
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager"), result.getText());
+        assertEquals(expectedText, result.getText());
         verify(userRemoteWebClient).uploadFile(any());
         verify(messageAssetRepository).save(any());
 
@@ -485,6 +516,7 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_HasPhotoButNoLargestPhoto_ShouldDeleteMessageAndReturnRetryMessage() {
         String chatId = "1";
         long userId = 1L;
+        String expectedText = "Fail to upload file";
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -501,13 +533,15 @@ class TelegramSupportServiceTest {
         lenient().when(message.getPhoto()).thenReturn(Collections.emptyList());
 
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_PHOTO_FAILED)).thenReturn(expectedText);
 
         ArgumentCaptor<TelegramMessage> messageCaptor = ArgumentCaptor.forClass(TelegramMessage.class);
         doNothing().when(telegramMessageRepository).delete(any());
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "manager.photo.failed"), result.getText());
+        assertEquals(expectedText, result.getText());
 
         verify(telegramMessageRepository).save(messageCaptor.capture());
         verify(telegramMessageRepository).delete(messageCaptor.getValue());
@@ -521,6 +555,7 @@ class TelegramSupportServiceTest {
         User user = mock(User.class);
         Document document = mock(Document.class);
         File file = mock(File.class);
+        String expectedText = "Message sent to manager";
 
         when(user.getId()).thenReturn(1L);
         when(message.getFrom()).thenReturn(user);
@@ -548,10 +583,12 @@ class TelegramSupportServiceTest {
             .build();
 
         when(telegramChatRepository.findByChatId("1")).thenReturn(Optional.of(chat));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
-        assertEquals(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager"), result.getText());
+        assertEquals(expectedText, result.getText());
 
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
@@ -567,6 +604,7 @@ class TelegramSupportServiceTest {
         String chatId = "1";
         String username = "tg_user";
         String caption = "Hello, manager!";
+        String expectedText = "Message sent to manager";
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -596,12 +634,14 @@ class TelegramSupportServiceTest {
         when(file.getFilePath()).thenReturn("/path/photo.jpeg");
         when(telegramUtils.fileToByteArray(file)).thenReturn(new byte[] {1, 2, 3});
         when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("https://azure.com/photo");
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
         SendMessage result = telegramSupportService.processSupportMessage(message, TelegramBotConstants.UK);
 
         assertTrue(result.getText()
-            .contains(MessageProvider.get(TelegramBotConstants.UK, "message.sent.to.manager")));
+            .contains(expectedText));
 
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(
             eq(username),
@@ -617,6 +657,7 @@ class TelegramSupportServiceTest {
     void testProcessSupportMessage_StartCommandWhileInSupport_ShouldReturnAlreadyOpenMessage() {
         String chatId = "123";
         String lang = TelegramBotConstants.UK;
+        String expectedText = "Manager chat is already open";
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -631,13 +672,15 @@ class TelegramSupportServiceTest {
             .build();
         when(telegramChatRepository.findByChatId(chatId))
             .thenReturn(Optional.of(chatEntity));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.MANAGER_CHAT_ALREADY_OPEN_MESSAGE)).thenReturn(expectedText);
 
         SendMessage result = telegramSupportService.processSupportMessage(message, lang);
 
         assertNotNull(result);
         assertEquals(chatId, result.getChatId());
         assertTrue(result.getText()
-            .contains(MessageProvider.get(lang, "manager.chat.already.open.message")));
+            .contains(expectedText));
 
         verify(telegramChatRepository).findByChatId(chatId);
     }
@@ -649,6 +692,8 @@ class TelegramSupportServiceTest {
         chat.setChatId("111");
         chat.setChatState(ChatState.IN_SUPPORT);
         chat.setLanguageCode("en");
+
+        String expectedText = "Message sent to manager";
 
         Sticker sticker = mock(Sticker.class);
         Message message = mock(Message.class);
@@ -668,10 +713,13 @@ class TelegramSupportServiceTest {
         when(telegramUtils.fileToByteArray(any())).thenReturn("bytes".getBytes());
         when(userRemoteWebClient.uploadFile(any())).thenReturn("http://cdn/sticker.webp");
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
+
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        assertEquals(MessageProvider.get("en", "message.sent.to.manager"), result.getText());
+        assertEquals(expectedText, result.getText());
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
 
@@ -683,6 +731,8 @@ class TelegramSupportServiceTest {
         chat.setChatState(ChatState.IN_SUPPORT);
         chat.setLanguageCode("en");
 
+        String expectedText = "Message file failed";
+
         Message message = mock(Message.class);
 
         User from = new User();
@@ -693,10 +743,13 @@ class TelegramSupportServiceTest {
         when(message.getSticker()).thenReturn(null);
         when(message.getChatId()).thenReturn(111L);
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
+
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        assertEquals(MessageProvider.get("en", "manager.file.failed"), result.getText());
+        assertEquals(expectedText, result.getText());
 
         verify(telegramMessageRepository).delete(any());
     }
@@ -708,6 +761,8 @@ class TelegramSupportServiceTest {
         chat.setChatId("111");
         chat.setChatState(ChatState.IN_SUPPORT);
         chat.setLanguageCode("en");
+
+        String expectedText = "Message sent to manager";
 
         Message message = mock(Message.class);
 
@@ -730,10 +785,13 @@ class TelegramSupportServiceTest {
         when(telegramUtils.fileToByteArray(any())).thenReturn("video".getBytes());
         when(userRemoteWebClient.uploadFile(any())).thenReturn("http://cdn/clip.mp4");
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(expectedText);
+
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        assertTrue(result.getText().contains(MessageProvider.get("en", "message.sent.to.manager")));
+        assertTrue(result.getText().contains(expectedText));
         verify(messageAssetRepository).save(any(MessageAsset.class));
     }
 
@@ -744,6 +802,8 @@ class TelegramSupportServiceTest {
         chat.setChatId("111");
         chat.setChatState(ChatState.IN_SUPPORT);
         chat.setLanguageCode("en");
+
+        String expectedText = "Message file failed";
 
         Message message = mock(Message.class);
 
@@ -756,10 +816,13 @@ class TelegramSupportServiceTest {
         when(message.getAnimation()).thenReturn(null);
         when(message.getChatId()).thenReturn(111L);
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MANAGER_FILE_FAILED)).thenReturn(expectedText);
+
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
         assertNotNull(result);
-        assertEquals((MessageProvider.get("en", "manager.file.failed")), result.getText());
+        assertEquals(expectedText, result.getText());
         verify(telegramMessageRepository).delete(any());
     }
 
@@ -791,6 +854,9 @@ class TelegramSupportServiceTest {
         when(telegramUtils.fileToByteArray(any(File.class))).thenReturn(new byte[] {1, 2, 3});
         when(userRemoteWebClient.uploadFile(any(MultipartFile.class))).thenReturn("http://file-url");
 
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.EN,
+            MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn("");
+
         // when
         SendMessage result = telegramSupportService.processSupportMessage(message, "en");
 
@@ -805,6 +871,8 @@ class TelegramSupportServiceTest {
         Message editedMessage = createMessage(12345L, 67890L, 98765, "Hello");
 
         when(telegramChatRepository.findByChatId("67890")).thenReturn(Optional.empty());
+        when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
+            MessageType.UNKNOWN_ERROR)).thenReturn("Unknown error");
         // When
         SendMessage result = telegramSupportService.processEditedSupportMessage(editedMessage, "uk");
 
