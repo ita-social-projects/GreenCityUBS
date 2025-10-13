@@ -167,8 +167,7 @@ public class OrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = PersonalDataDto.class))),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content)
     })
     @GetMapping("/personal-data")
     public ResponseEntity<PersonalDataDto> getUBSUsers(
