@@ -203,6 +203,12 @@ spec:
             secretKeyRef:
               name: {{ .Values.externalSecret.secretName }}
               key: GREENCITY-SECRET-TOKEN
+
+        - name: GREENCITY_UBS_ADMIN_BASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecret.secretName }}
+              key: GREENCITY-UBS-ADMIN-BASE-URL
         ports:
         - containerPort: 8060
           name: tomcat
