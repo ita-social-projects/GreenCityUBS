@@ -170,7 +170,7 @@ public class UserProfileController {
     })
     @DeleteMapping("/user/delete")
     public ResponseEntity<Object> deleteUser(@Parameter(hidden = true) @CurrentUserUuid String uuid,
-        @RequestBody UserDeletionReasonDto reason) {
+        @RequestBody @Valid UserDeletionReasonDto reason) {
         userService.deleteUserByUuid(uuid, reason);
         return ResponseEntity.ok().build();
     }
