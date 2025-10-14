@@ -1,18 +1,24 @@
 package greencity.service.ubs;
 
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
+import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
+import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
+import greencity.dto.order.EventDto;
 import greencity.entity.order.Event;
 import greencity.entity.order.Order;
 import greencity.entity.user.employee.Employee;
+import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.EventRepository;
+import greencity.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,14 +26,18 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
-import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final EmployeeRepository employeeRepository;
+    private final OrderRepository orderRepository;
+    private final ModelMapper modelMapper;
 
     /**
      * This is method which collect's information about order history lifecycle.
@@ -174,6 +184,26 @@ public class EventServiceImpl implements EventService {
             + "  " + employee.getLastName(), order);
     }
 
+    @Override
+    public List<EventDto> getAllEventsForOrder(Long orderId, String email, String language) {
+        Optional<Order> order = orderRepository.findById(orderId);
+
+        if (order.isEmpty()) {
+            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId);
+        }
+
+        List<Event> orderEvents = eventRepository.findAllEventsByOrderId(orderId);
+        if (orderEvents.isEmpty()) {
+            throw new NotFoundException(EVENTS_NOT_FOUND_EXCEPTION + orderId);
+        }
+
+        localizeEventNames(orderEvents, language);
+        return orderEvents.stream()
+            .map(event -> modelMapper.map(event, EventDto.class))
+            .sorted(Comparator.comparing(EventDto::getEventDate).reversed())
+            .toList();
+    }
+
     @Data
     private static class EmployeePositionChanges {
         private final String updated;
@@ -199,6 +229,24 @@ public class EventServiceImpl implements EventService {
         public static EmployeePositionChanges fromEmployeePosition(Long position) {
             return Optional.ofNullable(ALL_VAlUES.get(position))
                 .orElseThrow(() -> new NotFoundException(POSITION_NOT_FOUND_BY_ID + position));
+        }
+    }
+
+    /**
+     * Method that takes a list of events and a language and localizes the event
+     * names and author names in the list of events.
+     *
+     * @param events   a list of events
+     * @param language a language
+     */
+    private void localizeEventNames(List<Event> events, String language) {
+        if (AppConstant.LANGUAGE_EN.equals(language)) {
+            events.forEach(event -> {
+                event.setEventNameUk(event.getEventNameEn());
+                event.setAuthorNameUk(event.getAuthorNameEn());
+            });
+        } else if (!AppConstant.LANGUAGE_UK.equals(language)) {
+            throw new BadRequestException("Unexpected value: " + language);
         }
     }
 }

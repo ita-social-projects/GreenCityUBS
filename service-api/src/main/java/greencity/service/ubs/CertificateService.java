@@ -1,5 +1,6 @@
 package greencity.service.ubs;
 
+import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.pageble.PageableDto;
@@ -29,4 +30,14 @@ public interface CertificateService {
      */
     PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,
         CertificateFilterCriteria certificateFilterCriteria);
+
+    /**
+     * Method returns the status of the entered certificate.
+     *
+     * @param code     {@link String} code of certificate.
+     * @param userUuid {@link String} uuid of the user.
+     * @return {@link CertificateDto} which contains status.
+     * @author Oleh Bilonizhka
+     */
+    CertificateDto checkCertificate(String code, String userUuid);
 }

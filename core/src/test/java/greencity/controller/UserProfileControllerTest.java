@@ -1,16 +1,29 @@
 package greencity.controller;
 
+import static greencity.ModelUtils.getPrincipal;
+import static greencity.ModelUtils.getUserProfileCreateDto;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.user.DeactivateUserRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.user.UserProfileDto;
+import greencity.enums.UserStatus;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.user.UserService;
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,28 +38,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
-
-import static greencity.ModelUtils.getPrincipal;
-import static greencity.ModelUtils.getUserProfileCreateDto;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
 class UserProfileControllerTest {
-    private static final String deactivateUser = "/user/markUserAsDeactivated";
-
     private MockMvc mockMvc;
-
-    @Mock
-    UBSClientService ubsClientService;
 
     @InjectMocks
     UserProfileController userProfileController;
@@ -55,10 +51,14 @@ class UserProfileControllerTest {
     UserRepository userRepository;
 
     @Mock
-    private Validator mockValidator;
+    Validator mockValidator;
+
+    @Mock
+    UserService userService;
 
     private Principal principal = getPrincipal();
     private ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setup() {
@@ -72,15 +72,13 @@ class UserProfileControllerTest {
     }
 
     @Test
-    void saveUserDate() throws Exception {
+    void saveUserDataTest() throws Exception {
         UserProfileDto userProfileDto = ModelUtils.userProfileDto();
         List<AddressDto> addressDto = ModelUtils.addressDto();
         userProfileDto.setAddressDto(addressDto);
-
-        ObjectMapper objectMapper = new ObjectMapper();
         String responseJSON = objectMapper.writeValueAsString(userProfileDto);
-
         String uuid = "uuid";
+
         when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
 
         mockMvc.perform(put(AppConstant.UBS_LINK_USERPROFILE + "/user/update")
@@ -91,7 +89,7 @@ class UserProfileControllerTest {
     }
 
     @Test
-    void getProfileData() throws Exception {
+    void getProfileDataTest() throws Exception {
         String uuid = "uuid";
         when(userRepository.findUuidByRecipientEmail(principal.getName())).thenReturn(Optional.of(uuid));
         mockMvc.perform(get(AppConstant.UBS_LINK_USERPROFILE + "/user/getUserProfile")
@@ -101,25 +99,96 @@ class UserProfileControllerTest {
     }
 
     @Test
-    void deactivateUser() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        DeactivateUserRequestDto request = DeactivateUserRequestDto.builder()
-            .reason("test")
-            .build();
-        mockMvc.perform(put(AppConstant.UBS_LINK_USERPROFILE + deactivateUser)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(request)))
+    void changeUserStatusTest() throws Exception {
+        String uuid = "uuid";
+        Long id = 1L;
+        UserStatus userStatus = UserStatus.DEACTIVATED;
+
+        when(userRepository.findUuidByRecipientEmail(principal.getName()))
+            .thenReturn(Optional.of("uuid"));
+
+        mockMvc.perform(put(AppConstant.UBS_LINK_USERPROFILE + "/status/" + id)
+            .principal(principal)
+            .param("status", String.valueOf(userStatus)))
             .andExpect(status().isOk());
+
+        verify(userService).updateUserStatusById(uuid, id, userStatus);
     }
 
     @Test
-    void createUserProfile() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
+    void createUserProfileTest() throws Exception {
         String content = objectMapper.writeValueAsString(getUserProfileCreateDto());
         mockMvc.perform(post(AppConstant.UBS_LINK_USERPROFILE + "/user/create")
             .content(content)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated());
-        verify(ubsClientService).createUserProfile(getUserProfileCreateDto());
+        verify(userService).createUserProfile(getUserProfileCreateDto());
+    }
+
+    @Test
+    void getReasonsOfDeactivationTest() throws Exception {
+        String uuid = "uuid";
+        Long id = 1L;
+        List<String> reasons = List.of("reason1", "reason2");
+
+        when(userRepository.findUuidByRecipientEmail(principal.getName()))
+            .thenReturn(Optional.of("uuid"));
+        when(userService.getDeactivationReasons(id, uuid))
+            .thenReturn(reasons);
+
+        mockMvc.perform(get(AppConstant.UBS_LINK_USERPROFILE + "/reasons")
+            .principal(principal)
+            .param("id", String.valueOf(id))
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(reasons)));
+
+        verify(userService).getDeactivationReasons(id, uuid);
+    }
+
+    @Test
+    void getUserStatusTest() throws Exception {
+        String uuid = "uuid";
+        UserStatus userStatus = UserStatus.BLOCKED;
+
+        when(userService.getUserStatusByUuid(uuid))
+            .thenReturn(userStatus);
+
+        mockMvc.perform(get(AppConstant.UBS_LINK_USERPROFILE + "/user/status")
+            .param("uuid", uuid)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(userStatus)));
+
+        verify(userService).getUserStatusByUuid(uuid);
+    }
+
+    @Test
+    void deleteUserTest() throws Exception {
+        String uuid = "uuid";
+
+        when(userRepository.findUuidByRecipientEmail(principal.getName()))
+            .thenReturn(Optional.of("uuid"));
+
+        mockMvc.perform(delete(AppConstant.UBS_LINK_USERPROFILE + "/user/delete")
+            .principal(principal))
+            .andExpect(status().isOk());
+
+        verify(userService).deleteUserByUuid(uuid);
+    }
+
+    @Test
+    void getActivatedUsersAmountTest() throws Exception {
+        Long amount = 100L;
+
+        when(userService.getActivatedUsersAmount())
+            .thenReturn(amount);
+
+        mockMvc.perform(get(AppConstant.UBS_LINK_USERPROFILE + "/activatedUsersAmount")
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(String.valueOf(amount)));
+
+        verify(userService).getActivatedUsersAmount();
     }
 }

@@ -2,15 +2,11 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
+import greencity.dto.BotResponseProjection;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
-import greencity.dto.telegram.ChatDto;
-import greencity.dto.telegram.CreateTelegramMessageRequest;
-import greencity.dto.telegram.EditTelegramMessageRequest;
-import greencity.dto.telegram.FeedbackDto;
-import greencity.dto.telegram.MarkMessagesAsReadRequestDto;
-import greencity.dto.telegram.TelegramMessageDto;
-import greencity.dto.telegram.ToggleNotificationsRequestDto;
+import greencity.dto.telegram.*;
+import greencity.service.ubs.TelegramBotResponseService;
 import greencity.service.ubs.TelegramFeedbackService;
 import greencity.service.ubs.TelegramService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,6 +47,7 @@ import static greencity.constant.AppConstant.TELEGRAM_LINK;
 public class TelegramController {
     private final TelegramService telegramService;
     private final TelegramFeedbackService telegramFeedbackService;
+    private final TelegramBotResponseService telegramBotResponseService;
 
     /**
      * Retrieves all messages for a given chat ID with pagination support.
@@ -250,5 +247,61 @@ public class TelegramController {
     public ResponseEntity<Boolean> getIsNotificationsEnabled(
         @Parameter(hidden = true) @CurrentUserUuid String userUuid) {
         return ResponseEntity.ok(telegramService.getIsNotificationsEnabled(userUuid));
+    }
+
+    /**
+     * Retrieves a paginated list of all available bot responses.
+     *
+     * <p>
+     * This endpoint returns a pageable collection of {@link BotResponseProjection}
+     * objects containing configured bot responses. Access is restricted to users
+     * with the {@code TELEGRAM_MANAGEMENT} authority.
+     * </p>
+     *
+     * @param pageable the pagination and sorting information
+     * @return {@link ResponseEntity} containing a {@link PageableDto} of
+     *         {@link BotResponseProjection} and HTTP status {@code 200 (OK)} if the
+     *         request is successful
+     *
+     * @see BotResponseProjection
+     * @see PageableDto
+     */
+    @Operation(summary = "Get all bot responses")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @GetMapping(value = "/bot_responses", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PageableDto<BotResponseProjection>> getAllBotResponses(Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(telegramBotResponseService.getAllBotResponses(pageable));
+    }
+
+    /**
+     * Updates an existing bot response with new content.
+     *
+     * <p>
+     * This endpoint allows modification of a bot response configuration. The update
+     * request must include a valid {@link UpdateBotMessageRequestDto}. Access is
+     * restricted to users with the {@code TELEGRAM_MANAGEMENT} authority.
+     * </p>
+     *
+     * @param dto the request body containing updated bot response data
+     *
+     * @see UpdateBotMessageRequestDto
+     */
+    @Operation(summary = "Update bot response")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
+    @PutMapping(value = "/bot_responses", produces = MediaType.APPLICATION_JSON_VALUE)
+    public void updateBotResponse(@RequestBody UpdateBotMessageRequestDto dto) {
+        telegramBotResponseService.updateBotResponse(dto);
     }
 }

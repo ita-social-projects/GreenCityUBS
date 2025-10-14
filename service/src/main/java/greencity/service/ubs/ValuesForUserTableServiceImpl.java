@@ -11,6 +11,7 @@ import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.repository.UserRepository;
 import greencity.repository.UserTableRepo;
+import java.util.Comparator;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
     UserTableRepo userTableRepo;
     private final EmployeeRepository employeeRepository;
     private final TelegramChatRepository telegramChatRepository;
-    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     @Override
     public PageableDto<UserWithSomeOrderDetailAndChatIdDto> getAllFields(CustomerPage page, String columnName,
@@ -85,12 +86,13 @@ public class ValuesForUserTableServiceImpl implements ValuesForUserTableService 
         }
         allFieldsFromTableDto.setUserBonuses(u.getCurrentPoints().toString());
         Optional<Order> optional =
-            u.getOrders().stream().max((o1, o2) -> o1.getOrderDate().compareTo(o2.getOrderDate()));
+            u.getOrders().stream().max(Comparator.comparing(Order::getOrderDate));
         if (optional.isPresent()) {
             allFieldsFromTableDto
                 .setLastOrderDate(optional
                     .get().getOrderDate().toLocalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT)));
         }
+        allFieldsFromTableDto.setStatus(u.getStatus());
         telegramChatRepository.findByUser(u)
             .ifPresent(chat -> allFieldsFromTableDto.setChatId(chat.getId()));
         return allFieldsFromTableDto;
