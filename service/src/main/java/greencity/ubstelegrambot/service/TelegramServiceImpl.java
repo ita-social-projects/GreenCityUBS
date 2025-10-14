@@ -154,6 +154,7 @@ public class TelegramServiceImpl implements TelegramService {
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .sendAt(Instant.now())
+            .updatedAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
             .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
             .build();
@@ -171,6 +172,7 @@ public class TelegramServiceImpl implements TelegramService {
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
             .sendAt(Instant.now())
+            .updatedAt(Instant.now())
             .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
@@ -249,6 +251,7 @@ public class TelegramServiceImpl implements TelegramService {
                 .text(caption)
                 .status(MessageDeliveryStatus.SENT)
                 .sendAt(Instant.now())
+                .updatedAt(Instant.now())
                 .messageViewingStatus(MessageViewingStatus.READ)
                 .build();
 
@@ -349,7 +352,8 @@ public class TelegramServiceImpl implements TelegramService {
                     message.getFromManager(),
                     message.getStatus(),
                     assetDtos,
-                    message.getMessageViewingStatus());
+                    message.getMessageViewingStatus(),
+                    !message.getSendAt().equals(message.getUpdatedAt()));
             }).toList();
 
         return new PageableDto<>(
@@ -430,14 +434,17 @@ public class TelegramServiceImpl implements TelegramService {
                     asset.getContentType()))
                 .toList();
 
+            boolean isUpdated = !message.getSendAt().equals(message.getUpdatedAt());
+
             TelegramMessageDto lastMessage = TelegramMessageDto.builder()
                 .id(message.getId())
                 .text(message.getText())
-                .sendAt(message.getSendAt())
+                .sendAt(!isUpdated ? message.getSendAt() : message.getUpdatedAt())
                 .fromManager(message.getFromManager())
                 .deliveryStatus(message.getStatus())
                 .assets(assetDtos)
                 .messageViewingStatus(message.getMessageViewingStatus())
+                .isUpdated(isUpdated)
                 .build();
 
             chatDtoBuilder.lastMessage(lastMessage);

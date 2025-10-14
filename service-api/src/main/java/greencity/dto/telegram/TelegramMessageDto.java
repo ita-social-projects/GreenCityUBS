@@ -27,4 +27,6 @@ public class TelegramMessageDto {
     private List<MessageAssetDto> assets;
 
     private MessageViewingStatus messageViewingStatus;
+
+    private Boolean isUpdated;
 }
