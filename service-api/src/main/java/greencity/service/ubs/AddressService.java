@@ -1,17 +1,19 @@
 package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
+import greencity.dto.LocationsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.order.OrderAddressDtoResponse;
-import greencity.dto.order.OrderWithAddressesResponseDto;
-import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
-import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.dto.order.OrderAddressDtoRequest;
+import greencity.dto.order.OrderAddressDtoResponse;
+import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
+import greencity.dto.order.OrderWithAddressesResponseDto;
+import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
+import greencity.exceptions.NotFoundException;
 import java.util.List;
 
 public interface AddressService {
@@ -134,4 +136,63 @@ public interface AddressService {
      * @author Mahdziak Orest
      */
     ReadAddressByOrderDto getAddressByOrderId(Long orderId);
+
+    /**
+     * Checks if the given address belongs to the specified location area. - For
+     * Kyiv tariff: verifies if the address city is part of Kyiv. - For Kyiv region
+     * 20 km tariff: calculates the distance from Kyiv and ensures the address lies
+     * within the allowed radius. - For other tariffs: verifies by database match of
+     * location and address IDs.
+     *
+     * @param locationId the location ID to validate against
+     * @param addressId  the ID of the address to check
+     * @return true if the address belongs to the location area, false otherwise
+     */
+    boolean checkIfAddressMatchLocationArea(long locationId, long addressId);
+
+    /**
+     * Forms a new {@link OrderAddress} from the provided address and location,
+     * validates ownership and deletion status, and saves it in the database.
+     *
+     * @param addressId   the ID of the address
+     * @param locationId  the ID of the location
+     * @param currentUser the current authenticated user who owns the address
+     * @return the saved {@link OrderAddress} entity
+     * @throws NotFoundException if address or location does not exist, or if the
+     *                           address does not belong to the user
+     */
+    OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser);
+
+    /**
+     * Updates the order address if the provided new address and location differ
+     * from the current one. If they match, keeps the existing address.
+     *
+     * @param currentOrderAddress the current {@link OrderAddress} used in the order
+     * @param newAddressId        the ID of the new address
+     * @param newLocationId       the ID of the new location
+     * @param currentUser         the current authenticated user
+     * @return the updated or existing {@link OrderAddress}
+     * @throws NotFoundException if the new address or location is invalid or not
+     *                           owned by the user
+     */
+    OrderAddress getOrUpdateOrderAddress(OrderAddress currentOrderAddress,
+        Long newAddressId,
+        Long newLocationId,
+        User currentUser);
+
+    /**
+     * Retrieves all locations.
+     *
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocations();
+
+    /**
+     * Retrieves all active locations by courier id.
+     *
+     * @param courierId The ID of the courier for which to retrieve all active the
+     *                  locations.
+     * @return List of all locations.
+     */
+    List<LocationsDto> getAllLocationsByCourierId(Long courierId);
 }

@@ -1,12 +1,26 @@
 package greencity.controller;
 
+import static greencity.ModelUtils.getUuid;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.repository.UserRepository;
-import greencity.service.ubs.UBSClientService;
+import greencity.service.ubs.order.OrderService;
+import greencity.service.ubs.payment.ProcessPaymentService;
+import greencity.service.ubs.point.PointService;
+import greencity.service.ubs.user.UserService;
+import java.security.Principal;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,13 +32,6 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.security.Principal;
-import java.util.Optional;
-
-import static greencity.ModelUtils.getUuid;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @Import(SecurityConfig.class)
@@ -35,10 +42,19 @@ class ClientControllerTest {
     private MockMvc mockMvc;
 
     @Mock
-    UBSClientService ubsClientService;
+    UserRepository userRepository;
 
     @Mock
-    UserRepository userRepository;
+    private OrderService orderService;
+
+    @Mock
+    private PointService pointService;
+
+    @Mock
+    UserService userService;
+
+    @Mock
+    private ProcessPaymentService processPaymentService;
 
     @InjectMocks
     ClientController clientController;
@@ -59,7 +75,7 @@ class ClientControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService, times(1)).getOrderPaymentDetail(1L);
+        verify(orderService, times(1)).getOrderPaymentDetail(1L);
     }
 
     @Test
@@ -71,7 +87,7 @@ class ClientControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(ubsClientService).findAllCurrentPointsForUser(any());
+        verify(pointService).findAllCurrentPointsForUser(any());
     }
 
     @Test

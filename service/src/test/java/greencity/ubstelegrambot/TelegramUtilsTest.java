@@ -1,16 +1,16 @@
 package greencity.ubstelegrambot;
 
-import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;
 import greencity.enums.AssetType;
 import greencity.enums.ChatState;
+import greencity.enums.MessageType;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
-import greencity.ubstelegrambot.messages.MessageProvider;
+import greencity.ubstelegrambot.service.TelegramBotResponseServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +44,9 @@ class TelegramUtilsTest {
 
     @Mock
     private MultipartFile multipartFile;
+
+    @Mock
+    private TelegramBotResponseServiceImpl telegramBotResponseService;
 
     @Test
     void detectAssetTypeMultipartFile_WithImageContentType_ShouldReturnImage() {
@@ -221,6 +224,7 @@ class TelegramUtilsTest {
 
         when(telegramChatRepository.findByChatId("123")).thenReturn(Optional.of(chat));
         when(telegramChatRepository.save(any())).thenReturn(chat);
+        when(telegramBotResponseService.getResponseByLangAndMessageType(any(), any())).thenReturn("text");
 
         SendMessage message = new SendMessage();
         message.setText("Updated chat state");
@@ -238,6 +242,8 @@ class TelegramUtilsTest {
     void updateChatStateAndRespond_WhenChatNotFound_ShouldReturnErrorMessage() {
         when(telegramChatRepository.findByChatId("999")).thenReturn(Optional.empty());
         String id = "1";
+        String expectedMessage = "text";
+        when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(), eq(MessageType.UNKNOWN_ERROR))).thenReturn(expectedMessage);
         SendMessage result = telegramUtils.updateChatStateAndRespond(
                 "999",
                 ChatState.NORMAL,
@@ -245,6 +251,6 @@ class TelegramUtilsTest {
         );
 
         assertEquals("999", result.getChatId());
-        assertTrue(result.getText().contains(MessageProvider.get(TelegramBotConstants.UK,"unknown.error")));
+        assertTrue(result.getText().contains(expectedMessage));
     }
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="creation-settings-text-table" author="BohdanLys">
+        <createTable tableName="settings_text">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="section" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="field" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="value_uk" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="value_en" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

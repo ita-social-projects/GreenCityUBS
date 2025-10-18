@@ -7,10 +7,7 @@ import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
-import greencity.enums.AssetType;
-import greencity.enums.ChatState;
-import greencity.enums.MessageDeliveryStatus;
-import greencity.enums.MessageViewingStatus;
+import greencity.enums.*;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.exceptions.bots.UnsupportedTelegramAssetException;
 import greencity.producers.TelegramChatProducer;
@@ -59,6 +56,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     private final TelegramNotificationService telegramNotificationService;
     private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
+    private final TelegramBotResponseServiceImpl telegramBotResponseService;
 
     /**
      * {@inheritDoc}
@@ -68,8 +66,10 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     public SendMessage processSupportMessage(Message message, String lang) {
         Optional<TelegramChat> optionalChat = findAndValidateChat(message.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
+            log.warn("Telegram chat not found by ID: {}", message.getFrom().getId());
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.UNKNOWN_ERROR);
             return MessageFactory.createUnknownErrorOccurredMessage(message.getChatId().toString(),
-                TelegramBotConstants.UK);
+                TelegramBotConstants.UK, text);
         }
 
         TelegramChat chat = optionalChat.get();
@@ -78,15 +78,22 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             && message.getText().startsWith("/start")
             && chat.getChatState() == ChatState.IN_SUPPORT) {
             log.info("User is already in support chat {}. Filtering system /start message", chat.getChatId());
-            return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), lang);
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(lang,
+                MessageType.MANAGER_CHAT_ALREADY_OPEN_MESSAGE);
+            return MessageFactory.createChatAlreadyOpenMessage(chat.getChatId(), text);
         }
 
         if (message.hasText() && message.getText().contains(MessageProvider.get(lang, "client.end.support.mode"))) {
+            String feedbackText = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.FEEDBACK_MESSAGE);
             SendMessage endSupportSendMessage =
                 telegramUtils.updateChatStateAndRespond(chat.getChatId(), ChatState.NORMAL,
-                    MessageFactory.createFeedbackMessage(chat.getChatId(), lang));
+                    MessageFactory.createFeedbackMessage(chat.getChatId(), lang, feedbackText));
 
-            telegramExecutor.executeCommand(MessageFactory.deleteEndSupportKeyboardMessage(chat.getChatId(), lang));
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.CLIENT_STOP_SUPPORT_MODE);
+            telegramExecutor.executeCommand(MessageFactory.deleteEndSupportKeyboardMessage(
+                chat.getChatId(), text));
 
             telegramNotificationService.notifyManagerAboutEndSupportModeFromUser(message.getFrom().getUserName());
             return endSupportSendMessage;
@@ -100,8 +107,10 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
     public SendMessage processEditedSupportMessage(Message edited, String lang) {
         Optional<TelegramChat> optionalChat = findAndValidateChat(edited.getFrom().getId().toString());
         if (optionalChat.isEmpty()) {
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(
+                lang, MessageType.UNKNOWN_ERROR);
             return MessageFactory.createUnknownErrorOccurredMessage(edited.getChatId().toString(),
-                TelegramBotConstants.UK);
+                TelegramBotConstants.UK, text);
         }
         TelegramChat chat = optionalChat.get();
 
@@ -126,7 +135,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         } else {
             telegramMessage.setText(null);
         }
-
+        telegramMessage.setUpdatedAt(Instant.now());
         telegramMessageRepository.save(telegramMessage);
         return null;
     }
@@ -170,6 +179,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .mediaGroupId(mediaGroupId)
             .status(MessageDeliveryStatus.SENT)
             .sendAt(Instant.now())
+            .updatedAt(Instant.now())
             .text(messageText)
             .messageViewingStatus(MessageViewingStatus.UNREAD)
             .telegramMessageId(message.getMessageId())
@@ -210,8 +220,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             && !message.hasAnimation()) {
             log.warn("No text or supported file found in message from chat ID: {}", chat.getChatId());
             resetTelegramChatDataToInternalStatus(chat, telegramMessage);
-            resultMessage = MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            resultMessage = MessageFactory.buildMessage(message.getChatId().toString(), text);
         }
         return resultMessage;
     }
@@ -232,8 +243,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
-            return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            return MessageFactory.buildMessage(message.getChatId().toString(), text);
         } else {
             fileInfo.setFileId(sticker.getFileId());
             fileInfo.setFileSize(sticker.getFileSize() != null ? sticker.getFileSize().longValue() : 0L);
@@ -253,8 +265,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
-            return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            return MessageFactory.buildMessage(message.getChatId().toString(), text);
         } else {
             fileInfo.setFileId(animation.getFileId());
             fileInfo.setFileSize(animation.getFileSize() != null ? animation.getFileSize() : 0L);
@@ -279,8 +292,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
-            return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, "manager.photo.failed"));
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_PHOTO_FAILED);
+            return MessageFactory.buildMessage(message.getChatId().toString(), text);
         } else {
             fileInfo.setFileId(largestPhoto.getFileId());
             fileInfo.setFileSize(largestPhoto.getFileSize().longValue());
@@ -298,8 +312,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             if (previouslySavedMessage.isEmpty()) {
                 telegramMessageRepository.delete(telegramMessage);
             }
-            return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            return MessageFactory.buildMessage(message.getChatId().toString(), text);
         } else {
             fileInfo.setFileId(document.getFileId());
             fileInfo.setFileSize(document.getFileSize());
@@ -318,8 +333,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             File telegramFile = telegramExecutor.executeGetFile(new GetFile(fileInfo.getFileId()));
             if (telegramFile == null || telegramFile.getFilePath() == null) {
                 log.warn("Telegram file not found for fileId: {}", fileInfo.getFileId());
-                return MessageFactory.buildMessage(message.getChatId().toString(),
-                    MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
+                String text =
+                    telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+                return MessageFactory.buildMessage(message.getChatId().toString(), text);
             }
 
             if (message.hasPhoto()) {
@@ -366,8 +382,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         } catch (TelegramBotExecutionException | UnsupportedTelegramAssetException | IOException e) {
             log.error("Error loading or saving file from Telegram (Filename: {}): {}", fileInfo.getOriginalFileName(),
                 e.getMessage(), e);
-            return MessageFactory.buildMessage(message.getChatId().toString(),
-                MessageProvider.get(lang, TelegramBotConstants.MANAGER_FILE_FAILED));
+            String text =
+                telegramBotResponseService.getResponseByLangAndMessageType(lang, MessageType.MANAGER_FILE_FAILED);
+            return MessageFactory.buildMessage(message.getChatId().toString(), text);
         }
 
         return null;
@@ -399,6 +416,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             .deliveryStatus(telegramMessage.getStatus())
             .messageViewingStatus(telegramMessage.getMessageViewingStatus())
             .assets(assetDtos)
+            .isUpdated(false)
             .build();
 
         if (previouslySavedMessage.isEmpty()) {
@@ -410,8 +428,9 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
                 Optional.ofNullable(message.getFrom().getUserName()).orElse(message.getFrom().getFirstName()),
                 contentForNotification,
                 chat.getId());
-            return MessageFactory.buildMessage(chat.getChatId(),
-                MessageProvider.get(chat.getLanguageCode(), "message.sent.to.manager"));
+            String text = telegramBotResponseService.getResponseByLangAndMessageType(chat.getLanguageCode(),
+                MessageType.MESSAGE_SENT_TO_MANAGER);
+            return MessageFactory.buildMessage(chat.getChatId(), text);
         } else {
             telegramMessageRepository.save(telegramMessage);
             log.info("Added asset to existing media group message: {}", mediaGroupId);

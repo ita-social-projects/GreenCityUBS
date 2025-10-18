@@ -4,6 +4,8 @@ import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.admin.SettingsTextDto;
+import greencity.dto.admin.UpdateSectionTextsDto;
 import greencity.dto.bag.BagLimitDto;
 import greencity.dto.courier.AddingReceivingStationDto;
 import greencity.dto.courier.CourierDto;
@@ -21,6 +23,7 @@ import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
+import greencity.entity.admin.SettingsText;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Courier;
 import greencity.entity.order.Order;
@@ -31,11 +34,12 @@ import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.ReceivingStation;
+import greencity.enums.BagStatus;
 import greencity.enums.CourierStatus;
 import greencity.enums.LocationStatus;
+import greencity.enums.MainPageTextSection;
 import greencity.enums.StationStatus;
 import greencity.enums.TariffStatus;
-import greencity.enums.BagStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.UnprocessableEntityException;
@@ -131,6 +135,8 @@ class SuperAdminServiceImplTest {
     private OrderAddressRepository orderAddressRepository;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private SettingsTextRepository settingsTextRepository;
 
     @AfterEach
     void afterEach() {
@@ -147,7 +153,8 @@ class SuperAdminServiceImplTest {
             tariffsInfoRepository,
             tariffsLocationRepository,
             deactivateTariffsForChosenParamRepository,
-            orderBagRepository);
+            orderBagRepository,
+            settingsTextRepository);
     }
 
     @Test
@@ -2814,5 +2821,60 @@ class SuperAdminServiceImplTest {
             isCourierExists);
         verify(tariffsInfoRepository, never())
             .deactivateTariffsByCourierAndRegionAndCities(anyLong(), anyList(), anyLong());
+    }
+
+    @Test
+    void getAllTextsFieldsWhenFilterIsNullShouldReturnAll() {
+        SettingsText text1 = new SettingsText(1L, "header", "caption", "Заголовок", "Caption", null);
+        SettingsText text2 = new SettingsText(2L, "price", "caption", "Заголовок", "Caption", null);
+        when(settingsTextRepository.findAll()).thenReturn(List.of(text1, text2));
+
+        SettingsTextDto dto = superAdminService.getAllTextsFields(null);
+
+        assertEquals("Заголовок", dto.getUk().get("header").get("caption"));
+        assertEquals("Caption", dto.getEn().get("price").get("caption"));
+        verify(settingsTextRepository).findAll();
+    }
+
+    @Test
+    void getAllTextsFieldsWhenFilterProvidedShouldUseFilter() {
+        SettingsText text1 = new SettingsText(1L, "header", "caption", "Текст", "Text", null);
+        when(settingsTextRepository.findAllBySectionIgnoreCase("HEADER"))
+            .thenReturn(List.of(text1));
+
+        SettingsTextDto dto = superAdminService.getAllTextsFields(MainPageTextSection.HEADER);
+
+        assertEquals("Текст", dto.getUk().get("header").get("caption"));
+        assertEquals("Text", dto.getEn().get("header").get("caption"));
+        verify(settingsTextRepository).findAllBySectionIgnoreCase("HEADER");
+    }
+
+    @Test
+    void updateSectionTextFieldsShouldUpdateExistingTexts() {
+        UpdateSectionTextsDto updateDto = new UpdateSectionTextsDto("caption", "Новий текст", "New text");
+        SettingsText existing = new SettingsText(1L, "header", "caption", "Старий текст", "Old text", null);
+
+        when(settingsTextRepository.findBySectionAndFieldIgnoreCase(MainPageTextSection.HEADER.toString().toLowerCase(),
+            "caption"))
+            .thenReturn(Optional.of(existing));
+
+        superAdminService.updateSectionTextFields(List.of(updateDto), MainPageTextSection.HEADER);
+
+        assertEquals("Новий текст", existing.getValueUK());
+        assertEquals("New text", existing.getValueEN());
+        verify(settingsTextRepository).save(existing);
+    }
+
+    @Test
+    void updateSectionTextFieldsWhenTextNotFoundShouldThrowException() {
+        UpdateSectionTextsDto updateDto = new UpdateSectionTextsDto("missing", "текст", "text");
+        when(settingsTextRepository.findBySectionAndFieldIgnoreCase(MainPageTextSection.HEADER.toString().toLowerCase(),
+            "missing"))
+            .thenReturn(Optional.empty());
+
+        List<UpdateSectionTextsDto> dtos = List.of(updateDto);
+
+        assertThrows(NotFoundException.class,
+            () -> superAdminService.updateSectionTextFields(dtos, MainPageTextSection.HEADER));
     }
 }

@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidImage;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
@@ -11,10 +12,11 @@ import greencity.dto.pageble.PageableDto;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
+import greencity.enums.EmployeeStatus;
 import greencity.filters.EmployeeFilterCriteria;
 import greencity.filters.EmployeePage;
-import greencity.service.ubs.UBSClientService;
 import greencity.service.ubs.UBSManagementEmployeeService;
+import greencity.service.ubs.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -25,16 +27,25 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/ubs-employee")
@@ -42,7 +53,7 @@ import java.util.Set;
 @Validated
 public class ManagementEmployeeController {
     private final UBSManagementEmployeeService employeeService;
-    private final UBSClientService ubsClientService;
+    private final UserService userService;
 
     /**
      * Saves a new employee with optional image upload.
@@ -135,8 +146,10 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/deactivate-employee/{id}")
-    public ResponseEntity<HttpStatus> deleteEmployee(@Positive @PathVariable Long id) {
-        employeeService.deactivateEmployee(id);
+    public ResponseEntity<HttpStatus> deactivateEmployee(
+        @Parameter(hidden = true) @CurrentUserUuid String uuid,
+        @Positive @PathVariable Long id) {
+        employeeService.updateEmployeeStatus(uuid, id, EmployeeStatus.INACTIVE);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -156,8 +169,10 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('DEACTIVATE_EMPLOYEE', authentication)")
     @PutMapping("/activate-employee/{id}")
-    public ResponseEntity<HttpStatus> activateEmployee(@Positive @PathVariable Long id) {
-        employeeService.activateEmployee(id);
+    public ResponseEntity<HttpStatus> activateEmployee(
+        @Parameter(hidden = true) @CurrentUserUuid String uuid,
+        @Positive @PathVariable Long id) {
+        employeeService.updateEmployeeStatus(uuid, id, EmployeeStatus.ACTIVE);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -219,7 +234,7 @@ public class ManagementEmployeeController {
     @GetMapping("/get-all-authorities")
     public ResponseEntity<Object> getAllAuthorities(
         @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
-        Set<String> authorities = ubsClientService.getAllAuthorities(email);
+        Set<String> authorities = userService.getAllAuthorities(email);
         return ResponseEntity.status(HttpStatus.OK).body(authorities);
     }
 
@@ -244,7 +259,7 @@ public class ManagementEmployeeController {
     @GetMapping("/get-positions-authorities")
     public ResponseEntity<PositionAuthoritiesDto> getPositionsAndRelatedAuthorities(
         @Email(regexp = ValidationConstant.EMAIL_REGEXP) @RequestParam String email) {
-        return ResponseEntity.status(HttpStatus.OK).body(ubsClientService.getPositionsAndRelatedAuthorities(email));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getPositionsAndRelatedAuthorities(email));
     }
 
     /**
@@ -265,7 +280,7 @@ public class ManagementEmployeeController {
     @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_EMPLOYEES_AUTHORITIES', authentication)")
     @PutMapping("/edit-authorities")
     public ResponseEntity<Object> editAuthorities(@Valid @RequestBody UserEmployeeAuthorityDto dto) {
-        ubsClientService.updateEmployeesAuthorities(dto);
+        userService.updateEmployeesAuthorities(dto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

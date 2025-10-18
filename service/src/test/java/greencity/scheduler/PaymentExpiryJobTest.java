@@ -1,12 +1,15 @@
 package greencity.scheduler;
 
 import static greencity.ModelUtils.getOrder;
-import greencity.entity.order.Order;
-import greencity.service.ubs.UBSClientService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import greencity.entity.order.Order;
+import greencity.service.ubs.payment.ProcessPaymentService;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,15 +17,12 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
 
 @ExtendWith({MockitoExtension.class})
 @MockitoSettings(strictness = Strictness.LENIENT)
 class PaymentExpiryJobTest {
     @Mock
-    private UBSClientService ubsClientService;
+    private ProcessPaymentService processPaymentService;
 
     @Mock
     private JobExecutionContext jobExecutionContext;
@@ -49,6 +49,6 @@ class PaymentExpiryJobTest {
 
         paymentExpiryJob.execute(jobExecutionContext);
 
-        verify(ubsClientService).expirePaymentAttempt(orderId, pointsToUse, certificateCodes);
+        verify(processPaymentService).expirePaymentAttempt(orderId, pointsToUse, certificateCodes);
     }
 }

@@ -373,6 +373,31 @@ class ViolationServiceImplTest {
     }
 
     @Test
+    void testAddUserViolationWithNullMultipartFiles() {
+        Employee employee = ModelUtils.getEmployee();
+        User user = ModelUtils.getTestUser();
+        Order order = user.getOrders().getFirst();
+        order.setOrderStatus(OrderStatus.DONE);
+        order.setUser(user);
+        TariffsInfo tariffsInfo = ModelUtils.getTariffInfo();
+        order.setTariffsInfo(tariffsInfo);
+        AddingViolationsToUserDto add = ModelUtils.getAddingViolationsToUserDto();
+
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
+        when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(employee));
+        when(employeeRepository.findTariffsInfoForEmployee(anyLong())).thenReturn(Arrays.asList(1L, 2L));
+
+        violationService.addUserViolation(add, null, employee.getEmail());
+
+        verify(orderRepository, times(2)).findById(anyLong());
+        verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
+        verify(violationRepository).save(any(Violation.class));
+        verify(userRepository).save(user);
+        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order);
+        verify(notificationService).notifyAddViolation(order.getId());
+    }
+
+    @Test
     void testUpdateViolationWhenImagesIsNotEmpty() {
         Employee employee = ModelUtils.getEmployee();
         User user = ModelUtils.getTestUser();

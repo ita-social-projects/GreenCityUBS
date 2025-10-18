@@ -14,8 +14,6 @@ public class ErrorMessage {
     public static final String BAG_NOT_FOUND = "Bag does not exist by id: ";
     public static final String USER_DONT_HAVE_ENOUGH_POINTS = "User doesn't have enough bonus points.";
     public static final String TOO_MANY_CERTIFICATES = "Too many certificates was entered.";
-    public static final String THE_SET_OF_UBS_USER_DATA_DOES_NOT_EXIST =
-        "The set of user data does not exist with id: ";
     public static final String INVALID_DISTANCE_AMOUNT = "The distance should be between 0 and 20 km.";
     public static final String NO_SUCH_COORDINATES = "There are no any order with coordinates: ";
     public static final String INVALID_LITRES_AMOUNT = "The amount of litres should be between 0 and 10.000 litres.";
@@ -25,8 +23,6 @@ public class ErrorMessage {
     public static final String NOT_FOUND_ADDRESS_BY_PLACE_ID = "Not found address with such place id: ";
     public static final String UNDELIVERED_ORDERS_NOT_FOUND = "There are no any undelivered orders found.";
     public static final String PAYMENT_VALIDATION_ERROR = "The received payment data is not valid.";
-    public static final String THE_USER_ALREADY_HAS_CONNECTED_TO_TELEGRAM_BOT =
-        "The user already has connected to Telegram bot.";
     public static final String THE_MESSAGE_WAS_NOT_SENT = "The message was not sent.";
     public static final String USER_WITH_CURRENT_UUID_DOES_NOT_EXIST = "User with current uuid does not exist.";
     public static final String USER_WITH_CURRENT_UUID_ALREADY_EXISTS_IN_UBS =
@@ -34,11 +30,9 @@ public class ErrorMessage {
     public static final String USER_WITH_CURRENT_ID_DOES_NOT_EXIST = "User with current id does not exist.";
     public static final String ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST = "Order with current id does not exist: ";
     public static final String RECIPIENT_WITH_CURRENT_ID_DOES_NOT_EXIST = "Recipient with current id does not exist.";
-    public static final String THE_CHAT_ID_WAS_NOT_FOUND = "The chat id was not found.";
     public static final String NOT_FOUND_ADDRESS_BY_ORDER_ID = "Address not found for order by id: ";
     public static final String ORDER_STATUS_NOT_FOUND = "Order status not found";
     public static final String ORDER_PAYMENT_STATUS_NOT_FOUND = "Order payment status not found";
-    public static final String FILE_NOT_SAVED = "File hasn't been saved";
     public static final String EMPLOYEE_NOT_FOUND = "Employee with current id doesn't exist: ";
     public static final String EMPLOYEE_WITH_UUID_NOT_FOUND = "Employee with current uuid doesn't exist: ";
     public static final String EMPLOYEE_WITH_ENABLED_CHAT_NOT_FOUND_BY_TARIFF_ID =
@@ -54,22 +48,15 @@ public class ErrorMessage {
     public static final String RECEIVING_STATION_NOT_FOUND = "Receiving station doesn't exist.";
     public static final String EMPLOYEES_ASSIGNED_POSITION = "There are employees assigned to this position.";
     public static final String EMPLOYEE_WAS_NOT_SUCCESSFULLY_SAVED = "Employee was not successfully saved";
-    public static final String PARSING_URL_FAILED = "Can't parse image's url: ";
     public static final String CANNOT_DELETE_DEFAULT_IMAGE = "You can't delete default image.";
     public static final String PAYMENT_NOT_FOUND = "Payment not found for order id: ";
     public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
-    public static final String NOT_FOUND_LOCATION_ON_LEVEL_AND_BY_CODE =
-        "Not found locations on level: %s, and by code: %s";
-    public static final String VALUE_CAN_NOT_BE_NULL_OR_EMPTY = "The value parameter cannot be null or empty";
-    public static final String NOT_FOUND_LOCATION_BY_URL = "Not found locations by url: ";
     public static final String REGION_NOT_FOUND = "Region not found: ";
     public static final String CITY_NOT_FOUND = "City not found: ";
-    public static final String CITY_NOT_FOUND_IN_REGION = "City not found in region: ";
     public static final String ACTUAL_ADDRESS_NOT_FOUND = "Actual address not found";
     public static final String LOCATION_DOESNT_FOUND_BY_ID = "Location does not exist by id: ";
     public static final String LOCATIONS_BELONG_TO_DIFFERENT_REGIONS =
         "The locations belong to different regions. Please choose locations from the same region";
-    public static final String INTERRUPTED_EXCEPTION = "Interrupted exception thrown ";
     public static final String ORDER_ALREADY_HAS_VIOLATION = "Current order already has violation";
     public static final String ORDER_ALREADY_PAID = "Current order is already paid";
     public static final String VIOLATION_DOES_NOT_EXIST = "Violation does not exist for current order";
@@ -104,7 +91,6 @@ public class ErrorMessage {
     public static final String LOCATION_ALREADY_EXIST = " that you try to add was already created early";
     public static final String INCORRECT_ECO_NUMBER = "Incorrect format of Eco number";
     public static final String COURIER_ALREADY_EXISTS = "Courier with this name already exists";
-    public static final String CANNOT_ACCESS_PAYMENT_STATUS = "Cannot access another user's payment status";
     public static final String ORDER_HAS_NO_OVERPAYMENT = "This order has no overpayment";
     public static final String INVALID_REQUESTED_REFUND_AMOUNT = "Invalid requested refund amount";
     public static final String CANNOT_REFUND_MONEY =
@@ -126,7 +112,6 @@ public class ErrorMessage {
         "Could not find tariff for courier with id: %d and location with id: %d ";
     public static final String TARIFF_OR_LOCATION_IS_DEACTIVATED = "Tariff or location is deactivated.";
     public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for such locations is already exists";
-    public static final String USER_HAS_NOT_BEEN_DEACTIVATED = "User has not been deactivated";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
     public static final String COULD_NOT_RETRIEVE_CANCELLATION_RESPONSE =
@@ -144,10 +129,6 @@ public class ErrorMessage {
         "Limits are not inputted properly. You should input min and/or max limit values for at least one package.";
     public static final String MAX_VALUE_IS_INCORRECT = "Max value should be greater than min";
     public static final String MIN_MAX_VALUE_RESTRICTION = "Min and Max fields must have different values";
-    public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_DEACTIVATED = "Employee with current uuid was not "
-        + "deactivated.";
-    public static final String EMPLOYEE_WITH_CURRENT_UUID_WAS_NOT_ACTIVATED = "Employee with uuid: %s was not "
-        + "activated.";
     public static final String BAG_FOR_TARIFF_NOT_EXIST = "Could not find bag with id %d for tariff with id %d";
     public static final String TARIFF_ALREADY_HAS_THIS_STATUS = "Tariff with id %d already has status: %s";
     public static final String TARIFF_ACTIVATION_RESTRICTION_DUE_TO_UNSPECIFIED_LIMITS =
@@ -171,7 +152,6 @@ public class ErrorMessage {
     public static final String ORDER_CAN_NOT_BE_UPDATED = "An order with the status: %s, can not be updated";
     public static final String EMPLOYEE_NOT_FOUND_BY_EMAIL = "Employee with current id doesn't exist: ";
     public static final String ORDER_DOES_NOT_BELONG_TO_USER = "This order does not belong to user";
-    public static final String WRONG_SIGNATURE_USED = "This signature is invalid: ";
     public static final String TEMPLATE_DOES_NOT_CONTAIN_ALL_PLATFORMS =
         "This template does not contain messages for all platforms: ";
     public static final String PREDEFINED_NOTIFICATION_CANNOT_BE_DELETED =
@@ -213,7 +193,6 @@ public class ErrorMessage {
     public static final String TARIFFID_IS_NULL = "Tariff id cannot be null";
     public static final String TARIFFID_IS_NOT_POSITIVE = "Tariff Id must be greater than 0";
     public static final String TARIFF_LIST_CONTAINS_DUPLICATES = "Tariffs cannot contain duplicates";
-    public static final String USER_APP_UNAVAILABLE = "the User service is unavailable";
     public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
     public static final String TELEGRAM_SEND_EXCEPTION = "Exception occurred while sending to telegram: %s";
     public static final String TELEGRAM_RECEIVE_EXCEPTION = "Exception occurred while receiving from telegram: %s";
@@ -222,8 +201,15 @@ public class ErrorMessage {
     public static final String USER_DOESNT_HAVE_TELEGRAM_CHAT = "The user does not have a Telegram chat";
     public static final String TEMPLATE_IN_USE_CANNOT_BE_DELETED =
         "Template cannot be deleted while it is referenced by existing notifications";
+    public static final String BOT_RESPONSE_NOT_FOUND = "Bot response with ID %d not found";
+    public static final String BOT_MESSAGE_WITH_TYPE_AND_LANG_NOT_FOUND =
+        "Bot message with %s type and %s language not found";
     public static final String ORDER_IN_ONGOING_PROCESSING =
         "Order has an active payment attempt, complete it or cancel to start the new one";
     public static final String UNABLE_TO_CANCEL_PAYMENT_INVOICE =
         "Payment system refused to cancel payment invoice. Please try again later.";
+    public static final String FORBIDDEN_USER_DELETION = "Blocked or deactivated user cannot be deleted";
+    public static final String USER_CANNOT_DEACTIVATE_YOURSELF = "You cannot deactivate yourself if you are not a USER";
+    public static final String ADMIN_CANNOT_DEACTIVATE_OTHER_ADMIN = "ADMIN cannot deactivate other ADMIN users";
+    public static final String USER_DEACTIVATION_REASON_IS_EMPTY = "The User deactivation reasons list is empty";
 }
