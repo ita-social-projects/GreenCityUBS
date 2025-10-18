@@ -64,24 +64,21 @@ properties to these fields.
 
 Also, all these variables you can set in Intellij Idea. For instance:
 
+Required to set:
 ```properties
-spring.datasource.url=${DATASOURCE_URL}
-spring.datasource.username=${DATASOURCE_USER}
+spring.cloud.azure.credential.client-id=${AZURE_CLIENT_ID}
+spring.cloud.azure.credential.client-secret=${AZURE_SECRET_ID}
+spring.cloud.azure.profile.tenant-id=${AZURE_TENANT_ID}
+spring.cloud.azure.keyvault.secret.property-sources[0].endpoint=${KEY_VAULT_ENDPOINT}
+```
+
+Recommended to change:
+```properties
+spring.datasource.url=${UBS_DATASOURCE_URL}
+spring.datasource.username=${DATASOURCE_USERNAME}
 spring.datasource.password=${DATASOURCE_PASSWORD}
-spring.mail.username=${EMAIL_ADDRESS}
-spring.mail.password=${EMAIL_PASSWORD}
-cloud.name=${CLOUD_NAME}
-api.key=${API_KEY}
-api.secret=${API_SECRET}
-google.clientId=${GOOGLE_CLIENT_ID}
-spring.rabbitmq.host=${RABBITMQ_HOST}
-spring.rabbitmq.password=${RABBITMQ_PASSWORD}
-spring.rabbitmq.username=${RABBITMQ_USERNAME}
-bucketName=${BUCKET_NAME}
-staticUrl=${STATIC_URL}
-spring.social.facebook.app-id=${FACEBOOK_APP_ID}
-spring.social.facebook.app-secret=${FACEBOOK_APP_SECRET}
-greencity.server.address = ${GREENCITY_SERVER_ADDRESS}
+greencity.bots.ubs-bot-name=${TELEGRAM_BOT_NAME}
+greencity.bots.ubs-bot-token=${TELEGRAM_BOT_TOKEN}
 ```
 
 ### 4.3. How to work with Viber bot locally.
