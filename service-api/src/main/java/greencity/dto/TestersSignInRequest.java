@@ -1,4 +1,4 @@
 package greencity.dto;
 
-public record TestersSignInRequest(String email, String password, String secretKey) {
+public record TestersSignInRequest(String email, String password, String secretKey, String projectName) {
 }
