@@ -92,7 +92,7 @@ greencity.bots.ubs-bot-token=${TELEGRAM_BOT_TOKEN}
 
 2. Run GreenCityUser project (look up paragraph [How to run](https://github.com/ita-social-projects/GreenCityUser#42-how-to-run)).
 
-3. Use the following link to open Swagger UI: http://localhost:8060/swagger-ui.html#/
+3. Use the following link to open Swagger UI: http://localhost:8050/swagger-ui.html#/
 
 4. Use POST method with `/ownSecurity/signUp` to create an account. If you set a valid email credentials, you should receive an email with verification link. Verify the registration by following that link. We highly recommend to use gmail, it's free of charge and easy to get going: [how to allow email sending from gmail](https://support.google.com/accounts/answer/6010255?authuser=2&p=less-secure-apps&hl=en&authuser=2&visit_id=637098532320915318-4087823934&rd=1),  [Google client id](https://developers.google.com/adwords/api/docs/guides/authentication). Alternatively you can drop a record in `verify_email` table on your local database.
    First you should update user role : `UPDATE users SET role = 1 WHERE id = your_user_id;`. After this `DELETE FROM verify_emails WHERE user_id = your_user_id;`

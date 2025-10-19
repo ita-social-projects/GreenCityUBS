@@ -7,6 +7,6 @@ spec:
   ports:
   - name: http
     port: 80
-    targetPort: 8060
+    targetPort: 8050
   selector:
     app: {{ .Release.Name }}-greencity-ubs
