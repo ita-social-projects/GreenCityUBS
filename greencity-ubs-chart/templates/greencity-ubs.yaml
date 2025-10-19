@@ -31,7 +31,7 @@ spec:
         startupProbe:
           httpGet:
               path: /swagger-ui.html
-              port: 8060
+              port: 8050
           periodSeconds: 10
           failureThreshold: 20
         env:
