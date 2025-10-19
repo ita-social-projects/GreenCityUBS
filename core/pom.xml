@@ -28,7 +28,20 @@
         <google-guava.version>33.0.0-jre</google-guava.version>
         <json-path.version>2.9.0</json-path.version>
         <ldm.version>0.0.5</ldm.version>
+        <azure.spring.version>6.0.0</azure.spring.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.azure.spring</groupId>
+                <artifactId>spring-cloud-azure-dependencies</artifactId>
+                <version>${azure.spring.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <repositories>
         <repository>
@@ -249,6 +262,11 @@
             <artifactId>logcaptor</artifactId>
             <version>2.12.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.azure.spring</groupId>
+            <artifactId>spring-cloud-azure-starter-keyvault-secrets</artifactId>
+            <version>${azure.spring.version}</version>
         </dependency>
     </dependencies>
 

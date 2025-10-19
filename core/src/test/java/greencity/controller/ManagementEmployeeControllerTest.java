@@ -307,7 +307,7 @@ class ManagementEmployeeControllerTest {
 
         mockMvc.perform(get(UBS_LINK + "/" + email))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
 
         verify(service, times(1)).getEmployeeByEmail(email);

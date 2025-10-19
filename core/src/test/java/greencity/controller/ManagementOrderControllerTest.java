@@ -457,7 +457,7 @@ class ManagementOrderControllerTest {
         mockMvc.perform(get(ubsManagementLink + "/check-status-transition/formed-to-canceled/{id}", orderId)
             .contentType(MediaType.APPLICATION_XML))
             .andExpect(status().isOk())
-            .andExpect(content().string("<Boolean>true</Boolean>"));
+            .andExpect(content().string("true"));
         verify(ubsManagementService).checkIfOrderStatusIsFormedToCanceled(orderId);
     }
 
