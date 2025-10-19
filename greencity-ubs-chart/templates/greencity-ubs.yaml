@@ -35,180 +35,30 @@ spec:
           periodSeconds: 10
           failureThreshold: 20
         env:
+          - name: AZURE_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecret.secretName }}
+                key: AZURE-CLIENT-ID
 
-        - name: AZURE_CONNECTION_STRING
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: AZURE-CONNECTION-STRING
+          - name: AZURE_SECRET_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecret.secretName }}
+                key: AZURE-SECRET-ID
 
-        - name: AZURE_CONTAINER_NAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: AZURE-CONTAINER-NAME
+          - name: AZURE_TENANT_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecret.secretName }}
+                key: AZURE-TENANT-ID
 
-        - name: DATABASE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: DATABASE-PASSWORD
+          - name: KEY_VAULT_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.externalSecret.secretName }}
+                key: KEY-VAULT-ENDPOINT
 
-        - name: DATABASE_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: DATABASE-USER
-
-        # - name: DIALECT
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: {{ .Values.externalSecret.secretName }}
-        #       key: DIALECT
-
-        - name: DRIVER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: DRIVER
-
-        - name: GREENCITYUSER_SERVER_ADDRESS
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: GREENCITYUSER-SERVER-ADDRESS
-
-        - name: HIBERNATE_CONFIG
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: HIBERNATE-CONFIG
-
-        - name: JAWSDB_URL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: {{ if eq .Values.environment "prod" }}JAWSDB-URL-UBS{{ else }}JAWSDB-URL-UBS-TEST{{ end }}
-
-        - name: JDBC_LOB
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: JDBC-LOB
-
-        - name: LIQUIBASE_ENABLE
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: LIQUIBASE-ENABLE
-
-        - name: LIQUIBASE_LOG
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: LIQUIBASE-LOG
-
-        - name: POOL_SIZE
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: POOL-SIZE
-
-        - name: SHOW_SQL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: SHOW-SQL
-
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: SPRING-PROFILES-ACTIVE
-
-        - name: TOKEN_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: TOKEN-KEY
-
-        - name: MERCHANT_ID
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: MERCHANT-ID
-
-        - name: TELEGRAM_BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: TELEGRAM-BOT-TOKEN
-
-        - name: TELEGRAM_BOT_NAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: TELEGRAM-BOT-NAME
-
-        - name: GOOGLE_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: GOOGLE-API-KEY
-
-        - name: LDM_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: LDM-SECRET-KEY
-        
-        - name: DOMAIN_NAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: DOMAIN-NAME
-
-        - name: WAY_FOR_PAY_REDIRECT
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: WAY-FOR-PAY-REDIRECT
-
-        - name: WAY_FOR_PAY_RETURN_URL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: WAY-FOR-PAY-RETURN-URL
-
-        - name: WAY_FOR_PAY_CONFIRM_PAGE
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: WAY-FOR-PAY-CONFIRM-PAGE
-
-        - name: WAY_FOR_PAY_LOGIN
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: WAY-FOR-PAY-LOGIN
-
-        - name: WAY_FOR_PAY_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: WAY-FOR-PAY-SECRET
-
-        - name: GREENCITY_SECRET_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: GREENCITY-SECRET-TOKEN
-
-        - name: GREENCITY_UBS_ADMIN_BASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.externalSecret.secretName }}
-              key: GREENCITY-UBS-ADMIN-BASE-URL
         ports:
         - containerPort: 8060
           name: tomcat
