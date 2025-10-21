@@ -348,6 +348,7 @@ public class TelegramServiceImpl implements TelegramService {
                 return new TelegramMessageDto(
                     message.getId(),
                     message.getSendAt(),
+                    message.getUpdatedAt(),
                     message.getText(),
                     message.getFromManager(),
                     message.getStatus(),
@@ -439,7 +440,8 @@ public class TelegramServiceImpl implements TelegramService {
             TelegramMessageDto lastMessage = TelegramMessageDto.builder()
                 .id(message.getId())
                 .text(message.getText())
-                .sendAt(!isUpdated ? message.getSendAt() : message.getUpdatedAt())
+                .sendAt(message.getSendAt())
+                .updatedAt(message.getUpdatedAt())
                 .fromManager(message.getFromManager())
                 .deliveryStatus(message.getStatus())
                 .assets(assetDtos)

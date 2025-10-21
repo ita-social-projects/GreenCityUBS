@@ -18,6 +18,8 @@ public class TelegramMessageDto {
 
     private Instant sendAt;
 
+    private Instant updatedAt;
+
     private String text;
 
     private Boolean fromManager;

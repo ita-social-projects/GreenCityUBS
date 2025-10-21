@@ -411,6 +411,7 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
         TelegramMessageDto telegramMessageDto = TelegramMessageDto.builder()
             .id(telegramMessage.getId())
             .sendAt(telegramMessage.getSendAt())
+            .updatedAt(telegramMessage.getUpdatedAt())
             .text(telegramMessage.getText())
             .fromManager(telegramMessage.getFromManager())
             .deliveryStatus(telegramMessage.getStatus())
