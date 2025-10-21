@@ -3,7 +3,6 @@ package greencity.service.ubs.tariff;
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.tariff.GetActiveTariffInfoDto;
-import greencity.dto.tariff.GetTariffsInfoDto;
 import java.util.List;
 
 public interface TariffService {
