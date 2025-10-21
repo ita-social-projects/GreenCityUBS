@@ -18,6 +18,8 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
+import greencity.dto.tariff.GetActiveTariffInfoDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
@@ -572,5 +574,18 @@ public class OrderController {
         @Positive @PathVariable("id") Long id) {
         processPaymentService.cancelPaymentAttempt(userUuid, id);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "Get info about all active tariffs")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
+            content = @Content(schema = @Schema(implementation = GetTariffsInfoDto.class))),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @GetMapping("/activeTariffsInfo")
+    public ResponseEntity<List<GetActiveTariffInfoDto>> activeTariffsInfo() {
+        return ResponseEntity.status(HttpStatus.OK).body(tariffService.getTariffsInfo());
     }
 }
