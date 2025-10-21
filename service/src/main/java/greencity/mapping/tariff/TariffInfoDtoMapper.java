@@ -21,6 +21,8 @@ public class TariffInfoDtoMapper extends AbstractConverter<TariffsInfo, TariffIn
             .courierLimit(source.getCourierLimit())
             .courierDto(convertCourierToDto(source.getCourier()))
             .limitDescription(source.getLimitDescription())
+            .tariffNameEn(source.getTariffNameEn())
+            .tariffNameUk(source.getTariffNameUk())
             .build();
     }
 
