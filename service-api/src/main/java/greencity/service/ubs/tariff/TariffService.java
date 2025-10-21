@@ -2,6 +2,8 @@ package greencity.service.ubs.tariff;
 
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
+import greencity.dto.tariff.GetActiveTariffInfoDto;
+import greencity.dto.tariff.GetTariffsInfoDto;
 import java.util.List;
 
 public interface TariffService {
@@ -38,4 +40,11 @@ public interface TariffService {
      * @return The tariff ID associated with the specified location ID.
      */
     List<Long> getTariffIdByLocationId(Long locationId);
+
+    /**
+     * Retrieves the list of active tariffs.
+     *
+     * @return The list of active tariffs.
+     */
+    List<GetActiveTariffInfoDto> getTariffsInfo();
 }

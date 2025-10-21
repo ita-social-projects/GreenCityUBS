@@ -1,6 +1,8 @@
 package greencity.repository;
 
 import greencity.entity.order.TariffsInfo;
+import greencity.enums.TariffStatus;
+import org.hibernate.annotations.processing.SQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -203,4 +205,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "AND c.courier_status = 'ACTIVE' "
             + "AND c.id = :courierId ")
     Optional<TariffsInfo> findTariffInfoByLocationIdAndCourierId(Long locationId, Long courierId);
+
+    @Query("SELECT t FROM TariffsInfo t WHERE t.tariffStatus = 'ACTIVE'")
+    List<TariffsInfo> findAllActiveTariffsInfo();
 }
