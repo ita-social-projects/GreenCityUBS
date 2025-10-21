@@ -1,21 +1,28 @@
 package greencity.service.ubs.tariff;
 
 import static greencity.ModelUtils.getTariffInfoByLocationDto;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
+import greencity.dto.tariff.GetActiveTariffInfoDto;
+import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
+import greencity.entity.user.Location;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.CourierRepository;
 import greencity.repository.LocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -162,5 +169,75 @@ class TariffServiceImplTest {
         when(tariffsInfoRepository.findTariffIdByLocationId(locationId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> tariffService.getTariffIdByLocationId(locationId));
+    }
+
+    @Test
+    void getTariffsInfo_whenRepositoryReturnsEmptyList_thenReturnEmptyList() {
+        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of());
+
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
+
+        assertThat(result).isEmpty();
+        verify(tariffsInfoRepository).findAllActiveTariffsInfo();
+    }
+
+    @Test
+    void getTariffsInfo_whenSingleTariffWithOneLocation_thenDtoWithoutDescriptionMessages() {
+        TariffsInfo entity = TariffsInfo.builder()
+            .tariffLocations(Set.of(new TariffLocation()))
+            .build();
+
+        GetActiveTariffInfoDto mappedDto = new GetActiveTariffInfoDto();
+        when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
+        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of(entity));
+
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
+
+        assertThat(result).hasSize(1);
+        GetActiveTariffInfoDto dto = result.get(0);
+        assertThat(dto.getDescriptionMessageUk()).isNull();
+        assertThat(dto.getDescriptionMessageEn()).isNull();
+    }
+
+    @Test
+    void getTariffsInfo_whenSingleTariffWithMultipleLocations_thenDtoWithDescriptionMessages() {
+        Location loc1 = Location.builder()
+            .nameUk("Київ")
+            .nameEn("Kyiv")
+            .build();
+        Location loc2 = Location.builder()
+            .nameUk("Львів")
+            .nameEn("Lviv")
+            .build();
+
+        TariffLocation tl1 = TariffLocation.builder()
+            .location(loc1)
+            .build();
+        TariffLocation tl2 = TariffLocation.builder()
+            .location(loc2)
+            .build();
+
+        TariffsInfo entity = TariffsInfo.builder()
+            .tariffLocations(Set.of(tl1, tl2))
+            .build();
+
+        GetActiveTariffInfoDto mappedDto = new GetActiveTariffInfoDto();
+        when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
+        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of(entity));
+
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
+
+        assertThat(result).hasSize(1);
+        GetActiveTariffInfoDto dto = result.get(0);
+
+        assertThat(dto.getDescriptionMessageUk())
+            .contains("До тарифу також включені")
+            .contains("Київ")
+            .contains("Львів");
+
+        assertThat(dto.getDescriptionMessageEn())
+            .contains("The tariff also includes")
+            .contains("Kyiv")
+            .contains("Lviv");
     }
 }
