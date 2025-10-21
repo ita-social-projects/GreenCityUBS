@@ -1,7 +1,6 @@
 package greencity.ubstelegrambot;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -50,7 +49,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -388,31 +386,28 @@ class TelegramServiceTest {
     }
 
     @Test
-    void handleDefaultUpdate_CallbackStartsWithSetLanguage_ReturnsLanguageSwitcherProcessor() throws Exception {
-        // Arrange
+    void handleDefaultUpdate_CallbackStartsWithSetLanguage_ReturnsLanguageSwitcherProcessor() {
         Update update = mock(Update.class);
         CallbackQuery callbackQuery = mock(CallbackQuery.class);
         org.telegram.telegrambots.meta.api.objects.User mocked =
             mock(org.telegram.telegrambots.meta.api.objects.User.class);
+        SendMessage expected = new SendMessage("123", "test");
 
         when(update.hasCallbackQuery()).thenReturn(true);
         when(update.getCallbackQuery()).thenReturn(callbackQuery);
         when(callbackQuery.getData()).thenReturn("set_language_en");
         when(callbackQuery.getFrom()).thenReturn(mocked);
         when(mocked.getId()).thenReturn(123L);
-
         when(telegramChatRepository.findByChatId("123")).thenReturn(Optional.of(TelegramChat.builder()
             .chatStateUpdatedAt(Instant.now())
             .build()));
+        when(updateProcessor.process(update)).thenReturn(expected);
 
-        Method method = TelegramServiceImpl.class.getDeclaredMethod("handleDefaultUpdate", Update.class);
-        method.setAccessible(true);
+        telegramService.processUpdate(update);
 
-        // Act
-        TelegramUpdateProcessor result = (TelegramUpdateProcessor) method.invoke(telegramService, update);
-
-        // Assert
-        assertEquals(updateProcessor, result);
+        verify(updateProcessor).process(update);
+        verify(executor).executeCommand(expected);
+        verifyNoMoreInteractions(executor);
     }
 
     @Test
