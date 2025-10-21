@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1761037832922-1" author="BohdanLys">
+        <sql>
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Гатне'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Горенка'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Зазим’є'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Ірпінь'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Княжичі'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Коцюбинське'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Новосілки'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Петропавлівська Борщагівка'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Погреби'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Проліски'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Софіївська Борщагівка'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Чайки'), 'ACTIVE');
+
+            INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
+            VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Щасливе'), 'ACTIVE');
+        </sql>
+    </changeSet>
+</databaseChangeLog>
