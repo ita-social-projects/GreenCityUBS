@@ -579,7 +579,7 @@ public class OrderController {
     @Operation(summary = "Get info about all active tariffs")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(schema = @Schema(implementation = GetTariffsInfoDto.class))),
+            content = @Content(schema = @Schema(implementation = GetActiveTariffInfoDto.class))),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)

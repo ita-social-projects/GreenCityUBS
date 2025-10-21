@@ -80,11 +80,9 @@ public class TariffServiceImpl implements TariffService {
                     String locationsUk = joinLocationNames(locations, true);
                     String locationsEn = joinLocationNames(locations, false);
                     dto.setDescriptionMessageUk(
-                        "До тарифу також включені " + locationsUk
-                    );
+                        "До тарифу також включені " + locationsUk);
                     dto.setDescriptionMessageEn(
-                        "The tariff also includes " + locationsEn
-                    );
+                        "The tariff also includes " + locationsEn);
                 }
                 return dto;
             })
