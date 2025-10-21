@@ -27,6 +27,14 @@
     </changeSet>
 
     <changeSet id="1761036162867-1" author="BohdanLys">
+        <update tableName="tariffs_info">
+            <column name="tariff_name_en" value="Unnamed tariff"/>
+            <where>tariff_name_en IS NULL</where>
+        </update>
+        <update tableName="tariffs_info">
+            <column name="tariff_name_uk" value="Без назви тариф"/>
+            <where>tariff_name_uk IS NULL</where>
+        </update>
         <addNotNullConstraint tableName="tariffs_info" columnName="tariff_name_en" columnDataType="VARCHAR(255)"/>
         <addNotNullConstraint tableName="tariffs_info" columnName="tariff_name_uk" columnDataType="VARCHAR(255)"/>
     </changeSet>

@@ -1,8 +1,6 @@
 package greencity.repository;
 
 import greencity.entity.order.TariffsInfo;
-import greencity.enums.TariffStatus;
-import org.hibernate.annotations.processing.SQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
