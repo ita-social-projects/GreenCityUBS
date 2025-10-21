@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1761036382280-1" author="admin">
+    <changeSet id="insert-list-of-locations" author="admin">
         <insert tableName="locations">
             <column name="location_status" value="ACTIVE"/>
             <column name="region_id" value="1"/>

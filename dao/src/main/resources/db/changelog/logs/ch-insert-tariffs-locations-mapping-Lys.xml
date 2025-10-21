@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1761037832922-1" author="BohdanLys">
+    <changeSet id="insert-tariffs-locations-mapping" author="BohdanLys">
         <sql>
             INSERT INTO tariffs_locations (tariffs_info_id, location_id, location_status)
             VALUES (1, (SELECT id FROM locations WHERE name_uk = 'Гатне'), 'ACTIVE');

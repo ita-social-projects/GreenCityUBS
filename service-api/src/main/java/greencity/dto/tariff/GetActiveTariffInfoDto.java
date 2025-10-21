@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class GetActiveTariffInfoDto {
-    Long id;
+    private Long id;
     private String tariffNameUk;
     private String tariffNameEn;
     private String descriptionMessageUk;
