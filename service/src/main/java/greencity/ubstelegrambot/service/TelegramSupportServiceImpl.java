@@ -172,14 +172,15 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         String messageText = Optional.ofNullable(message.getText())
             .orElse(message.getCaption());
+        Instant currentTime = Instant.now();
 
         TelegramMessage telegramMessage = TelegramMessage.builder()
             .chat(chat)
             .fromManager(false)
             .mediaGroupId(mediaGroupId)
             .status(MessageDeliveryStatus.SENT)
-            .sendAt(Instant.now())
-            .updatedAt(Instant.now())
+            .sendAt(currentTime)
+            .updatedAt(currentTime)
             .text(messageText)
             .messageViewingStatus(MessageViewingStatus.UNREAD)
             .telegramMessageId(message.getMessageId())

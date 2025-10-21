@@ -148,13 +148,15 @@ public class TelegramServiceImpl implements TelegramService {
         SendMessage sendMessage = MessageFactory.buildMessage(chat.getChatId(), request.getText());
         Message sentMessage = executor.executeSendMessage(sendMessage);
 
+        Instant currentTime = Instant.now();
+
         TelegramMessage textMessage = TelegramMessage.builder()
             .chat(chat)
             .text(request.getText())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
-            .sendAt(Instant.now())
-            .updatedAt(Instant.now())
+            .sendAt(currentTime)
+            .updatedAt(currentTime)
             .messageViewingStatus(MessageViewingStatus.READ)
             .telegramMessageId(sentMessage != null ? sentMessage.getMessageId() : null)
             .build();
@@ -166,13 +168,14 @@ public class TelegramServiceImpl implements TelegramService {
 
     private void handleImageMessages(TelegramChat chat, CreateTelegramMessageRequest request,
         List<MultipartFile> images) {
+        Instant currentTime = Instant.now();
         TelegramMessage imageMessage = TelegramMessage.builder()
             .chat(chat)
             .text(request.getText())
             .fromManager(true)
             .status(MessageDeliveryStatus.SENT)
-            .sendAt(Instant.now())
-            .updatedAt(Instant.now())
+            .sendAt(currentTime)
+            .updatedAt(currentTime)
             .messageViewingStatus(MessageViewingStatus.READ)
             .build();
 
@@ -245,13 +248,14 @@ public class TelegramServiceImpl implements TelegramService {
             validateFileSize(file);
 
             String caption = images.isEmpty() ? request.getText() : null;
+            Instant currentTime = Instant.now();
             TelegramMessage fileMessage = TelegramMessage.builder()
                 .chat(chat)
                 .fromManager(true)
                 .text(caption)
                 .status(MessageDeliveryStatus.SENT)
-                .sendAt(Instant.now())
-                .updatedAt(Instant.now())
+                .sendAt(currentTime)
+                .updatedAt(currentTime)
                 .messageViewingStatus(MessageViewingStatus.READ)
                 .build();
 
