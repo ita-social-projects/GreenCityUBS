@@ -22,4 +22,6 @@ public class TariffInfoDto {
     private CourierLimit courierLimit;
     private CourierDto courierDto;
     private String limitDescription;
+    private String tariffNameUk;
+    private String tariffNameEn;
 }

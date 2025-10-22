@@ -40,6 +40,8 @@ public class TariffsForLocationDtoMapper extends AbstractConverter<TariffsInfo, 
             .max(source.getMax())
             .min(source.getMin())
             .limitDescription(source.getLimitDescription())
+            .tariffNameEn(source.getTariffNameEn())
+            .tariffNameUk(source.getTariffNameUk())
             .build();
     }
 }

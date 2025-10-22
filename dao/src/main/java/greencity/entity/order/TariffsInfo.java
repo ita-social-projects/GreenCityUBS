@@ -93,4 +93,10 @@ public class TariffsInfo {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "tariffsInfo")
     private List<Order> orders;
+
+    @Column(nullable = false, name = "tariff_name_uk")
+    private String tariffNameUk;
+
+    @Column(nullable = false, name = "tariff_name_en")
+    private String tariffNameEn;
 }

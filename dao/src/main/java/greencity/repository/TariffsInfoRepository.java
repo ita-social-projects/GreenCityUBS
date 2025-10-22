@@ -203,4 +203,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "AND c.courier_status = 'ACTIVE' "
             + "AND c.id = :courierId ")
     Optional<TariffsInfo> findTariffInfoByLocationIdAndCourierId(Long locationId, Long courierId);
+
+    @Query("SELECT t FROM TariffsInfo t WHERE t.tariffStatus = 'ACTIVE'")
+    List<TariffsInfo> findAllActiveTariffsInfo();
 }
