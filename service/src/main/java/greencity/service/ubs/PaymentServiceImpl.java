@@ -8,7 +8,7 @@ import static greencity.constant.ErrorMessage.INCOMPATIBLE_ORDER_STATUS_FOR_MONE
 import static greencity.constant.ErrorMessage.INVALID_REQUESTED_REFUND_AMOUNT;
 import static greencity.constant.ErrorMessage.ORDER_CAN_NOT_BE_UPDATED;
 import static greencity.constant.ErrorMessage.ORDER_HAS_NO_OVERPAYMENT;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND;
 import static greencity.constant.ErrorMessage.REFUND_CONFLICT_MONEY_AND_BONUSES;
 import static greencity.service.ubs.UBSManagementServiceImpl.FORMAT_DATE;
@@ -51,7 +51,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -96,7 +95,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentTableInfoDto getPaymentInfo(long orderId, Double sumToPay) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         Long sumToPayInCoins = PaymentUtil.convertBillsIntoCoins(sumToPay);
         Long paidAmountInCoins = PaymentUtil.calculatePaidAmount(order);
         Long overpaymentInCoins = PaymentUtil.calculateOverpayment(order, sumToPayInCoins);
@@ -122,7 +121,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new BadRequestException("Receipt link or image must be present");
         }
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         checkAvailableOrderForEmployee(order, email);
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(
             paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image, email)));
@@ -150,7 +149,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
         paymentRepository.deletePaymentById(paymentId);
         eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder().getId());
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
     }
 
@@ -166,7 +165,7 @@ public class PaymentServiceImpl implements PaymentService {
             () -> new NotFoundException(PAYMENT_NOT_FOUND + paymentId));
         Payment paymentUpdated = paymentRepository.save(changePaymentEntity(payment, paymentRequestDto, image));
         eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK + paymentRequestDto.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder().getId());
 
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(paymentUpdated);
         updateOrderPaymentStatusForManualPayment(payment.getOrder());
@@ -177,8 +176,10 @@ public class PaymentServiceImpl implements PaymentService {
      * {@inheritDoc}
      */
     @Override
-    public boolean processRefundForOrder(Order order, RefundDto refundDto,
+    public boolean processRefundForOrder(Long orderId, RefundDto refundDto,
         String employeeEmail) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         if (OrderStatus.BROUGHT_IT_HIMSELF == order.getOrderStatus()) {
             processRefundForBroughtItHimselfOrder(order, refundDto, employeeEmail);
             return false;
@@ -193,7 +194,9 @@ public class PaymentServiceImpl implements PaymentService {
      * {@inheritDoc}
      */
     @Override
-    public void processPointsRefundForOrder(Order order) {
+    public void processPointsRefundForOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         Integer pointsToReturn = order.getPointsToUse();
         if (isNull(pointsToReturn) || pointsToReturn == 0) {
             return;
@@ -286,7 +289,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new BadRequestException(CANNOT_REFUND_MONEY);
         }
         orderRepository.save(order);
-        eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK, employeeEmail, order);
+        eventService.saveEvent(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK, employeeEmail, order.getId());
     }
 
     private void refundPaymentsInBonus(Order order, String email) {
@@ -310,7 +313,7 @@ public class PaymentServiceImpl implements PaymentService {
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
         orderRepository.save(order);
         userRepository.save(currentUser);
-        eventService.saveEvent(OrderHistory.ADDED_BONUSES_UK, email, order);
+        eventService.saveEvent(OrderHistory.ADDED_BONUSES_UK, email, order.getId());
     }
 
     private void checkOverpayment(long overpayment) {
@@ -356,7 +359,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .order(order)
                 .reason(reason)
                 .build());
-        notificationService.notifyBonuses(order, (long) uahPoints);
+        notificationService.notifyBonuses(order.getId(), (long) uahPoints);
     }
 
     private void updateOrderPaymentStatusForManualPayment(Order order) {
@@ -371,12 +374,12 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (paymentsForCurrentOrder > 0 && totalAmount > totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-            eventService.save(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.SYSTEM_UK, order);
-            notificationService.notifyHalfPaidPackage(order);
+            eventService.save(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.SYSTEM_UK, order.getId());
+            notificationService.notifyHalfPaidPackage(order.getId());
         } else if (paymentsForCurrentOrder > 0 && totalAmount <= totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
-            eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
-            notificationService.notifyPaidOrder(order);
+            eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order.getId());
+            notificationService.notifyPaidOrder(order.getId());
         } else if (paymentsForCurrentOrder == 0) {
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         }
@@ -456,7 +459,7 @@ public class PaymentServiceImpl implements PaymentService {
         Employee employee = employeeRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + paymentRequestDto.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), order);
+            employee.getFirstName() + "  " + employee.getLastName(), order.getId());
         return payment;
     }
 }

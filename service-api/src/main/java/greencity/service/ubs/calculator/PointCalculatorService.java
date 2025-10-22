@@ -1,7 +1,7 @@
 package greencity.service.ubs.calculator;
 
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.entity.user.User;
+import greencity.dto.user.UserPointDto;
 
 /**
  * Service for calculating order payment amount with respect to user bonus
@@ -22,9 +22,9 @@ public interface PointCalculatorService {
      * user's bonus points.
      *
      * @param dto             order payment data containing requested points to use
-     * @param currentUser     user who makes the order
+     * @param userPoints     users points dto
      * @param sumToPayInCoins initial amount to pay in coins
      * @return final amount to pay in coins after applying points
      */
-    long getPointSumToPayInCoins(OrderWayForPayClientDto dto, User currentUser, long sumToPayInCoins);
+    long getPointSumToPayInCoins(OrderWayForPayClientDto dto, UserPointDto userPoints, long sumToPayInCoins);
 }

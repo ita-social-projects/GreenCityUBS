@@ -1,4 +1,4 @@
-package greencity.filters;
+package greencity.dto.address;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CustomerPage {
-    private int pageNumber = 0;
-    private int pageSize = 10;
+public class CoordinatesDto {
+    private double latitude;
+    private double longitude;
 }

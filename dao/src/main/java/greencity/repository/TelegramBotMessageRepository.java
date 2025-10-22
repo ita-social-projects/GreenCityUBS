@@ -1,6 +1,6 @@
 package greencity.repository;
 
-import greencity.dto.BotResponseProjection;
+import greencity.entity.telegram.BotResponseProjection;
 import greencity.entity.telegram.BotMessage;
 import greencity.enums.MessageType;
 import org.springframework.data.domain.Page;

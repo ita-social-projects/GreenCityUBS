@@ -38,16 +38,17 @@ import greencity.dto.violation.UpdateViolationToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
 import greencity.dto.violation.ViolationsInfoDto;
 import greencity.entity.parameters.CustomTableView;
-import greencity.filters.CertificateFilterCriteria;
-import greencity.filters.CertificatePage;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
+import greencity.dto.filters.CertificateFilterCriteria;
+import greencity.dto.filters.CertificatePage;
+import greencity.dto.filters.OrderPage;
+import greencity.dto.filters.OrderSearchCriteria;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.PaymentService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
+import greencity.service.ubs.order.OrderService;
 import greencity.validators.payment.ManualPaymentRequestValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -101,6 +102,7 @@ public class ManagementOrderController {
     private final BigOrderTableServiceView bigOrderTableService;
     private final PaymentService paymentService;
     private final ManualPaymentRequestValidator manualPaymentRequestValidator;
+    private final OrderService orderService;
 
     /**
      * Controller getting all certificates with sorting possibility.
@@ -412,9 +414,9 @@ public class ManagementOrderController {
     })
     @GetMapping("/read-order-info/{id}")
     public ResponseEntity<List<OrderDetailInfoDto>> getOrderInfo(
-        @Positive @PathVariable("id") Long id, @RequestParam String language) {
+        @Positive @PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(ubsManagementService.getOrderDetails(id, language));
+            .body(orderService.getOrderDetailsInfo(id));
     }
 
     /**

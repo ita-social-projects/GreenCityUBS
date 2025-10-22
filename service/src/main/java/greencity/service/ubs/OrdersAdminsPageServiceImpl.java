@@ -3,8 +3,8 @@ package greencity.service.ubs;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
-import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TitleDto;
+import greencity.dto.table.OptionForColumnDTO;
+import greencity.dto.table.TitleDto;
 import greencity.dto.courier.ReceivingStationDto;
 import greencity.dto.location.api.CityInfoDto;
 import greencity.dto.location.api.DistrictInfoDto;
@@ -36,8 +36,8 @@ import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
+import greencity.dto.filters.OrderPage;
+import greencity.dto.filters.OrderSearchCriteria;
 import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.CertificateRepository;
@@ -88,7 +88,6 @@ import static greencity.constant.ErrorMessage.ORDER_STATUS_NOT_FOUND;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static greencity.constant.OrderHistory.UBS_ADMIN;
 import static java.util.Objects.nonNull;
 
@@ -281,7 +280,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
         return switch (columnName) {
             case ORDER_STATUS ->
-                createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee));
+                createReturnForSwitchChangeOrder(orderStatusForDevelopStage(ordersId, value, employee.getId()));
             case DATE_OF_EXPORT ->
                 createReturnForSwitchChangeOrder(dateOfExportForDevelopStage(ordersId, value, employee.getId()));
             case TIME_OF_EXPORT ->
@@ -328,8 +327,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 validateOrder(order, employee);
                 setAddressComment(value, orderId);
 
-                eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, UBS_ADMIN, order);
-                orderLockService.unlockOrder(order);
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, UBS_ADMIN, orderId);
+                orderLockService.unlockOrder(orderId);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -377,8 +376,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
                 commentSetters.get(columnName).accept(order);
 
-                eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, UBS_ADMIN, order);
-                orderLockService.unlockOrder(order);
+                eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, UBS_ADMIN, orderId);
+                orderLockService.unlockOrder(orderId);
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -642,7 +641,9 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
     /* methods for changing order */
     @Override
     public synchronized List<Long> orderStatusForDevelopStage(List<Long> ordersId, String updatedStatusValue,
-        Employee employee) {
+        Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND + employeeId));
         List<Long> unresolvedGoals = new ArrayList<>();
         for (Long orderId : ordersId) {
             try {
@@ -662,7 +663,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 }
 
                 sendNotificationAboutOrderStatusChange(existedOrder, employee);
-                orderLockService.unlockOrder(existedOrder);
+                orderLockService.unlockOrder(existedOrder.getId());
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -672,15 +673,15 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
     private void sendNotificationAboutOrderStatusChange(Order updatedOrder, Employee employee) {
         if (updatedOrder.getOrderStatus() == OrderStatus.CONFIRMED) {
-            notificationService.notifyCourierItineraryFormed(updatedOrder);
+            notificationService.notifyCourierItineraryFormed(updatedOrder.getId());
         }
 
         if (updatedOrder.getOrderStatus() == OrderStatus.CANCELED) {
-            notificationService.notifyCanceledOrder(updatedOrder);
+            notificationService.notifyCanceledOrder(updatedOrder.getId());
 
             if (updatedOrder.getPointsToUse() != 0 || !updatedOrder.getCertificates().isEmpty()) {
-                notificationService.notifyBonusesFromCanceledOrder(updatedOrder);
-                paymentService.processPointsRefundForOrder(updatedOrder);
+                notificationService.notifyBonusesFromCanceledOrder(updatedOrder.getId());
+                paymentService.processPointsRefundForOrder(updatedOrder.getId());
 
                 if (!updatedOrder.getCertificates().isEmpty()) {
                     Set<Certificate> certificates = updatedOrder.getCertificates();
@@ -694,8 +695,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
 
         if (updatedOrder.getOrderStatus() == OrderStatus.BROUGHT_IT_HIMSELF) {
             eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK,
-                employee.getFirstName() + "  " + employee.getLastName(), updatedOrder);
-            notificationService.notifySelfPickupOrder(updatedOrder);
+                employee.getFirstName() + "  " + employee.getLastName(), updatedOrder.getId());
+            notificationService.notifySelfPickupOrder(updatedOrder.getId());
         }
     }
 
@@ -727,7 +728,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                             ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                     }
                     existedOrder.setCancellationReason(CancellationReason.valueOf(value));
-                    orderLockService.unlockOrder(existedOrder);
+                    orderLockService.unlockOrder(existedOrder.getId());
                 } catch (Exception e) {
                     unresolvedGoals.add(orderId);
                 }
@@ -753,7 +754,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .eventNameUk(OrderHistory.ORDER_CANCELLED_UK + "  " + value)
                     .build());
                 existedOrder.setCancellationComment(value);
-                orderLockService.unlockOrder(existedOrder);
+                orderLockService.unlockOrder(existedOrder.getId());
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -779,7 +780,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     .eventNameUk(OrderHistory.ADD_ADMIN_COMMENT_UK + "  " + value)
                     .build());
                 existedOrder.setAdminComment(value);
-                orderLockService.unlockOrder(existedOrder);
+                orderLockService.unlockOrder(existedOrder.getId());
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -809,7 +810,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 if (existedOrder.getDeliverTo() != null) {
                     existedOrder.setDeliverTo(LocalDateTime.of(date, existedOrder.getDeliverTo().toLocalTime()));
                 }
-                orderLockService.unlockOrder(existedOrder);
+                orderLockService.unlockOrder(existedOrder.getId());
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -836,7 +837,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 }
                 existedOrder.setDeliverFrom(LocalDateTime.of(existedOrder.getDateOfExport(), timeFrom));
                 existedOrder.setDeliverTo(LocalDateTime.of(existedOrder.getDateOfExport(), timeTo));
-                orderLockService.unlockOrder(existedOrder);
+                orderLockService.unlockOrder(existedOrder.getId());
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -856,7 +857,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                     throw new BadRequestException(ORDER_IS_BLOCKED + existedOrder.getBlockedByEmployee().getId());
                 }
                 existedOrder.setReceivingStation(station);
-                orderLockService.unlockOrder(existedOrder);
+                orderLockService.unlockOrder(existedOrder.getId());
             } catch (Exception e) {
                 unresolvedGoals.add(orderId);
             }
@@ -922,8 +923,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             if (Boolean.TRUE.equals(employeeOrderPositionRepository.existsByOrderAndPosition(order, position))) {
                 employeeOrderPositionRepository.delete(order, position);
                 String historyChanges = eventService.changesWithResponsibleEmployee(position.getId(), Boolean.TRUE);
-                orderLockService.unlockOrder(order);
-                eventService.saveEvent(historyChanges, currentEmployee.getEmail(), order);
+                orderLockService.unlockOrder(order.getId());
+                eventService.saveEvent(historyChanges, currentEmployee.getEmail(), order.getId());
             }
         } catch (Exception e) {
             unresolvedGoals.add(orderId);
@@ -976,8 +977,8 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                 historyChanges = eventService.changesWithResponsibleEmployee(position.getId(), Boolean.FALSE);
             }
 
-            orderLockService.unlockOrder(order);
-            eventService.saveEvent(historyChanges, currentEmployee.getEmail(), order);
+            orderLockService.unlockOrder(order.getId());
+            eventService.saveEvent(historyChanges, currentEmployee.getEmail(), order.getId());
         } catch (Exception e) {
             unresolvedGoals.add(orderId);
         }
@@ -1049,7 +1050,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
                         order.getBlockedByEmployee().getFirstName(), order.getBlockedByEmployee().getLastName()))
                     .build());
             } else {
-                orderLockService.lockOrder(order, employee);
+                orderLockService.lockOrder(order.getId(), employee.getId());
             }
         }
         return blockedOrderDTOS;
@@ -1070,7 +1071,7 @@ public class OrdersAdminsPageServiceImpl implements OrdersAdminsPageService {
             Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
             if (order.isBlocked() && order.getBlockedByEmployee().equals(employee)) {
-                orderLockService.unlockOrder(order);
+                orderLockService.unlockOrder(order.getId());
                 unblockedOrdersId.add(order.getId());
             }
         }

@@ -1,4 +1,4 @@
-package greencity.dto;
+package greencity.entity.telegram;
 
 public interface BotResponseProjection {
     String getMessageType();

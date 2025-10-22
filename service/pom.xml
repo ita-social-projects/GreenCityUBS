@@ -47,6 +47,11 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.greencity</groupId>
+            <artifactId>dao</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

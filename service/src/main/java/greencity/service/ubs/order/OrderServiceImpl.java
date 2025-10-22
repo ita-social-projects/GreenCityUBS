@@ -2,9 +2,11 @@ package greencity.service.ubs.order;
 
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
 import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
+import static greencity.constant.ErrorMessage.UBS_USER_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_NOT_FOUND_BY_ID;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
@@ -14,13 +16,21 @@ import greencity.constant.AppConstant;
 import greencity.dto.address.AddressInfoDto;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.BagTransDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.notification.SenderInfoDto;
 import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailDto;
+import greencity.dto.order.OrderDetailInfoDto;
+import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
+import greencity.dto.payment.PaymentWithStatusDto;
+import greencity.entity.order.Bag;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
@@ -41,12 +51,18 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.persistence.JpqlQueryHelper;
+import greencity.repository.BagRepository;
+import greencity.repository.CertificateRepository;
+import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.OrderStatusTranslationRepository;
 import greencity.repository.OrdersForUserRepository;
 import greencity.repository.TariffsInfoRepository;
+import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
+import greencity.service.ubs.OrderBagService;
+import greencity.service.ubs.PaymentUtil;
 import greencity.service.ubs.calculator.BagCalculatorService;
 import greencity.service.ubs.calculator.CertificateCalculatorService;
 import greencity.service.ubs.calculator.PaymentCalculatorService;
@@ -62,6 +78,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import jakarta.persistence.TypedQuery;
@@ -69,6 +86,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -82,7 +100,6 @@ import org.springframework.stereotype.Service;
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
-    private final OrdersForUserRepository ordersForUserRepository;
     private final UserRepository userRepository;
     private final OrderStatusTranslationRepository orderStatusTranslationRepository;
     private final OrderPaymentStatusTranslationRepository orderPaymentStatusTranslationRepository;
@@ -95,13 +112,25 @@ public class OrderServiceImpl implements OrderService {
     private final ModelMapper modelMapper;
     private final Scheduler quartzScheduler;
     private final JpqlQueryHelper jpqlQueryHelper;
+    private final CertificateRepository certificateRepository;
+    private final OrderBagRepository orderBagRepository;
+    private final UBSUserRepository ubsUserRepository;
+    private final OrdersForUserRepository ordersForUserRepository;
+    private final OrderBagService orderBagService;
+    private final BagRepository bagRepository;
 
     @Override
-    public Order formAndSaveOrderRequest(OrderResponseDto dto, Order order, User currentUser, UBSuser userData) {
-        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
-        List<OrderBag> bagsOrdered = prepareBags(dto, tariffsInfo);
-        Set<Certificate> orderCertificates = new HashSet<>();
+    public Long formAndSaveOrderRequest(OrderResponseDto dto, Long orderId, Long userId, Long ubsUserId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+        User currentUser = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID + userId));
+        UBSuser userData = ubsUserRepository.findById(ubsUserId)
+            .orElseThrow(() -> new NotFoundException(UBS_USER_NOT_FOUND_BY_ID + ubsUserId));
 
+        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
+        List<BagInfoDto> bagsOrdered = prepareBags(dto, order, tariffsInfo.getId());
+        Set<CertificateDto> orderCertificates = new HashSet<>();
         long sumToPayInCoinsWithoutDiscount = calculateTotal(bagsOrdered);
         pointsUtils.checkIfUserHasEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
 
@@ -116,11 +145,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void transferUserPointsToOrder(Order order, Integer pointsToUse) {
+    public void transferUserPointsToOrder(Long orderId, Integer pointsToUse) {
         if (pointsToUse <= 0) {
             return;
         }
 
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         User user = order.getUser();
         pointsUtils.checkIfUserHasEnoughPoints(user.getCurrentPoints(), pointsToUse);
 
@@ -161,7 +192,7 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> orderPages = jpqlQueryHelper.runPageableTypedQueryWithEntityGraph(jpqlQuery, page);
         List<Order> orders = orderPages.getContent();
         List<OrdersDataForUserDto> dtos = new ArrayList<>();
-        orders.forEach(order -> dtos.add(getOrdersData(order)));
+        orders.forEach(order -> dtos.add(getOrdersData(order.getId())));
 
         return new PageableDto<>(
             dtos,
@@ -174,23 +205,23 @@ public class OrderServiceImpl implements OrderService {
     public OrdersDataForUserDto getOrderForUser(String uuid, Long id) {
         Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
         if (order == null) {
-            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            throw new NotFoundException(ORDER_NOT_FOUND_BY_ID + id);
         }
 
-        return getOrdersData(order);
+        return getOrdersData(id);
     }
 
     @Override
     public OrderPaymentDetailDto getOrderPaymentDetail(Long orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         return buildOrderPaymentDetailDto(order);
     }
 
     @Override
     public OrderCancellationReasonDto getOrderCancellationReason(Long orderId, String uuid) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         if (!order.getUser().equals(userRepository.findByUuid(uuid))) {
             throw new AccessDeniedException(CANNOT_ACCESS_ORDER_CANCELLATION_REASON);
         }
@@ -204,7 +235,7 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrder(String uuid, Long id) {
         Order order = ordersForUserRepository.getAllByUserUuidAndId(uuid, id);
         if (order == null) {
-            throw new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST);
+            throw new NotFoundException(ORDER_NOT_FOUND_BY_ID + id);
         }
         unlockPointsAndCertificatesFromOrder(order);
         order.getOrderBags().clear();
@@ -213,13 +244,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrdersDataForUserDto getOrdersData(Order order) {
-        List<BagForUserDto> bags = bagCalculatorService.bagForUserDtosBuilder(order);
+    public OrdersDataForUserDto getOrdersData(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+        OrderInfoDto orderInfo = modelMapper.map(order, OrderInfoDto.class);
+        orderInfo.setOrderPrice(PaymentUtil.getPriceDetails(
+            orderInfo.getId(), orderRepository, orderBagService, certificateRepository)
+            .getTotalSumAmount());
+        List<BagForUserDto> bags = bagCalculatorService.bagForUserDtosBuilder(orderInfo);
         List<CertificateDto> certificates = mapCertificates(order);
 
         Long fullPrice = bagCalculatorService.calculateBagsSum(bags);
         Long amountWithDiscount = calculateDiscountedAmount(order, fullPrice, certificates);
-        Long paidAmount = paymentCalculatorService.countPaidAmount(order.getPayment());
+        List<PaymentWithStatusDto> payments = order.getPayment().stream()
+            .map(payment -> modelMapper.map(payment, PaymentWithStatusDto.class))
+            .toList();
+        Long paidAmount = paymentCalculatorService.countPaidAmount(payments);
 
         Double remainingToPay = moneyConverterUtil
             .convertCoinsIntoBills(amountWithDiscount - paidAmount);
@@ -248,8 +288,34 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    @Override
+    public OrderDetailDto getOrderDetails(Long orderId) {
+        OrderDetailDto dto = new OrderDetailDto();
+        Order order = orderRepository.getOrderDetails(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+
+        dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {}.getType()));
+        dto.setCapacityAndPrice(orderBagService.findAllBagsByOrderId(order.getId())
+            .stream()
+            .map(b -> modelMapper.map(b, BagInfoDto.class))
+            .collect(Collectors.toList()));
+        dto.setName(bagRepository.findAllByOrder(order.getId())
+            .stream()
+            .map(b -> modelMapper.map(b, BagTransDto.class))
+            .collect(Collectors.toList()));
+        dto.setOrderId(order.getId());
+
+        return dto;
+    }
+
+    @Override
+    public List<OrderDetailInfoDto> getOrderDetailsInfo(Long orderId) {
+        OrderDetailDto orderDeatails = getOrderDetails(orderId);
+        return modelMapper.map(orderDeatails, new TypeToken<List<OrderDetailInfoDto>>() {}.getType());
+    }
+
     private long applyBonusesAndCertificates(OrderResponseDto dto, Order order, long sumToPayInCoinsWithoutDiscount,
-        Set<Certificate> orderCertificates) {
+        Set<CertificateDto> orderCertificates) {
         long sumToPayInCoins = pointCalculatorService
             .reduceOrderSumDueToUsedPoints(sumToPayInCoinsWithoutDiscount, dto.getPointsToUse());
         if (sumToPayInCoinsWithoutDiscount == sumToPayInCoins) {
@@ -259,18 +325,47 @@ public class OrderServiceImpl implements OrderService {
 
         sumToPayInCoins =
             certificateCalculatorService.applyCertificatesToOrder(
-                dto, orderCertificates, order, sumToPayInCoins);
+                dto, orderCertificates, order.getId(), sumToPayInCoins);
         return sumToPayInCoins;
     }
 
-    private List<OrderBag> prepareBags(OrderResponseDto dto, TariffsInfo tariffsInfo) {
-        List<OrderBag> bags = new ArrayList<>();
-        bagCalculatorService.prepareBagsAndCalculateTotal(bags, dto.getBags(), tariffsInfo);
+    private List<BagInfoDto> prepareBags(OrderResponseDto dto, Order order, Long tariffsInfoId) {
+        List<BagInfoDto> bags = new ArrayList<>();
+        bagCalculatorService.prepareBagsAndCalculateTotal(bags, dto.getBags(), tariffsInfoId);
+        List<OrderBag> savedBags = orderBagRepository.findOrderBagsByOrderId(order.getId());
+        List<Long> savedBagIds = savedBags.stream()
+            .mapToLong(b -> b.getBag().getId())
+            .boxed()
+            .toList();
+        bags.forEach(bag -> {
+            int orderBagIndex = savedBagIds.indexOf(bag.getId().longValue());
+            Long convertedPrice = bag.getPrice().longValue() * AppConstant.CURRENCY_CONVERSION_RATE;
+
+            if (orderBagIndex == -1) {
+                Bag bagEntity = bagRepository.findById(bag.getId())
+                    .orElseThrow(() -> new NotFoundException("Bag not found"));
+                OrderBag newOrderBag = OrderBag.builder()
+                    .order(order)
+                    .bag(bagEntity)
+                    .amount(bag.getAmount())
+                    .price(convertedPrice)
+                    .nameUk(bag.getNameUk())
+                    .nameEn(bag.getNameEn())
+                    .capacity(bag.getCapacity())
+                    .build();
+                orderBagRepository.save(newOrderBag);
+            } else {
+                savedBags.get(orderBagIndex).setAmount(bag.getAmount());
+            }
+        });
         return bags;
     }
 
-    private long calculateTotal(List<OrderBag> bagsOrdered) {
-        return bagsOrdered.stream().mapToLong(OrderBag::getPrice).sum();
+    private long calculateTotal(List<BagInfoDto> bagsOrdered) {
+        return bagsOrdered.stream()
+            .map(e -> e.getPrice() * e.getAmount())
+            .mapToLong(e -> (long) (e * AppConstant.CURRENCY_CONVERSION_RATE))
+            .sum();
     }
 
     private TariffsInfo findTariffsInfoByBagIdsWithinLocation(List<Integer> bagIds, Long locationId) {
@@ -285,12 +380,17 @@ public class OrderServiceImpl implements OrderService {
             .toList();
     }
 
-    private Order formAndSaveOrder(
-        Order order, Set<Certificate> orderCertificates, List<OrderBag> bagsOrdered,
+    private Long formAndSaveOrder(
+        Order order, Set<CertificateDto> orderCertificates, List<BagInfoDto> bagsOrdered,
         UBSuser userData, User currentUser, long sumToPayInCoins, TariffsInfo tariffsInfo) {
+        List<String> certificatesIds = orderCertificates.stream()
+            .map(CertificateDto::getCode)
+            .toList();
+        Set<Certificate> certificates = new HashSet<>(certificateRepository.findAllById(certificatesIds));
+        order.setCertificates(certificates);
+        order.setOrderBags(orderBagRepository.findOrderBagsByOrderId(order.getId()));
+
         order.setTariffsInfo(tariffsInfo);
-        order.setCertificates(orderCertificates);
-        order.setOrderBags(bagsOrdered);
         order.setUbsUser(userData);
         order.setUser(currentUser);
         order.setSumTotalAmountWithoutDiscounts(
@@ -310,7 +410,8 @@ public class OrderServiceImpl implements OrderService {
             order.setPayment(new ArrayList<>());
         }
         order.getPayment().add(payment);
-        return orderRepository.save(order);
+        order = orderRepository.save(order);
+        return order.getId();
     }
 
     private void setOrderPaymentStatus(Order order, long sumToPay) {

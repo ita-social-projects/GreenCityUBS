@@ -1,7 +1,7 @@
 package greencity.service;
 
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.tariff.DetailsOfDeactivateTariffsDto;
 import greencity.dto.admin.SettingsTextDto;
 import greencity.dto.admin.UpdateSectionTextsDto;
 import greencity.dto.courier.AddingReceivingStationDto;
@@ -21,11 +21,10 @@ import greencity.dto.tariff.EditTariffDto;
 import greencity.dto.tariff.GetTariffLimitsDto;
 import greencity.dto.tariff.GetTariffsInfoDto;
 import greencity.dto.tariff.SetTariffLimitsDto;
-import greencity.entity.order.Courier;
 import greencity.enums.LocationStatus;
 import greencity.enums.MainPageTextSection;
 import greencity.exceptions.NotFoundException;
-import greencity.filters.TariffsInfoFilterCriteria;
+import greencity.dto.filters.TariffsInfoFilterCriteria;
 import java.util.List;
 
 public interface SuperAdminService {
@@ -157,7 +156,7 @@ public interface SuperAdminService {
      * Method for creating courier.
      *
      * @param dto {@link CreateCourierDto} - parameters that's user entered.
-     * @return {@link Courier}
+     * @return {@link CreateCourierDto}
      * @author Vadym Makitra
      */
     CreateCourierDto createCourier(CreateCourierDto dto, String uuid);
@@ -281,7 +280,7 @@ public interface SuperAdminService {
     void switchTariffStatus(Long tariffId, String tariffStatus);
 
     /**
-     * Method for changing status of {@link greencity.entity.order.TariffLocation}.
+     * Method for changing status of TariffLocation.
      *
      * @param tariffId - id of tariff where location statuses want to be changed
      * @param dto      - contains List of Location id's to update status

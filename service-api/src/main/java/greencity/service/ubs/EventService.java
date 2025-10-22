@@ -1,7 +1,6 @@
 package greencity.service.ubs;
 
 import greencity.dto.order.EventDto;
-import greencity.entity.order.Order;
 import java.util.List;
 
 public interface EventService {
@@ -10,10 +9,10 @@ public interface EventService {
      *
      * @param eventName   String.
      * @param eventAuthor String.
-     * @param order       Order.
+     * @param orderId     Long.
      * @author Yuriy Bahlay.
      */
-    void save(String eventName, String eventAuthor, Order order);
+    void save(String eventName, String eventAuthor, Long orderId);
 
     /**
      * This method return correct status for changes with Responsible employee.
@@ -28,11 +27,11 @@ public interface EventService {
      * Method save event with employee.
      *
      * @param name  {@link String};
-     * @param order {@link Order}
+     * @param orderId {@link Long};
      * @param email {@link String}.
      * @author Hlazova Nataliia.
      */
-    void saveEvent(String name, String email, Order order);
+    void saveEvent(String name, String email, Long orderId);
 
     /**
      * Methods for finding all events for Order.

@@ -56,7 +56,6 @@ public class AppConstant {
     public static final Double LOCATION_40_KM_ZONE_VALUE = 40.00;
     public static final String UKRAINE_EN = "Ukraine";
     public static final String LANG_EN = "en";
-    public static final String ADDRESS_NOT_FOUND_BY_ID_MESSAGE = "Address not found with id: ";
     public static final String ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE = "Location and Address selected "
         + "does not match, reselect correct data.";
     public static final byte CURRENCY_CONVERSION_RATE = 100;

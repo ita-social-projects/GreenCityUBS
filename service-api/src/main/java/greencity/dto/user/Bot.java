@@ -1,4 +1,4 @@
-package greencity.util;
+package greencity.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

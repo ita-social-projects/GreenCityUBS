@@ -2,7 +2,7 @@ package greencity.service.ubs.calculator;
 
 import greencity.constant.AppConstant;
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.entity.user.User;
+import greencity.dto.user.UserPointDto;
 import greencity.util.PointsUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,8 +21,8 @@ public class PointCalculatorServiceImpl implements PointCalculatorService {
     }
 
     @Override
-    public long getPointSumToPayInCoins(OrderWayForPayClientDto dto, User currentUser, long sumToPayInCoins) {
-        pointsUtils.checkIfUserHasEnoughPoints(currentUser.getCurrentPoints(), dto.getPointsToUse());
+    public long getPointSumToPayInCoins(OrderWayForPayClientDto dto, UserPointDto userPoints, long sumToPayInCoins) {
+        pointsUtils.checkIfUserHasEnoughPoints(userPoints.getPoints(), dto.getPointsToUse());
         sumToPayInCoins = reduceOrderSumDueToUsedPoints(sumToPayInCoins, dto.getPointsToUse());
         return sumToPayInCoins;
     }

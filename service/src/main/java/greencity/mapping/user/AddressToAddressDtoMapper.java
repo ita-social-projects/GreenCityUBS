@@ -1,8 +1,8 @@
 package greencity.mapping.user;
 
 import greencity.dto.address.AddressDto;
+import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.entity.coords.Coordinates;
 import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
 import greencity.repository.CityRepository;
@@ -45,7 +45,7 @@ public class AddressToAddressDtoMapper extends AbstractConverter<Address, Addres
             .houseCorpus(address.getBaseAddress().getHouseCorpus())
             .houseNumber(address.getBaseAddress().getHouseNumber())
             .addressComment(address.getBaseAddress().getAddressComment())
-            .coordinates(Coordinates.builder()
+            .coordinates(CoordinatesDto.builder()
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())

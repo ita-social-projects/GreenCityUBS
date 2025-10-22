@@ -3,7 +3,6 @@ package greencity.dto.user;
 import greencity.annotations.ValidPhoneNumber;
 import greencity.constant.ValidationConstant;
 import greencity.dto.address.AddressDto;
-import greencity.util.Bot;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

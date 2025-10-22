@@ -4,7 +4,7 @@ import greencity.annotations.ApiLocale;
 import greencity.annotations.CurrentUserUuid;
 import greencity.constant.ValidationConstant;
 import greencity.constants.HttpStatuses;
-import greencity.dto.LocationsDto;
+import greencity.dto.location.LocationsForTariffDto;
 import greencity.dto.OrderCourierPopUpDto;
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
@@ -509,8 +509,8 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/locations", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<LocationsDto>> getAllLocations() {
-        List<LocationsDto> locations = addressService.getAllLocations();
+    public ResponseEntity<List<LocationsForTariffDto>> getAllLocations() {
+        List<LocationsForTariffDto> locations = addressService.getAllLocations();
         return ResponseEntity.status(HttpStatus.OK).body(locations);
     }
 
@@ -544,9 +544,9 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping(value = "/locationsByCourier/{courierId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<LocationsDto>> getAllLocationsByCourierId(
+    public ResponseEntity<List<LocationsForTariffDto>> getAllLocationsByCourierId(
         @Positive @PathVariable("courierId") Long courierId) {
-        List<LocationsDto> locations = addressService.getAllLocationsByCourierId(courierId);
+        List<LocationsForTariffDto> locations = addressService.getAllLocationsByCourierId(courierId);
         return ResponseEntity.status(HttpStatus.OK).body(locations);
     }
 

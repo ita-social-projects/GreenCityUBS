@@ -2,7 +2,6 @@ package greencity.service.ubs.payment;
 
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
-import greencity.entity.order.Order;
 import greencity.enums.PaymentSystem;
 
 /**
@@ -22,10 +21,10 @@ public interface PaymentStrategy {
      * Processes a payment for the given order using the implemented payment system.
      *
      * @param dto             order data received from the client
-     * @param order           the {@link Order} entity to be paid
+     * @param orderId           the order to be paid
      * @param sumToPayInCoins the total amount to be paid, in coins
      * @return a {@link PaymentSystemResponse} containing payment result or redirect
      *         data
      */
-    PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins);
+    PaymentSystemResponse processPayment(OrderResponseDto dto, Long orderId, long sumToPayInCoins);
 }

@@ -2,9 +2,8 @@ package greencity.service.ubs.calculator;
 
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderBag;
-import greencity.entity.order.TariffsInfo;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.order.OrderInfoDto;
 import java.util.List;
 
 /**
@@ -12,32 +11,31 @@ import java.util.List;
  */
 public interface BagCalculatorService {
     /**
-     * Prepares {@link OrderBag} objects, validates tariff limits, and calculates
+     * Prepares {@link BagDto} objects, validates tariff limits, and calculates
      * the total sum to pay.
      *
      * @param orderBagList list to store created order bags
      * @param bags         customer's selected bags
-     * @param tariffsInfo  courier tariff info with limits and available bags
+     * @param tariffsInfoId  courier tariff info id
      * @return total sum to pay in coins
      */
-    long prepareBagsAndCalculateTotal(List<OrderBag> orderBagList, List<BagDto> bags,
-        TariffsInfo tariffsInfo);
+    long prepareBagsAndCalculateTotal(List<BagInfoDto> orderBagList, List<BagDto> bags, Long tariffsInfoId);
 
     /**
      * Calculates total sum of bags in the order (in coins).
      *
-     * @param order current order
+     * @param orderInfo current order info
      * @return sum of bags in coins
      */
-    long getBagsSumToPayInCoins(Order order);
+    long getBagsSumToPayInCoins(OrderInfoDto orderInfo);
 
     /**
      * Builds a list of bag DTOs for a user based on order data.
      *
-     * @param order current order
+     * @param orderInfo current order info
      * @return list of bag DTOs with amounts and prices
      */
-    List<BagForUserDto> bagForUserDtosBuilder(Order order);
+    List<BagForUserDto> bagForUserDtosBuilder(OrderInfoDto orderInfo);
 
     /**
      * Calculates total sum of given bags (in coins).

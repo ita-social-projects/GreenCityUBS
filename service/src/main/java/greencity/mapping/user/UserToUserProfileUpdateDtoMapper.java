@@ -1,9 +1,9 @@
 package greencity.mapping.user;
 
 import greencity.dto.address.AddressDto;
+import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.api.DistrictDto;
 import greencity.dto.user.UserProfileUpdateDto;
-import greencity.entity.coords.Coordinates;
 import greencity.entity.user.User;
 import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
@@ -56,7 +56,7 @@ public class UserToUserProfileUpdateDtoMapper extends AbstractConverter<User, Us
             .streetUk(address.getBaseAddress().getStreetUk())
             .streetEn(address.getBaseAddress().getStreetEn())
             .addressComment(address.getBaseAddress().getAddressComment())
-            .coordinates(Coordinates.builder()
+            .coordinates(CoordinatesDto.builder()
                 .latitude(address.getCoordinates().getLatitude())
                 .longitude(address.getCoordinates().getLongitude())
                 .build())

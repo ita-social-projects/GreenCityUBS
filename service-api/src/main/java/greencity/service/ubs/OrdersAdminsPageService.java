@@ -9,7 +9,6 @@ import greencity.dto.order.RequestToChangeOrdersDataDto;
 import greencity.dto.table.ColumnWidthDto;
 import greencity.dto.table.TableParamsDto;
 import greencity.dto.user.ChatLinkDto;
-import greencity.entity.user.employee.Employee;
 import java.util.List;
 
 public interface OrdersAdminsPageService {
@@ -61,10 +60,10 @@ public interface OrdersAdminsPageService {
      *
      * @param value    of {@link String}
      * @param ordersId of {@link List}
-     * @param employee of {@link Employee}
+     * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */
-    List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Employee employee);
+    List<Long> orderStatusForDevelopStage(List<Long> ordersId, String value, Long employeeId);
 
     /**
      * Method changing order's date of export.

@@ -1,4 +1,4 @@
-package greencity.filters;
+package greencity.dto.filters;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,9 +10,9 @@ import org.springframework.data.domain.Sort;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EmployeePage {
+public class CertificatePage {
     private int pageNumber = 0;
     private int pageSize = 10;
     private Sort.Direction sortDirection = Sort.Direction.DESC;
-    private String sortBy = "employeeId";
+    private String sortBy = "creationDate";
 }

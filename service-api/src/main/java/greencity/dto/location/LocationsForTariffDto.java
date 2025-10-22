@@ -1,4 +1,4 @@
-package greencity.dto;
+package greencity.dto.location;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.Builder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LocationsDto {
+public class LocationsForTariffDto {
     private Long id;
     private String locationStatus;
     private String regionNameUk;

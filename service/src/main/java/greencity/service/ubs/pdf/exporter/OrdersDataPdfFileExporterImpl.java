@@ -280,7 +280,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
 
             String paymentLink = order.getPaymentLink();
             if (paymentLink == null || paymentLink.isBlank()) {
-                paymentLink = processPaymentService.formedLink(order, sumInCoins);
+                paymentLink = processPaymentService.formedLink(order.getId(), sumInCoins);
             }
 
             if (paymentLink == null || paymentLink.isBlank()) {

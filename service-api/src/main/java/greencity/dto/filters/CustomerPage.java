@@ -1,4 +1,4 @@
-package greencity.dto;
+package greencity.dto.filters;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TitleDto {
-    private String key;
-    private String uk;
-    private String en;
+public class CustomerPage {
+    private int pageNumber = 0;
+    private int pageSize = 10;
 }

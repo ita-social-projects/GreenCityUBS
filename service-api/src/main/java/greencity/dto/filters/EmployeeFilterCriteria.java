@@ -1,4 +1,4 @@
-package greencity.filters;
+package greencity.dto.filters;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

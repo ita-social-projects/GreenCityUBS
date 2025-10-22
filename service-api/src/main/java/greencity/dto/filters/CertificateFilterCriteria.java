@@ -1,4 +1,4 @@
-package greencity.filters;
+package greencity.dto.filters;
 
 import greencity.enums.CertificateStatus;
 import lombok.AllArgsConstructor;

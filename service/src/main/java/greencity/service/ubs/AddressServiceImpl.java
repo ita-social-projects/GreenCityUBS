@@ -12,8 +12,8 @@ import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ID;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_BY_ORDER_ID;
 import static greencity.constant.ErrorMessage.NOT_FOUND_ADDRESS_ID_FOR_CURRENT_USER;
 import static greencity.constant.ErrorMessage.NUMBER_OF_ADDRESSES_EXCEEDED;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.TARIFF_FOR_COURIER_AND_LOCATION_NOT_EXIST;
+import static greencity.constant.ErrorMessage.USER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -24,30 +24,32 @@ import greencity.constant.KyivTariffLocation;
 import greencity.constant.OrderHistory;
 import greencity.constant.TariffLocation;
 import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.LocationsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
+import greencity.dto.location.CoordinatesDto;
+import greencity.dto.location.LocationsForTariffDto;
 import greencity.dto.location.api.DistrictDto;
+import greencity.dto.order.OrderAddressDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.ReadAddressByOrderDto;
 import greencity.entity.coords.Coordinates;
-import greencity.entity.order.Order;
 import greencity.entity.user.Location;
 import greencity.entity.user.Region;
 import greencity.entity.user.User;
 import greencity.entity.user.locations.City;
 import greencity.entity.user.locations.District;
 import greencity.entity.user.ubs.Address;
+import greencity.entity.user.ubs.BaseAddress;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.enums.AddressStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.mapping.location.AddressRequestDtoToBaseEntityMapper;
-import greencity.mapping.location.LocationToLocationsDtoMapper;
+import greencity.mapping.location.LocationToLocationsForTariffDtoMapper;
 import greencity.repository.AddressRepository;
 import greencity.repository.CityRepository;
 import greencity.repository.CourierRepository;
@@ -88,7 +90,7 @@ public class AddressServiceImpl implements AddressService {
     private final CourierRepository courierRepository;
     private final TariffsInfoRepository tariffsInfoRepository;
     private final GoogleApiService googleApiService;
-    private final LocationToLocationsDtoMapper locationToLocationsDtoMapper;
+    private final LocationToLocationsForTariffDtoMapper locationToLocationsForTariffDtoMapper;
     private final EventService eventService;
     private final AddressRequestDtoToBaseEntityMapper baseEntityMapper;
     private final ModelMapper modelMapper;
@@ -107,24 +109,10 @@ public class AddressServiceImpl implements AddressService {
         return addressDto;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate) {
-        CreateAddressRequestDto createAddressRequestDto =
-            modelMapper.map(orderAddressDtoUpdate, CreateAddressRequestDto.class);
-        Address address = modelMapper.map(orderAddressDtoUpdate, Address.class);
-        setLocations(createAddressRequestDto, address);
-        return modelMapper.map(address, OrderAddress.class);
-    }
-
     @Override
     @Transactional
     public OrderAddressDtoResponse addressUpdate(UpdateAddressDto addressDto, String email) {
-        Order order = orderRepository.findById(addressDto.getOrderId())
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + addressDto.getOrderId()));
-        return updateAddress(addressDto.getOrderAddressExportDetails(), order, email);
+        return updateAddress(addressDto.getOrderAddressExportDetails(), addressDto.getOrderId(), email);
     }
 
     /**
@@ -176,15 +164,27 @@ public class AddressServiceImpl implements AddressService {
      */
     @Override
     @Transactional
-    public OrderAddressDtoResponse updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
+    public OrderAddressDtoResponse updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
         String email) {
         OrderAddress orderAddress = orderAddressRepository.findById(dtoUpdate.getId())
             .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_ADDRESS_BY_ID, dtoUpdate.getId())));
-        OrderAddress updatedOrderAddress = updateOrderAddress(dtoUpdate);
-        mapUpdatedOrderAddressFields(orderAddress, updatedOrderAddress, dtoUpdate.getAddressComment());
-        orderAddressRepository.save(updatedOrderAddress);
-        eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_UK, email, order);
-        return modelMapper.map(updatedOrderAddress, OrderAddressDtoResponse.class);
+        CreateAddressRequestDto createAddressRequestDto = modelMapper.map(dtoUpdate, CreateAddressRequestDto.class);
+        Address address = modelMapper.map(dtoUpdate, Address.class);
+        setLocations(createAddressRequestDto, address);
+        CoordinatesDto coordinatesDto = dtoUpdate.getCoordinates();
+        address.setCoordinates(modelMapper.map(coordinatesDto, Coordinates.class));
+        BaseAddress newBaseAddress = address.getBaseAddress();
+        newBaseAddress.setActual(orderAddress.getBaseAddress().getActual());
+        newBaseAddress.setAddressStatus(orderAddress.getBaseAddress().getAddressStatus());
+        orderAddress.setBaseAddress(newBaseAddress);
+        orderAddress.setCityId(address.getCityId());
+        orderAddress.setDistrictId(address.getDistrictId());
+        orderAddress.setRegionId(address.getRegionId());
+        orderAddress.setCoordinates(address.getCoordinates());
+
+        orderAddressRepository.save(orderAddress);
+        eventService.saveEvent(OrderHistory.WASTE_REMOVAL_ADDRESS_CHANGE_UK, email, orderId);
+        return modelMapper.map(orderAddress, OrderAddressDtoResponse.class);
     }
 
     /**
@@ -333,7 +333,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public boolean checkIfAddressMatchLocationArea(long locationId, long addressId) {
         Address address = addressRepo.findById(addressId)
-            .orElseThrow(() -> new NotFoundException(AppConstant.ADDRESS_NOT_FOUND_BY_ID_MESSAGE + addressId));
+            .orElseThrow(() -> new NotFoundException(NOT_FOUND_ADDRESS_BY_ID.formatted(addressId)));
 
         boolean isKyivTariff = checkIfCityBelongsToKyivTariff(address.getBaseAddress().getCityEn());
 
@@ -358,14 +358,21 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser) {
-        return orderAddressRepository.save(formOrderAddress(addressId, locationId, currentUser));
+    public OrderAddressDto formAndSaveOrderAddress(Long addressId, Long locationId, Long userId) {
+        User currentUser = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID + userId));
+        OrderAddress orderAddress = orderAddressRepository.save(formOrderAddress(addressId, locationId, currentUser));
+        return modelMapper.map(orderAddress, OrderAddressDto.class);
     }
 
     @Override
     @Transactional
-    public OrderAddress getOrUpdateOrderAddress(OrderAddress currentOrderAddress, Long newAddressId, Long newLocationId,
-        User currentUser) {
+    public OrderAddressDto getOrUpdateOrderAddress(OrderAddressDto currentOrderAddress,
+        Long newAddressId,
+        Long newLocationId,
+        Long userId) {
+        User currentUser = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID + userId));
         OrderAddress newOrderAddress = formOrderAddress(
             newAddressId, newLocationId, currentUser);
         newOrderAddress.setId(currentOrderAddress.getId());
@@ -373,23 +380,24 @@ public class AddressServiceImpl implements AddressService {
         if (currentOrderAddress.equals(newOrderAddress)) {
             return currentOrderAddress;
         }
-        return orderAddressRepository.save(newOrderAddress);
+        newOrderAddress = orderAddressRepository.save(newOrderAddress);
+        return modelMapper.map(newOrderAddress, OrderAddressDto.class);
     }
 
     @Override
-    public List<LocationsDto> getAllLocations() {
+    public List<LocationsForTariffDto> getAllLocations() {
         List<Location> allActiveLocations = locationRepository.findAllActiveLocations();
-        return allActiveLocations.stream().map(locationToLocationsDtoMapper::convert).toList();
+        return allActiveLocations.stream().map(locationToLocationsForTariffDtoMapper::convert).toList();
     }
 
     @Override
-    public List<LocationsDto> getAllLocationsByCourierId(Long courierId) {
+    public List<LocationsForTariffDto> getAllLocationsByCourierId(Long courierId) {
         if (!courierRepository.existsCourierById(courierId)) {
             throw new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId);
         }
         List<Location> locations = locationRepository.findAllActiveLocationsByCourierId(courierId);
         return locations.stream()
-            .map(locationToLocationsDtoMapper::convert)
+            .map(locationToLocationsForTariffDtoMapper::convert)
             .map(locationsDto -> locationsDto.setTariffsId(
                 tariffsInfoRepository.findTariffIdByLocationIdAndCourierId(locationsDto.getId(), courierId)
                     .orElseThrow(() -> new NotFoundException(
@@ -457,16 +465,6 @@ public class AddressServiceImpl implements AddressService {
             .filter(address -> addressRequestDto
                 .areAddressesEqual((modelMapper.map(address, CreateAddressRequestDto.class))))
             .findFirst();
-    }
-
-    private void mapUpdatedOrderAddressFields(OrderAddress orderAddress, OrderAddress updatedOrderAddress,
-        String comment) {
-        updatedOrderAddress.setLocation(orderAddress.getLocation());
-        updatedOrderAddress.setId(orderAddress.getId());
-        updatedOrderAddress.getBaseAddress().setActual(orderAddress.getBaseAddress().getActual());
-        updatedOrderAddress.getBaseAddress().setAddressComment(comment);
-        updatedOrderAddress.setCoordinates(orderAddress.getCoordinates());
-        updatedOrderAddress.getBaseAddress().setAddressStatus(orderAddress.getBaseAddress().getAddressStatus());
     }
 
     private boolean checkIfCityBelongsToKyivTariff(String cityName) {

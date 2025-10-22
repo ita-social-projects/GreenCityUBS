@@ -11,6 +11,7 @@ import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.notification.ScheduledEmailMessage;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
+import greencity.dto.user.UserProfileDto;
 import greencity.entity.notifications.NotificationPlatform;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
@@ -25,6 +26,7 @@ import greencity.entity.user.Violation;
 import greencity.enums.*;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.user.UserNotFoundException;
 import greencity.filters.UserSpecification;
 import greencity.repository.NotificationParameterRepository;
 import greencity.repository.NotificationTemplateRepository;
@@ -39,6 +41,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.text.StringSubstitutor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -73,6 +76,7 @@ import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_BELONG_TO_USER;
 import static greencity.constant.ErrorMessage.NOTIFICATION_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.VIOLATION_DOES_NOT_EXIST;
 import static greencity.enums.NotificationReceiverType.SITE;
 import static java.util.Objects.isNull;
@@ -103,6 +107,7 @@ public class NotificationServiceImpl implements NotificationService {
     private ExecutorService executor;
     private final InternalUrlConfigProp internalUrlConfigProp;
     private final OrderBagService orderBagService;
+    private final ModelMapper modelMapper;
 
     private static final String ORDER_NUMBER_KEY = "orderNumber";
     private static final String AMOUNT_TO_PAY_KEY = "amountToPay";
@@ -199,10 +204,12 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyPaidOrder(Order order) {
+    public void notifyPaidOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         NotificationParameter orderNumber = NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
-            .value(order.getId().toString())
+            .value(orderId.toString())
             .build();
         fillAndSendNotification(Set.of(orderNumber), order, NotificationType.ORDER_IS_PAID);
     }
@@ -216,12 +223,14 @@ public class NotificationServiceImpl implements NotificationService {
             orderRepository.findAllByOrderStatusAndOrderPaymentStatus(OrderStatus.ADJUSTMENT, OrderPaymentStatus.PAID);
         orders.forEach(order -> {
             checkIfOrderNeedsNewNotification(order, NotificationType.COURIER_ITINERARY_FORMED);
-            notifyCourierItineraryFormed(order);
+            notifyCourierItineraryFormed(order.getId());
         });
     }
 
     @Override
-    public void notifyCourierItineraryFormed(Order order) {
+    public void notifyCourierItineraryFormed(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder()
             .key("date")
@@ -253,7 +262,9 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyHalfPaidPackage(Order order) {
+    public void notifyHalfPaidPackage(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         Double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters = initialiseNotificationParametersForUnpaidOrder(order, amountToPay);
 
@@ -285,7 +296,9 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyUnpaidOrder(Order order, String paymentLink) {
+    public void notifyUnpaidOrder(Long orderId, String paymentLink) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         Double amountToPay = getAmountToPay(order);
         Set<NotificationParameter> parameters =
             initialiseNotificationParametersForUnpaidOrder(order, amountToPay, paymentLink);
@@ -310,10 +323,12 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifySelfPickupOrder(Order order) {
+    public void notifySelfPickupOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         Set<NotificationParameter> parameters = Set.of(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
-            .value(order.getId().toString())
+            .value(orderId.toString())
             .build());
         fillAndSendNotification(parameters, order, NotificationType.ORDER_STATUS_CHANGED);
     }
@@ -376,7 +391,7 @@ public class NotificationServiceImpl implements NotificationService {
                     NotificationType.HALF_PAID_ORDER_WITH_STATUS_BROUGHT_BY_HIMSELF,
                     NotificationType.DONE_OR_CANCELED_UNPAID_ORDER);
             if (checkIfHalfPaidPackageNeedsNotification(order, lastNotification)) {
-                notifyHalfPaidPackage(order);
+                notifyHalfPaidPackage(order.getId());
             }
         }
     }
@@ -391,11 +406,13 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyBonuses(Order order, Long overpayment) {
+    public void notifyBonuses(Long orderId, Long overpayment) {
         if (overpayment <= 0) {
             return;
         }
 
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         Set<NotificationParameter> parameters = new HashSet<>();
 
         Integer paidBags = order.getAmountOfBagsOrdered().values().stream()
@@ -426,7 +443,9 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyBonusesFromCanceledOrder(Order order) {
+    public void notifyBonusesFromCanceledOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         Set<NotificationParameter> parameters = new HashSet<>();
         Integer pointsToReturn = order.getPointsToUse();
         if (isNull(pointsToReturn) || pointsToReturn == 0) {
@@ -456,7 +475,9 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyChangedViolation(Violation violation, Long orderId) {
+    public void notifyChangedViolation(Long violationId, Long orderId) {
+        Violation violation = violationRepository.findById(violationId)
+            .orElseThrow(() -> new NotFoundException(VIOLATION_DOES_NOT_EXIST));
         Set<NotificationParameter> parameters = new HashSet<>();
         parameters.add(NotificationParameter.builder()
             .key(ORDER_NUMBER_KEY)
@@ -727,8 +748,9 @@ public class NotificationServiceImpl implements NotificationService {
             LocalDate dateOfLastOrder = LocalDate.now(clock).minusMonths(months);
             callableGetInactiveUsersTasks.add(() -> {
                 List<User> users = userRepository.getInactiveUsersByDateOfLastOrder(dateOfLastOrder);
-                List<User> filteredUsers = users.stream()
+                List<UserProfileDto> filteredUsers = users.stream()
                     .filter(user -> !userIdsByLastNotifications.contains(user.getId()))
+                    .map(user -> modelMapper.map(user, UserProfileDto.class))
                     .collect(Collectors.toList());
                 log.info("Found {} inactive users for {} months ", filteredUsers.size(), months);
                 return InactiveAccountDto.builder().users(filteredUsers).months(months).build();
@@ -742,9 +764,11 @@ public class NotificationServiceImpl implements NotificationService {
             List<Future<InactiveAccountDto>> futures = executor.invokeAll(callableGetInactiveUsersTasks);
             futures.forEach(future -> {
                 try {
-                    List<User> users = future.get().getUsers();
+                    List<UserProfileDto> users = future.get().getUsers();
                     Long monthsOfAccountInactivity = future.get().getMonths();
-                    users.forEach(user -> {
+                    users.forEach(profile -> {
+                        User user = userRepository.findByRecipientEmail(profile.getRecipientEmail())
+                            .orElseThrow(() -> new UserNotFoundException(profile.getRecipientEmail()));
                         UserNotification notification = initialiseNotificationForInactiveUser(user);
                         sendNotificationsForBotsAndEmail(notification, monthsOfAccountInactivity);
                     });
@@ -838,7 +862,9 @@ public class NotificationServiceImpl implements NotificationService {
      * {@inheritDoc}
      */
     @Override
-    public void notifyCreatedOrder(Order order) {
+    public void notifyCreatedOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         fillAndSendNotification(
             getNotificationParametersWithCustomerInfo(order),
             order,
@@ -882,8 +908,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyUnpaidOrderPermanently(Order order, Long amountToPay,
+    public void notifyUnpaidOrderPermanently(Long orderId, Long amountToPay,
         PaymentSystemResponse paymentSystemResponse) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         boolean isOrderPayed = order.getOrderPaymentStatus() == OrderPaymentStatus.PAID;
         if (!isOrderPayed) {
             Double amount = amountToPay.doubleValue() / PERCENTAGE_DIVISOR;
@@ -963,7 +991,9 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyCanceledOrder(Order order) {
+    public void notifyCanceledOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         fillAndSendNotification(
             getNotificationParametersWithCustomerInfo(order),
             order,

@@ -1,4 +1,4 @@
-package greencity.dto;
+package greencity.dto.tariff;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

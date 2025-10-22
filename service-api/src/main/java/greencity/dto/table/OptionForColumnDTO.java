@@ -1,4 +1,4 @@
-package greencity.dto;
+package greencity.dto.table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
