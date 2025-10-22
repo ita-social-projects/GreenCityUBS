@@ -270,7 +270,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private long calculateTotal(List<OrderBag> bagsOrdered) {
-        return bagsOrdered.stream().mapToLong(OrderBag::getPrice).sum();
+        return bagsOrdered.stream().map(i -> i.getPrice() * i.getAmount()).mapToLong(i -> i).sum();
     }
 
     private TariffsInfo findTariffsInfoByBagIdsWithinLocation(List<Integer> bagIds, Long locationId) {
