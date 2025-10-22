@@ -31,4 +31,6 @@ public class GetTariffsInfoDto {
     private CourierLimit courierLimit;
     private Long min;
     private Long max;
+    private String tariffNameUk;
+    private String tariffNameEn;
 }

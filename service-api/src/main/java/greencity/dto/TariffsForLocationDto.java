@@ -25,4 +25,6 @@ public class TariffsForLocationDto {
     private List<LocationsDtos> locationsDtosList;
     private CourierDto courierDto;
     private String limitDescription;
+    private String tariffNameUk;
+    private String tariffNameEn;
 }
