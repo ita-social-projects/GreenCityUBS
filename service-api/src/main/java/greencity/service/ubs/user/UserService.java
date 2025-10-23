@@ -4,6 +4,7 @@ import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
 import greencity.dto.position.PositionAuthoritiesDto;
+import greencity.dto.user.UserDeletionReasonDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserProfileCreateDto;
@@ -109,9 +110,10 @@ public interface UserService {
     /**
      * Method to delete a user by uuid, setting their status to DELETED.
      *
-     * @param uuid {@link String} user's uuid.
+     * @param uuid   {@link String} user's uuid.
+     * @param reason {@link UserDeletionReasonDto} reason for deletion
      */
-    void deleteUserByUuid(String uuid);
+    void deleteUserByUuid(String uuid, UserDeletionReasonDto reason);
 
     /**
      * Method that change user status.
