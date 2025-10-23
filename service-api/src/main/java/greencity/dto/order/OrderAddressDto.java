@@ -6,7 +6,6 @@ import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.LocationsDto;
 import greencity.dto.location.api.CityInfoDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.dto.location.api.LocationDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

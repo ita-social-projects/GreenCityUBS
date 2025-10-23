@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.user.UserPointDto;
-import greencity.entity.user.User;
 import greencity.exceptions.BadRequestException;
 import greencity.util.PointsUtils;
 import org.junit.jupiter.api.Test;

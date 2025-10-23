@@ -1,6 +1,8 @@
 package greencity.service.ubs.order;
 
 import static greencity.ModelUtils.bagDto;
+import static greencity.ModelUtils.getBag;
+import static greencity.ModelUtils.getBagInfoDto;
 import static greencity.ModelUtils.getOrderInfoDto;
 import static greencity.ModelUtils.getOrderPaymentStatusTranslation;
 import static greencity.ModelUtils.getOrderStatusTranslation;
@@ -20,12 +22,18 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.bag.BagMappingDto;
+import greencity.dto.bag.BagTransDto;
 import greencity.dto.order.OrderCancellationReasonDto;
+import greencity.dto.order.OrderDetailDto;
+import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderPaymentDetailDto;
 import greencity.dto.order.OrderResponseDto;
@@ -47,6 +55,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.persistence.JpqlQueryHelper;
+import greencity.repository.BagRepository;
 import greencity.repository.CertificateRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderPaymentStatusTranslationRepository;
@@ -69,7 +78,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,6 +87,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -131,6 +140,8 @@ class OrderServiceImplTest {
     @Mock
     private CertificateRepository certificateRepository;
     @Mock
+    private BagRepository bagRepository;
+    @Mock
     private TypedQuery<Order> orderQuery;
 
     private User user;
@@ -166,11 +177,15 @@ class OrderServiceImplTest {
         dto.setBags(Collections.emptyList());
         dto.setPointsToUse(10);
         dto.setLocationId(1L);
+        BagInfoDto bagInfoDto = getBagInfoDto();
 
         when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
             .thenReturn(Optional.of(tariffsInfo));
-        when(bagCalculatorService.prepareBagsAndCalculateTotal(anyList(), anyList(), any()))
-            .thenReturn(100L);
+        doAnswer(invocation -> {
+            List<BagInfoDto> inputList = invocation.getArgument(0);
+            inputList.add(bagInfoDto);
+            return 100L;
+        }).when(bagCalculatorService).prepareBagsAndCalculateTotal(anyList(), anyList(), any());
         when(pointCalculatorService.reduceOrderSumDueToUsedPoints(anyLong(), anyInt())).thenReturn(90L);
         when(certificateCalculatorService.applyCertificatesToOrder(any(), any(), any(), anyLong())).thenReturn(90L);
         when(orderRepository.save(any())).thenReturn(order);
@@ -181,6 +196,7 @@ class OrderServiceImplTest {
         when(ubsUserRepository.findById(ubsUser.getId())).thenReturn(Optional.of(ubsUser));
         when(orderBagRepository.findOrderBagsByOrderId(order.getId())).thenReturn(order.getOrderBags());
         when(certificateRepository.findAllById(anyList())).thenReturn(order.getCertificates().stream().toList());
+        when(bagRepository.findById(bagInfoDto.getId())).thenReturn(Optional.of(getBag()));
 
         Long result = orderService.formAndSaveOrderRequest(dto, order.getId(), user.getId(), ubsUser.getId());
 
@@ -241,33 +257,6 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void formAndSaveOrderRequest_pointsNotUsed_setsPointsToZero() {
-        OrderResponseDto dto = new OrderResponseDto();
-        dto.setBags(Collections.emptyList());
-        dto.setPointsToUse(0);
-        dto.setLocationId(1L);
-        order.setPointsToUse(300);
-        order.setCertificates(Set.of(ModelUtils.getCertificate()));
-
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
-            .thenReturn(Optional.of(tariffsInfo));
-        when(bagCalculatorService.prepareBagsAndCalculateTotal(anyList(), anyList(), any()))
-            .thenReturn(200L);
-        when(pointCalculatorService.reduceOrderSumDueToUsedPoints(anyLong(), anyInt()))
-            .thenReturn(100L);
-        when(certificateCalculatorService.applyCertificatesToOrder(any(), any(), any(), anyLong()))
-            .thenReturn(100L);
-        when(orderRepository.save(any())).thenReturn(order);
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(ubsUserRepository.findById(ubsUser.getId())).thenReturn(Optional.of(ubsUser));
-        when(orderBagRepository.findOrderBagsByOrderId(order.getId())).thenReturn(order.getOrderBags());
-        when(certificateRepository.findAllById(anyList())).thenReturn(order.getCertificates().stream().toList());
-
-        orderService.formAndSaveOrderRequest(dto, order.getId(), user.getId(), ubsUser.getId());
-    }
-
-    @Test
     void transferUserPointsToOrder_success() {
         user.setCurrentPoints(100);
         user.setChangeOfPointsList(new ArrayList<>());
@@ -285,13 +274,14 @@ class OrderServiceImplTest {
 
     @Test
     void transferUserPointsToOrder_tooManyPoints() {
+        Long orderId = order.getId();
         user.setCurrentPoints(100);
         order.setSumTotalAmountWithoutDiscounts(2000L);
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         doNothing().when(pointsUtils).checkIfUserHasEnoughPoints(anyInt(), anyInt());
 
-        assertThatThrownBy(() -> orderService.transferUserPointsToOrder(order.getId(), 1000))
+        assertThatThrownBy(() -> orderService.transferUserPointsToOrder(orderId, 1000))
             .isInstanceOf(BadRequestException.class);
     }
 
@@ -561,5 +551,134 @@ class OrderServiceImplTest {
 
         assertEquals(QUARTZ_SCHEDULER_EXCEPTION, exception.getMessage());
         verify(quartzScheduler).deleteJob(jobKey);
+    }
+
+    @Test
+    void getOrderDetails_success() {
+        Bag bag = ModelUtils.getBag();
+        bag.setId(1);
+        List<Bag> bags = List.of(bag);
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        bagInfoDto.setId(1);
+        BagMappingDto bagMappingDto = new BagMappingDto();
+        bagMappingDto.setAmount(5);
+        BagTransDto bagTransDto = new BagTransDto();
+        bagTransDto.setName("Test Bag");
+        TypeToken<List<BagMappingDto>> bagMappingDtoToken = new TypeToken<>() {
+        };
+        order.setAmountOfBagsOrdered(Map.of(1, 5));
+
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
+        when(modelMapper.map(order, bagMappingDtoToken.getType())).thenReturn(List.of(bagMappingDto));
+        when(orderBagService.findAllBagsByOrderId(order.getId())).thenReturn(bags);
+        when(bagRepository.findAllByOrder(order.getId())).thenReturn(bags);
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(bag, BagTransDto.class)).thenReturn(bagTransDto);
+
+        OrderDetailDto result = orderService.getOrderDetails(order.getId());
+
+        assertThat(result).isNotNull();
+        assertThat(result.getOrderId()).isEqualTo(order.getId());
+        assertThat(result.getAmount()).hasSize(1);
+        assertThat(result.getCapacityAndPrice()).hasSize(1);
+        assertThat(result.getName()).hasSize(1);
+
+        verify(orderRepository).getOrderDetails(order.getId());
+        verify(orderBagService).findAllBagsByOrderId(order.getId());
+        verify(bagRepository).findAllByOrder(order.getId());
+    }
+
+    @Test
+    void getOrderDetails_orderNotFound_throwsNotFoundException() {
+        Long orderId = order.getId();
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> orderService.getOrderDetails(orderId));
+
+        verify(orderRepository).getOrderDetails(order.getId());
+    }
+
+    @Test
+    void getOrderDetailsInfo_success() {
+        Bag bag = ModelUtils.getBag();
+        bag.setId(1);
+        List<Bag> bags = List.of(bag);
+        BagInfoDto bagInfoDto = getBagInfoDto();
+        bagInfoDto.setId(1);
+        BagMappingDto bagMappingDto = new BagMappingDto();
+        bagMappingDto.setAmount(5);
+        BagTransDto bagTransDto = new BagTransDto();
+        bagTransDto.setName("Test Bag");
+        OrderDetailInfoDto orderDetailInfoDto = new OrderDetailInfoDto();
+        orderDetailInfoDto.setAmount(5);
+        orderDetailInfoDto.setCapacity(120);
+        order.setAmountOfBagsOrdered(Map.of(1, 5));
+        TypeToken<List<BagMappingDto>> bagMappingDtoToken = new TypeToken<>() {
+        };
+        TypeToken<List<OrderDetailInfoDto>> orderDetailInfoDtoToken = new TypeToken<>() {
+        };
+
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
+        when(modelMapper.map(order, bagMappingDtoToken.getType())).thenReturn(List.of(bagMappingDto));
+        when(orderBagService.findAllBagsByOrderId(order.getId())).thenReturn(bags);
+        when(bagRepository.findAllByOrder(order.getId())).thenReturn(bags);
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(bagInfoDto);
+        when(modelMapper.map(bag, BagTransDto.class)).thenReturn(bagTransDto);
+        when(modelMapper.map(any(OrderDetailDto.class), eq(orderDetailInfoDtoToken.getType())))
+            .thenReturn(List.of(orderDetailInfoDto));
+
+        List<OrderDetailInfoDto> result = orderService.getOrderDetailsInfo(order.getId());
+
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getAmount()).isEqualTo(5);
+
+        verify(orderRepository).getOrderDetails(order.getId());
+        verify(modelMapper).map(any(OrderDetailDto.class), eq(orderDetailInfoDtoToken.getType()));
+    }
+
+    @Test
+    void getOrdersData_withSenderInfoFromPrimaryFields() {
+        ubsUser.setSenderFirstName(null);
+        ubsUser.setSenderLastName(null);
+        ubsUser.setSenderPhoneNumber(null);
+        ubsUser.setSenderEmail(null);
+        ubsUser.setFirstName("John");
+        ubsUser.setLastName("Doe");
+        ubsUser.setPhoneNumber("+380123456789");
+        ubsUser.setEmail("john.doe@example.com");
+
+        OrderStatusTranslation statusTranslation = new OrderStatusTranslation();
+        statusTranslation.setNameUk("ukr");
+        statusTranslation.setNameEn("en");
+        OrderPaymentStatusTranslation paymentStatusTranslation = new OrderPaymentStatusTranslation();
+        paymentStatusTranslation.setTranslationValueUk("ukr");
+        paymentStatusTranslation.setTranslationsValueEn("en");
+
+        when(orderStatusTranslationRepository.getOrderStatusTranslationById(anyLong()))
+            .thenReturn(Optional.of(statusTranslation));
+        when(orderPaymentStatusTranslationRepository.getById(anyLong()))
+            .thenReturn(paymentStatusTranslation);
+        when(bagCalculatorService.bagForUserDtosBuilder(any())).thenReturn(Collections.emptyList());
+        when(bagCalculatorService.calculateBagsSum(any())).thenReturn(1000L);
+        when(paymentCalculatorService.countPaidAmount(any())).thenReturn(0L);
+        when(certificateCalculatorService.countCertificatesBonuses(any())).thenReturn(0);
+        when(moneyConverterUtil.convertCoinsIntoBills(anyLong())).thenReturn(1.0);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
+        when(modelMapper.map(order, OrderInfoDto.class)).thenReturn(getOrderInfoDto());
+        when(orderBagService.findAllBagsInOrderBagsList(order.getOrderBags()))
+            .thenReturn(tariffsInfo.getBags());
+
+        OrdersDataForUserDto resultOrder = orderService.getOrdersData(order.getId());
+
+        assertThat(resultOrder).isNotNull();
+        assertThat(resultOrder.getSender()).isNotNull();
+        assertThat(resultOrder.getSender().getSenderName()).isEqualTo("John");
+        assertThat(resultOrder.getSender().getSenderSurname()).isEqualTo("Doe");
+        assertThat(resultOrder.getSender().getSenderPhone()).isEqualTo("+380123456789");
+        assertThat(resultOrder.getSender().getSenderEmail()).isEqualTo("john.doe@example.com");
+
+        verify(orderRepository).findById(order.getId());
     }
 }

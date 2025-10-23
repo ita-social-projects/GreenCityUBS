@@ -3315,6 +3315,7 @@ public class ModelUtils {
             .nameEn("name")
             .price(100.)
             .capacity(10)
+            .amount(1)
             .build();
     }
 

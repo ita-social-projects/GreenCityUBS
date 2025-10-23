@@ -775,23 +775,25 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForOrder_ShouldThrowBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         RefundDto refundDto = getRefundDto_ReturnMoney();
         refundDto.setReturnMoney(false);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
         assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()), exception.getMessage());
     }
 
     @Test
     void processRefundForOrder_ValidateRefoundAmount_ShouldThrowBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
         RefundDto refundDto = getRefundDto_ReturnMoney();
         refundDto.setAmount(99999L);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
         assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
     }
 
@@ -814,6 +816,7 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForOrder_ShouldRefundMoney_andThrows_ORDER_HAS_NO_OVERPAYMENT() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         RefundDto refundDto = getRefundDto_ReturnMoney();
         order.setOrderStatus(OrderStatus.CANCELED);
         order.getPayment().forEach(p -> p.setAmount(-300L));
@@ -822,21 +825,20 @@ class PaymentServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
-                TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
         assertEquals(ORDER_HAS_NO_OVERPAYMENT, exception.getMessage());
     }
 
     @Test
     void processRefundForDoneOrder_ShouldRefundMoney_andThrowsBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         RefundDto refundDto = getRefundDto_ReturnMoney();
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
-                TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
         assertEquals(INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND, exception.getMessage());
     }
 
@@ -859,6 +861,7 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForDoneOrder_ShouldRefundBonuses_andThrowsBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         order.getPayment().forEach(p -> p.setAmount(-300L));
         order.setPointsToUse(1);
         RefundDto refundDto = getRefundDto_ReturnBonuses();
@@ -868,14 +871,14 @@ class PaymentServiceImplTest {
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
-                TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
         assertEquals(ORDER_HAS_NO_OVERPAYMENT, exception.getMessage());
     }
 
     @Test
     void processRefundForCanceledOrder_ShouldThrowsBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         RefundDto refundDto = getRefundDto_ReturnMoneyAndBonuses();
         order.setOrderStatus(OrderStatus.CANCELED);
         order.getPayment().forEach(p -> p.setAmount(-300L));
@@ -884,32 +887,31 @@ class PaymentServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
-                TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
         assertEquals(REFUND_CONFLICT_MONEY_AND_BONUSES, exception.getMessage());
     }
 
     @Test
     void processRefundForDoneOrder_ShouldThrowsBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), null,
-                TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, null, TEST_EMAIL));
         assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()), exception.getMessage());
     }
 
     @Test
     void processRefundForBroughtItHimselfOrder_refundMoney_shouldThrowsBadRequestException1() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
         RefundDto refundDto = getRefundDto_ReturnMoney();
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
-                TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
         assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
     }
 
@@ -934,13 +936,13 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForBroughtItHimselfOrder_refundBonuses_shouldThrowsBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         RefundDto refundDto = getRefundDto_ReturnMoney().setAmount(100L);
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(refundRepository.save(any(Refund.class))).thenThrow(new BadRequestException(CANNOT_REFUND_MONEY));
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
-                TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
         assertEquals(CANNOT_REFUND_MONEY, exception.getMessage());
         verify(orderRepository, never()).save(any(Order.class));
         verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
@@ -1082,13 +1084,14 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForDoneOrderWhenNeitherMoneyNorBonusesSelected() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         order.setOrderStatus(OrderStatus.DONE);
         RefundDto refundDto = getRefundDto_NothingToRefund();
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
 
         assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()), exception.getMessage());
         verify(refundRepository, never()).save(any());
@@ -1100,6 +1103,7 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForBroughtItHimselfOrderWhenRefundingBonuses() {
         Order order = getOrderForGetOrderStatusData2Test();
+        Long orderId = order.getId();
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
         order.setPointsToUse(50);
 
@@ -1117,7 +1121,7 @@ class PaymentServiceImplTest {
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(orderId, refundDto, TEST_EMAIL));
 
         assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
         verify(userRepository, never()).save(any());

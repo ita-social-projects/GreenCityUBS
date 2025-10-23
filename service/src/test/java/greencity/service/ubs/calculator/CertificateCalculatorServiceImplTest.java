@@ -76,6 +76,7 @@ class CertificateCalculatorServiceImplTest {
     @Test
     void applyCertificatesForClientOrder_ShouldThrow_WhenNotFound() {
         Order order = new Order();
+        Long orderId = order.getId();
         OrderWayForPayClientDto dto = new OrderWayForPayClientDto();
         dto.setCertificates(Set.of("ABC"));
 
@@ -83,12 +84,13 @@ class CertificateCalculatorServiceImplTest {
             .thenReturn(Set.of());
 
         assertThrows(NotFoundException.class,
-            () -> service.applyCertificatesForClientOrder(dto, order.getId(), 100L));
+            () -> service.applyCertificatesForClientOrder(dto, orderId, 100L));
     }
 
     @Test
     void applyCertificatesForClientOrder_ShouldThrow_WhenSomeInvalid() {
         Order order = new Order();
+        Long orderId = order.getId();
         OrderWayForPayClientDto dto = new OrderWayForPayClientDto();
         dto.setCertificates(Set.of("A", "B"));
 
@@ -101,7 +103,7 @@ class CertificateCalculatorServiceImplTest {
             .thenReturn(Set.of(cert));
 
         assertThrows(NotFoundException.class,
-            () -> service.applyCertificatesForClientOrder(dto, order.getId(), 100L));
+            () -> service.applyCertificatesForClientOrder(dto, orderId, 100L));
     }
 
     @Test
@@ -131,12 +133,13 @@ class CertificateCalculatorServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setCertificates(Set.of("A", "B", "C", "D"));
         Order order = new Order();
+        Long orderId = order.getId();
         Set<CertificateDto> certificates = new HashSet<>();
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         assertThrows(NotFoundException.class,
-            () -> service.applyCertificatesToOrder(dto, certificates, order.getId(), 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, orderId, 100L));
     }
 
     @Test
@@ -144,6 +147,7 @@ class CertificateCalculatorServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setCertificates(Set.of("A"));
         Order order = new Order();
+        Long orderId = order.getId();
 
         Certificate cert = new Certificate();
         cert.setCode("A");
@@ -154,7 +158,7 @@ class CertificateCalculatorServiceImplTest {
         Set<CertificateDto> certificates = new HashSet<>();
 
         assertThrows(CertificateIsNotActivated.class,
-            () -> service.applyCertificatesToOrder(dto, certificates, order.getId(), 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, orderId, 100L));
     }
 
     @Test
@@ -232,6 +236,7 @@ class CertificateCalculatorServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setCertificates(Set.of("A"));
         Order order = new Order();
+        Long orderId = order.getId();
 
         CertificateDto cert = new CertificateDto();
         cert.setCode("A");
@@ -248,7 +253,7 @@ class CertificateCalculatorServiceImplTest {
                 .build()));
 
         BadRequestException ex = assertThrows(BadRequestException.class,
-            () -> service.applyCertificatesToOrder(dto, certificates, order.getId(), 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, orderId, 100L));
 
         assertTrue(ex.getMessage().contains(cert.getCode()));
         assertTrue(ex.getMessage().contains("expired"));
@@ -259,6 +264,7 @@ class CertificateCalculatorServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setCertificates(Set.of("A"));
         Order order = new Order();
+        Long orderId = order.getId();
 
         CertificateDto cert = new CertificateDto();
         cert.setCode("A");
@@ -275,7 +281,7 @@ class CertificateCalculatorServiceImplTest {
                 .build()));
 
         BadRequestException ex = assertThrows(BadRequestException.class,
-            () -> service.applyCertificatesToOrder(dto, certificates, order.getId(), 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, orderId, 100L));
 
         assertTrue(ex.getMessage().contains(cert.getCode()));
         assertTrue(ex.getMessage().contains("used"));
@@ -317,12 +323,13 @@ class CertificateCalculatorServiceImplTest {
         }
         dto.setCertificates(certs);
         Order order = new Order();
+        Long orderId = order.getId();
         Set<CertificateDto> certificates = new HashSet<>();
 
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
 
         BadRequestException ex = assertThrows(BadRequestException.class,
-            () -> service.applyCertificatesToOrder(dto, certificates, order.getId(), 100L));
+            () -> service.applyCertificatesToOrder(dto, certificates, orderId, 100L));
 
         assertTrue(ex.getMessage().contains(ErrorMessage.TOO_MANY_CERTIFICATES));
     }

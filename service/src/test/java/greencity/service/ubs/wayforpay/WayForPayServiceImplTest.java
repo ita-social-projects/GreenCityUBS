@@ -209,7 +209,7 @@ class WayForPayServiceImplTest {
             .scheduleJob(any(JobDetail.class), any(Trigger.class));
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> wayForPayService.schedulePaymentExpiryJob(order.getId(), 0, null,
+            () -> wayForPayService.schedulePaymentExpiryJob(1L, 0, null,
                 30L, "http://x"));
 
         assertEquals(PAYMENT_EXPIRY_SCHEDULE_EXCEPTION, exception.getMessage());

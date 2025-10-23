@@ -2,7 +2,6 @@ package greencity.validators;
 
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
-import greencity.entity.order.Order;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.validation.ValidationException;
 import greencity.repository.OrderRepository;

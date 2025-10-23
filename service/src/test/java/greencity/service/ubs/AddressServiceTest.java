@@ -234,47 +234,6 @@ class AddressServiceTest {
         verify(orderAddressRepository).findById(anyLong());
     }
 
-//    @Test
-//    void updateOrderAddressForValidOrderTest() {
-//        OrderAddress expected = getOrderAddress();
-//        OrderAddressExportDetailsDtoUpdate orderAddressExportDetailsDtoUpdate =
-//            ModelUtils.getOrderAddressExportDetailsDtoUpdate();
-//        CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
-//        Address address = getAddress();
-//        Region region = ModelUtils.getRegion();
-//        District district = ModelUtils.getDistrict();
-//        City city = ModelUtils.getCity();
-//        when(modelMapper.map(orderAddressExportDetailsDtoUpdate, CreateAddressRequestDto.class))
-//            .thenReturn(createAddressRequestDto);
-//        when(modelMapper.map(any(OrderAddressExportDetailsDtoUpdate.class), eq(Address.class))).thenReturn(address);
-//        when(modelMapper.map(address, OrderAddress.class)).thenReturn(expected);
-//        when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.of(region));
-//        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
-//            .thenReturn(Optional.of(city));
-//        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
-//            .thenReturn(Optional.of(district));
-//        when(baseEntityMapper.convert(createAddressRequestDto, District.class)).thenReturn(district);
-//        when(baseEntityMapper.convert(any(CreateAddressRequestDto.class), eq(City.class))).thenReturn(city);
-//        addressService.updateOrderAddress(orderAddressExportDetailsDtoUpdate);
-//        verify(regionRepository, times(1)).findRegionByNameEnOrNameUk(anyString(), anyString());
-//        verify(districtRepository, times(1)).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
-//        verify(cityRepository, times(1)).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
-//    }
-//
-//    @Test
-//    void updateOrderAddressIfNoRegionFoundTest() {
-//        CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
-//        Address address = getAddress();
-//        OrderAddressExportDetailsDtoUpdate orderAddressExportDetailsDtoUpdate =
-//            ModelUtils.getOrderAddressExportDetailsDtoUpdate();
-//        when(modelMapper.map(orderAddressExportDetailsDtoUpdate, CreateAddressRequestDto.class))
-//            .thenReturn(createAddressRequestDto);
-//        when(modelMapper.map(any(OrderAddressExportDetailsDtoUpdate.class), eq(Address.class))).thenReturn(address);
-//        when(regionRepository.findRegionByNameEnOrNameUk(anyString(), anyString())).thenReturn(Optional.empty());
-//        assertThrows(BadRequestException.class,
-//            () -> addressService.updateOrderAddress(orderAddressExportDetailsDtoUpdate));
-//    }
-
     @Test
     void saveCurrentAddressForOrderTest() {
         CreateAddressRequestDto createAddressRequestDto = ModelUtils.getAddressRequestDto();
@@ -331,8 +290,9 @@ class AddressServiceTest {
     @Test
     void updateAddressThrowsNotFoundOrderAddressExceptionTest() {
         Order order = getOrder();
+        Long orderId = order.getId();
         assertThrows(NotFoundException.class,
-            () -> addressService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, order.getId(), "abc"));
+            () -> addressService.updateAddress(TEST_ORDER_ADDRESS_DTO_UPDATE, orderId, "abc"));
     }
 
     @Test
@@ -1029,33 +989,6 @@ class AddressServiceTest {
         verify(districtRepository, times(0)).findAllByCityId(anyLong());
     }
 
-//    @Test
-//    void mapUpdatedOrderAddressFieldsTest() throws Exception {
-//        Method mapUpdatedOrderAddressFieldsMethod =
-//            AddressServiceImpl.class.getDeclaredMethod("mapUpdatedOrderAddressFields",
-//                OrderAddress.class, OrderAddress.class, String.class);
-//        mapUpdatedOrderAddressFieldsMethod.setAccessible(true);
-//        Location location = ModelUtils.getLocation();
-//        String comment = "New comment test";
-//        OrderAddress actual = OrderAddress.builder().location(location)
-//            .id(1L)
-//            .baseAddress(BaseAddress.builder()
-//                .actual(false)
-//                .addressComment("No comments")
-//                .addressStatus(AddressStatus.DELETED)
-//                .build())
-//            .coordinates(location.getCoordinates())
-//            .build();
-//        OrderAddress expected = getOrderAddress();
-//        mapUpdatedOrderAddressFieldsMethod.invoke(addressService, expected, actual, comment);
-//        assertEquals(expected.getLocation(), actual.getLocation());
-//        assertEquals(expected.getId(), actual.getId());
-//        assertEquals(expected.getBaseAddress().getActual(), actual.getBaseAddress().getActual());
-//        assertEquals(comment, actual.getBaseAddress().getAddressComment());
-//        assertEquals(expected.getCoordinates(), actual.getCoordinates());
-//        assertEquals(expected.getBaseAddress().getAddressStatus(), actual.getBaseAddress().getAddressStatus());
-//    }
-
     @Test
     void addressUpdateIfPresentTest() {
         Order order = ModelUtils.getOrder();
@@ -1162,26 +1095,6 @@ class AddressServiceTest {
         verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
         verify(addressRepository).save(addressToSave);
     }
-
-//    @Test
-//    void updateOrderAddressTest() {
-//        Address addressToSave = getAddress();
-//
-//        when(modelMapper.map(TEST_ORDER_ADDRESS_DTO_UPDATE, CreateAddressRequestDto.class))
-//            .thenReturn(TEST_CREATE_ADDRESS_DTO);
-//        when(modelMapper.map(any(), eq(Address.class))).thenReturn(addressToSave);
-//        when(regionRepository.findRegionByNameEnOrNameUk(any(), any())).thenReturn(Optional.of(getRegion()));
-//        when(cityRepository.findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString()))
-//            .thenReturn(Optional.of(getCity()));
-//        when(districtRepository.findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString()))
-//            .thenReturn(Optional.of(getDistrict()));
-//
-//        addressService.updateOrderAddress(TEST_ORDER_ADDRESS_DTO_UPDATE);
-//
-//        verify(regionRepository).findRegionByNameEnOrNameUk(anyString(), anyString());
-//        verify(cityRepository).findCityByRegionIdAndNameUkAndNameEn(anyLong(), anyString(), anyString());
-//        verify(districtRepository).findDistrictByCityIdAndNameEnOrNameUk(anyLong(), anyString(), anyString());
-//    }
 
     @Test
     void saveCurrentAddressForOrderWithNoUserFoundTest() {
@@ -1382,6 +1295,7 @@ class AddressServiceTest {
     @Test
     void formAndSaveOrderAddress_deletedAddress_throwsNotFoundException() {
         User user = ModelUtils.getUser();
+        Long userId = user.getId();
         Address address = ModelUtils.getAddress();
         address.setId(5L);
         address.setUser(user);
@@ -1391,12 +1305,13 @@ class AddressServiceTest {
         when(locationRepository.findById(2L)).thenReturn(Optional.of(ModelUtils.getLocation()));
 
         assertThrows(NotFoundException.class,
-            () -> addressService.formAndSaveOrderAddress(5L, 2L, user.getId()));
+            () -> addressService.formAndSaveOrderAddress(5L, 2L, userId));
     }
 
     @Test
     void formAndSaveOrderAddress_wrongUser_throwsNotFoundException() {
         User realUser = ModelUtils.getUser();
+        Long realUserId = realUser.getId();
         User otherUser = new User();
         otherUser.setId(99L);
 
@@ -1409,7 +1324,7 @@ class AddressServiceTest {
         when(locationRepository.findById(2L)).thenReturn(Optional.of(ModelUtils.getLocation()));
 
         assertThrows(NotFoundException.class,
-            () -> addressService.formAndSaveOrderAddress(6L, 2L, realUser.getId()));
+            () -> addressService.formAndSaveOrderAddress(6L, 2L, realUserId));
     }
 
     @Test

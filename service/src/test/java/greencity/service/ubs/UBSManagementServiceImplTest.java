@@ -4,12 +4,8 @@ import static greencity.ModelUtils.ORDER_DETAIL_STATUS_DTO;
 import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO;
 import static greencity.ModelUtils.TEST_ADDITIONAL_BAG_INFO_DTO_LIST;
 import static greencity.ModelUtils.TEST_BAG;
-import static greencity.ModelUtils.TEST_BAG_INFO_DTO;
-import static greencity.ModelUtils.TEST_BAG_LIST;
-import static greencity.ModelUtils.TEST_BAG_MAPPING_DTO_LIST;
 import static greencity.ModelUtils.TEST_MAP_ADDITIONAL_BAG_LIST;
 import static greencity.ModelUtils.TEST_ORDER;
-import static greencity.ModelUtils.TEST_ORDER_DETAILS_INFO_DTO_LIST;
 import static greencity.ModelUtils.TEST_PAYMENT_LIST;
 import static greencity.ModelUtils.TEST_USER;
 import static greencity.ModelUtils.UPDATE_ORDER_PAGE_ADMIN_DTO;
@@ -88,7 +84,6 @@ import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.OrderHistory;
 import greencity.dto.bag.AdditionalBagInfoDto;
 import greencity.dto.bag.BagInfoDto;
-import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.ReasonNotTakeBagDto;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.employee.EmployeePositionDtoRequest;
@@ -99,7 +94,6 @@ import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderInfoDto;
@@ -154,7 +148,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -179,7 +172,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -1017,11 +1009,12 @@ class UBSManagementServiceImplTest {
     @Test
     void testSetOrderDetailThrowsUserNotFoundException() {
         Order order = getOrder();
+        Long orderId = order.getId();
         Map<Integer, Integer> confirm = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsConfirmed();
         Map<Integer, Integer> exported = UPDATE_ORDER_PAGE_ADMIN_DTO.getOrderDetailDto().getAmountOfBagsExported();
 
         assertThrows(NotFoundException.class,
-            () -> ubsManagementService.setOrderDetail(order.getId(), confirm, exported, "test@gmail.com"));
+            () -> ubsManagementService.setOrderDetail(orderId, confirm, exported, "test@gmail.com"));
     }
 
     @Test
@@ -1272,6 +1265,7 @@ class UBSManagementServiceImplTest {
         UpdateOrderPageAdminDto updateOrderPageAdminDto = updateOrderPageAdminDto();
         TariffsInfo tariffsInfo = getTariffsInfo();
         Order order = getOrder();
+        Long orderId = order.getId();
         order.setOrderDate(LocalDateTime.now()).setTariffsInfo(tariffsInfo);
         Employee employee = getEmployee();
 
@@ -1281,7 +1275,7 @@ class UBSManagementServiceImplTest {
 
         assertThrows(BadRequestException.class,
             () -> ubsManagementService.updateOrderAdminPageInfo(
-                updateOrderPageAdminDto, order.getId(), "en", "test@gmail.com"));
+                updateOrderPageAdminDto, orderId, "en", "test@gmail.com"));
         verify(employeeRepository).findByEmail("test@gmail.com");
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(1L, 1L);
     }

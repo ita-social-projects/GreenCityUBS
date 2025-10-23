@@ -166,13 +166,14 @@ class BagCalculatorServiceImplTest {
         List<BagInfoDto> orderBagList = new ArrayList<>();
         List<BagDto> bags = List.of(ModelUtils.getBagDto());
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Long tariffsInfoId = tariffsInfo.getId();
 
         when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(anyInt()))
             .thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, bags, tariffsInfo.getId()));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, bags, tariffsInfoId));
     }
 
     @Test
@@ -183,6 +184,7 @@ class BagCalculatorServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         tariffsInfo.setMin(1000L);
+        Long tariffsInfoId = tariffsInfo.getId();
 
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(true);
@@ -193,7 +195,7 @@ class BagCalculatorServiceImplTest {
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo.getId()));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
@@ -204,6 +206,7 @@ class BagCalculatorServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         tariffsInfo.setMax(1L);
+        Long tariffsInfoId = tariffsInfo.getId();
 
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(true);
@@ -214,7 +217,7 @@ class BagCalculatorServiceImplTest {
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo.getId()));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
@@ -225,6 +228,7 @@ class BagCalculatorServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         tariffsInfo.setMin(10L);
+        Long tariffsInfoId = tariffsInfo.getId();
 
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(true);
@@ -235,7 +239,7 @@ class BagCalculatorServiceImplTest {
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo.getId()));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
@@ -246,6 +250,7 @@ class BagCalculatorServiceImplTest {
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         tariffsInfo.setMax(1L);
+        Long tariffsInfoId = tariffsInfo.getId();
 
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(true);
@@ -256,7 +261,7 @@ class BagCalculatorServiceImplTest {
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo.getId()));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
@@ -294,6 +299,7 @@ class BagCalculatorServiceImplTest {
         dto.setAmount(2);
 
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Long tariffsInfoId = tariffsInfo.getId();
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(false);
         List<BagDto> dtoList = List.of(dto);
@@ -303,7 +309,7 @@ class BagCalculatorServiceImplTest {
         when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
 
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo.getId()));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test

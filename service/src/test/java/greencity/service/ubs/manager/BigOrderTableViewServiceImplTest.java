@@ -3,7 +3,6 @@ package greencity.service.ubs.manager;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.entity.parameters.CustomTableView;
-import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.exceptions.BadRequestException;
 import greencity.dto.filters.DateFilter;
