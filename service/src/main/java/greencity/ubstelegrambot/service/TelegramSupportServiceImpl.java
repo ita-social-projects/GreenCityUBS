@@ -1,7 +1,7 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.config.UserRemoteWebClient;
-import greencity.constant.constant.TelegramBotConstants;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;

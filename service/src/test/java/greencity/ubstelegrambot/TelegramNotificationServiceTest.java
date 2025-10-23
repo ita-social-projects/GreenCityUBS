@@ -1,6 +1,6 @@
 package greencity.ubstelegrambot;
 
-import greencity.constant.constant.TelegramBotConstants;
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramManager;
 import greencity.enums.MessageType;
 import greencity.repository.TelegramManagerRepository;

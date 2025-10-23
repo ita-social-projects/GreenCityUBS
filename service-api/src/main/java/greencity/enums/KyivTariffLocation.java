@@ -1,4 +1,4 @@
-package greencity.constant.constant;
+package greencity.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

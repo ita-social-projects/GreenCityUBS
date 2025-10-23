@@ -1,6 +1,6 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.constant.constant.TelegramBotConstants;
+import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.user.employee.Employee;
 import greencity.entity.user.employee.Position;

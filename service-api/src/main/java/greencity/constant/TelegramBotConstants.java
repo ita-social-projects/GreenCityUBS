@@ -1,4 +1,4 @@
-package greencity.constant.constant;
+package greencity.constant;
 
 import lombok.experimental.UtilityClass;
 

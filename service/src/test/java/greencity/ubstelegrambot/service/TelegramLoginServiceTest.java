@@ -1,7 +1,7 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
-import greencity.constant.constant.TelegramBotConstants;
+import greencity.constant.TelegramBotConstants;
 import greencity.dto.SuccessSignInDto;
 import greencity.dto.TestersSignInRequest;
 import greencity.entity.telegram.TelegramManager;

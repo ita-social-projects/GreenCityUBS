@@ -14,7 +14,7 @@ import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import greencity.ModelUtils;
 import greencity.constant.AppConstant;
-import greencity.constant.constant.pdf.PdfQrCodeText;
+import greencity.enums.pdf.PdfQrCodeText;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.repository.OrderRepository;

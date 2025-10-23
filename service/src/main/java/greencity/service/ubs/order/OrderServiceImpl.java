@@ -7,10 +7,10 @@ import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EX
 import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
 import static greencity.constant.ErrorMessage.UBS_USER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.USER_NOT_FOUND_BY_ID;
-import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
-import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
-import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
-import static greencity.constant.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
 import static java.util.Objects.nonNull;
 import greencity.constant.AppConstant;
 import greencity.dto.address.AddressInfoDto;

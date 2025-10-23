@@ -1,5 +1,5 @@
 
-package greencity.constant.constant.pdf;
+package greencity.enums.pdf;
 
 import greencity.constant.AppConstant;
 import lombok.Getter;

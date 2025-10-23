@@ -1,6 +1,6 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.constant.constant.TelegramBotConstants;
+import greencity.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
 import greencity.enums.MessageType;
 import org.junit.jupiter.api.Test;

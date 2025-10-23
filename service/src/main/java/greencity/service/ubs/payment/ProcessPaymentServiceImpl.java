@@ -8,11 +8,11 @@ import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.UNABLE_TO_CANCEL_PAYMENT_INVOICE;
 import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
-import static greencity.constant.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
-import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
-import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
-import static greencity.constant.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
-import static greencity.constant.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
+import static greencity.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
+import static greencity.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
 import static greencity.util.OrderUtils.getLastPayment;
 import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;

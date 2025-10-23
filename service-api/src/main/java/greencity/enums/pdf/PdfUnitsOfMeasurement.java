@@ -1,4 +1,4 @@
-package greencity.constant.constant.pdf;
+package greencity.enums.pdf;
 
 import greencity.constant.AppConstant;
 import lombok.Getter;
@@ -8,16 +8,15 @@ import java.util.Objects;
 
 @Getter
 @RequiredArgsConstructor
-public enum PdfAddressConstants {
-    HOUSE_NUMBER("буд.", "b."),
-    HOUSE_CORPUS_NUMBER("корпус", "housing"),
-    ENTRANCE_NUMBER("під'їзд", "entrance"),
-    DISTRICT("район", "district");
+public enum PdfUnitsOfMeasurement {
+    VOLUME("л", "l"),
+    UNITS("шт.", "pc."),
+    CURRENCY("грн", "UAH");
 
     private final String nameUk;
     private final String nameEn;
 
-    public static String getByLocale(PdfAddressConstants headerName, Locale locale) {
+    public static String getByLocale(PdfUnitsOfMeasurement headerName, Locale locale) {
         if (Objects.equals(AppConstant.LOCALE_EN_NAME, locale.getLanguage())) {
             return headerName.nameEn;
         }

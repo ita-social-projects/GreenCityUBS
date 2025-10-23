@@ -1,7 +1,7 @@
 package greencity.ubstelegrambot.keyboards;
 
 import com.vdurmont.emoji.EmojiParser;
-import greencity.constant.constant.TelegramBotConstants;
+import greencity.constant.TelegramBotConstants;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import java.util.ArrayList;
 import java.util.List;
-import static greencity.constant.constant.TelegramBotConstants.*;
+import static greencity.constant.TelegramBotConstants.*;
 
 public class KeyboardFactory {
     private KeyboardFactory() {

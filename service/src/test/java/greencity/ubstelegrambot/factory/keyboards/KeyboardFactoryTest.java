@@ -1,6 +1,6 @@
 package greencity.ubstelegrambot.factory.keyboards;
 
-import greencity.constant.constant.TelegramBotConstants;
+import greencity.constant.TelegramBotConstants;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
 import greencity.ubstelegrambot.messages.MessageProvider;
 import org.junit.jupiter.api.Test;
