@@ -27,6 +27,7 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
+import greencity.dto.tariff.GetActiveTariffInfoDto;
 import greencity.exception.handler.CustomExceptionHandler;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AddressService;
@@ -426,5 +427,18 @@ class OrderControllerTest {
             .andExpect(status().isOk());
 
         verify(processPaymentService).cancelPaymentAttempt(uuid, orderId);
+    }
+
+    @Test
+    void getAllActiveTariffs() throws Exception {
+        List<GetActiveTariffInfoDto> listOfTariffs =
+            Arrays.asList(new GetActiveTariffInfoDto(), new GetActiveTariffInfoDto());
+        when(tariffService.getTariffsInfo()).thenReturn(listOfTariffs);
+
+        mockMvc.perform(get(ubsLink + "/activeTariffsInfo"))
+            .andExpect(status().isOk())
+            .andExpect(content().json(new ObjectMapper().writeValueAsString(listOfTariffs)));
+
+        verify(tariffService).getTariffsInfo();
     }
 }

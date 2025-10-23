@@ -3,8 +3,9 @@ package greencity.filters;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import static java.util.Collections.emptyList;
+import java.util.stream.Collectors;
 
 @Converter
 public class StringListConverter implements AttributeConverter<List<String>, String> {
@@ -17,6 +18,11 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
 
     @Override
     public List<String> convertToEntityAttribute(String string) {
-        return string != null ? Arrays.asList(string.split(SPLIT_CHAR)) : emptyList();
+        if (string == null || string.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(string.split(SPLIT_CHAR))
+            .filter(s -> !s.isBlank())
+            .collect(Collectors.toList());
     }
 }

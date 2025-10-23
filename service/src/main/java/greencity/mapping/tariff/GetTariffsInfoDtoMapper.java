@@ -29,6 +29,8 @@ public class GetTariffsInfoDtoMapper extends AbstractConverter<TariffsInfo, GetT
             .min(source.getMin())
             .regionDto(regionDto)
             .createdAt(source.getCreatedAt())
+            .tariffNameEn(source.getTariffNameEn())
+            .tariffNameUk(source.getTariffNameUk())
             .creator(EmployeeNameDto.builder()
                 .id(source.getCreator().getId())
                 .firstName(source.getCreator().getFirstName())

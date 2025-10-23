@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="insert-list-of-locations" author="admin">
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.358498"/>
+            <column name="longitude" value="30.39896"/>
+            <column name="name_uk" value="Гатне"/>
+            <column name="name_en" value="Hatne"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.5609192"/>
+            <column name="longitude" value="30.3100147"/>
+            <column name="name_uk" value="Горенка"/>
+            <column name="name_en" value="Horenka"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.5749188"/>
+            <column name="longitude" value="30.66867"/>
+            <column name="name_uk" value="Зазим’є"/>
+            <column name="name_en" value="Zazymia"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.51875"/>
+            <column name="longitude" value="30.239783"/>
+            <column name="name_uk" value="Ірпінь"/>
+            <column name="name_en" value="Irpin"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.4589158"/>
+            <column name="longitude" value="30.8001325"/>
+            <column name="name_uk" value="Княжичі"/>
+            <column name="name_en" value="Kniazhychi"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.48837839999999"/>
+            <column name="longitude" value="30.3330936"/>
+            <column name="name_uk" value="Коцюбинське"/>
+            <column name="name_en" value="Kotsyubyns'ke"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.3548553"/>
+            <column name="longitude" value="30.4559111"/>
+            <column name="name_uk" value="Новосілки"/>
+            <column name="name_en" value="Novosilky"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.4336783"/>
+            <column name="longitude" value="30.3286144"/>
+            <column name="name_uk" value="Петропавлівська Борщагівка"/>
+            <column name="name_en" value="Petropavlivska Borshchahivka"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.5551181"/>
+            <column name="longitude" value="30.6426305"/>
+            <column name="name_uk" value="Погреби"/>
+            <column name="name_en" value="Pohreby"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.3935133"/>
+            <column name="longitude" value="30.7831676"/>
+            <column name="name_uk" value="Проліски"/>
+            <column name="name_en" value="Prolisky"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.408746"/>
+            <column name="longitude" value="30.3585499"/>
+            <column name="name_uk" value="Софіївська Борщагівка"/>
+            <column name="name_en" value="Sofiivska Borschahivka"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.4401629"/>
+            <column name="longitude" value="30.2879474"/>
+            <column name="name_uk" value="Чайки"/>
+            <column name="name_en" value="Chaiky"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+        <insert tableName="locations">
+            <column name="location_status" value="ACTIVE"/>
+            <column name="region_id" value="1"/>
+            <column name="latitude" value="50.3760418"/>
+            <column name="longitude" value="30.79903079999999"/>
+            <column name="name_uk" value="Щасливе"/>
+            <column name="name_en" value="Shchaslyve"/>
+            <column name="is_deleted" value="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

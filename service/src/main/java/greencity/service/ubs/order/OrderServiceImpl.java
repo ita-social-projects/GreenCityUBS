@@ -365,8 +365,8 @@ public class OrderServiceImpl implements OrderService {
 
     private long calculateTotal(List<BagInfoDto> bagsOrdered) {
         return bagsOrdered.stream()
-            .map(e -> e.getPrice() * e.getAmount())
-            .mapToLong(e -> (long) (e * AppConstant.CURRENCY_CONVERSION_RATE))
+            .map(e -> e.getPrice() * e.getAmount() * AppConstant.CURRENCY_CONVERSION_RATE)
+            .mapToLong(Double::longValue)
             .sum();
     }
 
