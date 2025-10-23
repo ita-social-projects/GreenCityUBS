@@ -20,9 +20,9 @@ import static java.util.stream.Collectors.toMap;
 import com.google.maps.model.LatLng;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.constant.constant.KyivTariffLocation;
+import greencity.enums.KyivTariffLocation;
 import greencity.constant.OrderHistory;
-import greencity.constant.constant.TariffLocation;
+import greencity.enums.TariffLocation;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
@@ -376,10 +376,6 @@ public class AddressServiceImpl implements AddressService {
         OrderAddress newOrderAddress = formOrderAddress(
             newAddressId, newLocationId, currentUser);
         newOrderAddress.setId(currentOrderAddress.getId());
-
-        if (currentOrderAddress.equals(newOrderAddress)) {
-            return currentOrderAddress;
-        }
         newOrderAddress = orderAddressRepository.save(newOrderAddress);
         return modelMapper.map(newOrderAddress, OrderAddressDto.class);
     }
