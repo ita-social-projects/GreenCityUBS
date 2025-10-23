@@ -26,9 +26,9 @@ public interface EventService {
     /**
      * Method save event with employee.
      *
-     * @param name  {@link String};
+     * @param name    {@link String};
      * @param orderId {@link Long};
-     * @param email {@link String}.
+     * @param email   {@link String}.
      * @author Hlazova Nataliia.
      */
     void saveEvent(String name, String email, Long orderId);

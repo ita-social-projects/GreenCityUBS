@@ -19,8 +19,8 @@ public interface TelegramBotResponseService {
      * Retrieves a paginated list of all bot responses.
      *
      * @param pageable pagination and sorting information
-     * @return a {@link PageableDto} containing a list of
-     *         {@link BotResponse} objects
+     * @return a {@link PageableDto} containing a list of {@link BotResponse}
+     *         objects
      */
     PageableDto<BotResponse> getAllBotResponses(Pageable pageable);
 

@@ -15,7 +15,7 @@ public interface WayForPayService {
      * Processes a payment request for the given order and returns the final payment
      * response containing a link for the user to complete the payment.
      *
-     * @param orderId           the order id to be paid
+     * @param orderId         the order id to be paid
      * @param sumToPayInCoins total amount to be paid, expressed in coins (cents)
      * @return a {@link PaymentSystemResponse} with orderId and payment link
      */
@@ -36,7 +36,7 @@ public interface WayForPayService {
      * Wraps the payment link into a standardized response object for further usage.
      *
      * @param orderId the order id being paid
-     * @param link  the payment link returned by WayForPay
+     * @param link    the payment link returned by WayForPay
      * @return a {@link PaymentSystemResponse} containing order ID and payment link
      */
     PaymentSystemResponse getPaymentRequestDto(Long orderId, String link);
@@ -79,8 +79,7 @@ public interface WayForPayService {
      * - Saves payment link and its expiry time to the order. <br>
      * - Throws an exception if job scheduling fails.
      *
-     * @param orderId            the order id for which the expiry job is
-     *                         scheduled
+     * @param orderId          the order id for which the expiry job is scheduled
      * @param pointsUsed       number of points used for payment
      * @param certificateCodes set of applied certificate codes (can be empty)
      * @param expirySeconds    the number of seconds until the payment link expires

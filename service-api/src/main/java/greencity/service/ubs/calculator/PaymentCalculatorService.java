@@ -17,8 +17,8 @@ public interface PaymentCalculatorService {
      * Calculates the final amount to pay for an order in coins, considering bags,
      * certificates, points, and previous payments.
      *
-     * @param dto         request DTO with payment/order details
-     * @param orderInfo       the order to calculate
+     * @param dto        request DTO with payment/order details
+     * @param orderInfo  the order to calculate
      * @param userPoints the user's points who placed the order
      * @return final amount to pay in coins
      */

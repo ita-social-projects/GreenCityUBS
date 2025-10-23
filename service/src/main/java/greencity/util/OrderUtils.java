@@ -23,8 +23,8 @@ public class OrderUtils {
      * object, and encodes the resulting string using Base64. The generated string
      * is in the format: orderId_counterOrderPaymentId_paymentId
      *
-     * @param order   The {@link Order} object containing details such as payment
-     *                and counterOrderPaymentId.
+     * @param order The {@link Order} object containing details such as payment and
+     *              counterOrderPaymentId.
      * @return A Base64-encoded string representing the generated order ID.
      */
     public static String generateEncodedOrderReference(Order order) {

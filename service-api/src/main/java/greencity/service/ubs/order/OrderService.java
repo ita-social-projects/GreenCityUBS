@@ -14,22 +14,22 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Service for creating and updating orders, including applying
- * points and forming full order details.
+ * Service for creating and updating orders, including applying points and
+ * forming full order details.
  */
 public interface OrderService {
     /**
-     * Forms and saves an order based on provided request data. - Validates
-     * tariffs for the selected bags and location. - Calculates the total sum
-     * including discounts, points, and certificates. - Updates the order with
-     * related entities (bags, certificates, tariffs, UBS user, etc.). - Persists
-     * the order and its associated payment in the database.
+     * Forms and saves an order based on provided request data. - Validates tariffs
+     * for the selected bags and location. - Calculates the total sum including
+     * discounts, points, and certificates. - Updates the order with related
+     * entities (bags, certificates, tariffs, UBS user, etc.). - Persists the order
+     * and its associated payment in the database.
      *
-     * @param dto         the {@link OrderResponseDto} containing order request
-     *                    details
-     * @param orderId       the existing or new order to populate
-     * @param userId the current authenticated user id
-     * @param ubsUserId    the ubs user id containing personal and address info
+     * @param dto       the {@link OrderResponseDto} containing order request
+     *                  details
+     * @param orderId   the existing or new order to populate
+     * @param userId    the current authenticated user id
+     * @param ubsUserId the ubs user id containing personal and address info
      * @return the saved order id
      * @throws NotFoundException   if tariffs, bags, or related entities cannot be
      *                             found
@@ -38,13 +38,13 @@ public interface OrderService {
     Long formAndSaveOrderRequest(OrderResponseDto dto, Long orderId, Long userId, Long ubsUserId);
 
     /**
-     * Transfers user points to the given order. - Validates that the user
-     * has enough points. <br>
+     * Transfers user points to the given order. - Validates that the user has
+     * enough points. <br>
      * - Ensures points do not exceed the remaining order amount. <br>
      * - Updates both the user’s balance and the order’s points usage. <br>
      * - Saves changes and records a points transaction event.
      *
-     * @param orderId       the order to apply points to
+     * @param orderId     the order to apply points to
      * @param pointsToUse the number of points the user wants to use
      * @throws BadRequestException if points exceed the maximum allowed or user
      *                             balance

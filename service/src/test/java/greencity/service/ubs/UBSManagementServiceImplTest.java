@@ -497,7 +497,8 @@ class UBSManagementServiceImplTest {
             .orderStatus("BROUGHT_IT_HIMSELF")
             .build();
 
-        OrderDetailStatusDto result = ubsManagementService.updateOrderDetailStatus(saved.getId(), detailStatusDto, email);
+        OrderDetailStatusDto result =
+            ubsManagementService.updateOrderDetailStatus(saved.getId(), detailStatusDto, email);
 
         verify(eventService).saveEvent(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK, email, updated.getId());
         verify(notificationService).notifySelfPickupOrder(updated.getId());

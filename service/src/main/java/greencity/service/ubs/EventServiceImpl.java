@@ -174,9 +174,9 @@ public class EventServiceImpl implements EventService {
     /**
      * Method save event with employee.
      *
-     * @param name  {@link String};
+     * @param name    {@link String};
      * @param orderId {@link Long}
-     * @param email {@link String}.
+     * @param email   {@link String}.
      * @author Hlazova Nataliia.
      */
     @Override

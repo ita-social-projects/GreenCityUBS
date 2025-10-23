@@ -21,7 +21,7 @@ public interface PaymentStrategy {
      * Processes a payment for the given order using the implemented payment system.
      *
      * @param dto             order data received from the client
-     * @param orderId           the order to be paid
+     * @param orderId         the order to be paid
      * @param sumToPayInCoins the total amount to be paid, in coins
      * @return a {@link PaymentSystemResponse} containing payment result or redirect
      *         data

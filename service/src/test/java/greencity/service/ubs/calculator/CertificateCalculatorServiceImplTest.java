@@ -272,7 +272,7 @@ class CertificateCalculatorServiceImplTest {
                 .code(cert.getCode())
                 .certificateStatus(CertificateStatus.USED)
                 .expirationDate(cert.getExpirationDate())
-            .build()));
+                .build()));
 
         BadRequestException ex = assertThrows(BadRequestException.class,
             () -> service.applyCertificatesToOrder(dto, certificates, order.getId(), 100L));

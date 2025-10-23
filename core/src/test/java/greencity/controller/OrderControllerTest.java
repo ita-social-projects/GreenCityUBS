@@ -371,8 +371,8 @@ class OrderControllerTest {
 
     @Test
     void getAllLocationsTest() throws Exception {
-        List<LocationsForTariffDto>
-            locationsForTariffDtoList = Arrays.asList(new LocationsForTariffDto(), new LocationsForTariffDto());
+        List<LocationsForTariffDto> locationsForTariffDtoList =
+            Arrays.asList(new LocationsForTariffDto(), new LocationsForTariffDto());
         when(addressService.getAllLocations()).thenReturn(locationsForTariffDtoList);
 
         mockMvc.perform(get(ubsLink + "/locations")
@@ -400,8 +400,8 @@ class OrderControllerTest {
     @Test
     void getAllLocationsByCourierIdTest() throws Exception {
         Long id = 1L;
-        List<LocationsForTariffDto>
-            locationsForTariffDtoList = Arrays.asList(new LocationsForTariffDto(), new LocationsForTariffDto());
+        List<LocationsForTariffDto> locationsForTariffDtoList =
+            Arrays.asList(new LocationsForTariffDto(), new LocationsForTariffDto());
         when(addressService.getAllLocationsByCourierId(id)).thenReturn(locationsForTariffDtoList);
 
         mockMvc.perform(get(ubsLink + "/locationsByCourier/" + id)

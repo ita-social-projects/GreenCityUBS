@@ -52,7 +52,7 @@ public interface AddressService {
      * Method that update address.
      *
      * @param dtoUpdate of {@link OrderAddressExportDetailsDtoUpdate} order id.
-     * @param orderId     {@link Long}.
+     * @param orderId   {@link Long}.
      * @param email     {@link String}.
      * @return {@link OrderAddressDtoResponse} that contains address.
      * @author Mahdziak Orest
@@ -143,9 +143,9 @@ public interface AddressService {
      * Forms a new {@link OrderAddressDto} from the provided address and location,
      * validates ownership and deletion status, and saves it in the database.
      *
-     * @param addressId   the ID of the address
-     * @param locationId  the ID of the location
-     * @param userId the current authenticated user id who owns the address
+     * @param addressId  the ID of the address
+     * @param locationId the ID of the location
+     * @param userId     the current authenticated user id who owns the address
      * @return the saved {@link OrderAddressDto} entity
      * @throws NotFoundException if address or location does not exist, or if the
      *                           address does not belong to the user
@@ -156,10 +156,11 @@ public interface AddressService {
      * Updates the order address if the provided new address and location differ
      * from the current one. If they match, keeps the existing address.
      *
-     * @param currentOrderAddress the current {@link OrderAddressDto} used in the order
+     * @param currentOrderAddress the current {@link OrderAddressDto} used in the
+     *                            order
      * @param newAddressId        the ID of the new address
      * @param newLocationId       the ID of the new location
-     * @param userId         the current authenticated user id
+     * @param userId              the current authenticated user id
      * @return the updated or existing {@link OrderAddressDto}
      * @throws NotFoundException if the new address or location is invalid or not
      *                           owned by the user

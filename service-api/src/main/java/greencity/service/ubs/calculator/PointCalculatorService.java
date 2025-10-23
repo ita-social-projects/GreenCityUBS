@@ -22,7 +22,7 @@ public interface PointCalculatorService {
      * user's bonus points.
      *
      * @param dto             order payment data containing requested points to use
-     * @param userPoints     users points dto
+     * @param userPoints      users points dto
      * @param sumToPayInCoins initial amount to pay in coins
      * @return final amount to pay in coins after applying points
      */

@@ -160,7 +160,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
 
         OrderInfoDto orderInfo = modelMapper.map(order, OrderInfoDto.class);
         orderInfo.setOrderPrice(PaymentUtil.getPriceDetails(
-                orderInfo.getId(), orderRepository, orderBagService, certificateRepository)
+            orderInfo.getId(), orderRepository, orderBagService, certificateRepository)
             .getTotalSumAmount());
         UserPointDto userPoints = modelMapper.map(currentUser, UserPointDto.class);
         long sumToPayInCoins = paymentCalculatorService.calculateSumToPay(dto, orderInfo, userPoints);

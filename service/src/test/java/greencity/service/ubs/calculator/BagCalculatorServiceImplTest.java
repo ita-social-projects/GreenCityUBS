@@ -324,7 +324,6 @@ class BagCalculatorServiceImplTest {
         BagInfoDto bagDto2 = ModelUtils.getBagInfoDto();
         bagDto2.setId(bag2.getId());
 
-
         when(modelMapper.map(bag1, BagInfoDto.class)).thenReturn(bagDto1);
         when(modelMapper.map(bag2, BagInfoDto.class)).thenReturn(bagDto2);
         when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));

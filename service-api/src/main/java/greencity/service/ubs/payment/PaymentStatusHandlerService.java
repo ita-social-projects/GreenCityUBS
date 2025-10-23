@@ -10,8 +10,8 @@ public interface PaymentStatusHandlerService {
      * order status to {PAID}, saves changes to repositories, removes payment links
      * from notifications, and logs/records events.
      *
-     * @param paymentId          the payment to update
-     * @param orderId                 the order to update
+     * @param paymentId             the payment to update
+     * @param orderId               the order to update
      * @param decodedOrderReference decoded reference string, used to extract
      *                              paymentId
      * @param status                the transaction status returned from the payment
@@ -24,8 +24,8 @@ public interface PaymentStatusHandlerService {
      * to {UNPAID} and persists changes.
      *
      * @param paymentId the payment to update
-     * @param orderId        the order to update
-     * @param status       the transaction status returned from the payment system
+     * @param orderId   the order to update
+     * @param status    the transaction status returned from the payment system
      */
     void checkResponseStatusFailure(Long paymentId, Long orderId, String status);
 }

@@ -294,7 +294,8 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.getOrderDetails(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
 
-        dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {}.getType()));
+        dto.setAmount(modelMapper.map(order, new TypeToken<List<BagMappingDto>>() {
+        }.getType()));
         dto.setCapacityAndPrice(orderBagService.findAllBagsByOrderId(order.getId())
             .stream()
             .map(b -> modelMapper.map(b, BagInfoDto.class))
@@ -311,7 +312,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderDetailInfoDto> getOrderDetailsInfo(Long orderId) {
         OrderDetailDto orderDeatails = getOrderDetails(orderId);
-        return modelMapper.map(orderDeatails, new TypeToken<List<OrderDetailInfoDto>>() {}.getType());
+        return modelMapper.map(orderDeatails, new TypeToken<List<OrderDetailInfoDto>>() {
+        }.getType());
     }
 
     private long applyBonusesAndCertificates(OrderResponseDto dto, Order order, long sumToPayInCoinsWithoutDiscount,

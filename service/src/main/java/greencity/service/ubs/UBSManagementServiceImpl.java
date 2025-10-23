@@ -924,8 +924,8 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * Method returns update export details by order id.
      *
      * @param orderId of {@link Long};
-     * @param dto   of {@link ExportDetailsDtoUpdate};
-     * @param email {@link String} email;
+     * @param dto     of {@link ExportDetailsDtoUpdate};
+     * @param email   {@link String} email;
      * @return {@link ExportDetailsDto};
      * @author Orest Mahdziak
      */
@@ -1132,7 +1132,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * This is method updates eco id from the shop for order.
      *
      * @param ecoNumberDto {@link EcoNumberDto}.
-     * @param orderId        {@link Long}.
+     * @param orderId      {@link Long}.
      * @param email        {@link String}.
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
@@ -1259,7 +1259,7 @@ public class UBSManagementServiceImpl implements UBSManagementService {
      * This is method which is updates admin page info for order.
      *
      * @param updateOrderPageDto {@link UpdateOrderPageAdminDto}.
-     * @param orderId              {@link Long}.
+     * @param orderId            {@link Long}.
      * @author Yuriy Bahlay, Sikhovskiy Rostyslav.
      */
     @Override

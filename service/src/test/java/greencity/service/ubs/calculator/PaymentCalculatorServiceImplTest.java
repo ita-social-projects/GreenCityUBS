@@ -51,7 +51,8 @@ class PaymentCalculatorServiceImplTest {
         long afterClientCertificates = 50L;
 
         when(bagCalculatorService.getBagsSumToPayInCoins(order)).thenReturn(bagsSum);
-        when(certificateCalculatorService.getCertificateSumToPayInCoins(order.getId(), bagsSum)).thenReturn(afterCertificates);
+        when(certificateCalculatorService.getCertificateSumToPayInCoins(order.getId(), bagsSum))
+            .thenReturn(afterCertificates);
         when(pointCalculatorService.getPointSumToPayInCoins(dto, user, afterCertificates)).thenReturn(afterPoints);
         when(certificateCalculatorService.applyCertificatesForClientOrder(dto, order.getId(), afterPoints))
             .thenReturn(afterClientCertificates);

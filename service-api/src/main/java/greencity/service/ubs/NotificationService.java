@@ -160,7 +160,7 @@ public interface NotificationService {
     /**
      * Method sends messages by e-mail/notification that order is unpaid.
      *
-     * @param orderId       of Order which status was changed
+     * @param orderId     of Order which status was changed
      * @param paymentLink payment link
      * @author Vladyslav Haliara
      */
@@ -260,7 +260,7 @@ public interface NotificationService {
      * Notify user that order has unpaid status when it was created and not paid.
      * This method is used one time when user create new order.
      *
-     * @param orderId                 the order to send notification for
+     * @param orderId               the order to send notification for
      * @param sumToPay              the sum to pay
      * @param paymentSystemResponse payment system response with link to pay order
      *

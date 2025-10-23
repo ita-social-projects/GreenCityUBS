@@ -48,8 +48,7 @@ public interface ProcessPaymentService {
      * redirect URL from the WayForPay response. - Schedules a payment expiry job
      * for the generated link.
      *
-     * @param orderId           the {order id for which the payment link is
-     *                        generated
+     * @param orderId         the {order id for which the payment link is generated
      * @param sumToPayInCoins the amount to be paid in coins
      * @return the checkout URL where the client should be redirected to complete
      *         payment
@@ -64,8 +63,7 @@ public interface ProcessPaymentService {
      * extracts the redirect URL. - Schedules a payment expiry job for the generated
      * link.
      *
-     * @param orderId           the order id for which the payment link is
-     *                        generated
+     * @param orderId         the order id for which the payment link is generated
      * @param sumToPayInCoins the amount to be paid in coins
      * @param dto             additional payment data such as used points and
      *                        certificates

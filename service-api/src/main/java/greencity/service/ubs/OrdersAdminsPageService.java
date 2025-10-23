@@ -58,8 +58,8 @@ public interface OrdersAdminsPageService {
     /**
      * Method changing order's status.
      *
-     * @param value    of {@link String}
-     * @param ordersId of {@link List}
+     * @param value      of {@link String}
+     * @param ordersId   of {@link List}
      * @param employeeId of {@link Long}
      * @author Liubomyr Pater
      */

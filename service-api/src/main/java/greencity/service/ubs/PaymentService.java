@@ -58,7 +58,7 @@ public interface PaymentService {
     /**
      * Processes a refund for an order.
      *
-     * @param orderId         the order to process.
+     * @param orderId       the order to process.
      * @param refundDto     {@link RefundDto} the details of the refund request.
      * @param employeeEmail {@link String} the email of the employee processing the
      *                      order.

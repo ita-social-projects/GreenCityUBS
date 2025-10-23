@@ -15,7 +15,7 @@ public interface CertificateCalculatorService {
      * Calculates the order amount in coins after applying all certificates linked
      * to the order (but before applying client-specific certificates).
      *
-     * @param orderId           the order id to process
+     * @param orderId         the order id to process
      * @param sumToPayInCoins initial amount to pay in coins (before certificates)
      * @return adjusted amount after applying certificates
      */
@@ -30,7 +30,7 @@ public interface CertificateCalculatorService {
      *
      * @param dto             request DTO containing payment/order details from
      *                        client
-     * @param orderId           the order id to update
+     * @param orderId         the order id to update
      * @param sumToPayInCoins current sum to pay in coins
      * @return adjusted amount after applying client certificates
      */
@@ -46,7 +46,7 @@ public interface CertificateCalculatorService {
      *
      * @param dto               response DTO representing order details
      * @param orderCertificates set of certificates to apply
-     * @param orderId             the order id to update
+     * @param orderId           the order id to update
      * @param sumToPayInCoins   current sum to pay in coins
      * @return adjusted amount after applying the given certificates
      */

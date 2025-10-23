@@ -11,12 +11,12 @@ import java.util.List;
  */
 public interface BagCalculatorService {
     /**
-     * Prepares {@link BagDto} objects, validates tariff limits, and calculates
-     * the total sum to pay.
+     * Prepares {@link BagDto} objects, validates tariff limits, and calculates the
+     * total sum to pay.
      *
-     * @param orderBagList list to store created order bags
-     * @param bags         customer's selected bags
-     * @param tariffsInfoId  courier tariff info id
+     * @param orderBagList  list to store created order bags
+     * @param bags          customer's selected bags
+     * @param tariffsInfoId courier tariff info id
      * @return total sum to pay in coins
      */
     long prepareBagsAndCalculateTotal(List<BagInfoDto> orderBagList, List<BagDto> bags, Long tariffsInfoId);
