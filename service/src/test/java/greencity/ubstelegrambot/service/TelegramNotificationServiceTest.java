@@ -1,6 +1,6 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.constant.TelegramBotConstants;
+import greencity.constant.constant.TelegramBotConstants;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.notifications.UserNotification;
 import greencity.entity.telegram.TelegramChat;

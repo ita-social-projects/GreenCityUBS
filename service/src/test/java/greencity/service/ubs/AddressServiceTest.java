@@ -55,7 +55,7 @@ import com.google.maps.model.LatLng;
 import greencity.ModelUtils;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.constant.TariffLocation;
+import greencity.constant.constant.TariffLocation;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.CoordinatesDto;
 import greencity.dto.address.AddressDto;

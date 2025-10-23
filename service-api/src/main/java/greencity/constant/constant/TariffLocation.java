@@ -1,4 +1,4 @@
-package greencity.constant;
+package greencity.constant.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

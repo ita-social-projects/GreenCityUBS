@@ -6,7 +6,7 @@ import static greencity.constant.ErrorMessage.USER_HAS_NO_ORDERS;
 import static greencity.constant.ErrorMessage.USER_NOT_FOUND_BY_UUID;
 import greencity.client.UserRemoteClient;
 import greencity.client.config.UserRemoteWebClient;
-import greencity.constant.TelegramBotConstants;
+import greencity.constant.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.ChatDto;

@@ -1,6 +1,6 @@
 package greencity.ubstelegrambot;
 
-import greencity.constant.TelegramBotConstants;
+import greencity.constant.constant.TelegramBotConstants;
 import greencity.enums.ChatState;
 import greencity.service.ubs.TelegramLanguageService;
 import greencity.service.ubs.TelegramLoginService;

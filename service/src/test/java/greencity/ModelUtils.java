@@ -13,7 +13,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import com.google.common.collect.Lists;
 import greencity.constant.AppConstant;
-import greencity.constant.TelegramBotConstants;
+import greencity.constant.constant.TelegramBotConstants;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.CityInfoDto;

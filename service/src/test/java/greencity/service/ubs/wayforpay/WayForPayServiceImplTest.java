@@ -1,6 +1,6 @@
 package greencity.service.ubs.wayforpay;
 
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
+import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;

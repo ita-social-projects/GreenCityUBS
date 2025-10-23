@@ -1,7 +1,7 @@
 package greencity.ubstelegrambot.service;
 
 import greencity.client.UserRemoteClient;
-import greencity.constant.TelegramBotConstants;
+import greencity.constant.constant.TelegramBotConstants;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.FeedbackDto;
 import greencity.dto.telegram.UserTelegramFeedbackDto;

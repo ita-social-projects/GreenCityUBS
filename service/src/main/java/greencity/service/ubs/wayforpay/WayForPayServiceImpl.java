@@ -1,11 +1,11 @@
 package greencity.service.ubs.wayforpay;
 
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
-import static greencity.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
+import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
+import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
+import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
+import static greencity.constant.constant.QuartzConstants.PAYMENT_EXPIRY_TRIGGER_KEY;
+import static greencity.constant.constant.QuartzConstants.WAY_FOR_PAY_LINK_VALIDITY_SECONDS;
 import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;
 import greencity.dto.order.OrderResponseDto;

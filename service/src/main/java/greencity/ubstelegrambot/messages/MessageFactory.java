@@ -1,6 +1,6 @@
 package greencity.ubstelegrambot.messages;
 
-import greencity.constant.TelegramBotConstants;
+import greencity.constant.constant.TelegramBotConstants;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.ubstelegrambot.keyboards.KeyboardFactory;
 import lombok.AccessLevel;

@@ -6,7 +6,7 @@ import greencity.client.UserRemoteClient;
 import greencity.config.InternalUrlConfigProp;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
-import greencity.constant.TelegramBotConstants;
+import greencity.constant.constant.TelegramBotConstants;
 import greencity.dto.notification.NotificationDto;
 import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
