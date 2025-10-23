@@ -1,8 +1,8 @@
 package greencity.validator;
 
 import greencity.constant.ErrorMessage;
-import greencity.entity.user.employee.Position;
-import greencity.repository.PositionRepository;
+import greencity.dto.position.PositionDto;
+import greencity.service.ubs.PositionService;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PositionsValidatorTest {
     @Mock
-    private PositionRepository positionRepository;
+    private PositionService positionService;
 
     @Mock
     private ConstraintValidatorContext context;
@@ -39,9 +39,9 @@ class PositionsValidatorTest {
     @Test
     void isValidShouldReturnTrueWhenAllPositionsExist() {
         Set<Long> inputIds = Set.of(1L, 2L);
-        List<Position> existingPositions = List.of(createPosition(1L), createPosition(2L));
+        List<PositionDto> existingPositions = List.of(createPosition(1L), createPosition(2L));
 
-        when(positionRepository.findAllById(inputIds)).thenReturn(existingPositions);
+        when(positionService.findAllByIds(inputIds)).thenReturn(existingPositions);
 
         assertTrue(validator.isValid(inputIds, context));
     }
@@ -49,9 +49,9 @@ class PositionsValidatorTest {
     @Test
     void isValidShouldReturnFalseWhenSomePositionsDoNotExist() {
         Set<Long> inputIds = Set.of(1L, 2L, 3L);
-        List<Position> existingPositions = List.of(createPosition(1L), createPosition(2L));
+        List<PositionDto> existingPositions = List.of(createPosition(1L), createPosition(2L));
 
-        when(positionRepository.findAllById(inputIds)).thenReturn(existingPositions);
+        when(positionService.findAllByIds(inputIds)).thenReturn(existingPositions);
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
 
         assertFalse(validator.isValid(inputIds, context));
@@ -63,9 +63,9 @@ class PositionsValidatorTest {
     @Test
     void isValidShouldReturnFalseWhenAllPositionsDoNotExist() {
         Set<Long> inputIds = Set.of(10L, 20L);
-        List<Position> existingPositions = Collections.emptyList();
+        List<PositionDto> existingPositions = Collections.emptyList();
 
-        when(positionRepository.findAllById(inputIds)).thenReturn(existingPositions);
+        when(positionService.findAllByIds(inputIds)).thenReturn(existingPositions);
         when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
 
         assertFalse(validator.isValid(inputIds, context));
@@ -84,17 +84,17 @@ class PositionsValidatorTest {
         Set<Long> inputIds = Collections.emptySet();
 
         assertTrue(validator.isValid(inputIds, context));
-        verifyNoInteractions(positionRepository);
+        verifyNoInteractions(positionService);
     }
 
     @Test
     void isValidShouldReturnTrueWhenInputIsNull() {
         assertTrue(validator.isValid(null, context));
-        verifyNoInteractions(positionRepository);
+        verifyNoInteractions(positionService);
     }
 
-    private Position createPosition(Long id) {
-        Position position = mock(Position.class);
+    private PositionDto createPosition(Long id) {
+        PositionDto position = mock(PositionDto.class);
         when(position.getId()).thenReturn(id);
         return position;
     }

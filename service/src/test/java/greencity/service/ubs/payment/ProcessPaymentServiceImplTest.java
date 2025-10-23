@@ -3,7 +3,9 @@ package greencity.service.ubs.payment;
 import static greencity.ModelUtils.getCertificate;
 import static greencity.ModelUtils.getOrder;
 import static greencity.ModelUtils.getOrderAddress;
+import static greencity.ModelUtils.getOrderAddressDto;
 import static greencity.ModelUtils.getOrderCount;
+import static greencity.ModelUtils.getOrderInfoDto;
 import static greencity.ModelUtils.getOrderResponseDto;
 import static greencity.ModelUtils.getPayment;
 import static greencity.ModelUtils.getPaymentSystemResponse;
@@ -28,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -37,6 +40,8 @@ import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
 import greencity.client.WayForPayClient;
 import greencity.constant.OrderHistory;
+import greencity.dto.order.OrderAddressDto;
+import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.PaymentSystemResponse;
@@ -57,12 +62,14 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.CertificateRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.NotificationService;
+import greencity.service.ubs.OrderBagService;
 import greencity.service.ubs.calculator.PaymentCalculatorService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.wayforpay.WayForPayService;
@@ -125,6 +132,10 @@ class ProcessPaymentServiceImplTest {
     private CertificateRepository certificateRepository;
     @Mock
     private WayForPayStrategy wayForPayStrategy;
+    @Mock
+    private OrderAddressRepository orderAddressRepository;
+    @Mock
+    private OrderBagService orderBagService;
     @InjectMocks
     private ProcessPaymentServiceImpl service;
 
@@ -143,21 +154,27 @@ class ProcessPaymentServiceImplTest {
         when(addressService.checkIfAddressMatchLocationArea(dto.getAddressId(), dto.getLocationId())).thenReturn(true);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(ubsUserRepository.save(any(UBSuser.class))).thenReturn(ubsUser);
-        when(orderService.formAndSaveOrderRequest(eq(dto), any(Order.class), eq(user), any(UBSuser.class)))
-            .thenReturn(order);
+        when(orderService.formAndSaveOrderRequest(eq(dto), any(Long.class), eq(user.getId()), nullable(Long.class)))
+            .thenReturn(order.getId());
+        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), dto.getLocationId(), user.getId()))
+            .thenReturn(getOrderAddressDto());
         try (MockedStatic<OrderUtils> mocked = Mockito.mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.getLastPayment(any())).thenReturn(payment);
             when(userRepository.save(any(User.class))).thenReturn(user);
-            doNothing().when(eventService).save(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
+            doNothing().when(eventService).save(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order.getId());
             when(paymentStrategyFactory.getPaymentStrategy(PaymentSystem.WAY_FOR_PAY)).thenReturn(wayForPayStrategy);
-            when(wayForPayStrategy.processPayment(any(OrderResponseDto.class), any(Order.class), anyLong()))
+            when(wayForPayStrategy.processPayment(any(OrderResponseDto.class), any(Long.class), anyLong()))
                 .thenReturn(paymentSystemResponse);
-            doNothing().when(notificationService).notifyCreatedOrder(order);
+            when(orderAddressRepository.findById(dto.getAddressId()))
+                .thenReturn(Optional.of(order.getUbsUser().getOrderAddress()));
+            when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+            when(orderRepository.save(any(Order.class))).thenReturn(order);
+            doNothing().when(notificationService).notifyCreatedOrder(order.getId());
 
             PaymentSystemResponse result = service.processNewOrder(dto, "uuid");
 
             assertThat(result).isEqualTo(paymentSystemResponse);
-            verify(notificationService).notifyCreatedOrder(order);
+            verify(notificationService).notifyCreatedOrder(order.getId());
         }
     }
 
@@ -176,21 +193,27 @@ class ProcessPaymentServiceImplTest {
         PaymentSystemResponse paymentSystemResponse = getPaymentSystemResponse();
 
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), dto.getLocationId(), user.getId()))
+            .thenReturn(getOrderAddressDto());
         when(userRepository.findByUuid("uuid")).thenReturn(user);
         when(addressService.checkIfAddressMatchLocationArea(anyLong(), anyLong())).thenReturn(true);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(ubsUserRepository.save(any(UBSuser.class))).thenReturn(ubsUser);
-        when(orderService.formAndSaveOrderRequest(eq(dto), any(Order.class), eq(user), any(UBSuser.class)))
-            .thenReturn(order);
+        when(orderService.formAndSaveOrderRequest(eq(dto), any(Long.class), eq(user.getId()), nullable(Long.class)))
+            .thenReturn(order.getId());
+        when(orderAddressRepository.findById(ubsUser.getOrderAddress().getId()))
+            .thenReturn(Optional.of(getOrderAddress()));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(userRepository.save(any(User.class))).thenReturn(user);
-        when(wayForPayService.getPaymentRequestDto(order, "")).thenReturn(paymentSystemResponse);
-        doNothing().when(notificationService).notifyCreatedOrder(order);
-        doNothing().when(eventService).save(anyString(), anyString(), eq(order));
+        when(wayForPayService.getPaymentRequestDto(order.getId(), "")).thenReturn(paymentSystemResponse);
+        doNothing().when(notificationService).notifyCreatedOrder(order.getId());
+        doNothing().when(eventService).save(anyString(), anyString(), eq(order.getId()));
 
         PaymentSystemResponse result = service.processNewOrder(dto, "uuid");
 
         assertThat(result).isEqualTo(paymentSystemResponse);
-        verify(notificationService).notifyCreatedOrder(order);
+        verify(notificationService).notifyCreatedOrder(order.getId());
     }
 
     @Test
@@ -215,34 +238,39 @@ class ProcessPaymentServiceImplTest {
         user.setOrders(new ArrayList<>(List.of(order)));
         UBSuser ubsUser = getUBSuser();
         Payment payment = getPayment();
-        OrderAddress orderAddress = getOrderAddress();
+        OrderAddressDto orderAddressDto = getOrderAddressDto();
         PaymentSystemResponse paymentSystemResponse = getPaymentSystemResponse();
 
         when(addressService.checkIfAddressMatchLocationArea(dto.getAddressId(), dto.getLocationId()))
             .thenReturn(true);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
-        when(addressService.getOrUpdateOrderAddress(order.getUbsUser().getOrderAddress(), dto.getAddressId(),
-            dto.getLocationId(), user))
-            .thenReturn(orderAddress);
+        when(addressService.getOrUpdateOrderAddress(orderAddressDto, dto.getAddressId(), dto.getLocationId(),
+            user.getId()))
+            .thenReturn(orderAddressDto);
+        when(modelMapper.map(order.getUbsUser().getOrderAddress(), OrderAddressDto.class)).thenReturn(orderAddressDto);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(ubsUserRepository.save(any(UBSuser.class))).thenReturn(ubsUser);
-        when(orderService.formAndSaveOrderRequest(eq(dto), any(Order.class), eq(user), any(UBSuser.class)))
-            .thenReturn(order);
+        when(orderService.formAndSaveOrderRequest(eq(dto), any(Long.class), eq(user.getId()), any(Long.class)))
+            .thenReturn(order.getId());
         try (MockedStatic<OrderUtils> mocked = Mockito.mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.getLastPayment(any())).thenReturn(payment);
             when(userRepository.save(any(User.class))).thenReturn(user);
-            doNothing().when(eventService).save(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
+            doNothing().when(eventService).save(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK,
+                order.getId());
             when(paymentStrategyFactory.getPaymentStrategy(PaymentSystem.WAY_FOR_PAY)).thenReturn(wayForPayStrategy);
-            when(wayForPayStrategy.processPayment(any(OrderResponseDto.class), any(Order.class), anyLong()))
+            when(orderAddressRepository.findById(ubsUser.getOrderAddress().getId()))
+                .thenReturn(Optional.of(getOrderAddress()));
+            when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+            when(wayForPayStrategy.processPayment(any(OrderResponseDto.class), any(Long.class), anyLong()))
                 .thenReturn(paymentSystemResponse);
-            doNothing().when(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(),
+            doNothing().when(notificationService).notifyUnpaidOrderPermanently(any(Long.class), anyLong(),
                 any(PaymentSystemResponse.class));
 
             PaymentSystemResponse result = service.processExistingOrder(dto, "uuid", order.getId());
 
             assertThat(result).isEqualTo(paymentSystemResponse);
-            verify(notificationService).notifyUnpaidOrderPermanently(any(Order.class), anyLong(),
+            verify(notificationService).notifyUnpaidOrderPermanently(any(Long.class), anyLong(),
                 any(PaymentSystemResponse.class));
         }
     }
@@ -346,7 +374,9 @@ class ProcessPaymentServiceImplTest {
         PaymentWayForPayRequestDto payRequestDto = new PaymentWayForPayRequestDto();
 
         User user = new User();
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
+        when(modelMapper.map(order, OrderInfoDto.class)).thenReturn(getOrderInfoDto());
         when(userRepository.findUserByUuid(userUuid)).thenReturn(Optional.of(user));
         when(paymentCalculatorService.calculateSumToPay(any(), any(), any())).thenReturn(100L);
         when(wayForPayService.getPaymentRequestDto(any(), any())).thenReturn(paymentSystemResponse);
@@ -365,15 +395,17 @@ class ProcessPaymentServiceImplTest {
 
     @Test
     void shouldReturnDtoWithNullLink_whenSumToPayIsZeroOrNegative() {
-        Order order = new Order();
+        Order order = getOrder();
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
 
         User user = new User();
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(modelMapper.map(order, OrderInfoDto.class)).thenReturn(getOrderInfoDto());
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid(userUuid)).thenReturn(Optional.of(user));
         when(paymentCalculatorService.calculateSumToPay(any(), any(), any())).thenReturn(0L);
-        when(wayForPayService.getPaymentRequestDto(order, null)).thenReturn(
-            PaymentSystemResponse.builder().orderId(orderId).link(null).build());
+        when(wayForPayService.getPaymentRequestDto(order.getId(), null)).thenReturn(
+            PaymentSystemResponse.builder().orderId(order.getId()).link(null).build());
 
         OrderWayForPayClientDto dto = new OrderWayForPayClientDto();
         dto.setOrderId(orderId);
@@ -381,7 +413,7 @@ class ProcessPaymentServiceImplTest {
         PaymentSystemResponse response = service.processOrder(userUuid, dto);
 
         assertNull(response.link());
-        verify(eventService).save(anyString(), anyString(), eq(order));
+        verify(eventService).save(anyString(), anyString(), eq(order.getId()));
     }
 
     @Test
@@ -391,10 +423,12 @@ class ProcessPaymentServiceImplTest {
         PaymentWayForPayRequestDto payRequestDto = new PaymentWayForPayRequestDto();
 
         User user = new User();
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(modelMapper.map(order, OrderInfoDto.class)).thenReturn(getOrderInfoDto());
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
         when(userRepository.findUserByUuid(userUuid)).thenReturn(Optional.of(user));
         when(paymentCalculatorService.calculateSumToPay(any(), any(), any())).thenReturn(500L);
-        when(wayForPayService.getPaymentRequestDto(eq(order), anyString()))
+        when(wayForPayService.getPaymentRequestDto(eq(order.getId()), anyString()))
             .thenReturn(PaymentSystemResponse.builder().orderId(orderId).link("link").build());
         when(wayForPayService.formPaymentRequestForWayForPay(anyLong(), anyLong()))
             .thenReturn(payRequestDto);
@@ -407,7 +441,7 @@ class ProcessPaymentServiceImplTest {
         PaymentSystemResponse response = service.processOrder(userUuid, dto);
 
         assertEquals("link", response.link());
-        verify(eventService, never()).save(anyString(), anyString(), eq(order));
+        verify(eventService, never()).save(anyString(), anyString(), eq(order.getId()));
     }
 
     @Test
@@ -433,7 +467,7 @@ class ProcessPaymentServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(quartzScheduler.getJobDetail(jobKey)).thenReturn(jobDetail);
         when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
-        when(wayForPayService.formPaymentCancellationRequestForWayForPay(order))
+        when(wayForPayService.formPaymentCancellationRequestForWayForPay(order.getId()))
             .thenReturn(new PaymentCancellationWayForPayRequestDto());
         when(wayForPayClient.getCancellationResponse(any(PaymentCancellationWayForPayRequestDto.class)))
             .thenReturn(response);
@@ -621,7 +655,7 @@ class ProcessPaymentServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(quartzScheduler.getJobDetail(jobKey)).thenReturn(jobDetail);
         when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
-        when(wayForPayService.formPaymentCancellationRequestForWayForPay(order))
+        when(wayForPayService.formPaymentCancellationRequestForWayForPay(order.getId()))
             .thenReturn(new PaymentCancellationWayForPayRequestDto());
         when(wayForPayClient.getCancellationResponse(any(PaymentCancellationWayForPayRequestDto.class)))
             .thenReturn(response);
@@ -742,13 +776,14 @@ class ProcessPaymentServiceImplTest {
         PaymentWayForPayRequestDto payRequestDto = new PaymentWayForPayRequestDto();
         OrderWayForPayClientDto dto = ModelUtils.getOrderWayForPayClientDto();
 
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(wayForPayClient.getCheckOutResponse(any()))
             .thenReturn("{\"invoiceUrl\":\"https://pay.example.com/invoice/TEST123\"}");
         when(wayForPayService.formPaymentRequestForWayForPay(anyLong(), anyLong()))
             .thenReturn(payRequestDto);
         when(wayForPayService.getLinkFromWayForPayCheckoutResponse(anyString())).thenReturn(invoiceUrl);
 
-        String result = service.formedLink(order, 560, dto);
+        String result = service.formedLink(order.getId(), 560, dto);
 
         assertEquals(invoiceUrl, result);
     }

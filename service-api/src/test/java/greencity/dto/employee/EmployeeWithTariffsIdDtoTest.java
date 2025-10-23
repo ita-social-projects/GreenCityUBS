@@ -1,8 +1,8 @@
 package greencity.dto.employee;
 
+import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.TariffWithChatAccess;
-import greencity.entity.user.employee.Position;
-import greencity.repository.PositionRepository;
+import greencity.service.ubs.PositionService;
 import jakarta.validation.ConstraintViolation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +34,7 @@ class EmployeeWithTariffsIdDtoTest {
     Validator validator;
 
     @MockBean
-    private PositionRepository positionRepository;
+    private PositionService positionService;
 
     private static final String validName = "Valid";
     private static final String validEmail = "mail@gmail.com";
@@ -53,23 +53,12 @@ class EmployeeWithTariffsIdDtoTest {
 
     @BeforeEach
     void setUp() {
-        when(positionRepository.findAllById(validPositionIds))
+        when(positionService.findAllByIds(validPositionIds))
                 .thenReturn(validPositionIds.stream()
-                        .map(id -> {
-                            Position pos = new Position();
-                            pos.setId(id);
-                            return pos;
-                        })
+                        .map(id -> PositionDto.builder()
+                            .id(id)
+                            .build())
                         .toList());
-
-        when(positionRepository.findByIdIn(validPositionIds))
-                .thenReturn(validPositionIds.stream()
-                        .map(id -> {
-                            Position pos = new Position();
-                            pos.setId(id);
-                            return pos;
-                        })
-                        .collect(Collectors.toSet()));
     }
 
     @Nested

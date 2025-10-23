@@ -63,7 +63,11 @@ class PaymentStatusHandlerServiceImplTest {
         String decodedOrderReference = "ORD_0_123";
         String status = AppConstant.APPROVED_STATUS;
 
-        paymentStatusHandlerService.checkOrderStatusApproved(payment, order, decodedOrderReference, status);
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        paymentStatusHandlerService.checkOrderStatusApproved(payment.getId(), order.getId(), decodedOrderReference,
+            status);
 
         assertThat(payment.getPaymentId()).isEqualTo("0");
         assertThat(payment.getPaymentStatus()).isEqualTo(greencity.enums.PaymentStatus.PAID);
@@ -71,7 +75,7 @@ class PaymentStatusHandlerServiceImplTest {
 
         verify(paymentRepository).save(payment);
         verify(orderRepository).save(order);
-        verify(eventService, times(2)).save(anyString(), anyString(), eq(order));
+        verify(eventService, times(2)).save(anyString(), anyString(), eq(order.getId()));
     }
 
     @Test
@@ -79,7 +83,11 @@ class PaymentStatusHandlerServiceImplTest {
         String decodedOrderReference = "ORD_123_0";
         String status = "PENDING";
 
-        paymentStatusHandlerService.checkOrderStatusApproved(payment, order, decodedOrderReference, status);
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        paymentStatusHandlerService.checkOrderStatusApproved(payment.getId(), order.getId(), decodedOrderReference,
+            status);
 
         assertThat(payment.getPaymentStatus()).isNull();
         assertThat(order.getOrderPaymentStatus()).isNull();
@@ -93,7 +101,10 @@ class PaymentStatusHandlerServiceImplTest {
     void checkResponseStatusFailure_statusFailed_setsUnpaid() {
         String status = AppConstant.FAILED_STATUS;
 
-        paymentStatusHandlerService.checkResponseStatusFailure(payment, order, status);
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        paymentStatusHandlerService.checkResponseStatusFailure(payment.getId(), order.getId(), status);
 
         assertThat(payment.getPaymentStatus()).isEqualTo(greencity.enums.PaymentStatus.UNPAID);
         assertThat(order.getOrderPaymentStatus()).isEqualTo(OrderPaymentStatus.UNPAID);
@@ -107,6 +118,8 @@ class PaymentStatusHandlerServiceImplTest {
         UserNotification notification = new UserNotification();
         NotificationParameter parameter = new NotificationParameter();
 
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(userNotificationRepository.findAllUserNotificationByOrderAndNotificationType(order,
             NotificationType.UNPAID_ORDER))
             .thenReturn(List.of(notification));
@@ -114,7 +127,8 @@ class PaymentStatusHandlerServiceImplTest {
             notification, AppConstant.PAY_BUTTON))
             .thenReturn(Optional.of(parameter));
 
-        paymentStatusHandlerService.checkOrderStatusApproved(payment, order, "ORD_123_0", AppConstant.APPROVED_STATUS);
+        paymentStatusHandlerService.checkOrderStatusApproved(payment.getId(), order.getId(),
+            "ORD_123_0", AppConstant.APPROVED_STATUS);
 
         verify(notificationParameterRepository).delete(parameter);
     }

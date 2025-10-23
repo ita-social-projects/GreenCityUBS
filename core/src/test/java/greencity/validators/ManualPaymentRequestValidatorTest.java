@@ -1,5 +1,6 @@
 package greencity.validators;
 
+import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.entity.order.Order;
 import greencity.exceptions.NotFoundException;
@@ -7,6 +8,7 @@ import greencity.exceptions.validation.ValidationException;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.UBSManagementService;
 import greencity.validators.payment.ManualPaymentRequestValidator;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,20 +46,22 @@ class ManualPaymentRequestValidatorTest {
     @Test
     void validateUpdateForValidPaymentDateTest() {
         LocalDateTime date = LocalDateTime.now();
-        Order order = new Order();
-        order.setOrderDate(date.minusDays(1));
+        OrderDetailStatusDto orderDetails = OrderDetailStatusDto.builder()
+            .date(LocalDate.now().minusDays(1))
+            .build();
         requestDto.setSettlementDate(date.format(DateTimeFormatter.ofPattern(SETTLEMENT_DATE_FORMAT)));
-        when(ubsManagementService.getOrderByPaymentId(ORDER_ID)).thenReturn(order);
+        when(ubsManagementService.getOrderByPaymentId(ORDER_ID)).thenReturn(orderDetails);
         assertDoesNotThrow(() -> validator.validate(requestDto, ORDER_ID, UPDATE));
     }
 
     @Test
     void validateAddForValidPaymentDateTest() {
         LocalDateTime date = LocalDateTime.now();
-        Order order = new Order();
-        order.setOrderDate(date.minusDays(1));
+        OrderDetailStatusDto orderDetails = OrderDetailStatusDto.builder()
+            .date(LocalDate.now().minusDays(1))
+            .build();
         requestDto.setSettlementDate(date.format(DateTimeFormatter.ofPattern(SETTLEMENT_DATE_FORMAT)));
-        when(ubsManagementService.findOrderById(ORDER_ID)).thenReturn(order);
+        when(ubsManagementService.findOrderById(ORDER_ID)).thenReturn(orderDetails);
         assertDoesNotThrow(() -> validator.validate(requestDto, ORDER_ID, ADD));
     }
 
@@ -79,10 +83,11 @@ class ManualPaymentRequestValidatorTest {
     @Test
     void validateUpdateDoesThrowExceptionForPastSettlementDateTest() {
         LocalDateTime date = LocalDateTime.now();
-        Order order = new Order();
-        order.setOrderDate(date.minusDays(1));
+        OrderDetailStatusDto orderDetails = OrderDetailStatusDto.builder()
+            .date(LocalDate.now().minusDays(1))
+            .build();
         requestDto.setSettlementDate(date.minusDays(2).format(DateTimeFormatter.ofPattern(SETTLEMENT_DATE_FORMAT)));
-        when(ubsManagementService.getOrderByPaymentId(ORDER_ID)).thenReturn(order);
+        when(ubsManagementService.getOrderByPaymentId(ORDER_ID)).thenReturn(orderDetails);
         assertThrows(ValidationException.class, () -> validator.validate(requestDto, ORDER_ID, UPDATE));
     }
 

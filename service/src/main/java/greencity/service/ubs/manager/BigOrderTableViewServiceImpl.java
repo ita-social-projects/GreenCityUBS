@@ -101,10 +101,12 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
             if (nonNull(tableByEmployeeId)) {
                 tableByEmployeeId.setTableFreeze(value);
                 tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
+            } else {
+                throw new EntityNotFoundException(TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND);
             }
-            throw new EntityNotFoundException(TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND);
+        } else {
+            throw new EntityNotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND);
         }
-        throw new EntityNotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND);
     }
 
     @Override

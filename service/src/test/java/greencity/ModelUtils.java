@@ -17,6 +17,7 @@ import greencity.constant.TelegramBotConstants;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.location.api.CityInfoDto;
+import greencity.dto.order.OrderInfoDto;
 import greencity.dto.tariff.DetailsOfDeactivateTariffsDto;
 import greencity.dto.LocationsDtos;
 import greencity.dto.table.OptionForColumnDTO;
@@ -583,6 +584,17 @@ public class ModelUtils {
             .orderPaymentStatus(OrderPaymentStatus.UNPAID)
             .additionalOrders(new HashSet<>(Arrays.asList("1111111111", "2222222222")))
             .events(new ArrayList<>())
+            .confirmedQuantity(new HashMap<>())
+            .exportedQuantity(new HashMap<>())
+            .amountOfBagsOrdered(new HashMap<>())
+            .build();
+    }
+
+    public static OrderInfoDto getOrderInfoDto() {
+        return OrderInfoDto.builder()
+            .id(1L)
+            .orderPrice(700)
+            .orderStatus(OrderStatus.FORMED)
             .build();
     }
 
@@ -1722,6 +1734,7 @@ public class ModelUtils {
 
     public static OrderAddressDto getOrderAddressDto() {
         return OrderAddressDto.builder()
+            .id(1L)
             .baseAddress(AddressDto.builder()
                 .regionUk("Region")
                 .cityUk("City")
@@ -1866,6 +1879,16 @@ public class ModelUtils {
             .currentPoints(100)
             .changeOfPointsList(new ArrayList<>())
             .status(UserStatus.ACTIVATED)
+            .build();
+    }
+
+    public static UserProfileDto getUserProfileDto() {
+        return UserProfileDto.builder()
+            .recipientEmail("someUser@gmail.com")
+            .recipientName("Taras")
+            .recipientSurname("Ivanov")
+            .recipientPhone("0501111111")
+            .telegramIsNotify(true)
             .build();
     }
 

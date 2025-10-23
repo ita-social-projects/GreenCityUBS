@@ -620,6 +620,10 @@ public class ModelUtils {
             .regionUk("місто Київ")
             .regionEn("Kyiv city")
             .addressComment("Test comment for address №1")
+            .coordinates(CoordinatesDto.builder()
+                .latitude(50.4501)
+                .longitude(30.5234)
+                .build())
             .build();
 
         return UpdateAddressDto.builder()

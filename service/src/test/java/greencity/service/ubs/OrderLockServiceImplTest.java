@@ -2,7 +2,9 @@ package greencity.service.ubs;
 
 import greencity.entity.order.Order;
 import greencity.entity.user.employee.Employee;
+import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +24,8 @@ import static org.mockito.Mockito.when;
 class OrderLockServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
+    @Mock
+    private EmployeeRepository employeeRepository;
 
     @InjectMocks
     private OrderLockServiceImpl orderLockService;
@@ -32,10 +36,14 @@ class OrderLockServiceImplTest {
         order.setId(1L);
         Employee employee = new Employee();
         employee.setId(1L);
-
         LocalDateTime currentTime = LocalDateTime.now();
 
-        orderLockService.lockOrder(order, employee);
+        when(orderRepository.findById(order.getId()))
+            .thenReturn(Optional.of(order));
+        when(employeeRepository.findById(employee.getId()))
+            .thenReturn(Optional.of(employee));
+
+        orderLockService.lockOrder(order.getId(), employee.getId());
 
         verify(orderRepository, times(1)).save(order);
 
@@ -49,13 +57,13 @@ class OrderLockServiceImplTest {
         Order order = Order.builder()
             .id(1L)
             .blocked(true)
-            .blockedByEmployee(Employee.builder()
-                .id(1L)
-                .build())
             .blockedAt(LocalDateTime.now())
             .build();
 
-        orderLockService.unlockOrder(order);
+        when(orderRepository.findById(order.getId()))
+            .thenReturn(Optional.of(order));
+
+        orderLockService.unlockOrder(order.getId());
 
         verify(orderRepository, times(1)).save(order);
 

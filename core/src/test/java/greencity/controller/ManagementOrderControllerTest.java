@@ -1,6 +1,7 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.ModelUtils;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.order.EcoNumberDto;
@@ -12,18 +13,20 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
-import greencity.filters.CertificateFilterCriteria;
-import greencity.filters.CertificatePage;
+import greencity.dto.filters.CertificateFilterCriteria;
+import greencity.dto.filters.CertificatePage;
 import greencity.service.ubs.CertificateService;
 import greencity.service.ubs.CoordinateService;
 import greencity.service.ubs.PaymentService;
 import greencity.service.ubs.UBSManagementService;
 import greencity.service.ubs.ViolationService;
 import greencity.service.ubs.manager.BigOrderTableServiceView;
+import greencity.service.ubs.order.OrderService;
 import java.security.Principal;
 import java.util.Optional;
 
 import greencity.validators.payment.ManualPaymentRequestValidator;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,9 +93,17 @@ class ManagementOrderControllerTest {
     @Mock
     PaymentService paymentService;
 
+    @Mock
+    OrderService orderService;
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Principal principal = getUuid();
+
+    @BeforeAll
+    static void beforeAll() {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
 
     @BeforeEach
     void setup() {

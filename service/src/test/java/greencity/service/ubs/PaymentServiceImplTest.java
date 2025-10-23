@@ -211,7 +211,7 @@ class PaymentServiceImplTest {
         doNothing().when(userRemoteWebClient).deleteFile("");
         doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + getManualPayment().getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(),
-            getOrder());
+            getOrder().getId());
         paymentServiceImpl.deleteManualPayment(1L, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).deletePaymentById(1L);
@@ -230,7 +230,7 @@ class PaymentServiceImplTest {
             .when(userRemoteWebClient).deleteFile(anyString());
         doNothing().when(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + getManualPayment().getPaymentId(),
             employee.getFirstName() + "  " + employee.getLastName(),
-            getOrder());
+            getOrder().getId());
         paymentServiceImpl.deleteManualPayment(1L, "abc");
         List<String> warns = logCaptor.getWarnLogs();
         assertTrue(warns.getFirst().contains("User service is unavailable: null"));
@@ -253,7 +253,7 @@ class PaymentServiceImplTest {
         verify(paymentRepository).deletePaymentById(1L);
         verify(userRemoteWebClient).deleteFile(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder().getId());
 
     }
 
@@ -275,7 +275,7 @@ class PaymentServiceImplTest {
         verify(paymentRepository).deletePaymentById(1L);
         verify(userRemoteWebClient, times(0)).deleteFile(payment.getImagePath());
         verify(eventService).save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK + payment.getPaymentId(),
-            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder());
+            employee.getFirstName() + "  " + employee.getLastName(), payment.getOrder().getId());
     }
 
     @Test
@@ -304,7 +304,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK + 1,
             employee.getFirstName() + "  " + employee.getLastName(),
-            getOrder());
+            getOrder().getId());
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), null, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
@@ -326,7 +326,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(getManualPayment());
         when(userRemoteWebClient.uploadFile(file)).thenReturn("path");
         doNothing().when(eventService).save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK + 1, "Yuriy" + "  " + "Gerasum",
-            getOrder());
+            getOrder().getId());
         paymentServiceImpl.updateManualPayment(1L, getManualPaymentRequestDto(), file, "abc");
         verify(paymentRepository, times(1)).findById(1L);
         verify(paymentRepository, times(1)).save(any());
@@ -440,12 +440,12 @@ class PaymentServiceImplTest {
             .thenReturn(Optional.of(tariffsInfo));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(paymentRepository.save(any())).thenReturn(payment);
-        doNothing().when(eventService).save(anyString(), anyString(), any(Order.class));
+        doNothing().when(eventService).save(anyString(), anyString(), any(Long.class));
 
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, image, TEST_EMAIL);
 
         verify(eventService, times(1))
-            .save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            .save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -473,7 +473,7 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(payment);
         when(userRemoteWebClient.uploadFile(any()))
             .thenThrow(webClientRequestException);
-        doNothing().when(eventService).save(anyString(), anyString(), any(Order.class));
+        doNothing().when(eventService).save(anyString(), anyString(), any(Long.class));
 
         paymentServiceImpl.saveNewManualPayment(1L, requestDto, file, TEST_EMAIL);
         List<String> warns = logCaptor.getWarnLogs();
@@ -507,7 +507,7 @@ class PaymentServiceImplTest {
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1,
-            "Петро  Петренко", order);
+            "Петро  Петренко", order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -543,9 +543,9 @@ class PaymentServiceImplTest {
 
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1,
-            "Петро  Петренко", order);
+            "Петро  Петренко", order.getId());
         verify(eventService, times(1))
-            .save(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            .save(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.SYSTEM_UK, order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -577,9 +577,9 @@ class PaymentServiceImplTest {
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(employeeRepository, times(2)).findByEmail(anyString());
         verify(eventService, times(1)).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1,
-            "Петро  Петренко", order);
+            "Петро  Петренко", order.getId());
         verify(eventService, times(1))
-            .save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            .save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -606,10 +606,10 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+            order.getId());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -636,10 +636,10 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+            order.getId());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -666,10 +666,10 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+            order.getId());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -696,10 +696,10 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+            order.getId());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, null, TEST_EMAIL);
         verify(eventService, times(1))
-            .save("Додано оплату №1", "Петро  Петренко", order);
+            .save("Додано оплату №1", "Петро  Петренко", order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -726,12 +726,12 @@ class PaymentServiceImplTest {
         when(paymentRepository.save(any()))
             .thenReturn(payment);
         doNothing().when(eventService).save(OrderHistory.ADD_PAYMENT_MANUALLY_UK + 1, "Петро" + "  " + "Петренко",
-            order);
+            order.getId());
         paymentServiceImpl.saveNewManualPayment(1L, paymentDetails, mock(MultipartFile.class),
             TEST_EMAIL);
 
         verify(eventService, times(1))
-            .save("Замовлення Оплачено", "Система", order);
+            .save("Замовлення Оплачено", "Система", order.getId());
         verify(paymentRepository, times(1)).save(any());
         verify(orderRepository, times(1)).findById(1L);
         verify(tariffsInfoRepository, atLeastOnce()).findTariffsInfoByIdForEmployee(anyLong(), anyLong());
@@ -751,11 +751,14 @@ class PaymentServiceImplTest {
         RefundDto refundDto = getRefundDto_ReturnMoney();
         refundDto.setAmount(100L);
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
-        paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL);
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL);
         verify(refundRepository).save(any(Refund.class));
         verify(orderRepository).save(any(Order.class));
         verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
-            any(Order.class));
+            any(Long.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
 
@@ -765,7 +768,8 @@ class PaymentServiceImplTest {
         RefundDto refundDto = getRefundDto_ReturnMoney();
         refundDto.setAmount(100L);
         order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
-        assertFalse(paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        assertFalse(paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
     }
 
     @Test
@@ -773,8 +777,9 @@ class PaymentServiceImplTest {
         Order order = getOrderForGetOrderStatusData2Test();
         RefundDto refundDto = getRefundDto_ReturnMoney();
         refundDto.setReturnMoney(false);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
         assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()), exception.getMessage());
     }
 
@@ -784,8 +789,9 @@ class PaymentServiceImplTest {
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
         RefundDto refundDto = getRefundDto_ReturnMoney();
         refundDto.setAmount(99999L);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
         assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
     }
 
@@ -794,11 +800,14 @@ class PaymentServiceImplTest {
         Order order = getOrderForGetOrderStatusData2Test();
         RefundDto refundDto = getRefundDto_ReturnMoney();
         order.setOrderStatus(OrderStatus.CANCELED);
-        assertTrue(paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        assertTrue(paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
         verify(refundRepository).save(any(Refund.class));
         verify(orderRepository).save(any(Order.class));
         verify(eventService).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
-            any(Order.class));
+            any(Long.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
 
@@ -809,8 +818,11 @@ class PaymentServiceImplTest {
         order.setOrderStatus(OrderStatus.CANCELED);
         order.getPayment().forEach(p -> p.setAmount(-300L));
         order.setPointsToUse(1);
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
                 TEST_EMAIL));
         assertEquals(ORDER_HAS_NO_OVERPAYMENT, exception.getMessage());
     }
@@ -819,8 +831,11 @@ class PaymentServiceImplTest {
     void processRefundForDoneOrder_ShouldRefundMoney_andThrowsBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
         RefundDto refundDto = getRefundDto_ReturnMoney();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
                 TEST_EMAIL));
         assertEquals(INCOMPATIBLE_ORDER_STATUS_FOR_MONEY_REFUND, exception.getMessage());
     }
@@ -828,13 +843,16 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForDoneOrder_ShouldRefundBonuses_andSaveOrder() {
         Order order = getOrderForGetOrderStatusData2Test();
-        when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(orderRepository.getOrderDetails(order.getId())).thenReturn(Optional.of(order));
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
-        assertTrue(paymentServiceImpl.processRefundForOrder(order, getRefundDto_ReturnBonuses(),
+
+        assertTrue(paymentServiceImpl.processRefundForOrder(order.getId(), getRefundDto_ReturnBonuses(),
             TEST_EMAIL));
         verify(orderRepository).save(any(Order.class));
         verify(userRepository).save(any(User.class));
-        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES_UK), eq(TEST_EMAIL), any(Order.class));
+        verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES_UK), eq(TEST_EMAIL), any(Long.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
 
@@ -844,10 +862,13 @@ class PaymentServiceImplTest {
         order.getPayment().forEach(p -> p.setAmount(-300L));
         order.setPointsToUse(1);
         RefundDto refundDto = getRefundDto_ReturnBonuses();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(orderRepository.getOrderDetails(1L)).thenReturn(Optional.of(order));
         when(certificateRepository.findCertificate(order.getId())).thenReturn(getCertificateList());
+
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
                 TEST_EMAIL));
         assertEquals(ORDER_HAS_NO_OVERPAYMENT, exception.getMessage());
     }
@@ -859,8 +880,11 @@ class PaymentServiceImplTest {
         order.setOrderStatus(OrderStatus.CANCELED);
         order.getPayment().forEach(p -> p.setAmount(-300L));
         order.setPointsToUse(1);
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
                 TEST_EMAIL));
         assertEquals(REFUND_CONFLICT_MONEY_AND_BONUSES, exception.getMessage());
     }
@@ -868,8 +892,11 @@ class PaymentServiceImplTest {
     @Test
     void processRefundForDoneOrder_ShouldThrowsBadRequestException() {
         Order order = getOrderForGetOrderStatusData2Test();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, null,
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), null,
                 TEST_EMAIL));
         assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()), exception.getMessage());
     }
@@ -879,8 +906,9 @@ class PaymentServiceImplTest {
         Order order = getOrderForGetOrderStatusData2Test();
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
         RefundDto refundDto = getRefundDto_ReturnMoney();
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
                 TEST_EMAIL));
         assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
     }
@@ -891,12 +919,15 @@ class PaymentServiceImplTest {
         RefundDto refundDto = getRefundDto_ReturnBonuses();
         refundDto.setAmount(100L);
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
-        assertFalse(paymentServiceImpl.processRefundForOrder(order, refundDto,
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        assertFalse(paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
             TEST_EMAIL));
         verify(userRepository).save(any(User.class));
         verify(orderRepository).save(any(Order.class));
         verify(eventService).saveEvent(eq(OrderHistory.ADDED_BONUSES_UK), eq(TEST_EMAIL),
-            any(Order.class));
+            any(Long.class));
         assertEquals(OrderPaymentStatus.PAYMENT_REFUNDED, order.getOrderPaymentStatus());
     }
 
@@ -905,25 +936,29 @@ class PaymentServiceImplTest {
         Order order = getOrderForGetOrderStatusData2Test();
         RefundDto refundDto = getRefundDto_ReturnMoney().setAmount(100L);
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(refundRepository.save(any(Refund.class))).thenThrow(new BadRequestException(CANNOT_REFUND_MONEY));
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto,
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
                 TEST_EMAIL));
         assertEquals(CANNOT_REFUND_MONEY, exception.getMessage());
         verify(orderRepository, never()).save(any(Order.class));
         verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
-            any(Order.class));
+            any(Long.class));
     }
 
     @Test
     void processRefundForBroughtItHimselfOrder_nothingToRefund_shouldReturnFalse() {
         Order order = getOrderForGetOrderStatusData2Test();
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
-        assertFalse(paymentServiceImpl.processRefundForOrder(order, null,
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        assertFalse(paymentServiceImpl.processRefundForOrder(order.getId(), null,
             TEST_EMAIL));
         verify(orderRepository, never()).save(any(Order.class));
         verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
-            any(Order.class));
+            any(Long.class));
         verify(userRepository, never()).save(any());
         verify(refundRepository, never()).save(any());
     }
@@ -933,11 +968,14 @@ class PaymentServiceImplTest {
         Order order = getOrderForGetOrderStatusData2Test();
         RefundDto refundDto = getRefundDto_NothingToRefund();
         order.setOrderStatus(OrderStatus.BROUGHT_IT_HIMSELF);
-        assertFalse(paymentServiceImpl.processRefundForOrder(order, refundDto,
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        assertFalse(paymentServiceImpl.processRefundForOrder(order.getId(), refundDto,
             TEST_EMAIL));
         verify(orderRepository, never()).save(any(Order.class));
         verify(eventService, never()).saveEvent(eq(OrderHistory.CANCELED_ORDER_MONEY_REFUND_UK), eq(TEST_EMAIL),
-            any(Order.class));
+            any(Long.class));
         verify(userRepository, never()).save(any());
         verify(refundRepository, never()).save(any());
     }
@@ -948,7 +986,9 @@ class PaymentServiceImplTest {
         order.setOrderStatus(OrderStatus.FORMED);
         RefundDto refundDto = getRefundDto_ReturnMoney();
 
-        boolean result = paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        boolean result = paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL);
 
         assertFalse(result);
         verify(refundRepository, never()).save(any());
@@ -970,7 +1010,9 @@ class PaymentServiceImplTest {
         order.setPointsToUse(pointsToUse);
         order.setUser(user);
 
-        paymentServiceImpl.processPointsRefundForOrder(order);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        paymentServiceImpl.processPointsRefundForOrder(order.getId());
 
         verify(userRepository, times(1)).save(user);
         ChangeOfPoints changeOfPoints = user.getChangeOfPointsList().getFirst();
@@ -980,7 +1022,7 @@ class PaymentServiceImplTest {
         assertEquals(user, changeOfPoints.getUser());
         assertEquals(order, changeOfPoints.getOrder());
 
-        paymentServiceImpl.processPointsRefundForOrder(order);
+        paymentServiceImpl.processPointsRefundForOrder(order.getId());
 
         verify(userRepository, times(1)).save(user);
     }
@@ -995,9 +1037,10 @@ class PaymentServiceImplTest {
         order.setPointsToUse(pointsToUse);
         order.setUser(user);
 
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(user.getChangeOfPointsList()).thenReturn(changeOfPointsList);
 
-        paymentServiceImpl.processPointsRefundForOrder(order);
+        paymentServiceImpl.processPointsRefundForOrder(order.getId());
 
         verify(user).setCurrentPoints(0);
         verify(user).setCurrentPoints(pointsToUse);
@@ -1014,9 +1057,10 @@ class PaymentServiceImplTest {
         order.setPointsToUse(pointsToUse);
         order.setUser(user);
 
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(user.getCurrentPoints()).thenReturn(currentUserPoints);
 
-        paymentServiceImpl.processPointsRefundForOrder(order);
+        paymentServiceImpl.processPointsRefundForOrder(order.getId());
 
         verify(user).setChangeOfPointsList(any(ArrayList.class));
         verify(userRepository).save(user);
@@ -1029,7 +1073,9 @@ class PaymentServiceImplTest {
         Order orderWithNullPoints = getOrderForGetOrderStatusData2Test();
         orderWithNullPoints.setPointsToUse(pointsToUse);
 
-        paymentServiceImpl.processPointsRefundForOrder(orderWithNullPoints);
+        when(orderRepository.findById(orderWithNullPoints.getId())).thenReturn(Optional.of(orderWithNullPoints));
+
+        paymentServiceImpl.processPointsRefundForOrder(orderWithNullPoints.getId());
         verify(userRepository, never()).save(any());
     }
 
@@ -1039,8 +1085,10 @@ class PaymentServiceImplTest {
         order.setOrderStatus(OrderStatus.DONE);
         RefundDto refundDto = getRefundDto_NothingToRefund();
 
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
 
         assertEquals(String.format(ORDER_CAN_NOT_BE_UPDATED, order.getOrderStatus()), exception.getMessage());
         verify(refundRepository, never()).save(any());
@@ -1066,8 +1114,10 @@ class PaymentServiceImplTest {
         User user = getTestUser();
         order.setUser(user);
 
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
         BadRequestException exception = assertThrows(BadRequestException.class,
-            () -> paymentServiceImpl.processRefundForOrder(order, refundDto, TEST_EMAIL));
+            () -> paymentServiceImpl.processRefundForOrder(order.getId(), refundDto, TEST_EMAIL));
 
         assertEquals(INVALID_REQUESTED_REFUND_AMOUNT, exception.getMessage());
         verify(userRepository, never()).save(any());
