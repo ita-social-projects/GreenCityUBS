@@ -4666,6 +4666,8 @@ public class ModelUtils {
             .locationIds(List.of(1L))
             .receivingStationIds(List.of(1L))
             .courierId(1L)
+            .tariffNameUk("Тариф тест")
+            .tariffNameEn("Tariff test")
             .build();
     }
 

@@ -1514,6 +1514,34 @@ class SuperAdminServiceImplTest {
     }
 
     @Test
+    void editTariffShouldUpdateNamesIfPresent() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        TariffLocation tariffLocation = ModelUtils.getTariffLocation();
+        ReceivingStation receivingStation = getReceivingStation();
+        Location location = ModelUtils.getLocation();
+        Courier courier = getCourier();
+
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+                .thenReturn(List.of(tariffLocation));
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(tariffsLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
+                .thenReturn(Optional.of(tariffLocation));
+        when(tariffsLocationRepository.findAllByTariffsInfo(tariffsInfo)).thenReturn(List.of(tariffLocation));
+        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
+
+        superAdminService.editTariff(1L, dto);
+
+        assertEquals("Тариф тест", tariffsInfo.getTariffNameUk());
+        assertEquals("Tariff test", tariffsInfo.getTariffNameEn());
+
+        verify(tariffsInfoRepository).save(tariffsInfo);
+    }
+
+    @Test
     void checkIfTariffDoesNotExistsTest() {
         AddNewTariffDto dto = ModelUtils.getAddNewTariffDto();
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(anyLong(), any()))
