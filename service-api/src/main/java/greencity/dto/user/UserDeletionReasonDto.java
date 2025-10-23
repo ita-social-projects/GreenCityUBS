@@ -1,5 +1,6 @@
 package greencity.dto.user;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class UserDeactivationReasonDto {
-    private String email;
-    private String name;
+public class UserDeletionReasonDto {
+    @NotBlank
     private String reason;
-    private String lang;
 }

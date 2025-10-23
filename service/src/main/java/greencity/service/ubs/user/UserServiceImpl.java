@@ -21,6 +21,7 @@ import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.UserActivationDto;
 import greencity.dto.user.UserDeactivationReasonDto;
+import greencity.dto.user.UserDeletionReasonDto;
 import greencity.dto.user.UserExternalDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserPointDto;
@@ -304,7 +305,7 @@ public class UserServiceImpl implements UserService {
      */
     @org.springframework.transaction.annotation.Transactional
     @Override
-    public void deleteUserByUuid(String uuid) {
+    public void deleteUserByUuid(String uuid, UserDeletionReasonDto reason) {
         User user = userRepository.findUserByUuid(uuid)
             .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid));
 
@@ -312,6 +313,9 @@ public class UserServiceImpl implements UserService {
             || user.getStatus() == UserStatus.BLOCKED) {
             throw new ForbiddenException(ErrorMessage.FORBIDDEN_USER_DELETION);
         }
+
+        String lang = userRemoteClient.findUserLanguageByUuid(user.getUuid());
+        saveAndSendDeactivationReason(user, reason.getReason(), lang);
 
         user.setStatus(UserStatus.DELETED);
         userRepository.save(user);
@@ -329,10 +333,10 @@ public class UserServiceImpl implements UserService {
             throw new UserStatusUpdateException(ErrorMessage.USER_CANNOT_DEACTIVATE_YOURSELF);
         }
 
-        UserExternalDto currentUserDto = userRemoteClient.findByUuid(currentUserUuid);
         String lang = userRemoteClient.findUserLanguageByUuid(targetUser.getUuid());
         switch (status) {
             case DEACTIVATED -> {
+                UserExternalDto currentUserDto = userRemoteClient.findByUuid(currentUserUuid);
                 UserExternalDto targetUserDto = userRemoteClient.findByUuid(targetUser.getUuid());
                 if (targetUserDto.getRole().equals(Role.ROLE_ADMIN)) {
                     throw new UserStatusUpdateException(ErrorMessage.ADMIN_CANNOT_DEACTIVATE_OTHER_ADMIN);
@@ -340,19 +344,7 @@ public class UserServiceImpl implements UserService {
 
                 String reason = String.format("Deactivated by %s[%s] admin.", currentUserDto.getName(),
                     currentUserDto.getUuid());
-                userDeactivationRepo.save(UserDeactivationReason.builder()
-                    .dateTimeOfDeactivation(LocalDateTime.now())
-                    .reason(reason)
-                    .user(targetUser)
-                    .build());
-
-                UserDeactivationReasonDto notification = UserDeactivationReasonDto.builder()
-                    .deactivationReason(reason)
-                    .email(targetUser.getRecipientEmail())
-                    .name(targetUser.getRecipientName())
-                    .lang(lang)
-                    .build();
-                userRemoteClient.sendReasonOfDeactivation(notification);
+                saveAndSendDeactivationReason(targetUser, reason, lang);
             }
             case ACTIVATED -> {
                 UserActivationDto notification = UserActivationDto.builder()
@@ -393,6 +385,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public long getActivatedUsersAmount() {
         return userRepository.countAllByStatus(UserStatus.ACTIVATED);
+    }
+
+    private void saveAndSendDeactivationReason(User user, String reason, String lang) {
+        userDeactivationRepo.save(UserDeactivationReason.builder()
+            .dateTimeOfDeactivation(LocalDateTime.now())
+            .reason(reason)
+            .user(user)
+            .build());
+
+        userRemoteClient.sendReasonOfDeactivation(UserDeactivationReasonDto.builder()
+            .reason(reason)
+            .email(user.getRecipientEmail())
+            .name(user.getRecipientName())
+            .lang(lang)
+            .build());
     }
 
     private List<String> filterReasons(String lang, String reasons) {

@@ -16,6 +16,7 @@ import greencity.configuration.SecurityConfig;
 import greencity.constant.AppConstant;
 import greencity.converters.UserArgumentResolver;
 import greencity.dto.address.AddressDto;
+import greencity.dto.user.UserDeletionReasonDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.enums.UserStatus;
 import greencity.exception.handler.CustomExceptionHandler;
@@ -166,15 +167,20 @@ class UserProfileControllerTest {
     @Test
     void deleteUserTest() throws Exception {
         String uuid = "uuid";
+        UserDeletionReasonDto dto = UserDeletionReasonDto.builder()
+            .reason("reason")
+            .build();
 
         when(userRepository.findUuidByRecipientEmail(principal.getName()))
             .thenReturn(Optional.of("uuid"));
 
         mockMvc.perform(delete(AppConstant.UBS_LINK_USERPROFILE + "/user/delete")
-            .principal(principal))
+            .principal(principal)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk());
 
-        verify(userService).deleteUserByUuid(uuid);
+        verify(userService).deleteUserByUuid(uuid, dto);
     }
 
     @Test
