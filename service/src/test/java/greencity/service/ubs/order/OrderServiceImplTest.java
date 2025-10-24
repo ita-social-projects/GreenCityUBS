@@ -629,8 +629,7 @@ class OrderServiceImplTest {
 
         List<OrderDetailInfoDto> result = orderService.getOrderDetailsInfo(order.getId());
 
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(1);
+        assertThat(result).isNotNull().hasSize(1);
         assertThat(result.get(0).getAmount()).isEqualTo(5);
 
         verify(orderRepository).getOrderDetails(order.getId());
