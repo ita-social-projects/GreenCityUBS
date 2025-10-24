@@ -55,8 +55,7 @@ class AddNewTariffDtoTest {
             locationIdList,
             receivingStationsIdList,
             "",
-            ""
-        );
+            "");
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         final Validator validator = factory.getValidator();

@@ -1526,10 +1526,10 @@ class SuperAdminServiceImplTest {
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
         when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
         when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
-                .thenReturn(List.of(tariffLocation));
+            .thenReturn(List.of(tariffLocation));
         when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
         when(tariffsLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
-                .thenReturn(Optional.of(tariffLocation));
+            .thenReturn(Optional.of(tariffLocation));
         when(tariffsLocationRepository.findAllByTariffsInfo(tariffsInfo)).thenReturn(List.of(tariffLocation));
         when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
 
