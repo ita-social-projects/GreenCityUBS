@@ -4,8 +4,6 @@ import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.entity.order.Order;
-import greencity.entity.user.User;
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +13,7 @@ public interface ProcessPaymentService {
      * order.
      *
      * @param dto  {@link OrderResponseDto} user entered data;
-     * @param uuid current {@link User}'s uuid;
+     * @param uuid current user's uuid;
      * @return {@link PaymentSystemResponse} which contains data to pay order out.
      * @author Oleksandr Ilnytskyi
      */
@@ -26,7 +24,7 @@ public interface ProcessPaymentService {
      * order is unpaid.
      *
      * @param dto     {@link OrderResponseDto} user entered data;
-     * @param uuid    current {@link User}'s uuid;
+     * @param uuid    current user's uuid;
      * @param orderId {@link Long} id of the order to adjust;
      * @return {@link PaymentSystemResponse} which contains data to pay order out.
      * @author Oleksandr Ilnytskyi
@@ -36,7 +34,7 @@ public interface ProcessPaymentService {
     /**
      * Method to generate payment link.
      *
-     * @param userUuid current {@link User} uuid.
+     * @param userUuid current user uuid.
      * @param dto      order information.
      * @return {@link PaymentSystemResponse} payment link and order id.
      */
@@ -50,13 +48,12 @@ public interface ProcessPaymentService {
      * redirect URL from the WayForPay response. - Schedules a payment expiry job
      * for the generated link.
      *
-     * @param order           the {@link Order} for which the payment link is
-     *                        generated
+     * @param orderId         the {order id for which the payment link is generated
      * @param sumToPayInCoins the amount to be paid in coins
      * @return the checkout URL where the client should be redirected to complete
      *         payment
      */
-    String formedLink(Order order, long sumToPayInCoins);
+    String formedLink(Long orderId, long sumToPayInCoins);
 
     /**
      * Forms a payment link for redirecting the user to WayForPay checkout, using
@@ -66,15 +63,14 @@ public interface ProcessPaymentService {
      * extracts the redirect URL. - Schedules a payment expiry job for the generated
      * link.
      *
-     * @param order           the {@link Order} for which the payment link is
-     *                        generated
+     * @param orderId         the order id for which the payment link is generated
      * @param sumToPayInCoins the amount to be paid in coins
      * @param dto             additional payment data such as used points and
      *                        certificates
      * @return the checkout URL where the client should be redirected to complete
      *         payment
      */
-    String formedLink(Order order, long sumToPayInCoins, OrderWayForPayClientDto dto);
+    String formedLink(Long orderId, long sumToPayInCoins, OrderWayForPayClientDto dto);
 
     /**
      * Method removes payment link data and returns specified certificates/points to
@@ -93,7 +89,7 @@ public interface ProcessPaymentService {
      * job after, which returns points/certificates from that attempt to user
      * account.
      *
-     * @param uuid    current {@link User}'s uuid.
+     * @param uuid    current user's uuid.
      * @param orderId id of the order that belongs to user.
      * @author Oleksandr Ilnytskyi
      */

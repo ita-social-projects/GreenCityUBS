@@ -19,4 +19,5 @@ public class BagInfoDto {
     Integer id;
     String nameUk;
     String nameEn;
+    Integer amount;
 }

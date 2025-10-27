@@ -1,6 +1,7 @@
 package greencity.ubstelegrambot.service;
 
-import greencity.dto.BotResponseProjection;
+import greencity.dto.telegram.BotResponse;
+import greencity.entity.telegram.BotResponseProjection;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.UpdateBotMessageRequestDto;
 import greencity.entity.telegram.BotMessage;
@@ -47,7 +48,7 @@ class TelegramBotResponseServiceTest {
 
         when(telegramBotMessageRepository.findAllPivot(pageable)).thenReturn(page);
 
-        PageableDto<BotResponseProjection> result = telegramBotResponseServiceImpl.getAllBotResponses(pageable);
+        PageableDto<BotResponse> result = telegramBotResponseServiceImpl.getAllBotResponses(pageable);
 
         assertThat(result.getPage()).hasSize(2);
         assertThat(result.getTotalElements()).isEqualTo(2);
@@ -62,7 +63,7 @@ class TelegramBotResponseServiceTest {
 
         when(telegramBotMessageRepository.findAllPivot(pageable)).thenReturn(emptyPage);
 
-        PageableDto<BotResponseProjection> result = telegramBotResponseServiceImpl.getAllBotResponses(pageable);
+        PageableDto<BotResponse> result = telegramBotResponseServiceImpl.getAllBotResponses(pageable);
 
         assertThat(result.getPage()).isEmpty();
         assertThat(result.getCurrentPage()).isZero();

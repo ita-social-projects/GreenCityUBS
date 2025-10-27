@@ -2,7 +2,10 @@ package greencity.dto.notification;
 
 import greencity.enums.NotificationType;
 import greencity.notificator.ScheduledNotificator;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor

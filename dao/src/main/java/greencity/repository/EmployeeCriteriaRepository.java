@@ -1,8 +1,8 @@
 package greencity.repository;
 
 import greencity.entity.user.employee.EmployeeFilterView;
-import greencity.filters.EmployeeFilterCriteria;
-import greencity.filters.EmployeePage;
+import greencity.dto.filters.EmployeeFilterCriteria;
+import greencity.dto.filters.EmployeePage;
 import java.util.Objects;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;

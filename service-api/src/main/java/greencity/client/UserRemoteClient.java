@@ -14,7 +14,6 @@ import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserActivationDto;
 import greencity.dto.user.UserDeactivationReasonDto;
 import greencity.dto.user.UserExternalDto;
-import greencity.entity.user.User;
 import java.util.Set;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * Client for getting info about {@link User} from GreenCityUser server.
+ * Client for getting info about user from GreenCityUser server.
  *
  * @author Andrii Yezenitskyi
  */
@@ -38,9 +37,9 @@ public interface UserRemoteClient {
     String UUID = "uuid";
 
     /**
-     * Finds {@link User}'s UUID by {@link User}'s Email.
+     * Finds user's UUID by user's Email.
      *
-     * @param email {@link User}'s Email.
+     * @param email user's Email.
      * @return {@link String} - UUID.
      */
     @GetMapping("/user/findUuidByEmail")
@@ -49,7 +48,7 @@ public interface UserRemoteClient {
     /**
      * Method checks the existence of the user by uuid.
      *
-     * @param uuid {@link User}'s UUID.
+     * @param uuid user's UUID.
      * @return {@link Boolean}.
      */
     @GetMapping("/user/checkByUuid")
@@ -156,7 +155,7 @@ public interface UserRemoteClient {
     /**
      * Find {@link UserExternalDto} by uuid.
      *
-     * @param uuid {@link User}'s uuid.
+     * @param uuid user's uuid.
      * @return {@link UserExternalDto}.
      */
     @GetMapping("/user/findByUuid/external")

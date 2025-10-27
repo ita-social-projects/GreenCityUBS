@@ -11,7 +11,6 @@ import greencity.dto.order.ExportDetailsDto;
 import greencity.dto.order.ExportDetailsDtoUpdate;
 import greencity.dto.order.NotTakenOrderReasonDto;
 import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailInfoDto;
 import greencity.dto.order.OrderDetailStatusDto;
 import greencity.dto.order.OrderDetailStatusRequestDto;
 import greencity.dto.order.OrderInfoDto;
@@ -21,7 +20,6 @@ import greencity.dto.order.UpdateOrderPageAdminDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.violation.ViolationsInfoDto;
-import greencity.entity.order.Order;
 import greencity.enums.SortingOrder;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,7 @@ public interface UBSManagementService {
     /**
      * Method returns all certificates.
      *
-     * @return List of {@link greencity.entity.order.Certificate} lists.
+     * @return List of certificate lists.
      * @author Nazar Struk
      */
     PageableDto<CertificateDtoForSearching> getAllCertificates(Pageable page, String columnName,
@@ -55,18 +53,11 @@ public interface UBSManagementService {
     ViolationsInfoDto getAllUserViolations(String email);
 
     /**
-     * Method for getting order detail by language and order id.
-     *
-     * @author Mahdziak Orest
-     */
-    List<OrderDetailInfoDto> getOrderDetails(Long orderId, String language);
-
-    /**
      * Method for updating order details.
      *
      * @author Mahdziak Orest
      */
-    void setOrderDetail(Order order,
+    void setOrderDetail(Long orderId,
         Map<Integer, Integer> confirmed, Map<Integer, Integer> exported, String email);
 
     /**
@@ -117,7 +108,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    OrderDetailStatusDto updateOrderDetailStatus(Order order, OrderDetailStatusRequestDto dto, String email);
+    OrderDetailStatusDto updateOrderDetailStatus(Long orderId, OrderDetailStatusRequestDto dto, String email);
 
     /**
      * Method that get export details by order id.
@@ -138,7 +129,7 @@ public interface UBSManagementService {
      *
      * @author Mahdziak Orest
      */
-    ExportDetailsDto updateOrderExportDetails(Order order, ExportDetailsDtoUpdate dto, String uuid);
+    ExportDetailsDto updateOrderExportDetails(Long orderId, ExportDetailsDtoUpdate dto, String uuid);
 
     /**
      * Method that gets bags additional information.
@@ -157,7 +148,7 @@ public interface UBSManagementService {
     /**
      * Method that save ReasonNotTakeBagDto.
      */
-    void saveReason(Order order, String description, MultipartFile[] images);
+    void saveReason(Long orderId, String description, MultipartFile[] images);
 
     /**
      * This is method updates eco id from the shop for order by id.
@@ -174,12 +165,12 @@ public interface UBSManagementService {
      * This is method updates eco id from the shop for order.
      *
      * @param ecoNumberDto {@link EcoNumberDto}.
-     * @param order        {@link Order}.
+     * @param orderId      {@link Long}.
      * @param email        {@link String}.
      *
      * @author Yuriy Bahlay.
      */
-    void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Order order, String email);
+    void updateEcoNumberForOrder(EcoNumberDto ecoNumberDto, Long orderId, String email);
 
     /**
      * This is method which is updates admin page info for order and save reason.
@@ -200,12 +191,12 @@ public interface UBSManagementService {
      * This is method which is updates admin page info for order.
      *
      * @param updateOrderPageAdminDto {@link UpdateOrderPageAdminDto}.
-     * @param order                   {@link Order}.
+     * @param orderId                 {@link Long}.
      * @param email                   {@link String}.
      *
      * @author Yuriy Bahlay.
      */
-    void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Order order, String lang,
+    void updateOrderAdminPageInfo(UpdateOrderPageAdminDto updateOrderPageAdminDto, Long orderId, String lang,
         String email);
 
     /**
@@ -271,17 +262,17 @@ public interface UBSManagementService {
      * Method returns an order by provided payment ID.
      *
      * @param paymentId the ID of the order.
-     * @return {@link Order}
+     * @return {@link OrderDetailStatusDto}
      *
      */
-    Order getOrderByPaymentId(long paymentId);
+    OrderDetailStatusDto getOrderByPaymentId(long paymentId);
 
     /**
      * Method returns an order by provided order ID.
      *
      * @param orderId {@link Long} the ID of the order.
-     * @return {@link Order}
+     * @return {@link OrderDetailStatusDto}
      *
      */
-    Order findOrderById(Long orderId);
+    OrderDetailStatusDto findOrderById(Long orderId);
 }

@@ -1,5 +1,6 @@
 package greencity.service.ubs.payment;
 
+import static greencity.constant.ErrorMessage.ORDER_ADDRESS_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
 import static greencity.constant.ErrorMessage.ORDER_IN_ONGOING_PROCESSING;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
@@ -17,12 +18,15 @@ import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
+import greencity.dto.order.OrderAddressDto;
+import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.user.PersonalDataDto;
+import greencity.dto.user.UserPointDto;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
@@ -38,6 +42,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.CertificateRepository;
+import greencity.repository.OrderAddressRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.UBSUserRepository;
 import greencity.repository.UserRepository;
@@ -45,6 +50,8 @@ import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.NotificationService;
+import greencity.service.ubs.OrderBagService;
+import greencity.service.ubs.PaymentUtil;
 import greencity.service.ubs.calculator.PaymentCalculatorService;
 import greencity.service.ubs.order.OrderService;
 import greencity.service.ubs.wayforpay.WayForPayService;
@@ -81,6 +88,8 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     private final WayForPayClient wayForPayClient;
     private final ModelMapper modelMapper;
     private final Scheduler quartzScheduler;
+    private final OrderBagService orderBagService;
+    private final OrderAddressRepository orderAddressRepository;
 
     @Override
     @Transactional
@@ -88,11 +97,13 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         validateOrderRequestAddress(dto);
         adjustPaymentDetails(dto);
 
-        Order order = mapOrder(dto);
+        Order order = orderRepository.save(mapOrder(dto));
         User currentUser = userRepository.findByUuid(uuid);
         UBSuser userData = createOrUpdateUbsUser(dto, currentUser, null);
 
-        order = orderService.formAndSaveOrderRequest(dto, order, currentUser, userData);
+        Long orderId = orderService.formAndSaveOrderRequest(dto, order.getId(), currentUser.getId(),
+            userData.getId());
+        order = getOrder(orderId);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
@@ -101,7 +112,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         PaymentSystemResponse paymentSystemResponse =
             processPaymentResponse(dto, order, sumToPayInCoins);
 
-        notificationService.notifyCreatedOrder(order);
+        notificationService.notifyCreatedOrder(order.getId());
 
         return paymentSystemResponse;
     }
@@ -120,7 +131,9 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
 
         UBSuser userData = createOrUpdateUbsUser(dto, currentUser, order);
 
-        order = orderService.formAndSaveOrderRequest(dto, order, currentUser, userData);
+        orderId = orderService.formAndSaveOrderRequest(dto, order.getId(), currentUser.getId(),
+            userData.getId());
+        order = getOrder(orderId);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
         formAndSaveUser(currentUser, dto.getPointsToUse(), order);
@@ -130,7 +143,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
             processPaymentResponse(dto, order, sumToPayInCoins);
 
         if (order.getOrderPaymentStatus() == OrderPaymentStatus.UNPAID) {
-            notificationService.notifyUnpaidOrderPermanently(order, sumToPayInCoins, paymentSystemResponse);
+            notificationService.notifyUnpaidOrderPermanently(order.getId(), sumToPayInCoins, paymentSystemResponse);
         }
 
         return paymentSystemResponse;
@@ -145,47 +158,54 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         User currentUser = getUserByUuid(userUuid);
         checkForNullCounter(order);
 
-        long sumToPayInCoins = paymentCalculatorService.calculateSumToPay(dto, order, currentUser);
+        OrderInfoDto orderInfo = modelMapper.map(order, OrderInfoDto.class);
+        orderInfo.setOrderPrice(PaymentUtil.getPriceDetails(
+            orderInfo.getId(), orderRepository, orderBagService, certificateRepository)
+            .getTotalSumAmount());
+        UserPointDto userPoints = modelMapper.map(currentUser, UserPointDto.class);
+        long sumToPayInCoins = paymentCalculatorService.calculateSumToPay(dto, orderInfo, userPoints);
 
-        orderService.transferUserPointsToOrder(order, dto.getPointsToUse());
+        orderService.transferUserPointsToOrder(order.getId(), dto.getPointsToUse());
         paymentVerification(sumToPayInCoins, order);
 
         if (sumToPayInCoins <= 0) {
-            return wayForPayService.getPaymentRequestDto(order, null);
+            return wayForPayService.getPaymentRequestDto(order.getId(), null);
         } else {
-            String link = formedLink(order, sumToPayInCoins);
-            return wayForPayService.getPaymentRequestDto(order, link);
+            String link = formedLink(order.getId(), sumToPayInCoins);
+            return wayForPayService.getPaymentRequestDto(order.getId(), link);
         }
     }
 
     @Override
     @Transactional
-    public String formedLink(Order order, long sumToPayInCoins) {
+    public String formedLink(Long orderId, long sumToPayInCoins) {
+        Order order = getOrder(orderId);
         validateOrderPaymentProcessingStatus(order);
-        Order increment = incrementCounter(order);
+        incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
-            wayForPayService.formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
+            wayForPayService.formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
-            .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
+            .setOrderReference(OrderUtils.generateEncodedOrderReference(order));
         String link = wayForPayService
             .getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
 
-        wayForPayService.schedulePaymentExpiryJob(order, 0, new HashSet<>(),
+        wayForPayService.schedulePaymentExpiryJob(order.getId(), 0, new HashSet<>(),
             WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
         return link;
     }
 
     @Override
-    public String formedLink(Order order, long sumToPayInCoins, OrderWayForPayClientDto dto) {
-        Order increment = incrementCounter(order);
+    public String formedLink(Long orderId, long sumToPayInCoins, OrderWayForPayClientDto dto) {
+        Order order = getOrder(orderId);
+        incrementCounter(order);
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
-            wayForPayService.formPaymentRequestForWayForPay(increment.getId(), sumToPayInCoins);
+            wayForPayService.formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
-            .setOrderReference(OrderUtils.generateEncodedOrderReference(increment.getId(), order));
+            .setOrderReference(OrderUtils.generateEncodedOrderReference(order));
         String link = wayForPayService
             .getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
         wayForPayService.schedulePaymentExpiryJob(
-            order, dto.getPointsToUse(),
+            order.getId(), dto.getPointsToUse(),
             dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
         return link;
     }
@@ -236,15 +256,16 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     }
 
     private UBSuser createOrUpdateUbsUser(OrderResponseDto dto, User currentUser, Order existingOrder) {
-        OrderAddress orderAddress;
+        OrderAddressDto orderAddress;
 
         if (existingOrder == null) {
             orderAddress = addressService.formAndSaveOrderAddress(
-                dto.getAddressId(), dto.getLocationId(), currentUser);
+                dto.getAddressId(), dto.getLocationId(), currentUser.getId());
             return formAndSaveUbsUser(dto.getPersonalData(), null, orderAddress, currentUser);
         } else {
+            orderAddress = modelMapper.map(existingOrder.getUbsUser().getOrderAddress(), OrderAddressDto.class);
             orderAddress = addressService.getOrUpdateOrderAddress(
-                existingOrder.getUbsUser().getOrderAddress(), dto.getAddressId(), dto.getLocationId(), currentUser);
+                orderAddress, dto.getAddressId(), dto.getLocationId(), currentUser.getId());
             return formAndSaveUbsUser(dto.getPersonalData(), existingOrder.getUbsUser().getId(), orderAddress,
                 currentUser);
         }
@@ -299,13 +320,15 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     }
 
     private UBSuser formAndSaveUbsUser(
-        PersonalDataDto dto, Long id, OrderAddress orderAddress, User currentUser) {
+        PersonalDataDto dto, Long id, OrderAddressDto orderAddress, User currentUser) {
+        OrderAddress orderAddressToSave = orderAddressRepository.findById(orderAddress.getId())
+            .orElseThrow(() -> new NotFoundException(ORDER_ADDRESS_NOT_FOUND_BY_ID + orderAddress.getId()));
         UBSuser userData = modelMapper.map(dto, UBSuser.class);
         userData.setId(id);
         userData.setUser(currentUser);
         userData.setPhoneNumber(
             UAPhoneNumberUtil.getE164PhoneNumberFormat(userData.getPhoneNumber()));
-        userData.setOrderAddress(orderAddress);
+        userData.setOrderAddress(orderAddressToSave);
         userData = ubsUserRepository.save(userData);
 
         currentUser.getUbsUsers().add(userData);
@@ -333,16 +356,16 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     }
 
     private void saveOrderEvent(String eventName, String author, Order order) {
-        eventService.save(eventName, author, order);
+        eventService.save(eventName, author, order.getId());
         log.info("Saved event: eventName={}, author={}, orderId={}", eventName, author, order.getId());
     }
 
     private PaymentSystemResponse processPaymentResponse(OrderResponseDto dto, Order order, long sumToPayInCoins) {
         if (dto.isShouldBePaid()) {
             return paymentStrategyFactory.getPaymentStrategy(dto.getPaymentSystem())
-                .processPayment(dto, order, sumToPayInCoins);
+                .processPayment(dto, order.getId(), sumToPayInCoins);
         } else {
-            return wayForPayService.getPaymentRequestDto(order, "");
+            return wayForPayService.getPaymentRequestDto(order.getId(), "");
         }
     }
 
@@ -363,14 +386,13 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
             order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
             order.setOrderStatus(OrderStatus.CONFIRMED);
             orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_CONFIRMED_UK, OrderHistory.SYSTEM_UK, order);
+            eventService.save(OrderHistory.ORDER_CONFIRMED_UK, OrderHistory.SYSTEM_UK, order.getId());
         }
     }
 
-    private Order incrementCounter(Order order) {
+    private void incrementCounter(Order order) {
         order.setCounterOrderPaymentId(order.getCounterOrderPaymentId() + 1);
         orderRepository.save(order);
-        return order;
     }
 
     private Order unlockSpecifiedPointsAndCertificatesFromOrder(
@@ -445,7 +467,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
 
     private void handleWayForPayPaymentCancellation(Order order) {
         PaymentCancellationWayForPayRequestDto requestDto = wayForPayService
-            .formPaymentCancellationRequestForWayForPay(order);
+            .formPaymentCancellationRequestForWayForPay(order.getId());
         String result = wayForPayService.getResultFromWayForPayCancellationResponse(
             wayForPayClient.getCancellationResponse(requestDto));
 

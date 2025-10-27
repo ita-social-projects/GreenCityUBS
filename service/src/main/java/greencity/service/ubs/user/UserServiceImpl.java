@@ -52,7 +52,7 @@ import greencity.repository.UserRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.EventService;
-import greencity.util.Bot;
+import greencity.dto.user.Bot;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -126,10 +126,10 @@ public class UserServiceImpl implements UserService {
         ubsUserRepository.save(updateRecipientDataInOrder(ubsUser, dtoUpdate));
         if (!isAdmin(authentication)) {
             eventService.save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.CLIENT_UK,
-                ubsUser.getOrders().getFirst());
+                ubsUser.getOrders().getFirst().getId());
         } else {
             eventService.save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.UBS_ADMIN,
-                ubsUser.getOrders().getFirst());
+                ubsUser.getOrders().getFirst().getId());
         }
 
         return UbsCustomersDto.builder()

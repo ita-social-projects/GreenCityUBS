@@ -10,7 +10,6 @@ import greencity.dto.user.UserPointDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.user.UserProfileUpdateDto;
-import greencity.entity.user.User;
 import java.util.Set;
 import greencity.enums.UserStatus;
 import java.util.List;
@@ -20,7 +19,7 @@ public interface UserService {
      * Method returns info about user, ubsUser and user violations by order orderId.
      *
      * @param orderId of {@link Long} order id;
-     * @param uuid    current {@link User}'s uuid;
+     * @param uuid    current user's uuid;
      * @return {@link UserInfoDto};
      * @author Rusanovscaia Nadejda
      */
@@ -30,7 +29,7 @@ public interface UserService {
      * Method updates ubs_user information order in order.
      *
      * @param dtoUpdate {@link UbsCustomersDtoUpdate} update payload;
-     * @param userUuid  current {@link User}'s uuid;
+     * @param userUuid  current user's uuid;
      * @return {@link UbsCustomersDto};
      * @author Rusanovscaia Nadejda
      */
@@ -68,7 +67,7 @@ public interface UserService {
     /**
      * Methods returns current user's bonus points.
      *
-     * @param uuid current {@link User}'s uuid.
+     * @param uuid current user's uuid.
      * @return {@link UserPointDto}.
      * @author Max Boiarchuk
      */
@@ -93,7 +92,7 @@ public interface UserService {
     PositionAuthoritiesDto getPositionsAndRelatedAuthorities(String email);
 
     /**
-     * Method updates Authority for {@link User}.
+     * Method updates Authority for user.
      *
      * @param dto - instance of {@link UserEmployeeAuthorityDto}.
      */

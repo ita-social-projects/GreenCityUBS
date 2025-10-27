@@ -1,6 +1,6 @@
 package greencity.mapping.station;
 
-import greencity.dto.OptionForColumnDTO;
+import greencity.dto.table.OptionForColumnDTO;
 import greencity.dto.courier.ReceivingStationDto;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;

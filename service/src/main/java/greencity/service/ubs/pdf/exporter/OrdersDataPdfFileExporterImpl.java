@@ -5,10 +5,10 @@ import static greencity.constant.AppConstant.LOCALE_EN_NAME;
 import static greencity.constant.AppConstant.LOCALE_UK_NAME;
 import static greencity.constant.ErrorMessage.CANNOT_EXPORT_DATA_TO_PDF;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.pdf.PdfFileHeaders.ADDRESS_INFO;
-import static greencity.constant.pdf.PdfFileHeaders.ORDER_COMMENT;
-import static greencity.constant.pdf.PdfFileHeaders.ORDER_DETAILS;
-import static greencity.constant.pdf.PdfFileHeaders.SENDER_INFO;
+import static greencity.enums.pdf.PdfFileHeaders.ADDRESS_INFO;
+import static greencity.enums.pdf.PdfFileHeaders.ORDER_COMMENT;
+import static greencity.enums.pdf.PdfFileHeaders.ORDER_DETAILS;
+import static greencity.enums.pdf.PdfFileHeaders.SENDER_INFO;
 import com.google.zxing.WriterException;
 import com.lowagie.text.Annotation;
 import com.lowagie.text.Chunk;
@@ -26,11 +26,11 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.draw.LineSeparator;
-import greencity.constant.pdf.PdfAddressConstants;
-import greencity.constant.pdf.PdfFileHeaders;
-import greencity.constant.pdf.PdfOrderContentDetailsHeaders;
-import greencity.constant.pdf.PdfOrderDetailsHeaders;
-import greencity.constant.pdf.PdfQrCodeText;
+import greencity.enums.pdf.PdfAddressConstants;
+import greencity.enums.pdf.PdfFileHeaders;
+import greencity.enums.pdf.PdfOrderContentDetailsHeaders;
+import greencity.enums.pdf.PdfOrderDetailsHeaders;
+import greencity.enums.pdf.PdfQrCodeText;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.entity.order.Order;
@@ -280,7 +280,7 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
 
             String paymentLink = order.getPaymentLink();
             if (paymentLink == null || paymentLink.isBlank()) {
-                paymentLink = processPaymentService.formedLink(order, sumInCoins);
+                paymentLink = processPaymentService.formedLink(order.getId(), sumInCoins);
             }
 
             if (paymentLink == null || paymentLink.isBlank()) {

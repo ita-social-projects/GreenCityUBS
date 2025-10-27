@@ -37,14 +37,14 @@ class WayForPayStrategyTest {
         PaymentSystemResponse expectedResponse = ModelUtils.getPaymentSystemResponse();
         OrderResponseDto orderResponseDto = ModelUtils.getOrderResponseDto();
 
-        when(wayForPayService.processWayForPay(orderResponseDto, order, sumToPayInCoins))
+        when(wayForPayService.processWayForPay(orderResponseDto, order.getId(), sumToPayInCoins))
             .thenReturn(expectedResponse);
 
         PaymentSystemResponse actualResponse =
-            wayForPayStrategy.processPayment(orderResponseDto, order, sumToPayInCoins);
+            wayForPayStrategy.processPayment(orderResponseDto, order.getId(), sumToPayInCoins);
 
         assertEquals(expectedResponse, actualResponse);
-        verify(wayForPayService).processWayForPay(orderResponseDto, order, sumToPayInCoins);
+        verify(wayForPayService).processWayForPay(orderResponseDto, order.getId(), sumToPayInCoins);
         verifyNoMoreInteractions(wayForPayService);
     }
 }

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.entity.user.User;
+import greencity.dto.user.UserPointDto;
 import greencity.exceptions.BadRequestException;
 import greencity.util.PointsUtils;
 import org.junit.jupiter.api.Test;
@@ -49,18 +49,18 @@ class PointCalculatorServiceImplTest {
         OrderWayForPayClientDto dto = new OrderWayForPayClientDto();
         dto.setPointsToUse(3);
 
-        User user = new User();
-        user.setCurrentPoints(10);
+        UserPointDto user = new UserPointDto();
+        user.setPoints(10);
 
         long sumToPay = 200L;
 
         doNothing().when(pointsUtils)
-            .checkIfUserHasEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
+            .checkIfUserHasEnoughPoints(user.getPoints(), dto.getPointsToUse());
 
         long result = pointCalculatorService.getPointSumToPayInCoins(dto, user, sumToPay);
 
         assertEquals(200L, result);
-        verify(pointsUtils).checkIfUserHasEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
+        verify(pointsUtils).checkIfUserHasEnoughPoints(user.getPoints(), dto.getPointsToUse());
     }
 
     @Test
@@ -68,11 +68,11 @@ class PointCalculatorServiceImplTest {
         OrderWayForPayClientDto dto = new OrderWayForPayClientDto();
         dto.setPointsToUse(20);
 
-        User user = new User();
-        user.setCurrentPoints(5);
+        UserPointDto user = new UserPointDto();
+        user.setPoints(5);
 
         doThrow(new BadRequestException("User doesn't have enough points"))
-            .when(pointsUtils).checkIfUserHasEnoughPoints(user.getCurrentPoints(), dto.getPointsToUse());
+            .when(pointsUtils).checkIfUserHasEnoughPoints(user.getPoints(), dto.getPointsToUse());
 
         assertThrows(BadRequestException.class, () -> pointCalculatorService.getPointSumToPayInCoins(dto, user, 100L));
     }

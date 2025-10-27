@@ -1,5 +1,6 @@
 package greencity.filters;
 
+import greencity.dto.filters.TariffsInfoFilterCriteria;
 import greencity.entity.order.Courier_;
 import greencity.entity.order.TariffLocation_;
 import greencity.entity.order.TariffsInfo;

@@ -128,4 +128,12 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
      * @return amount of user with given {@link UserStatus}.
      */
     long countAllByStatus(UserStatus userStatus);
+
+    /**
+     * Finds a user by their recipient email.
+     *
+     * @param email the recipient email of the user
+     * @return an {@link Optional} containing the user, or empty if not found
+     */
+    Optional<User> findByRecipientEmail(String email);
 }

@@ -3,8 +3,6 @@ package greencity.service.ubs.calculator;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
 import java.util.List;
 import java.util.Set;
 
@@ -17,11 +15,11 @@ public interface CertificateCalculatorService {
      * Calculates the order amount in coins after applying all certificates linked
      * to the order (but before applying client-specific certificates).
      *
-     * @param order           the order to process
+     * @param orderId         the order id to process
      * @param sumToPayInCoins initial amount to pay in coins (before certificates)
      * @return adjusted amount after applying certificates
      */
-    long getCertificateSumToPayInCoins(Order order, long sumToPayInCoins);
+    long getCertificateSumToPayInCoins(Long orderId, long sumToPayInCoins);
 
     /**
      * Applies client-specific certificates to the order and updates the amount to
@@ -32,12 +30,12 @@ public interface CertificateCalculatorService {
      *
      * @param dto             request DTO containing payment/order details from
      *                        client
-     * @param order           the order to update
+     * @param orderId         the order id to update
      * @param sumToPayInCoins current sum to pay in coins
      * @return adjusted amount after applying client certificates
      */
     long applyCertificatesForClientOrder(OrderWayForPayClientDto dto,
-        Order order,
+        Long orderId,
         long sumToPayInCoins);
 
     /**
@@ -48,12 +46,12 @@ public interface CertificateCalculatorService {
      *
      * @param dto               response DTO representing order details
      * @param orderCertificates set of certificates to apply
-     * @param order             the order to update
+     * @param orderId           the order id to update
      * @param sumToPayInCoins   current sum to pay in coins
      * @return adjusted amount after applying the given certificates
      */
-    long applyCertificatesToOrder(OrderResponseDto dto, Set<Certificate> orderCertificates,
-        Order order, long sumToPayInCoins);
+    long applyCertificatesToOrder(OrderResponseDto dto, Set<CertificateDto> orderCertificates,
+        Long orderId, long sumToPayInCoins);
 
     /**
      * Counts the total bonus amount available from the given certificates.

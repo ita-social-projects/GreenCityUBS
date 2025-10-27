@@ -2,7 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.constants.HttpStatuses;
-import greencity.dto.BotResponseProjection;
+import greencity.entity.telegram.BotResponseProjection;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.telegram.*;
@@ -274,7 +274,7 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/bot_responses", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageableDto<BotResponseProjection>> getAllBotResponses(Pageable pageable) {
+    public ResponseEntity<PageableDto<BotResponse>> getAllBotResponses(Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(telegramBotResponseService.getAllBotResponses(pageable));
     }

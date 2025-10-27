@@ -2,12 +2,16 @@ package greencity.service.ubs.calculator;
 
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
 import static greencity.constant.ErrorMessage.NOT_ENOUGH_BAGS_EXCEPTION;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_GREATER_THAN_LIMIT;
 import static greencity.constant.ErrorMessage.PRICE_OF_ORDER_LOWER_THAN_LIMIT;
+import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
 import static greencity.constant.ErrorMessage.TOO_MANY_BAGS_EXCEPTION;
 import greencity.constant.AppConstant;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.order.OrderInfoDto;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
@@ -17,6 +21,8 @@ import greencity.enums.CourierLimit;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.TariffsInfoRepository;
 import greencity.service.ubs.OrderBagService;
 import greencity.util.MoneyConverterUtil;
 import java.util.ArrayList;
@@ -33,27 +39,30 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
     private final MoneyConverterUtil moneyConverterUtil;
     private final ModelMapper modelMapper;
     private final OrderBagService orderBagService;
+    private final OrderRepository orderRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
 
     @Override
-    public long prepareBagsAndCalculateTotal(List<OrderBag> orderBagList, List<BagDto> bags,
-        TariffsInfo tariffsInfo) {
+    public long prepareBagsAndCalculateTotal(List<BagInfoDto> orderBagList, List<BagDto> bags, Long tariffsInfoId) {
+        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffsInfoId)
+            .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND));
         CalculationContext context = calculateOrderedBags(orderBagList, bags);
-
         validateLimits(tariffsInfo, context);
 
         addNotOrderedBugs(orderBagList, tariffsInfo, context.bagIds);
-
         return context.totalSumToPayInCoins;
     }
 
     @Override
-    public long getBagsSumToPayInCoins(Order order) {
-        List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(order);
+    public long getBagsSumToPayInCoins(OrderInfoDto orderInfo) {
+        List<BagForUserDto> bagForUserDtos = bagForUserDtosBuilder(orderInfo);
         return calculateBagsSum(bagForUserDtos);
     }
 
     @Override
-    public List<BagForUserDto> bagForUserDtosBuilder(Order order) {
+    public List<BagForUserDto> bagForUserDtosBuilder(OrderInfoDto orderInfo) {
+        Order order = orderRepository.findById(orderInfo.getId())
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderInfo.getId()));
         List<OrderBag> bagsAmountInOrder = order.getOrderBags();
         Map<Integer, Integer> actualBagsAmount = orderBagService.getActualBagsAmountForOrder(bagsAmountInOrder);
         return bagsAmountInOrder.stream()
@@ -68,10 +77,10 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
             .reduce(0L, Long::sum);
     }
 
-    private void addNotOrderedBugs(List<OrderBag> orderBagList, TariffsInfo tariffsInfo, List<Integer> bagIds) {
-        List<OrderBag> notOrderedBags = tariffsInfo.getBags().stream()
+    private void addNotOrderedBugs(List<BagInfoDto> orderBagList, TariffsInfo tariffsInfo, List<Integer> bagIds) {
+        List<BagInfoDto> notOrderedBags = tariffsInfo.getBags().stream()
             .filter(orderBag -> orderBag.getStatus() == BagStatus.ACTIVE && !bagIds.contains(orderBag.getId()))
-            .map(this::createOrderBag)
+            .map(orderBag -> modelMapper.map(orderBag, BagInfoDto.class))
             .toList();
         orderBagList.addAll(notOrderedBags.stream()
             .map(this::setAmountToOrderBag)
@@ -83,7 +92,7 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
         checkAmountOfBagsIfCourierLimitByAmountOfBag(tariffsInfo, context.limitedBags);
     }
 
-    private CalculationContext calculateOrderedBags(List<OrderBag> orderBagList, List<BagDto> bags) {
+    private CalculationContext calculateOrderedBags(List<BagInfoDto> orderBagList, List<BagDto> bags) {
         long totalSum = 0L;
         long limitedSum = 0L;
         int limitedBags = 0;
@@ -100,23 +109,13 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
                 totalSum += bag.getFullPrice() * dto.getAmount();
             }
 
-            OrderBag orderBag = createOrderBag(bag);
-            orderBag.setAmount(dto.getAmount());
-            orderBagList.add(orderBag);
+            BagInfoDto bagInfoDto = modelMapper.map(bag, BagInfoDto.class);
+            bagInfoDto.setAmount(dto.getAmount());
+            orderBagList.add(bagInfoDto);
         }
 
         totalSum += limitedSum;
         return new CalculationContext(totalSum, limitedSum, limitedBags, bagIds);
-    }
-
-    private OrderBag createOrderBag(Bag bag) {
-        return OrderBag.builder()
-            .bag(bag)
-            .capacity(bag.getCapacity())
-            .price(bag.getFullPrice())
-            .nameUk(bag.getNameUk())
-            .nameEn(bag.getNameEn())
-            .build();
     }
 
     private Bag findActiveBagById(Integer id) {
@@ -158,7 +157,7 @@ public class BagCalculatorServiceImpl implements BagCalculatorService {
         }
     }
 
-    private OrderBag setAmountToOrderBag(OrderBag orderBag) {
+    private BagInfoDto setAmountToOrderBag(BagInfoDto orderBag) {
         orderBag.setAmount(0);
         return orderBag;
     }

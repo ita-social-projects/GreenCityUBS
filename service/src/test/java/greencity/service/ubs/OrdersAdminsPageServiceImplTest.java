@@ -295,7 +295,7 @@ class OrdersAdminsPageServiceImplTest {
 
         List<Long> result = ordersAdminsPageService.timeOfExportForDevelopStage(ordersId, newValue, employeeId);
 
-        verify(orderLockService).unlockOrder(order);
+        verify(orderLockService).unlockOrder(order.getId());
 
         assertTrue(result.isEmpty());
     }
@@ -382,7 +382,7 @@ class OrdersAdminsPageServiceImplTest {
 
         var result = ordersAdminsPageService.dateOfExportForDevelopStage(ordersId, newValue, employeeId);
 
-        verify(orderLockService).unlockOrder(order);
+        verify(orderLockService).unlockOrder(order.getId());
 
         assertTrue(result.isEmpty());
     }
@@ -467,7 +467,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(order));
-        doNothing().when(orderLockService).unlockOrder(order);
+        doNothing().when(orderLockService).unlockOrder(order.getId());
 
         var changeOrderResponseDto = ordersAdminsPageService.chooseOrdersDataSwitcher(
             email,
@@ -482,7 +482,7 @@ class OrdersAdminsPageServiceImplTest {
 
         verify(employeeRepository).findByEmail(email);
         verify(orderRepository, times(orderRepositoryFindByIdCalls)).findById(anyLong());
-        verify(orderLockService, times(orderRepositoryFindByIdCalls)).unlockOrder(any(Order.class));
+        verify(orderLockService, times(orderRepositoryFindByIdCalls)).unlockOrder(any(Long.class));
 
     }
 
@@ -533,6 +533,7 @@ class OrdersAdminsPageServiceImplTest {
         "ON_THE_ROUTE, DONE",
     })
     void orderStatusForDevelopStageTest(String oldStatus, String newStatus) {
+        Employee employee = ModelUtils.getEmployee();
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.valueOf(oldStatus))
             .setDateOfExport(LocalDate.now())
@@ -540,13 +541,14 @@ class OrdersAdminsPageServiceImplTest {
             .setDeliverTo(LocalDateTime.now())
             .setEmployeeOrderPositions(Set.of(new EmployeeOrderPosition(
                 1L,
-                ModelUtils.getEmployee(),
+                employee,
                 ModelUtils.getPosition(),
                 order)));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
 
-        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, employee.getId());
 
         assertNotNull(order.getDateOfExport());
         assertNotNull(order.getDeliverFrom());
@@ -554,7 +556,7 @@ class OrdersAdminsPageServiceImplTest {
         assertNotNull(order.getReceivingStation());
         assertNotNull(order.getEmployeeOrderPositions());
 
-        verify(orderLockService).unlockOrder(order);
+        verify(orderLockService).unlockOrder(order.getId());
     }
 
     @Test
@@ -571,12 +573,14 @@ class OrdersAdminsPageServiceImplTest {
         expected.setReceivingStation(null);
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(saved));
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
 
-        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus,
+            ModelUtils.getEmployee().getId());
 
-        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK), anyString(), any(Order.class));
-        verify(notificationService).notifySelfPickupOrder(expected);
-        verify(orderLockService).unlockOrder(expected);
+        verify(eventService).save(eq(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK), anyString(), any(Long.class));
+        verify(notificationService).notifySelfPickupOrder(expected.getId());
+        verify(orderLockService).unlockOrder(expected.getId());
     }
 
     @Test
@@ -588,13 +592,14 @@ class OrdersAdminsPageServiceImplTest {
         order.setOrderStatus(OrderStatus.FORMED);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
 
-        ordersAdminsPageService.orderStatusForDevelopStage(orderIdsList, newStatus, ModelUtils.getEmployee());
+        ordersAdminsPageService.orderStatusForDevelopStage(orderIdsList, newStatus, ModelUtils.getEmployee().getId());
 
         verify(orderRepository).findById(orderId);
-        verify(notificationService).notifyBonusesFromCanceledOrder(order);
-        verify(paymentService).processPointsRefundForOrder(order);
-        verify(orderLockService).unlockOrder(order);
+        verify(notificationService).notifyBonusesFromCanceledOrder(order.getId());
+        verify(paymentService).processPointsRefundForOrder(order.getId());
+        verify(orderLockService).unlockOrder(order.getId());
     }
 
     @ParameterizedTest
@@ -605,6 +610,7 @@ class OrdersAdminsPageServiceImplTest {
         "FORMED, CANCELED"
     })
     void orderStatusForDevelopStageErasedPickUpDetailsAndResponsibleEmployeesTest(String oldStatus, String newStatus) {
+        Employee employee = ModelUtils.getEmployee();
         Order order = ModelUtils.getOrder();
         order.setOrderStatus(OrderStatus.valueOf(oldStatus))
             .setDateOfExport(LocalDate.now())
@@ -612,30 +618,35 @@ class OrdersAdminsPageServiceImplTest {
             .setDeliverTo(LocalDateTime.now())
             .setEmployeeOrderPositions(Set.of(new EmployeeOrderPosition(
                 1L,
-                ModelUtils.getEmployee(),
+                employee,
                 ModelUtils.getPosition(),
                 order)));
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
 
-        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, ModelUtils.getEmployee());
+        ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), newStatus, employee.getId());
 
-        verify(orderLockService).unlockOrder(order);
+        verify(orderLockService).unlockOrder(order.getId());
     }
 
     @Test
     void orderStatusForDevelopStageEntityNotFoundExceptionTest() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         assertEquals(List.of(1L),
-            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "", ModelUtils.getEmployee()));
+            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "",
+                ModelUtils.getEmployee().getId()));
     }
 
     @Test
     void orderStatusForDevelopStageBadOrderStatusRequestExceptionTest() {
         when(orderRepository.findById(1L))
             .thenReturn(Optional.of(ModelUtils.getOrder().setOrderStatus(OrderStatus.FORMED)));
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         assertEquals(List.of(1L),
-            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "DONE", ModelUtils.getEmployee()));
+            ordersAdminsPageService.orderStatusForDevelopStage(List.of(1L), "DONE",
+                ModelUtils.getEmployee().getId()));
     }
 
     @Test
@@ -652,9 +663,11 @@ class OrdersAdminsPageServiceImplTest {
                 .id(anotherEmployeeId).build())
             .build();
 
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(ModelUtils.getEmployee()));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        var result = ordersAdminsPageService.orderStatusForDevelopStage(ordersId, newValue, ModelUtils.getEmployee());
+        var result = ordersAdminsPageService.orderStatusForDevelopStage(ordersId, newValue,
+            ModelUtils.getEmployee().getId());
 
         verify(orderRepository).findById(orderId);
         verify(orderRepository, never()).save(any(Order.class));
@@ -675,14 +688,15 @@ class OrdersAdminsPageServiceImplTest {
         order.setOrderStatus(OrderStatus.FORMED);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        doNothing().when(orderLockService).unlockOrder(order);
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
+        doNothing().when(orderLockService).unlockOrder(order.getId());
 
         List<Long> result = ordersAdminsPageService.orderStatusForDevelopStage(
-            List.of(orderId), newStatus, employee);
+            List.of(orderId), newStatus, employee.getId());
 
         verify(orderRepository).findById(orderId);
-        verify(notificationService, never()).notifyCourierItineraryFormed(order);
-        verify(orderLockService).unlockOrder(order);
+        verify(notificationService, never()).notifyCourierItineraryFormed(order.getId());
+        verify(orderLockService).unlockOrder(order.getId());
         assertEquals(OrderStatus.ADJUSTMENT, order.getOrderStatus());
         assertTrue(result.isEmpty());
     }
@@ -701,19 +715,21 @@ class OrdersAdminsPageServiceImplTest {
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(certificateRepository.save(certificate)).thenReturn(certificate);
-        doNothing().when(notificationService).notifyCanceledOrder(order);
-        doNothing().when(notificationService).notifyBonusesFromCanceledOrder(order);
-        doNothing().when(paymentService).processPointsRefundForOrder(order);
-        doNothing().when(orderLockService).unlockOrder(order);
+        doNothing().when(notificationService).notifyCanceledOrder(order.getId());
+        doNothing().when(notificationService).notifyBonusesFromCanceledOrder(order.getId());
+        doNothing().when(paymentService).processPointsRefundForOrder(order.getId());
+        doNothing().when(orderLockService).unlockOrder(order.getId());
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
 
-        List<Long> result = ordersAdminsPageService.orderStatusForDevelopStage(List.of(orderId), newStatus, employee);
+        List<Long> result = ordersAdminsPageService.orderStatusForDevelopStage(List.of(orderId), newStatus,
+            employee.getId());
 
         verify(orderRepository).findById(orderId);
-        verify(notificationService).notifyCanceledOrder(order);
-        verify(notificationService).notifyBonusesFromCanceledOrder(order);
-        verify(paymentService).processPointsRefundForOrder(order);
+        verify(notificationService).notifyCanceledOrder(order.getId());
+        verify(notificationService).notifyBonusesFromCanceledOrder(order.getId());
+        verify(paymentService).processPointsRefundForOrder(order.getId());
         verify(certificateRepository).save(certificate);
-        verify(orderLockService).unlockOrder(order);
+        verify(orderLockService).unlockOrder(order.getId());
         assertEquals(OrderStatus.CANCELED, order.getOrderStatus());
         assertEquals(0, certificate.getPoints());
         assertTrue(result.isEmpty());
@@ -837,7 +853,7 @@ class OrdersAdminsPageServiceImplTest {
         verify(employeeRepository).findById(1L);
         verify(orderRepository).findById(1L);
         verify(orderRepository, never()).save(any(Order.class));
-        verify(eventService, never()).save(anyString(), anyString(), any(Order.class));
+        verify(eventService, never()).save(anyString(), anyString(), any(Long.class));
 
         assertTrue(order.isBlocked());
         assertEquals(blockedByEmployee.get(), order.getBlockedByEmployee());
@@ -848,10 +864,11 @@ class OrdersAdminsPageServiceImplTest {
     void chooseOrdersDataSwitcherTest() {
         String email = "test@gmail.com";
         RequestToChangeOrdersDataDto dto = ModelUtils.getRequestToChangeOrdersDataDTO();
-        Optional<Employee> employee = Optional.of(ModelUtils.getEmployee());
+        Employee employee = ModelUtils.getEmployee();
 
         when(receivingStationRepository.getReferenceById(1L)).thenReturn(ModelUtils.getReceivingStation());
-        when(employeeRepository.findByEmail(email)).thenReturn(employee);
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
 
         ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         dto.setColumnName("dateOfExport");
@@ -884,7 +901,7 @@ class OrdersAdminsPageServiceImplTest {
         when(receivingStationRepository.getReferenceById(1L)).thenReturn(ModelUtils.getReceivingStation());
 
         ordersAdminsPageService.receivingStationForDevelopStage(List.of(1L), "1", 1L);
-        verify(orderLockService).unlockOrder(order.get());
+        verify(orderLockService).unlockOrder(order.get().getId());
     }
 
     @Test
@@ -974,11 +991,11 @@ class OrdersAdminsPageServiceImplTest {
             .build();
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        doNothing().when(orderLockService).unlockOrder(order);
+        doNothing().when(orderLockService).unlockOrder(order.getId());
 
         var result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
 
-        verify(orderLockService).unlockOrder(order);
+        verify(orderLockService).unlockOrder(order.getId());
 
         assertEquals(CancellationReason.DELIVERED_HIMSELF, order.getCancellationReason());
         assertEquals(expectedResult, result);
@@ -1077,7 +1094,7 @@ class OrdersAdminsPageServiceImplTest {
 
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        doNothing().when(orderLockService).unlockOrder(order);
+        doNothing().when(orderLockService).unlockOrder(order.getId());
 
         ChangeOrderResponseDTO result;
         try (MockedStatic<LocalDateTime> localDateTime = Mockito.mockStatic(LocalDateTime.class)) {
@@ -1086,7 +1103,7 @@ class OrdersAdminsPageServiceImplTest {
             result = ordersAdminsPageService.chooseOrdersDataSwitcher(email, dto);
         }
 
-        verify(orderLockService).unlockOrder(order);
+        verify(orderLockService).unlockOrder(order.getId());
 
         assertEquals(List.of(event), order.getEvents());
         assertEquals(expectedResult, result);
@@ -1283,14 +1300,14 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(user);
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(blockedOrder));
-        doNothing().when(orderLockService).unlockOrder(blockedOrder);
+        doNothing().when(orderLockService).unlockOrder(blockedOrder.getId());
 
         List<Long> result = ordersAdminsPageService.unblockOrder(userUuid, orders);
 
         verify(userRepository).findByUuid(userUuid);
         verify(employeeRepository).findByEmail(email);
         verify(orderRepository).findById(orderId);
-        verify(orderLockService).unlockOrder(blockedOrder);
+        verify(orderLockService).unlockOrder(blockedOrder.getId());
         assertEquals(1, result.size());
         assertEquals(orderId, result.getFirst());
     }
@@ -1418,8 +1435,8 @@ class OrdersAdminsPageServiceImplTest {
             .thenReturn(Boolean.TRUE);
         doNothing().when(employeeOrderPositionRepository).delete(any(Order.class), any(Position.class));
         when(eventService.changesWithResponsibleEmployee(anyLong(), eq(Boolean.TRUE))).thenReturn("some changes");
-        doNothing().when(orderLockService).unlockOrder(any(Order.class));
-        doNothing().when(eventService).saveEvent(anyString(), anyString(), any(Order.class));
+        doNothing().when(orderLockService).unlockOrder(any(Long.class));
+        doNothing().when(eventService).saveEvent(anyString(), anyString(), any(Long.class));
 
         ordersAdminsPageService.responsibleEmployee(List.of(1L), "-1", 1L, "test@gmail.com");
 
@@ -1429,8 +1446,8 @@ class OrdersAdminsPageServiceImplTest {
         verify(employeeOrderPositionRepository).existsByOrderAndPosition(any(Order.class), any(Position.class));
         verify(employeeOrderPositionRepository).delete(any(Order.class), any(Position.class));
         verify(eventService).changesWithResponsibleEmployee(1L, true);
-        verify(orderLockService).unlockOrder(any(Order.class));
-        verify(eventService).saveEvent(anyString(), anyString(), any(Order.class));
+        verify(orderLockService).unlockOrder(any(Long.class));
+        verify(eventService).saveEvent(anyString(), anyString(), any(Long.class));
     }
 
     @Test
@@ -1476,8 +1493,8 @@ class OrdersAdminsPageServiceImplTest {
         verify(orderRepository).findById(anyLong());
         verify(orderAddressRepository).findByOrderId(anyLong());
         verify(orderAddressRepository).save(any(OrderAddress.class));
-        verify(orderLockService).unlockOrder(any(Order.class));
-        verify(eventService).save(anyString(), anyString(), any(Order.class));
+        verify(orderLockService).unlockOrder(any(Long.class));
+        verify(eventService).save(anyString(), anyString(), any(Long.class));
     }
 
     @Test
@@ -1561,8 +1578,8 @@ class OrdersAdminsPageServiceImplTest {
 
         verify(employeeRepository).findByEmail(anyString());
         verify(orderRepository).findById(anyLong());
-        verify(orderLockService).unlockOrder(any(Order.class));
-        verify(eventService).save(anyString(), anyString(), any(Order.class));
+        verify(orderLockService).unlockOrder(any(Long.class));
+        verify(eventService).save(anyString(), anyString(), any(Long.class));
     }
 
     @Test
