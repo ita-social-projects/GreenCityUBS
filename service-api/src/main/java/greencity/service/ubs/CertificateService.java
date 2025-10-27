@@ -4,8 +4,8 @@ import greencity.dto.certificate.CertificateDto;
 import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.certificate.CertificateDtoForSearching;
 import greencity.dto.pageble.PageableDto;
-import greencity.filters.CertificateFilterCriteria;
-import greencity.filters.CertificatePage;
+import greencity.dto.filters.CertificateFilterCriteria;
+import greencity.dto.filters.CertificatePage;
 
 public interface CertificateService {
     /**
@@ -25,7 +25,7 @@ public interface CertificateService {
     /**
      * Method returns all certificates with filtering and sorting data.
      *
-     * @return List of {@link greencity.entity.order.Certificate} lists.
+     * @return List of Certificates.
      * @author Sikhovskiy Rostyslav
      */
     PageableDto<CertificateDtoForSearching> getCertificatesWithFilter(CertificatePage certificatePage,

@@ -5,6 +5,7 @@ import static greencity.constant.ErrorMessage.CERTIFICATE_IS_NOT_ACTIVATED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_IS_USED;
 import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND;
 import static greencity.constant.ErrorMessage.CERTIFICATE_NOT_FOUND_BY_CODE;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.SOME_CERTIFICATES_ARE_INVALID;
 import static greencity.constant.ErrorMessage.TOO_MANY_CERTIFICATES;
 import static java.util.stream.Collectors.joining;
@@ -19,6 +20,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.certificate.CertificateIsNotActivated;
 import greencity.repository.CertificateRepository;
+import greencity.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,9 +37,12 @@ import org.springframework.stereotype.Service;
 public class CertificateCalculatorServiceImpl implements CertificateCalculatorService {
     private final ModelMapper modelMapper;
     private final CertificateRepository certificateRepository;
+    private final OrderRepository orderRepository;
 
     @Override
-    public long getCertificateSumToPayInCoins(Order order, long sumToPayInCoins) {
+    public long getCertificateSumToPayInCoins(Long orderId, long sumToPayInCoins) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         List<CertificateDto> certificateDtos = order.getCertificates().stream()
             .map(certificate -> modelMapper.map(certificate, CertificateDto.class))
             .toList();
@@ -50,7 +55,7 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
     @Override
     @Transactional
     public long applyCertificatesForClientOrder(OrderWayForPayClientDto dto,
-        Order order,
+        Long orderId,
         long sumToPayInCoins) {
         if (sumToPayInCoins == 0 || dto.getCertificates() == null) {
             return sumToPayInCoins;
@@ -65,6 +70,8 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
 
         checkValidationCertificates(certificates, dto);
 
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         for (Certificate certificate : certificates) {
             sumToPayInCoins = applyCertificate(order, sumToPayInCoins, certificate);
         }
@@ -74,9 +81,11 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
     @Override
     @Transactional
     public long applyCertificatesToOrder(OrderResponseDto dto,
-        Set<Certificate> orderCertificates,
-        Order order,
+        Set<CertificateDto> orderCertificates,
+        Long orderId,
         long sumToPayInCoins) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         if (sumToPayInCoins == 0 || dto.getCertificates() == null) {
             return sumToPayInCoins;
         }
@@ -91,7 +100,7 @@ public class CertificateCalculatorServiceImpl implements CertificateCalculatorSe
 
             sumToPayInCoins = applyCertificate(order, sumToPayInCoins, certificate);
 
-            orderCertificates.add(certificate);
+            orderCertificates.add(modelMapper.map(certificate, CertificateDto.class));
         }
         return sumToPayInCoins;
     }

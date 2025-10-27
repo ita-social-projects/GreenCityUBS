@@ -2,8 +2,8 @@ package greencity.repository;
 
 import greencity.enums.CertificateStatus;
 import greencity.entity.order.Certificate;
-import greencity.filters.CertificateFilterCriteria;
-import greencity.filters.CertificatePage;
+import greencity.dto.filters.CertificateFilterCriteria;
+import greencity.dto.filters.CertificatePage;
 import lombok.ToString;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

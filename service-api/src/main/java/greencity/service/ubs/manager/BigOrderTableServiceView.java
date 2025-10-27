@@ -3,9 +3,8 @@ package greencity.service.ubs.manager;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.order.OrderCountDto;
 import greencity.dto.table.CustomTableViewDto;
-import greencity.entity.table.TableColumnWidthForEmployee;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
+import greencity.dto.filters.OrderPage;
+import greencity.dto.filters.OrderSearchCriteria;
 import org.springframework.data.domain.Page;
 
 public interface BigOrderTableServiceView {
@@ -36,11 +35,9 @@ public interface BigOrderTableServiceView {
     /**
      * Method sets isTableFreeze field in TableColumnWidthForEmployee.
      *
-     * @return {@link TableColumnWidthForEmployee} that has been saved
-     *
      * @author Hrenevych Ivan
      */
-    TableColumnWidthForEmployee changeIsFreezeStatus(String uuid, Boolean value);
+    void changeIsFreezeStatus(String uuid, Boolean value);
 
     /**
      * Method returns total number of orders by employee email.

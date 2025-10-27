@@ -60,8 +60,9 @@
         </dependency>
         <dependency>
             <groupId>com.greencity</groupId>
-            <artifactId>dao</artifactId>
+            <artifactId>service-api</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
         <!-- dependencies -->
         <dependency>

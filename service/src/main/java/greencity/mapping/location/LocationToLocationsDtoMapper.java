@@ -1,7 +1,10 @@
 package greencity.mapping.location;
 
-import greencity.dto.LocationsDto;
+import greencity.dto.location.LocationTranslationDto;
+import greencity.dto.location.LocationsDto;
 import greencity.entity.user.Location;
+import java.util.ArrayList;
+import java.util.List;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
@@ -9,15 +12,22 @@ import org.springframework.stereotype.Component;
 public class LocationToLocationsDtoMapper extends AbstractConverter<Location, LocationsDto> {
     @Override
     public LocationsDto convert(Location location) {
+        List<LocationTranslationDto> locationTranslations = new ArrayList<>();
+        locationTranslations.add(LocationTranslationDto.builder()
+            .locationName(location.getNameUk())
+            .languageCode("uk")
+            .build());
+        locationTranslations.add(LocationTranslationDto.builder()
+            .locationName(location.getNameEn())
+            .languageCode("en")
+            .build());
+
         return LocationsDto.builder()
-            .id(location.getId())
+            .locationId(location.getId())
             .locationStatus(location.getLocationStatus().name())
-            .regionNameUk(String.valueOf(location.getRegion().getNameUk()))
-            .regionNameEn(String.valueOf(location.getRegion().getNameEn()))
             .latitude(location.getCoordinates().getLatitude())
             .longitude(location.getCoordinates().getLongitude())
-            .nameUk(location.getNameUk())
-            .nameEn(location.getNameEn())
+            .locationTranslationDtoList(locationTranslations)
             .build();
     }
 }

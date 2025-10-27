@@ -1,6 +1,5 @@
 package greencity;
 
-import greencity.configuration.RedirectionConfigProp;
 import greencity.dto.AddNewTariffDto;
 import greencity.dto.CreateAddressRequestDto;
 import greencity.dto.address.AddressDto;
@@ -11,7 +10,6 @@ import greencity.dto.certificate.CertificateDtoForAdding;
 import greencity.dto.courier.CourierDto;
 import greencity.dto.courier.CreateCourierDto;
 import greencity.dto.courier.ReceivingStationDto;
-import greencity.dto.customer.UbsCustomersDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.employee.EmployeeNameDto;
 import greencity.dto.employee.UserEmployeeAuthorityDto;
@@ -53,14 +51,12 @@ import greencity.dto.tariff.SetTariffLimitsDto;
 import greencity.dto.telegram.UpdateBotMessageRequestDto;
 import greencity.dto.user.AddingPointsToUserDto;
 import greencity.dto.user.PersonalDataDto;
-import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserProfileCreateDto;
 import greencity.dto.user.UserProfileDto;
 import greencity.dto.useragreement.UserAgreementDetailDto;
 import greencity.dto.useragreement.UserAgreementDto;
 import greencity.dto.violation.AddingViolationsToUserDto;
 import greencity.dto.violation.ViolationDetailInfoDto;
-import greencity.entity.coords.Coordinates;
 import greencity.enums.CancellationReason;
 import greencity.enums.CourierLimit;
 import greencity.enums.NotificationReceiverType;
@@ -153,7 +149,7 @@ public class ModelUtils {
             .houseNumber("7")
             .streetUk("Городоцька")
             .streetEn("Gorodotska")
-            .coordinates(Coordinates.builder().latitude(2.3).longitude(5.6).build())
+            .coordinates(CoordinatesDto.builder().latitude(2.3).longitude(5.6).build())
             .districtUk("Залізничний")
             .districtEn("Zaliznuchnuy")
             .regionEn("Region")
@@ -169,7 +165,7 @@ public class ModelUtils {
             .houseNumber("7")
             .streetUk("Шевченка")
             .streetEn("Shevchenka")
-            .coordinates(Coordinates.builder().latitude(3.3).longitude(6.6).build())
+            .coordinates(CoordinatesDto.builder().latitude(3.3).longitude(6.6).build())
             .districtUk("Залізничний")
             .districtEn("Zaliznuchnuy")
             .regionEn("Region")
@@ -200,19 +196,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static UserInfoDto getUserInfoDto() {
-        return UserInfoDto.builder()
-            .customerName("customer name")
-            .customerPhoneNumber("1234")
-            .customerEmail("test@gmail.com")
-            .senderName("sender name")
-            .customerPhoneNumber("321")
-            .customerEmail("customer@gmail.com")
-            .totalUserViolations(2)
-            .userViolationForCurrentOrder(1)
-            .build();
-    }
-
     public static UbsCustomersDtoUpdate getUbsCustomersDtoUpdate() {
         return UbsCustomersDtoUpdate.builder()
             .customerId(2L)
@@ -223,27 +206,15 @@ public class ModelUtils {
             .build();
     }
 
-    public static UbsCustomersDto getUbsCustomersDto() {
-        return UbsCustomersDto.builder()
-            .name("Ivan Petyrov")
-            .email("lipa@gmail.com")
-            .phoneNumber("096765432")
-            .build();
-    }
-
     public static OrderDetailStatusDto getPaidOrderDetailStatusDto() {
         return getPaidOrderDetailStatusDto(PaymentStatus.PAID);
-    }
-
-    public static OrderDetailStatusDto getUnpaidOrderDetailStatusDto() {
-        return getPaidOrderDetailStatusDto(PaymentStatus.UNPAID);
     }
 
     public static OrderDetailStatusDto getPaidOrderDetailStatusDto(PaymentStatus paymentStatus) {
         return OrderDetailStatusDto.builder()
             .paymentStatus(paymentStatus.name())
             .orderStatus(OrderStatus.CONFIRMED.name())
-            .date(LocalDateTime.now().toString())
+            .date(LocalDate.now())
             .build();
     }
 
@@ -509,12 +480,6 @@ public class ModelUtils {
             .build();
     }
 
-    public static RedirectionConfigProp getRedirectionConfig() {
-        return new RedirectionConfigProp()
-            .setGreenCityClient("123")
-            .setUserServerAddress("123");
-    }
-
     public static CreateAddressRequestDto getAddressRequestDto() {
         return CreateAddressRequestDto.builder()
             .districtEn("Shevchenkivskyi")
@@ -655,6 +620,10 @@ public class ModelUtils {
             .regionUk("місто Київ")
             .regionEn("Kyiv city")
             .addressComment("Test comment for address №1")
+            .coordinates(CoordinatesDto.builder()
+                .latitude(50.4501)
+                .longitude(30.5234)
+                .build())
             .build();
 
         return UpdateAddressDto.builder()

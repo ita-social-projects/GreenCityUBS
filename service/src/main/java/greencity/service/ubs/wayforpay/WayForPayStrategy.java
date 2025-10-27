@@ -2,7 +2,6 @@ package greencity.service.ubs.wayforpay;
 
 import greencity.dto.order.OrderResponseDto;
 import greencity.dto.order.PaymentSystemResponse;
-import greencity.entity.order.Order;
 import greencity.enums.PaymentSystem;
 import greencity.service.ubs.payment.PaymentStrategy;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,7 @@ public class WayForPayStrategy implements PaymentStrategy {
 
     @Override
     @Transactional
-    public PaymentSystemResponse processPayment(OrderResponseDto dto, Order order, long sumToPayInCoins) {
-        return wayForPayService.processWayForPay(dto, order, sumToPayInCoins);
+    public PaymentSystemResponse processPayment(OrderResponseDto dto, Long orderId, long sumToPayInCoins) {
+        return wayForPayService.processWayForPay(dto, orderId, sumToPayInCoins);
     }
 }

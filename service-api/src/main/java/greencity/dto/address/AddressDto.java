@@ -1,7 +1,8 @@
 package greencity.dto.address;
 
+import greencity.dto.location.CoordinatesDto;
 import greencity.dto.location.api.DistrictDto;
-import greencity.entity.coords.Coordinates;
+import greencity.enums.AddressStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -59,7 +60,7 @@ public class AddressDto implements Serializable {
     @Length(max = 255)
     private String addressComment;
 
-    private Coordinates coordinates;
+    private CoordinatesDto coordinates;
 
     private Boolean actual;
 
@@ -82,4 +83,6 @@ public class AddressDto implements Serializable {
     private String placeId;
 
     private List<DistrictDto> addressRegionDistrictList;
+
+    private AddressStatus addressStatus;
 }

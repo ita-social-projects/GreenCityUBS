@@ -8,8 +8,8 @@ import greencity.dto.position.AddingPositionDto;
 import greencity.dto.position.PositionDto;
 import greencity.dto.tariff.GetTariffInfoForEmployeeDto;
 import greencity.enums.EmployeeStatus;
-import greencity.filters.EmployeeFilterCriteria;
-import greencity.filters.EmployeePage;
+import greencity.dto.filters.EmployeeFilterCriteria;
+import greencity.dto.filters.EmployeePage;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 

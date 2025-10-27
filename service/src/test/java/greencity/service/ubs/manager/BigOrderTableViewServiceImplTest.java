@@ -3,12 +3,11 @@ package greencity.service.ubs.manager;
 import greencity.ModelUtils;
 import greencity.client.UserRemoteClient;
 import greencity.entity.parameters.CustomTableView;
-import greencity.entity.table.TableColumnWidthForEmployee;
 import greencity.entity.user.employee.Employee;
 import greencity.exceptions.BadRequestException;
-import greencity.filters.DateFilter;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
+import greencity.dto.filters.DateFilter;
+import greencity.dto.filters.OrderPage;
+import greencity.dto.filters.OrderSearchCriteria;
 import greencity.repository.BigOrderTableRepository;
 import greencity.repository.CustomTableViewRepo;
 import greencity.repository.EmployeeRepository;
@@ -158,13 +157,11 @@ class BigOrderTableViewServiceImplTest {
         when(tableColumnWidthForEmployeeRepository.save(getTestTableColumnWidthWithIsTableFreezeTrue()))
                 .thenReturn(getTestTableColumnWidthWithIsTableFreezeTrue());
 
-        TableColumnWidthForEmployee byUuid1 = bigOrderTableService.changeIsFreezeStatus("Test", true);
+        bigOrderTableService.changeIsFreezeStatus("Test", true);
 
         verify(employeeRepository).findByUuid("Test");
         verify(tableColumnWidthForEmployeeRepository).findByEmployeeId(getEmployee().getId());
         verify(tableColumnWidthForEmployeeRepository).save(getTestTableColumnWidthWithIsTableFreezeTrue());
-
-        Assertions.assertTrue(byUuid1.isTableFreeze(), "Should be true");
     }
 
     @Test

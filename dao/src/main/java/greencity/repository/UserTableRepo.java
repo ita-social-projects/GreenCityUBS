@@ -2,8 +2,8 @@ package greencity.repository;
 
 import greencity.enums.SortingOrder;
 import greencity.entity.user.User;
-import greencity.filters.CustomerPage;
-import greencity.filters.UserFilterCriteria;
+import greencity.dto.filters.CustomerPage;
+import greencity.dto.filters.UserFilterCriteria;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;

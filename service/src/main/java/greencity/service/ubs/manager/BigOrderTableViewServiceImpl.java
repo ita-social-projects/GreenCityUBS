@@ -23,8 +23,8 @@ import org.springframework.stereotype.Service;
 import greencity.dto.order.BigOrderTableDTO;
 import greencity.dto.table.CustomTableViewDto;
 import greencity.entity.parameters.CustomTableView;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
+import greencity.dto.filters.OrderPage;
+import greencity.dto.filters.OrderSearchCriteria;
 import lombok.AllArgsConstructor;
 import static greencity.constant.ErrorMessage.CANNOT_CHANGE_ORDER_TABLE_VIEW;
 import static greencity.constant.ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND;
@@ -93,18 +93,20 @@ public class BigOrderTableViewServiceImpl implements BigOrderTableServiceView {
     }
 
     @Override
-    public TableColumnWidthForEmployee changeIsFreezeStatus(String uuid, Boolean value) {
+    public void changeIsFreezeStatus(String uuid, Boolean value) {
         Employee employeeByUuid = employeeRepository.findByUuid(uuid).orElse(null);
         if (nonNull(employeeByUuid)) {
             TableColumnWidthForEmployee tableByEmployeeId = tableColumnWidthForEmployeeRepository
                 .findByEmployeeId(employeeByUuid.getId()).orElse(null);
             if (nonNull(tableByEmployeeId)) {
                 tableByEmployeeId.setTableFreeze(value);
-                return tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
+                tableColumnWidthForEmployeeRepository.save(tableByEmployeeId);
+            } else {
+                throw new EntityNotFoundException(TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND);
             }
-            throw new EntityNotFoundException(TABLE_COLUMN_WIDTH_BY_EMPLOYEE_ID_NOT_FOUND);
+        } else {
+            throw new EntityNotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND);
         }
-        throw new EntityNotFoundException(EMPLOYEE_WITH_UUID_NOT_FOUND);
     }
 
     @Override

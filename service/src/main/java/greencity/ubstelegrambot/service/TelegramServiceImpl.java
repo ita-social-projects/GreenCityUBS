@@ -1,8 +1,11 @@
 package greencity.ubstelegrambot.service;
 
+import static greencity.constant.ErrorMessage.TELEGRAM_CHAT_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT;
+import static greencity.constant.ErrorMessage.USER_HAS_NO_ORDERS;
+import static greencity.constant.ErrorMessage.USER_NOT_FOUND_BY_UUID;
 import greencity.client.UserRemoteClient;
 import greencity.client.config.UserRemoteWebClient;
-import greencity.constant.ErrorMessage;
 import greencity.constant.TelegramBotConstants;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.dto.pageble.PageableDto;
@@ -466,15 +469,15 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public OrdersDataForUserDto getLastOrderByChatId(Long chatId) {
         TelegramChat telegramChat = telegramChatRepository.findById(chatId)
-            .orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
+            .orElseThrow(() -> new NotFoundException(TELEGRAM_CHAT_NOT_FOUND_BY_ID + chatId));
 
         if (telegramChat.getUser() == null) {
-            throw new NotFoundException("Order not found");
+            throw new NotFoundException(USER_DOESNT_HAVE_TELEGRAM_CHAT);
         }
 
         Order order = orderRepository.findFirstByUserIdOrderByOrderDateDesc(telegramChat.getUser().getId())
-            .orElseThrow(() -> new NotFoundException("Order not found"));
-        OrdersDataForUserDto dto = orderService.getOrdersData(order);
+            .orElseThrow(() -> new NotFoundException(USER_HAS_NO_ORDERS));
+        OrdersDataForUserDto dto = orderService.getOrdersData(order.getId());
         Long completedCount = orderRepository.countByUserIdAndOrderStatus(
             telegramChat.getUser().getId(),
             OrderStatus.DONE);
@@ -490,7 +493,7 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public ChatDto getChatById(Long chatId) {
         TelegramChat chat = telegramChatRepository.findById(chatId)
-            .orElseThrow(() -> new NotFoundException("Chat with id " + chatId + " not found"));
+            .orElseThrow(() -> new NotFoundException(TELEGRAM_CHAT_NOT_FOUND_BY_ID + chatId));
         return ChatDto.builder()
             .id(chat.getId())
             .unreadMessagesCount(chat.getUnreadMessagesCount())
@@ -531,10 +534,10 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public void toggleNotifications(String uuid, ToggleNotificationsRequestDto request) {
         User user = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
+            .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_UUID + uuid));
 
         if (user.getTelegramBot() == null) {
-            throw new NotFoundException(ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT);
+            throw new NotFoundException(USER_DOESNT_HAVE_TELEGRAM_CHAT);
         }
 
         TelegramChat telegramChat = user.getTelegramBot();
@@ -549,10 +552,10 @@ public class TelegramServiceImpl implements TelegramService {
     @Override
     public boolean getIsNotificationsEnabled(String uuid) {
         User user = userRepository.findUserByUuid(uuid)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_UUID));
+            .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_UUID + uuid));
 
         if (user.getTelegramBot() == null) {
-            throw new NotFoundException(ErrorMessage.USER_DOESNT_HAVE_TELEGRAM_CHAT);
+            throw new NotFoundException(USER_DOESNT_HAVE_TELEGRAM_CHAT);
         }
 
         return user.getTelegramBot().getIsNotify();

@@ -77,7 +77,7 @@ class WayForPayServiceImplTest {
         when(encryptionUtil.formRequestSignature(any(), anyString())).thenReturn("signed");
         when(wayForPayClient.getCheckOutResponse(any())).thenReturn("{\"invoiceUrl\":\"http://pay-link\"}");
 
-        PaymentSystemResponse response = wayForPayService.processWayForPay(orderResponseDto, order, 500L);
+        PaymentSystemResponse response = wayForPayService.processWayForPay(orderResponseDto, order.getId(), 500L);
 
         assertNotNull(response);
         assertEquals(1L, response.orderId());
@@ -133,7 +133,7 @@ class WayForPayServiceImplTest {
         Order order = ModelUtils.getOrder();
         order.setId(5L);
 
-        PaymentSystemResponse response = wayForPayService.getPaymentRequestDto(order, "http://link");
+        PaymentSystemResponse response = wayForPayService.getPaymentRequestDto(order.getId(), "http://link");
 
         assertEquals(5L, response.orderId());
         assertEquals("http://link", response.link());
@@ -151,13 +151,14 @@ class WayForPayServiceImplTest {
     @Test
     void formPaymentCancellationRequestForWayForPay_createsValidRequest() {
         Order order = ModelUtils.getOrder();
-
         String expectedSignature = "signed123";
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(encryptionUtil.formRemoveInvoiceSignature(any(), eq("secret")))
             .thenReturn(expectedSignature);
 
         PaymentCancellationWayForPayRequestDto result =
-            wayForPayService.formPaymentCancellationRequestForWayForPay(order);
+            wayForPayService.formPaymentCancellationRequestForWayForPay(order.getId());
 
         assertEquals("REMOVE_INVOICE", result.getTransactionType());
         assertEquals(1, result.getApiVersion());
@@ -186,7 +187,9 @@ class WayForPayServiceImplTest {
         Long expirySeconds = 60L;
         String paymentLink = "http://payment.com/123";
 
-        wayForPayService.schedulePaymentExpiryJob(order, pointsUsed, certificates, expirySeconds, paymentLink);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+
+        wayForPayService.schedulePaymentExpiryJob(order.getId(), pointsUsed, certificates, expirySeconds, paymentLink);
 
         verify(quartzScheduler).scheduleJob(any(JobDetail.class), any(Trigger.class));
         verify(orderRepository).save(order);
@@ -201,11 +204,13 @@ class WayForPayServiceImplTest {
         Order order = new Order();
         order.setId(1L);
 
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         doThrow(new SchedulerException("fail")).when(quartzScheduler)
             .scheduleJob(any(JobDetail.class), any(Trigger.class));
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> wayForPayService.schedulePaymentExpiryJob(order, 0, null, 30L, "http://x"));
+            () -> wayForPayService.schedulePaymentExpiryJob(1L, 0, null,
+                30L, "http://x"));
 
         assertEquals(PAYMENT_EXPIRY_SCHEDULE_EXCEPTION, exception.getMessage());
     }

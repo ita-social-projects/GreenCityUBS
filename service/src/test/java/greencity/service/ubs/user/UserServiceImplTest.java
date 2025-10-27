@@ -78,7 +78,7 @@ import greencity.repository.UserDeactivationRepo;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.EventService;
-import greencity.util.Bot;
+import greencity.dto.user.Bot;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -334,7 +334,7 @@ class UserServiceImplTest {
         userService.updateUbsUserInfoInOrder(request, ubsUser.getUser().getUuid());
 
         verify(eventService).save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.UBS_ADMIN,
-            ubsUser.getOrders().getFirst());
+            ubsUser.getOrders().getFirst().getId());
         verify(ubsUserRepository).save(ubsUser);
     }
 

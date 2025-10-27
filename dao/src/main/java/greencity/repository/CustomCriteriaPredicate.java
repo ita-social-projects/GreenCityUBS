@@ -1,7 +1,7 @@
 package greencity.repository;
 
 import greencity.entity.order.BigOrderTableViews;
-import greencity.filters.DateFilter;
+import greencity.dto.filters.DateFilter;
 import org.springframework.stereotype.Component;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;

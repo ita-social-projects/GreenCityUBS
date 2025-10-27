@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import static greencity.constant.ErrorMessage.BAG_NOT_FOUND;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 
 @Slf4j
 @UtilityClass
@@ -131,7 +131,7 @@ public class PaymentUtil {
         OrderBagService orderBagService, CertificateRepository certificateRepository) {
         CounterOrderDetailsDto dto = new CounterOrderDetailsDto();
         Order order = orderRepository.getOrderDetails(id)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + id));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + id));
         List<Bag> bag = orderBagService.findAllBagsInOrderBagsList(order.getOrderBags());
         final List<Certificate> currentCertificate = certificateRepository.findCertificate(id);
 

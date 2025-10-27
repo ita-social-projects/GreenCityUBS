@@ -1,15 +1,18 @@
 package greencity.service.ubs.calculator;
 
+import greencity.constant.AppConstant;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.order.OrderInfoDto;
 import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.entity.order.Order;
-import greencity.entity.order.OrderBag;
-import greencity.entity.order.Payment;
-import greencity.entity.user.User;
+import greencity.dto.payment.PaymentWithStatusDto;
+import greencity.dto.user.UserPointDto;
 import greencity.enums.PaymentStatus;
+import greencity.repository.PaymentRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,38 +22,45 @@ public class PaymentCalculatorServiceImpl implements PaymentCalculatorService {
     private final BagCalculatorService bagCalculatorService;
     private final PointCalculatorService pointCalculatorService;
     private final CertificateCalculatorService certificateCalculatorService;
+    private final PaymentRepository paymentRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
-    public long calculateSumToPay(OrderWayForPayClientDto dto, Order order, User currentUser) {
+    public long calculateSumToPay(OrderWayForPayClientDto dto, OrderInfoDto orderInfo, UserPointDto userPoints) {
         long sumToPayInCoins = bagCalculatorService
-            .getBagsSumToPayInCoins(order);
+            .getBagsSumToPayInCoins(orderInfo);
 
         sumToPayInCoins = certificateCalculatorService
-            .getCertificateSumToPayInCoins(order, sumToPayInCoins);
+            .getCertificateSumToPayInCoins(orderInfo.getId(), sumToPayInCoins);
 
         sumToPayInCoins = pointCalculatorService
-            .getPointSumToPayInCoins(dto, currentUser, sumToPayInCoins);
+            .getPointSumToPayInCoins(dto, userPoints, sumToPayInCoins);
         // Apply client certificates *after* points,
         // because points must always reduce sum before certificates.
         sumToPayInCoins = certificateCalculatorService
-            .applyCertificatesForClientOrder(dto, order, sumToPayInCoins);
+            .applyCertificatesForClientOrder(dto, orderInfo.getId(), sumToPayInCoins);
 
-        return sumToPayInCoins - countPaidAmount(order.getPayment());
+        List<PaymentWithStatusDto> payments = paymentRepository.findAllByOrderId(orderInfo.getId()).stream()
+            .map(e -> modelMapper.map(e, PaymentWithStatusDto.class))
+            .toList();
+        return sumToPayInCoins - countPaidAmount(payments);
     }
 
     @Override
-    public Long countPaidAmount(List<Payment> payments) {
+    public long countPaidAmount(List<PaymentWithStatusDto> payments) {
         return payments.stream()
             .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
-            .map(Payment::getAmount)
+            .map(PaymentWithStatusDto::getAmount)
+            .mapToLong(Double::longValue)
             .reduce(0L, Long::sum);
     }
 
     @Override
-    public long calculateOrderSumWithoutDiscounts(List<OrderBag> getOrderBagsAndQuantity) {
+    public long calculateOrderSumWithoutDiscounts(List<BagInfoDto> getOrderBagsAndQuantity) {
         return getOrderBagsAndQuantity.stream()
             .map(orderBag -> orderBag.getPrice() * orderBag.getAmount())
+            .mapToLong(e -> (long) (e * AppConstant.CURRENCY_CONVERSION_RATE))
             .reduce(0L, Long::sum);
     }
 }

@@ -1,5 +1,6 @@
 package greencity.dto.order;
 
+import greencity.dto.location.CoordinatesDto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -50,4 +51,6 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     private String regionEn;
     @Length(max = 255)
     private String addressComment;
+    @NotNull
+    private CoordinatesDto coordinates;
 }

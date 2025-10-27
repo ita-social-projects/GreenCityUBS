@@ -47,8 +47,8 @@ public class ManualPaymentRequestValidator {
 
     private LocalDate retrieveOrderDate(long id, ManualPaymentRequestActions action) {
         return ManualPaymentRequestActions.ADD.equals(action)
-            ? ubsManagementService.findOrderById(id).getOrderDate().toLocalDate()
-            : ubsManagementService.getOrderByPaymentId(id).getOrderDate().toLocalDate();
+            ? ubsManagementService.findOrderById(id).getDate()
+            : ubsManagementService.getOrderByPaymentId(id).getDate();
     }
 
     private void invalidate(String violationMessage) {

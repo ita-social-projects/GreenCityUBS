@@ -1,18 +1,16 @@
 package greencity.service.ubs;
 
 import greencity.dto.CreateAddressRequestDto;
-import greencity.dto.LocationsDto;
 import greencity.dto.address.AddressDto;
 import greencity.dto.address.UpdateAddressDto;
+import greencity.dto.location.LocationsForTariffDto;
 import greencity.dto.location.api.DistrictDto;
+import greencity.dto.order.OrderAddressDto;
 import greencity.dto.order.OrderAddressDtoRequest;
 import greencity.dto.order.OrderAddressDtoResponse;
 import greencity.dto.order.OrderAddressExportDetailsDtoUpdate;
 import greencity.dto.order.OrderWithAddressesResponseDto;
 import greencity.dto.order.ReadAddressByOrderDto;
-import greencity.entity.order.Order;
-import greencity.entity.user.User;
-import greencity.entity.user.ubs.OrderAddress;
 import greencity.exceptions.NotFoundException;
 import java.util.List;
 
@@ -25,15 +23,6 @@ public interface AddressService {
      * @author Dmytro Kizerov
      */
     UpdateAddressDto getAddressForOrder(Long orderId);
-
-    /**
-     * Method updates order address fields.
-     *
-     * @param orderAddressDtoUpdate the DTO that contains required data for address
-     *                              update.
-     * @return {@link OrderAddress} updated order's address.
-     */
-    OrderAddress updateOrderAddress(OrderAddressExportDetailsDtoUpdate orderAddressDtoUpdate);
 
     /**
      * Method updates order address. This method updates order address. It takes
@@ -52,7 +41,7 @@ public interface AddressService {
      * Method that save address for current user.
      *
      * @param requestDto {@link CreateAddressRequestDto} information about address;
-     * @param uuid       current {@link User}'s uuid;
+     * @param uuid       current user's uuid;
      * @return {@link OrderAddressDtoRequest} contains all information needed for
      *         save address;
      * @author Veremchuk Zakhar
@@ -63,12 +52,12 @@ public interface AddressService {
      * Method that update address.
      *
      * @param dtoUpdate of {@link OrderAddressExportDetailsDtoUpdate} order id.
-     * @param order     {@link Order}.
+     * @param orderId   {@link Long}.
      * @param email     {@link String}.
      * @return {@link OrderAddressDtoResponse} that contains address.
      * @author Mahdziak Orest
      */
-    OrderAddressDtoResponse updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Order order,
+    OrderAddressDtoResponse updateAddress(OrderAddressExportDetailsDtoUpdate dtoUpdate, Long orderId,
         String email);
 
     /**
@@ -102,7 +91,7 @@ public interface AddressService {
      * addressComment).
      *
      * @param requestDto {@link OrderAddressDtoRequest} information about address;
-     * @param uuid       current {@link User}'s uuid;
+     * @param uuid       current user's uuid;
      * @return {@link OrderAddressDtoRequest} contains all information needed for
      *         update address;
      * @author Oleg Postolovskyi
@@ -113,7 +102,7 @@ public interface AddressService {
      * Method that delete user address.
      *
      * @param addressId of {@link Long} address id;
-     * @param uuid      current {@link User}'s uuid;
+     * @param uuid      current user's uuid;
      * @return {@link OrderWithAddressesResponseDto} that contains address list;
      * @author Veremchuk Zakhar
      */
@@ -122,7 +111,7 @@ public interface AddressService {
     /**
      * Methods return list of all user addresses.
      *
-     * @param uuid current {@link User}'s uuid;
+     * @param uuid current user's uuid;
      * @return {@link OrderWithAddressesResponseDto} that contains address list
      * @author Veremchuk Zakhar
      */
@@ -151,41 +140,42 @@ public interface AddressService {
     boolean checkIfAddressMatchLocationArea(long locationId, long addressId);
 
     /**
-     * Forms a new {@link OrderAddress} from the provided address and location,
+     * Forms a new {@link OrderAddressDto} from the provided address and location,
      * validates ownership and deletion status, and saves it in the database.
      *
-     * @param addressId   the ID of the address
-     * @param locationId  the ID of the location
-     * @param currentUser the current authenticated user who owns the address
-     * @return the saved {@link OrderAddress} entity
+     * @param addressId  the ID of the address
+     * @param locationId the ID of the location
+     * @param userId     the current authenticated user id who owns the address
+     * @return the saved {@link OrderAddressDto} entity
      * @throws NotFoundException if address or location does not exist, or if the
      *                           address does not belong to the user
      */
-    OrderAddress formAndSaveOrderAddress(Long addressId, Long locationId, User currentUser);
+    OrderAddressDto formAndSaveOrderAddress(Long addressId, Long locationId, Long userId);
 
     /**
      * Updates the order address if the provided new address and location differ
      * from the current one. If they match, keeps the existing address.
      *
-     * @param currentOrderAddress the current {@link OrderAddress} used in the order
+     * @param currentOrderAddress the current {@link OrderAddressDto} used in the
+     *                            order
      * @param newAddressId        the ID of the new address
      * @param newLocationId       the ID of the new location
-     * @param currentUser         the current authenticated user
-     * @return the updated or existing {@link OrderAddress}
+     * @param userId              the current authenticated user id
+     * @return the updated or existing {@link OrderAddressDto}
      * @throws NotFoundException if the new address or location is invalid or not
      *                           owned by the user
      */
-    OrderAddress getOrUpdateOrderAddress(OrderAddress currentOrderAddress,
+    OrderAddressDto getOrUpdateOrderAddress(OrderAddressDto currentOrderAddress,
         Long newAddressId,
         Long newLocationId,
-        User currentUser);
+        Long userId);
 
     /**
      * Retrieves all locations.
      *
      * @return List of all locations.
      */
-    List<LocationsDto> getAllLocations();
+    List<LocationsForTariffDto> getAllLocations();
 
     /**
      * Retrieves all active locations by courier id.
@@ -194,5 +184,5 @@ public interface AddressService {
      *                  locations.
      * @return List of all locations.
      */
-    List<LocationsDto> getAllLocationsByCourierId(Long courierId);
+    List<LocationsForTariffDto> getAllLocationsByCourierId(Long courierId);
 }

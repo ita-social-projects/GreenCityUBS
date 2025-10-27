@@ -664,7 +664,7 @@ class TelegramServiceTest {
 
         when(telegramChatRepository.findById(chatId)).thenReturn(Optional.of(chat));
         when(orderRepository.findFirstByUserIdOrderByOrderDateDesc(user.getId())).thenReturn(Optional.of(order));
-        when(orderService.getOrdersData(order)).thenReturn(expectedDto);
+        when(orderService.getOrdersData(order.getId())).thenReturn(expectedDto);
 
         OrdersDataForUserDto result = telegramService.getLastOrderByChatId(chatId);
 
@@ -778,7 +778,7 @@ class TelegramServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> telegramService.getLastOrderByChatId(chatId));
 
-        assertEquals("Chat with id 2 not found", exception.getMessage());
+        assertEquals("TelegramChat not found with id: 2", exception.getMessage());
     }
 
     @Test
@@ -794,7 +794,7 @@ class TelegramServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> telegramService.getLastOrderByChatId(chatId));
 
-        assertEquals("Order not found", exception.getMessage());
+        assertEquals("The user does not have a Telegram chat", exception.getMessage());
     }
 
     @Test
@@ -812,7 +812,7 @@ class TelegramServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> telegramService.getLastOrderByChatId(chatId));
 
-        assertEquals("Order not found", exception.getMessage());
+        assertEquals("User has no orders", exception.getMessage());
     }
 
     @Test
@@ -845,7 +845,7 @@ class TelegramServiceTest {
         NotFoundException exception = assertThrows(NotFoundException.class,
             () -> telegramService.getChatById(chatId));
 
-        assertEquals("Chat with id 99 not found", exception.getMessage());
+        assertEquals("TelegramChat not found with id: 99", exception.getMessage());
     }
 
     @Test

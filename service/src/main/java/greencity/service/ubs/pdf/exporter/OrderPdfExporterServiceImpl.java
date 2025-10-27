@@ -21,7 +21,7 @@ public class OrderPdfExporterServiceImpl implements PdfExporterService {
      */
     @Override
     public Resource generatePdfFileByObjectId(long objectId, Locale locale, String userUuid) {
-        OrdersDataForUserDto orderToWrite = orderService.getOrderForUser(userUuid, objectId);
+        OrdersDataForUserDto orderToWrite = orderService.getOrdersData(objectId);
         return new ByteArrayResource(pdfExporterService.export(orderToWrite, locale));
     }
 }

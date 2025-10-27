@@ -1,6 +1,6 @@
 package greencity.dto.notification;
 
-import greencity.entity.user.User;
+import greencity.dto.user.UserProfileDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class InactiveAccountDto {
-    private List<User> users;
+    private List<UserProfileDto> users;
     private Long months;
 }

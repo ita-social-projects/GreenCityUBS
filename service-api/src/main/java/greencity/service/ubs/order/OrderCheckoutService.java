@@ -2,7 +2,6 @@ package greencity.service.ubs.order;
 
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserPointsAndAllBagsDto;
-import greencity.entity.user.User;
 
 public interface OrderCheckoutService {
     /**
@@ -18,7 +17,7 @@ public interface OrderCheckoutService {
     /**
      * Methods returns all available for order bags and current user's bonus points.
      *
-     * @param uuid    current {@link User}'s uuid.
+     * @param uuid    current user's uuid.
      * @param orderId {@link Long} id of existing order.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Safarov Renat
@@ -28,7 +27,7 @@ public interface OrderCheckoutService {
     /**
      * Methods returns all saved user data.
      *
-     * @param uuid current {@link User}'s uuid.
+     * @param uuid current user's uuid.
      * @return instance of {@link PersonalDataDto}.
      * @author Oleh Bilonizhka
      */

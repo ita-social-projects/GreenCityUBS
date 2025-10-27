@@ -1,9 +1,10 @@
 package greencity.service.ubs;
 
-import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND_BY_EMAIL;
 import static greencity.constant.ErrorMessage.EVENTS_NOT_FOUND_EXCEPTION;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.POSITION_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.dto.order.EventDto;
@@ -44,10 +45,10 @@ public class EventServiceImpl implements EventService {
      *
      * @param eventName   String.
      * @param eventAuthor String.
-     * @param order       Order.
+     * @param orderId     Long.
      * @author Yuriy Bahlay.
      */
-    public void save(String eventName, String eventAuthor, Order order) {
+    public void save(String eventName, String eventAuthor, Long orderId) {
         if (eventName.isEmpty()) {
             return;
         }
@@ -60,6 +61,8 @@ public class EventServiceImpl implements EventService {
         getEventNameEngWithNumbers(eventName, event);
         getEventNameEngWithDate(eventName, event);
 
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         if (order.getEvents() != null) {
             List<Event> events = new ArrayList<>(order.getEvents());
             events.add(event);
@@ -171,17 +174,17 @@ public class EventServiceImpl implements EventService {
     /**
      * Method save event with employee.
      *
-     * @param name  {@link String};
-     * @param order {@link Order}
-     * @param email {@link String}.
+     * @param name    {@link String};
+     * @param orderId {@link Long}
+     * @param email   {@link String}.
      * @author Hlazova Nataliia.
      */
     @Override
-    public void saveEvent(String name, String email, Order order) {
+    public void saveEvent(String name, String email, Long orderId) {
         Employee employee = employeeRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND));
+            .orElseThrow(() -> new EntityNotFoundException(EMPLOYEE_NOT_FOUND_BY_EMAIL + email));
         save(name, employee.getFirstName()
-            + "  " + employee.getLastName(), order);
+            + "  " + employee.getLastName(), orderId);
     }
 
     @Override

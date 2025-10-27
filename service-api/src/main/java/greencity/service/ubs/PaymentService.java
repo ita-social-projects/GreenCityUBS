@@ -4,7 +4,6 @@ import greencity.dto.payment.ManualPaymentRequestDto;
 import greencity.dto.payment.ManualPaymentResponseDto;
 import greencity.dto.payment.PaymentTableInfoDto;
 import greencity.dto.refund.RefundDto;
-import greencity.entity.order.Order;
 import greencity.exceptions.BadRequestException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,7 +58,7 @@ public interface PaymentService {
     /**
      * Processes a refund for an order.
      *
-     * @param order         {@link Order} the order to process.
+     * @param orderId       the order to process.
      * @param refundDto     {@link RefundDto} the details of the refund request.
      * @param employeeEmail {@link String} the email of the employee processing the
      *                      order.
@@ -71,13 +70,13 @@ public interface PaymentService {
      *                             refund details.
      * @author Volodymyr Lukovskyi
      */
-    boolean processRefundForOrder(Order order, RefundDto refundDto,
+    boolean processRefundForOrder(Long orderId, RefundDto refundDto,
         String employeeEmail);
 
     /**
      * Processes a refund of bonus points for an order.
      *
-     * @param order {@link Order} the order for which points are refunded.
+     * @param orderId the order for which points are refunded.
      */
-    void processPointsRefundForOrder(Order order);
+    void processPointsRefundForOrder(Long orderId);
 }
