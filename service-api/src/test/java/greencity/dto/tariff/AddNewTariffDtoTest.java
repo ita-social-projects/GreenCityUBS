@@ -53,7 +53,9 @@ class AddNewTariffDtoTest {
             0L,
             courierId,
             locationIdList,
-            receivingStationsIdList);
+            receivingStationsIdList,
+            "",
+            "");
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         final Validator validator = factory.getValidator();
@@ -61,7 +63,7 @@ class AddNewTariffDtoTest {
         Set<ConstraintViolation<AddNewTariffDto>> constraintViolations =
             validator.validate(dto);
 
-        assertThat(constraintViolations).hasSize(4);
+        assertThat(constraintViolations).hasSize(6);
     }
 
     private static Stream<Arguments> provideFieldsAndInvalidValues() {
