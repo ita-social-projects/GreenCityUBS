@@ -22,6 +22,8 @@ public class ModelUtils {
             .courierId(1L)
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
+            .tariffNameUk("Тариф тест")
+            .tariffNameEn("Tariff test")
             .build();
     }
 
@@ -31,6 +33,8 @@ public class ModelUtils {
             .courierId(1L)
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
+            .tariffNameUk("Тариф тест")
+            .tariffNameEn("Tariff test")
             .build();
     }
 

@@ -650,6 +650,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .creator(employeeRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EMPLOYEE_WITH_UUID_NOT_FOUND + uuid)))
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
+            .tariffNameUk(addNewTariffDto.getTariffNameUk())
+            .tariffNameEn(addNewTariffDto.getTariffNameEn())
             .build();
         return tariffsInfoRepository.save(tariffsInfo);
     }
@@ -773,8 +775,18 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         tariffsInfo.setReceivingStationList(receivingStations);
         tariffsInfo.setTariffLocations(tariffLocations);
+        updateTariffNamesIfPresent(tariffsInfo, dto);
 
         tariffsInfoRepository.save(tariffsInfo);
+    }
+
+    private void updateTariffNamesIfPresent(TariffsInfo tariffsInfo, EditTariffDto dto) {
+        if (dto.getTariffNameUk() != null) {
+            tariffsInfo.setTariffNameUk(dto.getTariffNameUk());
+        }
+        if (dto.getTariffNameEn() != null) {
+            tariffsInfo.setTariffNameEn(dto.getTariffNameEn());
+        }
     }
 
     @Override

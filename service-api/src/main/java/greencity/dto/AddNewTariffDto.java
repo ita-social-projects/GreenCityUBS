@@ -1,5 +1,6 @@
 package greencity.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -27,4 +28,8 @@ public class AddNewTariffDto {
     private List<@Min(1) Long> locationIdList;
     @NotEmpty
     private List<@Min(1) Long> receivingStationsIdList;
+    @NotBlank
+    private String tariffNameUk;
+    @NotBlank
+    private String tariffNameEn;
 }
