@@ -1,9 +1,11 @@
 package greencity.entity.telegram;
 
 public interface BotResponseProjection {
+    Long getId();
+
     String getMessageType();
 
-    String getMessageUk();
+    String getLang();
 
-    String getMessageEn();
+    String getText();
 }

@@ -28,12 +28,14 @@ public class TelegramBotResponseServiceImpl implements TelegramBotResponseServic
      */
     @Override
     public PageableDto<BotResponse> getAllBotResponses(Pageable pageable) {
-        Page<BotResponseProjection> botMessages = telegramBotMessageRepository.findAllPivot(pageable);
+        Page<BotResponseProjection> botMessages = telegramBotMessageRepository.findAllWithLang(pageable);
+
         List<BotResponse> responses = botMessages.stream()
             .map(e -> BotResponse.builder()
+                .id(e.getId())
                 .messageType(e.getMessageType())
-                .messageUk(e.getMessageUk())
-                .messageEn(e.getMessageEn())
+                .lang(e.getLang())
+                .text(e.getText())
                 .build())
             .toList();
 
