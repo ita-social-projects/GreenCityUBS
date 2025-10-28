@@ -46,7 +46,7 @@ class TelegramBotResponseServiceTest {
             pageable,
             2);
 
-        when(telegramBotMessageRepository.findAllPivot(pageable)).thenReturn(page);
+        when(telegramBotMessageRepository.findAllWithLang(pageable)).thenReturn(page);
 
         PageableDto<BotResponse> result = telegramBotResponseServiceImpl.getAllBotResponses(pageable);
 
@@ -61,7 +61,7 @@ class TelegramBotResponseServiceTest {
         Pageable pageable = PageRequest.of(0, 2);
         Page<BotResponseProjection> emptyPage = Page.empty(pageable);
 
-        when(telegramBotMessageRepository.findAllPivot(pageable)).thenReturn(emptyPage);
+        when(telegramBotMessageRepository.findAllWithLang(pageable)).thenReturn(emptyPage);
 
         PageableDto<BotResponse> result = telegramBotResponseServiceImpl.getAllBotResponses(pageable);
 

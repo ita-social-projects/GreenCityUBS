@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BotResponse {
+    private Long id;
     private String messageType;
-    private String messageUk;
-    private String messageEn;
+    private String lang;
+    private String text;
 }
