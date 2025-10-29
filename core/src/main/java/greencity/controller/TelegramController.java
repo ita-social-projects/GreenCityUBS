@@ -50,7 +50,8 @@ public class TelegramController {
     private final TelegramBotResponseService telegramBotResponseService;
 
     /**
-     * Retrieves all messages for a given chat ID with pagination support.
+     * Retrieves all messages for a given chat ID with pagination support. Access
+     * restricted to users with TELEGRAM_MANAGEMENT authority.
      *
      * @param chatId the chat identifier
      * @param page   pagination parameters
@@ -64,6 +65,7 @@ public class TelegramController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping("/messages/{chatId}")
     public ResponseEntity<PageableDto<TelegramMessageDto>> getUserMessages(
         @Positive @PathVariable(name = "chatId") Long chatId, Pageable page) {
@@ -71,7 +73,8 @@ public class TelegramController {
     }
 
     /**
-     * Retrieves all chats with optional filtering by search term and pagination.
+     * Retrieves all chats with optional filtering by search term and pagination. Access
+     * restricted to users with TELEGRAM_MANAGEMENT authority.
      *
      * @param search   optional search term to filter chats
      * @param pageable pagination parameters
@@ -83,6 +86,7 @@ public class TelegramController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping("/chats")
     public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search,
         Pageable pageable) {
@@ -90,7 +94,8 @@ public class TelegramController {
     }
 
     /**
-     * Retrieves the last order details associated with the specified chat ID.
+     * Retrieves the last order details associated with the specified chat ID. Access
+     * restricted to users with TELEGRAM_MANAGEMENT authority.
      *
      * @param chatId the chat identifier
      * @return last order data for the user linked to the chat
@@ -103,6 +108,7 @@ public class TelegramController {
         @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping("/last-order")
     public ResponseEntity<OrdersDataForUserDto> getLastOrderByChatId(@Positive @RequestParam Long chatId) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getLastOrderByChatId(chatId));
@@ -195,6 +201,12 @@ public class TelegramController {
             .body(telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable));
     }
 
+    /**
+     * Marks one or more messages as read in a Telegram chat.
+     * Access restricted to users with TELEGRAM_MANAGEMENT authority.
+     *
+     * @param request the request containing message IDs to mark as read
+     */
     @Operation(summary = "Mark messages as read")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
@@ -208,6 +220,13 @@ public class TelegramController {
         telegramService.markMessagesAsRead(request);
     }
 
+    /**
+     * Edits a previously sent Telegram message from the manager.
+     * Access restricted to users with TELEGRAM_MANAGEMENT authority.
+     *
+     * @param request the edit request containing message ID and updated content
+     * @return HTTP 204 No Content response if the message was successfully edited
+     */
     @Operation(summary = "Edit telegram manager message")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
@@ -223,6 +242,12 @@ public class TelegramController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Toggles Telegram bot notifications on or off for the current user.
+     *
+     * @param userUuid the UUID of the currently authenticated user
+     * @param request  the request containing the new notification state
+     */
     @Operation(summary = "Toggle notifications in Telegram bot")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
@@ -237,6 +262,13 @@ public class TelegramController {
         telegramService.toggleNotifications(userUuid, request);
     }
 
+    /**
+     * Retrieves the current notification status (enabled or disabled) for the Telegram bot.
+     *
+     * @param userUuid the UUID of the currently authenticated user
+     * @return HTTP 200 OK response with a Boolean value — {@code true} if notifications are enabled,
+     *         {@code false} otherwise
+     */
     @Operation(summary = "Get the value of whether notifications are enabled in the Telegram bot")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
