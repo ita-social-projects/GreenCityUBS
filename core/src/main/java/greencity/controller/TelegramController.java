@@ -73,8 +73,8 @@ public class TelegramController {
     }
 
     /**
-     * Retrieves all chats with optional filtering by search term and pagination. Access
-     * restricted to users with TELEGRAM_MANAGEMENT authority.
+     * Retrieves all chats with optional filtering by search term and pagination.
+     * Access restricted to users with TELEGRAM_MANAGEMENT authority.
      *
      * @param search   optional search term to filter chats
      * @param pageable pagination parameters
@@ -94,8 +94,8 @@ public class TelegramController {
     }
 
     /**
-     * Retrieves the last order details associated with the specified chat ID. Access
-     * restricted to users with TELEGRAM_MANAGEMENT authority.
+     * Retrieves the last order details associated with the specified chat ID.
+     * Access restricted to users with TELEGRAM_MANAGEMENT authority.
      *
      * @param chatId the chat identifier
      * @return last order data for the user linked to the chat
@@ -202,8 +202,8 @@ public class TelegramController {
     }
 
     /**
-     * Marks one or more messages as read in a Telegram chat.
-     * Access restricted to users with TELEGRAM_MANAGEMENT authority.
+     * Marks one or more messages as read in a Telegram chat. Access restricted to
+     * users with TELEGRAM_MANAGEMENT authority.
      *
      * @param request the request containing message IDs to mark as read
      */
@@ -221,8 +221,8 @@ public class TelegramController {
     }
 
     /**
-     * Edits a previously sent Telegram message from the manager.
-     * Access restricted to users with TELEGRAM_MANAGEMENT authority.
+     * Edits a previously sent Telegram message from the manager. Access restricted
+     * to users with TELEGRAM_MANAGEMENT authority.
      *
      * @param request the edit request containing message ID and updated content
      * @return HTTP 204 No Content response if the message was successfully edited
@@ -263,11 +263,12 @@ public class TelegramController {
     }
 
     /**
-     * Retrieves the current notification status (enabled or disabled) for the Telegram bot.
+     * Retrieves the current notification status (enabled or disabled) for the
+     * Telegram bot.
      *
      * @param userUuid the UUID of the currently authenticated user
-     * @return HTTP 200 OK response with a Boolean value — {@code true} if notifications are enabled,
-     *         {@code false} otherwise
+     * @return HTTP 200 OK response with a Boolean value — {@code true} if
+     *         notifications are enabled, {@code false} otherwise
      */
     @Operation(summary = "Get the value of whether notifications are enabled in the Telegram bot")
     @ApiResponses(value = {
