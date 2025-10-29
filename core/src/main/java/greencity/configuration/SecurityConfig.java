@@ -1,10 +1,31 @@
 package greencity.configuration;
 
+import static greencity.constant.AppConstant.ADMIN;
+import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
+import static greencity.constant.AppConstant.ADMIN_LINK;
+import static greencity.constant.AppConstant.COMMIT_INFO;
+import static greencity.constant.AppConstant.EXPORT_SETTINGS_LINKS;
+import static greencity.constant.AppConstant.LOGS_LINKS;
+import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
+import static greencity.constant.AppConstant.TELEGRAM_LINK;
+import static greencity.constant.AppConstant.UBS_CLIENT_LINK;
+import static greencity.constant.AppConstant.UBS_EMPLOYEE;
+import static greencity.constant.AppConstant.UBS_EXPORT;
+import static greencity.constant.AppConstant.UBS_LINK;
+import static greencity.constant.AppConstant.UBS_LINK_USERPROFILE;
+import static greencity.constant.AppConstant.UBS_MANAG_LINK;
+import static greencity.constant.AppConstant.USER;
+import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
+import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import greencity.client.UserRemoteClient;
 import greencity.repository.UserRepository;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
 import greencity.security.providers.JwtAuthenticationProvider;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,27 +46,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import java.util.Arrays;
-import java.util.List;
-import static greencity.constant.AppConstant.ADMIN;
-import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
-import static greencity.constant.AppConstant.ADMIN_LINK;
-import static greencity.constant.AppConstant.COMMIT_INFO;
-import static greencity.constant.AppConstant.EXPORT_SETTINGS_LINKS;
-import static greencity.constant.AppConstant.LOGS_LINKS;
-import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
-import static greencity.constant.AppConstant.TELEGRAM_LINK;
-import static greencity.constant.AppConstant.UBS_CLIENT_LINK;
-import static greencity.constant.AppConstant.UBS_EMPLOYEE;
-import static greencity.constant.AppConstant.UBS_EXPORT;
-import static greencity.constant.AppConstant.UBS_LINK;
-import static greencity.constant.AppConstant.UBS_LINK_USERPROFILE;
-import static greencity.constant.AppConstant.UBS_MANAG_LINK;
-import static greencity.constant.AppConstant.USER;
-import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
-import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
-import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
@@ -111,6 +111,7 @@ public class SecurityConfig {
                     UBS_LINK + "/districts-for-kyiv",
                     UBS_LINK + "/order-details-for-tariff",
                     UBS_LINK + "/activeTariffsInfo",
+                    "/actuator/prometheus",
                     COMMIT_INFO,
                     SUPER_ADMIN_LINK + "/settingsText")
                 .permitAll()
