@@ -2,6 +2,7 @@ package greencity.producers;
 
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.UnreadMessagesDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -47,5 +48,9 @@ public class TelegramChatProducer {
     public void notifyNewChat(ChatDto chatDto) {
         log.debug("Publish to /topic/chats");
         messagingTemplate.convertAndSend("/topic/chats", chatDto);
+    }
+
+    public void notifyUnreadMessages(UnreadMessagesDto unreadMessagesDto) {
+        messagingTemplate.convertAndSend("/topic/unread", unreadMessagesDto);
     }
 }
