@@ -446,6 +446,7 @@ class UBSManagementServiceImplTest {
         user.setRecipientName("Петро");
         user.setRecipientSurname("Петренко");
         Order order = user.getOrders().getFirst();
+        order.setOrderStatus(OrderStatus.ON_THE_ROUTE);
         order.setOrderDate((LocalDateTime.now()));
 
         List<Payment> payment = new ArrayList<>();
@@ -471,7 +472,7 @@ class UBSManagementServiceImplTest {
         verify(orderRepository).findById(1L);
         verify(paymentRepository).findAllByOrderId(1L);
         verify(paymentRepository).saveAll(any());
-        verify(orderRepository, times(2)).save(any());
+        verify(orderRepository).save(any());
     }
 
     @Test
