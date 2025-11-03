@@ -53,16 +53,18 @@ public class TelegramChatProducer {
     /**
      * Sends a notification about the count of unread messages for users.
      * <p>
-     * This event is published to clients subscribed to the <b>/topic/unread</b> destination.
-     * It can be used to update the unread message counters in the user interface.
+     * This event is published to clients subscribed to the <b>/topic/unread</b>
+     * destination. It can be used to update the unread message counters in the user
+     * interface.
      * </p>
      *
-     * @param unreadMessagesDto the DTO containing unread message counts for users, must not be {@code null}
+     * @param unreadMessagesDto the DTO containing unread message counts for users,
+     *                          must not be {@code null}
      */
     @AsyncPublisher(
-            operation = @AsyncOperation(
-                    channelName = "/topic/unread",
-                    description = "Subscription for unread message count updates"))
+        operation = @AsyncOperation(
+            channelName = "/topic/unread",
+            description = "Subscription for unread message count updates"))
     @StompAsyncOperationBinding
     public void notifyUnreadMessages(@Payload UnreadMessagesDto unreadMessagesDto) {
         messagingTemplate.convertAndSend("/topic/unread", unreadMessagesDto);
