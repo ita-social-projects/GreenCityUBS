@@ -99,9 +99,9 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
             .orElseThrow(() -> new BadRequestException(PAYMENT_VALIDATION_ERROR));
 
         paymentStatusHandlerService
-            .checkResponseStatusFailure(orderPayment, order, response.getTransactionStatus());
-        paymentStatusHandlerService
-            .checkOrderStatusApproved(orderPayment, order, decodedOrderReference, response.getTransactionStatus());
+            .checkResponseStatusFailure(orderPayment.getId(), order.getId(), response.getTransactionStatus());
+        paymentStatusHandlerService.checkOrderStatusApproved(orderPayment.getId(), order.getId(),
+            decodedOrderReference, response.getTransactionStatus());
 
         return getPaymentResponseWayForPay(response);
     }

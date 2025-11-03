@@ -5,8 +5,6 @@ import greencity.dto.notification.NotificationFullDto;
 import greencity.dto.notification.NotificationShortDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.pageble.PageableAdvancedDto;
-import greencity.entity.order.Order;
-import greencity.entity.user.Violation;
 import greencity.enums.UserCategory;
 import org.springframework.data.domain.Pageable;
 
@@ -23,7 +21,7 @@ public interface NotificationService {
      *
      * @author Ann Sakhno
      */
-    void notifyPaidOrder(Order order);
+    void notifyPaidOrder(Long orderId);
 
     /**
      * Method that creates notifications for all orders with status
@@ -38,28 +36,21 @@ public interface NotificationService {
      *
      * @author Ann Sakhno
      */
-    void notifyCourierItineraryFormed(Order order);
+    void notifyCourierItineraryFormed(Long orderId);
 
     /**
      * Method that creates notification for half paid package.
      *
      * @author Ann Sakhno
      */
-    void notifyHalfPaidPackage(Order order);
+    void notifyHalfPaidPackage(Long orderId);
 
     /**
      * Method that creates notification for users bonuses.
      *
      * @author Ann Sakhno
      */
-    void notifyBonuses(Order order, Long overpayment);
-
-    /**
-     * Method that creates notification for users bonuses from cancelled order.
-     *
-     * @author Danylo Hlynskyi
-     */
-    void notifyBonusesFromCanceledOrder(Order order);
+    void notifyBonuses(Long orderId, Long overpayment);
 
     /**
      * Method that creates notification for new violations.
@@ -73,7 +64,12 @@ public interface NotificationService {
      *
      * @author Nazar Bokalo
      */
-    void notifyChangedViolation(Violation violation, Long orderId);
+    void notifyChangedViolation(Long violationId, Long orderId);
+
+    /**
+     * Method that creates notification when order canceled.
+     */
+    void notifyBonusesFromCanceledOrder(Long orderId);
 
     /**
      * Method that creates notification when admin delete user violations.
@@ -164,20 +160,20 @@ public interface NotificationService {
     /**
      * Method sends messages by e-mail/notification that order is unpaid.
      *
-     * @param order       of {@link Order} Order which status was changed
+     * @param orderId     of Order which status was changed
      * @param paymentLink payment link
      * @author Vladyslav Haliara
      */
-    void notifyUnpaidOrder(Order order, String paymentLink);
+    void notifyUnpaidOrder(Long orderId, String paymentLink);
 
     /**
      * Notifies the customer that the order status has been changed to "Brought by
      * himself".
      *
-     * @param order The order {@link Order} which status was changed.
+     * @param orderId The order which status was changed.
      * @author Maksym Lenets
      */
-    void notifySelfPickupOrder(Order order);
+    void notifySelfPickupOrder(Long orderId);
 
     /**
      * Method that returns page with notifications for user by email.
@@ -227,11 +223,11 @@ public interface NotificationService {
     /**
      * Notifies that a new order has been created.
      *
-     * @param order the created order
+     * @param orderId the created order
      *
      * @author Kizerov Dmytro
      */
-    void notifyCreatedOrder(Order order);
+    void notifyCreatedOrder(Long orderId);
 
     /**
      * Method to mark specific UserNotification as read.
@@ -264,13 +260,13 @@ public interface NotificationService {
      * Notify user that order has unpaid status when it was created and not paid.
      * This method is used one time when user create new order.
      *
-     * @param order                 the order to send notification for
+     * @param orderId               the order to send notification for
      * @param sumToPay              the sum to pay
      * @param paymentSystemResponse payment system response with link to pay order
      *
      * @author Vladyslav Haliara
      */
-    void notifyUnpaidOrderPermanently(Order order, Long sumToPay, PaymentSystemResponse paymentSystemResponse);
+    void notifyUnpaidOrderPermanently(Long orderId, Long sumToPay, PaymentSystemResponse paymentSystemResponse);
 
     /**
      * Notify manager that user requested info about green office service from
@@ -287,9 +283,9 @@ public interface NotificationService {
      * Notify user that order has been canceled. This method is used when order
      * status changed to CANCELED.
      *
-     * @param order the order to send notification for
+     * @param orderId the order to send notification for
      *
      * @author Rostyslav Zadyraichuk
      */
-    void notifyCanceledOrder(Order order);
+    void notifyCanceledOrder(Long orderId);
 }

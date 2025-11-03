@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class UserDeactivationReasonDto {
     private String email;
     private String name;
-    private String deactivationReason;
+    private String reason;
     private String lang;
 }

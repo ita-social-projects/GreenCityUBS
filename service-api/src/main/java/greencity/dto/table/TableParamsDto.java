@@ -1,8 +1,7 @@
 package greencity.dto.table;
 
-import greencity.dto.TitleDto;
-import greencity.filters.OrderPage;
-import greencity.filters.OrderSearchCriteria;
+import greencity.dto.filters.OrderPage;
+import greencity.dto.filters.OrderSearchCriteria;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

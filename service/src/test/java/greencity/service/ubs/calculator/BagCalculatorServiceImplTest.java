@@ -12,6 +12,8 @@ import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
 import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
+import greencity.dto.bag.BagInfoDto;
+import greencity.dto.order.OrderInfoDto;
 import greencity.entity.order.Bag;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
@@ -21,6 +23,8 @@ import greencity.enums.CourierLimit;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.BagRepository;
+import greencity.repository.OrderRepository;
+import greencity.repository.TariffsInfoRepository;
 import greencity.service.ubs.OrderBagService;
 import greencity.util.MoneyConverterUtil;
 import java.util.ArrayList;
@@ -44,20 +48,32 @@ class BagCalculatorServiceImplTest {
     private ModelMapper modelMapper;
     @Mock
     private OrderBagService orderBagService;
+    @Mock
+    private TariffsInfoRepository tariffsInfoRepository;
+    @Mock
+    private OrderRepository orderRepository;
     @InjectMocks
     private BagCalculatorServiceImpl bagCalculatorService;
 
     @Test
     void prepareBagsAndCalculateTotal_shouldCalculateTotal() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         List<BagDto> bags = List.of(ModelUtils.getBagDto());
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
-        Bag bag = ModelUtils.getBaglist().get(0);
-        bag.setLimitIncluded(true);
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+        Bag bag1 = ModelUtils.getBaglist().get(0);
+        bag1.setLimitIncluded(true);
+        BagInfoDto bagDto1 = ModelUtils.getBagInfoDto();
+        Bag bag2 = ModelUtils.getBaglist().get(1);
+        BagInfoDto bagDto2 = ModelUtils.getBagInfoDto();
+        bagDto2.setId(bag2.getId());
 
-        long total = bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, bags, tariffsInfo);
+        when(modelMapper.map(bag1, BagInfoDto.class)).thenReturn(bagDto1);
+        when(modelMapper.map(bag2, BagInfoDto.class)).thenReturn(bagDto2);
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag1));
+
+        long total = bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, bags, tariffsInfo.getId());
 
         assertTrue(total > 0);
         assertFalse(orderBagList.isEmpty());
@@ -75,7 +91,13 @@ class BagCalculatorServiceImplTest {
 
         Order order = orderBag1.getOrder();
         order.setOrderBags(List.of(orderBag1, orderBag2));
+        OrderInfoDto orderInfoDto = OrderInfoDto.builder()
+            .id(order.getId())
+            .orderStatus(order.getOrderStatus())
+            .orderPrice(1000)
+            .build();
 
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(orderBagService.getActualBagsAmountForOrder(order.getOrderBags()))
             .thenReturn(Map.of(
                 orderBag1.getBag().getId(), 1,
@@ -94,7 +116,7 @@ class BagCalculatorServiceImplTest {
         when(moneyConverterUtil.convertBillsIntoCoins(10.0)).thenReturn(orderBag1.getPrice() * 1);
         when(moneyConverterUtil.convertBillsIntoCoins(20.0)).thenReturn(orderBag2.getPrice() * 2);
 
-        long sum = bagCalculatorService.getBagsSumToPayInCoins(order);
+        long sum = bagCalculatorService.getBagsSumToPayInCoins(orderInfoDto);
         long expectedSum = orderBag1.getPrice() * 1 + orderBag2.getPrice() * 2;
 
         assertEquals(expectedSum, sum);
@@ -106,15 +128,21 @@ class BagCalculatorServiceImplTest {
         Order order = orderBag.getOrder();
         List<OrderBag> orderBags = List.of(orderBag);
         order.setOrderBags(orderBags);
+        OrderInfoDto orderInfoDto = OrderInfoDto.builder()
+            .id(order.getId())
+            .orderStatus(order.getOrderStatus())
+            .orderPrice(1000)
+            .build();
         BagForUserDto bagDto = ModelUtils.getBagForUserDto();
 
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(orderBagService.getActualBagsAmountForOrder(orderBags))
             .thenReturn(Map.of(orderBag.getBag().getId(), 2));
         when(modelMapper.map(orderBags.getFirst(), BagForUserDto.class))
             .thenReturn(bagDto);
         when(moneyConverterUtil.convertCoinsIntoBills(anyLong())).thenReturn(2.0);
 
-        List<BagForUserDto> dtos = bagCalculatorService.bagForUserDtosBuilder(order);
+        List<BagForUserDto> dtos = bagCalculatorService.bagForUserDtosBuilder(orderInfoDto);
 
         assertEquals(1, dtos.size());
         assertEquals(2.0, dtos.get(0).getTotalPrice());
@@ -135,130 +163,158 @@ class BagCalculatorServiceImplTest {
 
     @Test
     void prepareBagsAndCalculateTotal_shouldThrowWhenBagNotFound() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         List<BagDto> bags = List.of(ModelUtils.getBagDto());
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Long tariffsInfoId = tariffsInfo.getId();
 
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(anyInt()))
             .thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, bags, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, bags, tariffsInfoId));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldThrowWhenSumLowerThanMin() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
         dto.setAmount(1);
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         tariffsInfo.setMin(1000L);
+        Long tariffsInfoId = tariffsInfo.getId();
 
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(true);
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
         List<BagDto> dtoList = List.of(dto);
 
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(ModelUtils.getBagInfoDto());
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldThrowWhenSumGreaterThanMax() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
         dto.setAmount(100);
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER);
         tariffsInfo.setMax(1L);
+        Long tariffsInfoId = tariffsInfo.getId();
 
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(true);
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
         List<BagDto> dtoList = List.of(dto);
 
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(ModelUtils.getBagInfoDto());
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldThrowWhenBagsLessThanMin() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
         dto.setAmount(1);
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         tariffsInfo.setMin(10L);
+        Long tariffsInfoId = tariffsInfo.getId();
 
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(true);
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
         List<BagDto> dtoList = List.of(dto);
 
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(ModelUtils.getBagInfoDto());
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldThrowWhenBagsGreaterThanMax() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
         dto.setAmount(100);
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
         tariffsInfo.setCourierLimit(CourierLimit.LIMIT_BY_AMOUNT_OF_BAG);
         tariffsInfo.setMax(1L);
+        Long tariffsInfoId = tariffsInfo.getId();
 
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(true);
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
         List<BagDto> dtoList = List.of(dto);
 
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(ModelUtils.getBagInfoDto());
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldAddNotOrderedBags() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
 
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Bag bag = ModelUtils.getBaglist().get(0);
+        BagInfoDto bagDto = ModelUtils.getBagInfoDto();
         Bag activeBag = ModelUtils.getBaglist().get(0);
         activeBag.setId(999);
         activeBag.setStatus(BagStatus.ACTIVE);
+        BagInfoDto activeBagDto = ModelUtils.getBagInfoDto();
+        activeBagDto.setId(activeBag.getId());
         tariffsInfo.setBags(List.of(activeBag));
 
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(bagDto);
+        when(modelMapper.map(activeBag, BagInfoDto.class)).thenReturn(activeBagDto);
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(anyInt()))
             .thenReturn(Optional.of(ModelUtils.getBaglist().get(0)));
 
-        long total = bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo);
+        long total = bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo.getId());
 
         assertFalse(orderBagList.isEmpty());
-        assertTrue(orderBagList.stream().anyMatch(b -> b.getBag().getId().equals(999) && b.getAmount() == 0));
+        assertTrue(orderBagList.stream().anyMatch(b -> b.getId().equals(999) && b.getAmount() == 0));
         assertTrue(total > 0);
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldThrowWhenAmountLimitNotMet() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
         dto.setAmount(2);
 
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Long tariffsInfoId = tariffsInfo.getId();
         Bag bag = ModelUtils.getBaglist().get(0);
         bag.setLimitIncluded(false);
-
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
         List<BagDto> dtoList = List.of(dto);
 
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(ModelUtils.getBagInfoDto());
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+
         assertThrows(BadRequestException.class,
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfoId));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldPassWhenMinMaxNull() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
 
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
@@ -266,19 +322,26 @@ class BagCalculatorServiceImplTest {
         tariffsInfo.setMin(null);
         tariffsInfo.setMax(null);
 
-        Bag bag = ModelUtils.getBaglist().get(0);
-        bag.setLimitIncluded(true);
-
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+        Bag bag1 = ModelUtils.getBaglist().get(0);
+        bag1.setLimitIncluded(true);
+        BagInfoDto bagDto1 = ModelUtils.getBagInfoDto();
         List<BagDto> dtoList = List.of(dto);
+        Bag bag2 = ModelUtils.getBaglist().get(1);
+        BagInfoDto bagDto2 = ModelUtils.getBagInfoDto();
+        bagDto2.setId(bag2.getId());
+
+        when(modelMapper.map(bag1, BagInfoDto.class)).thenReturn(bagDto1);
+        when(modelMapper.map(bag2, BagInfoDto.class)).thenReturn(bagDto2);
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag1));
 
         assertDoesNotThrow(
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo.getId()));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldPassWhenBagsWithinMinMax() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
         dto.setAmount(2);
 
@@ -287,19 +350,26 @@ class BagCalculatorServiceImplTest {
         tariffsInfo.setMin(1L);
         tariffsInfo.setMax(3L);
 
-        Bag bag = ModelUtils.getBaglist().get(0);
-        bag.setLimitIncluded(true);
-
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+        Bag bag1 = ModelUtils.getBaglist().get(0);
+        bag1.setLimitIncluded(true);
+        BagInfoDto bagDto1 = ModelUtils.getBagInfoDto();
         List<BagDto> dtoList = List.of(dto);
+        Bag bag2 = ModelUtils.getBaglist().get(1);
+        BagInfoDto bagDto2 = ModelUtils.getBagInfoDto();
+        bagDto2.setId(bag2.getId());
+
+        when(modelMapper.map(bag1, BagInfoDto.class)).thenReturn(bagDto1);
+        when(modelMapper.map(bag2, BagInfoDto.class)).thenReturn(bagDto2);
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag1));
 
         assertDoesNotThrow(
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo.getId()));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldIgnoreCheckWhenMinNull() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
         dto.setAmount(0);
 
@@ -308,33 +378,46 @@ class BagCalculatorServiceImplTest {
         tariffsInfo.setMin(null);
         tariffsInfo.setMax(5L);
 
-        Bag bag = ModelUtils.getBaglist().get(0);
-        bag.setLimitIncluded(true);
+        Bag bag1 = ModelUtils.getBaglist().get(0);
+        bag1.setLimitIncluded(true);
+        Bag bag2 = ModelUtils.getBaglist().get(1);
+        BagInfoDto bagDto1 = ModelUtils.getBagInfoDto();
+        BagInfoDto bagDto2 = ModelUtils.getBagInfoDto();
+        bagDto2.setId(bag2.getId());
 
-        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag));
+        when(modelMapper.map(bag1, BagInfoDto.class)).thenReturn(bagDto1);
+        when(modelMapper.map(bag2, BagInfoDto.class)).thenReturn(bagDto2);
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
+        when(bagRepository.findActiveBagById(anyInt())).thenReturn(Optional.of(bag1));
         List<BagDto> dtoList = List.of(dto);
 
         assertDoesNotThrow(
-            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo));
+            () -> bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, dtoList, tariffsInfo.getId()));
     }
 
     @Test
     void prepareBagsAndCalculateTotal_shouldNotAddInactiveBags() {
-        List<OrderBag> orderBagList = new ArrayList<>();
+        List<BagInfoDto> orderBagList = new ArrayList<>();
         BagDto dto = ModelUtils.getBagDto();
 
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        Bag bag = ModelUtils.getBaglist().get(0);
+        BagInfoDto bagDto = ModelUtils.getBagInfoDto();
         Bag inactiveBag = ModelUtils.getBaglist().get(0);
         inactiveBag.setId(123);
         inactiveBag.setStatus(BagStatus.DELETED);
         tariffsInfo.setBags(List.of(inactiveBag));
+        BagInfoDto inactiveBagDto = ModelUtils.getBagInfoDto();
+        inactiveBagDto.setId(inactiveBag.getId());
 
+        when(modelMapper.map(bag, BagInfoDto.class)).thenReturn(bagDto);
+        when(tariffsInfoRepository.findById(tariffsInfo.getId())).thenReturn(Optional.of(tariffsInfo));
         when(bagRepository.findActiveBagById(anyInt()))
             .thenReturn(Optional.of(ModelUtils.getBaglist().get(0)));
 
-        long total = bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo);
+        long total = bagCalculatorService.prepareBagsAndCalculateTotal(orderBagList, List.of(dto), tariffsInfo.getId());
 
-        assertTrue(orderBagList.stream().noneMatch(b -> b.getBag().getId().equals(123)));
+        assertTrue(orderBagList.stream().noneMatch(b -> b.getId().equals(123)));
         assertTrue(total > 0);
     }
 }

@@ -343,7 +343,7 @@ class ViolationServiceImplTest {
         verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
         verify(violationRepository).save(any(Violation.class));
         verify(userRepository).save(user);
-        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order);
+        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order.getId());
         verify(notificationService).notifyAddViolation(order.getId());
     }
 
@@ -368,7 +368,7 @@ class ViolationServiceImplTest {
         verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
         verify(violationRepository).save(any(Violation.class));
         verify(userRepository).save(user);
-        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order);
+        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order.getId());
         verify(notificationService).notifyAddViolation(order.getId());
     }
 
@@ -393,7 +393,7 @@ class ViolationServiceImplTest {
         verify(employeeRepository).findTariffsInfoForEmployee(anyLong());
         verify(violationRepository).save(any(Violation.class));
         verify(userRepository).save(user);
-        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order);
+        verify(eventService).saveEvent(OrderHistory.ADD_VIOLATION_UK, employee.getEmail(), order.getId());
         verify(notificationService).notifyAddViolation(order.getId());
     }
 

@@ -1,5 +1,7 @@
 package greencity.service.ubs.payment;
 
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.PAYMENT_NOT_FOUND_BY_ID;
 import greencity.constant.AppConstant;
 import greencity.constant.OrderHistory;
 import greencity.entity.notifications.UserNotification;
@@ -8,6 +10,7 @@ import greencity.entity.order.Payment;
 import greencity.enums.NotificationType;
 import greencity.enums.OrderPaymentStatus;
 import greencity.enums.PaymentStatus;
+import greencity.exceptions.NotFoundException;
 import greencity.repository.NotificationParameterRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.PaymentRepository;
@@ -33,8 +36,11 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
 
     @Override
     @Transactional
-    public void checkOrderStatusApproved(Payment orderPayment, Order order,
-        String decodedOrderReference, String status) {
+    public void checkOrderStatusApproved(Long paymentId, Long orderId, String decodedOrderReference, String status) {
+        Payment orderPayment = paymentRepository.findById(paymentId)
+            .orElseThrow(() -> new NotFoundException(PAYMENT_NOT_FOUND_BY_ID + paymentId));
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         if (AppConstant.APPROVED_STATUS.equals(status)) {
             orderPayment.setPaymentId(decodedOrderReference.split("_")[AppConstant.COUNTER_ORDER_PAYMENT_ID_INDEX]);
             orderPayment.setPaymentStatus(PaymentStatus.PAID);
@@ -43,9 +49,9 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
             removePaymentLinkAndNotificationForOrder(order);
             paymentRepository.save(orderPayment);
             orderRepository.save(order);
-            eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order);
+            eventService.save(OrderHistory.ORDER_PAID_UK, OrderHistory.SYSTEM_UK, order.getId());
             eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK + orderPayment.getPaymentId(),
-                OrderHistory.SYSTEM_UK, order);
+                OrderHistory.SYSTEM_UK, order.getId());
             orderService.cancelPaymentExpiryJob(order.getId());
 
             log.info("Payment approved: orderId={}, status={}",
@@ -58,7 +64,11 @@ public class PaymentStatusHandlerServiceImpl implements PaymentStatusHandlerServ
 
     @Override
     @Transactional
-    public void checkResponseStatusFailure(Payment orderPayment, Order order, String status) {
+    public void checkResponseStatusFailure(Long paymentId, Long orderId, String status) {
+        Payment orderPayment = paymentRepository.findById(paymentId)
+            .orElseThrow(() -> new NotFoundException(PAYMENT_NOT_FOUND_BY_ID + paymentId));
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         if (AppConstant.FAILED_STATUS.equals(status)) {
             orderPayment.setPaymentStatus(PaymentStatus.UNPAID);
 

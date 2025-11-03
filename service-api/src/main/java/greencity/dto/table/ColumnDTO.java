@@ -1,7 +1,5 @@
 package greencity.dto.table;
 
-import greencity.dto.OptionForColumnDTO;
-import greencity.dto.TitleDto;
 import greencity.enums.EditType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

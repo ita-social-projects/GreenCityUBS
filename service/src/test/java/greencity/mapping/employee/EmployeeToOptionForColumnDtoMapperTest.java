@@ -1,7 +1,7 @@
 package greencity.mapping.employee;
 
 import greencity.ModelUtils;
-import greencity.dto.OptionForColumnDTO;
+import greencity.dto.table.OptionForColumnDTO;
 import greencity.entity.user.employee.Employee;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

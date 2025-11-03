@@ -1,7 +1,11 @@
 package greencity.service.ubs;
 
+import static greencity.constant.ErrorMessage.EMPLOYEE_NOT_FOUND;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import greencity.entity.order.Order;
 import greencity.entity.user.employee.Employee;
+import greencity.exceptions.NotFoundException;
+import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +20,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class OrderLockServiceImpl implements OrderLockService {
     private final OrderRepository orderRepository;
+    private final EmployeeRepository employeeRepository;
     @Value("${order.lock.duration.minutes}")
     private int lockDurationMinutes;
     private static final String REMOVE_LOCK_MESSAGE = "Remove lock from order with id: {}";
@@ -26,7 +31,11 @@ public class OrderLockServiceImpl implements OrderLockService {
      */
     @Override
     @Transactional
-    public synchronized void lockOrder(Order order, Employee employee) {
+    public synchronized void lockOrder(Long orderId, Long employeeId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new NotFoundException(EMPLOYEE_NOT_FOUND + employeeId));
         if (!order.isBlocked()) {
             order.setBlocked(true);
             order.setBlockedByEmployee(employee);
@@ -41,7 +50,9 @@ public class OrderLockServiceImpl implements OrderLockService {
      */
     @Override
     @Transactional
-    public synchronized void unlockOrder(Order order) {
+    public synchronized void unlockOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         order.setBlocked(false);
         order.setBlockedByEmployee(null);
         order.setBlockedAt(null);

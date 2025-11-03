@@ -1,11 +1,8 @@
 package greencity.service.ubs.payment;
 
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
-
 /**
  * Service for handling payment status updates and synchronizing them with the
- * corresponding {@link Order} and {@link Payment} entities.
+ * corresponding order and payment objects.
  */
 public interface PaymentStatusHandlerService {
     /**
@@ -13,27 +10,22 @@ public interface PaymentStatusHandlerService {
      * order status to {PAID}, saves changes to repositories, removes payment links
      * from notifications, and logs/records events.
      *
-     * @param orderPayment          the {@link Payment} entity to update
-     * @param order                 the {@link Order} entity to update
+     * @param paymentId             the payment to update
+     * @param orderId               the order to update
      * @param decodedOrderReference decoded reference string, used to extract
      *                              paymentId
      * @param status                the transaction status returned from the payment
      *                              system
      */
-    void checkOrderStatusApproved(Payment orderPayment,
-        Order order,
-        String decodedOrderReference,
-        String status);
+    void checkOrderStatusApproved(Long paymentId, Long orderId, String decodedOrderReference, String status);
 
     /**
      * Handles the case when a payment fails. Updates the payment and order status
      * to {UNPAID} and persists changes.
      *
-     * @param orderPayment the {@link Payment} entity to update
-     * @param order        the {@link Order} entity to update
-     * @param status       the transaction status returned from the payment system
+     * @param paymentId the payment to update
+     * @param orderId   the order to update
+     * @param status    the transaction status returned from the payment system
      */
-    void checkResponseStatusFailure(Payment orderPayment,
-        Order order,
-        String status);
+    void checkResponseStatusFailure(Long paymentId, Long orderId, String status);
 }

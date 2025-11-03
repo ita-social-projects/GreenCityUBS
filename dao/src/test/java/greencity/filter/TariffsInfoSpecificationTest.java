@@ -6,7 +6,7 @@ import greencity.entity.order.TariffsInfo_;
 import greencity.entity.user.Location_;
 import greencity.entity.user.employee.ReceivingStation_;
 import greencity.enums.TariffStatus;
-import greencity.filters.TariffsInfoFilterCriteria;
+import greencity.dto.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import jakarta.persistence.criteria.*;
 import static org.junit.jupiter.api.Assertions.*;

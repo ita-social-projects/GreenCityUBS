@@ -52,15 +52,16 @@ class EventServiceImplTest {
         Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
-        eventService.save("Замовлення оплаченно", "Анжрій Іванюк", order);
+        eventService.save("Замовлення оплаченно", "Анжрій Іванюк", order.getId());
         verify(eventRepository, times(1)).save(any());
     }
 
     @Test
     void saveEmptyEventTest() {
         Order order = getOrder();
-        eventService.save("", "admin", order);
+        eventService.save("", "admin", order.getId());
         verify(eventRepository, times(0)).save(any());
     }
 
@@ -71,13 +72,14 @@ class EventServiceImplTest {
         Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.ORDER_FORMED_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.ORDER_PAID_UK, eventAuthorClient, order);
-        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.ORDER_ADJUSTMENT_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.ORDER_CONFIRMED_UK, eventAuthorSystem, order);
+        eventService.save(OrderHistory.ORDER_FORMED_UK, eventAuthorSystem, order.getId());
+        eventService.save(OrderHistory.ORDER_PAID_UK, eventAuthorClient, order.getId());
+        eventService.save(OrderHistory.ADD_PAYMENT_SYSTEM_UK, eventAuthorSystem, order.getId());
+        eventService.save(OrderHistory.ORDER_ADJUSTMENT_UK, eventAuthorSystem, order.getId());
+        eventService.save(OrderHistory.ORDER_CONFIRMED_UK, eventAuthorSystem, order.getId());
 
         assertEquals("Order Status - Formed", OrderHistory.ORDER_FORMED_EN);
         assertEquals("System", OrderHistory.SYSTEM_EN);
@@ -96,13 +98,14 @@ class EventServiceImplTest {
         Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.UPDATE_DATE_EXPORT_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.SET_DATE_EXPORT_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.UPDATE_MIX_WASTE_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.ADD_NEW_ECO_NUMBER_UK, eventAuthorSystem, order);
-        eventService.save(OrderHistory.DELETED_ECO_NUMBER_UK, eventAuthorSystem, order);
+        eventService.save(OrderHistory.UPDATE_DATE_EXPORT_UK, eventAuthorSystem, order.getId());
+        eventService.save(OrderHistory.SET_DATE_EXPORT_UK, eventAuthorSystem, order.getId());
+        eventService.save(OrderHistory.UPDATE_MIX_WASTE_UK, eventAuthorSystem, order.getId());
+        eventService.save(OrderHistory.ADD_NEW_ECO_NUMBER_UK, eventAuthorSystem, order.getId());
+        eventService.save(OrderHistory.DELETED_ECO_NUMBER_UK, eventAuthorSystem, order.getId());
 
         assertEquals("Змінено деталі вивезення. Дата вивезення:", OrderHistory.UPDATE_DATE_EXPORT_UK);
         assertEquals("Встановлено деталі вивезення. Дата вивезення:", OrderHistory.SET_DATE_EXPORT_UK);
@@ -119,15 +122,16 @@ class EventServiceImplTest {
         Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK, userName, order);
-        eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK, userName, order);
-        eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK, userName, order);
-        eventService.save(OrderHistory.ORDER_HALF_PAID_UK, userName, order);
-        eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY_UK, userName, order);
-        eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, userName, order);
-        eventService.save(OrderHistory.DELETE_VIOLATION_UK, userName, order);
+        eventService.save(OrderHistory.DELETE_PAYMENT_MANUALLY_UK, userName, order.getId());
+        eventService.save(OrderHistory.ORDER_BROUGHT_IT_HIMSELF_UK, userName, order.getId());
+        eventService.save(OrderHistory.UPDATE_PAYMENT_MANUALLY_UK, userName, order.getId());
+        eventService.save(OrderHistory.ORDER_HALF_PAID_UK, userName, order.getId());
+        eventService.save(OrderHistory.ADD_PAYMENT_MANUALLY_UK, userName, order.getId());
+        eventService.save(OrderHistory.ADD_ADMIN_COMMENT_UK, userName, order.getId());
+        eventService.save(OrderHistory.DELETE_VIOLATION_UK, userName, order.getId());
 
         assertEquals("Payment removed №", OrderHistory.DELETE_PAYMENT_MANUALLY_EN);
         assertEquals("Order status - Will bring it myself", OrderHistory.ORDER_BROUGHT_IT_HIMSELF_EN);
@@ -154,9 +158,10 @@ class EventServiceImplTest {
         Order order = getOrder();
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0),
             ModelUtils.getListOfEvents().get(1)));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(employeeRepository.findByEmail(anyString())).thenReturn(Optional.of(ModelUtils.TEST_EMPLOYEE));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
-        eventService.saveEvent("Замовлення оплаченно", "email", order);
+        eventService.saveEvent("Замовлення оплаченно", "email", order.getId());
         verify(eventRepository, times(1)).save(any());
     }
 
@@ -166,9 +171,10 @@ class EventServiceImplTest {
         Order order = getOrder();
 
         order.setEvents(Arrays.asList(ModelUtils.getListOfEvents().get(0), ModelUtils.getListOfEvents().get(1)));
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(eventRepository.save(any())).thenReturn(ModelUtils.getListOfEvents().get(0));
 
-        eventService.save(OrderHistory.SET_EXPORT_DETAILS_EN, eventAuthor, order);
+        eventService.save(OrderHistory.SET_EXPORT_DETAILS_EN, eventAuthor, order.getId());
 
         assertEquals("Installed export details.", OrderHistory.SET_EXPORT_DETAILS_EN);
         assertEquals("Встановлено деталі вивезення.", OrderHistory.SET_EXPORT_DETAILS_UK);

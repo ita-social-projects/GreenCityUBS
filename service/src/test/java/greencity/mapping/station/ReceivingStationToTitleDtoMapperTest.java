@@ -1,7 +1,7 @@
 package greencity.mapping.station;
 
 import greencity.ModelUtils;
-import greencity.dto.OptionForColumnDTO;
+import greencity.dto.table.OptionForColumnDTO;
 import greencity.dto.courier.ReceivingStationDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

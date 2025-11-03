@@ -1,6 +1,6 @@
 package greencity.service.ubs.wayforpay;
 
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_SCHEDULE_EXCEPTION;
@@ -64,13 +64,13 @@ public class WayForPayServiceImpl implements WayForPayService {
 
     @Override
     @Transactional
-    public PaymentSystemResponse processWayForPay(OrderResponseDto dto, Order order, long sumToPayInCoins) {
-        PaymentWayForPayRequestDto requestDto = formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
+    public PaymentSystemResponse processWayForPay(OrderResponseDto dto, Long orderId, long sumToPayInCoins) {
+        PaymentWayForPayRequestDto requestDto = formPaymentRequestForWayForPay(orderId, sumToPayInCoins);
         String link = getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(requestDto));
         schedulePaymentExpiryJob(
-            order, dto.getPointsToUse(),
+            orderId, dto.getPointsToUse(),
             dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
-        return getPaymentRequestDto(order, link);
+        return getPaymentRequestDto(orderId, link);
     }
 
     @Override
@@ -78,14 +78,14 @@ public class WayForPayServiceImpl implements WayForPayService {
     public PaymentWayForPayRequestDto formPaymentRequestForWayForPay(Long orderId, long sumToPayInCoins) {
         Instant instant = Instant.now();
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST));
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         PaymentWayForPayRequestDto paymentWayForPayRequestDto = PaymentWayForPayRequestDto.builder()
             .transactionType("CREATE_INVOICE")
             .merchantAccount(merchantAccount)
             .merchantDomainName(merchantDomainName)
             .apiVersion(1)
             .serviceUrl(resultWayForPayUrl)
-            .orderReference(OrderUtils.generateEncodedOrderReference(orderId, order))
+            .orderReference(OrderUtils.generateEncodedOrderReference(order))
             .orderDate(instant.getEpochSecond())
             .amount(moneyConverterUtil.convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
@@ -113,9 +113,9 @@ public class WayForPayServiceImpl implements WayForPayService {
     }
 
     @Override
-    public PaymentSystemResponse getPaymentRequestDto(Order order, String link) {
+    public PaymentSystemResponse getPaymentRequestDto(Long orderId, String link) {
         return PaymentSystemResponse.builder()
-            .orderId(order.getId())
+            .orderId(orderId)
             .link(link)
             .build();
     }
@@ -127,13 +127,15 @@ public class WayForPayServiceImpl implements WayForPayService {
     }
 
     @Override
-    public PaymentCancellationWayForPayRequestDto formPaymentCancellationRequestForWayForPay(Order order) {
+    public PaymentCancellationWayForPayRequestDto formPaymentCancellationRequestForWayForPay(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         PaymentCancellationWayForPayRequestDto paymentCancellationWayForPayRequestDto =
             PaymentCancellationWayForPayRequestDto.builder()
                 .transactionType("REMOVE_INVOICE")
                 .apiVersion(1)
                 .merchantAccount(merchantAccount)
-                .orderReference(OrderUtils.generateEncodedOrderReference(order.getId(), order))
+                .orderReference(OrderUtils.generateEncodedOrderReference(order))
                 .build();
 
         paymentCancellationWayForPayRequestDto.setSignature(
@@ -150,11 +152,10 @@ public class WayForPayServiceImpl implements WayForPayService {
 
     @Override
     public void schedulePaymentExpiryJob(
-        Order order, int pointsUsed, Set<String> certificateCodes, Long expirySeconds, String paymentLink) {
+        Long orderId, int pointsUsed, Set<String> certificateCodes, Long expirySeconds, String paymentLink) {
         if (certificateCodes == null) {
             certificateCodes = new HashSet<>();
         }
-        Long orderId = order.getId();
 
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("orderId", orderId);
@@ -172,6 +173,8 @@ public class WayForPayServiceImpl implements WayForPayService {
             .build();
 
         try {
+            Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
             quartzScheduler.scheduleJob(job, trigger);
             order.setPaymentLink(paymentLink);
             order.setPaymentLinkExpiry(LocalDateTime.now().plusSeconds(expirySeconds));

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
 import greencity.converters.UserArgumentResolver;
-import greencity.dto.LocationsDto;
+import greencity.dto.location.LocationsForTariffDto;
 import greencity.dto.customer.UbsCustomersDtoUpdate;
 import greencity.dto.order.OrderCancellationReasonDto;
 import greencity.dto.order.OrderResponseDto;
@@ -372,13 +372,14 @@ class OrderControllerTest {
 
     @Test
     void getAllLocationsTest() throws Exception {
-        List<LocationsDto> locationsDtoList = Arrays.asList(new LocationsDto(), new LocationsDto());
-        when(addressService.getAllLocations()).thenReturn(locationsDtoList);
+        List<LocationsForTariffDto> locationsForTariffDtoList =
+            Arrays.asList(new LocationsForTariffDto(), new LocationsForTariffDto());
+        when(addressService.getAllLocations()).thenReturn(locationsForTariffDtoList);
 
         mockMvc.perform(get(ubsLink + "/locations")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
+            .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsForTariffDtoList)));
 
         verify(addressService).getAllLocations();
     }
@@ -400,13 +401,14 @@ class OrderControllerTest {
     @Test
     void getAllLocationsByCourierIdTest() throws Exception {
         Long id = 1L;
-        List<LocationsDto> locationsDtoList = Arrays.asList(new LocationsDto(), new LocationsDto());
-        when(addressService.getAllLocationsByCourierId(id)).thenReturn(locationsDtoList);
+        List<LocationsForTariffDto> locationsForTariffDtoList =
+            Arrays.asList(new LocationsForTariffDto(), new LocationsForTariffDto());
+        when(addressService.getAllLocationsByCourierId(id)).thenReturn(locationsForTariffDtoList);
 
         mockMvc.perform(get(ubsLink + "/locationsByCourier/" + id)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsDtoList)));
+            .andExpect(content().json(new ObjectMapper().writeValueAsString(locationsForTariffDtoList)));
 
         verify(addressService).getAllLocationsByCourierId(id);
     }

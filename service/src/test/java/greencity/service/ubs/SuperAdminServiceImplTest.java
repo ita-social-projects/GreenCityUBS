@@ -3,7 +3,7 @@ package greencity.service.ubs;
 import greencity.ModelUtils;
 import greencity.constant.ErrorMessage;
 import greencity.dto.AddNewTariffDto;
-import greencity.dto.DetailsOfDeactivateTariffsDto;
+import greencity.dto.tariff.DetailsOfDeactivateTariffsDto;
 import greencity.dto.admin.SettingsTextDto;
 import greencity.dto.admin.UpdateSectionTextsDto;
 import greencity.dto.bag.BagLimitDto;
@@ -46,7 +46,7 @@ import greencity.exceptions.UnprocessableEntityException;
 import greencity.exceptions.courier.CourierAlreadyExists;
 import greencity.exceptions.service.ServiceAlreadyExistsException;
 import greencity.exceptions.tariff.TariffAlreadyExistsException;
-import greencity.filters.TariffsInfoFilterCriteria;
+import greencity.dto.filters.TariffsInfoFilterCriteria;
 import greencity.filters.TariffsInfoSpecification;
 import greencity.repository.*;
 import org.junit.jupiter.api.AfterEach;
@@ -1511,6 +1511,34 @@ class SuperAdminServiceImplTest {
         verify(tariffsLocationRepository).findAllByTariffsInfo(tariffsInfo);
         verify(tariffsInfoRepository).save(tariffsInfo);
         verify(courierRepository).findById(1L);
+    }
+
+    @Test
+    void editTariffShouldUpdateNamesIfPresent() {
+        EditTariffDto dto = ModelUtils.getEditTariffDto();
+        TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
+        TariffLocation tariffLocation = ModelUtils.getTariffLocation();
+        ReceivingStation receivingStation = getReceivingStation();
+        Location location = ModelUtils.getLocation();
+        Courier courier = getCourier();
+
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
+        when(locationRepository.findByIdAndIsDeletedIsFalse(1L)).thenReturn(Optional.of(location));
+        when(tariffsLocationRepository.findAllByCourierIdAndLocationIds(1L, List.of(1L)))
+            .thenReturn(List.of(tariffLocation));
+        when(receivingStationRepository.findById(1L)).thenReturn(Optional.of(receivingStation));
+        when(tariffsLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
+            .thenReturn(Optional.of(tariffLocation));
+        when(tariffsLocationRepository.findAllByTariffsInfo(tariffsInfo)).thenReturn(List.of(tariffLocation));
+        when(tariffsInfoRepository.save(tariffsInfo)).thenReturn(tariffsInfo);
+
+        superAdminService.editTariff(1L, dto);
+
+        assertEquals("Тариф тест", tariffsInfo.getTariffNameUk());
+        assertEquals("Tariff test", tariffsInfo.getTariffNameEn());
+
+        verify(tariffsInfoRepository).save(tariffsInfo);
     }
 
     @Test

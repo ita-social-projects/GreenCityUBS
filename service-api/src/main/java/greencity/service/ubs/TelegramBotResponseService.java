@@ -1,7 +1,7 @@
 package greencity.service.ubs;
 
-import greencity.dto.BotResponseProjection;
 import greencity.dto.pageble.PageableDto;
+import greencity.dto.telegram.BotResponse;
 import greencity.dto.telegram.UpdateBotMessageRequestDto;
 import greencity.enums.MessageType;
 import org.springframework.data.domain.Pageable;
@@ -19,10 +19,10 @@ public interface TelegramBotResponseService {
      * Retrieves a paginated list of all bot responses.
      *
      * @param pageable pagination and sorting information
-     * @return a {@link PageableDto} containing a list of
-     *         {@link BotResponseProjection} objects
+     * @return a {@link PageableDto} containing a list of {@link BotResponse}
+     *         objects
      */
-    PageableDto<BotResponseProjection> getAllBotResponses(Pageable pageable);
+    PageableDto<BotResponse> getAllBotResponses(Pageable pageable);
 
     /**
      * Updates an existing bot response.

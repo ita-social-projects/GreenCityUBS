@@ -50,6 +50,7 @@ import greencity.dto.position.PositionAuthoritiesDto;
 import greencity.dto.user.PasswordStatusDto;
 import greencity.dto.user.UserActivationDto;
 import greencity.dto.user.UserDeactivationReasonDto;
+import greencity.dto.user.UserDeletionReasonDto;
 import greencity.dto.user.UserExternalDto;
 import greencity.dto.user.UserInfoDto;
 import greencity.dto.user.UserProfileCreateDto;
@@ -77,7 +78,7 @@ import greencity.repository.UserDeactivationRepo;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.EventService;
-import greencity.util.Bot;
+import greencity.dto.user.Bot;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -333,7 +334,7 @@ class UserServiceImplTest {
         userService.updateUbsUserInfoInOrder(request, ubsUser.getUser().getUuid());
 
         verify(eventService).save(OrderHistory.CHANGED_SENDER_UK, OrderHistory.UBS_ADMIN,
-            ubsUser.getOrders().getFirst());
+            ubsUser.getOrders().getFirst().getId());
         verify(ubsUserRepository).save(ubsUser);
     }
 
@@ -645,9 +646,13 @@ class UserServiceImplTest {
     void deleteUserByUuid_ShouldSetStatusToDeleted_WhenUserIsActivated() {
         String uuid = "test-uuid-123";
         testUser.setStatus(UserStatus.ACTIVATED);
+        UserDeletionReasonDto dto = UserDeletionReasonDto.builder()
+            .reason("test reason")
+            .build();
+
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(testUser));
 
-        userService.deleteUserByUuid(uuid);
+        userService.deleteUserByUuid(uuid, dto);
 
         assertEquals(UserStatus.DELETED, testUser.getStatus());
         verify(userRepository).save(testUser);
@@ -657,10 +662,14 @@ class UserServiceImplTest {
     void deleteUserByUuid_ShouldThrowForbiddenException_WhenUserIsDeactivated() {
         String uuid = "test-uuid-123";
         testUser.setStatus(UserStatus.DEACTIVATED);
+        UserDeletionReasonDto dto = UserDeletionReasonDto.builder()
+            .reason("test reason")
+            .build();
+
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(testUser));
 
         ForbiddenException exception = assertThrows(ForbiddenException.class,
-            () -> userService.deleteUserByUuid(uuid));
+            () -> userService.deleteUserByUuid(uuid, dto));
 
         assertEquals(ErrorMessage.FORBIDDEN_USER_DELETION, exception.getMessage());
         verify(userRepository, never()).save(any());
@@ -670,10 +679,14 @@ class UserServiceImplTest {
     void deleteUserByUuid_ShouldThrowForbiddenException_WhenUserIsBlocked() {
         String uuid = "test-uuid-123";
         testUser.setStatus(UserStatus.BLOCKED);
+        UserDeletionReasonDto dto = UserDeletionReasonDto.builder()
+            .reason("test reason")
+            .build();
+
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.of(testUser));
 
         ForbiddenException exception = assertThrows(ForbiddenException.class,
-            () -> userService.deleteUserByUuid(uuid));
+            () -> userService.deleteUserByUuid(uuid, dto));
 
         assertEquals(ErrorMessage.FORBIDDEN_USER_DELETION, exception.getMessage());
         verify(userRepository, never()).save(any());
@@ -682,10 +695,14 @@ class UserServiceImplTest {
     @Test
     void deleteUserByUuid_ShouldThrowNotFoundException_WhenUserNotExists() {
         String uuid = "non-existent-uuid";
+        UserDeletionReasonDto dto = UserDeletionReasonDto.builder()
+            .reason("test reason")
+            .build();
+
         when(userRepository.findUserByUuid(uuid)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> userService.deleteUserByUuid(uuid));
+            () -> userService.deleteUserByUuid(uuid, dto));
 
         assertEquals(ErrorMessage.USER_NOT_FOUND_BY_UUID + uuid, exception.getMessage());
         verify(userRepository, never()).save(any());

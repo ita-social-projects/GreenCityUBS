@@ -3,8 +3,8 @@ package greencity.service.ubs;
 import greencity.dto.order.UserWithSomeOrderDetailAndChatIdDto;
 import greencity.dto.pageble.PageableDto;
 import greencity.enums.SortingOrder;
-import greencity.filters.CustomerPage;
-import greencity.filters.UserFilterCriteria;
+import greencity.dto.filters.CustomerPage;
+import greencity.dto.filters.UserFilterCriteria;
 
 public interface ValuesForUserTableService {
     /**
