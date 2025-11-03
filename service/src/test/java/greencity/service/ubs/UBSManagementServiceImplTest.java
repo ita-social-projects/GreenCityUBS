@@ -446,6 +446,7 @@ class UBSManagementServiceImplTest {
         user.setRecipientName("Петро");
         user.setRecipientSurname("Петренко");
         Order order = user.getOrders().getFirst();
+        order.setOrderStatus(null);
         order.setOrderDate((LocalDateTime.now()));
 
         List<Payment> payment = new ArrayList<>();
