@@ -2,6 +2,7 @@ package greencity.repository;
 
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
+import greencity.enums.MessageViewingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -49,4 +50,15 @@ public interface TelegramMessageRepository extends JpaRepository<TelegramMessage
      *         this chat, otherwise empty
      */
     Optional<TelegramMessage> findByChatAndTelegramMessageId(TelegramChat telegramChat, Integer messageId);
+
+    /**
+     * Returns the number of {@link TelegramMessage} entities that have the
+     * specified {@link MessageViewingStatus}.
+     *
+     * @param messageViewingStatus the status to filter by (e.g.
+     *                             {@link MessageViewingStatus#UNREAD})
+     * @return the number of messages with the given status (returns {@code 0} if
+     *         none match)
+     */
+    Long countByMessageViewingStatus(MessageViewingStatus messageViewingStatus);
 }
