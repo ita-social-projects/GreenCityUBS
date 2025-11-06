@@ -540,7 +540,6 @@ class TelegramSupportServiceTest {
         when(message.hasPhoto()).thenReturn(true);
         when(message.getMediaGroupId()).thenReturn(null);
         lenient().when(message.getPhoto()).thenReturn(Collections.emptyList());
-
         when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
         when(telegramBotResponseService.getResponseByLangAndMessageType(TelegramBotConstants.UK,
             MessageType.MANAGER_PHOTO_FAILED)).thenReturn(expectedText);
