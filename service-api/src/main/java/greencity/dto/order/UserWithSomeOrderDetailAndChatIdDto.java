@@ -42,6 +42,6 @@ public class UserWithSomeOrderDetailAndChatIdDto {
     private String userBonuses;
     @JsonProperty("chatId")
     private Long chatId;
-    @JsonProperty("userStatus")
+    @JsonProperty("status")
     private UserStatus status;
 }
