@@ -42,7 +42,7 @@ public class TelegramChatProducer {
     @AsyncPublisher(
         operation = @AsyncOperation(
             channelName = "/topic/chats",
-            description = "Subscription for new chat created"))
+            description = "Subscription to receive chat updates (chat created, new chat message received)"))
     @StompAsyncOperationBinding
     public void notifyNewChat(ChatDto chatDto) {
         log.debug("Publish to /topic/chats");
