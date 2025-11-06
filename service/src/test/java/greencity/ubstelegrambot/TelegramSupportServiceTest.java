@@ -2,6 +2,7 @@ package greencity.ubstelegrambot;
 
 import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
+import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
@@ -211,6 +212,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(responseText));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer).notifyNewChat(any(ChatDto.class));
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, messageText, id);
     }
 
@@ -256,6 +258,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(messageText));
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer, never()).notifyNewChat(any(ChatDto.class));
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
             MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
@@ -300,6 +303,7 @@ class TelegramSupportServiceTest {
 
         assertTrue(result.getText().contains(expectedText));
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer, never()).notifyNewChat(any(ChatDto.class));
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
             MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
@@ -348,6 +352,7 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(expectedText));
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer, never()).notifyNewChat(any(ChatDto.class));
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(username,
             MessageProvider.get(TelegramBotConstants.UK, "photo.content"), id);
     }
@@ -399,6 +404,7 @@ class TelegramSupportServiceTest {
         verify(telegramMessageRepository).findByMediaGroupId(mediaGroupId);
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer, never()).notifyNewChat(any(ChatDto.class));
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
             eq(chat.getId()));
     }
@@ -431,6 +437,7 @@ class TelegramSupportServiceTest {
         assertEquals(expectedText, result.getText());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer, never()).notifyNewChat(any(ChatDto.class));
         verify(telegramNotificationService, never()).notifyManagerAboutNewMessagesFromUser(any(), any(),
             eq(chat.getId()));
     }
@@ -464,6 +471,7 @@ class TelegramSupportServiceTest {
         assertEquals(expectedText, result.getText());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer, never()).notifyNewChat(any(ChatDto.class));
     }
 
     @Test
@@ -509,6 +517,7 @@ class TelegramSupportServiceTest {
 
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer).notifyNewChat(any(ChatDto.class));
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
     }
 
@@ -547,6 +556,7 @@ class TelegramSupportServiceTest {
         verify(telegramMessageRepository).delete(messageCaptor.getValue());
 
         verify(telegramChatProducer, never()).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer, never()).notifyNewChat(any(ChatDto.class));
     }
 
     @Test
@@ -592,6 +602,7 @@ class TelegramSupportServiceTest {
 
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer).notifyNewChat(any(ChatDto.class));
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(any(), any(), eq(chat.getId()));
         verify(userRemoteWebClient).uploadFile(any(MultipartFile.class));
         verify(messageAssetRepository).save(any(MessageAsset.class));

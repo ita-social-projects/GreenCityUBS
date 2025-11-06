@@ -153,7 +153,6 @@ class TelegramServiceTest {
             employeeRepository,
             orderRepository,
             userRepository,
-            telegramChatProducer,
             telegramUtils,
             messageAssetRepository,
             telegramUpdateProcessorMap);
@@ -861,8 +860,6 @@ class TelegramServiceTest {
 
         Update update = new Update();
         update.setMessage(message);
-
-        doNothing().when(telegramChatProducer).notifyNewChat(any(ChatDto.class));
 
         TelegramChat savedChat = TelegramChat.builder()
             .id(1L)
