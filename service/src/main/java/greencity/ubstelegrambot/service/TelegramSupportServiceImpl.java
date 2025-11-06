@@ -427,23 +427,23 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
             telegramChatProducer.notifyNewMessage(telegramMessageDto, chat.getId());
 
             ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
-                    .id(chat.getId())
-                    .firstName(chat.getFirstName())
-                    .lastName(chat.getLastName())
-                    .username(chat.getUsername())
-                    .lastMessage(telegramMessageDto)
-                    .unreadMessagesCount(chat.getUnreadMessagesCount());
+                .id(chat.getId())
+                .firstName(chat.getFirstName())
+                .lastName(chat.getLastName())
+                .username(chat.getUsername())
+                .lastMessage(telegramMessageDto)
+                .unreadMessagesCount(chat.getUnreadMessagesCount());
 
             if (chat.getUser() != null) {
                 ChatUserDto chatUserDto = ChatUserDto
-                        .builder()
-                        .firstName(chat.getUser().getRecipientName())
-                        .lastName(chat.getUser().getRecipientSurname())
-                        .email(chat.getUser().getRecipientEmail())
-                        .build();
+                    .builder()
+                    .firstName(chat.getUser().getRecipientName())
+                    .lastName(chat.getUser().getRecipientSurname())
+                    .email(chat.getUser().getRecipientEmail())
+                    .build();
 
                 chatDtoBuilder
-                        .user(chatUserDto);
+                    .user(chatUserDto);
             }
 
             telegramChatProducer.notifyNewChat(chatDtoBuilder.build());
