@@ -1,14 +1,15 @@
 package greencity.producers;
 
+import static org.mockito.Mockito.verify;
 import greencity.dto.telegram.ChatDto;
 import greencity.dto.telegram.TelegramMessageDto;
+import greencity.dto.telegram.UnreadMessagesDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class TelegramChatProducerTest {
@@ -35,6 +36,15 @@ class TelegramChatProducerTest {
         telegramChatProducer.notifyNewChat(chatDto);
 
         verify(messagingTemplate).convertAndSend("/topic/chats", chatDto);
+    }
+
+    @Test
+    void testNotifyUnreadMessages_CorrectDestination_MessageSent() {
+        UnreadMessagesDto unreadMessagesDto = new UnreadMessagesDto();
+
+        telegramChatProducer.notifyUnreadMessages(unreadMessagesDto);
+
+        verify(messagingTemplate).convertAndSend("/topic/unread", unreadMessagesDto);
     }
 
 }
