@@ -126,9 +126,9 @@ public class NotificationController {
     @Operation(summary = "Read single Notification.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PatchMapping("/{notificationId}/viewNotification")
     public ResponseEntity<Object> viewNotification(@PathVariable Long notificationId,
@@ -145,9 +145,9 @@ public class NotificationController {
     @Operation(summary = "Unread single Notification.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @PatchMapping("/{notificationId}/unreadNotification")
     public ResponseEntity<Object> unreadNotification(@PathVariable Long notificationId,
@@ -165,9 +165,9 @@ public class NotificationController {
     @Operation(summary = "Delete single Notification.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
-        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+        @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<Object> deleteNotification(@PathVariable Long notificationId,
