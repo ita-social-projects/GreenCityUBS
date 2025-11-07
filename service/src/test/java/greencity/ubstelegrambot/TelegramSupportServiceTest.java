@@ -8,7 +8,9 @@ import greencity.entity.telegram.MessageAsset;
 import greencity.entity.telegram.TelegramChat;
 import greencity.entity.telegram.TelegramMessage;
 import greencity.enums.ChatState;
+import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageType;
+import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
@@ -45,6 +47,8 @@ import org.telegram.telegrambots.meta.api.objects.games.Animation;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -178,12 +182,13 @@ class TelegramSupportServiceTest {
     }
 
     @Test
-    void testProcessSupportMessage_OnlyTextMessage_ShouldReturnSentToManagerMessage() {
+    void testProcessSupportMessage_OnlyTextMessageChatUserEmpty_ShouldReturnSentToManagerMessage() {
         long id = 1L;
         String chatId = "1";
         String username = "tg_user";
         String messageText = "Hello";
         String responseText = "Message sent to manager";
+        Instant now = Instant.now();
 
         Message message = mock(Message.class);
         User user = mock(User.class);
@@ -212,7 +217,57 @@ class TelegramSupportServiceTest {
         assertTrue(result.getText().contains(responseText));
         verify(telegramMessageRepository).save(any(TelegramMessage.class));
         verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
-        verify(telegramChatProducer).notifyNewChat(any(ChatDto.class));
+        verify(telegramChatProducer).notifyNewChat(argThat(dto -> dto.getUser() == null &&
+            dto.getLastMessage().getSendAt().truncatedTo(ChronoUnit.SECONDS).equals(now.truncatedTo(ChronoUnit.SECONDS))
+            &&
+            dto.getLastMessage().getText().equals(messageText) &&
+            dto.getLastMessage().getDeliveryStatus() == MessageDeliveryStatus.SENT));
+        verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, messageText, id);
+    }
+
+    @Test
+    void testProcessSupportMessage_OnlyTextMessageChatUserPresent_ShouldReturnSentToManagerMessage() {
+        long id = 1L;
+        String chatId = "1";
+        String username = "tg_user";
+        String messageText = "Hello";
+        String responseText = "Message sent to manager";
+        Instant now = Instant.now();
+
+        Message message = mock(Message.class);
+        User user = mock(User.class);
+        greencity.entity.user.User internalUser = mock(greencity.entity.user.User.class);
+
+        when(user.getId()).thenReturn(1L);
+        when(user.getUserName()).thenReturn(username);
+        when(message.getFrom()).thenReturn(user);
+        when(message.hasText()).thenReturn(true);
+        when(message.hasPhoto()).thenReturn(false);
+        when(message.getText()).thenReturn(messageText);
+        when(message.getMediaGroupId()).thenReturn(null);
+
+        TelegramChat chat = TelegramChat
+            .builder()
+            .id(id)
+            .chatId(chatId)
+            .user(internalUser)
+            .languageCode(TelegramBotConstants.UK)
+            .unreadMessagesCount(0)
+            .build();
+
+        when(telegramChatRepository.findByChatId(chatId)).thenReturn(Optional.of(chat));
+        when(telegramBotResponseService.getResponseByLangAndMessageType(
+            chat.getLanguageCode(), MessageType.MESSAGE_SENT_TO_MANAGER)).thenReturn(responseText);
+        SendMessage result = telegramSupportService.processSupportMessage(message, chat.getLanguageCode());
+
+        assertTrue(result.getText().contains(responseText));
+        verify(telegramMessageRepository).save(any(TelegramMessage.class));
+        verify(telegramChatProducer).notifyNewMessage(any(TelegramMessageDto.class), anyLong());
+        verify(telegramChatProducer).notifyNewChat(argThat(dto -> dto.getUser() != null &&
+            dto.getLastMessage().getSendAt().truncatedTo(ChronoUnit.SECONDS).equals(now.truncatedTo(ChronoUnit.SECONDS))
+            &&
+            dto.getLastMessage().getText().equals(messageText) &&
+            dto.getLastMessage().getDeliveryStatus() == MessageDeliveryStatus.SENT));
         verify(telegramNotificationService).notifyManagerAboutNewMessagesFromUser(username, messageText, id);
     }
 
