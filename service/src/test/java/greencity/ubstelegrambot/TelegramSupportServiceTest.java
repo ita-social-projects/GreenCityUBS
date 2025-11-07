@@ -10,7 +10,6 @@ import greencity.entity.telegram.TelegramMessage;
 import greencity.enums.ChatState;
 import greencity.enums.MessageDeliveryStatus;
 import greencity.enums.MessageType;
-import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.producers.TelegramChatProducer;
 import greencity.repository.MessageAssetRepository;
