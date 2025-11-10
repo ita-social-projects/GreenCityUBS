@@ -19,6 +19,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -115,6 +116,7 @@ public class UserProfileController {
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content),
     })
+    @PreAuthorize("@preAuthorizer.hasAuthority('EDIT_CLIENT', authentication)")
     @PutMapping("/status/{userId}")
     public ResponseEntity<Void> changeUserStatus(
         @Parameter(hidden = true) @CurrentUserUuid String uuid,
