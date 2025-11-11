@@ -90,7 +90,6 @@ public class TelegramServiceImpl implements TelegramService {
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
     private final MessageAssetRepository messageAssetRepository;
     private final TelegramMessageStatusHandler telegramMessageStatusHandler;
@@ -656,15 +655,6 @@ public class TelegramServiceImpl implements TelegramService {
         TelegramChat createdChat = newChatBuilder.build();
 
         telegramChatRepository.save(createdChat);
-
-        ChatDto chatDto = ChatDto.builder()
-            .id(createdChat.getId())
-            .firstName(createdChat.getFirstName())
-            .lastName(createdChat.getLastName())
-            .unreadMessagesCount(0)
-            .username(createdChat.getUsername()).build();
-
-        telegramChatProducer.notifyNewChat(chatDto);
 
         return resolveProcessorByUuid(uuid, chatId);
     }

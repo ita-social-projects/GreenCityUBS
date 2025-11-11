@@ -2,6 +2,8 @@ package greencity.ubstelegrambot.service;
 
 import greencity.client.config.UserRemoteWebClient;
 import greencity.constant.TelegramBotConstants;
+import greencity.dto.telegram.ChatDto;
+import greencity.dto.telegram.ChatUserDto;
 import greencity.dto.telegram.MessageAssetDto;
 import greencity.dto.telegram.TelegramMessageDto;
 import greencity.entity.telegram.MessageAsset;
@@ -423,6 +425,28 @@ public class TelegramSupportServiceImpl implements TelegramSupportService {
 
         if (previouslySavedMessage.isEmpty()) {
             telegramChatProducer.notifyNewMessage(telegramMessageDto, chat.getId());
+
+            ChatDto.ChatDtoBuilder chatDtoBuilder = ChatDto.builder()
+                .id(chat.getId())
+                .firstName(chat.getFirstName())
+                .lastName(chat.getLastName())
+                .username(chat.getUsername())
+                .lastMessage(telegramMessageDto)
+                .unreadMessagesCount(chat.getUnreadMessagesCount());
+
+            if (chat.getUser() != null) {
+                ChatUserDto chatUserDto = ChatUserDto
+                    .builder()
+                    .firstName(chat.getUser().getRecipientName())
+                    .lastName(chat.getUser().getRecipientSurname())
+                    .email(chat.getUser().getRecipientEmail())
+                    .build();
+
+                chatDtoBuilder
+                    .user(chatUserDto);
+            }
+
+            telegramChatProducer.notifyNewChat(chatDtoBuilder.build());
 
             String contentForNotification = buildContentForNotification(telegramMessage);
 
