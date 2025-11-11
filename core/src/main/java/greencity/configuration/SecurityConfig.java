@@ -254,6 +254,7 @@ public class SecurityConfig {
                     "/notifications/updateTemplateForSITE")
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.PUT,
+                    TELEGRAM_LINK + "/notifications",
                     UBS_LINK + "/update-recipients-data")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE, USER)
                 .requestMatchers(HttpMethod.HEAD,
@@ -295,7 +296,9 @@ public class SecurityConfig {
                     UBS_LINK + "/order-details-for-tariff",
                     UBS_LINK + "/personal-data",
                     UBS_LINK + "/details-for-existing-order/{orderId}",
-                    UBS_LINK + "/orders/{id}/tariff")
+                    UBS_LINK + "/orders/{id}/tariff",
+                    TELEGRAM_LINK + "/notifications"
+                )
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     TELEGRAM_LINK + "/**",
