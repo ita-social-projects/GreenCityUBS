@@ -75,7 +75,6 @@ class WayForPayPropertiesTest {
         assertTrue(logCaptor.getErrorLogs().contains("WayForPaySecret property is empty"));
     }
 
-
     @Test
     void getWayForPayMerchandDomainName_shouldReturnValue_whenPropertyExists() {
         when(environment.getProperty("greencity.wayforpay.merchant.domain.name")).thenReturn("merchantName");
@@ -98,7 +97,6 @@ class WayForPayPropertiesTest {
         assertNull(wayForPayProperties.getWayForPayMerchandDomainName());
         assertTrue(logCaptor.getErrorLogs().contains("MerchantDomainName property is empty"));
     }
-
 
     @Test
     void getWayForPayResultUrl_shouldReturnValue_whenPropertyExists() {
@@ -145,7 +143,6 @@ class WayForPayPropertiesTest {
         assertNull(wayForPayProperties.getWayForPayReturnUrl());
         assertTrue(logCaptor.getErrorLogs().contains("WayForPayReturnUrl property is empty"));
     }
-
 
     @Test
     void getConfirmPageUrl_shouldReturnValue_whenPropertyExists() {

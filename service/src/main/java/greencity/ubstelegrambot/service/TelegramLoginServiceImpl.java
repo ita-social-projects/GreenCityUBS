@@ -76,7 +76,8 @@ public class TelegramLoginServiceImpl implements TelegramLoginService {
         }
 
         try {
-            var response = userRemoteClient.signIn(new TestersSignInRequest(login, password, authorizationProperties.getSignInToken(), "PICKUP"));
+            var response = userRemoteClient
+                .signIn(new TestersSignInRequest(login, password, authorizationProperties.getSignInToken(), "PICKUP"));
 
             var responseBody = response.getBody();
             String name = (responseBody != null && responseBody.name() != null) ? responseBody.name() : USERNAME;

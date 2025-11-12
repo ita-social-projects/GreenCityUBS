@@ -49,6 +49,7 @@ public class UserRemoteClientInterceptor implements RequestInterceptor {
      * @return {@link String} - access token.
      */
     private String createAccessTokenForService() {
-        return String.format(TOKEN_FORMAT, jwtTool.createAccessToken(authorizationProperties.getSystemEmailAddress(), 1));
+        return String.format(TOKEN_FORMAT,
+            jwtTool.createAccessToken(authorizationProperties.getSystemEmailAddress(), 1));
     }
 }
