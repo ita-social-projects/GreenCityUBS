@@ -24,6 +24,6 @@ public class OrderLockProperties {
         if (orderLockDuration == null) {
             log.error("OrderLockDuration property is empty");
         }
-        return orderLockDuration;
+        return orderLockDuration != null ? orderLockDuration : 5;
     }
 }
