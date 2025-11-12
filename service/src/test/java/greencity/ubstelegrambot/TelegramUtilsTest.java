@@ -8,6 +8,7 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageType;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.UnsupportedTelegramAssetException;
+import greencity.properties.TelegramProperties;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.ubstelegrambot.service.TelegramBotResponseServiceImpl;
@@ -47,6 +48,8 @@ class TelegramUtilsTest {
 
     @Mock
     private TelegramBotResponseServiceImpl telegramBotResponseService;
+    @Mock
+    private TelegramProperties telegramProperties;
 
     @Test
     void detectAssetTypeMultipartFile_WithImageContentType_ShouldReturnImage() {

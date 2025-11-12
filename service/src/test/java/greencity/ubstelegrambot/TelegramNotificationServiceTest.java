@@ -3,6 +3,7 @@ package greencity.ubstelegrambot;
 import greencity.constant.TelegramBotConstants;
 import greencity.entity.telegram.TelegramManager;
 import greencity.enums.MessageType;
+import greencity.properties.TelegramProperties;
 import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramLanguageService;
 import greencity.ubstelegrambot.service.TelegramBotResponseServiceImpl;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +41,8 @@ class TelegramNotificationServiceTest {
 
     @Mock
     private TelegramBotResponseServiceImpl telegramBotResponseService;
+    @Mock
+    private TelegramProperties telegramProperties;
 
     private static final String BASE_URL = "http://localhost:8080/";
 
@@ -52,7 +54,6 @@ class TelegramNotificationServiceTest {
 
     @Test
     void testNotifyManagerAboutNewMessagesFromUser_ManagersFound_MessageSent() {
-        ReflectionTestUtils.setField(telegramNotificationService, "baseUrl", BASE_URL);
         String username = "username";
         String messageText = "message";
         Long chatId = 123L;
@@ -66,6 +67,7 @@ class TelegramNotificationServiceTest {
             .chatId("123456711")
             .build();
 
+        when(telegramProperties.getUbsAdminBaseUrl()).thenReturn("baseUrl");
         when(telegramManagerRepository.findAll()).thenReturn(List.of(telegramManager1, telegramManager2));
         when(telegramBotResponseService.getResponseByLangAndMessageType(anyString(),
             eq(MessageType.CLIENT_WANT_TO_SPEAK))).thenReturn("text");
