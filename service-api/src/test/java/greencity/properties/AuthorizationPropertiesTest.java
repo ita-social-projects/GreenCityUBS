@@ -2,6 +2,7 @@ package greencity.properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import greencity.constant.ErrorMessage;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,9 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.env.Environment;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AuthorizationPropertiesTest {
     @Mock
     private Environment environment;
@@ -43,10 +47,11 @@ class AuthorizationPropertiesTest {
         when(environment.getProperty("greencity.authorization.token-key"))
             .thenReturn("");
 
-        String result = authorizationProperties.getAccessTokenKey();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> authorizationProperties.getAccessTokenKey());
 
-        assertEquals("", result);
-        assertTrue(logCaptor.getErrorLogs().contains("Authorization token key not set"));
+        assertEquals(ErrorMessage.JWT_SECRET_KEY_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.JWT_SECRET_KEY_NOT_FOUND));
     }
 
     @Test
@@ -65,10 +70,11 @@ class AuthorizationPropertiesTest {
         when(environment.getProperty("greencity.authorization.service-email"))
             .thenReturn("");
 
-        String result = authorizationProperties.getSystemEmailAddress();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> authorizationProperties.getSystemEmailAddress());
 
-        assertEquals("", result);
-        assertTrue(logCaptor.getErrorLogs().contains("SystemEmailAddress property is empty"));
+        assertEquals(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND));
     }
 
     @Test
@@ -87,9 +93,42 @@ class AuthorizationPropertiesTest {
         when(environment.getProperty("greencity.sing-in.secret-token"))
             .thenReturn("");
 
-        String result = authorizationProperties.getSignInToken();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> authorizationProperties.getSignInToken());
 
-        assertEquals("", result);
-        assertTrue(logCaptor.getErrorLogs().contains("SingInToken property is empty"));
+        assertEquals(ErrorMessage.SIGN_IN_TOKEN_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.SIGN_IN_TOKEN_NOT_FOUND));
+    }
+
+    @Test
+    void validateProperties_shouldLogInfo_whenAllPropertiesValid() {
+        when(environment.getProperty("greencity.authorization.token-key"))
+            .thenReturn("key123");
+        when(environment.getProperty("greencity.authorization.service-email"))
+            .thenReturn("service@greencity.com");
+        when(environment.getProperty("greencity.sing-in.secret-token"))
+            .thenReturn("sign123");
+
+        authorizationProperties.validateProperties();
+
+        assertTrue(logCaptor.getInfoLogs()
+            .contains("All authorization properties validated successfully."));
+        assertTrue(logCaptor.getErrorLogs().isEmpty());
+    }
+
+    @Test
+    void validateProperties_shouldThrowException_whenAnyPropertyInvalid() {
+        when(environment.getProperty("greencity.authorization.token-key"))
+            .thenReturn("key123");
+        when(environment.getProperty("greencity.authorization.service-email"))
+            .thenReturn("");
+        when(environment.getProperty("greencity.sing-in.secret-token"))
+            .thenReturn("sign123");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> authorizationProperties.validateProperties());
+
+        assertEquals(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND));
     }
 }

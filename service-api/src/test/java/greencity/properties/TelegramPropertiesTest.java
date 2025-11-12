@@ -3,6 +3,7 @@ package greencity.properties;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import greencity.constant.ErrorMessage;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +11,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.env.Environment;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class TelegramPropertiesTest {
 
     @Mock
@@ -45,10 +49,11 @@ class TelegramPropertiesTest {
         when(environment.getProperty("greencity.bots.ubs-bot-name"))
             .thenReturn("");
 
-        String result = telegramProperties.getTelegramBotName();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> telegramProperties.getTelegramBotName());
 
-        assertEquals("", result);
-        assertTrue(logCaptor.getErrorLogs().contains("The greencity bots name is empty"));
+        assertEquals(ErrorMessage.TELEGRAM_BOT_NAME_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.TELEGRAM_BOT_NAME_NOT_FOUND));
     }
 
     @Test
@@ -56,10 +61,11 @@ class TelegramPropertiesTest {
         when(environment.getProperty("greencity.bots.ubs-bot-name"))
             .thenReturn(null);
 
-        String result = telegramProperties.getTelegramBotName();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> telegramProperties.getTelegramBotName());
 
-        assertNull(result);
-        assertTrue(logCaptor.getErrorLogs().contains("The greencity bots name is empty"));
+        assertEquals(ErrorMessage.TELEGRAM_BOT_NAME_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.TELEGRAM_BOT_NAME_NOT_FOUND));
     }
 
     @Test
@@ -78,10 +84,11 @@ class TelegramPropertiesTest {
         when(environment.getProperty("greencity.bots.ubs-bot-token"))
             .thenReturn("");
 
-        String result = telegramProperties.getTelegramBotToken();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> telegramProperties.getTelegramBotToken());
 
-        assertEquals("", result);
-        assertTrue(logCaptor.getErrorLogs().contains("The greencity bots token is empty"));
+        assertEquals(ErrorMessage.TELEGRAM_BOT_TOKEN_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.TELEGRAM_BOT_TOKEN_NOT_FOUND));
     }
 
     @Test
@@ -89,10 +96,11 @@ class TelegramPropertiesTest {
         when(environment.getProperty("greencity.bots.ubs-bot-token"))
             .thenReturn(null);
 
-        String result = telegramProperties.getTelegramBotToken();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> telegramProperties.getTelegramBotToken());
 
-        assertNull(result);
-        assertTrue(logCaptor.getErrorLogs().contains("The greencity bots token is empty"));
+        assertEquals(ErrorMessage.TELEGRAM_BOT_TOKEN_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.TELEGRAM_BOT_TOKEN_NOT_FOUND));
     }
 
     @Test
@@ -111,10 +119,11 @@ class TelegramPropertiesTest {
         when(environment.getProperty("greencity.bots.ubs-bot-ui"))
             .thenReturn("");
 
-        String result = telegramProperties.getUbsAdminBaseUrl();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> telegramProperties.getUbsAdminBaseUrl());
 
-        assertEquals("", result);
-        assertTrue(logCaptor.getErrorLogs().contains("The greencity admin base url is empty"));
+        assertEquals(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND));
     }
 
     @Test
@@ -122,9 +131,42 @@ class TelegramPropertiesTest {
         when(environment.getProperty("greencity.bots.ubs-bot-ui"))
             .thenReturn(null);
 
-        String result = telegramProperties.getUbsAdminBaseUrl();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> telegramProperties.getUbsAdminBaseUrl());
 
-        assertNull(result);
-        assertTrue(logCaptor.getErrorLogs().contains("The greencity admin base url is empty"));
+        assertEquals(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND));
+    }
+
+    @Test
+    void validateProperties_shouldLogInfo_whenAllPropertiesValid() {
+        when(environment.getProperty("greencity.bots.ubs-bot-name"))
+            .thenReturn("name");
+        when(environment.getProperty("greencity.bots.ubs-bot-token"))
+            .thenReturn("token");
+        when(environment.getProperty("greencity.bots.ubs-bot-ui"))
+            .thenReturn("url");
+
+        telegramProperties.validateProperties();
+
+        assertTrue(logCaptor.getInfoLogs()
+            .contains("All Telegram properties validated successfully."));
+        assertTrue(logCaptor.getErrorLogs().isEmpty());
+    }
+
+    @Test
+    void validateProperties_shouldThrowException_whenAnyPropertyInvalid() {
+        when(environment.getProperty("greencity.bots.ubs-bot-name"))
+            .thenReturn("name");
+        when(environment.getProperty("greencity.bots.ubs-bot-token"))
+            .thenReturn("");
+        when(environment.getProperty("greencity.bots.ubs-bot-ui"))
+            .thenReturn("url");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> telegramProperties.validateProperties());
+
+        assertEquals(ErrorMessage.TELEGRAM_BOT_TOKEN_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.TELEGRAM_BOT_TOKEN_NOT_FOUND));
     }
 }

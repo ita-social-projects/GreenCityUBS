@@ -3,6 +3,7 @@ package greencity.properties;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import greencity.constant.ErrorMessage;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +11,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.env.Environment;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class RemoteWebClientPropertiesTest {
     @Mock
     private Environment environment;
@@ -44,10 +48,11 @@ class RemoteWebClientPropertiesTest {
         when(environment.getProperty("greencity.redirect.user-server-address"))
             .thenReturn("");
 
-        String result = remoteWebClientProperties.getGreenCityUserAddress();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> remoteWebClientProperties.getGreenCityUserAddress());
 
-        assertEquals("", result);
-        assertTrue(logCaptor.getErrorLogs().contains("The redirect user server address is empty"));
+        assertEquals(ErrorMessage.USER_SERVER_ADDRESS_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.USER_SERVER_ADDRESS_NOT_FOUND));
     }
 
     @Test
@@ -66,10 +71,11 @@ class RemoteWebClientPropertiesTest {
         when(environment.getProperty("webclient.connection-timeout-millis", Integer.class))
             .thenReturn(null);
 
-        Integer result = remoteWebClientProperties.getWebClientConnectTimeout();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> remoteWebClientProperties.getWebClientConnectTimeout());
 
-        assertNull(result);
-        assertTrue(logCaptor.getErrorLogs().contains("The webclient connection timeout is empty"));
+        assertEquals(ErrorMessage.WEB_CLIENT_CONNECTION_TIMEOUT_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WEB_CLIENT_CONNECTION_TIMEOUT_NOT_FOUND));
     }
 
     @Test
@@ -88,9 +94,42 @@ class RemoteWebClientPropertiesTest {
         when(environment.getProperty("webclient.response-timeout-millis", Integer.class))
             .thenReturn(null);
 
-        Integer result = remoteWebClientProperties.getWebClientResponseTimeout();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> remoteWebClientProperties.getWebClientResponseTimeout());
 
-        assertNull(result);
-        assertTrue(logCaptor.getErrorLogs().contains("The webclient response timeout is empty"));
+        assertEquals(ErrorMessage.WEB_CLIENT_RESPONSE_TIMEOUT_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WEB_CLIENT_RESPONSE_TIMEOUT_NOT_FOUND));
+    }
+
+    @Test
+    void validateProperties_shouldLogInfo_whenAllPropertiesValid() {
+        when(environment.getProperty("greencity.redirect.user-server-address"))
+            .thenReturn("user-url");
+        when(environment.getProperty("webclient.connection-timeout-millis", Integer.class))
+            .thenReturn(2);
+        when(environment.getProperty("webclient.response-timeout-millis", Integer.class))
+            .thenReturn(5);
+
+        remoteWebClientProperties.validateProperties();
+
+        assertTrue(logCaptor.getInfoLogs()
+            .contains("All Remote Web Client properties validated successfully."));
+        assertTrue(logCaptor.getErrorLogs().isEmpty());
+    }
+
+    @Test
+    void validateProperties_shouldThrowException_whenAnyPropertyInvalid() {
+        when(environment.getProperty("greencity.redirect.user-server-address"))
+            .thenReturn("user-url");
+        when(environment.getProperty("webclient.connection-timeout-millis", Integer.class))
+            .thenReturn(null);
+        when(environment.getProperty("webclient.response-timeout-millis", Integer.class))
+            .thenReturn(5);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> remoteWebClientProperties.validateProperties());
+
+        assertEquals(ErrorMessage.WEB_CLIENT_CONNECTION_TIMEOUT_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WEB_CLIENT_CONNECTION_TIMEOUT_NOT_FOUND));
     }
 }

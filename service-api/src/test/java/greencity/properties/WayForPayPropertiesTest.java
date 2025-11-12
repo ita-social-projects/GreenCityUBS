@@ -3,6 +3,7 @@ package greencity.properties;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import greencity.constant.ErrorMessage;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,14 +43,11 @@ class WayForPayPropertiesTest {
     @Test
     void getWayForPayLogin_shouldLogError_whenPropertyEmpty() {
         when(environment.getProperty("greencity.wayforpay.login")).thenReturn("");
-        assertEquals("", wayForPayProperties.getWayForPayLogin());
-        assertTrue(logCaptor.getErrorLogs().contains("WayForPayLogin property is empty"));
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> wayForPayProperties.getWayForPayLogin());
 
-        logCaptor.clearLogs();
-
-        when(environment.getProperty("greencity.wayforpay.login")).thenReturn(null);
-        assertNull(wayForPayProperties.getWayForPayLogin());
-        assertTrue(logCaptor.getErrorLogs().contains("WayForPayLogin property is empty"));
+        assertEquals(ErrorMessage.WAYFORPAY_LOGIN_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WAYFORPAY_LOGIN_NOT_FOUND));
     }
 
     @Test
@@ -65,14 +63,11 @@ class WayForPayPropertiesTest {
     @Test
     void getWayForPaySecret_shouldLogError_whenPropertyEmpty() {
         when(environment.getProperty("greencity.wayforpay.secret")).thenReturn("");
-        assertEquals("", wayForPayProperties.getWayForPaySecret());
-        assertTrue(logCaptor.getErrorLogs().contains("WayForPaySecret property is empty"));
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> wayForPayProperties.getWayForPaySecret());
 
-        logCaptor.clearLogs();
-
-        when(environment.getProperty("greencity.wayforpay.secret")).thenReturn(null);
-        assertNull(wayForPayProperties.getWayForPaySecret());
-        assertTrue(logCaptor.getErrorLogs().contains("WayForPaySecret property is empty"));
+        assertEquals(ErrorMessage.WAYFORPAY_SECRET_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WAYFORPAY_SECRET_NOT_FOUND));
     }
 
     @Test
@@ -88,14 +83,11 @@ class WayForPayPropertiesTest {
     @Test
     void getWayForPayMerchandDomainName_shouldLogError_whenPropertyEmpty() {
         when(environment.getProperty("greencity.wayforpay.merchant.domain.name")).thenReturn("");
-        assertEquals("", wayForPayProperties.getWayForPayMerchandDomainName());
-        assertTrue(logCaptor.getErrorLogs().contains("MerchantDomainName property is empty"));
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> wayForPayProperties.getWayForPayMerchandDomainName());
 
-        logCaptor.clearLogs();
-
-        when(environment.getProperty("greencity.wayforpay.merchant.domain.name")).thenReturn(null);
-        assertNull(wayForPayProperties.getWayForPayMerchandDomainName());
-        assertTrue(logCaptor.getErrorLogs().contains("MerchantDomainName property is empty"));
+        assertEquals(ErrorMessage.WAYFORPAY_MERCHANT_DOMAIN_NAME_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WAYFORPAY_MERCHANT_DOMAIN_NAME_NOT_FOUND));
     }
 
     @Test
@@ -111,14 +103,11 @@ class WayForPayPropertiesTest {
     @Test
     void getWayForPayResultUrl_shouldLogError_whenPropertyEmpty() {
         when(environment.getProperty("greencity.redirect.result-way-for-pay-url")).thenReturn("");
-        assertEquals("", wayForPayProperties.getWayForPayResultUrl());
-        assertTrue(logCaptor.getErrorLogs().contains("WayForPayResultUrl property is empty"));
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> wayForPayProperties.getWayForPayResultUrl());
 
-        logCaptor.clearLogs();
-
-        when(environment.getProperty("greencity.redirect.result-way-for-pay-url")).thenReturn(null);
-        assertNull(wayForPayProperties.getWayForPayResultUrl());
-        assertTrue(logCaptor.getErrorLogs().contains("WayForPayResultUrl property is empty"));
+        assertEquals(ErrorMessage.WAYFORPAY_RESULT_URL_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WAYFORPAY_RESULT_URL_NOT_FOUND));
     }
 
     @Test
@@ -134,14 +123,11 @@ class WayForPayPropertiesTest {
     @Test
     void getWayForPayReturnUrl_shouldLogError_whenPropertyEmpty() {
         when(environment.getProperty("greencity.redirect.green-city-client")).thenReturn("");
-        assertEquals("", wayForPayProperties.getWayForPayReturnUrl());
-        assertTrue(logCaptor.getErrorLogs().contains("WayForPayReturnUrl property is empty"));
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> wayForPayProperties.getWayForPayReturnUrl());
 
-        logCaptor.clearLogs();
-
-        when(environment.getProperty("greencity.redirect.green-city-client")).thenReturn(null);
-        assertNull(wayForPayProperties.getWayForPayReturnUrl());
-        assertTrue(logCaptor.getErrorLogs().contains("WayForPayReturnUrl property is empty"));
+        assertEquals(ErrorMessage.WAYFORPAY_RETURN_URL_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WAYFORPAY_RETURN_URL_NOT_FOUND));
     }
 
     @Test
@@ -157,13 +143,54 @@ class WayForPayPropertiesTest {
     @Test
     void getConfirmPageUrl_shouldLogError_whenPropertyEmpty() {
         when(environment.getProperty("redirect.confirm-page")).thenReturn("");
-        assertEquals("", wayForPayProperties.getConfirmPageUrl());
-        assertTrue(logCaptor.getErrorLogs().contains("ConfirmPageUrl property is empty"));
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> wayForPayProperties.getConfirmPageUrl());
 
-        logCaptor.clearLogs();
+        assertEquals(ErrorMessage.WAYFORPAY_CONFIRM_PAGE_URL_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WAYFORPAY_CONFIRM_PAGE_URL_NOT_FOUND));
+    }
 
-        when(environment.getProperty("redirect.confirm-page")).thenReturn(null);
-        assertNull(wayForPayProperties.getConfirmPageUrl());
-        assertTrue(logCaptor.getErrorLogs().contains("ConfirmPageUrl property is empty"));
+    @Test
+    void validateProperties_shouldLogInfo_whenAllPropertiesValid() {
+        when(environment.getProperty("greencity.wayforpay.login"))
+            .thenReturn("login");
+        when(environment.getProperty("greencity.wayforpay.secret"))
+            .thenReturn("secret");
+        when(environment.getProperty("greencity.wayforpay.merchant.domain.name"))
+            .thenReturn("domain-name");
+        when(environment.getProperty("greencity.redirect.result-way-for-pay-url"))
+            .thenReturn("result-url");
+        when(environment.getProperty("greencity.redirect.green-city-client"))
+            .thenReturn("return-url");
+        when(environment.getProperty("redirect.confirm-page"))
+            .thenReturn("confirm-page");
+
+        wayForPayProperties.validateProperties();
+
+        assertTrue(logCaptor.getInfoLogs()
+            .contains("All WayForPay properties validated successfully."));
+        assertTrue(logCaptor.getErrorLogs().isEmpty());
+    }
+
+    @Test
+    void validateProperties_shouldThrowException_whenAnyPropertyInvalid() {
+        when(environment.getProperty("greencity.wayforpay.login"))
+            .thenReturn("login");
+        when(environment.getProperty("greencity.wayforpay.secret"))
+            .thenReturn("secret");
+        when(environment.getProperty("greencity.wayforpay.merchant.domain.name"))
+            .thenReturn("domain-name");
+        when(environment.getProperty("greencity.redirect.result-way-for-pay-url"))
+            .thenReturn("result-url");
+        when(environment.getProperty("greencity.redirect.green-city-client"))
+            .thenReturn("return-url");
+        when(environment.getProperty("redirect.confirm-page"))
+            .thenReturn("");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> wayForPayProperties.validateProperties());
+
+        assertEquals(ErrorMessage.WAYFORPAY_CONFIRM_PAGE_URL_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.WAYFORPAY_CONFIRM_PAGE_URL_NOT_FOUND));
     }
 }

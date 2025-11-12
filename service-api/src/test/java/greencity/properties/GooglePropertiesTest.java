@@ -2,6 +2,7 @@ package greencity.properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import greencity.constant.ErrorMessage;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,10 +44,11 @@ class GooglePropertiesTest {
         when(environment.getProperty("greencity.authorization.googleApiKey"))
             .thenReturn("");
 
-        String result = googleProperties.getGoogleApiKey();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> googleProperties.getGoogleApiKey());
 
-        assertEquals("", result);
-        assertTrue(logCaptor.getErrorLogs().contains("Google API Key not set"));
+        assertEquals(ErrorMessage.GOOGLE_API_KEY_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GOOGLE_API_KEY_NOT_FOUND));
     }
 
     @Test
@@ -54,9 +56,34 @@ class GooglePropertiesTest {
         when(environment.getProperty("greencity.authorization.googleApiKey"))
             .thenReturn(null);
 
-        String result = googleProperties.getGoogleApiKey();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> googleProperties.getGoogleApiKey());
 
-        assertNull(result);
-        assertTrue(logCaptor.getErrorLogs().contains("Google API Key not set"));
+        assertEquals(ErrorMessage.GOOGLE_API_KEY_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GOOGLE_API_KEY_NOT_FOUND));
+    }
+
+    @Test
+    void validateProperties_shouldLogInfo_whenAllPropertiesValid() {
+        when(environment.getProperty("greencity.authorization.googleApiKey"))
+            .thenReturn("key123");
+
+        googleProperties.validateProperties();
+
+        assertTrue(logCaptor.getInfoLogs()
+            .contains("All Google properties validated successfully."));
+        assertTrue(logCaptor.getErrorLogs().isEmpty());
+    }
+
+    @Test
+    void validateProperties_shouldThrowException_whenAnyPropertyInvalid() {
+        when(environment.getProperty("greencity.authorization.googleApiKey"))
+            .thenReturn("");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> googleProperties.validateProperties());
+
+        assertEquals(ErrorMessage.GOOGLE_API_KEY_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GOOGLE_API_KEY_NOT_FOUND));
     }
 }

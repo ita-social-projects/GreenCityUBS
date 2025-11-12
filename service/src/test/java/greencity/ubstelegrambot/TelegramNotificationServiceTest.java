@@ -44,8 +44,6 @@ class TelegramNotificationServiceTest {
     @Mock
     private TelegramProperties telegramProperties;
 
-    private static final String BASE_URL = "http://localhost:8080/";
-
     @BeforeEach
     void setUp() {
         lenient().when(telegramLanguageService.getChatLanguage(anyString()))

@@ -2,6 +2,7 @@ package greencity.properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import greencity.constant.ErrorMessage;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,9 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.env.Environment;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class OrderLockPropertiesTest {
 
     @Mock
@@ -44,9 +48,34 @@ class OrderLockPropertiesTest {
         when(environment.getProperty("order.lock.duration.minutes", Integer.class))
             .thenReturn(null);
 
-        int result = orderLockProperties.getOrderLockDuration();
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> orderLockProperties.getOrderLockDuration());
 
-        assertEquals(5, result);
-        assertTrue(logCaptor.getErrorLogs().contains("OrderLockDuration property is empty"));
+        assertEquals(ErrorMessage.ORDER_LOCK_DURATION_MINUTES_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.ORDER_LOCK_DURATION_MINUTES_NOT_FOUND));
+    }
+
+    @Test
+    void validateProperties_shouldLogInfo_whenAllPropertiesValid() {
+        when(environment.getProperty("order.lock.duration.minutes", Integer.class))
+            .thenReturn(7);
+
+        orderLockProperties.validateProperties();
+
+        assertTrue(logCaptor.getInfoLogs()
+            .contains("All authorization properties validated successfully."));
+        assertTrue(logCaptor.getErrorLogs().isEmpty());
+    }
+
+    @Test
+    void validateProperties_shouldThrowException_whenAnyPropertyInvalid() {
+        when(environment.getProperty("order.lock.duration.minutes", Integer.class))
+            .thenReturn(null);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> orderLockProperties.validateProperties());
+
+        assertEquals(ErrorMessage.ORDER_LOCK_DURATION_MINUTES_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.ORDER_LOCK_DURATION_MINUTES_NOT_FOUND));
     }
 }
