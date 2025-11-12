@@ -8,12 +8,13 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.GreenCityUserServiceException;
 import greencity.exceptions.JsonParsingException;
 import greencity.exceptions.NotFoundException;
+import greencity.properties.AuthorizationProperties;
+import greencity.properties.RemoteWebClientProperties;
 import greencity.security.JwtTool;
 import io.netty.channel.ChannelOption;
 import java.net.URI;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -35,24 +36,13 @@ public class UserRemoteWebClientConfig {
     private static final String EMAIL_QUERY_PARAMETER = "email";
     private static final String PLUS_SYMBOL = "+";
     private static final String ENCODED_PLUS_SYMBOL = "%2B";
-
-    @Value("${greencity.redirect.user-server-address}")
-    private String greenCityUserBaseUrl;
-
-    @Value("${greencity.authorization.service-email}")
-    private String systemEmail;
-
-    @Value("${webclient.connection-timeout-millis}")
-    private Integer connectionTimeoutMillis;
-
-    @Value("${webclient.response-timeout-millis}")
-    private Integer responseTimeoutMillis;
-
+    private final RemoteWebClientProperties remoteWebClientProperties;
+    private final AuthorizationProperties authorizationProperties;
     private final JwtTool jwtTool;
 
     @Bean
     public WebClient webClient(WebClient.Builder builder) {
-        return builder.baseUrl(greenCityUserBaseUrl)
+        return builder.baseUrl(remoteWebClientProperties.getGreenCityUserAddress())
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .filter(authorizationHeaderFilter())
             .filter(handlingWebClientExceptions())
@@ -60,14 +50,14 @@ public class UserRemoteWebClientConfig {
             .clientConnector(
                 new ReactorClientHttpConnector(
                     HttpClient.create()
-                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeoutMillis)
-                        .responseTimeout(Duration.ofMillis(responseTimeoutMillis))))
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, remoteWebClientProperties.getWebClientConnectTimeout())
+                        .responseTimeout(Duration.ofMillis(remoteWebClientProperties.getWebClientResponseTimeout()))))
             .build();
     }
 
     private ExchangeFilterFunction authorizationHeaderFilter() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            String jwt = jwtTool.createAccessToken(systemEmail, 1);
+            String jwt = jwtTool.createAccessToken(authorizationProperties.getSystemEmailAddress(), 1);
             String authHeader = AppConstant.TOKEN_PREFIX + jwt;
 
             ClientRequest authorizedRequest = ClientRequest.from(clientRequest)
