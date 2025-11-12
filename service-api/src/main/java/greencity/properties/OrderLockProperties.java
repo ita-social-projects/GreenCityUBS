@@ -1,5 +1,7 @@
 package greencity.properties;
 
+import greencity.constant.ErrorMessage;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
@@ -19,11 +21,18 @@ import org.springframework.util.StringUtils;
 public class OrderLockProperties {
     private final Environment environment;
 
+    @PostConstruct
+    public void validateProperties() {
+        getOrderLockDuration();
+        log.info("All OrderLock properties validated successfully.");
+    }
+
     public int getOrderLockDuration() {
         Integer orderLockDuration = environment.getProperty("order.lock.duration.minutes", Integer.class);
         if (orderLockDuration == null) {
-            log.error("OrderLockDuration property is empty");
+            log.error(ErrorMessage.ORDER_LOCK_DURATION_MINUTES_NOT_FOUND);
+            throw new IllegalStateException(ErrorMessage.ORDER_LOCK_DURATION_MINUTES_NOT_FOUND);
         }
-        return orderLockDuration != null ? orderLockDuration : 5;
+        return orderLockDuration;
     }
 }

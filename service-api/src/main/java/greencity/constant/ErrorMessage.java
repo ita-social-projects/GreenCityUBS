@@ -218,4 +218,21 @@ public class ErrorMessage {
     public static final String ORDER_ADDRESS_NOT_FOUND_BY_ID = "OrderAddress not found with id: ";
     public static final String TELEGRAM_CHAT_NOT_FOUND_BY_ID = "TelegramChat not found with id: ";
     public static final String USER_HAS_NO_ORDERS = "User has no orders";
+    public static final String GOOGLE_API_KEY_NOT_FOUND = "Google API Key not set";
+    public static final String JWT_SECRET_KEY_NOT_FOUND = "Authorization token key not set";
+    public static final String SYSTEM_EMAIL_ADDRES_NOT_FOUND = "SystemEmailAddress property is empty";
+    public static final String SIGN_IN_TOKEN_NOT_FOUND = "SignIn token key not set";
+    public static final String ORDER_LOCK_DURATION_MINUTES_NOT_FOUND = "OrderLockDuration property is empty";
+    public static final String USER_SERVER_ADDRESS_NOT_FOUND = "The redirect user server address is empty";
+    public static final String WEB_CLIENT_CONNECTION_TIMEOUT_NOT_FOUND = "The webclient connection timeout is empty";
+    public static final String WEB_CLIENT_RESPONSE_TIMEOUT_NOT_FOUND = "The webclient response timeout is empty";
+    public static final String TELEGRAM_BOT_NAME_NOT_FOUND = "The greencity bots name is empty";
+    public static final String TELEGRAM_BOT_TOKEN_NOT_FOUND = "The greencity bots token is empty";
+    public static final String GREENCITY_ADMIN_BASE_USR_NOT_FOUND = "The greencity admin base url is empty";
+    public static final String WAYFORPAY_LOGIN_NOT_FOUND = "WayForPayLogin property is empty";
+    public static final String WAYFORPAY_SECRET_NOT_FOUND = "WayForPaySecret property is empty";
+    public static final String WAYFORPAY_MERCHANT_DOMAIN_NAME_NOT_FOUND = "MerchantDomainName property is empty";
+    public static final String WAYFORPAY_RESULT_URL_NOT_FOUND = "WayForPayResultUrl property is empty";
+    public static final String WAYFORPAY_RETURN_URL_NOT_FOUND = "WayForPayReturnUrl property is empty";
+    public static final String WAYFORPAY_CONFIRM_PAGE_URL_NOT_FOUND = "ConfirmPageUrl property is empty";
 }

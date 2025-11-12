@@ -1,5 +1,7 @@
 package greencity.properties;
 
+import greencity.constant.ErrorMessage;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
@@ -19,10 +21,19 @@ import org.springframework.util.StringUtils;
 public class AuthorizationProperties {
     private final Environment environment;
 
+    @PostConstruct
+    public void validateProperties() {
+        getAccessTokenKey();
+        getSystemEmailAddress();
+        getSignInToken();
+        log.info("All authorization properties validated successfully.");
+    }
+
     public String getAccessTokenKey() {
         String accessTokenKey = environment.getProperty("greencity.authorization.token-key");
         if (!StringUtils.hasText(accessTokenKey)) {
-            log.error("Authorization token key not set");
+            log.error(ErrorMessage.JWT_SECRET_KEY_NOT_FOUND);
+            throw new IllegalStateException(ErrorMessage.JWT_SECRET_KEY_NOT_FOUND);
         }
         return accessTokenKey;
     }
@@ -30,7 +41,8 @@ public class AuthorizationProperties {
     public String getSystemEmailAddress() {
         String systemEmailAddress = environment.getProperty("greencity.authorization.service-email");
         if (!StringUtils.hasText(systemEmailAddress)) {
-            log.error("SystemEmailAddress property is empty");
+            log.error(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND);
+            throw new IllegalStateException(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND);
         }
         return systemEmailAddress;
     }
@@ -38,7 +50,8 @@ public class AuthorizationProperties {
     public String getSignInToken() {
         String signIntoken = environment.getProperty("greencity.sing-in.secret-token");
         if (!StringUtils.hasText(signIntoken)) {
-            log.error("SingInToken property is empty");
+            log.error(ErrorMessage.SIGN_IN_TOKEN_NOT_FOUND);
+            throw new IllegalStateException(ErrorMessage.SIGN_IN_TOKEN_NOT_FOUND);
         }
         return signIntoken;
     }
