@@ -63,7 +63,7 @@ class OrderLockPropertiesTest {
         orderLockProperties.validateProperties();
 
         assertTrue(logCaptor.getInfoLogs()
-            .contains("All authorization properties validated successfully."));
+            .contains("All OrderLock properties validated successfully."));
         assertTrue(logCaptor.getErrorLogs().isEmpty());
     }
 
