@@ -73,13 +73,13 @@ class AuthorizationPropertiesTest {
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> authorizationProperties.getSystemEmailAddress());
 
-        assertEquals(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND, exception.getMessage());
-        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND));
+        assertEquals(ErrorMessage.SYSTEM_EMAIL_ADDRESS_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.SYSTEM_EMAIL_ADDRESS_NOT_FOUND));
     }
 
     @Test
     void getSignInToken_shouldReturnValue_whenExists() {
-        when(environment.getProperty("greencity.sing-in.secret-token"))
+        when(environment.getProperty("greencity.sign-in.secret-token"))
             .thenReturn("super-secret");
 
         String result = authorizationProperties.getSignInToken();
@@ -90,7 +90,7 @@ class AuthorizationPropertiesTest {
 
     @Test
     void getSignInToken_shouldLogError_whenEmpty() {
-        when(environment.getProperty("greencity.sing-in.secret-token"))
+        when(environment.getProperty("greencity.sign-in.secret-token"))
             .thenReturn("");
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
@@ -106,7 +106,7 @@ class AuthorizationPropertiesTest {
             .thenReturn("key123");
         when(environment.getProperty("greencity.authorization.service-email"))
             .thenReturn("service@greencity.com");
-        when(environment.getProperty("greencity.sing-in.secret-token"))
+        when(environment.getProperty("greencity.sign-in.secret-token"))
             .thenReturn("sign123");
 
         authorizationProperties.validateProperties();
@@ -122,13 +122,13 @@ class AuthorizationPropertiesTest {
             .thenReturn("key123");
         when(environment.getProperty("greencity.authorization.service-email"))
             .thenReturn("");
-        when(environment.getProperty("greencity.sing-in.secret-token"))
+        when(environment.getProperty("greencity.sign-in.secret-token"))
             .thenReturn("sign123");
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> authorizationProperties.validateProperties());
 
-        assertEquals(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND, exception.getMessage());
-        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND));
+        assertEquals(ErrorMessage.SYSTEM_EMAIL_ADDRESS_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.SYSTEM_EMAIL_ADDRESS_NOT_FOUND));
     }
 }

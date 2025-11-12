@@ -50,8 +50,8 @@ public class TelegramProperties {
     public String getUbsAdminBaseUrl() {
         String ubsAdminBaseUrl = environment.getProperty("greencity.bots.ubs-bot-ui");
         if (!StringUtils.hasText(ubsAdminBaseUrl)) {
-            log.error(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND);
-            throw new IllegalStateException(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND);
+            log.error(ErrorMessage.GREENCITY_ADMIN_BASE_URL_NOT_FOUND);
+            throw new IllegalStateException(ErrorMessage.GREENCITY_ADMIN_BASE_URL_NOT_FOUND);
         }
         return ubsAdminBaseUrl;
     }

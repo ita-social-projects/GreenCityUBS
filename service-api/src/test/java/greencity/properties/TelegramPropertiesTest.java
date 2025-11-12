@@ -122,8 +122,8 @@ class TelegramPropertiesTest {
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> telegramProperties.getUbsAdminBaseUrl());
 
-        assertEquals(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND, exception.getMessage());
-        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND));
+        assertEquals(ErrorMessage.GREENCITY_ADMIN_BASE_URL_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GREENCITY_ADMIN_BASE_URL_NOT_FOUND));
     }
 
     @Test
@@ -134,8 +134,8 @@ class TelegramPropertiesTest {
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> telegramProperties.getUbsAdminBaseUrl());
 
-        assertEquals(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND, exception.getMessage());
-        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GREENCITY_ADMIN_BASE_USR_NOT_FOUND));
+        assertEquals(ErrorMessage.GREENCITY_ADMIN_BASE_URL_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.GREENCITY_ADMIN_BASE_URL_NOT_FOUND));
     }
 
     @Test

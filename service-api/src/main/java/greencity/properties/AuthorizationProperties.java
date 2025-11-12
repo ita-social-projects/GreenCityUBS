@@ -41,14 +41,14 @@ public class AuthorizationProperties {
     public String getSystemEmailAddress() {
         String systemEmailAddress = environment.getProperty("greencity.authorization.service-email");
         if (!StringUtils.hasText(systemEmailAddress)) {
-            log.error(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND);
-            throw new IllegalStateException(ErrorMessage.SYSTEM_EMAIL_ADDRES_NOT_FOUND);
+            log.error(ErrorMessage.SYSTEM_EMAIL_ADDRESS_NOT_FOUND);
+            throw new IllegalStateException(ErrorMessage.SYSTEM_EMAIL_ADDRESS_NOT_FOUND);
         }
         return systemEmailAddress;
     }
 
     public String getSignInToken() {
-        String signIntoken = environment.getProperty("greencity.sing-in.secret-token");
+        String signIntoken = environment.getProperty("greencity.sign-in.secret-token");
         if (!StringUtils.hasText(signIntoken)) {
             log.error(ErrorMessage.SIGN_IN_TOKEN_NOT_FOUND);
             throw new IllegalStateException(ErrorMessage.SIGN_IN_TOKEN_NOT_FOUND);
