@@ -50,7 +50,8 @@ public class UserRemoteWebClientConfig {
             .clientConnector(
                 new ReactorClientHttpConnector(
                     HttpClient.create()
-                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, remoteWebClientProperties.getWebClientConnectTimeout())
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+                            remoteWebClientProperties.getWebClientConnectTimeout())
                         .responseTimeout(Duration.ofMillis(remoteWebClientProperties.getWebClientResponseTimeout()))))
             .build();
     }

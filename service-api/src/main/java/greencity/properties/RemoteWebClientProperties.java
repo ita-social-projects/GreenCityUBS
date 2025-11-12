@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Сlass for retrieving configuration values from the runtime environment.
- * Used to access dynamic properties.
- * Provides a flexible alternative to @Value, always getting the latest values
- * without having to restart the application or use /actuator/refresh.
+ * Сlass for retrieving configuration values from the runtime environment. Used
+ * to access dynamic properties. Provides a flexible alternative to @Value,
+ * always getting the latest values without having to restart the application or
+ * use /actuator/refresh.
  */
 
 @Component
@@ -19,25 +19,25 @@ import org.springframework.util.StringUtils;
 public class RemoteWebClientProperties {
     private final Environment environment;
 
-    public String getGreenCityUserAddress(){
+    public String getGreenCityUserAddress() {
         String address = environment.getProperty("greencity.redirect.user-server-address");
-        if (!StringUtils.hasText(address)){
+        if (!StringUtils.hasText(address)) {
             log.error("The redirect user server address is empty");
         }
         return address;
     }
 
-    public Integer getWebClientConnectTimeout(){
+    public Integer getWebClientConnectTimeout() {
         Integer connectionTimeout = environment.getProperty("webclient.connection-timeout-millis", Integer.class);
-        if (connectionTimeout == null){
+        if (connectionTimeout == null) {
             log.error("The webclient connection timeout is empty");
         }
         return connectionTimeout;
     }
 
-    public Integer getWebClientResponseTimeout(){
+    public Integer getWebClientResponseTimeout() {
         Integer responseTimeout = environment.getProperty("webclient.response-timeout-millis", Integer.class);
-        if (responseTimeout == null){
+        if (responseTimeout == null) {
             log.error("The webclient response timeout is empty");
         }
         return responseTimeout;

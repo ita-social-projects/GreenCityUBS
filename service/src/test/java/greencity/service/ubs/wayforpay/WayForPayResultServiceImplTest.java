@@ -13,6 +13,7 @@ import greencity.constant.AppConstant;
 import greencity.dto.payment.PaymentResponseDto;
 import greencity.dto.payment.PaymentResponseWayForPay;
 import greencity.entity.order.Order;
+import greencity.properties.WayForPayProperties;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.payment.PaymentStatusHandlerService;
 import greencity.util.EncryptionUtil;
@@ -30,9 +31,11 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class WayForPayResultServiceImplTest {
     @Mock
     private ObjectMapper objectMapper;
@@ -42,13 +45,15 @@ class WayForPayResultServiceImplTest {
     private OrderRepository orderRepository;
     @Mock
     private PaymentStatusHandlerService paymentStatusHandlerService;
+    @Mock
+    private WayForPayProperties wayForPayProperties;
 
     @InjectMocks
     private WayForPayResultServiceImpl wayForPayResultService;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(wayForPayResultService, "wayForPaySecret", "secret");
+        when(wayForPayProperties.getWayForPaySecret()).thenReturn("secret");
     }
 
     @Test

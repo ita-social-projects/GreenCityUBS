@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Сlass for retrieving configuration values from the runtime environment.
- * Used to access dynamic properties.
- * Provides a flexible alternative to @Value, always getting the latest values
- * without having to restart the application or use /actuator/refresh.
+ * Сlass for retrieving configuration values from the runtime environment. Used
+ * to access dynamic properties. Provides a flexible alternative to @Value,
+ * always getting the latest values without having to restart the application or
+ * use /actuator/refresh.
  */
 
 @Component
@@ -35,7 +35,7 @@ public class TelegramProperties {
         return telegramBotToken;
     }
 
-    public String getUbsAdminBaseUrl(){
+    public String getUbsAdminBaseUrl() {
         String ubsAdminBaseUrl = environment.getProperty("greencity.bots.ubs-bot-ui");
         if (!StringUtils.hasText(ubsAdminBaseUrl)) {
             log.error("The greencity admin base url is empty");

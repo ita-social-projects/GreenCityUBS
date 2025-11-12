@@ -263,7 +263,8 @@ public class UserServiceImpl implements UserService {
         String linkTemplate = null;
         if ("TELEGRAM".equals(type.name())) {
             linkTemplate = String.format("%s%s%s%s",
-                AppConstant.TELEGRAM_PART_1_OF_LINK, telegramProperties.getTelegramBotName(), AppConstant.TELEGRAM_PART_3_OF_LINK, uuid);
+                AppConstant.TELEGRAM_PART_1_OF_LINK, telegramProperties.getTelegramBotName(),
+                AppConstant.TELEGRAM_PART_3_OF_LINK, uuid);
         }
         return linkTemplate;
     }

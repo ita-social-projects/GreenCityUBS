@@ -20,7 +20,8 @@ public class TelegramBotConfig {
 
     @Bean
     public UBSTelegramBot ubsTelegramBot(@Lazy TelegramService telegramService) {
-        return new UBSTelegramBot(telegramProperties.getTelegramBotToken(), telegramProperties.getTelegramBotName(), telegramService);
+        return new UBSTelegramBot(telegramProperties.getTelegramBotToken(), telegramProperties.getTelegramBotName(),
+            telegramService);
     }
 
     @Bean

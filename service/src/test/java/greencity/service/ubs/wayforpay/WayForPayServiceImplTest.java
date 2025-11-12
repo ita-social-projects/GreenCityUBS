@@ -21,6 +21,7 @@ import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.exceptions.NotFoundException;
+import greencity.properties.WayForPayProperties;
 import greencity.repository.OrderRepository;
 import greencity.util.EncryptionUtil;
 import greencity.util.MoneyConverterUtil;
@@ -34,13 +35,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class WayForPayServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
@@ -52,17 +55,19 @@ class WayForPayServiceImplTest {
     private WayForPayClient wayForPayClient;
     @Mock
     private Scheduler quartzScheduler;
+    @Mock
+    private WayForPayProperties wayForPayProperties;
 
     @InjectMocks
     private WayForPayServiceImpl wayForPayService;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(wayForPayService, "resultWayForPayUrl", "http://test-result");
-        ReflectionTestUtils.setField(wayForPayService, "merchantAccount", "testAccount");
-        ReflectionTestUtils.setField(wayForPayService, "wayForPaySecret", "secret");
-        ReflectionTestUtils.setField(wayForPayService, "merchantDomainName", "testDomain");
-        ReflectionTestUtils.setField(wayForPayService, "greenCityClientUrl", "http://green-client");
+        when(wayForPayProperties.getWayForPayResultUrl()).thenReturn("http://test-result");
+        when(wayForPayProperties.getWayForPayLogin()).thenReturn("testAccount");
+        when(wayForPayProperties.getWayForPaySecret()).thenReturn("secret");
+        when(wayForPayProperties.getWayForPayMerchandDomainName()).thenReturn("testDomain");
+        when(wayForPayProperties.getWayForPayReturnUrl()).thenReturn("http://green-client");
     }
 
     @Test

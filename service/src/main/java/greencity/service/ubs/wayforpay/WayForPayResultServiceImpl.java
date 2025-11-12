@@ -11,6 +11,7 @@ import greencity.entity.order.Payment;
 import greencity.enums.OrderStatus;
 import greencity.enums.PaymentStatus;
 import greencity.exceptions.BadRequestException;
+import greencity.properties.WayForPayProperties;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.payment.PaymentStatusHandlerService;
 import greencity.util.EncryptionUtil;
@@ -33,9 +34,7 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
     private final EncryptionUtil encryptionUtil;
     private final OrderRepository orderRepository;
     private final PaymentStatusHandlerService paymentStatusHandlerService;
-
-    @Value("${greencity.wayforpay.secret}")
-    private String wayForPaySecret;
+    private final WayForPayProperties wayForPayProperties;
 
     @Override
     @Transactional
@@ -81,7 +80,8 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
     }
 
     private boolean isInvalidSignature(PaymentResponseDto dto) {
-        String calculatedSignature = encryptionUtil.generateResponseSignature(dto, wayForPaySecret);
+        String calculatedSignature =
+            encryptionUtil.generateResponseSignature(dto, wayForPayProperties.getWayForPaySecret());
         if (!calculatedSignature.equals(dto.getMerchantSignature())) {
             log.error("Invalid signature for orderReference={}", dto.getOrderReference());
             return true;
@@ -111,7 +111,7 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
             .orderReference(response.getOrderReference())
             .status("accept")
             .time(response.getCreatedDate()).build();
-        accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPaySecret));
+        accept.setSignature(encryptionUtil.formResponseSignature(accept, wayForPayProperties.getWayForPaySecret()));
         return accept;
     }
 

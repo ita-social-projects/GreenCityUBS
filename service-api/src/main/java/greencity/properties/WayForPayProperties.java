@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Сlass for retrieving configuration values from the runtime environment.
- * Used to access dynamic properties.
- * Provides a flexible alternative to @Value, always getting the latest values
- * without having to restart the application or use /actuator/refresh.
+ * Сlass for retrieving configuration values from the runtime environment. Used
+ * to access dynamic properties. Provides a flexible alternative to @Value,
+ * always getting the latest values without having to restart the application or
+ * use /actuator/refresh.
  */
 
 @Component
@@ -43,7 +43,7 @@ public class WayForPayProperties {
         return merchantDomainName;
     }
 
-    public String getWayForPayResultUrl(){
+    public String getWayForPayResultUrl() {
         String wayForPayResultUrl = environment.getProperty("greencity.redirect.result-way-for-pay-url");
         if (!StringUtils.hasText(wayForPayResultUrl)) {
             log.error("WayForPayResultUrl property is empty");
@@ -51,7 +51,7 @@ public class WayForPayProperties {
         return wayForPayResultUrl;
     }
 
-    public String getWayForPayReturnUrl(){
+    public String getWayForPayReturnUrl() {
         String wayForPayReturnUrl = environment.getProperty("greencity.redirect.green-city-client");
         if (!StringUtils.hasText(wayForPayReturnUrl)) {
             log.error("WayForPayReturnUrl property is empty");
@@ -59,7 +59,7 @@ public class WayForPayProperties {
         return wayForPayReturnUrl;
     }
 
-    public String getConfirmPageUrl(){
+    public String getConfirmPageUrl() {
         String confirmPageUrl = environment.getProperty("redirect.confirm-page");
         if (!StringUtils.hasText(confirmPageUrl)) {
             log.error("ConfirmPageUrl property is empty");

@@ -60,7 +60,8 @@ public class JwtTool {
             .claims(claims.build())
             .issuedAt(now)
             .expiration(calendar.getTime())
-            .signWith(Keys.hmacShaKeyFor(authorizationProperties.getAccessTokenKey().getBytes(StandardCharsets.UTF_8)), Jwts.SIG.HS256)
+            .signWith(Keys.hmacShaKeyFor(authorizationProperties.getAccessTokenKey().getBytes(StandardCharsets.UTF_8)),
+                Jwts.SIG.HS256)
             .compact();
     }
 

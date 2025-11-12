@@ -1,10 +1,10 @@
 package greencity.service.ubs.wayforpay;
 
-import greencity.config.GreenCityRedirectionConfigProp;
 import greencity.constant.AppConstant;
 import greencity.enums.PaymentStatus;
 import greencity.exceptions.payment.InvalidPaymentResponseException;
 import greencity.exceptions.payment.PaymentNotFoundException;
+import greencity.properties.WayForPayProperties;
 import greencity.repository.PaymentRepository;
 import greencity.util.OrderUtils;
 import java.util.Map;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
     private static final String APPROVED_STATUS = "Approved";
     private final PaymentRepository paymentRepository;
-    private final GreenCityRedirectionConfigProp redirectProp;
+    private final WayForPayProperties wayForPayProperties;
 
     @Override
     public String redirectUser(Map<String, String> formParams) {
@@ -42,7 +42,7 @@ public class WayForPayRedirectServiceImpl implements WayForPayRedirectService {
     }
 
     private String buildRedirectUrl(Long orderId, PaymentStatus paymentStatus, String transactionStatus) {
-        return Optional.ofNullable(redirectProp.getConfirmPage())
+        return Optional.ofNullable(wayForPayProperties.getConfirmPageUrl())
             .filter(s -> !s.isBlank())
             .orElseThrow(() -> new IllegalStateException("Confirm page URL is not configured"))
             + "?orderId=" + orderId
