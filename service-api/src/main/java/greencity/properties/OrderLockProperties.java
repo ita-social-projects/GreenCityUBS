@@ -16,16 +16,14 @@ import org.springframework.util.StringUtils;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AuthorizationProperties {
+public class OrderLockProperties {
     private final Environment environment;
 
-    public String getAccessTokenKey() {
-        String accessTokenKey = environment.getProperty("greencity.authorization.token-key");
-        if (!StringUtils.hasText(accessTokenKey)) {
-            log.error("Authorization token key not set");
+    public int getOrderLockDuration() {
+        Integer orderLockDuration = environment.getProperty("order.lock.duration.minutes", Integer.class);
+        if (orderLockDuration == null) {
+            log.error("OrderLockDuration property is empty");
         }
-        return accessTokenKey;
+        return orderLockDuration;
     }
-
-
 }

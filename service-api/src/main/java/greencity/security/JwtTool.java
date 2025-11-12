@@ -1,11 +1,11 @@
 package greencity.security;
 
+import greencity.properties.AuthorizationProperties;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import jakarta.servlet.http.HttpServletRequest;
 import javax.crypto.SecretKey;
@@ -24,10 +24,9 @@ import java.util.Date;
  */
 @Slf4j
 @Component
-@Getter
+@RequiredArgsConstructor
 public class JwtTool {
-    @Value("${greencity.authorization.token-key}")
-    private String accessTokenKey;
+    private final AuthorizationProperties authorizationProperties;
 
     /**
      * Method that get token from {@link HttpServletRequest}.
@@ -61,7 +60,7 @@ public class JwtTool {
             .claims(claims.build())
             .issuedAt(now)
             .expiration(calendar.getTime())
-            .signWith(Keys.hmacShaKeyFor(accessTokenKey.getBytes(StandardCharsets.UTF_8)), Jwts.SIG.HS256)
+            .signWith(Keys.hmacShaKeyFor(authorizationProperties.getAccessTokenKey().getBytes(StandardCharsets.UTF_8)), Jwts.SIG.HS256)
             .compact();
     }
 
@@ -71,7 +70,7 @@ public class JwtTool {
      */
     @SuppressWarnings({"unchecked, rawtype"})
     public List<String> getAuthoritiesFromToken(String accessToken) {
-        SecretKey key = Keys.hmacShaKeyFor(accessTokenKey.getBytes());
+        SecretKey key = Keys.hmacShaKeyFor(authorizationProperties.getAccessTokenKey().getBytes());
         return (List<String>) Jwts.parser()
             .verifyWith(key).build()
             .parseSignedClaims(accessToken)
