@@ -38,6 +38,7 @@ import greencity.repository.TariffsInfoRepository;
 import greencity.repository.EmployeeOrderPositionRepository;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.service.ubs.user.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -446,8 +447,11 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
      * {@inheritDoc}
      */
     @Override
-    public List<GetTariffInfoForEmployeeDto> getTariffsForEmployee() {
-        List<TariffsInfo> tariffs = tariffsInfoRepository.findAll();
+    public List<GetTariffInfoForEmployeeDto> getTariffsForEmployee(String email) {
+        Employee employee = employeeRepository.findByEmail(email)
+             .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND_BY_EMAIL + email));
+
+        List<TariffsInfo> tariffs = tariffsInfoRepository.findByEmployeeId(employee.getId());
         return tariffs
             .stream()
             .map(tariffsInfo -> modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class))

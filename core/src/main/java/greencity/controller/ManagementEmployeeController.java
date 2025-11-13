@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Positive;
+import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -298,8 +299,8 @@ public class ManagementEmployeeController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('SEE_TARIFFS', authentication)")
     @GetMapping("/getTariffs")
-    public ResponseEntity<List<GetTariffInfoForEmployeeDto>> getTariffInfoForEmployee() {
-        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getTariffsForEmployee());
+    public ResponseEntity<List<GetTariffInfoForEmployeeDto>> getTariffInfoForEmployee(Principal principal) {
+        return ResponseEntity.status(HttpStatus.OK).body(employeeService.getTariffsForEmployee(principal.getName()));
     }
 
     /**
