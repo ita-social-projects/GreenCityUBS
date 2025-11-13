@@ -2,6 +2,7 @@ package greencity.service.ubs;
 
 import greencity.entity.order.Order;
 import greencity.entity.user.employee.Employee;
+import greencity.properties.OrderLockProperties;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import java.util.Optional;
@@ -26,6 +27,8 @@ class OrderLockServiceImplTest {
     private OrderRepository orderRepository;
     @Mock
     private EmployeeRepository employeeRepository;
+    @Mock
+    private OrderLockProperties orderLockProperties;
 
     @InjectMocks
     private OrderLockServiceImpl orderLockService;

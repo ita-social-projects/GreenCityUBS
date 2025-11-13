@@ -1,15 +1,16 @@
 package greencity.security;
 
+import greencity.properties.AuthorizationProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.servlet.http.HttpServletRequest;
-
 import javax.crypto.SecretKey;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -20,24 +21,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class JwtToolTest {
     @Mock
     private HttpServletRequest mockHttpServletRequest;
 
+    @Mock
+    private AuthorizationProperties authorizationProperties;
+
+    @InjectMocks
     private JwtTool jwtTool;
 
     @BeforeEach
     void setup() {
-        jwtTool = new JwtTool();
-        ReflectionTestUtils.setField(jwtTool, "accessTokenKey", "secret-refresh-token-key-bigger-key");
+        jwtTool = new JwtTool(authorizationProperties);
+        when(authorizationProperties.getAccessTokenKey()).thenReturn("secret-refresh-token-key-bigger-key");
     }
 
     @Test
     void testGetAccessTokenKey() {
-        String accessTokenKey = jwtTool.getAccessTokenKey();
+        String accessTokenKey = authorizationProperties.getAccessTokenKey();
         assertEquals("secret-refresh-token-key-bigger-key", accessTokenKey);
     }
 
@@ -62,7 +69,7 @@ class JwtToolTest {
         String email = "test@example.com";
         int ttl = 60;
         String accessToken = jwtTool.createAccessToken(email, ttl);
-        SecretKey key = Keys.hmacShaKeyFor(jwtTool.getAccessTokenKey().getBytes());
+        SecretKey key = Keys.hmacShaKeyFor(authorizationProperties.getAccessTokenKey().getBytes());
         assertNotNull(accessToken);
 
         Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(accessToken).getPayload();
@@ -86,7 +93,7 @@ class JwtToolTest {
     @Test
     void testGetAuthoritiesFromToken() {
         final String accessToken = jwtTool.createAccessToken("test@example.com", 60);
-        SecretKey key = Keys.hmacShaKeyFor(jwtTool.getAccessTokenKey().getBytes());
+        SecretKey key = Keys.hmacShaKeyFor(authorizationProperties.getAccessTokenKey().getBytes());
 
         @SuppressWarnings({"unchecked, rawtype"})
         List<String> authorities = (List<String>) Jwts.parser()

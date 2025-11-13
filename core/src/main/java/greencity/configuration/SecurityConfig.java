@@ -1,6 +1,7 @@
 package greencity.configuration;
 
 import greencity.client.UserRemoteClient;
+import greencity.properties.AuthorizationProperties;
 import greencity.repository.UserRepository;
 import greencity.security.JwtTool;
 import greencity.security.filters.AccessTokenAuthenticationFilter;
@@ -57,6 +58,7 @@ public class SecurityConfig {
     private final UserRemoteClient userRemoteClient;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserRepository userRepository;
+    private final AuthorizationProperties authorizationProperties;
 
     @Value("${spring.messaging.stomp.websocket.allowed-origins}")
     private String[] allowedOrigins;
@@ -359,7 +361,7 @@ public class SecurityConfig {
      */
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) {
-        auth.authenticationProvider(new JwtAuthenticationProvider(jwtTool));
+        auth.authenticationProvider(new JwtAuthenticationProvider(authorizationProperties, jwtTool));
     }
 
     /**
