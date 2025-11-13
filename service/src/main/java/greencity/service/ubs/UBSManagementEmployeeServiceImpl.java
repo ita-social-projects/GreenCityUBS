@@ -449,7 +449,7 @@ public class UBSManagementEmployeeServiceImpl implements UBSManagementEmployeeSe
     @Override
     public List<GetTariffInfoForEmployeeDto> getTariffsForEmployee(String email) {
         Employee employee = employeeRepository.findByEmail(email)
-             .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND_BY_EMAIL + email));
+            .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.EMPLOYEE_NOT_FOUND_BY_EMAIL + email));
 
         List<TariffsInfo> tariffs = tariffsInfoRepository.findByEmployeeId(employee.getId());
         return tariffs
