@@ -15,6 +15,7 @@ import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.entity.order.Order;
 import greencity.entity.order.OrderBag;
 import greencity.exceptions.NotFoundException;
+import greencity.properties.WayForPayProperties;
 import greencity.repository.OrderRepository;
 import greencity.scheduler.PaymentExpiryJob;
 import greencity.util.EncryptionUtil;
@@ -38,7 +39,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,17 +50,7 @@ public class WayForPayServiceImpl implements WayForPayService {
     private final EncryptionUtil encryptionUtil;
     private final WayForPayClient wayForPayClient;
     private final Scheduler quartzScheduler;
-
-    @Value("${greencity.redirect.result-way-for-pay-url}")
-    private String resultWayForPayUrl;
-    @Value("${greencity.wayforpay.login}")
-    private String merchantAccount;
-    @Value("${greencity.wayforpay.secret}")
-    private String wayForPaySecret;
-    @Value("${greencity.wayforpay.merchant.domain.name}")
-    private String merchantDomainName;
-    @Value("${greencity.redirect.green-city-client}")
-    private String greenCityClientUrl;
+    private final WayForPayProperties wayForPayProperties;
 
     @Override
     @Transactional
@@ -81,10 +71,10 @@ public class WayForPayServiceImpl implements WayForPayService {
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
         PaymentWayForPayRequestDto paymentWayForPayRequestDto = PaymentWayForPayRequestDto.builder()
             .transactionType("CREATE_INVOICE")
-            .merchantAccount(merchantAccount)
-            .merchantDomainName(merchantDomainName)
+            .merchantAccount(wayForPayProperties.getWayForPayLogin())
+            .merchantDomainName(wayForPayProperties.getWayForPayMerchandDomainName())
             .apiVersion(1)
-            .serviceUrl(resultWayForPayUrl)
+            .serviceUrl(wayForPayProperties.getWayForPayResultUrl())
             .orderReference(OrderUtils.generateEncodedOrderReference(order))
             .orderDate(instant.getEpochSecond())
             .amount(moneyConverterUtil.convertCoinsIntoBills(sumToPayInCoins).intValue())
@@ -103,11 +93,11 @@ public class WayForPayServiceImpl implements WayForPayService {
                 .map(OrderBag::getAmount)
                 .filter(amount -> amount != 0)
                 .toList())
-            .returnUrl(greenCityClientUrl)
+            .returnUrl(wayForPayProperties.getWayForPayReturnUrl())
             .build();
 
         paymentWayForPayRequestDto.setSignature(encryptionUtil
-            .formRequestSignature(paymentWayForPayRequestDto, wayForPaySecret));
+            .formRequestSignature(paymentWayForPayRequestDto, wayForPayProperties.getWayForPaySecret()));
 
         return paymentWayForPayRequestDto;
     }
@@ -134,12 +124,13 @@ public class WayForPayServiceImpl implements WayForPayService {
             PaymentCancellationWayForPayRequestDto.builder()
                 .transactionType("REMOVE_INVOICE")
                 .apiVersion(1)
-                .merchantAccount(merchantAccount)
+                .merchantAccount(wayForPayProperties.getWayForPayLogin())
                 .orderReference(OrderUtils.generateEncodedOrderReference(order))
                 .build();
 
         paymentCancellationWayForPayRequestDto.setSignature(
-            encryptionUtil.formRemoveInvoiceSignature(paymentCancellationWayForPayRequestDto, wayForPaySecret));
+            encryptionUtil.formRemoveInvoiceSignature(paymentCancellationWayForPayRequestDto,
+                wayForPayProperties.getWayForPaySecret()));
 
         return paymentCancellationWayForPayRequestDto;
     }

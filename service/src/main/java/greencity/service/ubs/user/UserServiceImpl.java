@@ -43,6 +43,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserStatusUpdateException;
+import greencity.properties.TelegramProperties;
 import greencity.repository.AddressRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramChatRepository;
@@ -64,7 +65,6 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -84,9 +84,7 @@ public class UserServiceImpl implements UserService {
     private final EventService eventService;
     private final TelegramChatRepository telegramBotRepository;
     private final AddressService addressService;
-
-    @Value("${greencity.bots.ubs-bot-name}")
-    private String telegramBotName;
+    private final TelegramProperties telegramProperties;
 
     /**
      * {@inheritDoc}
@@ -265,7 +263,8 @@ public class UserServiceImpl implements UserService {
         String linkTemplate = null;
         if ("TELEGRAM".equals(type.name())) {
             linkTemplate = String.format("%s%s%s%s",
-                AppConstant.TELEGRAM_PART_1_OF_LINK, telegramBotName, AppConstant.TELEGRAM_PART_3_OF_LINK, uuid);
+                AppConstant.TELEGRAM_PART_1_OF_LINK, telegramProperties.getTelegramBotName(),
+                AppConstant.TELEGRAM_PART_3_OF_LINK, uuid);
         }
         return linkTemplate;
     }

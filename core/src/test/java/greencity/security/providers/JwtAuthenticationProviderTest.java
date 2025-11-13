@@ -1,5 +1,6 @@
 package greencity.security.providers;
 
+import greencity.properties.AuthorizationProperties;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.junit.jupiter.api.Assertions;
@@ -33,6 +34,9 @@ class JwtAuthenticationProviderTest {
     @Mock
     JwtTool jwtTool;
 
+    @Mock
+    private AuthorizationProperties authorizationProperties;
+
     @InjectMocks
     private JwtAuthenticationProvider jwtAuthenticationProvider;
 
@@ -43,7 +47,7 @@ class JwtAuthenticationProviderTest {
             TUlOIl0sImlhdCI6MTY1NDYzNjc2OSwiZXhwIjo2MTY1NDYzNjcwOX0.ajLrWu7MNoXWlPRWi\
             LD9d7vDzScqx8-9eBl3ZlYlspQ\
             """;
-        when(jwtTool.getAccessTokenKey()).thenReturn("12312312312312312312312312312312312");
+        when(authorizationProperties.getAccessTokenKey()).thenReturn("12312312312312312312312312312312312");
         Authentication authentication = new UsernamePasswordAuthenticationToken(
             accessToken,
             null);
@@ -61,7 +65,7 @@ class JwtAuthenticationProviderTest {
 
     @Test
     void authenticateWithExpiredAccessToken() {
-        when(jwtTool.getAccessTokenKey()).thenReturn("12312312312312312312312312312312312");
+        when(authorizationProperties.getAccessTokenKey()).thenReturn("12312312312312312312312312312312312");
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 """
                     eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJxcXFAZW1haWwuY29tIiwicm9sZSI6WyJST0xF\
@@ -76,7 +80,7 @@ class JwtAuthenticationProviderTest {
 
     @Test
     void authenticateWithMalformedAccessToken() {
-        when(jwtTool.getAccessTokenKey()).thenReturn("123123123");
+        when(authorizationProperties.getAccessTokenKey()).thenReturn("123123123");
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 """
                     Malformed\

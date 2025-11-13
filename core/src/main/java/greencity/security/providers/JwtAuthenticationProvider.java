@@ -1,5 +1,6 @@
 package greencity.security.providers;
 
+import greencity.properties.AuthorizationProperties;
 import greencity.security.JwtTool;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class JwtAuthenticationProvider implements AuthenticationProvider {
+    private final AuthorizationProperties authorizationProperties;
     private final JwtTool jwtTool;
 
     /**
@@ -40,7 +42,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
      */
     @Override
     public Authentication authenticate(Authentication authentication) {
-        SecretKey key = Keys.hmacShaKeyFor(jwtTool.getAccessTokenKey().getBytes());
+        SecretKey key = Keys.hmacShaKeyFor(authorizationProperties.getAccessTokenKey().getBytes());
         String email = Jwts.parser()
             .verifyWith(key).build()
             .parseSignedClaims(authentication.getName())

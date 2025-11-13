@@ -5,6 +5,7 @@ import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import greencity.entity.order.Order;
 import greencity.entity.user.employee.Employee;
 import greencity.exceptions.NotFoundException;
+import greencity.properties.OrderLockProperties;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,7 @@ import java.time.LocalDateTime;
 public class OrderLockServiceImpl implements OrderLockService {
     private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
-    @Value("${order.lock.duration.minutes}")
-    private int lockDurationMinutes;
+    private final OrderLockProperties orderLockProperties;
     private static final String REMOVE_LOCK_MESSAGE = "Remove lock from order with id: {}";
     private static final String SET_LOCK_MESSAGE = "Set lock to order with id: {}";
 
@@ -67,7 +67,7 @@ public class OrderLockServiceImpl implements OrderLockService {
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void checkLockOrders() {
-        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(lockDurationMinutes);
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(orderLockProperties.getOrderLockDuration());
         int unlocked = orderRepository.unlockExpiredOrders(expirationTime);
 
         if (unlocked > 0) {

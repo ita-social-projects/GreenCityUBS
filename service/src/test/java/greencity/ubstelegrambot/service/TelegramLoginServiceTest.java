@@ -9,6 +9,7 @@ import greencity.entity.user.employee.Employee;
 import greencity.enums.MessageType;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.http.RemoteServerUnavailableException;
+import greencity.properties.AuthorizationProperties;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramManagerRepository;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,9 @@ class TelegramLoginServiceTest {
 
     @Mock
     private UserRemoteClient userRemoteClient;
+
+    @Mock
+    private AuthorizationProperties authorizationProperties;
 
     @Mock
     private TelegramBotResponseServiceImpl telegramBotResponseService;

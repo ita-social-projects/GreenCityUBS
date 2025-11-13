@@ -3,10 +3,10 @@ package greencity.client.config;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import greencity.client.UserRemoteClient;
+import greencity.properties.AuthorizationProperties;
 import greencity.security.JwtTool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -22,8 +22,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Slf4j
 public class UserRemoteClientInterceptor implements RequestInterceptor {
     private final JwtTool jwtTool;
-    @Value("${greencity.authorization.service-email}")
-    private String serviceEmail;
+    private final AuthorizationProperties authorizationProperties;
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String TOKEN_FORMAT = "Bearer %s";
 
@@ -50,6 +49,7 @@ public class UserRemoteClientInterceptor implements RequestInterceptor {
      * @return {@link String} - access token.
      */
     private String createAccessTokenForService() {
-        return String.format(TOKEN_FORMAT, jwtTool.createAccessToken(serviceEmail, 1));
+        return String.format(TOKEN_FORMAT,
+            jwtTool.createAccessToken(authorizationProperties.getSystemEmailAddress(), 1));
     }
 }
