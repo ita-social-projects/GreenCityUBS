@@ -18,7 +18,7 @@ public class PointsUtils {
     public void checkIfUserHasEnoughPoints(Integer userPoints, Integer requiredPoints) {
         log.info("userPoints: {}", userPoints);
         log.info("requiredPoints: {}", requiredPoints);
-        //pointsToUse * (long) AppConstant.CURRENCY_CONVERSION_RATE
+        // pointsToUse * (long) AppConstant.CURRENCY_CONVERSION_RATE
         if (userPoints < requiredPoints) {
             throw new BadRequestException("User doesn't have enough points");
         }
