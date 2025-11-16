@@ -148,9 +148,6 @@ public class WayForPayServiceImpl implements WayForPayService {
             certificateCodes = new HashSet<>();
         }
 
-        log.info("Order ID: " + orderId);
-        log.info("Points: " + pointsUsed);
-
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("orderId", orderId);
         jobDataMap.put("pointsUsed", pointsUsed);

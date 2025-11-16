@@ -149,22 +149,17 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     @Override
     @Transactional
     public PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto) {
-        log.info("PointToUse - {}", dto.getPointsToUse());
         Order order = getOrder(dto.getOrderId());
         checkOrderIsPaid(order.getOrderPaymentStatus());
         validateOrderPaymentProcessingStatus(order);
         User currentUser = getUserByUuid(userUuid);
-        log.info("1 - {}", currentUser.getCurrentPoints().toString());
         checkForNullCounter(order);
 
         OrderInfoDto orderInfo = modelMapper.map(order, OrderInfoDto.class);
         orderInfo.setOrderPrice(PaymentUtil.getPriceDetails(
             orderInfo.getId(), orderRepository, orderBagService, certificateRepository)
             .getTotalSumAmount());
-        log.info("Order price - {}", orderInfo.getOrderPrice());
-        log.info("2 - {}", currentUser.getCurrentPoints().toString());
         UserPointDto userPoints = modelMapper.map(currentUser, UserPointDto.class);
-        log.info("UserPoints - {}", userPoints);
         long sumToPayInCoins = paymentCalculatorService.calculateSumToPay(dto, orderInfo, userPoints);
 
         orderService.transferUserPointsToOrder(order.getId(), dto.getPointsToUse());
@@ -410,7 +405,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         if (pointsToUse > 0) {
             return unlockSpecifiedPointsFromOrder(order, pointsToUse);
         }
-        log.info("Order with id {} has been unlocked", orderId);
         return order;
     }
 
@@ -422,8 +416,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
             .setDateOfUse(null)
             .setCertificateStatus(CertificateStatus.ACTIVE)
             .setPoints(certificate.getInitialPointsValue())));
-
-        log.info("unlockSpecifiedCertificatesFromOrder: " + certificateCodes);
         certificateRepository.saveAll(certificates);
     }
 
@@ -440,7 +432,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
                 .order(order)
                 .reason(BonusReason.RETURN_UNPAID_ORDER)
                 .build());
-        log.info("unlockSpecifiedPointsFromOrder: " + pointsToUse);
         userRepository.save(user);
         return order;
     }
