@@ -18,7 +18,7 @@ class UserToUserPointDtoMapperTest {
     @Test
     void convert() {
         User user = ModelUtils.getUser();
-        UserPointDto expected = UserPointDto.builder().points(100).build();
+        UserPointDto expected = UserPointDto.builder().points(ModelUtils.getUser().getCurrentPoints()).build();
         UserPointDto actual = userToUserPointDtoMapper.convert(user);
         assertEquals(actual.getPoints(), expected.getPoints());
     }
