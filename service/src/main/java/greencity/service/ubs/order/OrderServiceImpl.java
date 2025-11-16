@@ -161,6 +161,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.setPointsToUse(order.getPointsToUse() + pointsToUse);
+        order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
         user.setCurrentPoints(user.getCurrentPoints() - pointsToUse);
         user.getChangeOfPointsList()
             .add(ChangeOfPoints.builder()
