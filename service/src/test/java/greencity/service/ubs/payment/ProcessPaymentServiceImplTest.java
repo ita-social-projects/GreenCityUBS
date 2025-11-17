@@ -386,6 +386,7 @@ class ProcessPaymentServiceImplTest {
 
         OrderWayForPayClientDto dto = new OrderWayForPayClientDto();
         dto.setOrderId(orderId);
+        dto.setPointsToUse(0);
 
         service.processOrder(userUuid, dto);
 
@@ -408,6 +409,7 @@ class ProcessPaymentServiceImplTest {
 
         OrderWayForPayClientDto dto = new OrderWayForPayClientDto();
         dto.setOrderId(orderId);
+        dto.setPointsToUse(0);
 
         PaymentSystemResponse response = service.processOrder(userUuid, dto);
 
@@ -436,6 +438,7 @@ class ProcessPaymentServiceImplTest {
 
         OrderWayForPayClientDto dto = new OrderWayForPayClientDto();
         dto.setOrderId(orderId);
+        dto.setPointsToUse(0);
 
         PaymentSystemResponse response = service.processOrder(userUuid, dto);
 

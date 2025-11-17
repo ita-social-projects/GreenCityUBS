@@ -33,10 +33,7 @@ import greencity.entity.order.Order;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.BonusReason;
-import greencity.enums.CertificateStatus;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -171,7 +168,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         if (sumToPayInCoins <= 0) {
             return wayForPayService.getPaymentRequestDto(order.getId(), null);
         } else {
-            String link = formedLink(order.getId(), sumToPayInCoins);
+            String link = formedLink(order.getId(), sumToPayInCoins, dto);
             return wayForPayService.getPaymentRequestDto(order.getId(), link);
         }
     }
@@ -216,6 +213,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         Order order = unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
         order.setPaymentLink("");
         order.setPaymentLinkExpiry(null);
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         orderRepository.save(order);
     }
 
@@ -407,7 +405,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         if (pointsToUse > 0) {
             return unlockSpecifiedPointsFromOrder(order, pointsToUse);
         }
-
         return order;
     }
 
@@ -435,7 +432,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
                 .order(order)
                 .reason(BonusReason.RETURN_UNPAID_ORDER)
                 .build());
-
         userRepository.save(user);
         return order;
     }
