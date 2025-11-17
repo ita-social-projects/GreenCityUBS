@@ -254,9 +254,12 @@ class ManagementEmployeeControllerTest {
 
     @Test
     void getTariffInfoForEmployeeTest() throws Exception {
+        Principal mockPrincipal = mock(Principal.class);
+        when(mockPrincipal.getName()).thenReturn("testmail@gmail.com");
+
         mockMvc.perform(get(UBS_LINK + GET_ALL_TARIFFS)
-            .principal(principal)).andExpect(status().isOk());
-        verify(service, times(1)).getTariffsForEmployee();
+            .principal(mockPrincipal)).andExpect(status().isOk());
+        verify(service, times(1)).getTariffsForEmployee(mockPrincipal.getName());
     }
 
     @Test

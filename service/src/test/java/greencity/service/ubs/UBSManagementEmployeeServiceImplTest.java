@@ -597,16 +597,24 @@ class UBSManagementEmployeeServiceImplTest {
 
     @Test
     void getTariffsForEmployeeTest() {
+        String email = "test@example.com";
+
+        Employee employee = getEmployee();
+        employee.setEmail(email);
+        employee.setId(1L);
+
         TariffsInfo tariffsInfo = getTariffsInfo();
         GetTariffInfoForEmployeeDto dto = GetTariffInfoForEmployeeDto.builder().build();
 
+        when(repository.findByEmail(email)).thenReturn(Optional.of(employee));
         when(modelMapper.map(tariffsInfo, GetTariffInfoForEmployeeDto.class)).thenReturn(dto);
-        when(tariffsInfoRepository.findAll()).thenReturn(List.of(getTariffsInfo()));
+        when(tariffsInfoRepository.findByEmployeeId(employee.getId())).thenReturn(List.of(tariffsInfo));
 
-        List<GetTariffInfoForEmployeeDto> dtos = employeeService.getTariffsForEmployee();
+        List<GetTariffInfoForEmployeeDto> dtos = employeeService.getTariffsForEmployee(email);
         assertEquals(1, dtos.size());
-        verify(modelMapper, times(1)).map(any(), any());
-        verify(tariffsInfoRepository).findAll();
+        verify(repository, times(1)).findByEmail(email);
+        verify(tariffsInfoRepository, times(1)).findByEmployeeId(employee.getId());
+        verify(modelMapper, times(1)).map(tariffsInfo, GetTariffInfoForEmployeeDto.class);
     }
 
     @Test
