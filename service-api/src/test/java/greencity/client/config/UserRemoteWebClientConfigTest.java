@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.GreenCityUserServiceException;
 import greencity.exceptions.NotFoundException;
+import greencity.properties.AuthorizationProperties;
+import greencity.properties.RemoteWebClientProperties;
 import greencity.security.JwtTool;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
@@ -25,17 +27,26 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class UserRemoteWebClientConfigTest {
     static MockWebServer mockWebServer;
 
     @InjectMocks
     UserRemoteWebClientConfig userRemoteWebClientConfig;
+
+    @Mock
+    private RemoteWebClientProperties remoteWebClientProperties;
+
+    @Mock
+    private AuthorizationProperties authorizationProperties;
 
     @Mock
     JwtTool jwtTool;
@@ -58,11 +69,11 @@ class UserRemoteWebClientConfigTest {
         when(jwtTool.createAccessToken(anyString(), anyInt()))
             .thenReturn("mocked-jwt-token");
 
-        setField(userRemoteWebClientConfig, "greenCityUserBaseUrl",
-            mockWebServer.url("/").toString());
-        setField(userRemoteWebClientConfig, "systemEmail", "test@gmail.com");
-        setField(userRemoteWebClientConfig, "connectionTimeoutMillis", 1000);
-        setField(userRemoteWebClientConfig, "responseTimeoutMillis", 1000);
+        when(remoteWebClientProperties.getGreenCityUserAddress())
+            .thenReturn(mockWebServer.url("/").toString());
+        when(authorizationProperties.getSystemEmailAddress()).thenReturn("test@gmail.com");
+        when(remoteWebClientProperties.getWebClientConnectTimeout()).thenReturn(1000);
+        when(remoteWebClientProperties.getWebClientResponseTimeout()).thenReturn(1000);
 
         webClient = userRemoteWebClientConfig.webClient(WebClient.builder());
     }
@@ -200,16 +211,6 @@ class UserRemoteWebClientConfigTest {
         assertTrue(requestPath.contains("java-spring-boot"));
         assertTrue(requestPath.contains("category=tutorial"));
         assertFalse(requestPath.contains("%2B"));
-    }
-
-    private void setField(Object target, String name, Object value) {
-        try {
-            var field = target.getClass().getDeclaredField(name);
-            field.setAccessible(true);
-            field.set(target, value);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

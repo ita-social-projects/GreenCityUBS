@@ -9,13 +9,13 @@ import greencity.enums.ChatState;
 import greencity.enums.MessageType;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.UnsupportedTelegramAssetException;
+import greencity.properties.TelegramProperties;
 import greencity.repository.PositionRepository;
 import greencity.repository.TelegramChatRepository;
 import greencity.service.ubs.TelegramBotResponseService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -32,8 +32,7 @@ import static greencity.constant.ValidationConstant.EMAIL_REGEXP;
 @Service
 @RequiredArgsConstructor
 public class TelegramUtils {
-    @Value("${greencity.bots.ubs-bot-token}")
-    private String telegramBotToken;
+    private final TelegramProperties telegramProperties;
     private final PositionRepository positionRepository;
     private final TelegramChatRepository telegramChatRepository;
     private final TelegramBotResponseService telegramBotResponseService;
@@ -206,7 +205,7 @@ public class TelegramUtils {
      * @throws IOException if an error occurs during download or reading the stream
      */
     public byte[] fileToByteArray(File file) throws IOException {
-        URI uri = URI.create(file.getFileUrl(telegramBotToken));
+        URI uri = URI.create(file.getFileUrl(telegramProperties.getTelegramBotToken()));
         return IOUtils.toByteArray(uri.toURL().openStream());
     }
 }

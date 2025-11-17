@@ -208,4 +208,7 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
 
     @Query("SELECT t FROM TariffsInfo t WHERE t.tariffStatus = 'ACTIVE'")
     List<TariffsInfo> findAllActiveTariffsInfo();
+
+    @Query("SELECT t.tariffsInfo FROM TariffsInfoRecievingEmployee t WHERE t.employee.id = :employeeId")
+    List<TariffsInfo> findByEmployeeId(@Param("employeeId") Long employeeId);
 }

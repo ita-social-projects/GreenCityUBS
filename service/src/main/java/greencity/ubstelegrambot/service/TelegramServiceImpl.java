@@ -40,6 +40,7 @@ import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
 import greencity.service.ubs.TelegramService;
+import greencity.service.ubs.TelegramUnreadCountNotifier;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.order.OrderService;
 import greencity.specification.ChatSpecifications;
@@ -89,9 +90,10 @@ public class TelegramServiceImpl implements TelegramService {
     private final EmployeeRepository employeeRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final TelegramChatProducer telegramChatProducer;
     private final TelegramUtils telegramUtils;
     private final MessageAssetRepository messageAssetRepository;
+    private final TelegramMessageStatusHandler telegramMessageStatusHandler;
+    private final TelegramUnreadCountNotifier telegramUnreadCountNotifier;
     private final Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
 
     /**
@@ -508,23 +510,10 @@ public class TelegramServiceImpl implements TelegramService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional
     public void markMessagesAsRead(MarkMessagesAsReadRequestDto request) {
-        List<TelegramMessage> messages = telegramMessageRepository.findAllById(request.getMessagesIds());
+        telegramMessageStatusHandler.markMessagesAsRead(request);
 
-        for (TelegramMessage message : messages) {
-            if (message.getMessageViewingStatus() == MessageViewingStatus.UNREAD) {
-                message.setMessageViewingStatus(MessageViewingStatus.READ);
-
-                TelegramChat chat = message.getChat();
-                int currentUnread = chat.getUnreadMessagesCount();
-                if (currentUnread > 0) {
-                    chat.setUnreadMessagesCount(currentUnread - 1);
-                }
-            }
-        }
-
-        telegramMessageRepository.saveAll(messages);
+        telegramUnreadCountNotifier.notifyUnreadCount();
     }
 
     /**
@@ -588,6 +577,8 @@ public class TelegramServiceImpl implements TelegramService {
         if (sendMessage != null) {
             executor.executeCommand(sendMessage);
         }
+
+        telegramUnreadCountNotifier.notifyUnreadCount();
     }
 
     @Override
@@ -664,15 +655,6 @@ public class TelegramServiceImpl implements TelegramService {
         TelegramChat createdChat = newChatBuilder.build();
 
         telegramChatRepository.save(createdChat);
-
-        ChatDto chatDto = ChatDto.builder()
-            .id(createdChat.getId())
-            .firstName(createdChat.getFirstName())
-            .lastName(createdChat.getLastName())
-            .unreadMessagesCount(0)
-            .username(createdChat.getUsername()).build();
-
-        telegramChatProducer.notifyNewChat(chatDto);
 
         return resolveProcessorByUuid(uuid, chatId);
     }

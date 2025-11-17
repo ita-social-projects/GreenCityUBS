@@ -27,7 +27,6 @@ import greencity.entity.user.User;
 import greencity.entity.user.employee.Employee;
 import greencity.enums.AssetType;
 import greencity.enums.MessageDeliveryStatus;
-import greencity.enums.MessageViewingStatus;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.bots.TelegramBotExecutionException;
 import greencity.exceptions.bots.UnsupportedTelegramAssetException;
@@ -39,10 +38,12 @@ import greencity.repository.TelegramChatRepository;
 import greencity.repository.TelegramManagerRepository;
 import greencity.repository.TelegramMessageRepository;
 import greencity.repository.UserRepository;
+import greencity.service.ubs.TelegramUnreadCountNotifier;
 import greencity.service.ubs.TelegramUpdateProcessor;
 import greencity.service.ubs.order.OrderService;
 import greencity.ubstelegrambot.messages.MessageFactory;
 import greencity.ubstelegrambot.service.TelegramExecutor;
+import greencity.ubstelegrambot.service.TelegramMessageStatusHandler;
 import greencity.ubstelegrambot.service.TelegramServiceImpl;
 import greencity.ubstelegrambot.service.TelegramUtils;
 import java.awt.image.BufferedImage;
@@ -132,6 +133,12 @@ class TelegramServiceTest {
     @Mock
     private TelegramUpdateProcessor updateProcessor;
 
+    @Mock
+    private TelegramMessageStatusHandler telegramMessageStatusHandler;
+
+    @Mock
+    private TelegramUnreadCountNotifier telegramUnreadCountNotifier;
+
     private TelegramServiceImpl telegramService;
 
     public Map<String, TelegramUpdateProcessor> telegramUpdateProcessorMap;
@@ -153,9 +160,10 @@ class TelegramServiceTest {
             employeeRepository,
             orderRepository,
             userRepository,
-            telegramChatProducer,
             telegramUtils,
             messageAssetRepository,
+            telegramMessageStatusHandler,
+            telegramUnreadCountNotifier,
             telegramUpdateProcessorMap);
     }
 
@@ -862,8 +870,6 @@ class TelegramServiceTest {
         Update update = new Update();
         update.setMessage(message);
 
-        doNothing().when(telegramChatProducer).notifyNewChat(any(ChatDto.class));
-
         TelegramChat savedChat = TelegramChat.builder()
             .id(1L)
             .chatId(chatId.toString())
@@ -1449,43 +1455,17 @@ class TelegramServiceTest {
     @Test
     void testMarkMessagesAsRead_IdsSpecified_MessagesMarkedAsRead() {
         List<Long> messageIds = List.of(1L, 2L);
-
-        TelegramChat chat1 = TelegramChat.builder()
-            .id(10L)
-            .unreadMessagesCount(1)
+        MarkMessagesAsReadRequestDto requestDto = MarkMessagesAsReadRequestDto.builder()
+            .messagesIds(messageIds)
             .build();
 
-        TelegramChat chat2 = TelegramChat.builder()
-            .id(20L)
-            .unreadMessagesCount(0)
-            .build();
+        doNothing().when(telegramMessageStatusHandler).markMessagesAsRead(requestDto);
+        doNothing().when(telegramUnreadCountNotifier).notifyUnreadCount();
 
-        TelegramMessage message1 = TelegramMessage.builder()
-            .id(1L)
-            .messageViewingStatus(MessageViewingStatus.UNREAD)
-            .chat(chat1)
-            .build();
+        telegramService.markMessagesAsRead(requestDto);
 
-        TelegramMessage message2 = TelegramMessage.builder()
-            .id(2L)
-            .messageViewingStatus(MessageViewingStatus.READ)
-            .chat(chat2)
-            .build();
-
-        when(telegramMessageRepository.findAllById(messageIds))
-            .thenReturn(List.of(message1, message2));
-
-        telegramService.markMessagesAsRead(
-            MarkMessagesAsReadRequestDto.builder().messagesIds(messageIds).build());
-
-        verify(telegramMessageRepository).findAllById(messageIds);
-        verify(telegramMessageRepository).saveAll(List.of(message1, message2));
-
-        assertEquals(MessageViewingStatus.READ, message1.getMessageViewingStatus());
-        assertEquals(MessageViewingStatus.READ, message2.getMessageViewingStatus());
-
-        assertEquals(0, chat1.getUnreadMessagesCount());
-        assertEquals(0, chat2.getUnreadMessagesCount());
+        verify(telegramMessageStatusHandler).markMessagesAsRead(requestDto);
+        verify(telegramUnreadCountNotifier).notifyUnreadCount();
     }
 
     @Test

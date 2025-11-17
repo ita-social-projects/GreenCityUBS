@@ -8,11 +8,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
-import greencity.config.GreenCityRedirectionConfigProp;
 import greencity.constant.AppConstant;
 import greencity.enums.PaymentStatus;
 import greencity.exceptions.payment.InvalidPaymentResponseException;
 import greencity.exceptions.payment.PaymentNotFoundException;
+import greencity.properties.WayForPayProperties;
 import greencity.repository.PaymentRepository;
 import greencity.util.OrderUtils;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ class WayForPayRedirectServiceImplTest {
     private PaymentRepository paymentRepository;
 
     @Mock
-    private GreenCityRedirectionConfigProp redirectProp;
+    private WayForPayProperties wayForPayProperties;
 
     @InjectMocks
     private WayForPayRedirectServiceImpl service;
@@ -47,7 +47,7 @@ class WayForPayRedirectServiceImplTest {
     void redirectUser_shouldReturnCorrectUrl_whenPaymentApproved() {
         formParams.put("transactionStatus", "Approved");
 
-        when(redirectProp.getConfirmPage()).thenReturn("http://localhost:4200/#/ubs/confirm");
+        when(wayForPayProperties.getConfirmPageUrl()).thenReturn("http://localhost:4200/#/ubs/confirm");
         when(paymentRepository.getPaymentStatusByOrderIdAndPaymentId(anyLong(), anyLong()))
             .thenReturn(Optional.of(PaymentStatus.PAID));
 
@@ -69,7 +69,7 @@ class WayForPayRedirectServiceImplTest {
     void redirectUser_shouldReturnUnpaid_whenTransactionDeclined() {
         formParams.put("transactionStatus", "Declined");
 
-        when(redirectProp.getConfirmPage()).thenReturn("http://localhost:4200/#/ubs/confirm");
+        when(wayForPayProperties.getConfirmPageUrl()).thenReturn("http://localhost:4200/#/ubs/confirm");
         when(paymentRepository.getPaymentStatusByOrderIdAndPaymentId(anyLong(), anyLong()))
             .thenReturn(Optional.of(PaymentStatus.PAID));
 
@@ -87,7 +87,7 @@ class WayForPayRedirectServiceImplTest {
     void redirectUser_shouldReturnUnpaid_whenPaymentUnpaid() {
         formParams.put("transactionStatus", "Approved");
 
-        when(redirectProp.getConfirmPage()).thenReturn("http://localhost:4200/#/ubs/confirm");
+        when(wayForPayProperties.getConfirmPageUrl()).thenReturn("http://localhost:4200/#/ubs/confirm");
         when(paymentRepository.getPaymentStatusByOrderIdAndPaymentId(anyLong(), anyLong()))
             .thenReturn(Optional.of(PaymentStatus.UNPAID));
 

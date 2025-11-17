@@ -70,6 +70,7 @@ import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UBSuserNotFoundException;
 import greencity.exceptions.user.UserStatusUpdateException;
+import greencity.properties.TelegramProperties;
 import greencity.repository.AddressRepository;
 import greencity.repository.EmployeeRepository;
 import greencity.repository.TelegramChatRepository;
@@ -134,6 +135,8 @@ class UserServiceImplTest {
     private EmployeeRepository employeeRepository;
     @Mock
     private UserDeactivationRepo userDeactivationRepo;
+    @Mock
+    private TelegramProperties telegramProperties;
 
     private User testUser;
     private UserExternalDto currentUserDto;

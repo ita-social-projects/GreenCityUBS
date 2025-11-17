@@ -3,6 +3,7 @@ package greencity.ubstelegrambot.service;
 import greencity.entity.telegram.TelegramManager;
 import greencity.enums.MessageType;
 import greencity.exceptions.bots.TelegramBotExecutionException;
+import greencity.properties.TelegramProperties;
 import greencity.repository.TelegramManagerRepository;
 import greencity.service.ubs.TelegramBotResponseService;
 import greencity.service.ubs.TelegramLanguageService;
@@ -23,9 +24,7 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
     private final TelegramLanguageService telegramLanguageService;
     private final TelegramExecutor telegramExecutor;
     private final TelegramBotResponseService telegramBotResponseService;
-
-    @Value("${greencity.bots.ubs-bot-ui}")
-    private String baseUrl;
+    private final TelegramProperties telegramProperties;
 
     @Override
     public void notifyManagerAboutNewMessagesFromUser(String username, String messageText, Long innerChatId) {
@@ -34,7 +33,7 @@ public class TelegramNotificationServiceImpl implements TelegramNotificationServ
             String lang = telegramLanguageService.getChatLanguage(manager.getChatId());
             String text = telegramBotResponseService.getResponseByLangAndMessageType(
                 lang, MessageType.CLIENT_WANT_TO_SPEAK);
-            String url = buildUrl(baseUrl, innerChatId);
+            String url = buildUrl(telegramProperties.getUbsAdminBaseUrl(), innerChatId);
             SendMessage notification =
                 MessageFactory.createNotificationMessageForManager(manager.getChatId(), username, messageText,
                     url, text);

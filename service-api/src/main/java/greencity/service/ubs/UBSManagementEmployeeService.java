@@ -98,7 +98,7 @@ public interface UBSManagementEmployeeService {
      * @return list of GetTariffInfoForEmployeeDto.
      * @author Nikita Korzh.
      */
-    List<GetTariffInfoForEmployeeDto> getTariffsForEmployee();
+    List<GetTariffInfoForEmployeeDto> getTariffsForEmployee(String email);
 
     /**
      * Method to get a list of employees associated with a specific tariff.
