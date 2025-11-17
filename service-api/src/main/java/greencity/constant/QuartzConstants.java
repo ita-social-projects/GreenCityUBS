@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class QuartzConstants {
-    public static final Long WAY_FOR_PAY_LINK_VALIDITY_SECONDS = 864000L;
+    public static final Long WAY_FOR_PAY_LINK_VALIDITY_SECONDS = 300L;
     public static final String PAYMENT_EXPIRY_JOB_GROUP = "paymentExpiry";
     public static final String PAYMENT_EXPIRY_JOB_KEY = PAYMENT_EXPIRY_JOB_GROUP + "-";
     public static final String PAYMENT_EXPIRY_TRIGGER_KEY = PAYMENT_EXPIRY_JOB_GROUP + "Trigger-";
