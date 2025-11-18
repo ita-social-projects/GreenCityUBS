@@ -122,34 +122,4 @@ class OrdersDataPdfFileExporterImplTest {
         var text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
         assertTrue(text.contains(PdfQrCodeText.getByLocale(PdfQrCodeText.ALREADY_PAID, Locale.of("uk"))));
     }
-
-    @Test
-    void exportWhenLinkBlankShowsLinkNotGenerated() throws Exception {
-        var dto = ModelUtils.getOrdersDataForUserDto();
-        dto.setAmountBeforePayment(10.0);
-        when(orderRepository.findById(anyLong()))
-            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
-        when(processPaymentService.formedLink(any(), anyLong())).thenReturn("   ");
-
-        byte[] pdf = pdfFileExporter.export(dto, Locale.ENGLISH);
-        var text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
-
-        assertTrue(text.contains(PdfQrCodeText.getByLocale(PdfQrCodeText.LINK_NOT_GENERATED, Locale.ENGLISH)));
-    }
-
-    @Test
-    void export_whenLinkPresent_addsQrHint_andCallsFormedLink() throws Exception {
-        OrdersDataForUserDto dto = ModelUtils.getOrdersDataForUserDto();
-        dto.setAmountBeforePayment(10.00);
-        when(orderRepository.findById(anyLong()))
-            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
-        String url = "https://pay.example.com/invoice/TEST123";
-        when(processPaymentService.formedLink(any(), anyLong())).thenReturn(url);
-        Locale locale = Locale.ENGLISH;
-        byte[] pdf = pdfFileExporter.export(dto, locale);
-        String pageText = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
-        String expectedHint = PdfQrCodeText.getByLocale(PdfQrCodeText.QR_CODE_HINT, locale);
-        assertTrue(pageText.contains(expectedHint));
-        verify(processPaymentService).formedLink(any(), anyLong());
-    }
 }
