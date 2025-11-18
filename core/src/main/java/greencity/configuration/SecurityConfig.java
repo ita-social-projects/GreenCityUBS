@@ -297,8 +297,7 @@ public class SecurityConfig {
                     UBS_LINK + "/personal-data",
                     UBS_LINK + "/details-for-existing-order/{orderId}",
                     UBS_LINK + "/orders/{id}/tariff",
-                    TELEGRAM_LINK + "/notifications"
-                )
+                    TELEGRAM_LINK + "/notifications")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     TELEGRAM_LINK + "/**",
