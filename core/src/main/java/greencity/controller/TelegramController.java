@@ -94,7 +94,7 @@ public class TelegramController {
     @GetMapping("/chats")
     @PageableAsQueryParam
     public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search,
-                                                         @Parameter(hidden = true) Pageable pageable) {
+        @Parameter(hidden = true) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getChats(search, pageable));
     }
 
