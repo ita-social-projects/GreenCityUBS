@@ -1,29 +1,28 @@
 package greencity.service.ubs.pdf.exporter;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import greencity.ModelUtils;
 import greencity.constant.AppConstant;
+import greencity.entity.order.Order;
 import greencity.enums.pdf.PdfQrCodeText;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.payment.ProcessPaymentService;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,6 +37,13 @@ class OrdersDataPdfFileExporterImplTest {
 
     @InjectMocks
     private OrdersDataPdfFileExporterImpl pdfFileExporter;
+
+    private void invokeAddQrCode(OrdersDataForUserDto dto, Document document, Locale locale) throws Exception {
+        Method m = OrdersDataPdfFileExporterImpl.class
+            .getDeclaredMethod("addQrCode", OrdersDataForUserDto.class, Document.class, Locale.class);
+        m.setAccessible(true);
+        m.invoke(pdfFileExporter, dto, document, locale);
+    }
 
     @Test
     void exportValidEnPdf() throws IOException {
@@ -121,5 +127,36 @@ class OrdersDataPdfFileExporterImplTest {
         byte[] pdf = pdfFileExporter.export(dto, Locale.of("uk"));
         var text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
         assertTrue(text.contains(PdfQrCodeText.getByLocale(PdfQrCodeText.ALREADY_PAID, Locale.of("uk"))));
+    }
+
+    @Test
+    void addQrCode_whenSumIsZeroOrNegative_shouldShowAlreadyPaidMessage() throws Exception {
+        long orderId = 1L;
+        Locale locale = Locale.UK;
+
+        OrdersDataForUserDto orderDetails = mock(OrdersDataForUserDto.class);
+        when(orderDetails.getId()).thenReturn(orderId);
+        when(orderDetails.getAmountBeforePayment()).thenReturn(0.0); // => sumInCoins = 0
+
+        Order order = new Order();
+        order.setId(orderId);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        Document document = mock(Document.class);
+
+        invokeAddQrCode(orderDetails, document, locale);
+
+        ArgumentCaptor<Paragraph> paragraphCaptor = ArgumentCaptor.forClass(Paragraph.class);
+        verify(document, times(1)).add(paragraphCaptor.capture());
+
+        Paragraph paragraph = paragraphCaptor.getValue();
+        String actualText = paragraph.getContent().trim();
+
+        String expectedText =
+            PdfQrCodeText.getByLocale(PdfQrCodeText.ALREADY_PAID, locale);
+
+        assertEquals(expectedText, actualText);
+
+        verify(document, never()).add(isA(PdfPTable.class));
     }
 }
