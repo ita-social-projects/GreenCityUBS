@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.lowagie.text.Document;
+import com.lowagie.text.Image;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfReader;
@@ -14,8 +15,10 @@ import greencity.entity.order.Order;
 import greencity.enums.pdf.PdfQrCodeText;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
+import greencity.properties.RemoteWebClientProperties;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.payment.ProcessPaymentService;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Locale;
@@ -25,7 +28,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersDataPdfFileExporterImplTest {
@@ -34,6 +39,9 @@ class OrdersDataPdfFileExporterImplTest {
 
     @Mock
     private OrderRepository orderRepository;
+
+    @Mock
+    private RemoteWebClientProperties remoteWebClientProperties;
 
     @InjectMocks
     private OrdersDataPdfFileExporterImpl pdfFileExporter;
@@ -158,5 +166,59 @@ class OrdersDataPdfFileExporterImplTest {
         assertEquals(expectedText, actualText);
 
         verify(document, never()).add(isA(PdfPTable.class));
+    }
+
+    @Test
+    void addQrCode_whenSumPositive_shouldGenerateQrAndAddTable() throws Exception {
+        long orderId = 2L;
+        Locale locale = Locale.ENGLISH;
+
+        OrdersDataForUserDto orderDetails = mock(OrdersDataForUserDto.class);
+        when(orderDetails.getId()).thenReturn(orderId);
+        when(orderDetails.getAmountBeforePayment()).thenReturn(123.45); // > 0
+
+        Order order = new Order();
+        order.setId(orderId);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        when(remoteWebClientProperties.getGreenCityUbsAddress()).thenReturn("/");
+
+        Document document = mock(Document.class);
+
+        BufferedImage fakeQrImage = new BufferedImage(150, 150, BufferedImage.TYPE_INT_RGB);
+        Image fakePdfImage = mock(Image.class);
+
+        try (MockedStatic<QrCodeGenerator> qrCodeGenMock = mockStatic(QrCodeGenerator.class);
+            MockedStatic<PdfImageUtil> pdfImageUtilMock = mockStatic(PdfImageUtil.class)) {
+
+            qrCodeGenMock
+                .when(() -> QrCodeGenerator.generateQrCodeImage(anyString(), eq(150), eq(150)))
+                .thenReturn(fakeQrImage);
+
+            pdfImageUtilMock
+                .when(() -> PdfImageUtil.convertBufferedImageToImage(fakeQrImage))
+                .thenReturn(fakePdfImage);
+
+            invokeAddQrCode(orderDetails, document, locale);
+
+            verify(document, atLeastOnce()).add(isA(PdfPTable.class));
+
+            ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
+
+            qrCodeGenMock.verify(
+                () -> QrCodeGenerator.generateQrCodeImage(linkCaptor.capture(), eq(150), eq(150)));
+
+            String actualLink = linkCaptor.getValue();
+
+            String expectedLink = UriComponentsBuilder
+                .fromPath("/")
+                .path("ubs/redirect/{orderId}")
+                .buildAndExpand(orderId)
+                .toUriString();
+
+            assertEquals(expectedLink, actualLink);
+
+            verify(document, never()).add(isA(Paragraph.class));
+        }
     }
 }
