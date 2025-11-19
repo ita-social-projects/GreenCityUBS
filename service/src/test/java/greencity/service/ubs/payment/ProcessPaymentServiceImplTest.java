@@ -789,4 +789,25 @@ class ProcessPaymentServiceImplTest {
 
         assertEquals(invoiceUrl, result);
     }
+
+    @Test
+    void formedLinkForQRCodeTest() {
+        String invoiceUrl = "https://pay.example.com/invoice/TEST123";
+        Order order = getOrderCount();
+        order.setPayment(List.of(getPayment()));
+        order.setPaymentLink(" ");
+        order.setSumTotalAmountWithoutDiscounts(400L);
+        PaymentWayForPayRequestDto payRequestDto = new PaymentWayForPayRequestDto();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(wayForPayClient.getCheckOutResponse(any()))
+            .thenReturn("{\"invoiceUrl\":\"https://pay.example.com/invoice/TEST123\"}");
+        when(wayForPayService.formPaymentRequestForWayForPay(anyLong(), anyLong()))
+            .thenReturn(payRequestDto);
+        when(wayForPayService.getLinkFromWayForPayCheckoutResponse(anyString())).thenReturn(invoiceUrl);
+
+        String result = service.formedLink(order.getId());
+
+        assertEquals(invoiceUrl, result);
+    }
 }

@@ -13,9 +13,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
@@ -440,5 +439,16 @@ class OrderControllerTest {
             .andExpect(content().json(new ObjectMapper().writeValueAsString(listOfTariffs)));
 
         verify(tariffService).getTariffsInfo();
+    }
+
+    @Test
+    void redirectToWayForPay_ShouldReturnFoundAndLocationHeader() throws Exception {
+        when(processPaymentService.formedLink(1L)).thenReturn("test-link");
+
+        mockMvc.perform(get(ubsLink + "/redirect/" + 1L))
+            .andExpect(status().isFound())
+            .andExpect(header().string("Location", "test-link"));
+
+        verify(processPaymentService).formedLink(1L);
     }
 }
