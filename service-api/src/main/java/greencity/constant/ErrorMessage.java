@@ -224,6 +224,7 @@ public class ErrorMessage {
     public static final String SIGN_IN_TOKEN_NOT_FOUND = "SignIn token key not set";
     public static final String ORDER_LOCK_DURATION_MINUTES_NOT_FOUND = "OrderLockDuration property is empty";
     public static final String USER_SERVER_ADDRESS_NOT_FOUND = "The redirect user server address is empty";
+    public static final String UBS_SERVER_ADDRESS_NOT_FOUND = "The redirect ubs server address is empty";
     public static final String WEB_CLIENT_CONNECTION_TIMEOUT_NOT_FOUND = "The webclient connection timeout is empty";
     public static final String WEB_CLIENT_RESPONSE_TIMEOUT_NOT_FOUND = "The webclient response timeout is empty";
     public static final String TELEGRAM_BOT_NAME_NOT_FOUND = "The greencity bots name is empty";

@@ -56,6 +56,29 @@ class RemoteWebClientPropertiesTest {
     }
 
     @Test
+    void getGreenCityUbsAddress_shouldReturnValue() {
+        when(environment.getProperty("greencity.redirect.ubs-server-address"))
+            .thenReturn("https://greencity.com/ubs");
+
+        String result = remoteWebClientProperties.getGreenCityUbsAddress();
+
+        assertEquals("https://greencity.com/ubs", result);
+        verify(environment).getProperty("greencity.redirect.ubs-server-address");
+    }
+
+    @Test
+    void getGreenCityUbsAddress_shouldLogErrorIfEmpty() {
+        when(environment.getProperty("greencity.redirect.ubs-server-address"))
+            .thenReturn("");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> remoteWebClientProperties.getGreenCityUbsAddress());
+
+        assertEquals(ErrorMessage.UBS_SERVER_ADDRESS_NOT_FOUND, exception.getMessage());
+        assertTrue(logCaptor.getErrorLogs().contains(ErrorMessage.UBS_SERVER_ADDRESS_NOT_FOUND));
+    }
+
+    @Test
     void getWebClientConnectTimeout_shouldReturnValue() {
         when(environment.getProperty("webclient.connection-timeout-millis", Integer.class))
             .thenReturn(5000);
@@ -105,6 +128,8 @@ class RemoteWebClientPropertiesTest {
     void validateProperties_shouldLogInfo_whenAllPropertiesValid() {
         when(environment.getProperty("greencity.redirect.user-server-address"))
             .thenReturn("user-url");
+        when(environment.getProperty("greencity.redirect.ubs-server-address"))
+            .thenReturn("ubs-url");
         when(environment.getProperty("webclient.connection-timeout-millis", Integer.class))
             .thenReturn(2);
         when(environment.getProperty("webclient.response-timeout-millis", Integer.class))
@@ -121,6 +146,8 @@ class RemoteWebClientPropertiesTest {
     void validateProperties_shouldThrowException_whenAnyPropertyInvalid() {
         when(environment.getProperty("greencity.redirect.user-server-address"))
             .thenReturn("user-url");
+        when(environment.getProperty("greencity.redirect.ubs-server-address"))
+            .thenReturn("ubs-url");
         when(environment.getProperty("webclient.connection-timeout-millis", Integer.class))
             .thenReturn(null);
         when(environment.getProperty("webclient.response-timeout-millis", Integer.class))

@@ -175,10 +175,11 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
 
     @Override
     @Transactional
-    public String formedLink(Long orderId, long sumToPayInCoins) {
+    public String formedLink(Long orderId) {
         Order order = getOrder(orderId);
         validateOrderPaymentProcessingStatus(order);
         incrementCounter(order);
+        long sumToPayInCoins = order.getSumTotalAmountWithoutDiscounts();
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             wayForPayService.formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
