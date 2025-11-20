@@ -372,10 +372,6 @@ public class PaymentServiceImpl implements PaymentService {
         double totalPaidAmount = paymentsForCurrentOrder + dto.getCertificateBonus() + dto.getBonus();
         double totalAmount = PaymentUtil.setTotalPrice(dto);
 
-        log.info("paymentsForCurrentOrder - " + paymentsForCurrentOrder);
-        log.info("totalPaidAmount - " + totalPaidAmount);
-        log.info("totalAmount - " + totalAmount);
-
         if (paymentsForCurrentOrder > 0 && totalAmount > totalPaidAmount) {
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
             eventService.save(OrderHistory.ORDER_HALF_PAID_UK, OrderHistory.SYSTEM_UK, order.getId());

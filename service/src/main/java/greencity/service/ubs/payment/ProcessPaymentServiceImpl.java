@@ -187,7 +187,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
             .reduce(Long::sum)
             .orElse((long) 0);
         long sumToPayInCoins = order.getSumTotalAmountWithoutDiscounts() - paymentsForCurrentOrder;
-        log.info("sumToPayInCoins for PDF: " + sumToPayInCoins);
 
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             wayForPayService.formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
@@ -228,10 +227,8 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
             .toList();
         Long paidAmount = paymentCalculatorService.countPaidAmount(payments);
         if (paidAmount > 0) {
-            log.info("Order has paid amount: " + paidAmount);
             order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
         } else {
-            log.info("Order doesnt have paid amount: " + paidAmount);
             order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         }
         orderRepository.save(order);
