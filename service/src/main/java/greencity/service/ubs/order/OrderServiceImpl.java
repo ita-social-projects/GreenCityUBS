@@ -256,6 +256,7 @@ public class OrderServiceImpl implements OrderService {
         List<CertificateDto> certificates = mapCertificates(order);
 
         Long fullPrice = bagCalculatorService.calculateBagsSum(bags);
+        log.info("fullPrice - " + fullPrice);
         Long amountWithDiscount = calculateDiscountedAmount(order, fullPrice, certificates);
         List<PaymentWithStatusDto> payments = order.getPayment().stream()
             .map(payment -> modelMapper.map(payment, PaymentWithStatusDto.class))
