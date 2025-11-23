@@ -576,7 +576,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @Operation(summary = "Get info about all active tariffs bu courier id.")
+    @Operation(summary = "Get info about all active tariffs by courier id.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = GetActiveTariffInfoDto.class))),

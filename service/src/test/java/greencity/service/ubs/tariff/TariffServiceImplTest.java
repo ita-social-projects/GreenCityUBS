@@ -2,6 +2,7 @@ package greencity.service.ubs.tariff;
 
 import static greencity.ModelUtils.getTariffInfoByLocationDto;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
+import greencity.constant.ErrorMessage;
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.tariff.GetActiveTariffInfoDto;
@@ -23,8 +25,6 @@ import greencity.repository.TariffsInfoRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -250,5 +250,15 @@ class TariffServiceImplTest {
             .contains("The tariff also includes")
             .contains("Kyiv")
             .contains("Lviv");
+    }
+
+    @Test
+    void getTariffsInfo_whenCourierNotFound_shouldThrowNotFoundException() {
+        Long courierId = 99L;
+        when(courierRepository.findById(courierId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> tariffService.getTariffsInfo(courierId))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId);
     }
 }

@@ -112,7 +112,7 @@ public class ErrorMessage {
         "Could not find tariff for courier with id: %d and location with id: %d ";
     public static final String TARIFF_OR_LOCATION_IS_DEACTIVATED = "Tariff or location is deactivated.";
     public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for such locations is already exists";
-    public static final String TARIFF_WITH_SUCH_NAME_IS_ALREADY_EXISTS = "Tariff for with such name is already exists";
+    public static final String TARIFF_WITH_SUCH_NAME_IS_ALREADY_EXISTS = "Tariff with such name is already exists";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
     public static final String COULD_NOT_RETRIEVE_CANCELLATION_RESPONSE =
