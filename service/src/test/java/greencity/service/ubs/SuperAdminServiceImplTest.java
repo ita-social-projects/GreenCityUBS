@@ -2922,8 +2922,8 @@ class SuperAdminServiceImplTest {
             .build();
         Courier courier = ModelUtils.getCourier();
         TariffsInfo existingTariff = TariffsInfo.builder()
-            .tariffNameUk("Тариф")
-            .tariffNameEn("Different")
+            .tariffNameUk("Тест")
+            .tariffNameEn("Tariff")
             .build();
 
         when(courierRepository.findById(courierId))
