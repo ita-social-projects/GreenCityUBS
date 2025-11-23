@@ -2910,4 +2910,31 @@ class SuperAdminServiceImplTest {
         assertThrows(NotFoundException.class,
             () -> superAdminService.updateSectionTextFields(dtos, MainPageTextSection.HEADER));
     }
+
+    @Test
+    void addNewTariff_whenTariffWithSameNameExists_shouldThrowException() {
+        Long courierId = 1L;
+        AddNewTariffDto dto = AddNewTariffDto.builder()
+            .courierId(courierId)
+            .tariffNameUk("Тариф")
+            .tariffNameEn("Tariff")
+            .locationIdList(List.of(10L))
+            .build();
+        Courier courier = ModelUtils.getCourier();
+        TariffsInfo existingTariff = TariffsInfo.builder()
+            .tariffNameUk("Тариф")
+            .tariffNameEn("Different")
+            .build();
+
+        when(courierRepository.findById(courierId))
+            .thenReturn(Optional.of(courier));
+        when(tariffsInfoRepository.findAllTariffsInfoWithCourierId(courier))
+            .thenReturn(List.of(existingTariff));
+
+        assertThrows(
+            TariffAlreadyExistsException.class,
+            () -> superAdminService.addNewTariff(dto, "uuid-123"));
+        verify(tariffsInfoRepository, never()).save(any());
+        verify(tariffsLocationRepository, never()).saveAll(any());
+    }
 }
