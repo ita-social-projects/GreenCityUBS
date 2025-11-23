@@ -12,6 +12,7 @@ import greencity.ModelUtils;
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.tariff.GetActiveTariffInfoDto;
+import greencity.entity.order.Courier;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -173,12 +175,15 @@ class TariffServiceImplTest {
 
     @Test
     void getTariffsInfo_whenRepositoryReturnsEmptyList_thenReturnEmptyList() {
-        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of());
+        Courier courier = ModelUtils.getCourier();
 
-        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
+        when(tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)).thenReturn(List.of());
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
 
         assertThat(result).isEmpty();
-        verify(tariffsInfoRepository).findAllActiveTariffsInfo();
+        verify(tariffsInfoRepository).findAllActiveTariffsInfoWithCourierId(courier);
     }
 
     @Test
@@ -188,10 +193,13 @@ class TariffServiceImplTest {
             .build();
 
         GetActiveTariffInfoDto mappedDto = new GetActiveTariffInfoDto();
-        when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
-        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of(entity));
+        Courier courier = ModelUtils.getCourier();
 
-        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)).thenReturn(List.of(entity));
+        when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
+
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
 
         assertThat(result).hasSize(1);
         GetActiveTariffInfoDto dto = result.get(0);
@@ -221,11 +229,14 @@ class TariffServiceImplTest {
             .tariffLocations(Set.of(tl1, tl2))
             .build();
 
+        Courier courier = ModelUtils.getCourier();
+
         GetActiveTariffInfoDto mappedDto = new GetActiveTariffInfoDto();
         when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
-        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of(entity));
+        when(tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)).thenReturn(List.of(entity));
+        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
 
-        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
 
         assertThat(result).hasSize(1);
         GetActiveTariffInfoDto dto = result.get(0);
