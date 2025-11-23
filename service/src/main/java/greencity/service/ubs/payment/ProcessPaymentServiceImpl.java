@@ -25,11 +25,13 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
+import greencity.dto.payment.PaymentWithStatusDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserPointDto;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
+import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -57,6 +59,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -179,7 +182,12 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         Order order = getOrder(orderId);
         validateOrderPaymentProcessingStatus(order);
         incrementCounter(order);
-        long sumToPayInCoins = order.getSumTotalAmountWithoutDiscounts();
+        long paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
+            .equals(PaymentStatus.PAID)).map(Payment::getAmount)
+            .reduce(Long::sum)
+            .orElse((long) 0);
+        long sumToPayInCoins = order.getSumTotalAmountWithoutDiscounts() - paymentsForCurrentOrder;
+
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             wayForPayService.formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
@@ -214,7 +222,15 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         Order order = unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
         order.setPaymentLink("");
         order.setPaymentLinkExpiry(null);
-        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        List<PaymentWithStatusDto> payments = order.getPayment().stream()
+            .map(payment -> modelMapper.map(payment, PaymentWithStatusDto.class))
+            .toList();
+        Long paidAmount = paymentCalculatorService.countPaidAmount(payments);
+        if (paidAmount > 0) {
+            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        } else {
+            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        }
         orderRepository.save(order);
     }
 
