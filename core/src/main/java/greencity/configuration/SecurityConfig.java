@@ -97,7 +97,7 @@ public class SecurityConfig {
                     USER_AGREEMENT_LINK + "/latest",
                     UBS_LINK + "/districts-for-kyiv",
                     UBS_LINK + "/order-details-for-tariff",
-                    UBS_LINK + "/activeTariffsInfo",
+                    UBS_LINK + "/activeTariffsInfo/{id}",
                     UBS_LINK + "/redirect/{orderId}",
                     COMMIT_INFO,
                     SUPER_ADMIN_LINK + "/settingsText")

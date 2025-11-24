@@ -8,6 +8,7 @@ import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND_BY_LOCATION_ID;
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.tariff.GetActiveTariffInfoDto;
+import greencity.entity.order.Courier;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.exceptions.NotFoundException;
@@ -70,8 +71,10 @@ public class TariffServiceImpl implements TariffService {
     }
 
     @Override
-    public List<GetActiveTariffInfoDto> getTariffsInfo() {
-        return tariffsInfoRepository.findAllActiveTariffsInfo()
+    public List<GetActiveTariffInfoDto> getTariffsInfo(Long courierId) {
+        Courier courier = courierRepository.findById(courierId).orElseThrow(
+            () -> new NotFoundException(COURIER_IS_NOT_FOUND_BY_ID + courierId));
+        return tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)
             .stream()
             .map(entity -> {
                 GetActiveTariffInfoDto dto = modelMapper.map(entity, GetActiveTariffInfoDto.class);
