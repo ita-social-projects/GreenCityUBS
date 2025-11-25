@@ -432,13 +432,13 @@ class OrderControllerTest {
     void getAllActiveTariffs() throws Exception {
         List<GetActiveTariffInfoDto> listOfTariffs =
             Arrays.asList(new GetActiveTariffInfoDto(), new GetActiveTariffInfoDto());
-        when(tariffService.getTariffsInfo()).thenReturn(listOfTariffs);
+        when(tariffService.getTariffsInfo(1L)).thenReturn(listOfTariffs);
 
-        mockMvc.perform(get(ubsLink + "/activeTariffsInfo"))
+        mockMvc.perform(get(ubsLink + "/activeTariffsInfo/" + 1L))
             .andExpect(status().isOk())
             .andExpect(content().json(new ObjectMapper().writeValueAsString(listOfTariffs)));
 
-        verify(tariffService).getTariffsInfo();
+        verify(tariffService).getTariffsInfo(1L);
     }
 
     @Test

@@ -576,15 +576,15 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @Operation(summary = "Get info about all active tariffs")
+    @Operation(summary = "Get info about all active tariffs by courier id.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = GetActiveTariffInfoDto.class))),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @GetMapping("/activeTariffsInfo")
-    public ResponseEntity<List<GetActiveTariffInfoDto>> activeTariffsInfo() {
-        return ResponseEntity.status(HttpStatus.OK).body(tariffService.getTariffsInfo());
+    @GetMapping("/activeTariffsInfo/{id}")
+    public ResponseEntity<List<GetActiveTariffInfoDto>> activeTariffsInfo(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(tariffService.getTariffsInfo(id));
     }
 
     @Operation(summary = "Redirect to WayForPay from QR-code for payment.")
