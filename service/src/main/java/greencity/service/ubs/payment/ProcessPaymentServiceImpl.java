@@ -106,7 +106,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         order = getOrder(orderId);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
-        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order, dto.getPersonalData().getEmail());
         saveOrderEvent(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
 
         PaymentSystemResponse paymentSystemResponse =
@@ -136,7 +136,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         order = getOrder(orderId);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
-        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order, dto.getPersonalData().getEmail());
         saveOrderEvent(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
 
         PaymentSystemResponse paymentSystemResponse =
@@ -355,7 +355,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         return userData;
     }
 
-    private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
+    private void formAndSaveUser(User currentUser, int pointsToUse, Order order, String email) {
         currentUser.getOrders().add(order);
         if (pointsToUse != 0) {
             currentUser.setCurrentPoints(currentUser.getCurrentPoints() - pointsToUse);
@@ -366,6 +366,9 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
                 .order(order)
                 .reason(BonusReason.DEBIT_PAYMENT)
                 .build());
+        }
+        if (!currentUser.getRecipientEmail().equals(email)) {
+            currentUser.setAlternateEmail(email);
         }
         userRepository.save(currentUser);
     }
