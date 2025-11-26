@@ -5,12 +5,12 @@ import greencity.constant.ErrorMessage;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.UserRepository;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
@@ -45,7 +45,10 @@ public class WebSocketSecurityInterceptorConfig implements WebSocketMessageBroke
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
             @Override
-            public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
+            public Message<?> preSend(@Nullable Message<?> message, @Nullable MessageChannel channel) {
+                if (message == null) {
+                    return null;
+                }
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String token = accessor.getFirstNativeHeader("Authorization");
