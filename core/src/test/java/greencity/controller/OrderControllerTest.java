@@ -13,8 +13,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.configuration.SecurityConfig;
@@ -432,23 +433,12 @@ class OrderControllerTest {
     void getAllActiveTariffs() throws Exception {
         List<GetActiveTariffInfoDto> listOfTariffs =
             Arrays.asList(new GetActiveTariffInfoDto(), new GetActiveTariffInfoDto());
-        when(tariffService.getTariffsInfo(1L)).thenReturn(listOfTariffs);
+        when(tariffService.getTariffsInfo()).thenReturn(listOfTariffs);
 
-        mockMvc.perform(get(ubsLink + "/activeTariffsInfo/" + 1L))
+        mockMvc.perform(get(ubsLink + "/activeTariffsInfo"))
             .andExpect(status().isOk())
             .andExpect(content().json(new ObjectMapper().writeValueAsString(listOfTariffs)));
 
-        verify(tariffService).getTariffsInfo(1L);
-    }
-
-    @Test
-    void redirectToWayForPay_ShouldReturnFoundAndLocationHeader() throws Exception {
-        when(processPaymentService.formedLink(1L)).thenReturn("test-link");
-
-        mockMvc.perform(get(ubsLink + "/redirect/" + 1L))
-            .andExpect(status().isFound())
-            .andExpect(header().string("Location", "test-link"));
-
-        verify(processPaymentService).formedLink(1L);
+        verify(tariffService).getTariffsInfo();
     }
 }

@@ -17,8 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -70,9 +68,8 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping("/messages/{chatId}")
-    @PageableAsQueryParam
     public ResponseEntity<PageableDto<TelegramMessageDto>> getUserMessages(
-        @Positive @PathVariable(name = "chatId") Long chatId, @Parameter(hidden = true) Pageable page) {
+        @Positive @PathVariable(name = "chatId") Long chatId, Pageable page) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.findUserMessageByChatId(chatId, page));
     }
 
@@ -92,9 +89,8 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping("/chats")
-    @PageableAsQueryParam
     public ResponseEntity<PageableDto<ChatDto>> getChats(@RequestParam(required = false) String search,
-        @Parameter(hidden = true) Pageable pageable) {
+        Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramService.getChats(search, pageable));
     }
 
@@ -180,8 +176,7 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PageableAsQueryParam
-    public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacks(@Parameter(hidden = true) Pageable pageable) {
+    public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacks(Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(telegramFeedbackService.getAllFeedbacks(pageable));
     }
 
@@ -201,9 +196,8 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/feedbacks/{chatId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PageableAsQueryParam
     public ResponseEntity<PageableDto<FeedbackDto>> getAllFeedbacksByChatId(
-        @PathVariable(name = "chatId") Long chatId, @Parameter(hidden = true) Pageable pageable) {
+        @PathVariable(name = "chatId") Long chatId, Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(telegramFeedbackService.getAllFeedbacksByChatId(chatId, pageable));
     }
@@ -314,8 +308,7 @@ public class TelegramController {
     })
     @PreAuthorize("@preAuthorizer.hasAuthority('TELEGRAM_MANAGEMENT', authentication)")
     @GetMapping(value = "/bot_responses", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PageableAsQueryParam
-    public ResponseEntity<PageableDto<BotResponse>> getAllBotResponses(@Parameter(hidden = true) Pageable pageable) {
+    public ResponseEntity<PageableDto<BotResponse>> getAllBotResponses(Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(telegramBotResponseService.getAllBotResponses(pageable));
     }

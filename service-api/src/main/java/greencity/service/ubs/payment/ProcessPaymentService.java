@@ -48,11 +48,12 @@ public interface ProcessPaymentService {
      * redirect URL from the WayForPay response. - Schedules a payment expiry job
      * for the generated link.
      *
-     * @param orderId the {order id for which the payment link is generated
+     * @param orderId         the {order id for which the payment link is generated
+     * @param sumToPayInCoins the amount to be paid in coins
      * @return the checkout URL where the client should be redirected to complete
      *         payment
      */
-    String formedLink(Long orderId);
+    String formedLink(Long orderId, long sumToPayInCoins);
 
     /**
      * Forms a payment link for redirecting the user to WayForPay checkout, using

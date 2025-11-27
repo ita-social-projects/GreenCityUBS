@@ -20,6 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+
 public class OrdersDataForUserDto {
     private Long id;
     private LocalDateTime dateForm;

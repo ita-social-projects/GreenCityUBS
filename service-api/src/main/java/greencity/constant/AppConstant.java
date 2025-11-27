@@ -17,7 +17,6 @@ public class AppConstant {
     public static final String UBS_MANAG_LINK = "/ubs/management";
     public static final String UBS_CLIENT_LINK = "/ubs/client";
     public static final String ADMIN_LINK = "/admin";
-    public static final String NOTIFICATIONS_LINK = "/notifications";
     public static final String ADMIN_EMPL_LINK = "/admin/ubs-employee";
     public static final String SUPER_ADMIN_LINK = "/ubs/superAdmin";
     public static final String USER_AGREEMENT_LINK = "/user-agreement";
@@ -61,7 +60,7 @@ public class AppConstant {
         + "does not match, reselect correct data.";
     public static final byte CURRENCY_CONVERSION_RATE = 100;
     public static final byte MAX_CERTIFICATES_PER_ORDER = 5;
-    public static final Integer PAYMENT_VALIDITY_DURATION = 300;
+    public static final Integer VALIDITY_DURATION_TEN_DAYS = 864000;
     public static final String PAY_BUTTON = "payButton";
     public static final int ORDER_ID_INDEX = 0;
     public static final int COUNTER_ORDER_PAYMENT_ID_INDEX = 1;

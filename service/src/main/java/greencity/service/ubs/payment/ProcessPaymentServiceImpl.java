@@ -25,13 +25,11 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.dto.payment.PaymentWithStatusDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserPointDto;
 import greencity.entity.order.Certificate;
 import greencity.entity.order.ChangeOfPoints;
 import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -59,7 +57,6 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +103,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         order = getOrder(orderId);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
-        formAndSaveUser(currentUser, dto.getPointsToUse(), order, dto.getPersonalData().getEmail());
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
         saveOrderEvent(OrderHistory.ORDER_FORMED_UK, OrderHistory.CLIENT_UK, order);
 
         PaymentSystemResponse paymentSystemResponse =
@@ -136,7 +133,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         order = getOrder(orderId);
         long sumToPayInCoins = getLastPayment(order).getAmount();
 
-        formAndSaveUser(currentUser, dto.getPointsToUse(), order, dto.getPersonalData().getEmail());
+        formAndSaveUser(currentUser, dto.getPointsToUse(), order);
         saveOrderEvent(OrderHistory.ORDER_STATUS_UPDATED_UK, OrderHistory.CLIENT_UK, order);
 
         PaymentSystemResponse paymentSystemResponse =
@@ -178,16 +175,10 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
 
     @Override
     @Transactional
-    public String formedLink(Long orderId) {
+    public String formedLink(Long orderId, long sumToPayInCoins) {
         Order order = getOrder(orderId);
         validateOrderPaymentProcessingStatus(order);
         incrementCounter(order);
-        long paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
-            .equals(PaymentStatus.PAID)).map(Payment::getAmount)
-            .reduce(Long::sum)
-            .orElse((long) 0);
-        long sumToPayInCoins = order.getSumTotalAmountWithoutDiscounts() - paymentsForCurrentOrder;
-
         PaymentWayForPayRequestDto paymentWayForPayRequestDto =
             wayForPayService.formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
         paymentWayForPayRequestDto
@@ -222,15 +213,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         Order order = unlockSpecifiedPointsAndCertificatesFromOrder(orderId, pointsUsed, certificateCodes);
         order.setPaymentLink("");
         order.setPaymentLinkExpiry(null);
-        List<PaymentWithStatusDto> payments = order.getPayment().stream()
-            .map(payment -> modelMapper.map(payment, PaymentWithStatusDto.class))
-            .toList();
-        Long paidAmount = paymentCalculatorService.countPaidAmount(payments);
-        if (paidAmount > 0) {
-            order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
-        } else {
-            order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
-        }
+        order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
         orderRepository.save(order);
     }
 
@@ -355,7 +338,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         return userData;
     }
 
-    private void formAndSaveUser(User currentUser, int pointsToUse, Order order, String email) {
+    private void formAndSaveUser(User currentUser, int pointsToUse, Order order) {
         currentUser.getOrders().add(order);
         if (pointsToUse != 0) {
             currentUser.setCurrentPoints(currentUser.getCurrentPoints() - pointsToUse);
@@ -366,9 +349,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
                 .order(order)
                 .reason(BonusReason.DEBIT_PAYMENT)
                 .build());
-        }
-        if (!currentUser.getRecipientEmail().equals(email)) {
-            currentUser.setAlternateEmail(email);
         }
         userRepository.save(currentUser);
     }

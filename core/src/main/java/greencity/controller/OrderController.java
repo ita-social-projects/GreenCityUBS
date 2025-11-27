@@ -45,7 +45,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.io.IOException;
-import java.net.URI;
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
@@ -576,25 +575,14 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @Operation(summary = "Get info about all active tariffs by courier id.")
+    @Operation(summary = "Get info about all active tariffs")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = GetActiveTariffInfoDto.class))),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @GetMapping("/activeTariffsInfo/{id}")
-    public ResponseEntity<List<GetActiveTariffInfoDto>> activeTariffsInfo(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(tariffService.getTariffsInfo(id));
-    }
-
-    @Operation(summary = "Redirect to WayForPay from QR-code for payment.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK, content = @Content),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
-    })
-    @GetMapping("/redirect/{orderId}")
-    public ResponseEntity<Void> redirectToWayForPay(@PathVariable Long orderId) {
-        return ResponseEntity.status(HttpStatus.FOUND)
-            .location(URI.create(processPaymentService.formedLink(orderId))).build();
+    @GetMapping("/activeTariffsInfo")
+    public ResponseEntity<List<GetActiveTariffInfoDto>> activeTariffsInfo() {
+        return ResponseEntity.status(HttpStatus.OK).body(tariffService.getTariffsInfo());
     }
 }

@@ -2,7 +2,6 @@ package greencity.service.ubs.tariff;
 
 import static greencity.ModelUtils.getTariffInfoByLocationDto;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,11 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
-import greencity.constant.ErrorMessage;
 import greencity.dto.TariffInfoByLocationDto;
 import greencity.dto.TariffsForLocationDto;
 import greencity.dto.tariff.GetActiveTariffInfoDto;
-import greencity.entity.order.Courier;
 import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
@@ -25,6 +22,7 @@ import greencity.repository.TariffsInfoRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -175,15 +173,12 @@ class TariffServiceImplTest {
 
     @Test
     void getTariffsInfo_whenRepositoryReturnsEmptyList_thenReturnEmptyList() {
-        Courier courier = ModelUtils.getCourier();
+        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of());
 
-        when(tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)).thenReturn(List.of());
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
-
-        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
 
         assertThat(result).isEmpty();
-        verify(tariffsInfoRepository).findAllActiveTariffsInfoWithCourierId(courier);
+        verify(tariffsInfoRepository).findAllActiveTariffsInfo();
     }
 
     @Test
@@ -193,13 +188,10 @@ class TariffServiceImplTest {
             .build();
 
         GetActiveTariffInfoDto mappedDto = new GetActiveTariffInfoDto();
-        Courier courier = ModelUtils.getCourier();
-
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
-        when(tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)).thenReturn(List.of(entity));
         when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
+        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of(entity));
 
-        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
 
         assertThat(result).hasSize(1);
         GetActiveTariffInfoDto dto = result.get(0);
@@ -229,14 +221,11 @@ class TariffServiceImplTest {
             .tariffLocations(Set.of(tl1, tl2))
             .build();
 
-        Courier courier = ModelUtils.getCourier();
-
         GetActiveTariffInfoDto mappedDto = new GetActiveTariffInfoDto();
         when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
-        when(tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)).thenReturn(List.of(entity));
-        when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
+        when(tariffsInfoRepository.findAllActiveTariffsInfo()).thenReturn(List.of(entity));
 
-        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
+        List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo();
 
         assertThat(result).hasSize(1);
         GetActiveTariffInfoDto dto = result.get(0);
@@ -250,15 +239,5 @@ class TariffServiceImplTest {
             .contains("The tariff also includes")
             .contains("Kyiv")
             .contains("Lviv");
-    }
-
-    @Test
-    void getTariffsInfo_whenCourierNotFound_shouldThrowNotFoundException() {
-        Long courierId = 99L;
-        when(courierRepository.findById(courierId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> tariffService.getTariffsInfo(courierId))
-            .isInstanceOf(NotFoundException.class)
-            .hasMessageContaining(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID + courierId);
     }
 }

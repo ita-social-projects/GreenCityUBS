@@ -1,6 +1,5 @@
 package greencity.repository;
 
-import greencity.entity.order.Courier;
 import greencity.entity.order.TariffsInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -207,11 +206,8 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "AND c.id = :courierId ")
     Optional<TariffsInfo> findTariffInfoByLocationIdAndCourierId(Long locationId, Long courierId);
 
-    @Query("SELECT t FROM TariffsInfo t WHERE t.tariffStatus = 'ACTIVE' AND t.courier = :courier")
-    List<TariffsInfo> findAllActiveTariffsInfoWithCourierId(@Param("courier") Courier courier);
-
-    @Query("SELECT t FROM TariffsInfo t WHERE t.courier = :courier")
-    List<TariffsInfo> findAllTariffsInfoWithCourierId(@Param("courier") Courier courier);
+    @Query("SELECT t FROM TariffsInfo t WHERE t.tariffStatus = 'ACTIVE'")
+    List<TariffsInfo> findAllActiveTariffsInfo();
 
     @Query("SELECT t.tariffsInfo FROM TariffsInfoRecievingEmployee t WHERE t.employee.id = :employeeId")
     List<TariffsInfo> findByEmployeeId(@Param("employeeId") Long employeeId);

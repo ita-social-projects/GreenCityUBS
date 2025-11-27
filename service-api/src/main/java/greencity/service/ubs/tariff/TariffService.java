@@ -45,5 +45,5 @@ public interface TariffService {
      *
      * @return The list of active tariffs.
      */
-    List<GetActiveTariffInfoDto> getTariffsInfo(Long courierId);
+    List<GetActiveTariffInfoDto> getTariffsInfo();
 }

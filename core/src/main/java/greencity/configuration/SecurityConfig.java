@@ -28,7 +28,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import java.util.Arrays;
 import java.util.List;
-import static greencity.constant.AppConstant.*;
+import static greencity.constant.AppConstant.ADMIN;
+import static greencity.constant.AppConstant.ADMIN_EMPL_LINK;
+import static greencity.constant.AppConstant.ADMIN_LINK;
+import static greencity.constant.AppConstant.COMMIT_INFO;
+import static greencity.constant.AppConstant.EXPORT_SETTINGS_LINKS;
+import static greencity.constant.AppConstant.LOGS_LINKS;
+import static greencity.constant.AppConstant.SUPER_ADMIN_LINK;
+import static greencity.constant.AppConstant.TELEGRAM_LINK;
+import static greencity.constant.AppConstant.UBS_CLIENT_LINK;
+import static greencity.constant.AppConstant.UBS_EMPLOYEE;
+import static greencity.constant.AppConstant.UBS_EXPORT;
+import static greencity.constant.AppConstant.UBS_LINK;
+import static greencity.constant.AppConstant.UBS_LINK_USERPROFILE;
+import static greencity.constant.AppConstant.UBS_MANAG_LINK;
+import static greencity.constant.AppConstant.USER;
+import static greencity.constant.AppConstant.USER_AGREEMENT_LINK;
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
@@ -97,8 +112,7 @@ public class SecurityConfig {
                     USER_AGREEMENT_LINK + "/latest",
                     UBS_LINK + "/districts-for-kyiv",
                     UBS_LINK + "/order-details-for-tariff",
-                    UBS_LINK + "/activeTariffsInfo/{id}",
-                    UBS_LINK + "/redirect/{orderId}",
+                    UBS_LINK + "/activeTariffsInfo",
                     COMMIT_INFO,
                     SUPER_ADMIN_LINK + "/settingsText")
                 .permitAll()
@@ -242,7 +256,6 @@ public class SecurityConfig {
                     "/notifications/updateTemplateForSITE")
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.PUT,
-                    TELEGRAM_LINK + NOTIFICATIONS_LINK,
                     UBS_LINK + "/update-recipients-data")
                 .hasAnyRole(ADMIN, UBS_EMPLOYEE, USER)
                 .requestMatchers(HttpMethod.HEAD,
@@ -284,8 +297,7 @@ public class SecurityConfig {
                     UBS_LINK + "/order-details-for-tariff",
                     UBS_LINK + "/personal-data",
                     UBS_LINK + "/details-for-existing-order/{orderId}",
-                    UBS_LINK + "/orders/{id}/tariff",
-                    TELEGRAM_LINK + NOTIFICATIONS_LINK)
+                    UBS_LINK + "/orders/{id}/tariff")
                 .hasAnyRole(USER, ADMIN, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
                     TELEGRAM_LINK + "/**",

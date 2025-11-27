@@ -79,7 +79,7 @@ public class WayForPayServiceImpl implements WayForPayService {
             .orderDate(instant.getEpochSecond())
             .amount(moneyConverterUtil.convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
-            .orderTimeout(AppConstant.PAYMENT_VALIDITY_DURATION)
+            .orderTimeout(AppConstant.VALIDITY_DURATION_TEN_DAYS)
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
                 .map(orderBag -> orderBag.getNameUk().trim())

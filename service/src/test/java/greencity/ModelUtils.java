@@ -4299,8 +4299,6 @@ public class ModelUtils {
             .courierId(1L)
             .locationIdList(List.of(1L))
             .receivingStationsIdList(List.of(1L))
-            .tariffNameEn("Test")
-            .tariffNameUk("Тест")
             .regionId(1L)
             .build();
     }

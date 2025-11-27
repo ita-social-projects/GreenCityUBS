@@ -52,7 +52,7 @@ public class PaymentCalculatorServiceImpl implements PaymentCalculatorService {
         return payments.stream()
             .filter(payment -> PaymentStatus.PAID.equals(payment.getPaymentStatus()))
             .map(PaymentWithStatusDto::getAmount)
-            .mapToLong(e -> (long) (e * AppConstant.CURRENCY_CONVERSION_RATE))
+            .mapToLong(Double::longValue)
             .reduce(0L, Long::sum);
     }
 

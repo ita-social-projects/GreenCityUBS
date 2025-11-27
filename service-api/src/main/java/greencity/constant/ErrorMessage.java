@@ -112,7 +112,6 @@ public class ErrorMessage {
         "Could not find tariff for courier with id: %d and location with id: %d ";
     public static final String TARIFF_OR_LOCATION_IS_DEACTIVATED = "Tariff or location is deactivated.";
     public static final String TARIFF_IS_ALREADY_EXISTS = "Tariff for such locations is already exists";
-    public static final String TARIFF_WITH_SUCH_NAME_IS_ALREADY_EXISTS = "Tariff with such name is already exists";
     public static final String COULD_NOT_RETRIEVE_PASSWORD_STATUS = "Could not retrieve password status";
     public static final String COULD_NOT_RETRIEVE_CHECKOUT_RESPONSE = "Could not retrieve checkout response";
     public static final String COULD_NOT_RETRIEVE_CANCELLATION_RESPONSE =
@@ -225,7 +224,6 @@ public class ErrorMessage {
     public static final String SIGN_IN_TOKEN_NOT_FOUND = "SignIn token key not set";
     public static final String ORDER_LOCK_DURATION_MINUTES_NOT_FOUND = "OrderLockDuration property is empty";
     public static final String USER_SERVER_ADDRESS_NOT_FOUND = "The redirect user server address is empty";
-    public static final String UBS_SERVER_ADDRESS_NOT_FOUND = "The redirect ubs server address is empty";
     public static final String WEB_CLIENT_CONNECTION_TIMEOUT_NOT_FOUND = "The webclient connection timeout is empty";
     public static final String WEB_CLIENT_RESPONSE_TIMEOUT_NOT_FOUND = "The webclient response timeout is empty";
     public static final String TELEGRAM_BOT_NAME_NOT_FOUND = "The greencity bots name is empty";

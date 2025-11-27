@@ -1,36 +1,32 @@
 package greencity.service.ubs.pdf.exporter;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import com.lowagie.text.Document;
-import com.lowagie.text.Image;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfPTable;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import greencity.ModelUtils;
 import greencity.constant.AppConstant;
-import greencity.entity.order.Order;
 import greencity.enums.pdf.PdfQrCodeText;
 import greencity.dto.order.OrdersDataForUserDto;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
-import greencity.properties.RemoteWebClientProperties;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.payment.ProcessPaymentService;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersDataPdfFileExporterImplTest {
@@ -40,18 +36,8 @@ class OrdersDataPdfFileExporterImplTest {
     @Mock
     private OrderRepository orderRepository;
 
-    @Mock
-    private RemoteWebClientProperties remoteWebClientProperties;
-
     @InjectMocks
     private OrdersDataPdfFileExporterImpl pdfFileExporter;
-
-    private void invokeAddQrCode(OrdersDataForUserDto dto, Document document, Locale locale) throws Exception {
-        Method m = OrdersDataPdfFileExporterImpl.class
-            .getDeclaredMethod("addQrCode", OrdersDataForUserDto.class, Document.class, Locale.class);
-        m.setAccessible(true);
-        m.invoke(pdfFileExporter, dto, document, locale);
-    }
 
     @Test
     void exportValidEnPdf() throws IOException {
@@ -138,87 +124,32 @@ class OrdersDataPdfFileExporterImplTest {
     }
 
     @Test
-    void addQrCode_whenSumIsZeroOrNegative_shouldShowAlreadyPaidMessage() throws Exception {
-        long orderId = 1L;
-        Locale locale = Locale.UK;
+    void exportWhenLinkBlankShowsLinkNotGenerated() throws Exception {
+        var dto = ModelUtils.getOrdersDataForUserDto();
+        dto.setAmountBeforePayment(10.0);
+        when(orderRepository.findById(anyLong()))
+            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
+        when(processPaymentService.formedLink(any(), anyLong())).thenReturn("   ");
 
-        OrdersDataForUserDto orderDetails = mock(OrdersDataForUserDto.class);
-        when(orderDetails.getId()).thenReturn(orderId);
-        when(orderDetails.getAmountBeforePayment()).thenReturn(0.0); // => sumInCoins = 0
+        byte[] pdf = pdfFileExporter.export(dto, Locale.ENGLISH);
+        var text = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
 
-        Order order = new Order();
-        order.setId(orderId);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-
-        Document document = mock(Document.class);
-
-        invokeAddQrCode(orderDetails, document, locale);
-
-        ArgumentCaptor<Paragraph> paragraphCaptor = ArgumentCaptor.forClass(Paragraph.class);
-        verify(document, times(1)).add(paragraphCaptor.capture());
-
-        Paragraph paragraph = paragraphCaptor.getValue();
-        String actualText = paragraph.getContent().trim();
-
-        String expectedText =
-            PdfQrCodeText.getByLocale(PdfQrCodeText.ALREADY_PAID, locale);
-
-        assertEquals(expectedText, actualText);
-
-        verify(document, never()).add(isA(PdfPTable.class));
+        assertTrue(text.contains(PdfQrCodeText.getByLocale(PdfQrCodeText.LINK_NOT_GENERATED, Locale.ENGLISH)));
     }
 
     @Test
-    void addQrCode_whenSumPositive_shouldGenerateQrAndAddTable() throws Exception {
-        long orderId = 2L;
+    void export_whenLinkPresent_addsQrHint_andCallsFormedLink() throws Exception {
+        OrdersDataForUserDto dto = ModelUtils.getOrdersDataForUserDto();
+        dto.setAmountBeforePayment(10.00);
+        when(orderRepository.findById(anyLong()))
+            .thenReturn(Optional.of(mock(greencity.entity.order.Order.class)));
+        String url = "https://pay.example.com/invoice/TEST123";
+        when(processPaymentService.formedLink(any(), anyLong())).thenReturn(url);
         Locale locale = Locale.ENGLISH;
-
-        OrdersDataForUserDto orderDetails = mock(OrdersDataForUserDto.class);
-        when(orderDetails.getId()).thenReturn(orderId);
-        when(orderDetails.getAmountBeforePayment()).thenReturn(123.45); // > 0
-
-        Order order = new Order();
-        order.setId(orderId);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-
-        when(remoteWebClientProperties.getGreenCityUbsAddress()).thenReturn("/");
-
-        Document document = mock(Document.class);
-
-        BufferedImage fakeQrImage = new BufferedImage(150, 150, BufferedImage.TYPE_INT_RGB);
-        Image fakePdfImage = mock(Image.class);
-
-        try (MockedStatic<QrCodeGenerator> qrCodeGenMock = mockStatic(QrCodeGenerator.class);
-            MockedStatic<PdfImageUtil> pdfImageUtilMock = mockStatic(PdfImageUtil.class)) {
-
-            qrCodeGenMock
-                .when(() -> QrCodeGenerator.generateQrCodeImage(anyString(), eq(150), eq(150)))
-                .thenReturn(fakeQrImage);
-
-            pdfImageUtilMock
-                .when(() -> PdfImageUtil.convertBufferedImageToImage(fakeQrImage))
-                .thenReturn(fakePdfImage);
-
-            invokeAddQrCode(orderDetails, document, locale);
-
-            verify(document, atLeastOnce()).add(isA(PdfPTable.class));
-
-            ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
-
-            qrCodeGenMock.verify(
-                () -> QrCodeGenerator.generateQrCodeImage(linkCaptor.capture(), eq(150), eq(150)));
-
-            String actualLink = linkCaptor.getValue();
-
-            String expectedLink = UriComponentsBuilder
-                .fromPath("/")
-                .path("ubs/redirect/{orderId}")
-                .buildAndExpand(orderId)
-                .toUriString();
-
-            assertEquals(expectedLink, actualLink);
-
-            verify(document, never()).add(isA(Paragraph.class));
-        }
+        byte[] pdf = pdfFileExporter.export(dto, locale);
+        String pageText = new PdfTextExtractor(new PdfReader(pdf)).getTextFromPage(1, true);
+        String expectedHint = PdfQrCodeText.getByLocale(PdfQrCodeText.QR_CODE_HINT, locale);
+        assertTrue(pageText.contains(expectedHint));
+        verify(processPaymentService).formedLink(any(), anyLong());
     }
 }
