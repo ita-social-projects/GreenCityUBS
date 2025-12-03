@@ -1,23 +1,36 @@
 package greencity.configuration;
 
-import greencity.constant.AppConstant;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
-import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.messaging.simp.config.ChannelRegistration;
+import org.springframework.security.authorization.AuthorizationEventPublisher;
+import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.SpringAuthorizationEventPublisher;
+import org.springframework.security.messaging.access.intercept.AuthorizationChannelInterceptor;
+import org.springframework.security.messaging.context.AuthenticationPrincipalArgumentResolver;
+import org.springframework.security.messaging.context.SecurityContextChannelInterceptor;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import java.util.List;
 
 @Configuration
-public class WebSocketSecurityConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
+@RequiredArgsConstructor
+public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer {
+    private final ApplicationContext applicationContext;
+    private final AuthorizationManager<Message<?>> authorizationManager;
+
     @Override
-    protected void configureInbound(final MessageSecurityMetadataSourceRegistry messages) {
-        messages
-            .simpSubscribeDestMatchers("/topic/chats/**").hasRole(AppConstant.UBS_EMPLOYEE)
-            .simpSubscribeDestMatchers("/topic/messages/**").hasRole(AppConstant.UBS_EMPLOYEE)
-            .simpSubscribeDestMatchers("/topic/unread/**").hasRole(AppConstant.UBS_EMPLOYEE)
-            .anyMessage().authenticated();
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+        argumentResolvers.add(new AuthenticationPrincipalArgumentResolver());
     }
 
     @Override
-    protected boolean sameOriginDisabled() {
-        return true;
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        AuthorizationChannelInterceptor authz = new AuthorizationChannelInterceptor(authorizationManager);
+        AuthorizationEventPublisher publisher = new SpringAuthorizationEventPublisher(applicationContext);
+        authz.setAuthorizationEventPublisher(publisher);
+        registration.interceptors(new SecurityContextChannelInterceptor(), authz);
     }
 }
