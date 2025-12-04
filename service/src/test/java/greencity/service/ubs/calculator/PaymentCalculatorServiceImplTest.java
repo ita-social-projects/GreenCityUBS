@@ -45,10 +45,10 @@ class PaymentCalculatorServiceImplTest {
         paidPayment.setPaymentStatus(PaymentStatus.PAID);
         paidPayment.setAmount(20L);
 
-        long bagsSum = 100L;
-        long afterCertificates = 80L;
-        long afterPoints = 60L;
-        long afterClientCertificates = 50L;
+        long bagsSum = 10000L;
+        long afterCertificates = 8000L;
+        long afterPoints = 6000L;
+        long afterClientCertificates = 5000L;
 
         when(bagCalculatorService.getBagsSumToPayInCoins(order)).thenReturn(bagsSum);
         when(certificateCalculatorService.getCertificateSumToPayInCoins(order.getId(), bagsSum))
@@ -66,7 +66,7 @@ class PaymentCalculatorServiceImplTest {
 
         long result = paymentCalculatorService.calculateSumToPay(dto, order, user);
 
-        assertEquals(30L, result);
+        assertEquals(3000L, result);
         verify(bagCalculatorService).getBagsSumToPayInCoins(order);
         verify(certificateCalculatorService).getCertificateSumToPayInCoins(order.getId(), bagsSum);
         verify(pointCalculatorService).getPointSumToPayInCoins(dto, user, afterCertificates);
@@ -77,21 +77,21 @@ class PaymentCalculatorServiceImplTest {
     void countPaidAmount_ShouldReturnSumOfPaidPayments() {
         PaymentWithStatusDto p1 = new PaymentWithStatusDto();
         p1.setPaymentStatus(PaymentStatus.PAID);
-        p1.setAmount(30.0);
+        p1.setAmount(30.0);// 3000
 
         PaymentWithStatusDto p2 = new PaymentWithStatusDto();
         p2.setPaymentStatus(PaymentStatus.UNPAID);
-        p2.setAmount(40.0);
+        p2.setAmount(40.0);// 4000
 
         PaymentWithStatusDto p3 = new PaymentWithStatusDto();
         p3.setPaymentStatus(PaymentStatus.PAID);
-        p3.setAmount(50.0);
+        p3.setAmount(50.0);// 5000
 
         List<PaymentWithStatusDto> payments = List.of(p1, p2, p3);
 
         Long result = paymentCalculatorService.countPaidAmount(payments);
 
-        assertEquals(80L, result);
+        assertEquals(8000L, result);
     }
 
     @Test

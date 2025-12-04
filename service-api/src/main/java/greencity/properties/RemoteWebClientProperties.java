@@ -24,6 +24,7 @@ public class RemoteWebClientProperties {
     @PostConstruct
     public void validateProperties() {
         getGreenCityUserAddress();
+        getGreenCityUbsAddress();
         getWebClientConnectTimeout();
         getWebClientResponseTimeout();
         log.info("All Remote Web Client properties validated successfully.");
@@ -34,6 +35,15 @@ public class RemoteWebClientProperties {
         if (!StringUtils.hasText(address)) {
             log.error(ErrorMessage.USER_SERVER_ADDRESS_NOT_FOUND);
             throw new IllegalStateException(ErrorMessage.USER_SERVER_ADDRESS_NOT_FOUND);
+        }
+        return address;
+    }
+
+    public String getGreenCityUbsAddress() {
+        String address = environment.getProperty("greencity.redirect.ubs-server-address");
+        if (!StringUtils.hasText(address)) {
+            log.error(ErrorMessage.UBS_SERVER_ADDRESS_NOT_FOUND);
+            throw new IllegalStateException(ErrorMessage.UBS_SERVER_ADDRESS_NOT_FOUND);
         }
         return address;
     }
