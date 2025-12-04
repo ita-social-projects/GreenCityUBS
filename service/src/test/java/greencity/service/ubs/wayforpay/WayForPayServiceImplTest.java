@@ -89,7 +89,6 @@ class WayForPayServiceImplTest {
         assertEquals("http://pay-link", response.link());
     }
 
-
     @Test
     void testProcessWayForPay_throwException() {
         Order order = ModelUtils.getOrder();
@@ -100,12 +99,12 @@ class WayForPayServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(moneyConverterUtil.convertCoinsIntoBills(anyLong())).thenReturn(Double.valueOf(100));
         when(encryptionUtil.formRequestSignature(any(), anyString())).thenReturn("signed");
-        when(wayForPayClient.getCheckOutResponse(any())).thenReturn("{\"reasonCode\":1101,\"reason\":\"Signature is invalid\"}");
+        when(wayForPayClient.getCheckOutResponse(any()))
+            .thenReturn("{\"reasonCode\":1101,\"reason\":\"Signature is invalid\"}");
         Long orderId = order.getId();
         assertThrows(
             IllegalStateException.class,
-            () -> wayForPayService.processWayForPay(orderResponseDto, orderId, 500L)
-        );
+            () -> wayForPayService.processWayForPay(orderResponseDto, orderId, 500L));
     }
 
     @Test

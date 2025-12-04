@@ -117,8 +117,7 @@ public class WayForPayServiceImpl implements WayForPayService {
         if (!json.has(INVOICE_URL) || json.isNull(INVOICE_URL)) {
             log.error(wayForPayResponse);
             throw new IllegalStateException(
-                "WayForPay response does not contain invoiceUrl. Response: " + wayForPayResponse
-            );
+                "WayForPay response does not contain invoiceUrl. Response: " + wayForPayResponse);
         }
         return json.getString(INVOICE_URL);
     }
