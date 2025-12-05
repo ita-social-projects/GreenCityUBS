@@ -612,6 +612,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public AddNewTariffResponseDto addNewTariff(AddNewTariffDto addNewTariffDto, String userUUID) {
         Courier courier = tryToFindCourierById(addNewTariffDto.getCourierId());
         checkIfCourierHasStatusDeactivated(courier);
+        checkIfTariffExistsByCourier(courier, addNewTariffDto.getTariffNameUk(), addNewTariffDto.getTariffNameEn());
         List<Long> idListToCheck = new ArrayList<>(addNewTariffDto.getLocationIdList());
         final var tariffForLocationAndCourierAlreadyExistIdList =
             verifyIfTariffExists(idListToCheck, addNewTariffDto.getCourierId());
@@ -633,6 +634,16 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfoRepository.save(tariffsInfo);
         updateEmployeeTariffsInfoMapping(tariffsInfo);
         return new AddNewTariffResponseDto(tariffForLocationAndCourierAlreadyExistIdList, idListToCheck);
+    }
+
+    private void checkIfTariffExistsByCourier(Courier courier, String nameUk, String nameEn) {
+        List<TariffsInfo> tariffsInfoList = tariffsInfoRepository.findAllTariffsInfoWithCourierId(courier);
+        for (TariffsInfo tariffsInfo : tariffsInfoList) {
+            if (tariffsInfo.getTariffNameUk().equals(nameUk)
+                || tariffsInfo.getTariffNameEn().equals(nameEn)) {
+                throw new TariffAlreadyExistsException(ErrorMessage.TARIFF_WITH_SUCH_NAME_IS_ALREADY_EXISTS);
+            }
+        }
     }
 
     private void checkIfCourierHasStatusDeactivated(Courier courier) {
@@ -756,11 +767,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public void editTariff(Long id, EditTariffDto dto) {
         TariffsInfo tariffsInfo = tryToFindTariffById(id);
         List<Location> locations = tryToFindLocationsInSameRegion(dto.getLocationIds());
+        Courier courier = courierRepository.findById(dto.getCourierId())
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
 
         if (dto.getCourierId() != null) {
-            Courier courier = courierRepository.findById(dto.getCourierId())
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURIER_IS_NOT_FOUND_BY_ID));
-
             if (courier.getCourierStatus().equals(CourierStatus.DEACTIVATED)) {
                 throw new BadRequestException(ErrorMessage.TARIFF_EDIT_RESTRICTION_DUE_TO_DEACTIVATED_COURIER
                     + dto.getCourierId());
@@ -775,8 +785,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         tariffsInfo.setReceivingStationList(receivingStations);
         tariffsInfo.setTariffLocations(tariffLocations);
+        checkIfTariffExistsByCourier(courier, dto.getTariffNameUk(), dto.getTariffNameEn());
         updateTariffNamesIfPresent(tariffsInfo, dto);
-
         tariffsInfoRepository.save(tariffsInfo);
     }
 

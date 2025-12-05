@@ -51,6 +51,7 @@ public class WayForPayServiceImpl implements WayForPayService {
     private final WayForPayClient wayForPayClient;
     private final Scheduler quartzScheduler;
     private final WayForPayProperties wayForPayProperties;
+    private static final String INVOICE_URL = "invoiceUrl";
 
     @Override
     @Transactional
@@ -79,7 +80,7 @@ public class WayForPayServiceImpl implements WayForPayService {
             .orderDate(instant.getEpochSecond())
             .amount(moneyConverterUtil.convertCoinsIntoBills(sumToPayInCoins).intValue())
             .currency("UAH")
-            .orderTimeout(AppConstant.VALIDITY_DURATION_TEN_DAYS)
+            .orderTimeout(AppConstant.PAYMENT_VALIDITY_DURATION)
             .productName(order.getOrderBags().stream()
                 .filter(bag -> bag.getAmount() != 0)
                 .map(orderBag -> orderBag.getNameUk().trim())
@@ -113,7 +114,12 @@ public class WayForPayServiceImpl implements WayForPayService {
     @Override
     public String getLinkFromWayForPayCheckoutResponse(String wayForPayResponse) {
         JSONObject json = new JSONObject(wayForPayResponse);
-        return json.getString("invoiceUrl");
+        if (!json.has(INVOICE_URL) || json.isNull(INVOICE_URL)) {
+            log.error(wayForPayResponse);
+            throw new IllegalStateException(
+                "WayForPay response does not contain invoiceUrl. Response: " + wayForPayResponse);
+        }
+        return json.getString(INVOICE_URL);
     }
 
     @Override

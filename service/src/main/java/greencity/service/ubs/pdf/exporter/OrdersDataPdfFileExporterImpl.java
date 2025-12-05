@@ -36,9 +36,9 @@ import greencity.dto.order.OrdersDataForUserDto;
 import greencity.entity.order.Order;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.exporting.pdf.PdfFileExportingException;
+import greencity.properties.RemoteWebClientProperties;
 import greencity.repository.OrderRepository;
 import greencity.service.ubs.file.export.FileExporter;
-import greencity.service.ubs.payment.ProcessPaymentService;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -49,13 +49,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataForUserDto> {
     private static final String DEFAULT_FONT_NAME = "Comic Sans MS";
     private static final Color DEFAULT_CELL_BACKGROUND_COLOR = Color.WHITE;
@@ -67,8 +68,8 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
     private static final int DEFAULT_SPACING_VALUE = 10;
     private static final float[] ORDER_DETAILS_TABLE_COLUMN_WIDTH = new float[] {50, 95, 100, 100, 80, 100, 80};
     private static final float[] ORDER_CONTENT_TABLE_COLUMN_WIDTH = new float[] {125, 120, 120, 120, 120};
-    private final ProcessPaymentService processPaymentService;
     private final OrderRepository orderRepository;
+    private final RemoteWebClientProperties remoteWebClientProperties;
 
     /**
      * {@inheritDoc}
@@ -278,17 +279,13 @@ public class OrdersDataPdfFileExporterImpl implements FileExporter<OrdersDataFor
                 return;
             }
 
-            String paymentLink = order.getPaymentLink();
-            if (paymentLink == null || paymentLink.isBlank()) {
-                paymentLink = processPaymentService.formedLink(order.getId(), sumInCoins);
-            }
+            String backendQrUrl = UriComponentsBuilder
+                .fromPath(remoteWebClientProperties.getGreenCityUbsAddress())
+                .path("ubs/redirect/{orderId}")
+                .buildAndExpand(order.getId())
+                .toUriString();
 
-            if (paymentLink == null || paymentLink.isBlank()) {
-                addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);
-                return;
-            }
-
-            addQrCodeWithText(document, paymentLink, locale);
+            addQrCodeWithText(document, backendQrUrl, locale);
         } catch (Exception e) {
             log.warn("Cannot add QR code to PDF for order {}: {}", orderDetails.getId(), e.getMessage(), e);
             addQrCodeMessage(document, PdfQrCodeText.LINK_NOT_GENERATED, locale);

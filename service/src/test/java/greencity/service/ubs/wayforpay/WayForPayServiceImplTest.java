@@ -90,6 +90,24 @@ class WayForPayServiceImplTest {
     }
 
     @Test
+    void testProcessWayForPay_throwException() {
+        Order order = ModelUtils.getOrder();
+        order.setId(1L);
+        order.setOrderBags(List.of());
+        OrderResponseDto orderResponseDto = ModelUtils.getOrderResponseDto();
+
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(moneyConverterUtil.convertCoinsIntoBills(anyLong())).thenReturn(Double.valueOf(100));
+        when(encryptionUtil.formRequestSignature(any(), anyString())).thenReturn("signed");
+        when(wayForPayClient.getCheckOutResponse(any()))
+            .thenReturn("{\"reasonCode\":1101,\"reason\":\"Signature is invalid\"}");
+        Long orderId = order.getId();
+        assertThrows(
+            IllegalStateException.class,
+            () -> wayForPayService.processWayForPay(orderResponseDto, orderId, 500L));
+    }
+
+    @Test
     void testFormPaymentRequestForWayForPay_Success() {
         long sumToPayInCoins = 1000L;
         Long orderId = 2L;

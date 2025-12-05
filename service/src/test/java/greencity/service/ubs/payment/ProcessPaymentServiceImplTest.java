@@ -51,6 +51,7 @@ import greencity.entity.order.Certificate;
 import greencity.entity.order.Order;
 import greencity.entity.order.Payment;
 import greencity.entity.user.User;
+import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
 import greencity.enums.CertificateStatus;
 import greencity.enums.OrderPaymentStatus;
@@ -225,6 +226,44 @@ class ProcessPaymentServiceImplTest {
 
         assertThrows(AddressNotWithinLocationAreaException.class,
             () -> service.processNewOrder(dto, "uuid"));
+    }
+
+    @Test
+    void processNewOrder_shouldUpdateAlternateEmail_whenEmailDiffers() {
+        String oldEmail = "old@mail.com";
+        String newEmail = "new@mail.com";
+        OrderResponseDto dto = getOrderResponseDto(false);
+        dto.getPersonalData().setEmail(newEmail);
+        Order order = getOrder();
+        UBSuser ubsUser = getUBSuser();
+        PaymentSystemResponse response = getPaymentSystemResponse();
+        OrderAddressDto addressDto = getOrderAddressDto();
+        OrderAddress orderAddress = getOrderAddress();
+        User user = getUser();
+        user.setOrders(new ArrayList<>(List.of(order)));
+        user.setRecipientEmail(oldEmail);
+
+        when(addressService.checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId()))
+            .thenReturn(true);
+        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), dto.getLocationId(), user.getId()))
+            .thenReturn(addressDto);
+        when(orderAddressRepository.findById(addressDto.getId())).thenReturn(Optional.of(orderAddress));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
+        when(userRepository.findByUuid("uuid")).thenReturn(user);
+        when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
+        when(orderService.formAndSaveOrderRequest(dto, order.getId(), user.getId(), null))
+            .thenReturn(order.getId());
+        when(orderRepository.save(order)).thenReturn(order);
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(ubsUserRepository.save(ubsUser)).thenReturn(ubsUser);
+        when(userRepository.save(user)).thenReturn(user);
+        when(wayForPayService.getPaymentRequestDto(order.getId(), "")).thenReturn(response);
+        doNothing().when(eventService).save(anyString(), anyString(), anyLong());
+        doNothing().when(notificationService).notifyCreatedOrder(order.getId());
+
+        service.processNewOrder(dto, "uuid");
+
+        assertEquals(newEmail, user.getAlternateEmail());
     }
 
     @Test
@@ -786,6 +825,27 @@ class ProcessPaymentServiceImplTest {
         when(wayForPayService.getLinkFromWayForPayCheckoutResponse(anyString())).thenReturn(invoiceUrl);
 
         String result = service.formedLink(order.getId(), 560, dto);
+
+        assertEquals(invoiceUrl, result);
+    }
+
+    @Test
+    void formedLinkForQRCodeTest() {
+        String invoiceUrl = "https://pay.example.com/invoice/TEST123";
+        Order order = getOrderCount();
+        order.setPayment(List.of(getPayment()));
+        order.setPaymentLink(" ");
+        order.setSumTotalAmountWithoutDiscounts(400L);
+        PaymentWayForPayRequestDto payRequestDto = new PaymentWayForPayRequestDto();
+
+        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
+        when(wayForPayClient.getCheckOutResponse(any()))
+            .thenReturn("{\"invoiceUrl\":\"https://pay.example.com/invoice/TEST123\"}");
+        when(wayForPayService.formPaymentRequestForWayForPay(anyLong(), anyLong()))
+            .thenReturn(payRequestDto);
+        when(wayForPayService.getLinkFromWayForPayCheckoutResponse(anyString())).thenReturn(invoiceUrl);
+
+        String result = service.formedLink(order.getId());
 
         assertEquals(invoiceUrl, result);
     }
