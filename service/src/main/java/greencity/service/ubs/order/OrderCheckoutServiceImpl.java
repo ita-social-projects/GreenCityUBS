@@ -1,12 +1,5 @@
 package greencity.service.ubs.order;
 
-import static greencity.constant.ErrorMessage.LOCATION_DOESNT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_NOT_FOUND;
-import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.dto.bag.BagTranslationDto;
@@ -24,7 +17,6 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.BagRepository;
-import greencity.repository.LocationRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TariffLocationRepository;
@@ -39,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import static greencity.constant.ErrorMessage.*;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +39,6 @@ import org.springframework.stereotype.Service;
 public class OrderCheckoutServiceImpl implements OrderCheckoutService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final TariffLocationRepository tariffLocationRepository;
-    private final LocationRepository locationRepository;
     private final BagRepository bagRepository;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
@@ -55,14 +47,13 @@ public class OrderCheckoutServiceImpl implements OrderCheckoutService {
     private final ModelMapper modelMapper;
 
     @Override
-    public UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(Long tariffId, Long locationId) {
+    public UserPointsAndAllBagsDto getFirstPageDataByTariff(Long tariffId) {
         TariffsInfo tariffsInfo = tariffsInfoRepository.findById(tariffId)
             .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + tariffId));
 
-        Location location = locationRepository.findById(locationId)
-            .orElseThrow(() -> new NotFoundException(LOCATION_DOESNT_FOUND_BY_ID + locationId));
-
-        checkIfTariffIsAvailableForCurrentLocation(tariffsInfo, location);
+        if (tariffsInfo.getTariffStatus() == TariffStatus.DEACTIVATED) {
+            throw new BadRequestException(TARIFF_IS_DEACTIVATED);
+        }
 
         return getUserPointsAndAllBagsDtoByTariffIdAndUserPoints(tariffsInfo.getId(), 0);
     }
