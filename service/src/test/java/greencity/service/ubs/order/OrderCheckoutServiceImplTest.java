@@ -1,9 +1,6 @@
 package greencity.service.ubs.order;
 
-import static greencity.constant.ErrorMessage.LOCATION_IS_DEACTIVATED_FOR_TARIFF;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TARIFF_OR_LOCATION_IS_DEACTIVATED;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,13 +20,11 @@ import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.LocationStatus;
 import greencity.enums.TariffStatus;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.http.AccessDeniedException;
 import greencity.repository.BagRepository;
-import greencity.repository.LocationRepository;
 import greencity.repository.OrderBagRepository;
 import greencity.repository.OrderRepository;
 import greencity.repository.TariffLocationRepository;
@@ -57,8 +52,6 @@ class OrderCheckoutServiceImplTest {
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private TariffLocationRepository tariffLocationRepository;
-    @Mock
-    private LocationRepository locationRepository;
     @Mock
     private BagRepository bagRepository;
     @Mock
@@ -95,33 +88,25 @@ class OrderCheckoutServiceImplTest {
     }
 
     @Test
-    void getFirstPageDataByTariffAndLocationId_success() {
+    void getFirstPageDataByTariff_success() {
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
-        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
-            .thenReturn(Optional.of(TariffLocation.builder()
-                .id(1L)
-                .location(location)
-                .tariffsInfo(tariffsInfo)
-                .locationStatus(location.getLocationStatus())
-                .build()));
         when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(ModelUtils.getBag()));
 
         when(modelMapper.map(any(Bag.class), eq(BagTranslationDto.class)))
             .thenReturn(ModelUtils.getBagTranslationDto());
 
         UserPointsAndAllBagsDto result =
-            orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L);
+            orderCheckoutService.getFirstPageDataByTariff(1L);
 
         assertThat(result.getBags()).hasSize(1);
     }
 
     @Test
-    void getFirstPageDataByTariffAndLocationId_tariffNotFound() {
+    void getFirstPageDataByTariff_tariffNotFound() {
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-            orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L))
+            orderCheckoutService.getFirstPageDataByTariff(1L))
             .isInstanceOf(NotFoundException.class);
     }
 
@@ -211,43 +196,14 @@ class OrderCheckoutServiceImplTest {
     }
 
     @Test
-    void getFirstPageDataByTariffAndLocationId_tariffOrLocationDeactivated() {
+    void getFirstPageDataByTariff_tariffOrLocationDeactivated() {
         tariffsInfo.setTariffStatus(TariffStatus.DEACTIVATED);
 
         when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
 
-        assertThatThrownBy(() -> orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L))
+        assertThatThrownBy(() -> orderCheckoutService.getFirstPageDataByTariff(1L))
             .isInstanceOf(BadRequestException.class)
-            .hasMessageContaining(TARIFF_OR_LOCATION_IS_DEACTIVATED);
-    }
-
-    @Test
-    void getFirstPageDataByTariffAndLocationId_locationDeactivatedForTariff() {
-        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
-        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
-            .thenReturn(Optional.of(TariffLocation.builder()
-                .id(1L)
-                .location(location)
-                .tariffsInfo(tariffsInfo)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build()));
-
-        location.setLocationStatus(LocationStatus.ACTIVE);
-        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
-        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
-            .thenReturn(Optional.of(TariffLocation.builder()
-                .id(1L)
-                .location(location)
-                .tariffsInfo(tariffsInfo)
-                .locationStatus(LocationStatus.DEACTIVATED)
-                .build()));
-
-        assertThatThrownBy(() ->
-            orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L))
-            .isInstanceOf(BadRequestException.class)
-            .hasMessageContaining(LOCATION_IS_DEACTIVATED_FOR_TARIFF + 1L);
+            .hasMessageContaining(TARIFF_IS_DEACTIVATED);
     }
 
     @Test
@@ -264,38 +220,5 @@ class OrderCheckoutServiceImplTest {
         PersonalDataDto result = orderCheckoutService.getSecondPageData("uuid-123");
 
         assertThat(result.getEmail()).isNull();
-    }
-
-    @Test
-    void isTariffAvailableForCurrentLocation_success() {
-        when(tariffLocationRepository.findTariffLocationByTariffsInfoAndLocation(tariffsInfo, location))
-            .thenReturn(Optional.of(TariffLocation.builder()
-                .id(1L)
-                .tariffsInfo(tariffsInfo)
-                .location(location)
-                .locationStatus(LocationStatus.ACTIVE)
-                .build()));
-
-        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
-        when(bagRepository.findAllActiveBagsByTariffsInfoId(1L)).thenReturn(List.of(ModelUtils.getBag()));
-        when(modelMapper.map(any(Bag.class), eq(BagTranslationDto.class))).thenReturn(ModelUtils.getBagTranslationDto());
-
-        UserPointsAndAllBagsDto result = orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L);
-
-        assertThat(result.getBags()).isNotEmpty();
-    }
-
-    @Test
-    void getFirstPageDataByTariffAndLocationId_locationStatusDeactivated() {
-        tariffsInfo.setTariffStatus(TariffStatus.ACTIVE);
-        location.setLocationStatus(LocationStatus.DEACTIVATED);
-
-        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariffsInfo));
-        when(locationRepository.findById(10L)).thenReturn(Optional.of(location));
-
-        assertThatThrownBy(() -> orderCheckoutService.getFirstPageDataByTariffAndLocationId(1L, 10L))
-            .isInstanceOf(BadRequestException.class)
-            .hasMessageContaining(TARIFF_OR_LOCATION_IS_DEACTIVATED);
     }
 }

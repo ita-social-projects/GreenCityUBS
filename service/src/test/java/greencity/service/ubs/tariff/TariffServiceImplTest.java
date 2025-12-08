@@ -20,7 +20,6 @@ import greencity.entity.order.TariffsInfo;
 import greencity.entity.user.Location;
 import greencity.exceptions.NotFoundException;
 import greencity.repository.CourierRepository;
-import greencity.repository.LocationRepository;
 import greencity.repository.TariffsInfoRepository;
 import java.util.List;
 import java.util.Optional;
@@ -37,8 +36,6 @@ class TariffServiceImplTest {
     @Mock
     private CourierRepository courierRepository;
     @Mock
-    private LocationRepository locationRepository;
-    @Mock
     private TariffsInfoRepository tariffsInfoRepository;
     @Mock
     private ModelMapper modelMapper;
@@ -47,58 +44,29 @@ class TariffServiceImplTest {
     private TariffServiceImpl tariffService;
 
     @Test
-    void getTariffInfoForLocation() {
-        Long courierId = 1L;
-        Long locationId = 2L;
+    void getTariffInfo() {
+        Long tariffId = 1L;
 
         TariffInfoByLocationDto tariffInfoByLocationDto = getTariffInfoByLocationDto();
         TariffsInfo tariffsInfo = ModelUtils.getTariffsInfo();
 
-        when(courierRepository.existsCourierById(courierId)).thenReturn(true);
-        when(locationRepository.existsById(locationId)).thenReturn(true);
-        when(tariffsInfoRepository.findTariffsInfoLimitsByCourierIdAndLocationId(courierId, locationId))
+        when(tariffsInfoRepository.findById(tariffId))
             .thenReturn(Optional.ofNullable(tariffsInfo));
         when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class))
             .thenReturn(tariffInfoByLocationDto.getTariffsForLocationDto());
 
-        TariffInfoByLocationDto result = tariffService.getTariffInfoForLocation(courierId, locationId);
-
+        TariffInfoByLocationDto result = tariffService.getTariffInfo(tariffId);
         assertEquals(tariffInfoByLocationDto, result);
     }
 
     @Test
-    void getTariffInfoForLocation_CourierNotFound() {
-        Long courierId = 1L;
-        Long locationId = 2L;
+    void getTariffInfo_TariffNotFound() {
+        Long tariffId = 1L;
 
-        when(courierRepository.existsCourierById(courierId)).thenReturn(false);
-
-        assertThrows(NotFoundException.class,
-            () -> tariffService.getTariffInfoForLocation(courierId, locationId));
-    }
-
-    @Test
-    void getTariffInfoForLocation_LocationNotFound() {
-        Long courierId = 1L;
-        Long locationId = 2L;
-
-        when(courierRepository.existsCourierById(courierId)).thenReturn(true);
-        when(locationRepository.existsById(locationId)).thenReturn(false);
+        when(tariffsInfoRepository.findById(tariffId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> tariffService.getTariffInfoForLocation(courierId, locationId));
-    }
-
-    @Test
-    void getTariffInfoForLocation_TariffNotFound() {
-        Long courierId = 1L;
-        Long locationId = 2L;
-
-        when(courierRepository.existsCourierById(courierId)).thenReturn(true);
-        when(locationRepository.existsById(locationId)).thenReturn(true);
-
-        assertThrows(NotFoundException.class,
-            () -> tariffService.getTariffInfoForLocation(courierId, locationId));
+            () -> tariffService.getTariffInfo(tariffId));
     }
 
     @Test

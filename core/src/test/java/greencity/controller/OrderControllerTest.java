@@ -128,7 +128,7 @@ class OrderControllerTest {
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(orderCheckoutService).getFirstPageDataByTariffAndLocationId(1L, 1L);
+        verify(orderCheckoutService).getFirstPageDataByTariff(1L);
     }
 
     @Test

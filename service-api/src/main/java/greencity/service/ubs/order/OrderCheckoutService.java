@@ -7,12 +7,11 @@ public interface OrderCheckoutService {
     /**
      * Method returns all bags available for order.
      *
-     * @param tariffId   {@link Long} tariff id.
-     * @param locationId {@link Long} location id.
+     * @param tariffId {@link Long} tariff id.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author Safarov Renat
      */
-    UserPointsAndAllBagsDto getFirstPageDataByTariffAndLocationId(Long tariffId, Long locationId);
+    UserPointsAndAllBagsDto getFirstPageDataByTariff(Long tariffId);
 
     /**
      * Methods returns all available for order bags and current user's bonus points.
