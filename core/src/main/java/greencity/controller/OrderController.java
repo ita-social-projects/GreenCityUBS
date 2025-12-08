@@ -86,14 +86,13 @@ public class OrderController {
     private final UserService userService;
 
     /**
-     * Controller returns all available bags by tariff and location ids.
+     * Controller returns all available bags by tariff id.
      *
-     * @param tariffId   - id of tariff.
-     * @param locationId - id of location.
+     * @param tariffId - id of tariff.
      * @return {@link UserPointsAndAllBagsDto}.
      * @author SafarovRenat
      */
-    @Operation(summary = "Get details for the given tariff and location")
+    @Operation(summary = "Get details for the given tariff")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
             content = @Content(schema = @Schema(implementation = UserPointsAndAllBagsDto.class))),
@@ -101,11 +100,10 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/order-details-for-tariff")
-    public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByTariffAndLocationId(
-        @RequestParam Long tariffId,
-        @RequestParam Long locationId) {
+    public ResponseEntity<UserPointsAndAllBagsDto> getCurrentUserPointsByTariffId(
+        @RequestParam Long tariffId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(orderCheckoutService.getFirstPageDataByTariffAndLocationId(tariffId, locationId));
+            .body(orderCheckoutService.getFirstPageDataByTariff(tariffId));
     }
 
     /**
@@ -435,25 +433,23 @@ public class OrderController {
     }
 
     /**
-     * Controller for getting info about tariff for courier and location.
+     * Controller for getting info about tariff.
      *
-     * @param courierId  - id of courier
-     * @param locationId - id of location
+     * @param tariffId - id of tariff
      * @return {@link TariffInfoByLocationDto}
      * @author Anton Bondar
      */
-    @Operation(summary = "Get tariff for courier and location")
+    @Operation(summary = "Get tariff by tariff ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @GetMapping("/tariffinfo/{locationId}")
+    @GetMapping("/tariffinfo/{tariffId}")
     public ResponseEntity<TariffInfoByLocationDto> getInfoAboutTariff(
-        @Positive @RequestParam Long courierId,
-        @Positive @PathVariable Long locationId) {
+        @Positive @PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(tariffService.getTariffInfoForLocation(courierId, locationId));
+            .body(tariffService.getTariffInfo(tariffId));
     }
 
     /**
