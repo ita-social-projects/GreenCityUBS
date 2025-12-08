@@ -7,14 +7,13 @@ import java.util.List;
 
 public interface TariffService {
     /**
-     * Method for getting info about tariff by courier ID and location ID.
+     * Method for getting info about tariff by tariff ID.
      *
-     * @param courierId  - id of courier
-     * @param locationId - id of location
+     * @param tariffId The ID of the tariff.
      * @return {@link TariffInfoByLocationDto}
      * @author Anton Bondar
      */
-    TariffInfoByLocationDto getTariffInfoForLocation(Long courierId, Long locationId);
+    TariffInfoByLocationDto getTariffInfoForLocation(Long tariffId);
 
     /**
      * Method for getting info about tariff by order's id.

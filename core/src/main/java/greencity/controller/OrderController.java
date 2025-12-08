@@ -435,25 +435,23 @@ public class OrderController {
     }
 
     /**
-     * Controller for getting info about tariff for courier and location.
+     * Controller for getting info about tariff.
      *
-     * @param courierId  - id of courier
-     * @param locationId - id of location
+     * @param tariffId - id of tariff
      * @return {@link TariffInfoByLocationDto}
      * @author Anton Bondar
      */
-    @Operation(summary = "Get tariff for courier and location")
+    @Operation(summary = "Get tariff by tariff ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
         @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
-    @GetMapping("/tariffinfo/{locationId}")
+    @GetMapping("/tariffinfo/{tariffId}")
     public ResponseEntity<TariffInfoByLocationDto> getInfoAboutTariff(
-        @Positive @RequestParam Long courierId,
-        @Positive @PathVariable Long locationId) {
+        @Positive @PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(tariffService.getTariffInfoForLocation(courierId, locationId));
+            .body(tariffService.getTariffInfoForLocation(tariffId));
     }
 
     /**
