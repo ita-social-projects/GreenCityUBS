@@ -13,7 +13,7 @@ public interface TariffService {
      * @return {@link TariffInfoByLocationDto}
      * @author Anton Bondar
      */
-    TariffInfoByLocationDto getTariffInfoForLocation(Long tariffId);
+    TariffInfoByLocationDto getTariffInfo(Long tariffId);
 
     /**
      * Method for getting info about tariff by order's id.

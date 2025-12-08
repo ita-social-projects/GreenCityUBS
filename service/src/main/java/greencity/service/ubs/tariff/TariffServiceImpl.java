@@ -28,7 +28,7 @@ public class TariffServiceImpl implements TariffService {
     private final ModelMapper modelMapper;
 
     @Override
-    public TariffInfoByLocationDto getTariffInfoForLocation(Long tariffId) {
+    public TariffInfoByLocationDto getTariffInfo(Long tariffId) {
         TariffsInfo tariffsInfo = findTariffsInfoByTariffId(tariffId);
 
         return TariffInfoByLocationDto.builder()
@@ -84,8 +84,7 @@ public class TariffServiceImpl implements TariffService {
 
     private TariffsInfo findTariffsInfoByTariffId(Long tariffId) {
         return tariffsInfoRepository.findById(tariffId)
-            .orElseThrow(() -> new NotFoundException(
-                String.format(TARIFF_NOT_FOUND + tariffId)));
+            .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + tariffId));
     }
 
     private String joinLocationNames(Set<TariffLocation> locations, boolean isUk) {

@@ -44,7 +44,7 @@ class TariffServiceImplTest {
     private TariffServiceImpl tariffService;
 
     @Test
-    void getTariffInfoForLocation() {
+    void getTariffInfo() {
         Long tariffId = 1L;
 
         TariffInfoByLocationDto tariffInfoByLocationDto = getTariffInfoByLocationDto();
@@ -55,18 +55,18 @@ class TariffServiceImplTest {
         when(modelMapper.map(tariffsInfo, TariffsForLocationDto.class))
             .thenReturn(tariffInfoByLocationDto.getTariffsForLocationDto());
 
-        TariffInfoByLocationDto result = tariffService.getTariffInfoForLocation(tariffId);
+        TariffInfoByLocationDto result = tariffService.getTariffInfo(tariffId);
         assertEquals(tariffInfoByLocationDto, result);
     }
 
     @Test
-    void getTariffInfoForLocation_TariffNotFound() {
+    void getTariffInfo_TariffNotFound() {
         Long tariffId = 1L;
 
         when(tariffsInfoRepository.findById(tariffId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> tariffService.getTariffInfoForLocation(tariffId));
+            () -> tariffService.getTariffInfo(tariffId));
     }
 
     @Test

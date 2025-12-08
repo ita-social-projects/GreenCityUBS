@@ -449,7 +449,7 @@ public class OrderController {
     public ResponseEntity<TariffInfoByLocationDto> getInfoAboutTariff(
         @Positive @PathVariable Long tariffId) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(tariffService.getTariffInfoForLocation(tariffId));
+            .body(tariffService.getTariffInfo(tariffId));
     }
 
     /**
