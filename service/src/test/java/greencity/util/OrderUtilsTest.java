@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class OrderUtilsTest {
     private Order order;
@@ -31,12 +34,16 @@ class OrderUtilsTest {
         when(order.getPayment()).thenReturn(Collections.singletonList(payment));
         when(order.getCounterOrderPaymentId()).thenReturn(2L);
         when(payment.getId()).thenReturn(456L);
+        UUID fixedUuid = UUID.fromString("00000000-0000-0000-0000-000000001234");
 
-        String encodedOrderId = OrderUtils.generateEncodedOrderReference(order);
+        try (MockedStatic<UUID> uuidMock = Mockito.mockStatic(UUID.class)) {
+            uuidMock.when(UUID::randomUUID).thenReturn(fixedUuid);
+            String encodedOrderId = OrderUtils.generateEncodedOrderReference(order);
 
-        String decodedOrderId = new String(Base64.getDecoder().decode(encodedOrderId));
+            String decodedOrderId = new String(Base64.getDecoder().decode(encodedOrderId));
 
-        assertEquals("123_2_456", decodedOrderId);
+            assertEquals("123_2_456_00000000-0000-0000-0000-000000001234", decodedOrderId);
+        }
     }
 
     @Test
