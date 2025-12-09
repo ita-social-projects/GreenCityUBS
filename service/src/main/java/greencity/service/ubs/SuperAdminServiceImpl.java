@@ -786,8 +786,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         tariffsInfo.setReceivingStationList(receivingStations);
         tariffsInfo.setTariffLocations(tariffLocations);
         updateTariffNamesIfPresent(tariffsInfo, dto);
-        checkIfTariffExistsByCourierOnUpdate(tariffsInfo.getId(), courier, dto.getTariffNameUk(),
-            dto.getTariffNameEn());
+        checkIfTariffExistsByCourierOnUpdate(tariffsInfo.getId(), courier, tariffsInfo.getTariffNameUk(),
+            tariffsInfo.getTariffNameEn());
         tariffsInfoRepository.save(tariffsInfo);
     }
 
