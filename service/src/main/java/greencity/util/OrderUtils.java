@@ -7,6 +7,7 @@ import greencity.exceptions.payment.InvalidPaymentResponseException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Comparator;
+import java.util.UUID;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,16 +22,17 @@ public class OrderUtils {
     /**
      * Generates an order ID string based on the given orderId and the {@link Order}
      * object, and encodes the resulting string using Base64. The generated string
-     * is in the format: orderId_counterOrderPaymentId_paymentId
+     * is in the format: orderId_counterOrderPaymentId_paymentId_UUID
      *
      * @param order The {@link Order} object containing details such as payment and
      *              counterOrderPaymentId.
      * @return A Base64-encoded string representing the generated order ID.
      */
     public static String generateEncodedOrderReference(Order order) {
-        String rawOrderId = String.format("%s_%s_%s", order.getId(),
+        String rawOrderId = String.format("%s_%s_%s_%s", order.getId(),
             (order.getCounterOrderPaymentId() == null) ? 1 : order.getCounterOrderPaymentId(),
-            getLastPayment(order).getId());
+            getLastPayment(order).getId(),
+            UUID.randomUUID());
 
         return Base64.getEncoder()
             .withoutPadding()
@@ -40,7 +42,7 @@ public class OrderUtils {
     /**
      * Decodes a Base64-encoded order ID string back into its original format. The
      * original string should have the format:
-     * orderId_counterOrderPaymentId_paymentId.
+     * orderId_counterOrderPaymentId_paymentId_UUID.
      *
      * @param encodedOrderId The Base64-encoded order ID string.
      * @return The decoded order ID string in its original format.
