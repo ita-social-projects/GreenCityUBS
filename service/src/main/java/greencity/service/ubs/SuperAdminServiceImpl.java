@@ -785,8 +785,9 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         tariffsInfo.setReceivingStationList(receivingStations);
         tariffsInfo.setTariffLocations(tariffLocations);
-        checkIfTariffExistsByCourier(courier, dto.getTariffNameUk(), dto.getTariffNameEn());
         updateTariffNamesIfPresent(tariffsInfo, dto);
+        checkIfTariffExistsByCourierOnUpdate(tariffsInfo.getId(), courier, dto.getTariffNameUk(),
+            dto.getTariffNameEn());
         tariffsInfoRepository.save(tariffsInfo);
     }
 
@@ -796,6 +797,20 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         if (dto.getTariffNameEn() != null) {
             tariffsInfo.setTariffNameEn(dto.getTariffNameEn());
+        }
+    }
+
+    private void checkIfTariffExistsByCourierOnUpdate(Long currentTariffId, Courier courier, String nameUk,
+        String nameEn) {
+        List<TariffsInfo> tariffsInfoList = tariffsInfoRepository.findAllTariffsInfoWithCourierId(courier);
+        for (TariffsInfo tariffsInfo : tariffsInfoList) {
+            if (Objects.equals(tariffsInfo.getId(), currentTariffId)) {
+                continue;
+            }
+            if (Objects.equals(tariffsInfo.getTariffNameUk(), nameUk)
+                || Objects.equals(tariffsInfo.getTariffNameEn(), nameEn)) {
+                throw new TariffAlreadyExistsException(ErrorMessage.TARIFF_WITH_SUCH_NAME_IS_ALREADY_EXISTS);
+            }
         }
     }
 
