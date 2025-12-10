@@ -3,6 +3,7 @@ package greencity.configuration;
 import greencity.client.UserRemoteClient;
 import greencity.constant.ErrorMessage;
 import greencity.exceptions.http.AccessDeniedException;
+import greencity.exceptions.http.RemoteServerUnavailableException;
 import greencity.exceptions.user.UserNotFoundException;
 import greencity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -59,19 +60,25 @@ public class WebSocketSecurityInterceptorConfig implements WebSocketMessageBroke
                         log.error("Websocket authentication failed. Token is null or doesn't start with Bearer");
                         throw new AccessDeniedException("Access denied");
                     }
-                    ((ProviderManager) authenticationManager).setEraseCredentialsAfterAuthentication(false);
                     Authentication authentication = authenticationManager
                         .authenticate(new UsernamePasswordAuthenticationToken(token, null));
                     String uuid = userRepository.findUuidByRecipientEmail((String) authentication.getPrincipal())
                         .orElseThrow(
                             () -> new UserNotFoundException(ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST));
-                    boolean exists = userRemoteClient.checkIfUserExistsByUuid(uuid);
-                    if (!exists) {
-                        log.error("Websocket authentication failed. User with uuid {} doesn't exist", uuid);
+
+                    try {
+                        boolean exists = userRemoteClient.checkIfUserExistsByUuid(uuid);
+                        if (!exists) {
+                            log.error("Websocket authentication failed. User with uuid {} doesn't exist", uuid);
+                            throw new AccessDeniedException("Access denied");
+                        }
+                        log.debug("User successfully authenticate with websocket - {}", authentication.getPrincipal());
+                        accessor.setUser(authentication);
+                    } catch (RemoteServerUnavailableException e) {
+                        log.error("Websocket authentication failed. Unable to verify user with uuid {}: {}", uuid,
+                            e.getMessage());
                         throw new AccessDeniedException("Access denied");
                     }
-                    log.debug("User successfully authenticate with websocket - {}", authentication.getPrincipal());
-                    accessor.setUser(authentication);
                 }
                 return message;
             }
