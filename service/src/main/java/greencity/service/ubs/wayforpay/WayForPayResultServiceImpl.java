@@ -91,7 +91,7 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
 
     private PaymentResponseWayForPay validatePayment(PaymentResponseDto response) {
         String decodedOrderReference = OrderUtils.decodeOrderReference(response.getOrderReference());
-        Payment orderPayment = mapPayment(response, decodedOrderReference);
+        Payment orderPayment = mapPayment(response);
         long orderId = OrderUtils.getIdByOrderReference(
             response.getOrderReference(), AppConstant.ORDER_ID_INDEX);
 
@@ -115,14 +115,14 @@ public class WayForPayResultServiceImpl implements WayForPayResultService {
         return accept;
     }
 
-    private Payment mapPayment(PaymentResponseDto response, String decodedOrderReference) {
+    private Payment mapPayment(PaymentResponseDto response) {
         if (response.getFee() == null) {
             response.setFee("0");
         }
+        Long paymentId = OrderUtils.getIdByOrderReference(response.getOrderReference(), AppConstant.PAYMENT_ID_INDEX);
+
         return Payment.builder()
-            .id(Long.valueOf(decodedOrderReference
-                .substring(decodedOrderReference.lastIndexOf("_")
-                    + AppConstant.COUNTER_ORDER_PAYMENT_ID_INDEX)))
+            .id(paymentId)
             .currency(response.getCurrency())
             .amount(Long.parseLong(response.getAmount()) * AppConstant.CURRENCY_CONVERSION_RATE)
             .orderStatus(OrderStatus.FORMED)
