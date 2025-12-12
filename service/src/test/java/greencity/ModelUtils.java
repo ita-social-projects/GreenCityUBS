@@ -4268,6 +4268,8 @@ public class ModelUtils {
         return TariffsInfo.builder()
             .id(1L)
             .courier(ModelUtils.getCourier())
+            .tariffNameUk("Тариф")
+            .tariffNameEn("Tariff")
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .tariffLocations(Set.of(TariffLocation.builder()
                 .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
