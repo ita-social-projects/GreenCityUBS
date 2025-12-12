@@ -52,7 +52,7 @@ public class OrderResponseDto implements Serializable {
     private boolean shouldBePaid;
 
     @NotNull
-    private Long locationId;
+    private Long tariffId;
 
     private PaymentSystem paymentSystem;
 }

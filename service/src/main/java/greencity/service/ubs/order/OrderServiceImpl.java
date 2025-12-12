@@ -1,12 +1,7 @@
 package greencity.service.ubs.order;
 
 import static greencity.constant.AppConstant.ENROLLMENT_TO_THE_BONUS_ACCOUNT_EN;
-import static greencity.constant.ErrorMessage.CANNOT_ACCESS_ORDER_CANCELLATION_REASON;
-import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST;
-import static greencity.constant.ErrorMessage.TOO_MUCH_POINTS_FOR_ORDER;
-import static greencity.constant.ErrorMessage.UBS_USER_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.USER_NOT_FOUND_BY_ID;
+import static greencity.constant.ErrorMessage.*;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
@@ -21,13 +16,7 @@ import greencity.dto.bag.BagMappingDto;
 import greencity.dto.bag.BagTransDto;
 import greencity.dto.certificate.CertificateDto;
 import greencity.dto.notification.SenderInfoDto;
-import greencity.dto.order.OrderCancellationReasonDto;
-import greencity.dto.order.OrderDetailDto;
-import greencity.dto.order.OrderDetailInfoDto;
-import greencity.dto.order.OrderInfoDto;
-import greencity.dto.order.OrderPaymentDetailDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrdersDataForUserDto;
+import greencity.dto.order.*;
 import greencity.dto.pageble.PageableDto;
 import greencity.dto.payment.PaymentWithStatusDto;
 import greencity.entity.order.Bag;
@@ -127,8 +116,9 @@ public class OrderServiceImpl implements OrderService {
             .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID + userId));
         UBSuser userData = ubsUserRepository.findById(ubsUserId)
             .orElseThrow(() -> new NotFoundException(UBS_USER_NOT_FOUND_BY_ID + ubsUserId));
+        TariffsInfo tariffsInfo = tariffsInfoRepository.findById(dto.getTariffId())
+            .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + dto.getTariffId()));
 
-        TariffsInfo tariffsInfo = findTariffsInfoByBagIdsWithinLocation(getBagIds(dto.getBags()), dto.getLocationId());
         List<BagInfoDto> bagsOrdered = prepareBags(dto, order, tariffsInfo.getId());
         Set<CertificateDto> orderCertificates = new HashSet<>();
         long sumToPayInCoinsWithoutDiscount = calculateTotal(bagsOrdered);
@@ -369,12 +359,6 @@ public class OrderServiceImpl implements OrderService {
             .map(e -> e.getPrice() * e.getAmount() * AppConstant.CURRENCY_CONVERSION_RATE)
             .mapToLong(Double::longValue)
             .sum();
-    }
-
-    private TariffsInfo findTariffsInfoByBagIdsWithinLocation(List<Integer> bagIds, Long locationId) {
-        return tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(bagIds, locationId)
-            .orElseThrow(
-                () -> new NotFoundException(String.format(TARIFF_FOR_BAGS_AT_LOCATION_NOT_EXIST, bagIds, locationId)));
     }
 
     private List<Integer> getBagIds(List<BagDto> dto) {

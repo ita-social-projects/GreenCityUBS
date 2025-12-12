@@ -438,7 +438,7 @@ public class ModelUtils {
             .addressId(1L)
             .additionalOrders(new HashSet<>(List.of("232-534-634")))
             .bags(Collections.singletonList(new BagDto(3, 999)))
-            .locationId(1L)
+            .tariffId(1L)
             .orderComment("comment")
             .certificates(Collections.emptySet())
             .pointsToUse(700)
