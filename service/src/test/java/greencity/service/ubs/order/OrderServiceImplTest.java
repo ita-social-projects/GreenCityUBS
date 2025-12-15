@@ -176,10 +176,10 @@ class OrderServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setBags(Collections.emptyList());
         dto.setPointsToUse(10);
-        dto.setLocationId(1L);
+        dto.setTariffId(tariffsInfo.getId());
         BagInfoDto bagInfoDto = getBagInfoDto();
 
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+        when(tariffsInfoRepository.findById(tariffsInfo.getId()))
             .thenReturn(Optional.of(tariffsInfo));
         doAnswer(invocation -> {
             List<BagInfoDto> inputList = invocation.getArgument(0);
@@ -208,10 +208,10 @@ class OrderServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setBags(Collections.emptyList());
         dto.setPointsToUse(0);
-        dto.setLocationId(1L);
+        dto.setTariffId(tariffsInfo.getId());
         order.setPayment(null);
 
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+        when(tariffsInfoRepository.findById(tariffsInfo.getId()))
             .thenReturn(Optional.of(tariffsInfo));
         when(bagCalculatorService.prepareBagsAndCalculateTotal(anyList(), anyList(), any()))
             .thenReturn(100L);
@@ -235,9 +235,9 @@ class OrderServiceImplTest {
         OrderResponseDto dto = new OrderResponseDto();
         dto.setBags(Collections.emptyList());
         dto.setPointsToUse(0);
-        dto.setLocationId(1L);
+        dto.setTariffId(tariffsInfo.getId());
 
-        when(tariffsInfoRepository.findTariffsInfoByBagIdAndLocationId(anyList(), anyLong()))
+        when(tariffsInfoRepository.findById(tariffsInfo.getId()))
             .thenReturn(Optional.of(tariffsInfo));
         when(bagCalculatorService.prepareBagsAndCalculateTotal(anyList(), anyList(), any()))
             .thenReturn(100L);
