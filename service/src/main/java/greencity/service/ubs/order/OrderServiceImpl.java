@@ -361,12 +361,6 @@ public class OrderServiceImpl implements OrderService {
             .sum();
     }
 
-    private List<Integer> getBagIds(List<BagDto> dto) {
-        return dto.stream()
-            .map(BagDto::getId)
-            .toList();
-    }
-
     private Long formAndSaveOrder(
         Order order, Set<CertificateDto> orderCertificates, List<BagInfoDto> bagsOrdered,
         UBSuser userData, User currentUser, long sumToPayInCoins, TariffsInfo tariffsInfo) {
