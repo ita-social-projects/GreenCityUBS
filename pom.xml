@@ -27,7 +27,6 @@
         <liquibase.version>4.25.0</liquibase.version>
         <commons-dbcp2.version>2.10.0</commons-dbcp2.version>
         <commons-io.version>2.15.1</commons-io.version>
-        <spring-security.version>6.1.5</spring-security.version>
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <test.containers.version>1.19.3</test.containers.version>
         <junit.version>4.13.2</junit.version>
