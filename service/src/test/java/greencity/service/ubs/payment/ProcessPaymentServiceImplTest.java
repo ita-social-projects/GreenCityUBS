@@ -31,12 +31,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+
 import greencity.ModelUtils;
 import greencity.client.WayForPayClient;
 import greencity.constant.OrderHistory;
@@ -47,9 +43,8 @@ import greencity.dto.order.OrderWayForPayClientDto;
 import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
+import greencity.entity.order.*;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -61,11 +56,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.CertificateRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.UBSUserRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.EventService;
 import greencity.service.ubs.NotificationService;
@@ -76,10 +67,7 @@ import greencity.service.ubs.wayforpay.WayForPayService;
 import greencity.service.ubs.wayforpay.WayForPayStrategy;
 import greencity.util.OrderUtils;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -136,6 +124,8 @@ class ProcessPaymentServiceImplTest {
     private OrderAddressRepository orderAddressRepository;
     @Mock
     private OrderBagService orderBagService;
+    @Mock
+    private TariffsInfoRepository tariffsInfoRepository;
     @InjectMocks
     private ProcessPaymentServiceImpl service;
 
@@ -149,14 +139,23 @@ class ProcessPaymentServiceImplTest {
         Payment payment = getPayment();
         PaymentSystemResponse paymentSystemResponse = getPaymentSystemResponse();
 
+        Location location = new Location();
+        location.setId(10L);
+        TariffLocation tariffLocation = new TariffLocation();
+        tariffLocation.setLocation(location);
+        TariffsInfo tariff = new TariffsInfo();
+        tariff.setId(dto.getTariffId());
+        tariff.setTariffLocations(Set.of(tariffLocation));
+
+        when(tariffsInfoRepository.findById(dto.getTariffId())).thenReturn(Optional.of(tariff));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(userRepository.findByUuid("uuid")).thenReturn(user);
-        when(addressService.checkIfAddressMatchLocationArea(dto.getAddressId(), dto.getLocationId())).thenReturn(true);
+        when(addressService.checkIfAddressMatchLocationArea(location.getId(), dto.getAddressId())).thenReturn(true);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
         when(ubsUserRepository.save(any(UBSuser.class))).thenReturn(ubsUser);
         when(orderService.formAndSaveOrderRequest(eq(dto), any(Long.class), eq(user.getId()), nullable(Long.class)))
             .thenReturn(order.getId());
-        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), dto.getLocationId(), user.getId()))
+        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), location.getId(), user.getId()))
             .thenReturn(getOrderAddressDto());
         try (MockedStatic<OrderUtils> mocked = Mockito.mockStatic(OrderUtils.class)) {
             mocked.when(() -> OrderUtils.getLastPayment(any())).thenReturn(payment);
@@ -182,7 +181,7 @@ class ProcessPaymentServiceImplTest {
     void processNewOrder_shouldReturnWayForPayResponse_whenShouldBePaidFalse() {
         OrderResponseDto dto = getOrderResponseDto();
         dto.setShouldBePaid(false);
-        dto.setLocationId(1L);
+        dto.setTariffId(1L);
         dto.setAddressId(2L);
 
         Order order = getOrder();
@@ -192,8 +191,17 @@ class ProcessPaymentServiceImplTest {
 
         PaymentSystemResponse paymentSystemResponse = getPaymentSystemResponse();
 
+        Location location = new Location();
+        location.setId(10L);
+        TariffLocation tariffLocation = new TariffLocation();
+        tariffLocation.setLocation(location);
+        TariffsInfo tariff = new TariffsInfo();
+        tariff.setId(dto.getTariffId());
+        tariff.setTariffLocations(Set.of(tariffLocation));
+
+        when(tariffsInfoRepository.findById(dto.getTariffId())).thenReturn(Optional.of(tariff));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
-        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), dto.getLocationId(), user.getId()))
+        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), location.getId(), user.getId()))
             .thenReturn(getOrderAddressDto());
         when(userRepository.findByUuid("uuid")).thenReturn(user);
         when(addressService.checkIfAddressMatchLocationArea(anyLong(), anyLong())).thenReturn(true);
@@ -219,9 +227,17 @@ class ProcessPaymentServiceImplTest {
     @Test
     void processNewOrder_shouldThrowException_whenAddressNotValid() {
         OrderResponseDto dto = getOrderResponseDto();
-        dto.setLocationId(1L);
-        dto.setAddressId(2L);
+        Order order = getOrder();
 
+        Location location = new Location();
+        location.setId(100L);
+        TariffLocation tariffLocation = new TariffLocation();
+        tariffLocation.setLocation(location);
+        TariffsInfo tariff = new TariffsInfo();
+        tariff.setTariffLocations(Set.of(tariffLocation));
+
+        when(tariffsInfoRepository.findById(1L)).thenReturn(Optional.of(tariff));
+        when(modelMapper.map(dto, Order.class)).thenReturn(order);
         when(addressService.checkIfAddressMatchLocationArea(anyLong(), anyLong())).thenReturn(false);
 
         assertThrows(AddressNotWithinLocationAreaException.class,
@@ -243,9 +259,19 @@ class ProcessPaymentServiceImplTest {
         user.setOrders(new ArrayList<>(List.of(order)));
         user.setRecipientEmail(oldEmail);
 
-        when(addressService.checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId()))
+        Location location = new Location();
+        location.setId(1L);
+        TariffLocation tariffLocation = new TariffLocation();
+        tariffLocation.setLocation(location);
+        TariffsInfo tariff = new TariffsInfo();
+        tariff.setId(dto.getTariffId());
+        tariff.setTariffLocations(Set.of(tariffLocation));
+
+        when(tariffsInfoRepository.findById(dto.getTariffId()))
+            .thenReturn(Optional.of(tariff));
+        when(addressService.checkIfAddressMatchLocationArea(location.getId(), dto.getAddressId()))
             .thenReturn(true);
-        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), dto.getLocationId(), user.getId()))
+        when(addressService.formAndSaveOrderAddress(dto.getAddressId(), location.getId(), user.getId()))
             .thenReturn(addressDto);
         when(orderAddressRepository.findById(addressDto.getId())).thenReturn(Optional.of(orderAddress));
         when(modelMapper.map(dto, Order.class)).thenReturn(order);
@@ -279,12 +305,20 @@ class ProcessPaymentServiceImplTest {
         OrderAddressDto orderAddressDto = getOrderAddressDto();
         PaymentSystemResponse paymentSystemResponse = getPaymentSystemResponse();
 
-        when(addressService.checkIfAddressMatchLocationArea(dto.getAddressId(), dto.getLocationId()))
-            .thenReturn(true);
+        Location location = new Location();
+        location.setId(1L);
+        TariffLocation tariffLocation = new TariffLocation();
+        tariffLocation.setLocation(location);
+        TariffsInfo tariff = new TariffsInfo();
+        tariff.setId(dto.getTariffId());
+        tariff.setTariffLocations(Set.of(tariffLocation));
+
+        when(tariffsInfoRepository.findById(dto.getTariffId())).thenReturn(Optional.of(tariff));
+        when(addressService.checkIfAddressMatchLocationArea(location.getId(), dto.getAddressId())).thenReturn(true);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
-        when(addressService.getOrUpdateOrderAddress(orderAddressDto, dto.getAddressId(), dto.getLocationId(),
-            user.getId()))
+        when(
+            addressService.getOrUpdateOrderAddress(orderAddressDto, dto.getAddressId(), location.getId(), user.getId()))
             .thenReturn(orderAddressDto);
         when(modelMapper.map(order.getUbsUser().getOrderAddress(), OrderAddressDto.class)).thenReturn(orderAddressDto);
         when(modelMapper.map(dto.getPersonalData(), UBSuser.class)).thenReturn(ubsUser);
@@ -323,8 +357,6 @@ class ProcessPaymentServiceImplTest {
         User user = getUser();
         user.setOrders(new ArrayList<>(List.of(order)));
 
-        when(addressService.checkIfAddressMatchLocationArea(dto.getAddressId(), dto.getLocationId()))
-            .thenReturn(true);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
@@ -341,8 +373,6 @@ class ProcessPaymentServiceImplTest {
         User user = getUser();
         user.setOrders(new ArrayList<>(List.of(order)));
 
-        when(addressService.checkIfAddressMatchLocationArea(dto.getAddressId(), dto.getLocationId()))
-            .thenReturn(true);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
@@ -359,8 +389,6 @@ class ProcessPaymentServiceImplTest {
         User user = getUser();
         user.setOrders(new ArrayList<>(List.of(order)));
 
-        when(addressService.checkIfAddressMatchLocationArea(dto.getAddressId(), dto.getLocationId()))
-            .thenReturn(true);
         when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
         when(userRepository.findByUuid("uuid")).thenReturn(user);
 
