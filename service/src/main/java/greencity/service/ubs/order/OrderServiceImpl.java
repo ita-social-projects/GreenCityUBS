@@ -9,7 +9,6 @@ import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
 import static java.util.Objects.nonNull;
 import greencity.constant.AppConstant;
 import greencity.dto.address.AddressInfoDto;
-import greencity.dto.bag.BagDto;
 import greencity.dto.bag.BagForUserDto;
 import greencity.dto.bag.BagInfoDto;
 import greencity.dto.bag.BagMappingDto;
