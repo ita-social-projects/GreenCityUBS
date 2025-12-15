@@ -4230,6 +4230,8 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
+            .tariffNameEn("Tariff")
+            .tariffNameUk("Тариф")
             .tariffStatus(TariffStatus.NEW)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))

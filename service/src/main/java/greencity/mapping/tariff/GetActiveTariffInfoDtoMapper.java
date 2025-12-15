@@ -2,7 +2,9 @@ package greencity.mapping.tariff;
 
 import greencity.dto.location.LocationsForTariffDto;
 import greencity.dto.tariff.GetActiveTariffInfoDto;
+import greencity.entity.order.TariffLocation;
 import greencity.entity.order.TariffsInfo;
+import greencity.enums.LocationStatus;
 import greencity.mapping.location.LocationToLocationsForTariffDtoMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.AbstractConverter;
@@ -23,7 +25,11 @@ public class GetActiveTariffInfoDtoMapper extends AbstractConverter<TariffsInfo,
             .ofNullable(source.getTariffLocations())
             .orElse(Set.of())
             .stream()
-            .map(l -> locationToLocationsForTariffDtoMapper.convert(l.getLocation()))
+            .filter(tl -> tl != null && tl.getLocationStatus() == LocationStatus.ACTIVE)
+            .map(TariffLocation::getLocation)
+            .filter(java.util.Objects::nonNull)
+            .map(locationToLocationsForTariffDtoMapper::convert)
+            .filter(java.util.Objects::nonNull)
             .toList();
 
         GetActiveTariffInfoDto.GetActiveTariffInfoDtoBuilder builder = GetActiveTariffInfoDto.builder()
