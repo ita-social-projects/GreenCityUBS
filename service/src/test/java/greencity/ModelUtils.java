@@ -3608,6 +3608,8 @@ public class ModelUtils {
         return LocationsForTariffDto.builder()
             .id(1L)
             .locationStatus("ACTIVE")
+            .nameEn("Kyiv")
+            .nameUk("Київ")
             .longitude(3.34d)
             .latitude(1.32d)
             .build();
@@ -4296,6 +4298,14 @@ public class ModelUtils {
                 .createdBy(ModelUtils.createEmployee())
                 .build()))
             .build();
+    }
+
+    public static TariffsInfo getTariffInfoWIthMultipleLocations() {
+        TariffsInfo tariffsInfo = getTariffInfo();
+        TariffLocation tariffLocation1 = getTariffLocation();
+        TariffLocation tariffLocation2 = getTariffLocation2();
+        tariffsInfo.setTariffLocations(Set.of(tariffLocation1, tariffLocation2));
+        return tariffsInfo;
     }
 
     public static AddNewTariffDto getAddNewTariffDto() {

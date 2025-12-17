@@ -48,7 +48,8 @@ public class GetActiveTariffInfoDtoMapper extends AbstractConverter<TariffsInfo,
     }
 
     private String joinLocationNames(List<LocationsForTariffDto> locations, boolean isUk) {
-        return locations.stream()
+        String prefix = isUk ? "До тарифу також включені " : "The tariff also includes ";
+        return prefix + locations.stream()
             .map(loc -> isUk ? loc.getNameUk() : loc.getNameEn())
             .collect(Collectors.joining(", "));
     }
