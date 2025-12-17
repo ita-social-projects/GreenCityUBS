@@ -3608,6 +3608,8 @@ public class ModelUtils {
         return LocationsForTariffDto.builder()
             .id(1L)
             .locationStatus("ACTIVE")
+            .nameEn("Kyiv")
+            .nameUk("Київ")
             .longitude(3.34d)
             .latitude(1.32d)
             .build();
@@ -4230,6 +4232,8 @@ public class ModelUtils {
                     .coordinates(ModelUtils.getCoordinates())
                     .build())
                 .build()))
+            .tariffNameEn("Tariff")
+            .tariffNameUk("Тариф")
             .tariffStatus(TariffStatus.NEW)
             .creator(ModelUtils.getEmployee())
             .createdAt(LocalDate.of(2022, 10, 20))
@@ -4268,6 +4272,8 @@ public class ModelUtils {
         return TariffsInfo.builder()
             .id(1L)
             .courier(ModelUtils.getCourier())
+            .tariffNameUk("Тариф")
+            .tariffNameEn("Tariff")
             .courierLimit(CourierLimit.LIMIT_BY_SUM_OF_ORDER)
             .tariffLocations(Set.of(TariffLocation.builder()
                 .tariffsInfo(ModelUtils.getTariffInfoWithLimitOfBags())
@@ -4292,6 +4298,14 @@ public class ModelUtils {
                 .createdBy(ModelUtils.createEmployee())
                 .build()))
             .build();
+    }
+
+    public static TariffsInfo getTariffInfoWIthMultipleLocations() {
+        TariffsInfo tariffsInfo = getTariffInfo();
+        TariffLocation tariffLocation1 = getTariffLocation();
+        TariffLocation tariffLocation2 = getTariffLocation2();
+        tariffsInfo.setTariffLocations(Set.of(tariffLocation1, tariffLocation2));
+        return tariffsInfo;
     }
 
     public static AddNewTariffDto getAddNewTariffDto() {
