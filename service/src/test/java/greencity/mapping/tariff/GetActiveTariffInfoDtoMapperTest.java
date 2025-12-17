@@ -25,7 +25,7 @@ class GetActiveTariffInfoDtoMapperTest {
     LocationToLocationsForTariffDtoMapper locationToLocationsForTariffDtoMapper;
 
     @Test
-    void testConvert_OnlyOnLocationsForTariff_EntityConverted() {
+    void testConvert_OnlyOneLocationsForTariff_EntityConverted() {
         TariffsInfo tariffInfo = ModelUtils.getTariffInfo();
 
         LocationsForTariffDto dto = ModelUtils.getLocationDtoFromDao();
@@ -44,7 +44,7 @@ class GetActiveTariffInfoDtoMapperTest {
     }
 
     @Test
-    void testConvert_MoreThenOnLocationsForTariff_EntityConverted() {
+    void testConvert_MoreThanOnLocationsForTariff_EntityConverted() {
         TariffsInfo tariffInfo = ModelUtils.getTariffInfoWIthMultipleLocations();
 
         LocationsForTariffDto dto = ModelUtils.getLocationDtoFromDao();
