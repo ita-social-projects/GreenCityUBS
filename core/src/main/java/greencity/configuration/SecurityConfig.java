@@ -87,6 +87,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(req -> req
                 .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/actuator/prometheus").permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/socket/**",
                     UBS_LINK + "/getAllActiveCouriers",
