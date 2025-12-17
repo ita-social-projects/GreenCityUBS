@@ -207,7 +207,11 @@ public interface TariffsInfoRepository extends JpaRepository<TariffsInfo, Long>,
             + "AND c.id = :courierId ")
     Optional<TariffsInfo> findTariffInfoByLocationIdAndCourierId(Long locationId, Long courierId);
 
-    @Query("SELECT t FROM TariffsInfo t WHERE t.tariffStatus = 'ACTIVE' AND t.courier = :courier")
+    @Query(nativeQuery = true,
+        value = "SELECT DISTINCT t FROM TariffsInfo t "
+            + "JOIN FETCH t.tariffLocations tl "
+            + "JOIN FETCH tl.location "
+            + "WHERE t.tariffStatus = 'ACTIVE' AND t.courier = :courier")
     List<TariffsInfo> findAllActiveTariffsInfoWithCourierId(@Param("courier") Courier courier);
 
     @Query("SELECT t FROM TariffsInfo t WHERE t.courier = :courier")
