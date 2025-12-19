@@ -432,6 +432,7 @@ class PaymentServiceImplTest {
         Order order = getFormedOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         Employee employee = getEmployee();
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
@@ -461,6 +462,7 @@ class PaymentServiceImplTest {
         user.setRecipientName("Петро");
         user.setRecipientSurname("Петренко");
         Order order = getFormedOrder();
+        order.setPaymentLink("");
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         Payment payment = getManualPayment();
@@ -490,6 +492,7 @@ class PaymentServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         payment.setAmount(0L);
         order.setPayment(singletonList(payment));
@@ -523,6 +526,7 @@ class PaymentServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         payment.setAmount(50_00L);
         order.setPayment(singletonList(payment));
@@ -560,6 +564,7 @@ class PaymentServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         payment.setAmount(500_00L);
         order.setPayment(singletonList(payment));
@@ -594,6 +599,7 @@ class PaymentServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
@@ -624,6 +630,7 @@ class PaymentServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.HALF_PAID);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021").amount(200L).receiptLink("link").paymentId("1").build();
@@ -654,6 +661,7 @@ class PaymentServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.UNPAID);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
@@ -684,6 +692,7 @@ class PaymentServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAYMENT_REFUNDED);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
@@ -714,6 +723,7 @@ class PaymentServiceImplTest {
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
         order.setOrderPaymentStatus(OrderPaymentStatus.PAID);
+        order.setPaymentLink("");
         Payment payment = getManualPayment();
         ManualPaymentRequestDto paymentDetails = ManualPaymentRequestDto.builder()
             .settlementDate("02-08-2021").amount(500L).receiptLink("link").paymentId("1").build();
@@ -1133,6 +1143,7 @@ class PaymentServiceImplTest {
         Order order = getFormedOrder();
         TariffsInfo tariffsInfo = getTariffsInfo();
         order.setTariffsInfo(tariffsInfo);
+        order.setPaymentLink("");
 
         Employee employee = getEmployee();
         ManualPaymentRequestDto paymentRequestDto = getManualPaymentRequestDto();

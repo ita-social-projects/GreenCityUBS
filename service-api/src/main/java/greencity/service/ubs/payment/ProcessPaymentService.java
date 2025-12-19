@@ -41,20 +41,6 @@ public interface ProcessPaymentService {
     PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto);
 
     /**
-     * Forms a payment link for redirecting the user to WayForPay checkout. -
-     * Increments the order’s counter for payment attempts. - Creates a
-     * {@link PaymentWayForPayRequestDto} request with encoded order reference. -
-     * Sends the request to WayForPay checkout client. - Extracts and returns the
-     * redirect URL from the WayForPay response. - Schedules a payment expiry job
-     * for the generated link.
-     *
-     * @param orderId the {order id for which the payment link is generated
-     * @return the checkout URL where the client should be redirected to complete
-     *         payment
-     */
-    String formedLink(Long orderId);
-
-    /**
      * Forms a payment link for redirecting the user to WayForPay checkout, using
      * additional client data. - Increments the order’s counter for payment
      * attempts. - Creates a {@link PaymentWayForPayRequestDto} request with encoded
@@ -93,4 +79,18 @@ public interface ProcessPaymentService {
      * @author Oleksandr Ilnytskyi
      */
     void cancelPaymentAttempt(String uuid, Long orderId);
+
+    /**
+     * Forms a payment link for redirecting the user to WayForPay checkout. -
+     * Increments the order’s counter for payment attempts. - Creates a
+     * {@link PaymentWayForPayRequestDto} request with encoded order reference. -
+     * Sends the request to WayForPay checkout client. - Extracts and returns the
+     * redirect URL from the WayForPay response. - Schedules a payment expiry job
+     * for the generated link.
+     *
+     * @param orderId the {order id for which the payment link is generated
+     * @return the checkout URL where the client should be redirected to complete
+     *         payment
+     */
+    String formedLinkForPDFQRCode(Long orderId);
 }
