@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @NoArgsConstructor
@@ -199,6 +200,9 @@ public class Order {
 
     @Column(name = "payment_link_expiry")
     private LocalDateTime paymentLinkExpiry;
+
+    @Column(name = "order_uuid")
+    private UUID orderUUIId;
 
     /**
      * Updates the list of order bags associated with this order. This method
