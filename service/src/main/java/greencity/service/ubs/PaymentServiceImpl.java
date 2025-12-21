@@ -124,7 +124,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
-        if (!order.getPaymentLink().isEmpty()) {
+        if (order.getPaymentLink() != null && !order.getPaymentLink().isEmpty()) {
             processPaymentService.cancelPaymentAttempt(order.getUser().getUuid(), orderId);
         }
         checkAvailableOrderForEmployee(order, email);

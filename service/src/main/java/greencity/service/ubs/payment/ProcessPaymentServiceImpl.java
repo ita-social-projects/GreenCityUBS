@@ -176,7 +176,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     @Transactional
     public String formedLinkForPDFQRCode(Long orderId) {
         Order order = getOrder(orderId);
-        if (!order.getPaymentLink().isEmpty()) {
+        if (order.getPaymentLink() != null && !order.getPaymentLink().isEmpty()) {
             return order.getPaymentLink();
         }
         validateOrderPaymentProcessingStatus(order);
