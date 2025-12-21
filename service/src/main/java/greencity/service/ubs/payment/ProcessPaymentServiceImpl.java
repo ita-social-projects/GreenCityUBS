@@ -1,13 +1,6 @@
 package greencity.service.ubs.payment;
 
-import static greencity.constant.ErrorMessage.ORDER_ADDRESS_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.ORDER_ALREADY_PAID;
-import static greencity.constant.ErrorMessage.ORDER_IN_ONGOING_PROCESSING;
-import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
-import static greencity.constant.ErrorMessage.ORDER_STATUS_AND_PAYMENT_CONDITION_FAILED;
-import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
-import static greencity.constant.ErrorMessage.UNABLE_TO_CANCEL_PAYMENT_INVOICE;
-import static greencity.constant.ErrorMessage.USER_WITH_CURRENT_UUID_DOES_NOT_EXIST;
+import static greencity.constant.ErrorMessage.*;
 import static greencity.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
 import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
@@ -18,20 +11,15 @@ import greencity.client.WayForPayClient;
 import greencity.constant.AppConstant;
 import greencity.constant.ErrorMessage;
 import greencity.constant.OrderHistory;
-import greencity.dto.order.OrderAddressDto;
-import greencity.dto.order.OrderInfoDto;
-import greencity.dto.order.OrderResponseDto;
-import greencity.dto.order.OrderWayForPayClientDto;
-import greencity.dto.order.PaymentSystemResponse;
+import greencity.dto.order.*;
 import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.dto.payment.PaymentWithStatusDto;
 import greencity.dto.user.PersonalDataDto;
 import greencity.dto.user.UserPointDto;
-import greencity.entity.order.Certificate;
-import greencity.entity.order.ChangeOfPoints;
-import greencity.entity.order.Order;
-import greencity.entity.order.Payment;
+import greencity.entity.order.*;
+import greencity.entity.order.TariffLocation;
+import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
@@ -40,11 +28,7 @@ import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
 import greencity.exceptions.http.AccessDeniedException;
-import greencity.repository.CertificateRepository;
-import greencity.repository.OrderAddressRepository;
-import greencity.repository.OrderRepository;
-import greencity.repository.UBSUserRepository;
-import greencity.repository.UserRepository;
+import greencity.repository.*;
 import greencity.service.phone.UAPhoneNumberUtil;
 import greencity.service.ubs.AddressService;
 import greencity.service.ubs.EventService;
@@ -87,11 +71,11 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     private final Scheduler quartzScheduler;
     private final OrderBagService orderBagService;
     private final OrderAddressRepository orderAddressRepository;
+    private final TariffsInfoRepository tariffsInfoRepository;
 
     @Override
     @Transactional
     public PaymentSystemResponse processNewOrder(OrderResponseDto dto, String uuid) {
-        validateOrderRequestAddress(dto);
         adjustPaymentDetails(dto);
 
         Order order = orderRepository.save(mapOrder(dto));
@@ -117,7 +101,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     @Override
     @Transactional
     public PaymentSystemResponse processExistingOrder(OrderResponseDto dto, String uuid, Long orderId) {
-        validateOrderRequestAddress(dto);
         User currentUser = userRepository.findByUuid(uuid);
         Order order = getOrder(orderId);
         validateOrderPaymentProcessingStatus(order);
@@ -279,19 +262,34 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     }
 
     private UBSuser createOrUpdateUbsUser(OrderResponseDto dto, User currentUser, Order existingOrder) {
+        TariffsInfo tariff = tariffsInfoRepository.findById(dto.getTariffId())
+            .orElseThrow(() -> new NotFoundException(TARIFF_NOT_FOUND + dto.getTariffId()));
+
+        Long resolvedLocationId = resolveLocationIdForAddressAndTariff(tariff, dto.getAddressId());
+
         OrderAddressDto orderAddress;
 
         if (existingOrder == null) {
             orderAddress = addressService.formAndSaveOrderAddress(
-                dto.getAddressId(), dto.getLocationId(), currentUser.getId());
+                dto.getAddressId(), resolvedLocationId, currentUser.getId());
             return formAndSaveUbsUser(dto.getPersonalData(), null, orderAddress, currentUser);
         } else {
             orderAddress = modelMapper.map(existingOrder.getUbsUser().getOrderAddress(), OrderAddressDto.class);
             orderAddress = addressService.getOrUpdateOrderAddress(
-                orderAddress, dto.getAddressId(), dto.getLocationId(), currentUser.getId());
+                orderAddress, dto.getAddressId(), resolvedLocationId, currentUser.getId());
             return formAndSaveUbsUser(dto.getPersonalData(), existingOrder.getUbsUser().getId(), orderAddress,
                 currentUser);
         }
+    }
+
+    private Long resolveLocationIdForAddressAndTariff(TariffsInfo tariff, Long addressId) {
+        return tariff.getTariffLocations().stream()
+            .map(TariffLocation::getLocation)
+            .map(Location::getId)
+            .filter(locationId -> addressService.checkIfAddressMatchLocationArea(locationId, addressId))
+            .findFirst()
+            .orElseThrow(() -> new AddressNotWithinLocationAreaException(
+                AppConstant.ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE));
     }
 
     private Order mapOrder(OrderResponseDto dto) {
@@ -328,12 +326,6 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     private Order getOrder(Long orderId) {
         return orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST + orderId));
-    }
-
-    private void validateOrderRequestAddress(OrderResponseDto dto) {
-        if (!addressService.checkIfAddressMatchLocationArea(dto.getLocationId(), dto.getAddressId())) {
-            throw new AddressNotWithinLocationAreaException(AppConstant.ADDRESS_NOT_WITHIN_LOCATION_AREA_MESSAGE);
-        }
     }
 
     private void adjustPaymentDetails(OrderResponseDto dto) {

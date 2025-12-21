@@ -199,7 +199,11 @@ class TariffServiceImplTest {
 
         Courier courier = ModelUtils.getCourier();
 
-        GetActiveTariffInfoDto mappedDto = new GetActiveTariffInfoDto();
+        GetActiveTariffInfoDto mappedDto = GetActiveTariffInfoDto
+            .builder()
+            .descriptionMessageEn("The tariff also includes Kyiv, Lviv")
+            .descriptionMessageUk("До тарифу також включені Київ, Львів")
+            .build();
         when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
         when(tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)).thenReturn(List.of(entity));
         when(courierRepository.findById(1L)).thenReturn(Optional.of(courier));
@@ -207,7 +211,7 @@ class TariffServiceImplTest {
         List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
 
         assertThat(result).hasSize(1);
-        GetActiveTariffInfoDto dto = result.get(0);
+        GetActiveTariffInfoDto dto = result.getFirst();
 
         assertThat(dto.getDescriptionMessageUk())
             .contains("До тарифу також включені")

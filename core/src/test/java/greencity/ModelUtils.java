@@ -114,7 +114,7 @@ public class ModelUtils {
                 .phoneNumber("0678945221")
                 .build())
             .addressId(1L)
-            .locationId(1L)
+            .tariffId(1L)
             .paymentSystem(PaymentSystem.WAY_FOR_PAY)
             .build();
     }
