@@ -37,6 +37,7 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.entity.order.*;
+import greencity.entity.order.TariffLocation;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
