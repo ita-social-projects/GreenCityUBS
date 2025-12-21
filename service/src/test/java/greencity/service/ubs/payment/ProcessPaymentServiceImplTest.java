@@ -851,7 +851,6 @@ class ProcessPaymentServiceImplTest {
     @Test
     void formedLinkForQRCodeTest() {
         String invoiceUrl = "https://pay.example.com/invoice/TEST123";
-        Long orderId = 1L;
         Order order = getOrderCount();
         order.setId(orderId);
         order.setPaymentLink("");
@@ -874,7 +873,7 @@ class ProcessPaymentServiceImplTest {
         PaymentWayForPayRequestDto payRequestDto = new PaymentWayForPayRequestDto();
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(wayForPayService.formPaymentRequestForWayForPay(eq(orderId), eq(250L)))
+        when(wayForPayService.formPaymentRequestForWayForPay(orderId, 250L))
             .thenReturn(payRequestDto);
         when(wayForPayClient.getCheckOutResponse(same(payRequestDto)))
             .thenReturn("{\"invoiceUrl\":\"" + invoiceUrl + "\"}");
@@ -886,7 +885,7 @@ class ProcessPaymentServiceImplTest {
         assertEquals(invoiceUrl, result);
         assertNotNull(payRequestDto.getOrderReference());
         assertFalse(payRequestDto.getOrderReference().isBlank());
-        verify(wayForPayService).formPaymentRequestForWayForPay(eq(orderId), eq(250L));
+        verify(wayForPayService).formPaymentRequestForWayForPay(orderId, 250L);
         verify(wayForPayClient).getCheckOutResponse(same(payRequestDto));
         verify(wayForPayService).getLinkFromWayForPayCheckoutResponse(anyString());
         verify(wayForPayService).schedulePaymentExpiryJob(
