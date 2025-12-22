@@ -15,7 +15,5 @@ public class GetActiveTariffInfoDto {
     private Long id;
     private String tariffNameUk;
     private String tariffNameEn;
-    private String descriptionMessageUk;
-    private String descriptionMessageEn;
     private List<LocationsForTariffDto> tariffLocations;
 }

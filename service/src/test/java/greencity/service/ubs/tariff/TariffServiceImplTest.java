@@ -171,8 +171,6 @@ class TariffServiceImplTest {
 
         assertThat(result).hasSize(1);
         GetActiveTariffInfoDto dto = result.get(0);
-        assertThat(dto.getDescriptionMessageUk()).isNull();
-        assertThat(dto.getDescriptionMessageEn()).isNull();
     }
 
     @Test
@@ -201,8 +199,6 @@ class TariffServiceImplTest {
 
         GetActiveTariffInfoDto mappedDto = GetActiveTariffInfoDto
             .builder()
-            .descriptionMessageEn("The tariff also includes Kyiv, Lviv")
-            .descriptionMessageUk("До тарифу також включені Київ, Львів")
             .build();
         when(modelMapper.map(entity, GetActiveTariffInfoDto.class)).thenReturn(mappedDto);
         when(tariffsInfoRepository.findAllActiveTariffsInfoWithCourierId(courier)).thenReturn(List.of(entity));
@@ -212,16 +208,6 @@ class TariffServiceImplTest {
 
         assertThat(result).hasSize(1);
         GetActiveTariffInfoDto dto = result.getFirst();
-
-        assertThat(dto.getDescriptionMessageUk())
-            .contains("До тарифу також включені")
-            .contains("Київ")
-            .contains("Львів");
-
-        assertThat(dto.getDescriptionMessageEn())
-            .contains("The tariff also includes")
-            .contains("Kyiv")
-            .contains("Lviv");
     }
 
     @Test
