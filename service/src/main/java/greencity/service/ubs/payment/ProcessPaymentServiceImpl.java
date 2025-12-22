@@ -41,10 +41,7 @@ import greencity.service.ubs.wayforpay.WayForPayService;
 import greencity.util.OrderUtils;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -135,7 +132,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     @Override
     @Transactional
     public PaymentSystemResponse processOrder(String userUuid, OrderWayForPayClientDto dto) {
-        Order order = getOrder(dto.getOrderId());
+        Order order = checkUUID(getOrder(dto.getOrderId()));
         checkOrderIsPaid(order.getOrderPaymentStatus());
         validateOrderPaymentProcessingStatus(order);
         User currentUser = getUserByUuid(userUuid);
@@ -160,9 +157,28 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
     }
 
     @Override
-    @Transactional
-    public String formedLink(Long orderId) {
+    public String formedLink(Long orderId, long sumToPayInCoins, OrderWayForPayClientDto dto) {
         Order order = getOrder(orderId);
+        incrementCounter(order);
+        PaymentWayForPayRequestDto paymentWayForPayRequestDto =
+            wayForPayService.formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
+        paymentWayForPayRequestDto
+            .setOrderReference(OrderUtils.generateEncodedOrderReference(order));
+        String link = wayForPayService
+            .getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
+        wayForPayService.schedulePaymentExpiryJob(
+            order.getId(), dto.getPointsToUse(),
+            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
+        return link;
+    }
+
+    @Override
+    @Transactional
+    public String formedLinkForPDFQRCode(Long orderId) {
+        Order order = getOrder(orderId);
+        if (order.getPaymentLink() != null && !order.getPaymentLink().isEmpty()) {
+            return order.getPaymentLink();
+        }
         validateOrderPaymentProcessingStatus(order);
         incrementCounter(order);
         long paymentsForCurrentOrder = order.getPayment().stream().filter(payment -> payment.getPaymentStatus()
@@ -183,20 +199,12 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         return link;
     }
 
-    @Override
-    public String formedLink(Long orderId, long sumToPayInCoins, OrderWayForPayClientDto dto) {
-        Order order = getOrder(orderId);
-        incrementCounter(order);
-        PaymentWayForPayRequestDto paymentWayForPayRequestDto =
-            wayForPayService.formPaymentRequestForWayForPay(order.getId(), sumToPayInCoins);
-        paymentWayForPayRequestDto
-            .setOrderReference(OrderUtils.generateEncodedOrderReference(order));
-        String link = wayForPayService
-            .getLinkFromWayForPayCheckoutResponse(wayForPayClient.getCheckOutResponse(paymentWayForPayRequestDto));
-        wayForPayService.schedulePaymentExpiryJob(
-            order.getId(), dto.getPointsToUse(),
-            dto.getCertificates(), WAY_FOR_PAY_LINK_VALIDITY_SECONDS, link);
-        return link;
+    private Order checkUUID(Order order) {
+        if (order.getOrderUUIId() == null) {
+            order.setOrderUUIId(UUID.randomUUID());
+            orderRepository.save(order);
+        }
+        return order;
     }
 
     @Transactional
@@ -289,6 +297,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
         order.setOrderDate(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.FORMED);
         order.setCounterOrderPaymentId(0L);
+        order.setOrderUUIId(UUID.randomUUID());
         return order;
     }
 
@@ -478,7 +487,7 @@ public class ProcessPaymentServiceImpl implements ProcessPaymentService {
             .formPaymentCancellationRequestForWayForPay(order.getId());
         String result = wayForPayService.getResultFromWayForPayCancellationResponse(
             wayForPayClient.getCancellationResponse(requestDto));
-
+        log.info("Result: " + result);
         if (!result.equals("Removed")) {
             throw new BadRequestException(UNABLE_TO_CANCEL_PAYMENT_INVOICE);
         }

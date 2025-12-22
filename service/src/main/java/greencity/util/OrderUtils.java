@@ -7,7 +7,6 @@ import greencity.exceptions.payment.InvalidPaymentResponseException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Comparator;
-import java.util.UUID;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,8 +31,7 @@ public class OrderUtils {
         String rawOrderId = String.format("%s_%s_%s_%s", order.getId(),
             (order.getCounterOrderPaymentId() == null) ? 1 : order.getCounterOrderPaymentId(),
             getLastPayment(order).getId(),
-            UUID.randomUUID());
-
+            order.getOrderUUIId());
         return Base64.getEncoder()
             .withoutPadding()
             .encodeToString(rawOrderId.getBytes(StandardCharsets.UTF_8));
