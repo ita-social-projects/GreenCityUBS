@@ -170,7 +170,6 @@ class TariffServiceImplTest {
         List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
 
         assertThat(result).hasSize(1);
-        GetActiveTariffInfoDto dto = result.get(0);
     }
 
     @Test
@@ -207,7 +206,6 @@ class TariffServiceImplTest {
         List<GetActiveTariffInfoDto> result = tariffService.getTariffsInfo(1L);
 
         assertThat(result).hasSize(1);
-        GetActiveTariffInfoDto dto = result.getFirst();
     }
 
     @Test
