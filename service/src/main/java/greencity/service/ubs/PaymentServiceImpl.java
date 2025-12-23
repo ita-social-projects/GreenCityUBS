@@ -44,6 +44,7 @@ import greencity.repository.PaymentRepository;
 import greencity.repository.RefundRepository;
 import greencity.repository.TariffsInfoRepository;
 import greencity.repository.UserRepository;
+import greencity.service.ubs.payment.ProcessPaymentService;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -82,6 +83,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final TariffsInfoRepository tariffsInfoRepository;
     private final RefundRepository refundRepository;
     private final UserRepository userRepository;
+    private final ProcessPaymentService processPaymentService;
 
     /**
      * Method gets all order payments, count paid amount, amount which user should
@@ -122,6 +124,9 @@ public class PaymentServiceImpl implements PaymentService {
         }
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new NotFoundException(ORDER_NOT_FOUND_BY_ID + orderId));
+        if (order.getPaymentLink() != null && !order.getPaymentLink().isEmpty()) {
+            processPaymentService.cancelPaymentAttempt(order.getUser().getUuid(), orderId);
+        }
         checkAvailableOrderForEmployee(order, email);
         ManualPaymentResponseDto manualPaymentResponseDto = buildPaymentResponseDto(
             paymentRepository.save(buildPaymentEntity(order, paymentRequestDto, image, email)));

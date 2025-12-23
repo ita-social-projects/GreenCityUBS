@@ -54,8 +54,6 @@ class GetActiveTariffInfoDtoMapperTest {
         GetActiveTariffInfoDto expected = GetActiveTariffInfoDto.builder()
             .tariffNameUk("Тариф")
             .tariffNameEn("Tariff")
-            .descriptionMessageUk("До тарифу також включені Київ, Київ")
-            .descriptionMessageEn("The tariff also includes Kyiv, Kyiv")
             .tariffLocations(List.of(dto, dto))
             .id(1L)
             .build();
