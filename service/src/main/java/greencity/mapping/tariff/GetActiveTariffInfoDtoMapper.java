@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -37,20 +36,6 @@ public class GetActiveTariffInfoDtoMapper extends AbstractConverter<TariffsInfo,
             .tariffNameEn(source.getTariffNameEn())
             .tariffNameUk(source.getTariffNameUk())
             .tariffLocations(locationsForTariffDtos);
-
-        if (locationsForTariffDtos.size() > 1) {
-            builder
-                .descriptionMessageUk(joinLocationNames(locationsForTariffDtos, true))
-                .descriptionMessageEn(joinLocationNames(locationsForTariffDtos, false));
-        }
-
         return builder.build();
-    }
-
-    private String joinLocationNames(List<LocationsForTariffDto> locations, boolean isUk) {
-        String prefix = isUk ? "До тарифу також включені " : "The tariff also includes ";
-        return prefix + locations.stream()
-            .map(loc -> isUk ? loc.getNameUk() : loc.getNameEn())
-            .collect(Collectors.joining(", "));
     }
 }
