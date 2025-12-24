@@ -18,6 +18,15 @@ spec:
   - host: {{ .Values.ingress.hostname }}
     http:
       paths:
+      # fake service to block /actuator/prometheus and allow all other endpoint
+      - path: /actuator/prometheus
+        pathType: Exact
+        backend:
+          service:
+            name: actuator-prometheus-blocker
+            port:
+              number: 80
+
       - path: /
         pathType: Prefix
         backend:

@@ -87,6 +87,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(req -> req
                 .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/actuator/prometheus").permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/socket/**",
                     UBS_LINK + "/getAllActiveCouriers",
@@ -111,6 +112,7 @@ public class SecurityConfig {
                     "/springwolf/**",
                     "/webjars/**")
                 .permitAll()
+                .requestMatchers("/actuator/**").hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/getAllCertificates",
                     UBS_MANAG_LINK + "/bigOrderTable",
