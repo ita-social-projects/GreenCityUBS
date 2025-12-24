@@ -44,10 +44,18 @@
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
         <org.eclipse.jgit.version>7.1.0.202411261347-r</org.eclipse.jgit.version>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            **/target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>5.5.0.6356</version>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>

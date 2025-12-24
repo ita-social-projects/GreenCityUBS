@@ -112,6 +112,7 @@ public class SecurityConfig {
                     "/springwolf/**",
                     "/webjars/**")
                 .permitAll()
+                .requestMatchers("/actuator/**").hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.GET,
                     UBS_MANAG_LINK + "/getAllCertificates",
                     UBS_MANAG_LINK + "/bigOrderTable",
