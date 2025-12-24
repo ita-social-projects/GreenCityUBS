@@ -591,6 +591,6 @@ public class OrderController {
     @GetMapping("/redirect/{orderId}")
     public ResponseEntity<Void> redirectToWayForPay(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.FOUND)
-            .location(URI.create(processPaymentService.formedLink(orderId))).build();
+            .location(URI.create(processPaymentService.formedLinkForPDFQRCode(orderId))).build();
     }
 }

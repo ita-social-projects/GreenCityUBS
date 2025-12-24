@@ -29,12 +29,12 @@ class OrderUtilsTest {
     @Test
     void generateEncodedOrderReferenceTest() {
         Payment payment = mock(Payment.class);
-
+        UUID fixedUuid = UUID.fromString("00000000-0000-0000-0000-000000001234");
         when(order.getId()).thenReturn(123L);
         when(order.getPayment()).thenReturn(Collections.singletonList(payment));
         when(order.getCounterOrderPaymentId()).thenReturn(2L);
+        when(order.getOrderUUIId()).thenReturn(fixedUuid);
         when(payment.getId()).thenReturn(456L);
-        UUID fixedUuid = UUID.fromString("00000000-0000-0000-0000-000000001234");
 
         try (MockedStatic<UUID> uuidMock = Mockito.mockStatic(UUID.class)) {
             uuidMock.when(UUID::randomUUID).thenReturn(fixedUuid);

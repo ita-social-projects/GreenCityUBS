@@ -47,14 +47,14 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           git fetch --unshallow
-          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ita-social-projects-green-ubs -Dsonar.organization=ita-social-projects -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports -Dsonar.exclusions=**/EncryptionUtil.java -Dsonar.coverage.exclusions='**/configuration/*,**/entity/*,**/exceptions/*,**/exceptions/**,**/enums/*,**/enums/**,**/BigOrderTableRepository.java,**/ChatLinkDto.java,**/entity/telegram/AuthorizedUser.java,**/dto/telegram/AuthorizedUserDto.java,**/service/ubs/BASE64DecodedMultipartFile.java,**/entity/telegram/ChatFeedback.java,**/dto/telegram/FeedbackDto.java,**/entity/telegram/Image.java,**/mapping/telegrammessage/ImageConverter.java,**/ubstelegrambot/keyboards/KeyboardFactory.java,**/ubstelegrambot/messages/MessageFactory.java,**/dto/SuccessSignInDto.java,**/config/TelegramBotConfig.java,**/dto/telegram/TelegramImageDto.java,**/entity/telegram/TelegramMessage.java,**/dto/telegram/TelegramTextMessageDto.java,**/entity/telegram/TelegramUser.java,**/dto/TestersSignInRequest.java,**/entity/telegram/TextMessage.java,**/mapping/telegrammessage/TextMessageMapper.java,**/entity/telegram/UnknownTelegramUser.java,**/dto/telegram/UnknownTelegramUserDto.java,**/specification/*,**/entity/telegram/TelegramChat.java,**/constant/**,**/constant/*'
+          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ita-social-projects-green-ubs -Dsonar.organization=ita-social-projects -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports -Dsonar.exclusions=**/EncryptionUtil.java -Dsonar.coverage.exclusions='**/configuration/*,**/entity/*,**/exceptions/*,**/exceptions/**,**/enums/*,**/enums/**,**/BigOrderTableRepository.java,**/ChatLinkDto.java,**/entity/telegram/AuthorizedUser.java,**/dto/telegram/AuthorizedUserDto.java,**/service/ubs/BASE64DecodedMultipartFile.java,**/entity/telegram/ChatFeedback.java,**/dto/telegram/FeedbackDto.java,**/entity/telegram/Image.java,**/mapping/telegrammessage/ImageConverter.java,**/ubstelegrambot/keyboards/KeyboardFactory.java,**/ubstelegrambot/messages/MessageFactory.java,**/dto/SuccessSignInDto.java,**/config/TelegramBotConfig.java,**/dto/telegram/TelegramImageDto.java,**/entity/telegram/TelegramMessage.java,**/dto/telegram/TelegramTextMessageDto.java,**/entity/telegram/TelegramUser.java,**/dto/TestersSignInRequest.java,**/entity/telegram/TextMessage.java,**/mapping/telegrammessage/TextMessageMapper.java,**/entity/telegram/UnknownTelegramUser.java,**/dto/telegram/UnknownTelegramUserDto.java,**/specification/*,**/entity/telegram/TelegramChat.java,**/constant/**,**/constant/*'
       
       - name: Test Reporter
         uses: dorny/test-reporter@v1.5.0
         if: success() || failure()
         with:
           name: Tests Report
-          path: ${{ env.userRepoName }}/target/surefire-reports/*.xml
+          path: '**/target/surefire-reports/*.xml'
           reporter: java-junit
       
       - name: Rename user jar to app

@@ -443,12 +443,12 @@ class OrderControllerTest {
 
     @Test
     void redirectToWayForPay_ShouldReturnFoundAndLocationHeader() throws Exception {
-        when(processPaymentService.formedLink(1L)).thenReturn("test-link");
+        when(processPaymentService.formedLinkForPDFQRCode(1L)).thenReturn("test-link");
 
         mockMvc.perform(get(ubsLink + "/redirect/" + 1L))
             .andExpect(status().isFound())
             .andExpect(header().string("Location", "test-link"));
 
-        verify(processPaymentService).formedLink(1L);
+        verify(processPaymentService).formedLinkForPDFQRCode(1L);
     }
 }

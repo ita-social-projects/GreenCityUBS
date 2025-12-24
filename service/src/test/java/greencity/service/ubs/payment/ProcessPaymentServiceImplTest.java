@@ -16,23 +16,16 @@ import static greencity.constant.ErrorMessage.ORDER_DOES_NOT_BELONG_TO_USER;
 import static greencity.constant.ErrorMessage.ORDER_NOT_FOUND_BY_ID;
 import static greencity.constant.ErrorMessage.ORDER_WITH_CURRENT_ID_DOES_NOT_EXIST;
 import static greencity.constant.ErrorMessage.UNABLE_TO_CANCEL_PAYMENT_INVOICE;
-import static greencity.constant.QuartzConstants.NO_PAYMENT_ATTEMPT_FOR_ORDER;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_CANCEL_EXCEPTION;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_GROUP;
-import static greencity.constant.QuartzConstants.PAYMENT_EXPIRY_JOB_KEY;
-import static greencity.constant.QuartzConstants.QUARTZ_SCHEDULER_EXCEPTION;
+import static greencity.constant.QuartzConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.*;
-
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import greencity.ModelUtils;
 import greencity.client.WayForPayClient;
 import greencity.constant.OrderHistory;
@@ -44,14 +37,12 @@ import greencity.dto.order.PaymentSystemResponse;
 import greencity.dto.payment.PaymentCancellationWayForPayRequestDto;
 import greencity.dto.payment.PaymentWayForPayRequestDto;
 import greencity.entity.order.*;
+import greencity.entity.order.TariffLocation;
 import greencity.entity.user.Location;
 import greencity.entity.user.User;
 import greencity.entity.user.ubs.OrderAddress;
 import greencity.entity.user.ubs.UBSuser;
-import greencity.enums.CertificateStatus;
-import greencity.enums.OrderPaymentStatus;
-import greencity.enums.OrderStatus;
-import greencity.enums.PaymentSystem;
+import greencity.enums.*;
 import greencity.exceptions.BadRequestException;
 import greencity.exceptions.NotFoundException;
 import greencity.exceptions.address.AddressNotWithinLocationAreaException;
@@ -861,20 +852,47 @@ class ProcessPaymentServiceImplTest {
     void formedLinkForQRCodeTest() {
         String invoiceUrl = "https://pay.example.com/invoice/TEST123";
         Order order = getOrderCount();
-        order.setPayment(List.of(getPayment()));
-        order.setPaymentLink(" ");
+        order.setId(orderId);
+        order.setPaymentLink("");
         order.setSumTotalAmountWithoutDiscounts(400L);
+
+        Payment paid1 = getPayment();
+        paid1.setPaymentStatus(PaymentStatus.PAID);
+        paid1.setAmount(100L);
+
+        Payment paid2 = getPayment();
+        paid2.setPaymentStatus(PaymentStatus.PAID);
+        paid2.setAmount(50L);
+
+        Payment pending = getPayment();
+        pending.setPaymentStatus(PaymentStatus.HALF_PAID);
+        pending.setAmount(999L);
+
+        order.setPayment(List.of(paid1, paid2, pending));
+
         PaymentWayForPayRequestDto payRequestDto = new PaymentWayForPayRequestDto();
 
-        when(orderRepository.findById(order.getId())).thenReturn(Optional.of(order));
-        when(wayForPayClient.getCheckOutResponse(any()))
-            .thenReturn("{\"invoiceUrl\":\"https://pay.example.com/invoice/TEST123\"}");
-        when(wayForPayService.formPaymentRequestForWayForPay(anyLong(), anyLong()))
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(wayForPayService.formPaymentRequestForWayForPay(orderId, 250L))
             .thenReturn(payRequestDto);
-        when(wayForPayService.getLinkFromWayForPayCheckoutResponse(anyString())).thenReturn(invoiceUrl);
+        when(wayForPayClient.getCheckOutResponse(same(payRequestDto)))
+            .thenReturn("{\"invoiceUrl\":\"" + invoiceUrl + "\"}");
+        when(wayForPayService.getLinkFromWayForPayCheckoutResponse(anyString()))
+            .thenReturn(invoiceUrl);
 
-        String result = service.formedLink(order.getId());
+        String result = service.formedLinkForPDFQRCode(orderId);
 
         assertEquals(invoiceUrl, result);
+        assertNotNull(payRequestDto.getOrderReference());
+        assertFalse(payRequestDto.getOrderReference().isBlank());
+        verify(wayForPayService).formPaymentRequestForWayForPay(orderId, 250L);
+        verify(wayForPayClient).getCheckOutResponse(same(payRequestDto));
+        verify(wayForPayService).getLinkFromWayForPayCheckoutResponse(anyString());
+        verify(wayForPayService).schedulePaymentExpiryJob(
+            eq(orderId),
+            eq(0),
+            any(HashSet.class),
+            eq(WAY_FOR_PAY_LINK_VALIDITY_SECONDS),
+            eq(invoiceUrl));
     }
 }
