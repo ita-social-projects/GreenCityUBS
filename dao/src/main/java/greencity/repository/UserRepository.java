@@ -32,6 +32,14 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     Optional<User> findUserByUuid(String uuid);
 
     /**
+     * Method returns user by user email.
+     *
+     * @param email {@link String} - id to connect 2 db.
+     * @return optional of {@link User} - current user.
+     */
+    Optional<User> findUserByRecipientEmail(String email);
+
+    /**
      * Method returns total user violations.
      *
      * @param userId {@link Long} - id to connect 2 db.

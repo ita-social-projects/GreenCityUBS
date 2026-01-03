@@ -107,6 +107,14 @@ public interface UserService {
     UserStatus getUserStatusByUuid(String uuid);
 
     /**
+     * Method to find user's status by email.
+     *
+     * @param email user's email.
+     * @return user's status.
+     */
+    UserStatus getUserStatusByEmail(String email);
+
+    /**
      * Method to delete a user by uuid, setting their status to DELETED.
      *
      * @param uuid   {@link String} user's uuid.

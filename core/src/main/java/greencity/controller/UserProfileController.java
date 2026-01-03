@@ -159,6 +159,18 @@ public class UserProfileController {
         return ResponseEntity.ok(userService.getUserStatusByUuid(uuid));
     }
 
+    @Operation(summary = "Get user status by email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED, content = @Content),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN, content = @Content)
+    })
+    @GetMapping("/user/status/by_email")
+    public ResponseEntity<UserStatus> getUserStatusByEmailSafe(@RequestParam String email) {
+        return ResponseEntity.ok(userService.getUserStatusByEmail(email));
+    }
+
     /**
      * Method for deleting current authenticated user. Deleted user is still existed
      * in system but with DELETED status and can be restored.

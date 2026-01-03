@@ -302,6 +302,16 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public UserStatus getUserStatusByEmail(String email) {
+        User user = userRepository.findUserByRecipientEmail(email)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_EMAIL + email));
+        return user.getStatus();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @org.springframework.transaction.annotation.Transactional
     @Override
     public void deleteUserByUuid(String uuid, UserDeletionReasonDto reason) {
@@ -317,6 +327,8 @@ public class UserServiceImpl implements UserService {
         saveAndSendDeactivationReason(user, reason.getReason(), lang);
 
         user.setStatus(UserStatus.DELETED);
+        user.setEmailBeforeDeleting(user.getRecipientEmail());
+        user.setRecipientEmail(user.getUuid() + "@" + user.getRecipientEmail().split("@")[1]);
         userRepository.save(user);
     }
 

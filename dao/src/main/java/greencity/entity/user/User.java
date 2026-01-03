@@ -17,6 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -60,6 +61,10 @@ public class User {
 
     @Column(name = "recipient_email")
     private String recipientEmail;
+
+    @Email
+    @Column(name = "email_before_deleting")
+    private String emailBeforeDeleting;
 
     @Column(name = "alternate_email")
     private String alternateEmail;

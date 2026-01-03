@@ -317,4 +317,5 @@
     <include file="db/changelog/logs/ch-insert-list-of-cities-into-locations-table-Lys.xml"/>
     <include file="db/changelog/logs/ch-insert-tariffs-locations-mapping-Lys.xml"/>
     <include file="db/changelog/logs/ch-add-column-into-order-table-Lys.xml"/>
+    <include file="db/changelog/logs/2026-01-02-add-email-before-deleting.xml" />
 </databaseChangeLog>
