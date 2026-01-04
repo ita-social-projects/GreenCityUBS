@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="fix-confirmed-quantity-trigger" author="you">
+        <sql endDelimiter="/">
+
+            CREATE OR REPLACE FUNCTION sum_total_amount_without_discounts_OBM_confirmed_quantity() RETURNS TRIGGER AS $orders$
+            BEGIN
+
+            IF (
+                TG_OP = 'INSERT'
+                OR OLD.confirmed_quantity IS DISTINCT FROM NEW.confirmed_quantity
+            ) THEN
+                UPDATE orders o
+                SET sum_total_amount_without_discounts = (
+                    SELECT COALESCE(
+                                   SUM(COALESCE(obm.confirmed_quantity, 0) * b.full_price),
+                                   0
+                           )
+                    FROM order_bag_mapping obm
+                             JOIN bag b ON b.id = obm.bag_id
+                    WHERE obm.order_id = o.id
+                )
+                WHERE o.id = COALESCE(NEW.order_id, OLD.order_id);
+            END IF;
+
+            RETURN NEW;
+            END;
+            $orders$ LANGUAGE plpgsql;
+
+            CREATE OR REPLACE FUNCTION sum_total_amount_without_discounts_OBM_exported_quantity() RETURNS TRIGGER AS $orders$
+            BEGIN
+
+            IF (
+                TG_OP = 'INSERT'
+                OR OLD.exported_quantity IS DISTINCT FROM NEW.exported_quantity
+            ) THEN
+            UPDATE orders o
+            SET sum_total_amount_without_discounts = (
+                SELECT COALESCE(
+                               SUM(COALESCE(obm.exported_quantity, 0) * b.full_price),
+                               0
+                       )
+                FROM order_bag_mapping obm
+                         JOIN bag b ON b.id = obm.bag_id
+                WHERE obm.order_id = o.id
+            )
+            WHERE o.id = COALESCE(NEW.order_id, OLD.order_id);
+            END IF;
+
+            RETURN NEW;
+            END;
+            $orders$ LANGUAGE plpgsql;
+
+            DROP TRIGGER IF EXISTS insert_update_order_bag_mapping_confirmed_quantity ON order_bag_mapping;
+            DROP TRIGGER IF EXISTS insert_update_order_bag_mapping_exported_quantity ON order_bag_mapping;
+
+            CREATE TRIGGER insert_update_order_bag_mapping_confirmed_quantity
+                AFTER INSERT OR UPDATE OF confirmed_quantity
+                ON order_bag_mapping
+                FOR EACH ROW EXECUTE FUNCTION sum_total_amount_without_discounts_OBM_confirmed_quantity();
+
+            CREATE TRIGGER insert_update_order_bag_mapping_exported_quantity
+                AFTER INSERT OR UPDATE OF exported_quantity
+                ON order_bag_mapping
+                FOR EACH ROW EXECUTE FUNCTION sum_total_amount_without_discounts_OBM_exported_quantity();
+            /
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
