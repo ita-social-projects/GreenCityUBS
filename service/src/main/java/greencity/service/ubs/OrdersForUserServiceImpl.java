@@ -29,7 +29,7 @@ public class OrdersForUserServiceImpl implements OrdersForUserService {
         String username = getUsername(userId);
 
         List<UserOrdersDto> userOrdersDtoList = ordersForUserRepository
-            .getAllOrdersByUserId(PageRequest.of(page.getPageNumber() * 10, 10, sort), userId)
+            .getAllOrdersByUserId(PageRequest.of(page.getPageNumber(), 10, sort), userId)
             .stream().map(this::getAllOrders)
             .collect(Collectors.toList());
         return new UserWithOrdersDto(username, userOrdersDtoList);
