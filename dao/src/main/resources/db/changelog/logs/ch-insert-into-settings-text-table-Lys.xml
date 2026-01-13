@@ -212,4 +212,21 @@ For suburbs - from 10 working days
             <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
         </insert>
     </changeSet>
+
+    <changeSet id="1768296299684-1" author="BohdanLys">
+        <insert tableName="settings_text">
+            <column name="section" value="how_works"/>
+            <column name="field" value="tech_support_caption"/>
+            <column name="value_uk" value="Технічна підтримка"/>
+            <column name="value_en" value="Technical support"/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+        <insert tableName="settings_text">
+            <column name="section" value="how_works"/>
+            <column name="field" value="tech_support"/>
+            <column name="value_uk" value="7 днів на тиждень з 9:00 до 19:00."/>
+            <column name="value_en" value="7 days a week from 9:00 a.m. to 7:00 p.m."/>
+            <column name="updated_at" valueDate="2025-09-28T09:30:00"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
