@@ -16,12 +16,15 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class AddressValidator implements ConstraintValidator<ValidAddress, CreateAddressRequestDto> {
     private final GoogleApiService googleApiService;
     private static final double DELTA = 0.007;
     private static final int LANGUAGE_CODE_FOR_UK = 0;
+    private static final int LANGUAGE_CODE_FOR_EN = 1;
 
     @Override
     public boolean isValid(CreateAddressRequestDto createAddressRequestDto, ConstraintValidatorContext context) {
@@ -35,10 +38,12 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
         LatLng latLng = new LatLng(coordinates.getLatitude(), coordinates.getLongitude());
 
         GeocodingResult geoResult;
+        GeocodingResult geoResultEn;
         AddressResponseFromGoogleAPI resultFromCoordinates;
 
         try {
             geoResult = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UK);
+            geoResultEn = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_EN);
             resultFromCoordinates = googleApiService.getResultFromGoogleByCoordinates(latLng);
         } catch (NotFoundException | GoogleApiException e) {
             context.disableDefaultConstraintViolation();
@@ -61,7 +66,7 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
             return false;
         }
 
-        if (!isStreetValid(geoResult, createAddressRequestDto)) {
+        if (!isStreetValid(geoResult, geoResultEn, createAddressRequestDto)) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Street does not match the provided address.")
                 .addConstraintViolation();
@@ -102,14 +107,18 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
             .orElse(null);
     }
 
-    private boolean isStreetValid(GeocodingResult geoResult, CreateAddressRequestDto dto) {
+    private boolean isStreetValid(GeocodingResult geoResult, GeocodingResult geoResultEn, CreateAddressRequestDto dto) {
         String apiStreet = getLongName(geoResult.addressComponents, AddressComponentType.ROUTE);
+        String apiStreetEn = getLongName(geoResultEn.addressComponents, AddressComponentType.ROUTE);
+        log.info(apiStreetEn);
+        log.info(dto.getStreetEn());
 
-        if (apiStreet == null) {
+        if (apiStreet == null || apiStreetEn == null) {
             return false;
         }
-
+        log.info(apiStreet);
+        log.info(dto.getStreetUk());
         return apiStreet.equalsIgnoreCase(dto.getStreetUk())
-            || apiStreet.equalsIgnoreCase(dto.getStreetEn());
+            && apiStreetEn.equalsIgnoreCase(dto.getStreetEn());
     }
 }
