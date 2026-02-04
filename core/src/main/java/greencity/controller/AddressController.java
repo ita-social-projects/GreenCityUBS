@@ -193,8 +193,7 @@ public class AddressController {
     @Operation(summary = "Get all districts for Kyiv")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
-            content = @Content(array = @ArraySchema(schema = @Schema(implementation = DistrictDto.class)))),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = DistrictDto.class))))
     })
     @GetMapping("/districts-for-kyiv")
     public ResponseEntity<List<DistrictDto>> getAllDistrictsForKyiv() {
