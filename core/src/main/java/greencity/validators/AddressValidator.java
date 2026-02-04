@@ -61,6 +61,13 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
             return false;
         }
 
+        if (!isStreetValid(geoResult, createAddressRequestDto)) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Street does not match the provided address.")
+                .addConstraintViolation();
+            return false;
+        }
+
         return true;
     }
 
@@ -93,5 +100,16 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
             .map(component -> component.longName)
             .findFirst()
             .orElse(null);
+    }
+
+    private boolean isStreetValid(GeocodingResult geoResult, CreateAddressRequestDto dto) {
+        String apiStreet = getLongName(geoResult.addressComponents, AddressComponentType.ROUTE);
+
+        if (apiStreet == null) {
+            return false;
+        }
+
+        return apiStreet.equalsIgnoreCase(dto.getStreetUk())
+            || apiStreet.equalsIgnoreCase(dto.getStreetEn());
     }
 }
