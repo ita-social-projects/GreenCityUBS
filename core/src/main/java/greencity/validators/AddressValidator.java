@@ -13,10 +13,8 @@ import greencity.exceptions.api.GoogleApiException;
 import greencity.service.google.GoogleApiService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
 import java.util.Arrays;
 import java.util.Objects;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
