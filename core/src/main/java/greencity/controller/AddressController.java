@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUserUuid;
 import greencity.annotations.ValidAddress;
+import greencity.annotations.ValidAddressV2;
 import greencity.annotations.ValidUpdateAddress;
 import greencity.constants.HttpStatuses;
 import greencity.dto.CreateAddressRequestDto;
@@ -220,7 +221,8 @@ public class AddressController {
     })
     @PatchMapping("/update-address")
     public ResponseEntity<OrderAddressDtoResponse> updateAddress(
-        @RequestBody @Valid UpdateAddressDto addressDto, @Parameter(hidden = true) Principal principal) {
+        @RequestBody @Valid @ValidAddressV2 UpdateAddressDto addressDto,
+        @Parameter(hidden = true) Principal principal) {
         return ResponseEntity.ok(addressService.addressUpdate(addressDto, principal.getName()));
     }
 

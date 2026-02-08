@@ -53,4 +53,5 @@ public class OrderAddressExportDetailsDtoUpdate implements Serializable {
     private String addressComment;
     @NotNull
     private CoordinatesDto coordinates;
+    private String placeId;
 }
