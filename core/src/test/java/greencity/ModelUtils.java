@@ -608,6 +608,7 @@ public class ModelUtils {
     public static UpdateAddressDto getUpdateAddressDto() {
         OrderAddressExportDetailsDtoUpdate orderAddressDetails = OrderAddressExportDetailsDtoUpdate.builder()
             .id(1L)
+            .placeId("placeid")
             .districtUk("Деснянський район")
             .districtEn("Desnyans'kyi District")
             .streetUk("вулиця Шевченка")
