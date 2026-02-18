@@ -70,7 +70,6 @@ public class AddressValidatorV2 implements ConstraintValidator<ValidAddressV2, U
                 .addConstraintViolation();
             return false;
         }
-
         return true;
     }
 
@@ -110,7 +109,6 @@ public class AddressValidatorV2 implements ConstraintValidator<ValidAddressV2, U
         UpdateAddressDto dto) {
         String apiStreetUk = getLongName(geoResultUk.addressComponents, AddressComponentType.ROUTE);
         String apiStreetEn = getLongName(geoResultEn.addressComponents, AddressComponentType.ROUTE);
-
         if (apiStreetUk == null || apiStreetEn == null || dto.getOrderAddressExportDetails().getStreetUk() == null
             || dto.getOrderAddressExportDetails().getStreetEn() == null) {
             return false;

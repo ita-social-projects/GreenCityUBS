@@ -1,7 +1,8 @@
 package greencity.dto.location;
 
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,8 +19,10 @@ import lombok.EqualsAndHashCode;
 @ToString
 @EqualsAndHashCode
 public class CoordinatesDto implements Serializable {
-    @NotBlank
-    private double latitude;
-    @NotBlank
-    private double longitude;
+    @NotNull
+    @JsonProperty("lat")
+    private Double latitude;
+    @NotNull
+    @JsonProperty("lng")
+    private Double longitude;
 }
