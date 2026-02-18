@@ -20,9 +20,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 public class CoordinatesDto implements Serializable {
     @NotNull
-    @JsonProperty("lat")
+    @JsonProperty("latitude")
     private Double latitude;
     @NotNull
-    @JsonProperty("lng")
+    @JsonProperty("longitude")
     private Double longitude;
 }

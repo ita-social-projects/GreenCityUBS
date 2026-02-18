@@ -25,7 +25,7 @@ env:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v2
@@ -35,11 +35,6 @@ jobs:
         with:
           java-version: 21
           distribution: 'temurin'
-
-      - name: Start Docker
-        run: |
-          sudo systemctl start docker
-          docker info
 
 #       - name: Set up Go
 #         uses: actions/setup-go@v3
