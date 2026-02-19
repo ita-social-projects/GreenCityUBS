@@ -44,6 +44,10 @@ public class PhoneNumberValidation implements ConstraintValidator<ValidPhoneNumb
             return false;
         }
 
+        if (trimmedValue.length() != 13) {
+            return false;
+        }
+
         try {
             Phonenumber.PhoneNumber phoneNumber = phoneNumberUtil.parse(trimmedValue, DEFAULT_REGION);
             return phoneNumberUtil.isValidNumber(phoneNumber);

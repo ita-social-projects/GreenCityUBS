@@ -28,26 +28,6 @@ class PhoneNumberValidationTest {
         }
 
         @Test
-        void shouldAcceptFormattedInternationalWithSymbols() {
-            assertTrue(validator.isValid("+38(093)87-54-569", null));
-        }
-
-        @Test
-        void shouldAcceptInternationalFormatWithoutPlus() {
-            assertTrue(validator.isValid("380998754569", null));
-        }
-
-        @Test
-        void shouldAcceptNationalFormatStartingWithZero() {
-            assertTrue(validator.isValid("0678754569", null));
-        }
-
-        @Test
-        void shouldAcceptShortNationalFormatWithoutZero() {
-            assertTrue(validator.isValid("938754569", null));
-        }
-
-        @Test
         void shouldAcceptValidPhoneNumberWithSpacesAround() {
             assertTrue(validator.isValid("  +380938754569  ", null));
         }
@@ -56,6 +36,26 @@ class PhoneNumberValidationTest {
     @Nested
     @DisplayName("Invalid phone numbers")
     class InvalidPhoneNumbers {
+
+        @Test
+        void shouldRejectFormattedInternationalWithSymbols() {
+            assertFalse(validator.isValid("+38(093)87-54-569", null));
+        }
+
+        @Test
+        void shouldRejectInternationalFormatWithoutPlus() {
+            assertFalse(validator.isValid("380998754569", null));
+        }
+
+        @Test
+        void shouldRejectNationalFormatStartingWithZero() {
+            assertFalse(validator.isValid("0678754569", null));
+        }
+
+        @Test
+        void shouldRejectShortNationalFormatWithoutZero() {
+            assertFalse(validator.isValid("938754569", null));
+        }
 
         @Test
         void shouldRejectInvalidCountryCode() {

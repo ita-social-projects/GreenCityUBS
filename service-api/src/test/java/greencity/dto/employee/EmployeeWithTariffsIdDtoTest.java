@@ -171,11 +171,10 @@ class EmployeeWithTariffsIdDtoTest {
     @Nested
     @DisplayName("Phone number validation")
     class PhoneNumberValidation {
-
-        @ParameterizedTest
-        @MethodSource("validPhoneNumbers")
-        void shouldAcceptValidPhoneNumbers(String phone) {
-            EmployeeWithTariffsIdDto dto = createEmployeeWithTariffsDto(validName, validName, validEmail, phone);
+        @Test
+        void shouldAcceptValidPhoneNumbers() {
+            EmployeeWithTariffsIdDto dto =
+                createEmployeeWithTariffsDto(validName, validName, validEmail, "+380938754569");
             assertThat(validator.validate(dto)).isEmpty();
         }
 
@@ -195,20 +194,15 @@ class EmployeeWithTariffsIdDtoTest {
                 .contains("employeeDto.phoneNumber");
         }
 
-        private static Stream<Arguments> validPhoneNumbers() {
-            return Stream.of(
-                Arguments.of("+380938754569"),
-                Arguments.of("+38(093)87-54-569"),
-                Arguments.of("380998754569"),
-                Arguments.of("0678754569"),
-                Arguments.of("938754569"));
-        }
-
         private static Stream<Arguments> invalidPhoneNumbers() {
             return Stream.of(
                 Arguments.of(""),
                 Arguments.of(" "),
                 Arguments.of("text"),
+                Arguments.of("+38(093)87-54-569"),
+                Arguments.of("380998754569"),
+                Arguments.of("0678754569"),
+                Arguments.of("938754569"),
                 Arguments.of("067875Dhgjh4569"),
                 Arguments.of("0114860406"),
                 Arguments.of("4860406"),

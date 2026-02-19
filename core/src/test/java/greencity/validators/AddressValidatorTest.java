@@ -18,12 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -43,16 +40,21 @@ class AddressValidatorTest {
 
     private CreateAddressRequestDto addressRequestDto;
     private GeocodingResult geoResult;
+    private GeocodingResult geoResultEn;
     private AddressResponseFromGoogleAPI addressResponseFromGoogleAPI;
 
     @BeforeEach
     void setUp() {
         CoordinatesDto coordinatesDto = new CoordinatesDto(50.45, 30.523);
         addressRequestDto = CreateAddressRequestDto.builder()
-            .cityUk("Kyiv")
-            .regionUk("Kyiv")
+            .cityUk("Київ")
+            .cityEn("Kyiv")
+            .regionUk("Київ")
+            .regionEn("Kyiv")
             .coordinates(coordinatesDto)
             .placeId("place-id")
+            .streetEn("Khreschatyk Street")
+            .streetUk("вулиця Хрещатик")
             .build();
 
         geoResult = new GeocodingResult();
@@ -60,29 +62,38 @@ class AddressValidatorTest {
         geoResult.geometry.location = new LatLng(50.45, 30.523);
 
         AddressComponent cityComponent = new AddressComponent();
-        cityComponent.longName = "Kyiv";
+        cityComponent.longName = "Київ";
         cityComponent.types = new AddressComponentType[] {AddressComponentType.LOCALITY};
 
         AddressComponent regionComponent = new AddressComponent();
-        regionComponent.longName = "Kyiv";
+        regionComponent.longName = "Київ";
         regionComponent.types = new AddressComponentType[] {AddressComponentType.ADMINISTRATIVE_AREA_LEVEL_1};
 
-        geoResult.addressComponents = new AddressComponent[] {cityComponent, regionComponent};
+        AddressComponent streetComponent = new AddressComponent();
+        streetComponent.longName = "вулиця Хрещатик";
+        streetComponent.types = new AddressComponentType[] {AddressComponentType.ROUTE};
+
+        geoResult.addressComponents = new AddressComponent[] {cityComponent, regionComponent, streetComponent};
+
+        geoResultEn = new GeocodingResult();
+        AddressComponent streetEn = new AddressComponent();
+        streetEn.longName = "Khreschatyk Street";
+        streetEn.types = new AddressComponentType[] {AddressComponentType.ROUTE};
+        geoResultEn.addressComponents = new AddressComponent[] {streetEn};
 
         addressResponseFromGoogleAPI = new AddressResponseFromGoogleAPI();
-        addressResponseFromGoogleAPI.setCity("Kyiv");
-        addressResponseFromGoogleAPI.setRegion("Kyiv");
+        addressResponseFromGoogleAPI.setCity("Київ");
+        addressResponseFromGoogleAPI.setRegion("Київ");
     }
 
     @Test
-	void testIsValidWhenAllConditionsAreMetShouldReturnTrue() {
-		when(googleApiService.getResultFromGeoCode(anyString(), anyInt())).thenReturn(geoResult);
-		when(googleApiService.getResultFromGoogleByCoordinates(any(LatLng.class))).thenReturn(addressResponseFromGoogleAPI);
+    void testIsValidWhenAllConditionsAreMetShouldReturnTrue() {
+        when(googleApiService.getResultFromGeoCode(anyString(), eq(0))).thenReturn(geoResult);
+        when(googleApiService.getResultFromGeoCode(anyString(), eq(1))).thenReturn(geoResultEn);
+        when(googleApiService.getResultFromGoogleByCoordinates(any())).thenReturn(addressResponseFromGoogleAPI);
 
-		boolean isValid = addressValidator.isValid(addressRequestDto, context);
-
-		assertTrue(isValid);
-	}
+        assertTrue(addressValidator.isValid(addressRequestDto, context));
+    }
 
     @Test
 	void testIsValidWhenGoogleServiceReturnsNullShouldReturnFalse() {
