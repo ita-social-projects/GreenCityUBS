@@ -13,7 +13,9 @@ import greencity.dto.filters.DateFilter;
 import greencity.dto.filters.OrderPage;
 import greencity.dto.filters.OrderSearchCriteria;
 import greencity.ubstelegrambot.UBSTelegramBot;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Sql(scripts = "/sqlFiles/bigOrderTableRepository/delete.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = UbsApplication.class)
+@Disabled("Due to issue with docker version in ubuntu images")
 class BigOrderTableRepositoryTest extends IntegrationTestBase {
     @MockBean
     private UBSTelegramBot telegramBot;

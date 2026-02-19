@@ -4,8 +4,8 @@ import com.google.maps.model.AddressComponent;
 import com.google.maps.model.AddressComponentType;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
-import greencity.annotations.ValidAddress;
-import greencity.dto.CreateAddressRequestDto;
+import greencity.annotations.ValidAddressV2;
+import greencity.dto.address.UpdateAddressDto;
 import greencity.dto.google.AddressResponseFromGoogleAPI;
 import greencity.dto.location.CoordinatesDto;
 import greencity.exceptions.NotFoundException;
@@ -13,36 +13,34 @@ import greencity.exceptions.api.GoogleApiException;
 import greencity.service.google.GoogleApiService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import java.util.Arrays;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
-public class AddressValidator implements ConstraintValidator<ValidAddress, CreateAddressRequestDto> {
+public class AddressValidatorV2 implements ConstraintValidator<ValidAddressV2, UpdateAddressDto> {
     private final GoogleApiService googleApiService;
     private static final double DELTA = 0.007;
     private static final int LANGUAGE_CODE_FOR_UK = 0;
     private static final int LANGUAGE_CODE_FOR_EN = 1;
 
     @Override
-    public boolean isValid(CreateAddressRequestDto createAddressRequestDto, ConstraintValidatorContext context) {
-        String placeId = createAddressRequestDto.getPlaceId();
-
+    public boolean isValid(UpdateAddressDto updateAddressDto, ConstraintValidatorContext context) {
+        String placeId = updateAddressDto.getOrderAddressExportDetails().getPlaceId();
         if (Objects.isNull(placeId)) {
             return false;
         }
-
-        CoordinatesDto coordinates = createAddressRequestDto.getCoordinates();
+        CoordinatesDto coordinates = updateAddressDto.getOrderAddressExportDetails().getCoordinates();
         LatLng latLng = new LatLng(coordinates.getLatitude(), coordinates.getLongitude());
 
-        GeocodingResult geoResult;
+        GeocodingResult geoResultUk;
         GeocodingResult geoResultEn;
         AddressResponseFromGoogleAPI resultFromCoordinates;
 
         try {
-            geoResult = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UK);
+            geoResultUk = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_UK);
             geoResultEn = googleApiService.getResultFromGeoCode(placeId, LANGUAGE_CODE_FOR_EN);
             resultFromCoordinates = googleApiService.getResultFromGoogleByCoordinates(latLng);
         } catch (NotFoundException | GoogleApiException e) {
@@ -52,27 +50,26 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
             return false;
         }
 
-        if (resultFromCoordinates == null || !isCoordinatesValid(geoResult, coordinates)) {
+        if (resultFromCoordinates == null || !isCoordinatesValid(geoResultUk, coordinates)) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Invalid coordinates or address.")
                 .addConstraintViolation();
             return false;
         }
 
-        if (!areCityAndRegionValid(geoResult, resultFromCoordinates, createAddressRequestDto)) {
+        if (!areCityUkAndRegionUkValid(geoResultUk, resultFromCoordinates, updateAddressDto)) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("City and region do not match the provided address.")
                 .addConstraintViolation();
             return false;
         }
 
-        if (!isStreetValid(geoResult, geoResultEn, createAddressRequestDto)) {
+        if (!isStreetValid(geoResultUk, geoResultEn, updateAddressDto)) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Street does not match the provided address.")
                 .addConstraintViolation();
             return false;
         }
-
         return true;
     }
 
@@ -86,17 +83,18 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
         return Math.abs(lat1 - lat2) <= DELTA && Math.abs(lon1 - lon2) <= DELTA;
     }
 
-    private boolean areCityAndRegionValid(GeocodingResult geoResult, AddressResponseFromGoogleAPI resultFromCoordinates,
-        CreateAddressRequestDto dto) {
-        String apiCity = getLongName(geoResult.addressComponents, AddressComponentType.LOCALITY);
+    private boolean areCityUkAndRegionUkValid(GeocodingResult geoResultUk,
+        AddressResponseFromGoogleAPI resultFromCoordinates,
+        UpdateAddressDto dto) {
+        String apiCity = getLongName(geoResultUk.addressComponents, AddressComponentType.LOCALITY);
 
         if (apiCity == null) {
             return false;
         }
 
-        return dto.getCityUk().equalsIgnoreCase(apiCity)
+        return dto.getOrderAddressExportDetails().getCityUk().equalsIgnoreCase(apiCity)
             && apiCity.equalsIgnoreCase(resultFromCoordinates.getCity())
-            && dto.getCityUk().equalsIgnoreCase(resultFromCoordinates.getCity());
+            && dto.getOrderAddressExportDetails().getCityUk().equalsIgnoreCase(resultFromCoordinates.getCity());
     }
 
     private String getLongName(AddressComponent[] addressComponents, AddressComponentType type) {
@@ -107,14 +105,15 @@ public class AddressValidator implements ConstraintValidator<ValidAddress, Creat
             .orElse(null);
     }
 
-    private boolean isStreetValid(GeocodingResult geoResult, GeocodingResult geoResultEn, CreateAddressRequestDto dto) {
-        String apiStreet = getLongName(geoResult.addressComponents, AddressComponentType.ROUTE);
+    private boolean isStreetValid(GeocodingResult geoResultUk, GeocodingResult geoResultEn,
+        UpdateAddressDto dto) {
+        String apiStreetUk = getLongName(geoResultUk.addressComponents, AddressComponentType.ROUTE);
         String apiStreetEn = getLongName(geoResultEn.addressComponents, AddressComponentType.ROUTE);
-
-        if (apiStreet == null || apiStreetEn == null || dto.getStreetUk() == null || dto.getStreetEn() == null) {
+        if (apiStreetUk == null || apiStreetEn == null || dto.getOrderAddressExportDetails().getStreetUk() == null
+            || dto.getOrderAddressExportDetails().getStreetEn() == null) {
             return false;
         }
-        return apiStreet.equalsIgnoreCase(dto.getStreetUk())
-            && apiStreetEn.equalsIgnoreCase(dto.getStreetEn());
+        return apiStreetUk.equalsIgnoreCase(dto.getOrderAddressExportDetails().getStreetUk())
+            && apiStreetEn.equalsIgnoreCase(dto.getOrderAddressExportDetails().getStreetEn());
     }
 }

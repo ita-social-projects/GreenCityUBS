@@ -111,7 +111,7 @@ public class ModelUtils {
                 .lastName("Antonov")
                 .id(13L)
                 .email("mail@mail.ua")
-                .phoneNumber("0678945221")
+                .phoneNumber("+380678945221")
                 .build())
             .addressId(1L)
             .tariffId(1L)
@@ -201,7 +201,7 @@ public class ModelUtils {
             .customerId(2L)
             .customerName("Anatolii")
             .customerSurname("Petyrov")
-            .customerPhoneNumber("0951234561")
+            .customerPhoneNumber("+380951234561")
             .customerEmail("anatolii.andr@gmail.com")
             .build();
     }
@@ -608,6 +608,7 @@ public class ModelUtils {
     public static UpdateAddressDto getUpdateAddressDto() {
         OrderAddressExportDetailsDtoUpdate orderAddressDetails = OrderAddressExportDetailsDtoUpdate.builder()
             .id(1L)
+            .placeId("placeid")
             .districtUk("Деснянський район")
             .districtEn("Desnyans'kyi District")
             .streetUk("вулиця Шевченка")
